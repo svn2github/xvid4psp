@@ -1,0 +1,442 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+    <DefaultClrNameSpace>XviD4PSP</DefaultClrNameSpace>
+    <AssemblyName>XviD4PSP</AssemblyName>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AlwaysCompileMarkupFilesInSeparateDomain>false</AlwaysCompileMarkupFilesInSeparateDomain>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>XviD4PSP</RootNamespace>
+    <ApplicationIcon>main.ico</ApplicationIcon>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ProjectGuid>{6AC85262-C5F1-46AA-9A7E-CADCAAF33107}</ProjectGuid>
+    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <StartupObject>
+    </StartupObject>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ManifestCertificateThumbprint>A1C634A8DFB41EEBDC5C0B0B25E1EB03F10B0524</ManifestCertificateThumbprint>
+    <ManifestKeyFile>XviD4PSP_TemporaryKey.pfx</ManifestKeyFile>
+    <GenerateManifests>false</GenerateManifests>
+    <TargetZone>LocalIntranet</TargetZone>
+    <SignManifests>false</SignManifests>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Optimize>true</Optimize>
+    <PlatformTarget>x86</PlatformTarget>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ref\DirectShowLib-2005.dll</HintPath>
+    </Reference>
+    <Reference Include="MediaBridge, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ref\MediaBridge.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="UIAutomationTypes">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsFormsIntegration">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <ApplicationDefinition Include="App.xaml" />
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="classes\aac_arguments.cs" />
+    <Compile Include="classes\AudioStream.cs" />
+    <Compile Include="classes\AviFile\AudioStream.cs" />
+    <Compile Include="classes\AviFile\Avi.cs" />
+    <Compile Include="classes\AviFile\AviManager.cs" />
+    <Compile Include="classes\AviFile\AviPlayer.cs" />
+    <Compile Include="classes\AviFile\AviStream.cs" />
+    <Compile Include="classes\AviFile\EditableVideoStream.cs" />
+    <Compile Include="classes\AviFile\VideoStream.cs" />
+    <Compile Include="classes\AviSynthScripting.cs" />
+    <Compile Include="classes\AviSynthWrapper.cs" />
+    <Compile Include="classes\AviSynthReader.cs" />
+    <Compile Include="classes\Calculate.cs" />
+    <Compile Include="classes\AviSynthEncoder.cs" />
+    <Compile Include="classes\ac3_arguments.cs" />
+    <Compile Include="classes\wmv_arguments.cs" />
+    <Compile Include="classes\FFInfo.cs" />
+    <Compile Include="classes\ffmpeg_arguments.cs" />
+    <Compile Include="classes\HeaderWriter.cs" />
+    <Compile Include="classes\muxers\dpgmuxer.cs" />
+    <Compile Include="classes\PowerManagement\PowerManagement.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="classes\PowerManagement\PowerManagementNative.cs" />
+    <Compile Include="classes\PowerManagement\PowerManagementResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PowerManagementResource.resx</DependentUpon>
+    </Compile>
+    <Compile Include="classes\PowerManagement\PowerManagerExeptions.cs" />
+    <Compile Include="classes\VirtualDubModWrapper.cs" />
+    <Compile Include="classes\XviD_arguments.cs" />
+    <Compile Include="classes\PresetLoader.cs" />
+    <Compile Include="classes\Format.cs" />
+    <Compile Include="classes\Languages.cs" />
+    <Compile Include="classes\Massive.cs" />
+    <Compile Include="classes\MediaInfoWrapper.cs" />
+    <Compile Include="classes\mp3_arguments.cs" />
+    <Compile Include="classes\Open.cs" />
+    <Compile Include="classes\Settings.cs" />
+    <Compile Include="classes\SysInfo.cs" />
+    <Compile Include="classes\Tasks.cs" />
+    <Compile Include="classes\Win32.cs" />
+    <Compile Include="classes\x264_arguments.cs" />
+    <Compile Include="codec_controls\AftenAC3.xaml.cs">
+      <DependentUpon>AftenAC3.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FMPEG1.xaml.cs">
+      <DependentUpon>FMPEG1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FLV1.xaml.cs">
+      <DependentUpon>FLV1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FMJPEG.xaml.cs">
+      <DependentUpon>FMJPEG.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FFV1.xaml.cs">
+      <DependentUpon>FFV1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FFHUFF.xaml.cs">
+      <DependentUpon>FFHUFF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FLPCM.xaml.cs">
+      <DependentUpon>FLPCM.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FMPEG2.xaml.cs">
+      <DependentUpon>FMPEG2.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FMPEG4.xaml.cs">
+      <DependentUpon>FMPEG4.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FDV.xaml.cs">
+      <DependentUpon>FDV.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FPCM.xaml.cs">
+      <DependentUpon>FPCM.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FMP2.xaml.cs">
+      <DependentUpon>FMP2.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\XviD.xaml.cs">
+      <DependentUpon>XviD.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\LameMP3.xaml.cs">
+      <DependentUpon>LameMP3.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\NeroAAC.xaml.cs">
+      <DependentUpon>NeroAAC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\x264.xaml.cs">
+      <DependentUpon>x264.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\NumericUpDown.xaml.cs">
+      <DependentUpon>NumericUpDown.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="classes\VStripWrapper.cs" />
+    <Compile Include="windows\About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\AspectResolution.xaml.cs">
+      <DependentUpon>AspectResolution.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Autocrop.xaml.cs">
+      <DependentUpon>Autocrop.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Caching.xaml.cs">
+      <DependentUpon>Caching.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\AudioEncoding.xaml.cs">
+      <DependentUpon>AudioEncoding.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Changelog.xaml.cs">
+      <DependentUpon>Changelog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\ColorCorrection.xaml.cs">
+      <DependentUpon>ColorCorrection.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Options_MPEG2DVD.xaml.cs">
+      <DependentUpon>Options_MPEG2DVD.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Settings_Window.xaml.cs">
+      <DependentUpon>Settings_Window.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Options_BluRay.xaml.cs">
+      <DependentUpon>Options_BluRay.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Options_M2TS.xaml.cs">
+      <DependentUpon>Options_M2TS.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\IndexChecker.xaml.cs">
+      <DependentUpon>IndexChecker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Decoder.xaml.cs">
+      <DependentUpon>Decoder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\FFMpegSourceHelper.xaml.cs">
+      <DependentUpon>FFMpegSourceHelper.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\FramerateDetector.xaml.cs">
+      <DependentUpon>FramerateDetector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Donate.xaml.cs">
+      <DependentUpon>Donate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\MKVRebuilder.xaml.cs">
+      <DependentUpon>MKVRebuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\FFRebuilder.xaml.cs">
+      <DependentUpon>FFRebuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Interlace.xaml.cs">
+      <DependentUpon>Interlace.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\SourceDetector.xaml.cs">
+      <DependentUpon>SourceDetector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\DVDImport.xaml.cs">
+      <DependentUpon>DVDImport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\OpenDialog.xaml.cs">
+      <DependentUpon>OpenDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\CopyOrDisabled.xaml.cs">
+      <DependentUpon>CopyOrDisabled.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Demuxer.xaml.cs">
+      <DependentUpon>Demuxer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Shutdown.xaml.cs">
+      <DependentUpon>Shutdown.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Encoder.xaml.cs">
+      <DependentUpon>Encoder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\NewProfile.xaml.cs">
+      <DependentUpon>NewProfile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\UserControl1.xaml.cs">
+      <DependentUpon>UserControl1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\VideoEncoding.xaml.cs">
+      <DependentUpon>VideoEncoding.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\FilesListWindow.xaml.cs">
+      <DependentUpon>FilesListWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Filtering.xaml.cs">
+      <DependentUpon>Filtering.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Indexing.xaml.cs">
+      <DependentUpon>Indexing.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Informer.xaml.cs">
+      <DependentUpon>Informer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\MediaInfo.xaml.cs">
+      <DependentUpon>MediaInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Message.xaml.cs">
+      <DependentUpon>Message.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\Normalizer.xaml.cs">
+      <DependentUpon>Normalizer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\AudioOptions.xaml.cs">
+      <DependentUpon>AudioOptions.xaml</DependentUpon>
+    </Compile>
+    <Page Include="codec_controls\AftenAC3.xaml" />
+    <Page Include="codec_controls\FMPEG1.xaml" />
+    <Page Include="codec_controls\FLV1.xaml" />
+    <Page Include="codec_controls\FMJPEG.xaml" />
+    <Page Include="codec_controls\FFV1.xaml" />
+    <Page Include="codec_controls\FFHUFF.xaml" />
+    <Page Include="codec_controls\FLPCM.xaml" />
+    <Page Include="codec_controls\FMPEG2.xaml" />
+    <Page Include="codec_controls\FMPEG4.xaml" />
+    <Page Include="codec_controls\FDV.xaml" />
+    <Page Include="codec_controls\FPCM.xaml" />
+    <Page Include="codec_controls\FMP2.xaml" />
+    <Page Include="codec_controls\XviD.xaml" />
+    <Page Include="codec_controls\LameMP3.xaml" />
+    <Page Include="codec_controls\NeroAAC.xaml" />
+    <Page Include="codec_controls\x264.xaml" />
+    <Page Include="controls\NumericUpDown.xaml" />
+    <Page Include="ResourceDictionary1.xaml" />
+    <Page Include="windows\About.xaml" />
+    <Page Include="windows\AspectResolution.xaml" />
+    <Page Include="windows\Autocrop.xaml" />
+    <Page Include="windows\Caching.xaml" />
+    <Page Include="windows\AudioEncoding.xaml" />
+    <Page Include="windows\Changelog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="windows\ColorCorrection.xaml" />
+    <Page Include="windows\Options_MPEG2DVD.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="windows\Settings_Window.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="windows\Options_BluRay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="windows\Options_M2TS.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="windows\IndexChecker.xaml" />
+    <Page Include="windows\Decoder.xaml" />
+    <Page Include="windows\FFMpegSourceHelper.xaml" />
+    <Page Include="windows\FramerateDetector.xaml" />
+    <Page Include="windows\Donate.xaml" />
+    <Page Include="windows\MKVRebuilder.xaml" />
+    <Page Include="windows\FFRebuilder.xaml" />
+    <Page Include="windows\Interlace.xaml" />
+    <Page Include="windows\SourceDetector.xaml" />
+    <Page Include="windows\DVDImport.xaml" />
+    <Page Include="windows\MainWindow.xaml" />
+    <Page Include="windows\OpenDialog.xaml" />
+    <Page Include="windows\CopyOrDisabled.xaml" />
+    <Page Include="windows\Demuxer.xaml" />
+    <Page Include="windows\Shutdown.xaml" />
+    <Page Include="windows\Encoder.xaml" />
+    <Page Include="windows\NewProfile.xaml" />
+    <Page Include="windows\UserControl1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="windows\VideoEncoding.xaml" />
+    <Page Include="windows\FilesListWindow.xaml" />
+    <Page Include="windows\Filtering.xaml" />
+    <Page Include="windows\Indexing.xaml" />
+    <Page Include="windows\Informer.xaml" />
+    <Page Include="windows\MediaInfo.xaml" />
+    <Page Include="windows\Message.xaml" />
+    <Page Include="windows\Normalizer.xaml" />
+    <Page Include="windows\AudioOptions.xaml" />
+    <Resource Include="pictures\back_frame.png" />
+    <Resource Include="pictures\donate_notable copy.png" />
+    <Resource Include="pictures\frame_r.png" />
+    <Resource Include="pictures\logo_aften.png" />
+    <Resource Include="pictures\logo_FF_dv.png" />
+    <Resource Include="pictures\logo_FF_FFV1.png" />
+    <Resource Include="pictures\logo_FF_FLV.png" />
+    <Resource Include="pictures\logo_FF_HUFF.png" />
+    <Resource Include="pictures\logo_FF_LPCM.png" />
+    <Resource Include="pictures\logo_FF_MJPEG.png" />
+    <Resource Include="pictures\logo_FF_MP2.png" />
+    <Resource Include="pictures\logo_FF_MPEG1.png" />
+    <Resource Include="pictures\logo_FF_mpeg2.png" />
+    <Resource Include="pictures\logo_FF_mpeg4.png" />
+    <Resource Include="pictures\logo_FF_PCM.png" />
+    <Resource Include="pictures\logo_lame.png" />
+    <Resource Include="pictures\logo_NeroAAC.png" />
+    <Resource Include="pictures\logo_x264.png" />
+    <Resource Include="pictures\logo_xvid.png" />
+    <Resource Include="pictures\main_logo_134.png" />
+    <Resource Include="pictures\main_logo_16_1.png" />
+    <Resource Include="pictures\next_frame.png" />
+    <Resource Include="pictures\pause_new.png" />
+    <Resource Include="pictures\play-pause.png" />
+    <Resource Include="pictures\play.png" />
+    <Resource Include="pictures\play_new.png" />
+    <Resource Include="pictures\stop_new.png" />
+    <Resource Include="pictures\yandex_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="languages\English.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="languages\Russian.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="main.ico" />
+    <Resource Include="pictures\Volume_Disable.PNG" />
+    <Resource Include="pictures\Volume1.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="classes\PowerManagement\PowerManagementResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>PowerManagementResource.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>

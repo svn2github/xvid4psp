@@ -1,0 +1,23 @@
+After you compile XviD4PSP.exe (or before), you must reproduce in you_source_folder\trunk\bin\Debug\
+exactly the same directory structure, like you can see in C:\Program Files\Winnydows\XviD4PSP5, or 
+where you have to install it. I.e. you must place in Debug folder this folders with theirs content:
+apps, dlls, presets, languages. Without this steps your compiled XviD4PSP.exe will won`t work..
+BUT YOU MUST INSTALL XviD4PSP_5.0.37.4_(Unofficial).exe FIRST, BECAUSE THERE WAS MANY CHANGES IN
+PLUGINS AND APPLICATIONS SINCE LAST OFFICIAL VERSION (5.036)!
+
+Don`t forget to update 3d-party components and plugins (apps, dlls), if they was updated in current
+version to.
+
+
+
+После того, как вы скомпилируете XviD4PSP.exe (или до этого), вы должны воссоздать в папке по адресу
+you_source_folder\trunk\bin\Debug\ точно такую-же структуру директорий, какую можете видеть по адресу,
+куда была установлена XviD4PSP (по умолчанию это что-то типа C:\Program Files\Winnydows\XviD4PSP5).
+Таким образом, вы должны скопировать оттуда (со всем содержимым) и перенести в папку Debug следующие
+папки: apps, dlls, presets, languages. Не проделав этих действий, вы не сможете заставить работать 
+ваш скомпилированный XviD4PSP.exe.
+НО ПЕРЕД ЭТИМ ВЫ ОБЯЗАТЕЛЬНО ДОЛЖНЫ УСТАНОВИТЬ XviD4PSP_5.0.37.4_(Unofficial).exe, Т.К. ПОСЛЕ ОФФИ-
+ЦИАЛЬНОЙ ВЕРСИИ (5.036) БЫЛО ОБНОВЛЕНО МНОГО ПРОГРАММ И ДЛЛ-ОК!
+
+Не забывайте обновлять сторонние утилиты и плагины (apps, dlls), если в текущей версии программы они
+так-же были изменены.

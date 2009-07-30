@@ -1,0 +1,23 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.FFV1"
+	x:Name="UserControl"
+	Width="Auto" Height="Auto">
+
+	<Grid x:Name="LayoutRoot" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Image Source="..\pictures\logo_FF_FFV1.png" Stretch="None" VerticalAlignment="Top" Height="95" HorizontalAlignment="Center"/>
+		<Grid Margin="0,95,0,0" Background="{DynamicResource black_gradient_2}" VerticalAlignment="Stretch" Height="132" Width="312">
+			<Label OpacityMask="{x:Null}" x:Name="label_color" Content="Colorspace:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,22,0,0" VerticalAlignment="Top"/>
+			<ComboBox x:Name="combo_color" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,26.66,8,0" VerticalAlignment="Top" SelectionChanged="combo_color_SelectionChanged"/>
+			<Label OpacityMask="{x:Null}" x:Name="label_codertype" Content="Coder type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8.167,50.62,0,0" VerticalAlignment="Top"/>
+			<ComboBox x:Name="combo_codertype" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,55.28,7.833,0" VerticalAlignment="Top" SelectionChanged="combo_codertype_SelectionChanged"/>
+			<Label OpacityMask="{x:Null}" x:Name="label_context" Content="Context model:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8.167,79.24,0,0" VerticalAlignment="Top"/>
+			<ComboBox x:Name="combo_contextmodel" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,83.9,7.833,0" VerticalAlignment="Top" SelectionChanged="combo_contextmodel_SelectionChanged"/>
+		</Grid>
+	</Grid>
+</UserControl>

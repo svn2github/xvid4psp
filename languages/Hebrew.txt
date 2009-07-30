@@ -1,0 +1,868 @@
+//Dialogs
+
+Select video files
+בחר קבצי וידאו
+
+All video files
+כל קבצי הוידאו
+
+All files
+כל הקבצים
+
+files
+קבצי
+
+Yes
+כן
+
+No
+לא
+
+OK
+אישור
+
+Cancel
+ביטול
+
+Select files for import:
+בחר קבצים לייבוא:
+
+Friend files
+קבצים שייכים
+
+Do you want add friend file to job?
+?האם ברצונך להוסיף קובץ אח לעבודה
+
+All settings reset ok.
+אתחל את כל ההגדרות מחדש
+
+Error
+תקלה
+
+//תפריט
+
+File
+קובץ
+
+Apps
+תוכנות
+
+Open
+פתח
+
+Join file
+אחד קובץ
+
+Close
+סגור
+
+Close file
+סגור קובץ
+
+Save
+שמור
+
+Save file
+שמור קובץ
+
+Open DVD folder
+פתח תיקיית די.וי.די
+
+Exit
+יציאה
+
+Settings
+הגדרות
+
+Language
+שפה
+
+Reset all settings
+אתחל מחדש את כל ההגדרות
+
+Tools
+כלים
+
+Help
+עזרה
+
+About
+על
+
+Can`t find output video file!
+!לא מצליח למצוא את קובץ הפלט של הוידאו
+
+Can`t find output audio file!
+!לא מצליח למצוא את קובץ הפלט של הקול
+
+Select other name for output file!
+!בחר שם אחר לקובץ הפלט של הוידאו
+
+Resume
+המשך
+
+ready
+מוכן
+
+Idle
+סרק
+
+Normal
+רגיל
+
+High
+גבוה
+
+Some jobs still encoding!
+!חלק מן העבודות עדיין מקודדות
+
+Warning
+אזהרה
+
+Current progress
+התקדמות נוכחית
+
+Total progress
+סך ההתקדמות
+
+Pause encoding
+השהה קידוד
+
+Resume encoding
+המשך קידוד
+
+Change encoding priority
+שנה קדימות קידוד
+
+Cancel encoding
+בטל קידוד
+
+Changes
+שינויים
+
+Can`t create gain file!
+!לא מסוגל ליצור קובץ מקדם
+
+Indexing progress
+התקדמות עריכת מפתח
+
+Indexing
+עריכת מפתח שרשרת
+
+MPEG file detected. Create index file ?
+?ליצור קובץ מפתח mpeg זוהה קובץ 
+
+
+Recomend for correct decoding!
+!ממליץ לקידוד נכון
+
+
+Cancel indexing
+בטל עריכת מפתח שרשרת
+
+Informer
+מודיע
+
+Normalizer
+מנרמל
+
+Play selected track
+נגן רצועה נבחרת
+
+Tracker
+רצועת שמע
+
+Select audio track
+בחר רצועת שמע
+
+Question
+שאלה
+
+Player
+נגן
+
+Video
+וידאו
+
+Audio
+שמע
+
+Subtitles
+כתוביות
+
+Refresh
+רענן
+
+Change audio track
+שנה רצועת שמע
+
+Add
+הוסף
+
+Remove
+הסר
+
+Select subtitles file
+בחר קובץ כתוביות
+
+AviSynth is not found!
+!AviSynth לא נמצאה תוכנת
+
+Please install AviSynth 2.5.7 or higher.
+או גרסה מתקדמת יותר Avisynth 2.5.7 אנא התקן
+
+
+Filtering
+הורד רעש/חדד
+
+Encoding
+מקדד
+
+Format
+תצורה
+
+Player engine
+מנוע נגן
+
+Resolution/Aspect
+רזולוציה/יחס
+
+Interlace
+שזירה
+
+Interlaced
+משולב
+
+Progressive
+מתקדם
+
+Refresh preview
+רענן תצוגה מקדימה
+
+Create auto script
+אוטומטי (script)צור קובץ אצווה
+
+Edit filtering script
+מסנן (script)ערוך קובץ אצווה 
+
+Edit video encoding settings
+ערוך הגדרות קידוד וידאו
+
+Edit audio encoding settings
+ערוך הגדרות קידוד שמע
+
+Auto
+אוטומטי
+
+Volume
+עוצמת קול
+
+Preview
+תצוגה מקדימה
+
+
+Apply
+ישם
+
+
+Video decoding
+פיענוח וידאו
+
+Other files
+קבצים אחרים
+
+
+Decoding
+פיענוח
+
+Import
+יבא
+
+Export
+יצא
+
+After opening
+לאחר פתיחה
+
+After encoding
+לאחר קידוד
+
+Before encoding
+לפני קידוד
+
+Nothing
+כלום
+
+Play
+נגן
+
+Middle
+אמצע
+
+Standby
+המתן
+
+Hibernate
+לך לחרופ
+
+Shutdown
+סגור
+
+Volume amplifing to
+הגבר עוצמת שמע ל
+
+Input resolution:
+רזולוציית קלט:
+
+Output resolution:
+רזולוציית פלט:
+
+Resolution step:
+מדרג רזולציה:
+
+Resize filter:
+מסנן גודל:
+
+Input aspect:
+יחס קלט:
+
+Output aspect:
+יחס פלט:
+
+How fix aspect difference:
+כיצד לתקן הבדל יחס:
+
+Width
+רוחב
+
+Height
+גובה
+
+Crop top, bottom:
+חתוך למעלה, למטה
+
+Crop left, right:
+:חתוך שמאל, ימין
+
+Bottom
+למטה
+
+Top
+למעלה
+
+Left
+שמאל
+
+Right
+ימין
+
+Black width, height:
+שחור רוחב, גובה
+
+Save script
+(script)שמור קובץ אצווה 
+
+Autocrop
+חתוך אוטומטית
+
+Detection of crop values
+גילוי ערכי חיתוך
+
+Disabled
+מנוטרל
+
+MPEG`s only
+בלבד MPEG קבצי
+
+Caסhing
+מטמון
+
+Don`t stop caching please. It can brake file import!
+!נא לא לעצור פעילות מטמון. זה יכול לעצור ייבוא קובץ
+
+Please wait... Caching can take long time.
+אנא המתן... הטמנה יכולה לקחת זמן רב.
+
+Sound extracting...
+...חילוץ שמע
+
+Volume gain detecting...
+...זיהוי מקדם שמע
+
+FFmpegSource create CACHE files. It can take long time and hard drive space.
+.יוצר קבצי מטמון. זה יכול לקחת זמן רב והרבה מקום בדיסק הקשיח FFmpegSource
+
+Use other decoders for more fast import.
+השתמש במפענחים אחרים לייבוא מהיר יותר
+
+FFmpegSource - slow, but safe and codec independed import:
+codec-איטי, אך בטוח והיבוא אינו תלוי ב -FFmpegSource 
+
+AVISource and DirectShowSource - fast, but depend on system codecs import.
+אשר מותקנים במערכת Codec-מהיר, אך תלוי ב DirectShowSource-ו AVISource
+
+FFmpegSource cache
+FFmpegSource מטמון
+
+Delete
+מחק
+
+Leave
+השאר
+
+Framerate
+קצב תמונה
+
+Samplerate
+קצב דגימה
+
+Input framerate:
+:קצב תמונה של קלט
+
+Output framerate:
+קצב תמונה של הפלט:
+
+Input samplerate:
+קצב דגימה של הקלט:
+
+Output samplerate:
+קצב דגימה של הפלט:
+
+Auto crop
+חתוך אוטומטית
+
+Auto volume
+עוצמת שמע אוטומטית
+
+On import
+בזמן יבוא
+
+On export
+בזמן יצוא
+
+Video encoding settings
+הגדרות קידוד וידאו
+
+Size
+גודל
+
+Codec
+Codec
+
+Quality
+איכות
+
+Profile:
+מתאר:
+
+Video encoding
+קידוד וידאו
+
+Audio encoding
+קידוד שמע
+
+New profile
+מתאר חדש
+
+Name of new profile:
+שם של מתאר חדש:
+
+Profile with same name already exists.
+מתאר עם שם זהה כבר קיים.
+
+Replace profile?
+?להחליף מתאר
+
+Not allowed remove last profile!
+!לא מורשה הסר מתאר אחרון
+
+Do you realy want remove profile
+?האם אתה באמת רוצה להסיר את המתאר
+
+Add profile
+הוסף מתאר
+
+Remove profile
+הסר מתאר
+
+Unknown
+לא ידוע
+
+exceed maximum file size for format
+מעבר לגודל מרבי של קובץ לתצורה
+
+Encode
+קדד
+
+Start files encoding
+התחל קידוד קבצים
+
+This task encoding now. Cancel encoding before updating.
+משימה זו עוברת קידוד כעת. בטל קידוד לפני עדכון
+
+Disabled remove tasks in encoding progress!
+!נטרל הסר משימות בזמן קידוד
+
+Do you want run one more encoding thread?
+?האם ברצונך להריץ שרשור קידוד נוסף
+
+Task list
+רשימת משימות
+
+Delay
+השהה
+
+Encoding settings
+הגדרות קידוד
+
+Audio delay:
+השהיית שמע:
+
+Check
+בדוק
+
+Check delay
+השהיית בדיקה
+
+Play-Pause
+נגן-השהה
+
+Frame back
+תמונה אחורה
+
+Frame forward
+תמונה קדימה
+
+Open file
+פתח קובץ
+
+Open new file
+פתח קובץ חדש
+
+Save task to list
+שמור משימה ברשימה
+
+Select unique name for output file:
+בחר שם ייחודי לקובץ פלט:
+
+Deselect
+הסר בחירה
+
+Delete all tasks
+מחק את כל המשימות
+
+Delete encoded tasks
+מחק משימות אשר קודדו
+
+Delete selected task
+מחק משימה נבחרת
+
+Always close encoding task dialog
+סגור תמיד דיאלוג קידוד משימה
+
+Always delete from list encoded tasks
+מחק תמיד מהרשימה משימות אשר קודד
+
+Import formats:
+יבא תצורות:
+
+Export formats:
+יצא תצורות:
+
+Reset task status
+אתחל מחדש מצב משימה
+
+Apply new volume
+ישם שם חדש
+
+Color correction
+בהירות/ניגודיות
+
+Edit saturation, brightness or contrast
+ערוך רוויה, בהירות או ניגודיות
+
+Need update DirectX files! Do it now?
+ ?לעשות זאת עכשיו !DirecX-צריך לעדכן את קבצי ה
+
+Hue
+גוון
+
+Saturation
+רוויה
+
+Brightness
+בהירות
+
+Contrast
+ניגודיות
+
+Is used to change the brightness of the image.
+משמש לשינוי הבהירות של התמונה
+
+Positive values increase the brightness.
+(ערכים חיובים מגדילים את הבהירות (מבהירים
+
+Negative values decrease the brightness.
+(ערכים שליליים מפחיתים את הבהירות (מכהים
+
+Is used to adjust the color hue of the image.
+משמש לכיוון גוון הצבע של התמונה
+
+Positive values shift the image towards red.
+ערכים חיובים הופכים את התמונה לאדומה יותר
+
+Negative values shift it towards green.
+ערכים שליליים הופכים את התמונה לירוקה יותר
+
+Is used to change the contrast of the image.
+משמש לשינוי הניגודיות של התמונה
+
+Values above 1.0 increase the contrast.
+ערכים מעל 1.0 מגדילים את הניגודיות
+
+Values below 1.0 decrease the contrast.
+ערכים מתחת לאחד מחלישים את הניגודיות
+
+Is used to adjust the color saturation of the image.
+משמש לכיוון רווית הצבע של התמונה
+
+Values above 1.0 increase the saturation.
+ערכים מעל 1.0 מגדילים את הרוויה
+
+Values below 1.0 reduce the saturation.
+ערכים מתחת ל-1.0 מפחיתים את הרוויה
+
+Saturation/Brightness
+רוויה/בהירות
+
+Denoise/Sharpen
+הפחתת רעשים/חדות
+
+Input file on CD or DVD! FFmpegSource decode files only from HardDrive.
+מקדד קבצים אך ורק מהדיסק הקשיח FFmpegSource !CD או DVD קובץ הקלט נמצא על 
+
+Copy files to HardDrive or use DirectShowSource decoder.
+DirectShouwSource העתק קבצים אל הדיסק הקשיח או השתמש במפענח 
+
+Switch decoder to DirectShowSource and try again?
+?ולנסות שוב DirectShowSource -להחליף מפענח  ל
+
+Update DirectX
+DirectX עדכן 
+
+System will be shutdown! 20 seconds left!
+!המערכת תכבה! נותרו 20 שניות
+
+Save to WAV
+WAV -שמור ל 
+
+Save to
+-שמור כ
+
+
+Select output file
+בחר קובץ פלט
+
+Decoder
+מפענח
+
+Demuxer
+מפריד אותות
+
+Decoding to Windows PCM
+PCM מפענח אל חלונות 
+
+Audio demuxing
+הפרדת אותות שמע
+
+Video demuxing
+הפרדת אותות ודיאו
+
+Can`t demux
+לא מסוגל להפריד אותות
+
+Maximum free drive space detected on
+נפח כונן מרבי התגלה ב
+
+Place for temp files
+מיקום קבצים זמניים
+
+Do you want use this drive for temp files?
+?האם ברצונך להשתמש בכונן זה לקבצים זמנייים
+
+Using already created file
+משתמש בקובץ שכבר נוצר
+
+Sorry, but stream will be extracted only from first file! :(
+:(!מצטער, אך הערוץ יחולץ אך ורק מהקובץ הראשון 
+
+Audio encoding settings
+הגדרות קידוד שמע
+
+Output file will be created without sound.
+קובץ הפלט יווצר ללא שמע
+
+Stream contein parameter incompatible with format
+הערוץ מכיל משתנים אשר לא מתאים לתצורה
+
+Auto join
+אחד אוטומטית
+
+DVD Only
+בלבד DVD
+
+Enabled
+אפשר
+
+Output file name is very long! Do you want autocut name?
+?שם הקובץ מאוד ארוך! האם ברצונך לקצרו אוטומטית
+
+Play in
+נגן ב
+
+Total encoding time:
+סה"כ זמן קידוד:
+
+Out file size is:
+גודל קובץ יוצא הוא:
+
+Output file size is very small!
+!גודל קובץ הפלט מאוד קטן
+
+Debug
+נקה שגיאות
+
+Add arguments to log
+הוסף הקש  אל הלוג
+
+Framerate converter:
+ממיר קצב תמונה:
+
+Samplerate converter:
+ממיר קצב דגימה:
+
+File don`t have audio streams!
+!לקובץ אין ערוצי שמע
+
+Can`t change parameters in COPY mode!
+!אי אפשר לשנות משתנים במצב העתקה
+
+Open file before do something!
+!פתח קובץ לפני שאתה עושה משהו
+
+Nothing for remove!
+!שום דבר להסרה
+
+Can`t decode audio with
+לא יכול לפענח את השמע 
+
+Can`t decode file with
+לא יכול לפענח את הקובץ
+
+Try switch decoder to FFmpegSource?
+?FFmpegSource-לנסות להחליף מפענח ל 
+
+Home page
+דף הבית
+
+AviSynth guide
+AviSynth מדריך
+
+Info
+מידע
+
+Close current file
+סגור קובץ נוכחי
+
+Open media file
+פתח קובץ מדיה
+
+Select media file
+בחר קובץ מדיה
+
+All media files
+כל קבצי המדיה
+
+Fullscreen
+מסך מלא
+
+Fullscreen mode
+מצב מסך מלא
+
+Stop media file
+עצור את קובץ המדיה
+
+Play or Pause media file
+נגן או השהה קובץ מדיה
+
+Exit from application
+צא מן התוכנית
+
+loading
+טוען
+
+Matroska file is corrupted! Try repair file?
+?קובץ מטרוסקה מושחת! לנסות לתקן את הקובץ
+
+Remuxing Matroska file
+מחבר אותות קובץ מטרוסקה
+
+Rapairer
+מתקן
+
+Select drive or folder with VOB files:
+VOB בחר כונן או תיקייה המכילים קבצי :
+
+Can`t find any VOB file in:
+:ב VOB לא יכול למצוא כל קובץ 
+
+Play
+נגן
+
+Pause
+השהה
+
+Stop
+עצור
+
+Select title:
+בחר כותר:
+
+Detect black borders
+זהה שוליים שחורים
+
+Detect interlace
+זהה שזירה
+
+Interlace detecting
+מזהה שזירה
+
+Detecting fields order
+מזהה סדר שדות
+
+Getting medi info
+משיג מידע על מדיה
+
+Detecting black borders
+מזהה גבולות שחורים
+
+Analyse
+מנתח
+
+Deinterlace
+פרום שזירה
+
+Field order
+סדר שדות
+
+Detect source type
+זהה סוג מקור
+
+Source type
+סוג מקור
+
+Auto deinterlace
+פרום שזירה אוטומטית
+
+Support
+תמיכה

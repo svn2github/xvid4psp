@@ -1,0 +1,26 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.Changelog"
+	x:Name="Window"
+	Title="Changelog:"
+	Width="600" Height="600" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" Visibility="Visible" SizeToContent="WidthAndHeight" HorizontalAlignment="Left" MaxHeight="700" MinWidth="550" MinHeight="300" MaxWidth="900">
+
+	<Grid x:Name="LayoutRoot" Background="{x:Null}">
+		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
+			<GroupBox Foreground="#FFFFFFFF" x:Name="group_muxing" Header="Changelog" Margin="8,8,8,8" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+				<Grid Width="Auto" Height="Auto">
+                    
+					<TextBox x:Name="changelog_text" Text="" TextWrapping="Wrap" Margin="8,8,8,8" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Visible" IsReadOnly="True" IsUndoEnabled="False" />
+					
+				    
+                    
+                </Grid>
+			</GroupBox>
+		</Grid>
+		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.96" Background="{DynamicResource black_gradient}">
+<Button x:Name="button_ok" Content="Ok" Click="button_ok_Click" HorizontalAlignment="Right" Margin="0,8,8,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+		</Grid>
+	</Grid>
+</Window>

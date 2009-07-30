@@ -1,0 +1,22 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.AftenAC3"
+	x:Name="UserControl"
+	Width="Auto" Height="Auto">
+
+	<Grid Width="Auto" Height="Auto" x:Name="LayoutRoot" Background="{x:Null}">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Image Margin="0,0,0,0" Source="..\pictures\logo_aften.png" Stretch="None" VerticalAlignment="Top" Height="95" d:LayoutOverrides="Width" HorizontalAlignment="Center"/>
+		<Grid Margin="0,95,0,0" VerticalAlignment="Stretch" Height="59" Background="{DynamicResource black_gradient_2}" Width="312">
+			<ComboBox HorizontalAlignment="Right" Margin="0,19,8,0" x:Name="combo_bitrate" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bitrate_SelectionChanged" VerticalAlignment="Top"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,15,0,0" VerticalAlignment="Top"/>
+		</Grid>
+	</Grid>
+</UserControl>

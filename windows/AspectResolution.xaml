@@ -1,0 +1,117 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.AspectResolution"
+	x:Name="Window"
+	Title="ResolutionAspect"
+	Width="Auto" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" d:DesignWidth="423.437">
+
+	<Grid x:Name="LayoutRoot">
+	 <Grid x:Name="grid_main1" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
+        <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
+            <TabItem Header="Main" x:Name="tab_main">
+                <Grid Width="380" Height="Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+             <StackPanel>
+			  <StackPanel x:Name="grid_main" Background="{x:Null}" Margin="0,0,0,0">
+				<DockPanel Margin="16,8,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_source_res" Content="Input resolution:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_resolution" Content="720x576" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+				</DockPanel>
+				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_final_res" Content="Output resolution:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto"/>
+					<ComboBox x:Name="combo_height" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_height_SelectionChanged" Width="62" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+					<ComboBox x:Name="combo_width" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_width_SelectionChanged" Width="62" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+				</DockPanel>
+				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_resizer" Content="Resize filter:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<ComboBox x:Name="combo_resizer" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_resizer_SelectionChanged" Width="132" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+				</DockPanel>
+				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_inaspect" Content="Input aspect:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<ComboBox x:Name="combo_inaspect" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_inaspect_SelectionChanged" Width="132" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+				</DockPanel>
+				<DockPanel HorizontalAlignment="Stretch" Margin="16,0,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_outaspect" Content="Output aspect:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Right"/>
+                    <ComboBox x:Name="combo_outaspect" Width="132" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_outaspect_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0" DockPanel.Dock="Right"/>
+                </DockPanel>
+                <DockPanel HorizontalAlignment="Stretch" Margin="16,0,16,0" Width="Auto" Height="Auto">
+                    <Label OpacityMask="{x:Null}" x:Name="text_aspecterror" Content="Aspect error:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Right"/>
+                <TextBox x:Name="textbox_error" VerticalAlignment="Center" HorizontalAlignment="Right" Text="" TextWrapping="Wrap" Width="132" Height="Auto" DockPanel.Dock="Right" Opacity="0.95" IsReadOnly="True"/>
+                </DockPanel>
+                <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_aspectfix" Content="How fix aspect difference:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<ComboBox x:Name="combo_aspectfix" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_aspectfix_SelectionChanged" Width="132" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+				</DockPanel>
+				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_crop_tb" Content="Crop top, bottom:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<ComboBox x:Name="combo_crop_b" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_b_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+					<ComboBox x:Name="combo_crop_t" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_t_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+				</DockPanel>
+				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_crop_lr" Content="Crop left, right:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<ComboBox x:Name="combo_crop_r" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_r_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+					<ComboBox x:Name="combo_crop_l" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_l_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+				</DockPanel>
+				<DockPanel Width="Auto" Height="Auto" Margin="16,0,16,0">
+					<Label OpacityMask="{x:Null}" x:Name="text_black" Content="Black width, height:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<ComboBox x:Name="combo_black_h" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_black_h_SelectionChanged" HorizontalAlignment="Right" DockPanel.Dock="Right" VerticalAlignment="Center"/>
+					<ComboBox x:Name="combo_black_w" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_black_w_SelectionChanged" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"/>
+				</DockPanel>
+				<DockPanel Margin="16,0,16,10" Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_runautocrop" Content="Run autocrop:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<Button x:Name="button_analyse" Content="Analyse" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_analyse_Click" HorizontalAlignment="Right" Margin="0,3,0,0" VerticalAlignment="Top" Width="132" Height="22" FontSize="12" />
+				</DockPanel>
+			  </StackPanel>
+            </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Settings" x:Name="tab_settings">
+               <Grid Width="380" Height="Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                       <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Autocrop" Margin="0,3,0,65" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                          <StackPanel>
+                                <DockPanel Margin="8,5,8,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_autocropframes" Content="Frames to analyze:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <ComboBox x:Name="combo_autocropframes" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_autocropframes_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                                <DockPanel Margin="8,0,8,5" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_autocropsens" Content="Autocrop sensivity:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <ComboBox x:Name="combo_autocropsens" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_autocropsens_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                                
+                            
+                            
+                            </StackPanel>
+                        </GroupBox>
+                      <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="0,100,0,5" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                 <DockPanel Margin="8,0,8,5" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate aspect when crop is using:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
+                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,86,0"/>
+                                </DockPanel>                
+                            </StackPanel>
+                      </GroupBox>    
+               </Grid> 
+            </TabItem>
+        </TabControl>
+        </Grid>
+        <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
+			    <Button x:Name="button_cancel" Height="25" Content="Cancel" Click="button_cancel_Click" d:LayoutOverrides="Height" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="120,0,4,0"/>
+		    	<Button x:Name="button_ok" Width="80" Height="25" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="290,0,4,0"/>				
+				<Button x:Name="button_refresh" Width="80" Height="25" Content="Apply" Click="button_refresh_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="-290,0,4,0"/>
+				<Button x:Name="button_fullscreen" Width="80" Height="25" Content="Fullscreen" Click="button_fullscreen_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="-120,0,4,0"/>
+          </Grid>		
+       </Grid>
+</Window>

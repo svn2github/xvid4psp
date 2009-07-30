@@ -1,0 +1,44 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.Interlace"
+	x:Name="Window"
+	Title="Interlace/Framerate"
+	Width="400" Height="385" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl">
+
+	<Grid x:Name="LayoutRoot" Background="{x:Null}">
+		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
+			<GroupBox Foreground="#FFFFFFFF" x:Name="group_interlace" Header="Interlace" Margin="8,8,8,137.04" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+				<Grid Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="label_source_info" Content="Detect source type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Top"/>
+					<Button x:Name="button_analyse" Content="Analyse" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_analyse_Click" HorizontalAlignment="Right" Margin="0,5.66,8,0" VerticalAlignment="Top" Width="149" Height="21.96"/>
+					<Label OpacityMask="{x:Null}" x:Name="label_deinterlace" Content="Deinterlace:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" d:LayoutOverrides="Height" Margin="8,85.86,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_deinterlace" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_deinterlace_SelectionChanged" HorizontalAlignment="Right" Margin="0,91.52,8,0" Width="149" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="label_field_order" Content="Field order:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,57.24,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_fieldorder" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_fieldorder_SelectionChanged" HorizontalAlignment="Right" Margin="0,62.9,8,0" VerticalAlignment="Top" Width="149"/>
+					<Label OpacityMask="{x:Null}" x:Name="label_source_type" Content="Source type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,28.62,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_sourcetype" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_sourcetype_SelectionChanged" HorizontalAlignment="Right" Margin="0,34.28,8,0" VerticalAlignment="Top" Width="149"/>
+					<Label OpacityMask="{x:Null}" x:Name="label_outinterlace" Content="Target type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,114.48,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_outinterlace" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,120.14,8,0" Width="149" VerticalAlignment="Top" SelectionChanged="combo_outinterlace_SelectionChanged"/>
+				</Grid>
+			</GroupBox>
+			<GroupBox Margin="8,0,8,8" Header="Framerate" Foreground="#FFFFFFFF" x:Name="group_framerate" VerticalAlignment="Bottom" Height="125.04">
+				<Grid Width="Auto" Height="Auto">
+					<Label OpacityMask="{x:Null}" x:Name="text_in_framerate" Content="Input framerate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_in_framerate_value" Content="25.000 fps" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Right" Margin="0,8,8,0" VerticalAlignment="Top" Width="Auto"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_out_framerate" Content="Output framerate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,36.62,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_framerate" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_framerate_SelectionChanged" HorizontalAlignment="Right" Margin="0,41.28,8,0" VerticalAlignment="Top" Width="149"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_framerateconvertor" Content="Convertion method:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,65.24,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_framerateconvertor" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,69.9,8,0" VerticalAlignment="Top" Width="149" SelectionChanged="combo_framerateconvertor_SelectionChanged"/>
+				</Grid>
+			</GroupBox>
+		</Grid>
+		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.96" Background="{DynamicResource black_gradient}">
+			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" BorderThickness="1,1,1,1" Click="button_cancel_Click" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Margin="0,8,92,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="80"/>
+			<Button x:Name="button_refresh" Width="80" Height="Auto" Content="Apply" Click="button_refresh_Click" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,8,0,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+		<Button x:Name="button_fullscreen" Width="80" Height="Auto" Content="Fullscreen" Click="button_fullscreen_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" HorizontalAlignment="Left" Template="{DynamicResource GlassButton}" Margin="92,8,0,8"/>
+        </Grid>
+	</Grid>
+</Window>

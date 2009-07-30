@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ArgumentNullMessage" xml:space="preserve">
+    <value>Argument powerSchemeTitle cannot be null.</value>
+  </data>
+  <data name="ChoiceAutomatic" xml:space="preserve">
+    <value>Automatic</value>
+  </data>
+  <data name="ChoiceDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="ChoiceDoNothing" xml:space="preserve">
+    <value>Do Nothing</value>
+  </data>
+  <data name="ChoiceEnabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="ChoiceLowPowerSaving" xml:space="preserve">
+    <value>Low Power Saving</value>
+  </data>
+  <data name="ChoiceMaximumPerformance" xml:space="preserve">
+    <value>Maximum Performance</value>
+  </data>
+  <data name="ChoiceMaximumPowerSaving" xml:space="preserve">
+    <value>Maximum Power Saving</value>
+  </data>
+  <data name="ChoiceMediumPowerSaving" xml:space="preserve">
+    <value>Medium Power Saving</value>
+  </data>
+  <data name="ChoiceModeratePowerSaving" xml:space="preserve">
+    <value>Moderate Power Saving</value>
+  </data>
+  <data name="ChoiceNever" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="ChoiceNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="ChoicePreventIdle" xml:space="preserve">
+    <value>Prevent Idle</value>
+  </data>
+  <data name="ChoiceUseAwayMode" xml:space="preserve">
+    <value>Use Away Mode</value>
+  </data>
+  <data name="DeleteSchemeMessage" xml:space="preserve">
+    <value>Cannot delete default or active power schemes.</value>
+  </data>
+  <data name="ErrorInvalidGuid" xml:space="preserve">
+    <value>'{0}' is not valid.</value>
+  </data>
+  <data name="ErrorSpecifyAgrument" xml:space="preserve">
+    <value>You must supply '{0}'.</value>
+  </data>
+  <data name="ErrorSpecifyBothArguments" xml:space="preserve">
+    <value>You must supply '{0}' and '{1}'. </value>
+  </data>
+  <data name="MaximumRebootTimerValue" xml:space="preserve">
+    <value>Argument secondsTimer's value can not be greater than or equal to 315360000 seconds.</value>
+  </data>
+  <data name="MaximumShutdownTimerValue" xml:space="preserve">
+    <value>Argument secondsTimer's value can not be greater than or equal to 315360000 seconds.</value>
+  </data>
+  <data name="NoHibernationSupport" xml:space="preserve">
+    <value>The computer does not support hibernation (power state S4).</value>
+  </data>
+  <data name="NoShutdownPrivilege" xml:space="preserve">
+    <value>User does not have sufficient privileges to shutdown.</value>
+  </data>
+  <data name="PostfixAcSpecific" xml:space="preserve">
+    <value> (AC-specific)</value>
+  </data>
+  <data name="PostfixDcSpecific" xml:space="preserve">
+    <value> (DC-specific)</value>
+  </data>
+  <data name="PostfixPercentage" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="PostfixSeconds" xml:space="preserve">
+    <value> seconds</value>
+  </data>
+  <data name="PowerSchemeBalancedTitle" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
+  <data name="PowerSchemeHighPerformanceTitle" xml:space="preserve">
+    <value>High performance</value>
+  </data>
+  <data name="PowerSchemeNotFound" xml:space="preserve">
+    <value>Specified power scheme not found.</value>
+  </data>
+  <data name="PowerSchemePowerSaverTitle" xml:space="preserve">
+    <value>Power saver</value>
+  </data>
+  <data name="RebootMessageLength" xml:space="preserve">
+    <value>Length of argument shutdownMessage cannot be greater than 511 characters.</value>
+  </data>
+  <data name="RegularExpressionGuid" xml:space="preserve">
+    <value>^(\{){0,1}[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}(\}){0,1}$</value>
+  </data>
+  <data name="ShutdownMessageLength" xml:space="preserve">
+    <value>Length of argument shutdownMessage cannot be greater than 511 characters.</value>
+  </data>
+  <data name="SubgroupBatteryGuid" xml:space="preserve">
+    <value>e73a048d-bf27-4f12-9731-8b2076e8891f</value>
+  </data>
+  <data name="SubgroupDiskGuid" xml:space="preserve">
+    <value>0012ee47-9041-4b5d-9b77-535fba8b1442</value>
+  </data>
+  <data name="SubgroupDisplayGuid" xml:space="preserve">
+    <value>7516b95f-f776-4464-8c53-06167f40cc99</value>
+  </data>
+  <data name="SubgroupMultimediaGuid" xml:space="preserve">
+    <value>9596fb26-9850-41fd-ac3e-f7c3c00afd4b</value>
+  </data>
+  <data name="SubgroupPciExpressGuid" xml:space="preserve">
+    <value>501a4d13-42af-4429-9fd1-a8218c268e20</value>
+  </data>
+  <data name="SubgroupPowerButtonGuid" xml:space="preserve">
+    <value>4f971e89-eebd-4455-a8de-9e59040e7347</value>
+  </data>
+  <data name="SubgroupProcessorGuid" xml:space="preserve">
+    <value>54533251-82be-4824-96c1-47b60b740d00</value>
+  </data>
+  <data name="SubgroupSearchIndexingGuid" xml:space="preserve">
+    <value>581a5406-53a3-4acd-af43-f685fa098e06</value>
+  </data>
+  <data name="SubgroupSleepGuid" xml:space="preserve">
+    <value>238c9fa8-0aad-41ed-83f4-97be242c8f20</value>
+  </data>
+  <data name="SubgroupUsbGuid" xml:space="preserve">
+    <value>2a737441-1930-4402-8d77-b2bebba308a3</value>
+  </data>
+  <data name="SubgroupWirelessAdapterGuid" xml:space="preserve">
+    <value>19cbb8fa-5279-450e-9fac-8a3d5fedd0c1</value>
+  </data>
+  <data name="Win32ErrorCodeMessage" xml:space="preserve">
+    <value>Windows32 Error Code : </value>
+  </data>
+</root>

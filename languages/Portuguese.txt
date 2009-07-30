@@ -1,0 +1,864 @@
+//Dialogs
+
+Select video files
+Seleccionar ficheiros de vídeo
+
+All video files
+Todos os ficheiros de vídeo
+
+All files
+Todos os ficheiros
+
+files
+Ficheiros
+
+Yes
+Sim
+
+No
+Não
+
+OK
+OK
+
+Cancel
+Cancelar
+
+Select files for import:
+Seleccione os ficheiros que pretende importar:
+
+Friend files
+Ficheiros contíguos
+
+Do you want add friend file to job?
+Deseja adicionar ficheiros contíguos à tarefa?
+
+All settings reset ok.
+Valores de origem repostos.
+
+Error
+Erro
+
+//Menu
+
+File
+Ficheiro
+
+Apps
+Aplicações
+
+Open
+Abrir
+
+Join file
+Juntar ficheiro
+
+Close
+Fechar
+
+Close file
+Fechar ficheiro
+
+Save
+Guardar
+
+Save file
+Guardar ficheiro
+
+Open DVD folder
+Abrir pasta de um DVD
+
+Exit
+Sair
+
+Settings
+Configuração
+
+Language
+Idioma
+
+Reset all settings
+Repôr valores de origem
+
+Tools
+Ferramentas
+
+Help
+Ajuda
+
+About
+Sobre
+
+Can`t find output video file!
+Vídeo de saída não encontrado!
+
+Can`t find output audio file!
+Áudio de saída não encontrado!
+
+Select other name for output file!
+Seleccione outro nome para o ficheiro de saída!
+
+Resume
+Resumir
+
+ready
+Começar
+
+Idle
+Baixa
+
+Normal
+Normal
+
+High
+Elevada
+
+Some jobs still encoding!
+Algumas tarefas ainda a converter!
+
+Warning
+Atenção
+
+Current progress
+Progresso actual
+
+Total progress
+Progresso total
+
+Pause encoding
+Parar conversão
+
+Resume encoding
+Resumir conversão
+
+Change encoding priority
+Alterar prioridade de conversão
+
+Cancel encoding
+Cancelar conversão
+
+Changes
+Alterações
+
+Can`t create gain file!
+Impossível criar ficheiro contíguo!
+
+Indexing progress
+A indexar progresso
+
+Indexing
+A indexar
+
+MPEG file detected. Create index file ?
+Detectado ficheiro MPEG. Criar ficheiro índex?
+
+Recomend for correct decoding!
+Recomendado para correcta descodificação!
+
+Cancel indexing
+Cancelar indexação
+
+Informer
+Informador
+
+Normalizer
+Normalizador
+
+Play selected track
+Reproduzir faixa seleccionada
+
+Tracker
+Seleccionador de áudio
+
+Select audio track
+Seleccionar faixa de áudio
+
+Question
+Questão
+
+Player
+Leitor
+
+Video
+Vídeo
+
+Audio
+Áudio
+
+Subtitles
+Legendas
+
+Refresh
+Actualizar
+
+Change audio track
+Alterar faixa de áudio
+
+Add
+Adicionar
+
+Remove
+Remover
+
+Select subtitles file
+Seleccionar ficheiro de legendas
+
+AviSynth is not found!
+AviSynth não encontrado!
+
+Please install AviSynth 2.5.7 or higher.
+Por favor instale AviSynth 2.5.7 ou superior.
+
+Filtering
+Denoise/Sharpen
+
+Encoding
+A converter
+
+Format
+Formato
+
+Player engine
+Sistema de reprodução
+
+Resolution/Aspect
+Resolução/Aspecto
+
+Interlace
+Interlace
+
+Interlaced
+Interlaced
+
+Progressive
+Progressivo
+
+Refresh preview
+Actualizar previsão
+
+Create auto script
+Criar script automático
+
+Edit filtering script
+Editar script filtrado
+
+Edit video encoding settings
+Editar opções de conversão de vídeo
+
+Edit audio encoding settings
+Editar opções de conversão de áudio
+
+Auto
+Automático
+
+Volume
+Volume
+
+Preview
+Prever
+
+Apply
+Aplicar
+
+Video decoding
+Descodificador de vídeo
+
+Other files
+Outros ficheiros
+
+Decoding
+A descodificar
+
+Import
+Importar
+
+Export
+Exportar
+
+After opening
+Depois de abrir
+
+After encoding
+Depois de converter
+
+Before encoding
+Antes de converter
+
+Nothing
+Nada
+
+Play
+Reproduzir
+
+Middle
+Meio
+
+Standby
+Suspender
+
+Hibernate
+Hibernar
+
+Shutdown
+Encerrar
+
+Volume amplifing to
+Volume amplificado em
+
+Input resolution:
+Resolução de entrada:
+
+Output resolution:
+Resolução de saída:
+
+Resolution step:
+Etapa de resolução:
+
+Resize filter:
+Filtro de redimensionamento:
+
+Input aspect:
+Aspecto de entrada:
+
+Output aspect:
+Aspecto de saída:
+
+How fix aspect difference:
+Como fixar diferença de aspecto:
+
+Width
+Largura
+
+Height
+Comprimento
+
+Crop top, bottom:
+Cortar cima, baixo:
+
+Crop left, right:
+Cortar esquerda, direita:
+
+Bottom
+Baixo
+
+Top
+Cima
+
+Left
+Esquerda
+
+Right
+Direita
+
+Black width, height:
+Borda negra, comprimento:
+
+Save script
+Guardar script
+
+Autocrop
+Corte automático
+
+Detection of crop values
+Detecção dos valores de corte
+
+Disabled
+Desactivado
+
+MPEG`s only
+Apenas ficheiros MPEG
+
+Cañhing
+Caching
+
+Don`t stop caching please. It can brake file import!
+Não pare o caching, por favor. Poderá corromper a importação do ficheiro!
+
+Please wait... Caching can take long time.
+Aguarde... Caching poderá demorar algum tempo.
+
+Sound extracting...
+A extrair som...
+
+Volume gain detecting...
+A detectar diferença de volume...
+
+FFmpegSource create CACHE files. It can take long time and hard drive space.
+FFmpegSource está a criar ficheiros CACHE. Poderá demorar algum tempo e necessitar de espaço em disco.
+
+Use other decoders for more fast import.
+Utilize outros descodificadores para uma mais eficiente importação.
+
+FFmpegSource - slow, but safe and codec independed import:
+FFmpegSource - lento, mas seguro e independente de codecs:
+
+AVISource and DirectShowSource - fast, but depend on system codecs import.
+AVISource e DirectShowSource - rápido, mas depende dos codecs instalados.
+
+FFmpegSource cache
+Cache de FFmpegSource
+
+Delete
+Apagar
+
+Leave
+Abandonar
+
+Framerate
+Framerate
+
+Samplerate
+Samplerate
+
+Input framerate:
+Framerate de entrada:
+
+Output framerate:
+Framerate de saída:
+
+Input samplerate:
+Samplerate de entrada:
+
+Output samplerate:
+Samplerate de saída:
+
+Auto crop
+Corte automático
+
+Auto volume
+Volume automático
+
+On import
+A importar
+
+On export
+A exportar
+
+Video encoding settings
+Definições de conversão de vídeo
+
+Size
+Tamanho
+
+Codec
+Codec
+
+Quality
+Qualidade
+
+Profile:
+Profile:
+
+Video encoding
+Conversão de vídeo
+
+Audio encoding
+Conversão de áudio
+
+New profile
+Novo profile
+
+Name of new profile:
+Nome de novo profile:
+
+Profile with same name already exists.
+Já existe um profile com o mesmo nome.
+
+Replace profile?
+Substituir profile?
+
+Not allowed remove last profile!
+Impossível remover último profile!
+
+Do you realy want remove profile
+Deseja remover profile
+
+Add profile
+Adicionar profile
+
+Remove profile
+Remover profile
+
+Unknown
+Desconhecido
+
+exceed maximum file size for format
+Excedido Tamanho máximo do ficheiro para o formato
+
+Encode
+Converter
+
+Start files encoding
+Iniciar conversão dos ficheiros
+
+This task encoding now. Cancel encoding before updating.
+A faixa encontra-se em conversão. Cancelar conversão antes de actualizar.
+
+Disabled remove tasks in encoding progress!
+Desactivada a remoção de faixas que se encontram em conversão!
+
+Do you want run one more encoding thread?
+Deseja iniciar nova conversão?
+
+Task list
+Lista de faixas
+
+Delay
+Atraso
+
+Encoding settings
+Definições de conversão
+
+Audio delay:
+Atraso de áudio:
+
+Check
+Verificar
+
+Check delay
+Verificar atraso
+
+Play-Pause
+Reproduzir - Pausa
+
+Frame back
+Frame anterior
+
+Frame forward
+Frame seguinte
+
+Open file
+Abrir ficheiro
+
+Open new file
+Abrir novo ficheiro
+
+Save task to list
+Guardar tarefa na lista
+
+Select unique name for output file:
+Seleccionar nome para ficheiro de saída:
+
+Deselect
+Remover selecção
+
+Delete all tasks
+Remover todas as tarefas
+
+Delete encoded tasks
+Remover tarefas concluídas
+
+Delete selected task
+Remover tarefas seleccionadas
+
+Always close encoding task dialog
+Fechar sempre janela após concluída a conversão
+
+Always delete from list encoded tasks
+Remover sempre da lista as tarefas concluídas
+
+Import formats:
+Importar formatos:
+
+Export formats:
+Exportar formatos:
+
+Reset task status
+Repôr valores de origem das opções de tarefas
+
+Apply new volume
+Aplicar novo volume
+
+Color correction
+Brilho/Contraste
+
+Edit saturation, brightness or contrast
+Editar saturação, brilho ou contraste
+
+Need update DirectX files! Do it now?
+Necessita de actualizar DirectX! Deseja fazer agora?
+
+Hue
+Tonalidade
+
+Saturation
+Saturação
+
+Brightness
+Brilho
+
+Contrast
+Contraste
+
+Is used to change the brightness of the image.
+Utilizado para alterar brilho da imagem.
+
+Positive values increase the brightness.
+Valores positivos aumentam brilho.
+
+Negative values decrease the brightness.
+Valores negativos diminuem brilho.
+
+Is used to adjust the color hue of the image.
+Utilizado para ajustar a tonalidade da cor na imagem.
+
+Positive values shift the image towards red.
+Valores positivos dão um tom avermelhado à imagem.
+
+Negative values shift it towards green.
+Valores negativos dão um tom esverdeado à imagem.
+
+Is used to change the contrast of the image.
+Utilizado para alterar o contraste da imagem.
+
+Values above 1.0 increase the contrast.
+Valores superiores a 1.0 aumentam contraste.
+
+Values below 1.0 decrease the contrast.
+Valores inferiores a 1.0 diminuem contraste.
+
+Is used to adjust the color saturation of the image.
+Utilizado para ajustar a saturação das cores da imagem.
+
+Values above 1.0 increase the saturation.
+Valores superiores a 1.0 aumentam saturação.
+
+Values below 1.0 reduce the saturation.
+Valores inferiores a 1.0 diminuem saturação.
+
+Saturation/Brightness
+Saturação/Brilho
+
+Denoise/Sharpen
+Denoise/Sharpen
+
+Input file on CD or DVD! FFmpegSource decode files only from HardDrive.
+Ficheiro de entrada em CD ou DVD! FFmpegSource descodifica apenas ficheiros que se encontrem no disco rígido.
+
+Copy files to HardDrive or use DirectShowSource decoder.
+Copia ficheiros do disco rígido ou utiliza descodificador DirectShowSource.
+
+Switch decoder to DirectShowSource and try again?
+Alterar descodificador para DirectShowSource e tentar de novo?
+
+Update DirectX
+Actualizar DirectX
+
+System will be shutdown! 20 seconds left!
+O sistema irá ser encerrado! 20 segundos restantes!
+
+Save to WAV
+Guardar em WAV
+
+Save to
+Guardar em
+
+Select output file
+Escolher ficheiro de saída
+
+Decoder
+Descodificador
+
+Demuxer
+Demuxer
+
+Decoding to Windows PCM
+A descodificar para Windows PCM
+
+Audio demuxing
+demuxing áudio
+
+Video demuxing
+demuxing vídeo
+
+Can`t demux
+Impossível fazer demux
+
+Maximum free drive space detected on
+Detectado espaço livre em disco
+
+Place for temp files
+Local para ficheiros temporários
+
+Do you want use this drive for temp files?
+Deseja utilizar este disco para ficheiros temporários?
+
+Using already created file
+A utilizar ficheiro criado
+
+Sorry, but stream will be extracted only from first file! :(
+Ups, stream apenas será extraído do primeiro ficheiro! :(
+
+Audio encoding settings
+Definições de conversão de áudio
+
+Output file will be created without sound.
+Ficheiro de saída será criado sem som.
+
+Stream contein parameter incompatible with format
+Stream contém parâmetro incompatível com o formato
+
+Auto join
+Junção automática
+
+DVD Only
+Apenas DVD
+
+Enabled
+Activado
+
+Output file name is very long! Do you want autocut name?
+Nome do ficheiro de saída muito longo! Deseja cortar automaticamente o nome?
+
+Play in
+Reproduzir em
+
+Total encoding time:
+Tempo total de conversão:
+
+Out file size is:
+Tamanho do ficheiro de saída:
+
+Output file size is very small!
+Tamanho do ficheiro de saída é muito pequeno!
+
+Debug
+Debug
+
+Add arguments to log
+Adicionar argumento para log
+
+Framerate converter:
+Conversor framerate:
+
+Samplerate converter:
+Conversor samplerate:
+
+File don`t have audio streams!
+Ficheiro não tem streams de áudio!
+
+Can`t change parameters in COPY mode!
+Impossível alterar parâmetros no modo COPIAR!
+
+Open file before do something!
+Não se esqueça de abrir um ficheiro!
+
+Nothing for remove!
+Nada para remover!
+
+Can`t decode audio with
+Impossível descodificar áudio com
+
+Can`t decode file with
+Impossível descodificar ficheiro com
+
+Try switch decoder to FFmpegSource?
+Tentasr alterar descodificador para FFmpegSource?
+
+Home page
+Página inicial
+
+AviSynth guide
+Guia AviSynth
+
+Info
+Informação
+
+Close current file
+Fechar ficheiro actual
+
+Open media file
+Abrir ficheiro multimédia
+
+Select media file
+Seleccionar ficheiro multimédia
+
+All media files
+Todos os ficheiros multimédia
+
+Fullscreen
+Ecrã inteiro
+
+Fullscreen mode
+Modo Ecrã inteiro
+
+Stop media file
+Parar ficheiro multimédia
+
+Play or Pause media file
+Reproduzir ou pausar ficheiro multimédia
+
+Exit from application
+Sair da aplicação
+
+loading
+A carregar
+
+Matroska file is corrupted! Try repair file?
+Ficheiro Matroska corrompido! Tentar restaurar ficheiro?
+
+Remuxing Matroska file
+Remuxing ficheiro Matroska
+
+Rapairer
+A restaurar
+
+Select drive or folder with VOB files:
+Seleccione disco ou pasta com os ficheiros VOB:
+
+Can`t find any VOB file in:
+Impossível encontrar ficheiros VOB em:
+
+Play
+Reproduzir
+
+Pause
+Pausa
+
+Stop
+Parar
+
+Select title:
+Seleccionar título:
+
+Detect black borders
+Detectar bordas negras
+
+Detect interlace
+Detectar interlace
+
+Interlace detecting
+A detectar Interlace
+
+Detecting fields order
+A detectar campos ordenados
+
+Getting medi info
+A obter informações multimédia
+
+Detecting black borders
+A detectar bordas negras
+
+Analyse
+Analisar
+
+Deinterlace
+Deinterlace
+
+Field order
+Campos ordenado
+
+Detect source type
+Detectar tipo de fonte
+
+Source type
+Tipo de fonte
+
+Auto deinterlace
+Deinterlace automático
+
+Support
+Suporte Online
+
+You don`t have YV12 decoder! It`s need for source interlace detection.
+Não possui descodificador YV12! É necessário para detectar interlace da fonte.

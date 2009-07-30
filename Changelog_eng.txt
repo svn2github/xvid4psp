@@ -1,0 +1,374 @@
+
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 30.07.09 pre-Changelog:
+
+sorry for my bad english :D    
+
+>>> Добавлена возможность записывать лог кодирования в файл, с сохранением в Темп-папку, или в папку, куда производится
+    кодирование (выбирается в Настройках->Лог кодирования). Так-же, вне зависимости от настроек, при даблклике по тексту
+    в окне лога, его содержимое будет переписано в файл (файл сохранится в той папке, куда идет кодирование).
+
+>>> Добавлена пакетная обработка файлов (Файл->Открыть папку...). При выборе этого пункта, появится окно, в котором нужно
+    будет указать папку, в которой находятся файлы, которые требуется открыть. Т.к. в выбраной папке могут находиться ка-
+    кие-угодно файлы, то был введен фильтр по расширениям. Настроить его можно в меню Настройки->Глобальные настройки->
+    Пакетная обработка. Там-же можно указать, запустить ли процесс кодирования сразу после открытия всех файлов, или нет.
+    После выбора исходной папки, появится окно выбора конечной папки. Это может быть одна и та-же папка, в случае, если
+    в ней уже имеется такой файл, то к перекодированному файлу в начале название добавится _encoded-1_. Когда все файлы
+    будут открыты, для самого последнего загрузится превью (для остальных файлов превью не загружалось - это ускорило и 
+    сделало более безопасным процесс их открытия), и появится окно со статистикой открытия. При необходимости, можно
+    открыть таким способом несколько папок, и уже потом начать кодирование.
+    --Известные проблемы: 
+     -если при открытия одного из файлов произойдет ошибка, то программа может вылететь (не связано с текущим нововве-
+      дением).
+     -при открытии какого-либо файла может появится окно с сообщением/диалогом выбора, в таком случае пока это окно 
+      не будет закрыто, дальнейшее открытие файлов производиться не будет.
+     -если при открытии папки с файлами попадется хоть один аудио-файл, то формат переключится на Аудио, и все последу-
+      ющие файлы будут открыты в этом формате. ОБ этом надо заранее подумать, и или исключить такие файлы из папки, или
+      удалить соответсвующее расширение в настройках.
+     -нельзя заранее установить разрешение и прочие параметры видео, можно только включить/выключить какие-то операции,
+      производимые после открытия файла (Автокроп, Автогромкость, Автодеинтерлейс и т.д.), и установить Формат, настройки
+      аудио-видео кодеков, фильтрацию и цветокоррекцию - эти параметры будут использоваться для всех файлов.
+
+>>> Вместо плагина nnedi.dll теперь будет использоваться nnedi2.dll (используется в YadifModEDI, MCBob, NNEDI). В скрипте
+    MCBob.avs необходимо вручную заменить везде вызов nnedi на nnedi2.
+
+>>> Введена проверка Темп-папки на отсутсвие в ней файлов. Проверка производится только после переустановки программы, или
+    после сброса настроек (т.е. если при запуске программы текущий номер для заданий = 0000). Если папка не пуста, то поя-
+    вится окно с предложением открыть папку для просмотра файлов (пользователь сам должен решить, какие файлы ему не нужны)
+    или проигнорировать это сообщение. Так-же в настройках, на вкладке выбора темп-папки, была добавлена кнопка открытия
+    текущей Темп-папки.
+    --Вовсе не обязательно, чтоб временная папка была пуста, главное, чтобы в ней не было остатков от предыдущих неудачных
+      кодирований (при этом временные файлы не удаляются), и вообще любых файлов, имеющих 4-е цифры в начале имени.
+  
+>>> Теперь из файлов-пресетов фильтрации в скрипт будут переноситься и пустые строчки (раньше они удалялись, что ухудшало
+    читабельность скрипта).
+
+>>> Добавлена возможность выбора subme10 для x264-го.
+
+
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+XviD4PSP 5.0.37.3(Unofficial)->5.0.37.4(Unofficial) Changelog:
+
+
+>>> Added function Trim. It will work only for encoding, not for Copy mode.
+
+>>> Now when you save current task, some parametres of the video will be recalculated (readed from the Avisynth-script).
+    This was done because when script was changed manualy, these parameters also may have changes.
+    --You can enable this feature in the global settings (disable by default).
+
+>>> Fixed error when closing file, if player engine is MediaBridge.
+
+>>> Fullscreen button added in the Resolution\Aspect and Deinterlace windows.
+
+>>> Aspect\Resolution window was splitted ot two parts: Main and Settings. Added aspect error indicator and option 
+    "Recalculate aspect when crop is using".
+
+>>> Added posibility to use a new FFmpegSource2 instead of old FFmpegSource, whose development has been stopped.
+
+>>> Added one more decoder (source) for the video: DirectShowSource2 (DSS2) from Haali. DSS2 can provide frame accurate
+    seeking, standart DirectShowSource can`t provide this. You can choose this decoder in menu Video->Decoding..
+    --thanks to Procrustean for the info about DSS2.
+  
+>>> Yamb, MKVextractGUI and AVI-Mux was added it the Tools menu.
+   
+>>> Fixed auto adding (not adding) audio files from the folder where *.dga project is located, if file name have 
+    track_N string, (tsRemuxer add this info wneh demuxing file).
+    --reported by Procrustean.
+
+>>> x264 settings window have been reworked. Few new options was added, some elements was relocated. Also many changes
+    for the new x264 (r1177+) was made. Rewritten tooltips, changed fast codec-presets (Main->Presets) and presets, that
+    storing in .txt-files (but only for this formats: AVI, MP4, MKV, M2TS, MP4 PS3 or XBOX360, MP4 PSP AVC, TS) 
+    --All presets, tooltips, testing and some code changes - by Procrustean. Testing, some good ideas and comments - 
+      by Makkay.
+
+>>> Spline64Resize was added as one more resizer in Resolution\Aspect window. Some new histograms added in the Color-
+    correction window.
+    --it`s only have sense if you using AviSynth 2.5.8 
+
+>>> Some other changes..
+
+------
+
+Updated components:
+
+
+Updated: DGIndex (1.5.5)
+Updated: FFmpegSource (1.21 - последняя версия, которая была выпущена)
+Updated: MediaInfo (0.7.18)
+Updated: NicAudio (2.0.3)
+Updated: ffmpeg (unofficial build r19401)
+Updated: x264 (1181kMod.generic.x86 by komisar666)
+Updated: MKVtoolnix (2.9.7-build20090713-149)
+Updated: AviSynth (2.5.8MT build by SEt 12.07.09)
+Added:   FFmpegSource2 (FFMS2_vc1_fix2_test 12.07.09)
+Added:   avss.dll (DSS2)
+Added:   MKVextractGUI
+Added:   Yamb
+Added:   AVI-Mux GUI 
+
+
+And also archive of plugins and filtering presets, by Tempter57.
+
+
+
+-----------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+XviD4PSP 5.0.37.2(Unofficial)->5.0.37.3(Unofficial) 02.07.09 Changelog:
+
+ 
+>>> Autocrop algorythm was changed. Now it works independedly for the each side. Also some other settings was changed.
+ 
+>>> Fixed issue whith AutoGain: even if you disable this option in settings, autogain will analyze your file when you
+    start encoding - fixed.
+    (reported by Makkay)
+
+>>> Fixed issue with AutoGain(2): if you open several files and use AutoGain after opening, you may have situation, when
+    all new files will receive gain from the first (or previous) file.
+    (reported by Makkay)
+
+>>> Fixed problem with canceled audio-tasks.
+
+>>> Now windows parameters will not be stored on exit, if main window was Minimized before closing.
+    (reported by wwmax)
+
+>>> For x264 and Xvid codecs now added possibility to manualy enter CLI options, that was not specified in the XviD4PSP
+    codec-settings window.
+
+>>> Now you can choose where crop and resize must be placed in the script: before or after(by default) filtering.
+
+>>> Now when you encoding with x264 you will see real fps in the encoding log, this value receiving directly from the x264,
+    and have high precision. It will also increase precision of estimated time calculation. 
+
+>>> Current frame/total frames counter was added in the main window. Unfortunately this counter indicate calculated values,
+    so it may have some inaccuracy..
+
+>>> Some other changes..
+
+------
+
+Updated components:
+
+
+Updated: mkvtoolnix (2.9.7.7)
+Updated: x264 (x264.1169kMod.generic.x86 by komisar666)
+
+
+And also archive of plugins and filtering presets, by Tempter57.
+
+
+
+-----------------------
+
+
+
+
+
+
+
+
+
+
+
+
+Second unofficial build of the XviD4PSP, I hope that all new changes will
+not produce to many bugs :)
+
+
+fcp (forclip)
+-------
+
+
+
+XviD4PSP 5.0.37.1(Unoficial)->5.0.37.2(Unofficial) Changelog:
+
+ 
+>>> DGAVCIndex was added in the Tools menu.
+
+>>> *.dga-files support added. It`s very important that you will make your dga-project in individual folder, with will contain
+    only *.dga-file, *.log-file (XviD4PSP will be use AR specified in this file), and audio-file(s). 
+    --This new feature may have some unexpected problems, need more testing.
+
+>>> Fixed wrong NTSC fps in the H264-in-AVI files. For example, instead of 23.976 fps we have 23.975 fps, and if we have long
+    video, we will also have out of sync closer to the end. - fixed.
+    --bugreport, help and tests by wwmax.
+ 
+>>> Now when you muxing VBR(or ABR) MP3 to AVI, VirtualDubMod will automatically get command "don`t rewrite file header" -  it 
+    must solve some problems with VBR-sound (out of sync etc).
+
+>>> Fixed problem with rendering video in the preview monitor, if this video have width more than 1024pix (you moving main window,
+    but preview still stand on the one place).
+
+>>> Fixed auto-ColorMatrix adding. 
+
+>>> Now when you open filtering-preset you will see all lines starting with # (it means #comments).
+    --You can disable it in GlobalSettings.
+
+>>> Now for background in the Fullsreen mode will using part of the main window. You can also double-click on this area to disable
+    Fullscreen.
+
+>>> Fixed MPEG1/2/4 and FV1 encoding by ffmpeg.exe, that was broken in 5.0.37.1-version due to some changes in cli-arguments of the
+    updated ffmpeg.exe (trellis and ME-search).
+
+>>> Some cosmetic changes in the encoding log (will be noticeably only if "Show encoding arguments" is enabled).
+
+>>> Now window parameters will not store on exit, if programm main window was Maximized before closing.
+
+>>> From the MP3 (CBR), MP2 and AC3 audio-codec settings windows was removed all unsupported by codecs bitrates. 
+
+>>> Some other changes.. 
+
+------
+
+Updated components:
+
+Updated: Lame (3.98.2)
+Updated: Xvid (1.2.2)
+Updated: MediaInfo (0.7.16.0)
+Updated: mkvtoolnix (2.9.5.7)
+
+
+And also archive of plugins and filtering presets, by Tempter57.
+
+
+
+-----------------------
+
+
+Seems that 5.036 was last official version of the XviD4PSP. Winnydows (developer of the XviD4PSP) says many times that project 
+XviD4PSP was stopped, and instead of this program he making new one - Winnydows Commander (with also contains Multi-encoder 
+feature). This version of XviD4PSP I made only for myself. It means that all changes that I made were necessary for me, for me
+and only for me. But if this changes will also necessary for you - I will be very glad :)
+I`m not a programmer, so please forgive me all new bugs! :D You will use this version at your own risk!!!
+
+fcp (forclip)
+-------
+
+
+XviD4PSP 5.036->5.0.37.1(Unoficial) Changelog:
+ 
+>>> For preview-player added volume control. This feature working as well in both player engine (MediaBridge and DirectShow). 
+    Current value will store in the Windows registry.
+
+>>> Fixed some bugs with MediaBridge player engine.
+
+
+>>> Some tweaks with Fullscreen mode (showing player controls added).
+    --Please read Changelog_rus.txt for more info :)  
+
+>>> Enhanced keyboard support:
+     Key:        Action:
+     Space       Play/Pause
+      <-         Previous Frame
+      ->         Next Frame
+    Up Arrow     Volume +
+    Down Arrow   Volume -
+     Escape      Fullscreen (on/off)
+       F         Call Filtering Window
+       C         Call Colorcorrection Window
+   --Keyboard support will work only when "focus" set on the Slider (player Timeline, player positioner..) 
+
+>>> Now when mouse came in the filename area (it`s located above player window) timer will show full time instead of current time.
+
+>>> Filtering window. Useless button Autoscript was replaced by the Fullscreen button. Now you can edit your Avisynth-script standing
+    in Fullscreen mode.
+    --Keyboard support for player will not working while Filtering window is opened (because "focus" leave from the slider).
+
+>>> Filtering window. Added AvsP-editer button. All you need to do is press this button (AvsP will started with your current
+    Avisynth-script autoloaded), edit your script, save this script (please don`t chage name AvsP.avs!), close AvsP, and after this
+    you will see your edited script in the Filtering window. Now press Refresh or Ok button.
+
+>>> Colorcorrection window. Added Histogram showing and Fullscreen button.
+
+>>> Colorcorrection window. Maximum possible Contrast now 5.0 and step enhanced to 0.01 (instead of 0.1).
+
+>>> Now you can add your own settings for the mkvmerge auto-generated command line (press E-button when MKV-Format is selected).
+    Added text WILL NOT HAVE any cheks for errors, and will be simple aded in the END of the auto-generated command line. 
+    It`s only for advanced users! 
+
+>>> Added auto storing window parameters when programm is closing, and auto re-storing when programm is starting again (check 
+    this option in GlobalSettings).
+
+>>> Also check "Renew script when audio/video encoding settings is changed" option. If it enabled Avisynth script will be automati-
+    caly generated every time you change your audio/video encoding settings, and if you change your script manualy before, you will
+    lose all your changes! - this algorythm now can be disabled, but if it produce some problems you can enable it again.
+
+>>> Added Changelog viewer (opening from the About window). About window also have some changes due to this build status (unoficial).
+
+>>> Language-support files did not updated with this build.. I`m to lazzy, sorry..
+
+>>> May be there was some other changes, I can`t remember :)
+
+------
+
+Updated components:
+
+Updated DGIndex (1.5.4)
+Updated NicSource.dll (r202) (for mpa-files now using NicMPG123Source instead of NicMPASource)
+Updated Bass (2.4)
+Updated mp4box (0.4.6)
+Updated ffmpeg (r18866) 
+Updated NeroAAC (1.3.3.0)
+Updated tsMuxeR (1.10.6)
+Updated x264 (1162kGIT.generic.x86 by komisar666)
+Updated MKVtoolnix (2.9.0)
+
+This updates may produce some problems (every update can produce unexpected problems!), so if you see that some of this component working
+not properly, you can simply replace it by old_version (from XviD4PSP 5.036 or find it somewhere else).
+
+
+Also in installer added archive of plugins and filtering presets, by Tempter57.
+
+
+
+------
+
+
+
+
+

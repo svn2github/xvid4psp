@@ -1,0 +1,11 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.OpenDialog"
+	x:Name="Window"
+	Title="OpenDialog"
+	Width="0" Height="0" ResizeMode="NoResize" WindowStartupLocation="Manual" Closing="Window_Closing" SizeToContent="Manual" IsEnabled="False" Opacity="0" Visibility="Visible" ShowInTaskbar="False" Topmost="True" WindowState="Normal" WindowStyle="None">
+
+	<Grid x:Name="LayoutRoot"/>
+</Window>

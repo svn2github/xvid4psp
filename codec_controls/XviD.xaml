@@ -1,0 +1,148 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+	x:Class="XviD4PSP.XviD"
+	x:Name="UserControl"
+	Width="Auto" Height="Auto" xmlns:MyUserControl="clr-namespace:MyUserControl">
+
+	<UserControl.Resources>
+		<Style TargetType="{x:Type ComboBox}">
+			<Setter Property="FocusVisualStyle" Value="{StaticResource ComboBoxFocusVisual}"/>
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>
+			<Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
+			<Setter Property="BorderBrush" Value="{StaticResource ButtonNormalBorder}"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+			<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+			<Setter Property="Padding" Value="4,3"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type ComboBox}">
+						<Grid SnapsToDevicePixels="true" x:Name="MainGrid">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition MinWidth="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}" Width="0"/>
+							</Grid.ColumnDefinitions>
+							<Popup AllowsTransparency="true" IsOpen="{Binding Path=IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}" Placement="Bottom" PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}" Margin="1" x:Name="PART_Popup" Grid.ColumnSpan="2">
+								<Microsoft_Windows_Themes:SystemDropShadowChrome MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{Binding Path=ActualWidth, ElementName=MainGrid}" x:Name="Shdw" Color="Transparent">
+									<Border x:Name="DropDownBorder" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="1">
+										<ScrollViewer CanContentScroll="true">
+											<ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.DirectionalNavigation="Contained"/>
+										</ScrollViewer>
+									</Border>
+								</Microsoft_Windows_Themes:SystemDropShadowChrome>
+							</Popup>
+							<ToggleButton Style="{StaticResource ComboBoxReadonlyToggleButton}" Grid.ColumnSpan="2" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+							<ContentPresenter IsHitTestVisible="false" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
+						</Grid>
+						<ControlTemplate.Triggers>
+							<Trigger Property="HasDropShadow" SourceName="PART_Popup" Value="true">
+								<Setter Property="Margin" TargetName="Shdw" Value="0,0,5,5"/>
+								<Setter Property="Color" TargetName="Shdw" Value="#71000000"/>
+							</Trigger>
+							<Trigger Property="HasItems" Value="false">
+								<Setter Property="Height" TargetName="DropDownBorder" Value="95"/>
+							</Trigger>
+							<Trigger Property="IsEnabled" Value="false">
+								<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+								<Setter Property="Background" Value="#FFF4F4F4"/>
+							</Trigger>
+							<Trigger Property="IsGrouping" Value="true">
+								<Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+			<Style.Triggers>
+				<Trigger Property="IsEditable" Value="true">
+					<Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
+					<Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+					<Setter Property="IsTabStop" Value="false"/>
+					<Setter Property="Padding" Value="3"/>
+					<Setter Property="Template" Value="{StaticResource ComboBoxEditableTemplate}"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
+
+	<Grid x:Name="LayoutRoot" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient_2}">
+		<Image Margin="0,0,0,0" Source="..\pictures\logo_xvid.png" Stretch="None" VerticalAlignment="Top" Height="95" HorizontalAlignment="Center"/>
+		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,92,0,0">
+			<TabItem Header="Main">
+				<Grid Width="304" Height="211.48">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
+					<ComboBox Margin="0,20.66,7,0" x:Name="combo_mode" VerticalAlignment="Top" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mode_SelectionChanged" HorizontalAlignment="Right" d:LayoutOverrides="HorizontalAlignment"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_mode" Content="Encoding mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" Margin="9,14,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate: (kbps)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9,42.62,0,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_codec_preset" Width="127" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_codec_preset_SelectionChanged" HorizontalAlignment="Right" Margin="0,77.9,8,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_codec_preset" Content="Preset:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9,71.24,0,0" VerticalAlignment="Top"/>
+					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,47.777,8,0" Width="127" x:Name="num_bitrate" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_fourcc" Width="127" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,105.52,8,0" VerticalAlignment="Top" SelectionChanged="combo_fourcc_SelectionChanged" IsEnabled="True"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_fourcc" Content="FOURCC:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9,99.86,0,0" VerticalAlignment="Top"/>
+					<CheckBox x:Name="check_cartoon" Width="Auto" Height="Auto" Content="Cartoon" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Left" Margin="13.98,0,0,35.1" VerticalAlignment="Bottom" Checked="check_cartoon_Checked" IsEnabled="True" Unchecked="check_cartoon_Unchecked"/>
+					<CheckBox x:Name="check_grayscale" Width="Auto" Height="Auto" Content="Grayscale" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="13.98,0,0,12.48" VerticalAlignment="Bottom" Checked="check_grayscale_Checked" Unchecked="check_grayscale_Unchecked" IsEnabled="True"/>
+				</Grid>
+			</TabItem>
+			<TabItem Header="Motion">
+				<Grid Width="304" Height="180.4">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*"/>
+					</Grid.RowDefinitions>
+					<ComboBox x:Name="combo_quality" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,20.66,8,0" VerticalAlignment="Top" SelectionChanged="combo_quality_SelectionChanged"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="Motion search:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="9,14,0,0" VerticalAlignment="Top"/>
+					<CheckBox d:LayoutOverrides="HorizontalAlignment, Height" HorizontalAlignment="Left" Margin="13.98,0,0,12.86" x:Name="check_chroma" VerticalAlignment="Bottom" Width="Auto" Height="Auto" Content="Chroma motion estimation" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Checked="check_chroma_Checked" Unchecked="check_chroma_Unchecked"/>
+					<ComboBox x:Name="combo_vhqmode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,49.28,8,0" VerticalAlignment="Top" SelectionChanged="combo_vhqmode_SelectionChanged"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_vhqmode" Content="VHQ mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="9,42.62,0,0" VerticalAlignment="Top"/>
+					<CheckBox x:Name="check_gmc" Width="Auto" Height="Auto" Content="Global motion compensation" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="13.98,0,0,35.48" VerticalAlignment="Bottom" Checked="check_gmc_Checked" Unchecked="check_gmc_Unchecked"/>
+					<CheckBox x:Name="check_qpel" Width="Auto" Height="Auto" Content="Quarter pixel search" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="13.98,0,0,58.1" VerticalAlignment="Bottom" Checked="check_qpel_Checked" Unchecked="check_qpel_Unchecked"/>
+				</Grid>
+			</TabItem>
+			<TabItem Header="B-frames">
+				<Grid Width="304" Height="153">
+					<ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bframes_SelectionChanged" HorizontalAlignment="Right" Margin="0,20.66,8,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_bframes" Content="B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="9,16,0,0" VerticalAlignment="Top"/>
+					<CheckBox x:Name="check_bvhq" Width="Auto" Height="Auto" Content="VHQ for B-frames" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_bvhq_Checked" Unchecked="check_bvhq_Unchecked" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="13.98,0,0,11.14" VerticalAlignment="Bottom"/>
+					<CheckBox x:Name="check_packedmode" Width="Auto" Height="Auto" Content="Packed bitstream" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Checked="check_packedmode_Checked" Unchecked="check_packedmode_Unchecked" HorizontalAlignment="Left" Margin="13.98,0,0,33.76" VerticalAlignment="Bottom"/>
+					<CheckBox x:Name="check_closedgop" Width="Auto" Height="Auto" Content="Closed GOP" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Checked="check_closedgop_Checked" Unchecked="check_closedgop_Unchecked" HorizontalAlignment="Left" Margin="13.98,0,0,56.38" VerticalAlignment="Bottom"/>
+				</Grid>
+			</TabItem>
+			<TabItem Header="Quantization">
+				<Grid Width="304" Height="129">
+					<ComboBox x:Name="combo_qmatrix" Width="200" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_qmatrix_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,20.66,8,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_qmatrix" Content="Matrix:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,14,0,0" VerticalAlignment="Top"/>
+					<CheckBox x:Name="check_trellis" Width="Auto" Height="Auto" Content="Trellis quantization" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Checked="check_trellis_Checked" Unchecked="check_trellis_Unchecked" HorizontalAlignment="Left" Margin="13.98,0,0,35.14" VerticalAlignment="Bottom"/>
+					<CheckBox x:Name="check_lumimasking" Width="Auto" Height="Auto" Content="Lumimasking algorithm" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_lumimasking_Checked" Unchecked="check_lumimasking_Unchecked" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="13.98,0,0,12.52" VerticalAlignment="Bottom"/>
+				</Grid>
+			</TabItem>
+		<TabItem Header="CLI">
+                <Grid Width="304" Height="230.48">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Label OpacityMask="{x:Null}" x:Name="text_cli1" Content="Arguments for the 1st pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
+                    <TextBox Margin="4,27,4,4" Width="Auto" Height="40" x:Name="textbox_string1" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma"  />
+                    <Label OpacityMask="{x:Null}" x:Name="text_cli2" Content="Arguments for the 2nd pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,75,0,0"/>
+                    <TextBox Margin="4,102,4,4" Width="Auto" Height="40" x:Name="textbox_string2" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_cli3" Content="Arguments for the 3rd pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,150,0,0"/>
+                    <TextBox Margin="4,177,4,4" Width="Auto" Height="40" x:Name="textbox_string3" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
+                </Grid>
+            </TabItem>
+        
+        
+        </TabControl>
+	</Grid>
+</UserControl>

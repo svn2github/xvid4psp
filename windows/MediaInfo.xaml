@@ -1,0 +1,20 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	x:Class="XviD4PSP.MediaInfo"
+	x:Name="Window"
+	Title="MediaInfo"
+	Width="386" Height="445" SizeToContent="Width" WindowStartupLocation="CenterOwner">
+
+	<Grid x:Name="LayoutRoot" Background="{x:Null}">
+		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}" DragEnter="grid_main_DragEnter" Drop="grid_main_Drop">
+			<TextBox x:Name="tbxInfo" Text="" TextWrapping="Wrap" Margin="8,8,8,8" AllowDrop="True"/>
+		</Grid>
+		<Grid x:Name="grid_buttons" Height="38" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom">
+    
+			<Button x:Name="button_open" Width="75" Content="Open" HorizontalAlignment="Left" Margin="8,0,0,8" VerticalAlignment="Bottom" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_open_Click"/>
+    
+			<Button x:Name="button_close" Content="Close" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="0,8,8,8" Click="button_close_Click" HorizontalAlignment="Right" Width="75"/>
+		</Grid>
+	</Grid>
+</Window>

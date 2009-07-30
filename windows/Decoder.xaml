@@ -1,0 +1,14 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.Decoder"
+	x:Name="Window"
+	Title="Decoder"
+	Width="298" Height="90" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SizeToContent="Manual">
+
+	<Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
+		<Label OpacityMask="{x:Null}" x:Name="label_info" Content="Sound decoding..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" Margin="8,8,8,0" VerticalAlignment="Top"/>
+		<ProgressBar x:Name="progress" Foreground="{DynamicResource StrawBerryBrush}" Margin="8,0,8,8" VerticalAlignment="Bottom" Height="12" IsIndeterminate="True"/>
+	</Grid>
+</Window>
