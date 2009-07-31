@@ -9,6 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using Microsoft.Windows.Themes;
 using MyUserControl;
 using System;
 using System.Diagnostics;
