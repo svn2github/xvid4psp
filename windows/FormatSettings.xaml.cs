@@ -4,11 +4,6 @@ using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Navigation;
-using System.Collections.Generic;
-using System.Collections;
 
 namespace XviD4PSP
 {
@@ -18,6 +13,7 @@ namespace XviD4PSP
         private Massive oldm;
         private MainWindow p;
         public string fstream;
+        public string format;
         
         public FormatSettings(Massive mass, MainWindow parent)
 		{
@@ -28,7 +24,7 @@ namespace XviD4PSP
             p = parent;
             Owner = p;
 
-            string format = m.format.ToString();
+            format = m.format.ToString();
 
             textbox_vcodec_list.Text = FormatReader.GetFormatInfo(format, "GetVCodecsList");
             textbox_acodec_list.Text = FormatReader.GetFormatInfo(format, "GetACodecsList");
@@ -108,15 +104,6 @@ namespace XviD4PSP
 
 
 
-
-
-
-            string sdirect_remux = Settings.GetFormatPreset(m.format, "direct_remux");
-            if (sdirect_remux != null)
-                check_direct_remux.IsChecked = Convert.ToBoolean(sdirect_remux);
-            else
-                check_direct_remux.IsChecked = true;
-
             TranslateItems();
             SetTooltips();
 
@@ -135,39 +122,39 @@ namespace XviD4PSP
                     {    
                         //Считываем построчно, ищем в текущей строчке совпадение с одним из параметров, если находим - меняем его значение на текущее, и пересобираем текст в новую переменную o_O
                         line = reader.ReadLine();
-                        if (line.StartsWith("\\" + m.format + "\\" + "GetVCodecsList\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetVCodecsList"), textbox_vcodec_list.Text.Trim()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetVCodec\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetVCodec"), combo_VCodec.SelectedItem.ToString()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetACodecsList\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetACodecsList"), textbox_acodec_list.Text.Trim()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetACodec\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetACodec"), combo_ACodec.SelectedItem.ToString()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetValidSampleratesList\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetValidSampleratesList"), textbox_samplerates_list.Text.Trim()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetValidFrameratesList\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetValidFrameratesList"), textbox_framerates_list.Text.Trim()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetValidExtension\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetValidExtension"), combo_Extension.SelectedItem.ToString()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetMuxer\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetMuxer"), combo_Muxer.SelectedItem.ToString()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetValidResolutionW\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetValidResolutionW"), combo_ResolutionW.SelectedItem.ToString()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetValidResolutionH\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetValidResolutionH"), combo_ResolutionH.SelectedItem.ToString()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "IsLockedOutAspect\\"))
+                        if (line.StartsWith("\\" + format + "\\GetVCodecsList\\"))
+                            line = "\\" + format + "\\GetVCodecsList\\" + textbox_vcodec_list.Text.Trim() + Environment.NewLine;                       
+                        else if (line.StartsWith("\\" + format + "\\GetVCodec\\"))
+                            line = "\\" + format + "\\GetVCodec\\" + combo_VCodec.SelectedItem.ToString() + Environment.NewLine;                       
+                        else if (line.StartsWith("\\" + format + "\\GetACodecsList\\"))
+                            line = "\\" + format + "\\GetACodecsList\\" + textbox_acodec_list.Text.Trim() + Environment.NewLine;                       
+                        else if (line.StartsWith("\\" + format + "\\GetACodec\\"))
+                            line = "\\" + format + "\\GetACodec\\" + combo_ACodec.SelectedItem.ToString() + Environment.NewLine;
+                        else if (line.StartsWith("\\" + format + "\\GetValidSampleratesList\\"))
+                            line = "\\" + format + "\\GetValidSampleratesList\\" + textbox_samplerates_list.Text.Trim() + Environment.NewLine;                       
+                        else if (line.StartsWith("\\" + format + "\\GetValidFrameratesList\\"))
+                            line = "\\" + format + "\\GetValidFrameratesList\\" + textbox_framerates_list.Text.Trim() + Environment.NewLine;                       
+                        else if (line.StartsWith("\\" + format + "\\GetValidExtension\\"))
+                            line = "\\" + format + "\\GetValidExtension\\" + combo_Extension.SelectedItem.ToString() + Environment.NewLine;                        
+                        else if (line.StartsWith("\\" + format + "\\GetMuxer\\"))
+                            line = "\\" + format + "\\GetMuxer\\" + combo_Muxer.SelectedItem.ToString() + Environment.NewLine;                      
+                        else if (line.StartsWith("\\" + format + "\\GetValidResolutionW\\"))
+                            line = "\\" + format + "\\GetValidResolutionW\\" + combo_ResolutionW.SelectedItem.ToString() + Environment.NewLine;                       
+                        else if (line.StartsWith("\\" + format + "\\GetValidResolutionH\\"))
+                            line = "\\" + format + "\\GetValidResolutionH\\" + combo_ResolutionH.SelectedItem.ToString() + Environment.NewLine;                        
+                        else if (line.StartsWith("\\" + format + "\\IsLockedOutAspect\\"))
                         {
                             string logval = "no";
                             if (check_fixed_ar.IsChecked == true) logval = "yes";
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "IsLockedOutAspect"), logval) + Environment.NewLine;
+                            line = "\\" + format + "\\IsLockedOutAspect\\" + logval + Environment.NewLine;
                         }
-                        else if (line.StartsWith("\\" + m.format + "\\" + "GetValidOutAspects\\"))
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "GetValidOutAspects"), textbox_aspects.Text.Trim()) + Environment.NewLine;
-                        else if (line.StartsWith("\\" + m.format + "\\" + "Is4GBlimitedFormat\\"))
+                        else if (line.StartsWith("\\" + m.format + "\\GetValidOutAspects\\"))
+                            line = "\\" + format + "\\GetValidOutAspects\\" + textbox_aspects.Text.Trim() + Environment.NewLine;
+                        else if (line.StartsWith("\\" + m.format + "\\Is4GBlimitedFormat\\"))
                         {
                             string logval = "no";
                             if (check_4gb_only.IsChecked == true) logval = "yes";
-                            line = line.Replace(FormatReader.GetFormatInfo(m.format.ToString(), "Is4GBlimitedFormat"), logval) + Environment.NewLine;
+                            line = "\\" + format + "\\Is4GBlimitedFormat\\" + logval + Environment.NewLine;
                         }
                         else
                             if (!reader.EndOfStream)
@@ -244,23 +231,6 @@ namespace XviD4PSP
         {
             Message mes = new Message(this);
             mes.ShowMessage(message, Languages.Translate("Error"));
-        }
-
-
-        private void check_direct_remux_Checked(object sender, RoutedEventArgs e)
-        {
-            if (check_direct_remux.IsFocused)
-            {
-                Settings.SetFormatPreset(m.format, "direct_remux", check_direct_remux.IsChecked.Value.ToString());
-            }
-        }
-
-        private void check_direct_remux_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (check_direct_remux.IsFocused)
-            {
-                Settings.SetFormatPreset(m.format, "direct_remux", check_direct_remux.IsChecked.Value.ToString());
-            }
         }
 
         private void combo_VCodec_Selection_Changed(object sender, SelectionChangedEventArgs e)

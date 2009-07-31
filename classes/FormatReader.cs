@@ -6,7 +6,6 @@ using System.Collections;
 using System.Data;
 using System.Runtime.InteropServices;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace XviD4PSP
 {

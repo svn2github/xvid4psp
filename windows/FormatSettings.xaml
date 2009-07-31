@@ -42,12 +42,7 @@
                     <ComboBox Margin="0,294.201,4,0" x:Name="combo_Extension" Height="21" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_Extension_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Right" Width="65.934" />
 
                      <CheckBox x:Name="check_4gb_only" Content="Maximum filesize is 4Gb" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="4,333.671,0,0" d:LayoutOverrides="Width, Height" Click="check_4Gb_Only_Clicked" HorizontalContentAlignment="Left" Height="16.9" VerticalAlignment="Top" HorizontalAlignment="Left" Width="301.105" />
-
-
-                    <Label OpacityMask="{x:Null}" x:Name="label_split" Content="Split output file:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,590,0,0" VerticalAlignment="Top" Width="Auto" />
-					
-					<CheckBox x:Name="check_direct_remux" Width="Auto" Content="Use direct remuxing when it possible" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,590,0,0" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" VerticalAlignment="Top" Checked="check_direct_remux_Checked" Unchecked="check_direct_remux_Unchecked"/>
-				    <Label OpacityMask="{x:Null}" x:Name="mkv_string_enter" Content="Add this text to the mkvmerge.exe command line:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto"  HorizontalAlignment="Left" Margin="4,582,0,0" VerticalAlignment="Top" Width="320.107" />
+          
                     
                 </Grid>
 			</GroupBox>
