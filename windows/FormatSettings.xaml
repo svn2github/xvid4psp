@@ -1,0 +1,60 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.FormatSettings"
+	x:Name="Window"
+	Title="FormatSettings:"
+	Width="500" Height="500" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+
+	<Grid x:Name="LayoutRoot" Background="{x:Null}">
+		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
+			<GroupBox Foreground="#FFFFFFFF" x:Name="group_format" Header="Format Name" Margin="8,8,8,8" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+				<Grid Width="Auto" Height="Auto">
+                    <Label OpacityMask="{x:Null}" x:Name="vcodeclist" Content="Valid video codecs:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,3.674,0,0" VerticalAlignment="Top" Height="26.9" HorizontalAlignment="Left" Width="351.25" />
+                    <TextBox Margin="4,27.972,96.75,0" Height="23" x:Name="textbox_vcodec_list" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
+                    <Label OpacityMask="{x:Null}" x:Name="getvcodec" Content="Usualy used:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" HorizontalAlignment="Right" Margin="0,3.674,0,0" VerticalAlignment="Top" Height="26.9" Width="96.4" HorizontalContentAlignment="Left" />
+                    <ComboBox Margin="0,28.33,4,0" x:Name="combo_VCodec" Height="23" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="89.24" SelectionChanged="combo_VCodec_Selection_Changed" VerticalAlignment="Top"/>
+                    
+                    <Label OpacityMask="{x:Null}" x:Name="acodeclist" Content="Valid audio codecs:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,106.6,0,0" VerticalAlignment="Top" Height="26.9" HorizontalAlignment="Left" Width="353.25" />
+                    <TextBox Margin="4,130.425,96.75,0" Height="23" x:Name="textbox_acodec_list" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />                    
+                    <Label OpacityMask="{x:Null}" x:Name="getacodec" Content="Usualy used:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" HorizontalAlignment="Right" Margin="0,106.6,0,0" VerticalAlignment="Top" Height="26.9" Width="96.4" HorizontalContentAlignment="Left" />
+                    <ComboBox Margin="0,130.425,4,0" x:Name="combo_ACodec" Height="23" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="89.24" SelectionChanged="combo_ACodec_Selection_Changed" VerticalAlignment="Top"/>
+
+                    <Label OpacityMask="{x:Null}" x:Name="framerateslist" Content="Valid framerates:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,51.2,96.75,0" VerticalAlignment="Top" Height="26.9" />
+                    <TextBox Margin="4,75.484,4,0" x:Name="textbox_framerates_list" Text="" TextWrapping="Wrap" FontSize="13" FontFamily="Tahoma" Height="23" VerticalAlignment="Top" />
+
+                    <Label OpacityMask="{x:Null}" x:Name="samplerateslist" Content="Valid samplerates:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,154.583,96.75,0" VerticalAlignment="Top" Height="26.9" />
+                    <TextBox Margin="4,178.6,4,0" x:Name="textbox_samplerates_list" Text="" TextWrapping="Wrap" FontSize="13" FontFamily="Tahoma" Height="22.757" VerticalAlignment="Top" />
+                    
+                    <Label OpacityMask="{x:Null}" x:Name="validresolution" Content="Resolution:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="2,222.233,0,0" HorizontalAlignment="Left" Width="94" Height="26.9" VerticalAlignment="Top" />
+                    <ComboBox Margin="95.6,225.547,0,0" x:Name="combo_ResolutionW" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_ResolutionW_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52" />
+                    <Label OpacityMask="{x:Null}" x:Name="x" Content="x" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="143.875,222.233,0,0" Height="23.799" VerticalAlignment="Top" HorizontalAlignment="Left" Width="18.109" />
+                    <ComboBox Margin="157.5,225.547,0,0" x:Name="combo_ResolutionH" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_ResolutionH_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52" />
+                    <CheckBox x:Name="check_fixed_ar" Content="Use only AR`s, specified below:" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="214.467,227.233,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Click="check_Fixed_AR_Clicked" Height="16.9" HorizontalAlignment="Left" Width="238.146" />
+                    <TextBox Margin="4,249.889,4,0" x:Name="textbox_aspects" Text="" TextWrapping="Wrap" FontSize="13" FontFamily="Tahoma" Height="23" VerticalAlignment="Top" />                    
+                    
+                    
+                    <Label OpacityMask="{x:Null}" x:Name="validmuxer" Content="Muxer fot this format:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,291.057,0,0" Height="26.9" VerticalAlignment="Top" VerticalContentAlignment="Top" HorizontalAlignment="Left" Width="161.984" />
+                    <ComboBox Margin="162.162,294.201,0,0" x:Name="combo_Muxer" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_Muxer_Selection_Changed" Height="21" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108.373" />
+
+                    <Label OpacityMask="{x:Null}" x:Name="validextension" Content="File extension:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,291.057,70,0" Height="26.9" VerticalAlignment="Top" FlowDirection="LeftToRight" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="104" />
+                    <ComboBox Margin="0,294.201,4,0" x:Name="combo_Extension" Height="21" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_Extension_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Right" Width="65.934" />
+
+                     <CheckBox x:Name="check_4gb_only" Content="Maximum filesize is 4Gb" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="4,333.671,0,0" d:LayoutOverrides="Width, Height" Click="check_4Gb_Only_Clicked" HorizontalContentAlignment="Left" Height="16.9" VerticalAlignment="Top" HorizontalAlignment="Left" Width="301.105" />
+
+
+                    <Label OpacityMask="{x:Null}" x:Name="label_split" Content="Split output file:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,590,0,0" VerticalAlignment="Top" Width="Auto" />
+					
+					<CheckBox x:Name="check_direct_remux" Width="Auto" Content="Use direct remuxing when it possible" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,590,0,0" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" VerticalAlignment="Top" Checked="check_direct_remux_Checked" Unchecked="check_direct_remux_Unchecked"/>
+				    <Label OpacityMask="{x:Null}" x:Name="mkv_string_enter" Content="Add this text to the mkvmerge.exe command line:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto"  HorizontalAlignment="Left" Margin="4,582,0,0" VerticalAlignment="Top" Width="320.107" />
+                    
+                </Grid>
+			</GroupBox>
+		</Grid>
+		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.96" Background="{DynamicResource black_gradient}">
+			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" BorderThickness="1,1,1,1" Click="button_cancel_Click" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Margin="0,8,92,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="80"/>
+		</Grid>
+	</Grid>
+</Window>

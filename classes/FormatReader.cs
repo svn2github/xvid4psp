@@ -32,7 +32,7 @@ namespace XviD4PSP
                    return null;
                }
            }
-           catch (Exception ex)
+           catch (Exception)
            {
                return null;
            }     
@@ -54,7 +54,7 @@ namespace XviD4PSP
                        line = sr.ReadLine();
                        if (line.StartsWith("\\" + format_name + "\\" + what_to_find + "\\"))
                        {
-                           line = line.Replace("\\" + format_name + "\\" + what_to_find + "\\", "").TrimEnd();//оставляем только нужную часть, и удаляем пробелы с обеих концов
+                           line = line.Replace("\\" + format_name + "\\" + what_to_find + "\\", "").Trim();//оставляем только нужную часть, и удаляем пробелы с обеих концов
                            lines = line.Split(separator, StringSplitOptions.None); //Делим строку на подстроки
 
                            for (int i = 0; i <= lines.Length - 1; i++)
@@ -67,7 +67,7 @@ namespace XviD4PSP
                    return null;
                }
            }
-           catch (Exception ex)
+           catch (Exception)
            {
                return null;
            }     

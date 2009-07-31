@@ -5860,6 +5860,12 @@ namespace XviD4PSP
                     m = blu.m.Clone();
                     UpdateTaskMassive(m);
                 }
+                else if (m.format == Format.ExportFormats.Custom)
+                {
+                    FormatSettings cust = new FormatSettings(m, this);
+                    //m = cust.m.Clone();
+                    //UpdateTaskMassive(m);  
+                }
                 else
                 {
                     Message mess = new Message(this);

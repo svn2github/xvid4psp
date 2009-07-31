@@ -1,4 +1,4 @@
-﻿D:\SVN\trunk\obj\Debug\GeneratedInternalTypeHelper.g.cs
+﻿
 
 FD:\SVN\trunk\codec_controls\FMPEG1.xaml
 FD:\SVN\trunk\codec_controls\FLV1.xaml
@@ -10,6 +10,7 @@ FD:\SVN\trunk\codec_controls\x264.xaml
 FD:\SVN\trunk\controls\NumericUpDown.xaml
 FD:\SVN\trunk\windows\About.xaml
 FD:\SVN\trunk\windows\Changelog.xaml
+FD:\SVN\trunk\windows\FormatSettings.xaml
 FD:\SVN\trunk\windows\Options_MPEG2DVD.xaml
 FD:\SVN\trunk\windows\Settings_Window.xaml
 FD:\SVN\trunk\windows\Options_BluRay.xaml

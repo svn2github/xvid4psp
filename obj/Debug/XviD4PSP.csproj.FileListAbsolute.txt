@@ -653,3 +653,5 @@ D:\SVN\trunk\obj\Debug\windows\AudioOptions.baml
 D:\SVN\trunk\obj\Debug\XviD4PSP.g.resources
 D:\SVN\trunk\obj\Debug\XviD4PSP.classes.PowerManagement.PowerManagementResource.resources
 D:\SVN\trunk\obj\Debug\XviD4PSP.csproj.GenerateResource.Cache
+D:\SVN\trunk\obj\Debug\windows\FormatSettings.g.cs
+D:\SVN\trunk\obj\Debug\windows\FormatSettings.baml
