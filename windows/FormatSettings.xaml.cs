@@ -13,7 +13,7 @@ namespace XviD4PSP
         private Massive oldm;
         private MainWindow p;
         public string fstream;
-        public string format;
+        private string format;
         
         public FormatSettings(Massive mass, MainWindow parent)
 		{
@@ -76,20 +76,45 @@ namespace XviD4PSP
             int step = 16;
             while (n < 1920 + step)
             {
-                combo_ResolutionW.Items.Add(n.ToString());
+                combo_MaxResolutionW.Items.Add(n.ToString());
                 n = n + step;
             }
-            combo_ResolutionW.SelectedItem = FormatReader.GetFormatInfo(format, "GetValidResolutionW");
+            combo_MaxResolutionW.SelectedItem = FormatReader.GetFormatInfo(format, "MaxResolutionW");
 
             n = 16;
             step = 8;
             while (n < 1088 + step)
             {
-                combo_ResolutionH.Items.Add(n.ToString());
+                combo_MaxResolutionH.Items.Add(n.ToString());
                 n = n + step;
             }
-            combo_ResolutionH.SelectedItem = FormatReader.GetFormatInfo(format, "GetValidResolutionH");
+            combo_MaxResolutionH.SelectedItem = FormatReader.GetFormatInfo(format, "MaxResolutionH");
 
+            n = 16;
+            step = 16;
+            while (n< 1920 + step)
+            {
+                combo_MinResolutionW.Items.Add(n.ToString());
+                n = n + step;
+            }
+            combo_MinResolutionW.SelectedItem = FormatReader.GetFormatInfo(format, "MinResolutionW");
+
+            n = 16;
+            step = 8;
+            while (n < 1088 + step)
+            {
+                combo_MinResolutionH.Items.Add(n.ToString());
+                n = n + step;
+            }
+            combo_MinResolutionH.SelectedItem = FormatReader.GetFormatInfo(format, "MinResolutionH");
+            
+            
+            
+            
+            
+            
+            
+            
             if (FormatReader.GetFormatInfo(format, "IsLockedOutAspect") == "yes")
                 check_fixed_ar.IsChecked = true;
             else
@@ -119,29 +144,33 @@ namespace XviD4PSP
                 using (StreamReader reader = new StreamReader(Calculate.StartupPath + "\\FormatSettings.ini", System.Text.Encoding.Default))
                 {
                     while (!reader.EndOfStream)
-                    {    
+                    {
                         //Считываем построчно, ищем в текущей строчке совпадение с одним из параметров, если находим - меняем его значение на текущее, и пересобираем текст в новую переменную o_O
                         line = reader.ReadLine();
                         if (line.StartsWith("\\" + format + "\\GetVCodecsList\\"))
-                            line = "\\" + format + "\\GetVCodecsList\\" + textbox_vcodec_list.Text.Trim() + Environment.NewLine;                       
+                            line = "\\" + format + "\\GetVCodecsList\\" + textbox_vcodec_list.Text.Trim() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\GetVCodec\\"))
-                            line = "\\" + format + "\\GetVCodec\\" + combo_VCodec.SelectedItem.ToString() + Environment.NewLine;                       
+                            line = "\\" + format + "\\GetVCodec\\" + combo_VCodec.SelectedItem.ToString() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\GetACodecsList\\"))
-                            line = "\\" + format + "\\GetACodecsList\\" + textbox_acodec_list.Text.Trim() + Environment.NewLine;                       
+                            line = "\\" + format + "\\GetACodecsList\\" + textbox_acodec_list.Text.Trim() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\GetACodec\\"))
                             line = "\\" + format + "\\GetACodec\\" + combo_ACodec.SelectedItem.ToString() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\GetValidSampleratesList\\"))
-                            line = "\\" + format + "\\GetValidSampleratesList\\" + textbox_samplerates_list.Text.Trim() + Environment.NewLine;                       
+                            line = "\\" + format + "\\GetValidSampleratesList\\" + textbox_samplerates_list.Text.Trim() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\GetValidFrameratesList\\"))
-                            line = "\\" + format + "\\GetValidFrameratesList\\" + textbox_framerates_list.Text.Trim() + Environment.NewLine;                       
+                            line = "\\" + format + "\\GetValidFrameratesList\\" + textbox_framerates_list.Text.Trim() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\GetValidExtension\\"))
-                            line = "\\" + format + "\\GetValidExtension\\" + combo_Extension.SelectedItem.ToString() + Environment.NewLine;                        
+                            line = "\\" + format + "\\GetValidExtension\\" + combo_Extension.SelectedItem.ToString() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\GetMuxer\\"))
-                            line = "\\" + format + "\\GetMuxer\\" + combo_Muxer.SelectedItem.ToString() + Environment.NewLine;                      
-                        else if (line.StartsWith("\\" + format + "\\GetValidResolutionW\\"))
-                            line = "\\" + format + "\\GetValidResolutionW\\" + combo_ResolutionW.SelectedItem.ToString() + Environment.NewLine;                       
-                        else if (line.StartsWith("\\" + format + "\\GetValidResolutionH\\"))
-                            line = "\\" + format + "\\GetValidResolutionH\\" + combo_ResolutionH.SelectedItem.ToString() + Environment.NewLine;                        
+                            line = "\\" + format + "\\GetMuxer\\" + combo_Muxer.SelectedItem.ToString() + Environment.NewLine;
+                        else if (line.StartsWith("\\" + format + "\\MinResolutionW\\"))
+                            line = "\\" + format + "\\MinResolutionW\\" + combo_MinResolutionW.SelectedItem.ToString() + Environment.NewLine;
+                        else if (line.StartsWith("\\" + format + "\\MinResolutionH\\"))
+                            line = "\\" + format + "\\MinResolutionH\\" + combo_MinResolutionH.SelectedItem.ToString() + Environment.NewLine;
+                        else if (line.StartsWith("\\" + format + "\\MaxResolutionW\\"))
+                            line = "\\" + format + "\\MaxResolutionW\\" + combo_MaxResolutionW.SelectedItem.ToString() + Environment.NewLine;
+                        else if (line.StartsWith("\\" + format + "\\MaxResolutionH\\"))
+                            line = "\\" + format + "\\MaxResolutionH\\" + combo_MaxResolutionH.SelectedItem.ToString() + Environment.NewLine;
                         else if (line.StartsWith("\\" + format + "\\IsLockedOutAspect\\"))
                         {
                             string logval = "no";
@@ -204,7 +233,7 @@ namespace XviD4PSP
             getacodec.Content = Languages.Translate("Usualy used:");
             samplerateslist.Content = Languages.Translate("Valid samplerates:");
             validresolution.Content = Languages.Translate("Resolution:");
-            check_fixed_ar.Content = Languages.Translate("Use only AR`s, specified below:");
+            check_fixed_ar.Content = "fix AR:"; //Languages.Translate("Use only AR`s, specified below:");
             validmuxer.Content = Languages.Translate("Muxer fot this format:");
             validextension.Content = Languages.Translate("File extension:");
             check_4gb_only.Content = Languages.Translate("Maximum filesize is 4Gb");
@@ -219,7 +248,7 @@ namespace XviD4PSP
             combo_ACodec.ToolTip = Languages.Translate("Codec, that usualy used in this format (or maybe i`m wrong)");
             textbox_samplerates_list.ToolTip = Languages.Translate("Samplerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("valid values: 22050, 32000, 44100, 48000, 96000, 192000");
             validresolution.ToolTip = Languages.Translate("Resolution:");
-            check_fixed_ar.ToolTip = Languages.Translate("If this format can have only specified (by next setting) AR - then yes, if it can have any AR - then no");
+            check_fixed_ar.ToolTip = Languages.Translate("DO NOT USE THIS OPTION!") + Environment.NewLine +  Languages.Translate("If this format can have only specified (by next setting) AR - then yes, if it can have any AR - then no");
             combo_Muxer.ToolTip = Languages.Translate("Muxer, that will be used for this format.");
             combo_Extension.ToolTip = Languages.Translate("File extension:");
             check_4gb_only.ToolTip = Languages.Translate("Maximum filesize is 4Gb");
@@ -253,16 +282,40 @@ namespace XviD4PSP
 
         }
 
-        private void combo_ResolutionW_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        private void combo_MaxResolutionW_Selection_Changed(object sender, SelectionChangedEventArgs e)
         {
-
+            if (combo_MaxResolutionW.IsDropDownOpen)
+            {
+                if (Convert.ToInt32(combo_MaxResolutionW.SelectedItem) < Convert.ToInt32(combo_MinResolutionW.SelectedItem))
+                    combo_MaxResolutionW.SelectedItem = combo_MinResolutionW.SelectedItem;
+            }
+        }
+        private void combo_MaxResolutionH_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_MaxResolutionH.IsDropDownOpen)
+            {
+                if (Convert.ToInt32(combo_MaxResolutionH.SelectedItem) < Convert.ToInt32(combo_MinResolutionH.SelectedItem))
+                    combo_MaxResolutionH.SelectedItem = combo_MinResolutionH.SelectedItem;
+            }
         }
 
-        private void combo_ResolutionH_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        private void combo_MinResolutionW_Selection_Changed(object sender, SelectionChangedEventArgs e)
         {
-
+            if (combo_MinResolutionW.IsDropDownOpen)
+            {
+                if (Convert.ToInt32(combo_MinResolutionW.SelectedItem) > Convert.ToInt32(combo_MaxResolutionW.SelectedItem))
+                    combo_MinResolutionW.SelectedItem = combo_MaxResolutionW.SelectedItem;
+            }
         }
-
+        private void combo_MinResolutionH_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_MinResolutionH.IsDropDownOpen)
+            {
+                if (Convert.ToInt32(combo_MinResolutionH.SelectedItem) > Convert.ToInt32(combo_MaxResolutionH.SelectedItem))
+                    combo_MinResolutionH.SelectedItem = combo_MaxResolutionH.SelectedItem;
+            }
+        }
+      
         private void check_Fixed_AR_Clicked(object sender, RoutedEventArgs e)
         {
 
@@ -282,13 +335,6 @@ namespace XviD4PSP
         {
 
         }
-
-
-
-
-
-
-
 
 	}
 }

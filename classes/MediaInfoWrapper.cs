@@ -774,6 +774,13 @@ namespace XviD4PSP
             }
         }
 
+        public string ScanOrder
+        {
+            get
+            {
+                return Get(StreamKind.Video, 0, "ScanOrder");
+            }
+        }
 
     }
 }

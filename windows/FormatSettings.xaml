@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.FormatSettings"
 	x:Name="Window"
 	Title="FormatSettings:"
-	Width="500" Height="500" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	Width="500" Height="478" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
@@ -27,13 +27,18 @@
                     <Label OpacityMask="{x:Null}" x:Name="samplerateslist" Content="Valid samplerates:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,154.583,96.75,0" VerticalAlignment="Top" Height="26.9" />
                     <TextBox Margin="4,178.6,4,0" x:Name="textbox_samplerates_list" Text="" TextWrapping="Wrap" FontSize="13" FontFamily="Tahoma" Height="22.757" VerticalAlignment="Top" />
                     
-                    <Label OpacityMask="{x:Null}" x:Name="validresolution" Content="Resolution:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="2,222.233,0,0" HorizontalAlignment="Left" Width="94" Height="26.9" VerticalAlignment="Top" />
-                    <ComboBox Margin="95.6,225.547,0,0" x:Name="combo_ResolutionW" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_ResolutionW_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52" />
-                    <Label OpacityMask="{x:Null}" x:Name="x" Content="x" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="143.875,222.233,0,0" Height="23.799" VerticalAlignment="Top" HorizontalAlignment="Left" Width="18.109" />
-                    <ComboBox Margin="157.5,225.547,0,0" x:Name="combo_ResolutionH" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_ResolutionH_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52" />
-                    <CheckBox x:Name="check_fixed_ar" Content="Use only AR`s, specified below:" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="214.467,227.233,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Click="check_Fixed_AR_Clicked" Height="16.9" HorizontalAlignment="Left" Width="238.146" />
+                    <Label OpacityMask="{x:Null}" x:Name="validresolution" Content="Resolution:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,222.234,0,0" HorizontalAlignment="Left" Width="94" Height="26.9" VerticalAlignment="Top" />
+                    <Label OpacityMask="{x:Null}" x:Name="Max" Content="max" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#ffffff" Margin="239.813,222.234,0,0" Height="23.799" VerticalAlignment="Top" HorizontalAlignment="Left" Width="36.685" />
+                    <ComboBox Margin="272,225.547,0,0" x:Name="combo_MaxResolutionW" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_MaxResolutionW_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52" />
+                    <Label OpacityMask="{x:Null}" x:Name="X" Content="x" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="323.091,222.234,0,0" Height="23.799" VerticalAlignment="Top" HorizontalAlignment="Left" Width="18.109" />
+                    <ComboBox Margin="338.8,225.548,0,0" x:Name="combo_MaxResolutionH" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_MaxResolutionH_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52" />
+                    <CheckBox x:Name="check_fixed_ar" Content="fix AR:" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="0,227.234,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Click="check_Fixed_AR_Clicked" Height="16.9" HorizontalAlignment="Right" Width="62.754" />
                     <TextBox Margin="4,249.889,4,0" x:Name="textbox_aspects" Text="" TextWrapping="Wrap" FontSize="13" FontFamily="Tahoma" Height="23" VerticalAlignment="Top" />                    
                     
+                    <Label OpacityMask="{x:Null}" x:Name="Min" Content="min" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#ffffff" Margin="89.964,222.233,0,0" Height="23.799" VerticalAlignment="Top" HorizontalAlignment="Left" Width="30.5" />
+                    <ComboBox Margin="119.952,225.548,0,0" x:Name="combo_MinResolutionW" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_MinResolutionW_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52" />
+                    <Label OpacityMask="{x:Null}" x:Name="x" Content="x" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="170.646,222.233,0,0" Height="23.799" VerticalAlignment="Top" HorizontalAlignment="Left" Width="18.109" />
+                    <ComboBox Margin="185.6,225.548,0,0" x:Name="combo_MinResolutionH" Height="20" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_MinResolutionH_Selection_Changed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="51.6" />
                     
                     <Label OpacityMask="{x:Null}" x:Name="validmuxer" Content="Muxer fot this format:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,291.057,0,0" Height="26.9" VerticalAlignment="Top" VerticalContentAlignment="Top" HorizontalAlignment="Left" Width="161.984" />
                     <ComboBox Margin="162.162,294.201,0,0" x:Name="combo_Muxer" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_Muxer_Selection_Changed" Height="21" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108.373" />

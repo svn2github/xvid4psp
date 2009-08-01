@@ -806,7 +806,10 @@ namespace XviD4PSP
         {
             try
             {
-                Process.Start("http://www.winnydows.com");
+                if (Settings.Language == "Russian" || Settings.Language == "Ukrainian")
+                    Process.Start("http://www.ru.winnydows.com");
+                else
+                    Process.Start("http://www.winnydows.com");
             }
             catch (Exception ex)
             {
@@ -5863,6 +5866,67 @@ namespace XviD4PSP
                 else if (m.format == Format.ExportFormats.Custom)
                 {
                     FormatSettings cust = new FormatSettings(m, this);
+                    if (cust.fstream != null)
+                    {
+                        LoadVideoPresets();
+                        LoadAudioPresets();
+                        //забиваем-обновляем аудио массивы
+                        m = FillAudio(m);
+                        //забиваем настройки из профиля
+                        m.vencoding = Settings.GetVEncodingPreset(m.format);
+                        if (!combo_vencoding.Items.Contains(m.vencoding))
+                            m.vencoding = "Copy";
+                        m.outvcodec = PresetLoader.GetVCodec(m);
+                        m.vpasses = PresetLoader.GetVCodecPasses(m);
+                        m = PresetLoader.DecodePresets(m);
+                        //перезабиваем специфику формата
+                        m = Format.GetOutInterlace(m);
+                        m = Format.GetValidFramerate(m);
+                        m = Calculate.UpdateOutFrames(m);
+                        m = Format.GetValidResolution(m);
+                        m = Format.GetValidOutAspect(m);
+                        m = AspectResolution.FixAspectDifference(m);
+                        //принудительный фикс цвета для DVD
+                        if (Settings.AutoColorMatrix &&
+                            Calculate.IsMPEG(m.infilepath))
+                        {
+                            if (m.outvcodec == "MPEG2")
+                                m.iscolormatrix = false;
+                            else
+                                m.iscolormatrix = true;
+                        }
+                        m.outfilesize = Calculate.GetEncodingSize(m);
+                        //перезабиваем настройки форматов
+                        m.split = Settings.GetFormatPreset(m.format, "split");
+                        //создаём новый AviSynth скрипт
+                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        //проверяем скрипт на ошибки и пытаемся их автоматически исправить
+                        string er = Calculate.CheckScriptErrors(m);
+                        if (er != null)
+                        {
+                            if (er == "SSRC: could not resample between the two samplerates.")
+                                m.sampleratemodifer = AviSynthScripting.SamplerateModifers.ResampleAudio;
+
+                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        }
+                        //загружаем обновлённый скрипт
+                        LoadVideo(MediaLoad.update);
+                        UpdateTaskMassive(m);
+
+                        //проверяем можно ли копировать данный формат
+                        //if (m.vencoding == "Copy")
+                        //{
+                        //    string CopyProblems = Format.ValidateCopyVideo(m);
+                        //    if (CopyProblems != null)
+                        //    {
+                        //        Message mess = new Message(this);
+                        //        mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                        //            " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                        //    }
+                        //}
+                        SetVideoPresetFromSettings();
+                        SetAudioPresetFromSettings();
+                    }
                     //m = cust.m.Clone();
                     //UpdateTaskMassive(m);  
                 }
@@ -6191,14 +6255,10 @@ namespace XviD4PSP
             if (mass != null)
             {               
                 //Разбираемся с названием для перекодированного файла
-                int nn = 1;
                 mass.outfilepath = path_to_save + "\\" + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
-                while (File.Exists(mass.outfilepath))
-                {
-                    mass.outfilepath = path_to_save + "\\" + "_encoded-" + nn.ToString() + "_" + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
-                    nn += 1;
-                }
-
+                if (File.Exists(mass.outfilepath))
+                    mass.outfilepath = path_to_save + "\\(" + Path.GetFileName(m.infilepath) + ") " + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
+                
                 //Выход отсюда, если такое задание уже имеется (видимо была ошибка при открытии файла, и текущее задание дублирует предыдущее)
                 if (outfiles.Contains(mass.outfilepath))
                     return;

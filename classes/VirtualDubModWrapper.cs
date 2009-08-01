@@ -53,7 +53,7 @@ namespace XviD4PSP
                    //Для правильного муксинга вбр и абр мп3-звука (0 - переписывать заголовок, 1 - не переписывать заголовок мп3-файла)
                    if (m.mp3_options.encodingmode == Settings.AudioEncodingModes.VBR || m.mp3_options.encodingmode == Settings.AudioEncodingModes.ABR)//для VBR и ABR 1
                    {
-                       sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 1);");//0
+                       sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 1);");//1
                    }
                    else //для CBR 0
                    {

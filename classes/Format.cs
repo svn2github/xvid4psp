@@ -1136,8 +1136,8 @@ namespace XviD4PSP
            }
            else if (m.format == ExportFormats.Custom)
            {
-               MaxW = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetValidResolutionW"));
-               MaxH = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetValidResolutionH"));
+               MaxW = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MaxResolutionW"));
+               MaxH = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MaxResolutionH"));
            }
 
            else
@@ -1260,8 +1260,8 @@ namespace XviD4PSP
                m.format == ExportFormats.M2TS ||
                m.format == ExportFormats.TS ||
                m.format == ExportFormats.WMV ||
-               m.format == ExportFormats.Flv ||
-               m.format == ExportFormats.Custom) 
+               m.format == ExportFormats.Flv)
+                
            {
                while (n < 1920 + step)
                {
@@ -1442,6 +1442,18 @@ namespace XviD4PSP
            //    }
            //}
 
+           if (m.format == ExportFormats.Custom)
+           {
+               n = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MinResolutionW"));
+               while (n < Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MaxResolutionW")) + step)
+               {
+                   reswlist.Add(n);
+                   n = n + step;
+               }
+           }
+           
+           
+           
            return reswlist;
        }
 
@@ -1467,8 +1479,7 @@ namespace XviD4PSP
                m.format == ExportFormats.M2TS ||
                m.format == ExportFormats.TS ||
                m.format == ExportFormats.WMV ||
-               m.format == ExportFormats.Flv ||
-               m.format == ExportFormats.Custom)
+               m.format == ExportFormats.Flv)
            {
                while (n < 1088 + step)
                {
@@ -1657,6 +1668,16 @@ namespace XviD4PSP
            //    }
            //}
 
+           if (m.format == ExportFormats.Custom)
+           {
+               n = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MinResolutionH"));
+               while (n < Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MaxResolutionH")) + step)
+               {
+                   reshlist.Add(n);
+                   n = n + step;
+               }
+           }
+                              
            return reshlist;
        }
 
@@ -2232,7 +2253,6 @@ namespace XviD4PSP
 
        public static Massive GetValidOutAspect(Massive m)
        {
-
            //метод для форматов с фиксированным аспектом
            if (m.format == ExportFormats.BluRay)
            {
@@ -2247,7 +2267,8 @@ namespace XviD4PSP
 
                m.sar = Calculate.ConvertDoubleToPointString(m.outaspect);
                if (m.format == ExportFormats.Mp4PSPAVCTV ||
-                   m.format == ExportFormats.BluRay)
+                   m.format == ExportFormats.BluRay ||
+                   m.format == ExportFormats.Custom) //тут
                    m.sar = null;
 
                m.aspectfix = AspectResolution.AspectFixes.Black;
