@@ -1671,6 +1671,7 @@ namespace XviD4PSP
            if (m.format == ExportFormats.Custom)
            {
                n = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MinResolutionH"));
+               step = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetResolutionHMod"));
                while (n < Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MaxResolutionH")) + step)
                {
                    reshlist.Add(n);

@@ -1037,7 +1037,7 @@ namespace XviD4PSP
                         ext != ".avi" &&
                         Settings.OtherDecoder == AviSynthScripting.Decoders.FFmpegSource)
                     {
-                        if (Calculate.IsReadOnly(x.infilepath) && Settings.FFmpegSource2)
+                        if (Calculate.IsReadOnly(x.infilepath) && !Settings.FFmpegSource2)
                         {
                             Message mess = new Message(this);
                             mess.ShowMessage(Languages.Translate("Input file on CD or DVD! FFmpegSource decode files only from HardDrive.") +

@@ -82,7 +82,7 @@ namespace XviD4PSP
             combo_MaxResolutionW.SelectedItem = FormatReader.GetFormatInfo(format, "MaxResolutionW");
 
             n = 16;
-            step = 8;
+            step = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetResolutionHMod"));
             while (n < 1088 + step)
             {
                 combo_MaxResolutionH.Items.Add(n.ToString());
@@ -100,21 +100,14 @@ namespace XviD4PSP
             combo_MinResolutionW.SelectedItem = FormatReader.GetFormatInfo(format, "MinResolutionW");
 
             n = 16;
-            step = 8;
+            step = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetResolutionHMod"));
             while (n < 1088 + step)
             {
                 combo_MinResolutionH.Items.Add(n.ToString());
                 n = n + step;
             }
             combo_MinResolutionH.SelectedItem = FormatReader.GetFormatInfo(format, "MinResolutionH");
-            
-            
-            
-            
-            
-            
-            
-            
+           
             if (FormatReader.GetFormatInfo(format, "IsLockedOutAspect") == "yes")
                 check_fixed_ar.IsChecked = true;
             else
@@ -126,7 +119,6 @@ namespace XviD4PSP
                 check_4gb_only.IsChecked = true;
             else
                 check_4gb_only.IsChecked = false;
-
 
 
             TranslateItems();
