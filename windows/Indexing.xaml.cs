@@ -151,7 +151,11 @@ namespace XviD4PSP
                     sw.WriteLine(_line);
                 sw.Close();
 
-                info.Arguments = "-SD=\" -IA=6 -FO=0 -OM=2 -BF=\"" + filelistpath +
+                string field_operation = "0";
+                if (Settings.DGForceFilm)
+                    field_operation = "1";
+
+                info.Arguments = "-SD=\" -IA=6 -FO=" + field_operation + " -OM=2 -BF=\"" + filelistpath +
                                  "\" -OF=\"" + Calculate.RemoveExtention(m.indexfile, true) + "\" -HIDE -EXIT";
                
                 encoderProcess.StartInfo = info;

@@ -859,9 +859,16 @@ namespace XviD4PSP
             Close();
         }
 
-        private void mnPlayer_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void mnApps_Folder_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            Process.Start(Calculate.StartupPath + "\\WPF_VideoPlayer");
+            try
+            {
+                Process.Start(Calculate.StartupPath);
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
         }
 
         private void menu_join_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -2042,7 +2049,25 @@ namespace XviD4PSP
             button_set_end.Content = Languages.Translate("Set End");
             button_apply_trim.Content = Languages.Translate("Apply Trim");
             menu_open_folder.Header = Languages.Translate("Open folder...");
-        
+            mnApps_Folder.Header =Languages.Translate("Open XviD4PSP folder");
+
+            //Тултипы для выбора видео-декодера
+            mnAVIFiles.ToolTip = "Choose decoder that will be used for decoding AVI-files.";
+            mn_avi_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
+            mn_avi_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio";
+            mn_avi_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2)";
+            mnMPEGFiles.ToolTip = "Choose decoder that will be used for decoding MPEG-files.";
+            mn_mpg_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
+            mn_mpg_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio";
+            mn_mpg_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2)";
+            mn_mpg_dec_mpg.ToolTip = "I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.";
+            check_force_film.ToolTip = "Turns on ForcedFilm for DGIndex(MPEG2Source), it will reduce fps to 23,976. Read DGIndex manual for more info!" + Environment.NewLine + "DON`T FORGET TO TURN IT OFF AFTER USING! NEWER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!";
+            mnOtherFiles.ToolTip = "Choose decoder that will be used for decoding other file-types";
+            mn_oth_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
+            mn_oth_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio";
+            mn_oth_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2)";
+            mnFFmpegSource.ToolTip = "Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.";
+            
         }
 
         //загружаем настройки
@@ -2145,6 +2170,8 @@ namespace XviD4PSP
             else
                 mn_ffmpeg_old.IsChecked = true;
 
+            if (Settings.DGForceFilm)
+                check_force_film.IsChecked = true;
 
         }
 
@@ -6301,6 +6328,11 @@ namespace XviD4PSP
             {
                 ErrorExeption(ex.Message);
             }
+        }
+
+        private void check_Force_Film_Clicked(object sender, RoutedEventArgs e)
+        {
+            Settings.DGForceFilm = check_force_film.IsChecked.Value;
         }
 
 

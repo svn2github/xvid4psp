@@ -56,7 +56,8 @@
 							<RadioButton Width="Auto" Height="Auto" Content="DirectShowSource2" x:Name="mn_mpg_dec_ds2" Checked="mn_mpg_dec_ds2_Checked"/>
                             <RadioButton Width="Auto" Height="Auto" Content="FFmpegSource" IsChecked="False" x:Name="mn_mpg_dec_ff" Checked="mn_mpg_dec_ff_Checked"/>
 							<RadioButton x:Name="mn_mpg_dec_mpg" Width="Auto" Height="Auto" Content="MPEG2Source" IsChecked="True" Checked="mn_mpg_dec_mpg_Checked"/>
-						</MenuItem>
+						    <CheckBox x:Name="check_force_film" Content="ForceFilm for MPEG2Source" IsChecked="False" Click="check_Force_Film_Clicked"/>
+                        </MenuItem>
 						<MenuItem x:Name="mnOtherFiles" Header="Other files">
 							<RadioButton Width="Auto" Height="Auto" Content="DirectShowSource" x:Name="mn_oth_dec_ds" Checked="mn_oth_dec_ds_Checked"/>
 							<RadioButton Width="Auto" Height="Auto" Content="DirectShowSource2" x:Name="mn_oth_dec_ds2" Checked="mn_oth_dec_ds2_Checked"/>
@@ -155,7 +156,7 @@
 					<MenuItem x:Name="menu_info_ffmpeg" Header="FFMPEG Info" Click="menu_info_ffmpeg_Click"/>
 					<MenuItem x:Name="menu_info_mp4" Header="MP4BOX Info" Click="menu_info_mp4_Click"/>
 					<Separator/>
-					<MenuItem x:Name="mnPlayer" Header="WPF Video Player" Click="mnPlayer_Click"/>
+					<MenuItem x:Name="mnApps_Folder" Header="Open XviD4PSP folder" Click="mnApps_Folder_Click"/>
 					<Separator/>
 					<MenuItem Header="FFRebuilder" x:Name="menu_ffrebuilder" Click="menu_ffrebuilder_Click"/>
 					<MenuItem x:Name="menu_mkvrebuilder" Header="MKVRebuilder" Click="menu_mkvrebuilder_Click"/>

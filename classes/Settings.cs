@@ -1510,6 +1510,26 @@ namespace XviD4PSP
             }
         }
 
+        //¬ключить опцию ForcedFilm при индексации DGIndex`ом
+        public static bool DGForceFilm
+        {
+            get
+            {
+                object value = GetValue("DGForceFilm");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("DGForceFilm", value);
+            }
+        }
 
 
 
