@@ -2010,6 +2010,7 @@ namespace XviD4PSP
             menu_aenc_settings.Header = Languages.Translate("Encoding settings");
             menu_venc_settings.Header = Languages.Translate("Encoding settings");
             button_edit_sbc.ToolTip = Languages.Translate("Edit saturation, brightness or contrast");
+            button_edit_format.ToolTip = Languages.Translate("Edit format settings");
 
             button_open.Content = Languages.Translate("Open");
             button_open.ToolTip = Languages.Translate("Open new file");
@@ -2054,18 +2055,18 @@ namespace XviD4PSP
             //Тултипы для выбора видео-декодера
             mnAVIFiles.ToolTip = "Choose decoder that will be used for decoding AVI-files.";
             mn_avi_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
-            mn_avi_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio";
-            mn_avi_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2)";
+            mn_avi_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
+            mn_avi_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2).";
             mnMPEGFiles.ToolTip = "Choose decoder that will be used for decoding MPEG-files.";
             mn_mpg_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
-            mn_mpg_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio";
-            mn_mpg_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2)";
+            mn_mpg_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
+            mn_mpg_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2).";
             mn_mpg_dec_mpg.ToolTip = "I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.";
             check_force_film.ToolTip = "Turns on ForcedFilm for DGIndex(MPEG2Source), it will reduce fps to 23,976. Read DGIndex manual for more info!" + Environment.NewLine + "DON`T FORGET TO TURN IT OFF AFTER USING! NEWER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!";
-            mnOtherFiles.ToolTip = "Choose decoder that will be used for decoding other file-types";
+            mnOtherFiles.ToolTip = "Choose decoder that will be used for decoding other file-types.";
             mn_oth_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
-            mn_oth_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio";
-            mn_oth_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2)";
+            mn_oth_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
+            mn_oth_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2).";
             mnFFmpegSource.ToolTip = "Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.";
             
         }

@@ -1,66 +1,63 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 30.07.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 05.08.09 pre-Changelog:
 
 sorry for my bad english :D    
 
->>> Добавлена возможность записывать лог кодирования в файл, с сохранением в Темп-папку, или в папку, куда производится
-    кодирование (выбирается в Настройках->Лог кодирования). Так-же, вне зависимости от настроек, при даблклике по тексту
-    в окне лога, его содержимое будет переписано в файл (файл сохранится в той папке, куда идет кодирование).
+>>> Added posibility to save encoding log to file. It will be created in Temp-folder or in current working folder - depen-
+    nding on settings. Also if you make double-click on text in encoding window, current contents of this window also
+    will be saved as log-file (on this time file will be created in the current working, no matter what you choose in set-
+    tings).
 
->>> Добавлена пакетная обработка файлов (Файл->Открыть папку...). При выборе этого пункта, появится окно, в котором нужно
-    будет указать папку, в которой находятся файлы, которые требуется открыть. Т.к. в выбраной папке могут находиться ка-
-    кие-угодно файлы, то был введен фильтр по расширениям. Настроить его можно в меню Настройки->Глобальные настройки->
-    Пакетная обработка. Там-же можно указать, запустить ли процесс кодирования сразу после открытия всех файлов, или нет.
-    После выбора исходной папки, появится окно выбора конечной папки. Это может быть одна и та-же папка, в случае, если
-    в ней уже имеется такой файл, то к перекодированному файлу в начале название добавится полное название исходного
-    файла (в скобках). Когда все файлы будут открыты, для самого последнего загрузится превью (для остальных файлов 
-    превью не загружалось - это ускорило и сделало более безопасным процесс их открытия), и появится окно со статистикой
-    открытия. При необходимости, можно открыть таким способом несколько папок, и уже потом начать кодирование.
-    --Известные проблемы: 
-     -если при открытия одного из файлов произойдет ошибка, то программа может вылететь (не связано с текущим нововве-
-      дением).
-     -при открытии какого-либо файла может появится окно с сообщением/диалогом выбора, в таком случае пока это окно 
-      не будет закрыто, дальнейшее открытие файлов производиться не будет.
-     -если при открытии папки с файлами попадется хоть один аудио-файл, то формат переключится на Аудио, и все последу-
-      ющие файлы будут открыты в этом формате. ОБ этом надо заранее подумать, и или исключить такие файлы из папки, или
-      удалить соответсвующее расширение в настройках.
-     -нельзя заранее установить разрешение и прочие параметры видео, можно только включить/выключить какие-то операции,
-      производимые после открытия файла (Автокроп, Автогромкость, Автодеинтерлейс и т.д.), и установить Формат, настройки
-      аудио-видео кодеков, фильтрацию и цветокоррекцию - эти параметры будут использоваться для всех файлов.
-     -возможно что новый Custom-формат сможет немного помочь в предыдущем случае, если получится его настроить :)
+>>> Added batch encoding function (File->Open folder...). First you must select folder in which you stored the source
+    files, then you must select destination folder, in which encoded files will be placed (it can be the same folder).
+    To avoid opening all the files in the folder, filter was introduced, that select only files wich specified file-
+    extension. You can edit valid extensions in Settings->Global settings->Batch encoding menu, also here you can choose,
+    do you want to programm start encoding your files immediately after opening thy all, or no. In case if destination
+    file name is exist in selected folder, file name will be changed - full file name (with extension) of the source file
+    will be added at the begining of the destination file name. After opening all the files in the folder, you will see
+    statistics window, and for the latest opened file will be loaded preview. If you want to open one more folder, you 
+    can do it now. Known issues:
+    --in the process of opening one of the file may occur an error, and programm may hang up or something else..
+    --in the process of opening one of the file, a programm window may appear (for selecting audio track, or something).
+    --after opening audio-file programm change encoding format to Audio, and all other files will be opened with this
+      format. To avoid this you must: delete (or replace) all audio-files from you folder, or (better way) edit valid
+      file-extensions in the Settings->Global settings->Batch encoding menu.
+    --you can`t pre-specified some parameters for the encoding file, such as resolution, etc. You can only: select filt-
+      ration, colorcorrection, video and audio codec settings, and encoding format (but you need to open one file first,
+      to some of this settings became available). Also you can use auto-options, that working after opening file (auto-
+      volume, auto-crop, auto-deinterlace).
+    --may be the new Custom format will help with previous issue, if you will be able to configure it as you need :)
 
->>> Вместо плагина nnedi.dll теперь будет использоваться nnedi2.dll (используется в YadifModEDI, MCBob, NNEDI). В скрипте
-    MCBob.avs необходимо вручную заменить везде вызов nnedi на nnedi2.
+>>> Instead of old plugin nnedi.dll now will be used new nnedi2.dll (it`s used in YadifModEDI, MCBob and NNEDI deinterlace
+    filters).
 
->>> Введена проверка Темп-папки на отсутсвие в ней файлов. Проверка производится только после переустановки программы, или
-    после сброса настроек (т.е. если при запуске программы текущий номер для заданий = 0000). Если папка не пуста, то поя-
-    вится окно с предложением открыть папку для просмотра файлов (пользователь сам должен решить, какие файлы ему не нужны)
-    или проигнорировать это сообщение. Так-же в настройках, на вкладке выбора темп-папки, была добавлена кнопка открытия
-    текущей Темп-папки.
-    --Вовсе не обязательно, чтоб временная папка была пуста, главное, чтобы в ней не было остатков от предыдущих неудачных
-      кодирований (при этом временные файлы не удаляются), и вообще любых файлов, имеющих 4-е цифры в начале имени.
+>>> Added test of the Temp folder, to check is there are some files in it, or it`s empty. This check will be run only 
+    after reinstalling programm, or after reset all programm-settings (i.e. only when Key=0000). If Temp-folder is not
+    empty, an error window will appear, that will propose to go into the folder to delete files, or ignore this message.
+    But it`s strongly recommended that you delete all not needed files, especialy if they starts with 4 digits (3753.h264).
+    Also in Settings->Global settings->Temp files was added Open button (to open selected Temp-folder).
+
+>>> Now form the filtering preset to current script will be replaced and empty lines (that contains nothing; they are dele-
+    ting before) - it must enhances readability of the script.
   
->>> Теперь из файлов-пресетов фильтрации в скрипт будут переноситься и пустые строчки (раньше они удалялись, что ухудшало
-    читабельность скрипта).
+>>> Added --subme10 for the x264.
 
->>> Добавлена возможность выбора subme10 для x264-го.
+>>> Added very experimental Custom format. All settings from this format is stored in the FormatSettings.ini file, and 
+    you can change it manualy, or use for this purpose specially designed new window - Edit format. Maybe in the future
+    some other formats also will be transferred from the programm to this ini-file.
 
->>> Введен экспериментальный формат Custom, настройки для которого хранятся в файле FormatSettings.ini (в корневой папке
-    программы). Настройка этого формата возможна как через редактирование этого ini-файла, так и через специально сделаное
-    окно настроек форматов (в дальнейшем можно будет использовать его и для других форматов). 
-    --Никаких изменений в класс Encoder не вносилось.. 
+>>> Little fix for the new MediaInfo: if it says that video have PullDown, and if it have 23.976fps, then in programm retu-
+    rnes value 29.970 fps. This fix was needed because MPEG2Source, using PullDown flag, will play this video at the
+    29.970 fps. In other way, w/o this fix XviD5PSP will thinking that video is realy have 23fps, and did`t start process
+    of deinterlace-analysing. But after this fix Xvid4PSP will start this process, and then turn on TIVTC for this video.
 
->>> Фикс для нового MediaInfo: если он говорит, что видео имеет PullDown, и его частота равна 23.976 фпс, то в программу
-    возвращается значение 29.970 фпс. Это потребовалось для запуска процесса анализа интерлейса, который выставит TIVTC
-    и вернет частоту к 23.976. Без этого фикса анализ интерлейса не запускался, TIVTC не включался, в программе значилось,
-    что частота видео 23.976, в то время как MPEG2Source, слушаясь флага PullDown, воспороизводил его с частотой 29.976.
+>>> In Video->Decoding->MPEG files menu was added new item: ForceFilm for MPEG2Source (for DGIndex). If you enable this
+    option, DGIndex will indexing all mpeg files with option ForcedFilm (read DGIndex manual first!). Don`t forget to
+    turn it OFF after using! Newer try to use it if you don`t understand what it does!
 
->>> В настройки программы (Видео->Декодирование->MPEG файлы) выведена опция DGIndex`а ForceFilm. По умолчанию отключено,
-    включать рекомендуется только при понимании того, что это и зачем это нужно. После использования обязательно нужно
-    не забывать её отключать! 
+>>> In the Tools menu item WPF Video Player was replaced by Open XviD4PSP folder. It will open folder, where XviD4PSP is
+    located (may help, if you want to edit or change some files by yourself).
 
->>> В меню Инструменты пункт WPF Video Player переименован в Открыть папку XviD4PSP, при его выборе откроется папка, в 
-    которую установлен XviD4PSP.
 
 ...
 
@@ -105,21 +102,24 @@ XviD4PSP 5.0.37.3(Unofficial)->5.0.37.4(Unofficial) Changelog:
 
 >>> Fixed error when closing file, if player engine is MediaBridge.
 
->>> Fullscreen button added in the Resolution\Aspect and Deinterlace windows.
+>>> In the Resolution\Aspect and Deinterlace windows added button Fullscreen. Also now you can open Resolution\
+    Aspect window if you press R on keyboard, for the Deinterlace window you must press I button.
 
->>> Aspect\Resolution window was splitted ot two parts: Main and Settings. Added aspect error indicator and option 
+>>> Aspect\Resolution window was splitted on two parts: Main and Settings. Added aspect error indicator and option 
     "Recalculate aspect when crop is using".
 
->>> Added posibility to use a new FFmpegSource2 instead of old FFmpegSource, whose development has been stopped.
+>>> Added posibility to use a new FFmpegSource2 instead of old FFmpegSource, whose development has been stopped. You
+    can specify which one will be used in Video->Decoding->FFmpegSource menu. By default will be used old version.
 
 >>> Added one more decoder (source) for the video: DirectShowSource2 (DSS2) from Haali. DSS2 can provide frame accurate
-    seeking, standart DirectShowSource can`t provide this. You can choose this decoder in menu Video->Decoding..
+    seeking, standart DirectShowSource can`t provide this. Also this decoder not using your sytem-codecs for decoding
+    Audio (will be used internal plugins, that cames with XviD4PSP). You can choose this decoder in menu Video->Decoding..
     --thanks to Procrustean for the info about DSS2.
   
 >>> Yamb, MKVextractGUI and AVI-Mux was added it the Tools menu.
    
->>> Fixed auto adding (not adding) audio files from the folder where *.dga project is located, if file name have 
-    track_N string, (tsRemuxer add this info wneh demuxing file).
+>>> Fixed auto adding (not adding) audio files from the folder where *.dga project is located, if file names have 
+    track_N string, (tsRemuxer add this info when demuxing file).
     --reported by Procrustean.
 
 >>> x264 settings window have been reworked. Few new options was added, some elements was relocated. Also many changes
@@ -196,13 +196,14 @@ XviD4PSP 5.0.37.2(Unofficial)->5.0.37.3(Unofficial) 02.07.09 Changelog:
 >>> For x264 and Xvid codecs now added possibility to manualy enter CLI options, that was not specified in the XviD4PSP
     codec-settings window.
 
->>> Now you can choose where crop and resize must be placed in the script: before or after(by default) filtering.
+>>> Now you can choose where crop and resize must be placed in the script: before or after (by default) filtering. Go to
+    the Settings->Global settings.
 
 >>> Now when you encoding with x264 you will see real fps in the encoding log, this value receiving directly from the x264,
     and have high precision. It will also increase precision of estimated time calculation. 
 
 >>> Current frame/total frames counter was added in the main window. Unfortunately this counter indicate calculated values,
-    so it may have some inaccuracy..
+    so it may have some inaccuracy..  
 
 >>> Some other changes..
 
@@ -246,21 +247,21 @@ XviD4PSP 5.0.37.1(Unoficial)->5.0.37.2(Unofficial) Changelog:
  
 >>> DGAVCIndex was added in the Tools menu.
 
->>> *.dga-files support added. It`s very important that you will make your dga-project in individual folder, with will contain
-    only *.dga-file, *.log-file (XviD4PSP will be use AR specified in this file), and audio-file(s). 
-    --This new feature may have some unexpected problems, need more testing.
+>>> *.dga-files (DGAVCIndex project) support added. It`s very important that you will make your dga-project in individual
+    folder, with will contain only *.dga-file, *.log-file (XviD4PSP will using AR specified in this file), and audio-file(s) - 
+    they will be automaticaly catched and added to your video. 
 
 >>> Fixed wrong NTSC fps in the H264-in-AVI files. For example, instead of 23.976 fps we have 23.975 fps, and if we have long
     video, we will also have out of sync closer to the end. - fixed.
     --bugreport, help and tests by wwmax.
  
->>> Now when you muxing VBR(or ABR) MP3 to AVI, VirtualDubMod will automatically get command "don`t rewrite file header" -  it 
+>>> Now when you muxing VBR (or ABR) MP3 to AVI, VirtualDubMod will automatically get command "don`t rewrite file header" -  it 
     must solve some problems with VBR-sound (out of sync etc).
 
 >>> Fixed problem with rendering video in the preview monitor, if this video have width more than 1024pix (you moving main window,
     but preview still stand on the one place).
 
->>> Fixed auto-ColorMatrix adding. 
+>>> Fixed auto-ColorMatrix adding when you change encoding format (even if ColorMatrix is disabled in settings). 
 
 >>> Now when you open filtering-preset you will see all lines starting with # (it means #comments).
     --You can disable it in GlobalSettings.
@@ -275,7 +276,7 @@ XviD4PSP 5.0.37.1(Unoficial)->5.0.37.2(Unofficial) Changelog:
 
 >>> Now window parameters will not store on exit, if programm main window was Maximized before closing.
 
->>> From the MP3 (CBR), MP2 and AC3 audio-codec settings windows was removed all unsupported by codecs bitrates. 
+>>> From the MP3(CBR), MP2 and AC3 audio-codecs settings windows was removed all unsupported by this codecs bitrates. 
 
 >>> Some other changes.. 
 
@@ -350,7 +351,7 @@ XviD4PSP 5.036->5.0.37.1(Unoficial) Changelog:
 >>> Added auto storing window parameters when programm is closing, and auto re-storing when programm is starting again (check 
     this option in GlobalSettings).
 
->>> Also check "Renew script when audio/video encoding settings is changed" option. If it enabled Avisynth script will be automati-
+>>> Also check "Renew script when audio/video encoding settings is changed" option. If it enabled Avisynth-script will be automati-
     caly generated every time you change your audio/video encoding settings, and if you change your script manualy before, you will
     lose all your changes! - this algorythm now can be disabled, but if it produce some problems you can enable it again.
 

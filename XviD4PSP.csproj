@@ -412,6 +412,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="main.ico" />
+    <Resource Include="pictures\settings13.png" />
+    <Resource Include="pictures\settings11.png" />
+    <Resource Include="pictures\edit2.png" />
+    <Resource Include="pictures\settings3.png" />
+    <Resource Include="pictures\settings.png" />
+    <Resource Include="pictures\edit.png" />
+    <Resource Include="pictures\settings1.png" />
     <Resource Include="pictures\Volume_Disable.PNG" />
     <Resource Include="pictures\Volume1.PNG" />
   </ItemGroup>
