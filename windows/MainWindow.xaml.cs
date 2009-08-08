@@ -239,7 +239,7 @@ namespace XviD4PSP
 
                     //загружаем настройки
                     LoadSettings();
-
+                   
                     //ищем оптимальную темп папку
                     if (Settings.SearchTempPath)
                     {
@@ -262,15 +262,22 @@ namespace XviD4PSP
                                 Languages.Translate("Do you want use this drive for temp files?"), Languages.Translate("Place for temp files"),
                                  Message.MessageStyle.YesNo);
                             if (mess.result == Message.Result.Yes)
+                            {
                                 Settings.TempPath = drivestring + "Temp";
+                                TempFolderFiles(); //Проверка папки на наличие в ней файлов
+                            }
+                            else
+                            {
+                                Settings_Window sett = new Settings_Window(this, 2);
+                            }
                         }
                         if (!Directory.Exists(Settings.TempPath))
                             Directory.CreateDirectory(Settings.TempPath);
                     }
-
+        
                     //Проверяем, пуста ли Темп-папка
-                    if (Settings.Key == "0000")
-                        TempFolderFiles();                                   
+                    //if (Settings.Key == "0000")
+                       // TempFolderFiles();                                   
                     
                     if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                     {
@@ -5968,7 +5975,7 @@ namespace XviD4PSP
 
         private void menu_settings_Click(object sender, RoutedEventArgs e)
         {
-            Settings_Window sett = new Settings_Window(this);
+            Settings_Window sett = new Settings_Window(this, 1);
         }
 
         //Прибавление громкости кнопками
@@ -6334,6 +6341,18 @@ namespace XviD4PSP
         private void check_Force_Film_Clicked(object sender, RoutedEventArgs e)
         {
             Settings.DGForceFilm = check_force_film.IsChecked.Value;
+        }
+
+        private void menu_Google_code_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start("http://code.google.com/p/xvid4psp/");
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
         }
 
 

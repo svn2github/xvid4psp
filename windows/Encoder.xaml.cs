@@ -470,23 +470,22 @@ namespace XviD4PSP
                     }
                     else
                     {
-                        if (line.StartsWith("x264 [error]") ||
-                            line.StartsWith("x264 [info]") ||
-                            line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
+                        //if (line.StartsWith("x264 [error]") ||
+                        //    line.StartsWith("x264 [info]") ||
+                        //    line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
+                        if (line.StartsWith("encoded"))
+                        {
+                            encodertext += Environment.NewLine + line;
+                            SetLog("x264 [total]: " + line);
+                        }
+                        else
                         {
                             if (encodertext != null)
                                 encodertext += Environment.NewLine;
                             encodertext += line;
                             SetLog(line);
                         }
-                        if (line.StartsWith("encoded"))
-                        {
-                            encodertext += line;
-                            SetLog("x264 [total]: " + line);
-                        }
                     }
-                    //if (line.StartsWith("encoded") && line.EndsWith("kb/s"))
-                    //    break;
                 }
             }
 
@@ -589,23 +588,22 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            if (line.StartsWith("x264 [error]") ||
-                                line.StartsWith("x264 [info]") && !line.StartsWith("x264 [info]: using cpu capabilities:") ||
-                                line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
+                            //if (line.StartsWith("x264 [error]") ||
+                            //    line.StartsWith("x264 [info]") ||
+                            //    line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
+                            if (line.StartsWith("encoded"))
+                            {
+                                encodertext += Environment.NewLine + line;
+                                SetLog("x264 [total]: " + line);
+                            }
+                            else
                             {
                                 if (encodertext != null)
                                     encodertext += Environment.NewLine;
                                 encodertext += line;
                                 SetLog(line);
                             }
-                            if (line.StartsWith("encoded"))
-                            {
-                                encodertext += line;
-                                SetLog("x264 [total]: " + line);
-                            }                        
                         }
-                        //if (line.StartsWith("encoded") && line.EndsWith("kb/s"))
-                        //    break;
                     }
                 }
             }
@@ -671,23 +669,22 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            if (line.StartsWith("x264 [error]") ||
-                                line.StartsWith("x264 [info]") && !line.StartsWith("x264 [info]: using cpu capabilities:") ||
-                                line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
+                            //if (line.StartsWith("x264 [error]") ||
+                            //    line.StartsWith("x264 [info]") ||
+                            //    line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
+                            if (line.StartsWith("encoded"))
+                            {
+                                encodertext += Environment.NewLine + line;
+                                SetLog("x264 [total]: " + line);
+                            }
+                            else
                             {
                                 if (encodertext != null)
                                     encodertext += Environment.NewLine;
                                 encodertext += line;
                                 SetLog(line);
                             }
-                            if (line.StartsWith("encoded"))
-                            {
-                                encodertext += line;
-                                SetLog("x264 [total]: " + line);
-                            }
                         }
-                        //if (line.StartsWith("encoded") && line.EndsWith("kb/s"))
-                        //    break;
                     }
                 }
             }
@@ -4760,6 +4757,23 @@ namespace XviD4PSP
                             p.deletefiles.Add(a.audiopath);
                     }
                 }
+                else
+                {
+                    try
+                    {
+                        string logfilename = Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.outfilepath) + ".error.log";
+                        FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                        StreamWriter writer = new StreamWriter(strm);
+                        writer.WriteLine(tbxLog.Text);
+                        writer.Flush();
+                        writer.Dispose();
+                        strm.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorExeption(ex.Message);
+                    }
+                }
                 SafeDelete(m.scriptpath);
                 if (m.outvideofile != null)
                 {
@@ -4885,7 +4899,8 @@ namespace XviD4PSP
 
         private void ErrorExeption(string message)
         {
-            SetLog(Languages.Translate("Error") + ": " + message);
+            SetLog("");
+            SetLog(Languages.Translate("Error") + ": " + Environment.NewLine + message);
             IsErrors = true;
             //ShowMessage(message);
         }
@@ -4999,8 +5014,8 @@ namespace XviD4PSP
                 writer.WriteLine(tbxLog.Text);
                
                 writer.Flush();
-                writer.Close();
-                strm.Close();
+                //writer.Close();
+                //strm.Close();
                 writer.Dispose();
                 strm.Dispose();
             }

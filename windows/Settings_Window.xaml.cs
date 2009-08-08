@@ -14,7 +14,7 @@ namespace XviD4PSP
 	{
         private MainWindow p;
 
-        public Settings_Window(MainWindow parent)
+        public Settings_Window(MainWindow parent, int set_focus_to)
 		{
 			this.InitializeComponent();
 
@@ -81,6 +81,14 @@ namespace XviD4PSP
 
             SetTooltips();
 
+            //Чтоб открыть окно на нужной вкладке
+            if (set_focus_to == 2)
+                tab_temp.Focus();
+            else if (set_focus_to == 3)
+                tab_encoding.Focus();
+            else if (set_focus_to == 4)
+                tab_open_folder.Focus();
+
             ShowDialog();
 		}
 
@@ -96,6 +104,7 @@ namespace XviD4PSP
                         if (!Directory.Exists(textbox_temp.Text))
                             Directory.CreateDirectory(textbox_temp.Text);
                         Settings.TempPath = textbox_temp.Text;
+                        p.TempFolderFiles(); //Проверка на наличие в папке файлов
                     }
                 }
                 catch (Exception ex)

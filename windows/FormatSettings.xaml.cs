@@ -191,8 +191,8 @@ namespace XviD4PSP
                 StreamWriter writer = new StreamWriter(strm, System.Text.Encoding.Default);
                 writer.WriteLine(fstream);
                 writer.Flush();
-                writer.Close();
-                strm.Close();
+                //writer.Close();
+                //strm.Close();
                 writer.Dispose();
                 strm.Dispose();
             }

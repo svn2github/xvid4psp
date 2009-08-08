@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.Encoder"
 	x:Name="Window"
 	Title="Encoder"
-	Width="480" Height="337" ResizeMode="CanResize" WindowStartupLocation="CenterOwner" Loaded="Window_Loaded" Closing="Window_Closing" SizeChanged="Window_SizeChanged" SizeToContent="Manual" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	Width="520" Height="337" ResizeMode="CanResize" WindowStartupLocation="CenterOwner" Loaded="Window_Loaded" Closing="Window_Closing" SizeChanged="Window_SizeChanged" SizeToContent="Manual" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid.RowDefinitions>

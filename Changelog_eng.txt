@@ -1,12 +1,13 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 05.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 08.08.09 pre-Changelog:
 
 sorry for my bad english :D    
 
 >>> Added posibility to save encoding log to file. It will be created in Temp-folder or in current working folder - depen-
     nding on settings. Also if you make double-click on text in encoding window, current contents of this window also
-    will be saved as log-file (on this time file will be created in the current working, no matter what you choose in set-
-    tings).
+    will be saved as log-file (on this time file will be created in the current working folder, no matter what you choose
+    in settings). And if an error has occur while encoding, log-file will be saved automaticaly (in Temp-folder, as
+    error.log).
 
 >>> Added batch encoding function (File->Open folder...). First you must select folder in which you stored the source
     files, then you must select destination folder, in which encoded files will be placed (it can be the same folder).
@@ -31,11 +32,12 @@ sorry for my bad english :D
 >>> Instead of old plugin nnedi.dll now will be used new nnedi2.dll (it`s used in YadifModEDI, MCBob and NNEDI deinterlace
     filters).
 
->>> Added test of the Temp folder, to check is there are some files in it, or it`s empty. This check will be run only 
-    after reinstalling programm, or after reset all programm-settings (i.e. only when Key=0000). If Temp-folder is not
-    empty, an error window will appear, that will propose to go into the folder to delete files, or ignore this message.
-    But it`s strongly recommended that you delete all not needed files, especialy if they starts with 4 digits (3753.h264).
-    Also in Settings->Global settings->Temp files was added Open button (to open selected Temp-folder).
+>>> Added test of the Temp folder, to check is there are some files in it, or it`s empty. This check will be run after
+    you selecting a new Temp-folder in Settings, or when programm find another disc with more free-space, and you hit Yes.
+    If Temp-folder is not empty, an error window will appear, that will propose to go into the folder to delete files, or
+    ignore this message. But it`s strongly recommended that you delete all not needed files, especialy if they starts
+    with 4 digits (like 0358.h264 or 1254.mp3). Also in Settings->Global settings->Temp files was added Open button
+    (to open selected Temp-folder).
 
 >>> Now form the filtering preset to current script will be replaced and empty lines (that contains nothing; they are dele-
     ting before) - it must enhances readability of the script.
@@ -58,8 +60,10 @@ sorry for my bad english :D
 >>> In the Tools menu item WPF Video Player was replaced by Open XviD4PSP folder. It will open folder, where XviD4PSP is
     located (may help, if you want to edit or change some files by yourself).
 
+>>> Now in the encoding log you will see all info, that x264 produce when encoding. All lines from this log have filtering
+    before, and in some cases this results in loosing some log-info (some error messages didn`t showing).  
 
-...
+>>> Some other changes..
 
 
 

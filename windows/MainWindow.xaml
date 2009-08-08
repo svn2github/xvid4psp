@@ -183,7 +183,8 @@
 					<Separator/>
 					<MenuItem Header="Support forum" x:Name="menu_support" Click="menu_support_Click"/>
 					<MenuItem x:Name="menu_home" Header="Home page" Click="menu_home_Click"/>
-					<Separator/>
+					<MenuItem x:Name="menu_Google_code" Header="Google-code" Click="menu_Google_code_Click"/>
+                    <Separator/>
 					<MenuItem x:Name="menu_avisynth_guide_en" Header="AviSynth guide (EN)" Click="menu_avisynth_guide_en_Click"/>
 					<MenuItem x:Name="menu_avisynth_guide_ru" Header="AviSynth guide (RU)" Click="menu_avisynth_guide_ru_Click"/>
 				</MenuItem>
