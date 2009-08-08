@@ -1789,7 +1789,12 @@ namespace XviD4PSP
        {
            AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
-           if (m.format == ExportFormats.PmpAvc)
+           string ext = Path.GetExtension(m.infilepath).ToLower();
+
+           if (ext == ".avs")
+               return "AVS-script";
+           
+           else if (m.format == ExportFormats.PmpAvc)
            {
                if (instream.codecshort != "AAC" &&
                    instream.codecshort != "MP3")
@@ -1898,7 +1903,16 @@ namespace XviD4PSP
 
        public static string ValidateCopyVideo(Massive m)
        {
-           if (m.format == ExportFormats.PmpAvc ||
+           string ext = Path.GetExtension(m.infilepath).ToLower();
+
+           if (ext == ".avs")
+               return "AVS-script";
+           else if (ext == ".d2v")
+               return "DGIndex-project";
+           else if (ext == ".dga")
+               return "DGAVCIndex-project";
+           
+           else if (m.format == ExportFormats.PmpAvc ||
                m.format == ExportFormats.Mp4PSPAVC ||
                m.format == ExportFormats.Mp4PSPASP)
            {
@@ -1914,7 +1928,7 @@ namespace XviD4PSP
                    return null;
                else
                    return m.inresw + "x" + m.inresh;
-                   
+
            }
            else if (m.format == ExportFormats.BluRay)
            {

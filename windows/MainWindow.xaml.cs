@@ -1636,7 +1636,7 @@ namespace XviD4PSP
                         {
                             Message mess = new Message(this);
                             mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
-                                " " + Format.EnumToString(x.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                                " " + Format.EnumToString(x.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                         }
                     }
 
@@ -3205,7 +3205,7 @@ namespace XviD4PSP
                         {
                             Message mess = new Message(this);
                             mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
-                                " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                         }
                     }
                 }
@@ -3433,7 +3433,7 @@ namespace XviD4PSP
                             {
                                 Message mess = new Message(this);
                                 mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
-                                    " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                                    " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                             }
                         }
                     }
@@ -5514,7 +5514,7 @@ namespace XviD4PSP
                     {
                         Message mess = new Message(this);
                         mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
-                            " " + Format.EnumToString(mass.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                            " " + Format.EnumToString(mass.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
                 else

@@ -230,26 +230,35 @@ namespace XviD4PSP
             if (info != null)
             {
                 int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\w+)", out times);
+                //string type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\w+)", out times);
+                string type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\d).channel", out times);
+               
                 if (times != 0)
                 {
-                    int test = 0;
-                    Int32.TryParse(type, NumberStyles.Integer, null, out test);
-                    if (test != 0)
-                    {
-                        type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\d:\d)", out times);
-                        if (times == 0)
-                            return 0;
-                    }
+                    //Всё это работало со старым ffmpeg.exe
+                    //int test = 0;
+                    //Int32.TryParse(type, NumberStyles.Integer, null, out test);
+                    //if (test != 0)
+                    //{
+                    //    type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\d:\d)", out times);
+                    //    
+                    //    if (times == 0)
+                    //        return 0;
+                    //}
+                    //
+                    //Stream #0.1: Audio: pcm_s16le, 48000 Hz, 2 channels, s16, 1536 kb/s
+                    //Settings.Test = Convert.ToString(type);
 
-                    if (type == "mono")
-                        return 1;
-                    else if (type == "stereo")
-                        return 2;
-                    else if (type == "5:1")
-                        return 6;
-                    else
-                        return 0;
+                    //if (type == "mono")
+                    //    return 1;
+                    //else if (type == "stereo")
+                    //    return 2;
+                    //else if (type == "5:1")
+                    //    return 6;
+                    //else                  
+                    //return 0;
+                    
+                    return Convert.ToInt32(type);
                 }
                 else
                     return 0;
