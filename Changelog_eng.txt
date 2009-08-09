@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 08.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 09.08.09 pre-Changelog:
 
 sorry for my bad english :D    
 
@@ -62,6 +62,11 @@ sorry for my bad english :D
 
 >>> Now in the encoding log you will see all info, that x264 produce when encoding. All lines from this log have filtering
     before, and in some cases this results in loosing some log-info (some error messages didn`t showing).  
+
+>>> Fixed number of audio-channels detection using ffmpeg.exe. This was broken due to some changes in ffmpeg info-log.
+
+>>> In "forbidden to copy" was added files with extensions: .avs, .d2v(only for video stream) and .dga(only for video st-
+    ream).
 
 >>> Some other changes..
 
