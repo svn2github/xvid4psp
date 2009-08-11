@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 09.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 11.08.09 pre-Changelog:
 
 sorry for my bad english :D    
 
@@ -67,6 +67,11 @@ sorry for my bad english :D
 
 >>> In "forbidden to copy" was added files with extensions: .avs, .d2v(only for video stream) and .dga(only for video st-
     ream).
+
+>>> Fixed crashing when you trying to open audio-encoding settings window but audio mode is Disabled.
+    --Reported by Makkay
+
+>>> For the FLV format added posibility to muxing video, encdoded with On2 VP6 (FV4) codec.
 
 >>> Some other changes..
 

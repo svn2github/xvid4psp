@@ -9,8 +9,8 @@
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
 			<Image Margin="0,0,0,0" Width="500" Height="228" Stretch="None" Source="..\pictures\donate_notable copy.png" VerticalAlignment="Bottom"/>			
-			<Button x:Name="button_email" Margin="6,108,6,0" Height="68" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" BorderThickness="1,1,1,1" VerticalAlignment="Top" HorizontalAlignment="Center" Width="542" Click="button_email_Click">
-				<TextBox Margin="0,0,0,0" Text="Send me email spamhere@hush.com" TextWrapping="Wrap" Height="Auto" VerticalAlignment="Center" FontSize="32" Background="{x:Null}" x:Name="text_email" BorderBrush="{x:Null}" Foreground="#FFFFFFFF" IsEnabled="True" Focusable="False" IsReadOnly="True" IsHitTestVisible="False"/>
+			<Button x:Name="button_email" Margin="6,92,6,0" Height="68" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" BorderThickness="1,1,1,1" VerticalAlignment="Top" HorizontalAlignment="Center" Width="542" Click="button_email_Click">
+				<TextBox Margin="0,0,0,0" Text="Send me email: forclip@gmail.com" TextWrapping="Wrap" Height="Auto" VerticalAlignment="Center" FontSize="32" Background="{x:Null}" x:Name="text_email" BorderBrush="{x:Null}" Foreground="#FFFFFFFF" IsEnabled="True" Focusable="False" IsReadOnly="True" IsHitTestVisible="False"/>
 			</Button>
 			<TextBox Margin="16,16,16,0" Text="XviD4PSP free program, but development and support requires a lot of time and effort. To help the author to further improve XviD4PSP or if you just like this program, you can make small donation:" TextWrapping="Wrap" Height="Auto" VerticalAlignment="Top" FontSize="14" Background="{x:Null}" x:Name="text_donate" BorderBrush="{x:Null}" Foreground="#FFFFFFFF" IsEnabled="True" Focusable="False" IsReadOnly="True" IsHitTestVisible="False"/>
 		</Grid>

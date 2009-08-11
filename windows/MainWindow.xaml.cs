@@ -266,7 +266,7 @@ namespace XviD4PSP
                                 Settings.TempPath = drivestring + "Temp";
                                 TempFolderFiles(); //Проверка папки на наличие в ней файлов
                             }
-                            else
+                            else if (Settings.Key == "0000") //Чтоб не доставать каждый раз окном выбора Темп-папки, а только при первом запуске
                             {
                                 Settings_Window sett = new Settings_Window(this, 2);
                             }
@@ -3554,7 +3554,7 @@ namespace XviD4PSP
             }
             else
             {
-                if (m.inaudiostreams.Count == 0)
+                if (m.inaudiostreams.Count == 0 || combo_aencoding.SelectedItem.ToString() == "Disabled")
                 {
                     Message mess = new Message(this);
                     mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));

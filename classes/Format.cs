@@ -2033,7 +2033,9 @@ namespace XviD4PSP
                ext = "avi";
            if (m.invcodecshort == "VC1")
                ext = "vc1";
-
+           if (ext.Contains("vp5") || ext.Contains("vp6"))
+               ext = "flv";
+           
            Demuxers dem = GetDemuxer(m);
            Muxers mux = GetMuxer(m);
            if (dem == Demuxers.mp4box &&
@@ -2658,7 +2660,7 @@ namespace XviD4PSP
                if (m.encodingmode != Settings.EncodingModes.OnePass)
                    m.encodingmode = Settings.EncodingModes.OnePass;
            }
-
+           //m.encodingmode = Settings.EncodingModes.OnePass;
            return m;
        }
 
