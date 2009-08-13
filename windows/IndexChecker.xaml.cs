@@ -60,14 +60,17 @@ namespace XviD4PSP
                 media.Open(m.infilepath);
                 m.invcodec = media.VCodecString;
                 m.invcodecshort = media.VCodecShort;
+                //Добавляем инфу, по которой потом можно будет определить, применять ли ForceFilm
+                m.inframerate = media.FrameRate;
+                if (media.ScanOrder.Contains("Pulldown")) m.IsPullDown = true;
                 media.Close();
 
                 //проверка на невалидную индексацию
                 if (m.invcodecshort != "MPEG2" &&
                     m.invcodecshort != "MPEG1")
                 {
-                    m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
-                    return;
+                    //m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
+                    return; //Просто выходим отсюда, декодер будет выбран позже (Settings.OtherDecoder)
                 }
 
                 //получаем индекс файл

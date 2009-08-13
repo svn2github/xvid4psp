@@ -152,7 +152,7 @@ namespace XviD4PSP
                 sw.Close();
 
                 string field_operation = "0";
-                if (Settings.DGForceFilm)
+                if (Settings.DGForceFilm && m.IsPullDown && m.inframerate == "23.976") //ForceFilm, если оно надо
                     field_operation = "1";
 
                 info.Arguments = "-SD=\" -IA=6 -FO=" + field_operation + " -OM=2 -BF=\"" + filelistpath +

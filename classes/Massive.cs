@@ -625,6 +625,19 @@ namespace XviD4PSP
             }
         }
 
+        private bool _IsPullDown = false;
+        public bool IsPullDown
+        {
+            get
+            {
+                return _IsPullDown;
+            }
+            set
+            {
+                _IsPullDown = value;
+            }
+        }
+
         private DeinterlaceType _deinterlace = DeinterlaceType.Disabled;
         public DeinterlaceType deinterlace
         {

@@ -112,10 +112,11 @@ namespace XviD4PSP
                         //m.interlace = SourceType.FILM;
                     }
 
-                    if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && !media.ScanOrder.Contains("Pulldown") && m.inframerate != "23.976" && Settings.DGForceFilm)
-                    {
-                        ShowMessage(Languages.Translate("This video was indexing with turned on option ForceFilm, but for this video it was not needed. If you forgot to turn it off,") + Environment.NewLine + Languages.Translate("go to menu Video->Decoding->MPEGfiles and turn it off, then delete indexing folder and try again."), Languages.Translate("Error"), Message.MessageStyle.Ok);
-                    }
+                    //Это сообщение больше не нужно, т.к. ForceFilm будет только при индексации видео с PullDown и 23.976фпс
+                    //if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && !media.ScanOrder.Contains("Pulldown") && m.inframerate != "23.976" && Settings.DGForceFilm)
+                    //{
+                    //    ShowMessage(Languages.Translate("This video was indexing with turned on option ForceFilm, but for this video it was not needed. If you forgot to turn it off,") + Environment.NewLine + Languages.Translate("go to menu Video->Decoding->MPEGfiles and turn it off, then delete indexing folder and try again."), Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    //}
 
                     //забиваем аудио потоки
                     if (ext == ".pmp")

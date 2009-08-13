@@ -577,7 +577,7 @@ namespace XviD4PSP
            }
 
            string ext = Path.GetExtension(m.infilepath).ToLower();
-           if (Calculate.IsMPEG(m.infilepath))
+           if (Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
            {
                if (m.indexfile != null)
                    m.vdecoder = AviSynthScripting.Decoders.MPEG2Source;
@@ -585,11 +585,8 @@ namespace XviD4PSP
                {
                    if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source &&
                        m.indexfile == null)
-                   {
-                       if (m.invcodecshort == "h264")
-                           m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;//FFmpegSource
-                       else
-                           m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
+                   {                       
+                           m.vdecoder = Settings.OtherDecoder; //FFmpegSource
                    }
                    else
                        m.vdecoder = Settings.MPEGDecoder;

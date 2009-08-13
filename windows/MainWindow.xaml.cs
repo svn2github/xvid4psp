@@ -1182,7 +1182,7 @@ namespace XviD4PSP
 
                         if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source)
                         {
-                            //проверяем индекс папку
+                            //проверяем индекс папку (проверка содержимого файла - если там МПЕГ, то нужна индексация; тут-же идет запуск МедиаИнфо)
                             IndexChecker ich = new IndexChecker(x);
                             if (ich.m == null) return;
                             x = ich.m.Clone();
@@ -1283,11 +1283,11 @@ namespace XviD4PSP
                         //    }
                         //}
                     }
-
+                    
                     //определяем видео декодер
                     if (x.vdecoder == 0)
                         x = Format.GetValidVDecoder(x);
-
+                    
                     //принудительный фикс цвета для DVD
                     if (Settings.AutoColorMatrix &&
                         x.format != Format.ExportFormats.Audio)
@@ -2069,7 +2069,7 @@ namespace XviD4PSP
             mn_mpg_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
             mn_mpg_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2).";
             mn_mpg_dec_mpg.ToolTip = "I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.";
-            check_force_film.ToolTip = "Turns on ForcedFilm for DGIndex(MPEG2Source), it will reduce fps to 23,976. Read DGIndex manual for more info!" + Environment.NewLine + "DON`T FORGET TO TURN IT OFF AFTER USING! NEWER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!";
+            check_force_film.ToolTip = "Turns on ForcedFilm for DGIndex(MPEG2Source), it will reduce fps to 23,976. Applies only if video have PullDown flag and 23.976fps (29.970 after PullDown). Read DGIndex manual for more info!" + Environment.NewLine + "NEWER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!";
             mnOtherFiles.ToolTip = "Choose decoder that will be used for decoding other file-types.";
             mn_oth_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
             mn_oth_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
@@ -2768,7 +2768,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath))
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
                 {
                     m.oldindexfile = m.indexfile;
                     m.indexfile = null;
@@ -2784,7 +2784,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath))
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
                 {
                     m.oldindexfile = m.indexfile;
                     m.indexfile = null;
@@ -2800,7 +2800,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath))
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
                 {
                     m.oldindexfile = m.indexfile;
                     m.indexfile = null;
@@ -2816,7 +2816,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath))
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
                 {
                     if (m.oldindexfile != null)
                         m.indexfile = m.oldindexfile;
