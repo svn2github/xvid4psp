@@ -265,7 +265,7 @@ namespace XviD4PSP
                    //Кэш для FFmpegSource2 в папку Temp
                    string cache_path = "";
                    if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
-                       cache_path = ", cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";                  
+                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";                  
                    
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
                    n++;
@@ -934,7 +934,7 @@ namespace XviD4PSP
            //загружаем необходимые плагины импорта
            if (m.vdecoder == Decoders.AVCSource)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine; //AVC
-           if (Calculate.IsMPEG(m.infilepath) && m.vdecoder != Decoders.AVCSource)
+           if (m.vdecoder == Decoders.MPEG2Source)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine; //AVC
 
 
@@ -1055,7 +1055,7 @@ namespace XviD4PSP
                    //Кэш для FFmpegSource2 в папку Temp
                    string cache_path = "";
                    if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
-                       cache_path = ", cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";  
+                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";  
                    
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
                    n += 1;
@@ -1163,7 +1163,7 @@ namespace XviD4PSP
            if(m.vdecoder == Decoders.AVCSource)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine; //AVC
 
-           if (Calculate.IsMPEG(m.infilepath) && m.vdecoder != Decoders.AVCSource)
+           if (m.vdecoder == Decoders.MPEG2Source)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
 
            if (m.vdecoder == Decoders.FFmpegSource)
@@ -1200,7 +1200,7 @@ namespace XviD4PSP
                //Кэш для FFmpegSource2 в папку Temp
                string cache_path = "";
                if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
-                   cache_path = ", cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.infilepath).ToLower() + ".ffindex\"";
+                   cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.infilepath).ToLower() + ".ffindex\"";
 
                script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
            }

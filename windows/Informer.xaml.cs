@@ -109,7 +109,7 @@ namespace XviD4PSP
                     if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && media.ScanOrder.Contains("Pulldown") && m.inframerate == "23.976" && !Settings.DGForceFilm)
                     { 
                         m.inframerate = "29.970";
-                        //m.interlace = SourceType.FILM;
+                        m.interlace = SourceType.FILM;
                     }
 
                     //Это сообщение больше не нужно, т.к. ForceFilm будет только при индексации видео с PullDown и 23.976фпс
