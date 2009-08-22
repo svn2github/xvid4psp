@@ -465,8 +465,7 @@ namespace XviD4PSP
                     if (mat.Success == true)
                     {
                         worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                        encoder_fps = Convert.ToDouble((mat.Groups[3].Value).Replace(".", ","));
-                      //SetLog(Convert.ToString(encoder_fps)); 
+                        encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
                     }
                     else
                     {
@@ -584,7 +583,7 @@ namespace XviD4PSP
                         if (mat.Success == true)
                         {
                             worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                            encoder_fps = Convert.ToDouble((mat.Groups[3].Value).Replace(".", ","));
+                            encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
                         }
                         else
                         {
@@ -665,7 +664,7 @@ namespace XviD4PSP
                         if (mat.Success == true)
                         {
                             worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                            encoder_fps = Convert.ToDouble((mat.Groups[3].Value).Replace(".", ","));
+                            encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
                         }
                         else
                         {

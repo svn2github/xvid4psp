@@ -1,10 +1,10 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 11.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 22.08.09 pre-Changelog:
 
 sorry for my bad english :D    
 
 >>> Added posibility to save encoding log to file. It will be created in Temp-folder or in current working folder - depen-
-    nding on settings. Also if you make double-click on text in encoding window, current contents of this window also
+    nding on settings. Also if you made double-click on text in encoding window, current contents of this window also
     will be saved as log-file (on this time file will be created in the current working folder, no matter what you choose
     in settings). And if an error has occur while encoding, log-file will be saved automaticaly (in Temp-folder, as
     error.log).
@@ -12,16 +12,16 @@ sorry for my bad english :D
 >>> Added batch encoding function (File->Open folder...). First you must select folder in which you stored the source
     files, then you must select destination folder, in which encoded files will be placed (it can be the same folder).
     To avoid opening all the files in the folder, filter was introduced, that select only files wich specified file-
-    extension. You can edit valid extensions in Settings->Global settings->Batch encoding menu, also here you can choose,
-    do you want to programm start encoding your files immediately after opening thy all, or no. In case if destination
+    extensions. You can edit valid extensions in Settings->Global settings->Batch encoding menu, also here you can choose,
+    do you want to programm start encoding your files immediately after opening they all, or no. In case if destination
     file name is exist in selected folder, file name will be changed - full file name (with extension) of the source file
-    will be added at the begining of the destination file name. After opening all the files in the folder, you will see
+    will be added at the begining of the destination file name. After opening all files in the folder, you will see
     statistics window, and for the latest opened file will be loaded preview. If you want to open one more folder, you 
     can do it now. Known issues:
     --in the process of opening one of the file may occur an error, and programm may hang up or something else..
     --in the process of opening one of the file, a programm window may appear (for selecting audio track, or something).
     --after opening audio-file programm change encoding format to Audio, and all other files will be opened with this
-      format. To avoid this you must: delete (or replace) all audio-files from you folder, or (better way) edit valid
+      format. To avoid this you must: delete (or replace) all audio-files from your folder, or (better way) edit valid
       file-extensions in the Settings->Global settings->Batch encoding menu.
     --you can`t pre-specified some parameters for the encoding file, such as resolution, etc. You can only: select filt-
       ration, colorcorrection, video and audio codec settings, and encoding format (but you need to open one file first,
@@ -39,12 +39,12 @@ sorry for my bad english :D
     with 4 digits (like 0358.h264 or 1254.mp3). Also in Settings->Global settings->Temp files was added Open button
     (to open selected Temp-folder).
 
->>> Now form the filtering preset to current script will be replaced and empty lines (that contains nothing; they are dele-
-    ting before) - it must enhances readability of the script.
+>>> Now from the filtering preset to current script will be replaced and empty lines to (that contains nothing; they are
+    deleting before) - it must enhances readability of the script.
   
 >>> Added --subme10 for the x264.
 
->>> Added very experimental Custom format. All settings from this format is stored in the FormatSettings.ini file, and 
+>>> Added very experimental Custom format. All settings for this format storing in the FormatSettings.ini file, and 
     you can change it manualy, or use for this purpose specially designed new window - Edit format. Maybe in the future
     some other formats also will be transferred from the programm to this ini-file.
 
@@ -54,8 +54,8 @@ sorry for my bad english :D
     of deinterlace-analysing. But after this fix Xvid4PSP will start this process, and then turn on TIVTC for this video.
 
 >>> In Video->Decoding->MPEG files menu was added new item: ForceFilm for MPEG2Source (for DGIndex). If you enable this
-    option, DGIndex will indexing all mpeg files with option ForcedFilm (read DGIndex manual first!). Don`t forget to
-    turn it OFF after using! Newer try to use it if you don`t understand what it does!
+    option, and if MediaInfo says that current video is PullDowned + have 23fps, then DGIndex will indexing current file
+    with option ForcedFilm (read DGIndex manual before use it!). In other case this option will be ignored.
 
 >>> In the Tools menu item WPF Video Player was replaced by Open XviD4PSP folder. It will open folder, where XviD4PSP is
     located (may help, if you want to edit or change some files by yourself).
@@ -63,7 +63,7 @@ sorry for my bad english :D
 >>> Now in the encoding log you will see all info, that x264 produce when encoding. All lines from this log have filtering
     before, and in some cases this results in loosing some log-info (some error messages didn`t showing).  
 
->>> Fixed number of audio-channels detection using ffmpeg.exe. This was broken due to some changes in ffmpeg info-log.
+>>> Fixed number of audio-channels detection using ffmpeg.exe. It was broken due to some changes in ffmpeg info-log.
 
 >>> In "forbidden to copy" was added files with extensions: .avs, .d2v(only for video stream) and .dga(only for video st-
     ream).
@@ -72,6 +72,13 @@ sorry for my bad english :D
     --Reported by Makkay
 
 >>> For the FLV format added posibility to muxing video, encdoded with On2 VP6 (FV4) codec.
+
+>>> Fixed wrong decoder selection for .ts and .m2ts files with h264, there was always selected DirectShowSource for this
+    files. Now decoder will be choosen according to settings for Other Files (if .ts or .m2ts contains h264), or for MPEG
+    files (if .ts or .m2ts contains MPEG).
+
+>>> Fixed wrong interpretation of fps value, recieved from the x264 while encoding, that may appear on some machines. 
+    --Reported by carbonize.
 
 >>> Some other changes..
 
