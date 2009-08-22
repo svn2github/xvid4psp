@@ -152,7 +152,7 @@ namespace XviD4PSP
                else
                {
                    m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
-                   m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avs\")" + Environment.NewLine;
+                   m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
                }
            }
            //DSS2
@@ -262,12 +262,15 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   //Кэш для FFmpegSource2 в папку Temp
+                   //Изменения под FFmpegSource2
+                   string ffmpegsource2 = "";
                    string cache_path = "";
                    if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
-                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";                  
-                   
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
+                   {
+                       ffmpegsource2 = "2";
+                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                   }
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
                    n++;
                    if (n < m.infileslist.Length)
                        invideostring += " + ";
@@ -958,7 +961,7 @@ namespace XviD4PSP
                else
                {
                    script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
-                   script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avs\")" + Environment.NewLine;
+                   script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
                }
            }
 
@@ -1052,12 +1055,15 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   //Кэш для FFmpegSource2 в папку Temp
+                   //Изменения под FFmpegSource2
+                   string ffmpegsource2 = "";
                    string cache_path = "";
                    if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
-                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";  
-                   
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
+                   {
+                       ffmpegsource2 = "2";
+                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                   }
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
                    n += 1;
                    if (n < m.infileslist.Length)
                        invideostring += " + ";
@@ -1173,7 +1179,7 @@ namespace XviD4PSP
                else
                {
                    script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
-                   script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avs\")" + Environment.NewLine;
+                   script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
                }
            }
 
@@ -1197,12 +1203,15 @@ namespace XviD4PSP
 
            if (m.vdecoder == Decoders.FFmpegSource)
            {
-               //Кэш для FFmpegSource2 в папку Temp
+               //Изменения под FFmpegSource2
+               string ffmpegsource2 = "";
                string cache_path = "";
-               if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
+               if (Settings.FFmpegSource2 == true)
+               {
+                   ffmpegsource2 = "2";
                    cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.infilepath).ToLower() + ".ffindex\"";
-
-               script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
+               }
+               script += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
            }
 
            if (m.vdecoder == Decoders.DSS2)
