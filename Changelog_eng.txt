@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 22.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 24.08.09 pre-Changelog:
 
 sorry for my bad english :D    
 
@@ -42,7 +42,7 @@ sorry for my bad english :D
 >>> Now from the filtering preset to current script will be replaced and empty lines to (that contains nothing; they are
     deleting before) - it must enhances readability of the script.
   
->>> Added --subme10 for the x264.
+>>> Added --subme10, --no-mbtree, --rc-lookahead and --no-psy options (in the x264 settings window).
 
 >>> Added very experimental Custom format. All settings for this format storing in the FormatSettings.ini file, and 
     you can change it manualy, or use for this purpose specially designed new window - Edit format. Maybe in the future

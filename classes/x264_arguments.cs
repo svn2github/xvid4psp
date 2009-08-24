@@ -172,19 +172,6 @@ namespace XviD4PSP
             }
         }
 
-        private bool _badapt = true;
-        public bool badapt
-        {
-            get
-            {
-                return _badapt;
-            }
-            set
-            {
-                _badapt = value;
-            }
-        }
-
         private bool _bpyramid = false;
         public bool bpyramid
         {
@@ -474,6 +461,7 @@ namespace XviD4PSP
                _qp_offset = value;
            }
        }
+       
        private bool _slow_frstpass = false;
        public bool slow_frstpass
        {
@@ -487,7 +475,44 @@ namespace XviD4PSP
            }
        }
 
-    
+       private bool _no_mbtree = false;
+       public bool no_mbtree
+       {
+           get
+           {
+               return _no_mbtree;
+           }
+           set
+           {
+               _no_mbtree = value;
+           }
+       }
+
+       private int _lookahead = 40;
+       public int lookahead
+       {
+           get
+           {
+               return _lookahead;
+           }
+           set
+           {
+               _lookahead = value;
+           }
+       }
+       
+       private bool _no_psy = false;
+       public bool no_psy
+       {
+           get
+           {
+               return _no_psy;
+           }
+           set
+           {
+               _no_psy = value;
+           }
+       }
 
     }
 }
