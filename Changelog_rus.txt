@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 24.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 26.08.09 pre-Changelog:
 
 
 >>> Добавлена возможность записывать лог кодирования в файл, с сохранением в Темп-папку, или в папку, куда производится
@@ -89,7 +89,17 @@ XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 24.08.09 pre-Changelog:
 
 >>> Разные мелкие изменения и исправления..
 
+------
 
+Обновленные компоненты:
+
+Обновлен: FFmpegSource2 (какая-то бета версия, http://www.mod16.org/ffms2)
+Обновлен: MediaInfo (0.7.20, http://mediainfo.sourceforge.net)
+Обновлен: NicAudio (2.0.4, http://www.codeplex.com/NicAudio)
+Обновлен: ffmpeg (unofficial build r19689, http://ffmpeg.arrozcru.org/autobuilds)
+Обновлен: MKVtoolnix (2.9.8-build20090824-165, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
+Обновлен: x264 (1222kMod.generic.x86 by komisar666, http://komisar.gin.by)
+Обновлен: Украинский перевод (by Hentaihunter)
 
 
 

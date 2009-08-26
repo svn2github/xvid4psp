@@ -76,7 +76,7 @@ namespace XviD4PSP
            // загружаем доп функции
            m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
            m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
-
+           
            //загружаем необходимые плагины импорта
            if (m.indexfile != null && m.vdecoder != Decoders.AVCSource) //DGDecode только не для AVC
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine; //AVC

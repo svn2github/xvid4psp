@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 24.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 26.08.09 pre-Changelog:
 
 sorry for my bad english :D    
 
@@ -80,10 +80,16 @@ sorry for my bad english :D
 >>> Fixed wrong interpretation of fps value, recieved from the x264 while encoding, that may appear on some machines. 
     --Reported by carbonize.
 
->>> Some other changes..
+Updated components:
 
 
-
+Updated: FFmpegSource2 (какая-то бета версия, http://www.mod16.org/ffms2)
+Updated: MediaInfo (0.7.20, http://mediainfo.sourceforge.net)
+Updated: NicAudio (2.0.4, http://www.codeplex.com/NicAudio)
+Updated: ffmpeg (unofficial build r19689, http://ffmpeg.arrozcru.org/autobuilds)
+Updated: MKVtoolnix (2.9.8-build20090824-165, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
+Updated: x264 (1222kMod.generic.x86 by komisar666, http://komisar.gin.by)
+Updated: Ukrainian translation (by Hentaihunter)
 
 
 

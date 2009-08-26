@@ -1830,8 +1830,8 @@ namespace XviD4PSP
             textbox_start.IsReadOnly = false;
             textbox_end.IsReadOnly = false;
 
-
-            if (m.infilepath != null &&
+            //Вот тут происходило удаление исходника..
+            if (m.infilepath != null && Path.GetFileNameWithoutExtension(m.infilepath) != m.taskname &&
     Path.GetDirectoryName(m.infilepath) == Settings.TempPath)
                 SafeDelete(m.infilepath);
 
@@ -2375,7 +2375,7 @@ namespace XviD4PSP
             //textbox_frame.Text = Convert.ToString((int)(Position.TotalSeconds * Calculate.ConvertStringToDouble(m.outframerate))) + "/" + 
             //Convert.ToString((int)(NaturalDuration.TotalSeconds * Calculate.ConvertStringToDouble(m.outframerate)));
         }
-
+            
         private void button_play_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m != null)
@@ -6355,6 +6355,10 @@ namespace XviD4PSP
             }
         }
 
+        
+
+        
+        
 
 
     }
