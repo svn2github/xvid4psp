@@ -712,7 +712,7 @@ namespace XviD4PSP
         public void UpdateManualProfile()
         {
             try
-            {
+            {                
                 UpdateMassive();
 
                 m.vencoding = "Custom";

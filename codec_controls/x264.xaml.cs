@@ -161,7 +161,6 @@ namespace XviD4PSP
                        
             //combo_qcomp.Items.Add("0.0");
             
-            
             LoadFromProfile();
         }
 
@@ -1894,6 +1893,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 preset = CodecPresets.Placebo;
 
             combo_codec_preset.SelectedItem = preset.ToString();
+
         }
 
         private void combo_codec_preset_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -2166,7 +2166,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
-        private void textbox_string1_TextChanged(object sender, TextChangedEventArgs e)
+        private void textbox_string1_TextChanged(object sender, TextChangedEventArgs e)//прес
         {
             m.userstring1 = textbox_string1.Text;
         }

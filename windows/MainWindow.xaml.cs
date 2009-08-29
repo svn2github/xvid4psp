@@ -158,7 +158,7 @@ namespace XviD4PSP
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
             this.KeyUp += new KeyEventHandler(MainWindow_KeyUp);
             this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter);//Мышь вошла в зону с названием файла
-            this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave);//Мышь вышла из зоны с названием файла
+            this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave);//Мышь вышла из зоны с названием файла           
         }
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -385,7 +385,6 @@ namespace XviD4PSP
 
         }
 
-
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
 
@@ -480,6 +479,7 @@ namespace XviD4PSP
                 {
                     EditScript();
                 }
+                
                 //C - Цветокоррекция
                 if (e.Key == Key.C && slider_pos.IsFocused)
                 {
@@ -2084,6 +2084,8 @@ namespace XviD4PSP
             string l = Settings.Language;
             if (l == "Russian")
                 mnRussian.IsChecked = true;
+            else if (l == "Ukrainian")
+                check_ukrainian.IsChecked = true;
             else if (l == "Italian")
                 check_italian.IsChecked = true;
             else if (l == "German")
@@ -2098,6 +2100,8 @@ namespace XviD4PSP
                 check_portuguese.IsChecked = true;
             else if (l == "Chinese")
                 check_chinese.IsChecked = true;
+            else if (l == "Hungarian")
+                check_hungarian.IsChecked = true;
             else
                 mnEnglish.IsChecked = true;
 
@@ -6225,64 +6229,73 @@ namespace XviD4PSP
         {
             CloseChildWindows();
             
-            //Папка с исходниками
-            System.Windows.Forms.FolderBrowserDialog open_folder = new System.Windows.Forms.FolderBrowserDialog();
-            open_folder.Description = Languages.Translate("Select folder where input files is located:");
-            open_folder.ShowNewFolderButton = false;
-            if(path_to_open != null)
-                open_folder.SelectedPath = path_to_open;
-            if (open_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                path_to_open = open_folder.SelectedPath;
-            else
-                return;
-
-            //Папка для перекодированного
-            System.Windows.Forms.FolderBrowserDialog save_folder = new System.Windows.Forms.FolderBrowserDialog();
-            save_folder.Description = Languages.Translate("Select folder for the encoded files:");
-            save_folder.ShowNewFolderButton = true;
-            save_folder.SelectedPath = path_to_open;
-            if (save_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                path_to_save = save_folder.SelectedPath;
-            else
-                return;
-           
-            this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
-            this.Height = this.Window.Height - 1;
-
-            int files_in_folder = Directory.GetFiles(path_to_open).Length; //Кол-во файлов в папке
-            opened_files = 0; //Обнуляем счетчик успешно открытых файлов
-
-            //Делим строку с валидными расширениями на отдельные строчки
-            string[] separator = new string[] { "/" };
-            string[] goodexts = Settings.GoodFilesExtensions.Split(separator, StringSplitOptions.None);
-            
-            foreach (string files in Directory.GetFiles(path_to_open, "*"))
+            try
             {
-                string ext = Path.GetExtension(files).ToLower().Replace(".", "");
-                
-                //Сравниваем расширение текущего файла со всеми строчками с валидными расширениями, и открываем файл при совпадении
-                foreach (string goodext in goodexts)
+                //Папка с исходниками
+                System.Windows.Forms.FolderBrowserDialog open_folder = new System.Windows.Forms.FolderBrowserDialog();
+                open_folder.Description = Languages.Translate("Select folder where input files is located:");
+                open_folder.ShowNewFolderButton = false;
+                if (path_to_open != null)
+                    open_folder.SelectedPath = path_to_open;
+                if (open_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    path_to_open = open_folder.SelectedPath;
+                else
+                    return;
+
+                //Папка для перекодированного
+                System.Windows.Forms.FolderBrowserDialog save_folder = new System.Windows.Forms.FolderBrowserDialog();
+                save_folder.Description = Languages.Translate("Select folder for the encoded files:");
+                save_folder.ShowNewFolderButton = true;
+                save_folder.SelectedPath = path_to_open;
+                if (save_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    path_to_save = save_folder.SelectedPath;
+                else
+                    return;
+
+                this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
+                this.Height = this.Window.Height - 1;
+
+                int files_in_folder = Directory.GetFiles(path_to_open).Length; //Кол-во файлов в папке
+                opened_files = 0; //Обнуляем счетчик успешно открытых файлов
+
+                //Делим строку с валидными расширениями на отдельные строчки
+                string[] separator = new string[] { "/" };
+                string[] goodexts = Settings.GoodFilesExtensions.Split(separator, StringSplitOptions.None);
+
+                foreach (string files in Directory.GetFiles(path_to_open, "*"))
                 {
-                    if (goodext == ext)
+                    string ext = Path.GetExtension(files).ToLower().Replace(".", "");
+
+                    //Сравниваем расширение текущего файла со всеми строчками с валидными расширениями, и открываем файл при совпадении
+                    foreach (string goodext in goodexts)
                     {
-                        Massive x = new Massive();
-                        x.infilepath = files;
-                        x.infileslist = new string[] { files };
-                        action_open(x, ShowPreview.dntshow);
-                        action_auto_save(m.Clone());
-                        break;
+                        if (goodext == ext)
+                        {
+                            Massive x = new Massive();
+                            x.infilepath = files;
+                            x.infileslist = new string[] { files };
+                            action_open(x, ShowPreview.dntshow);
+                            if (m != null)
+                                action_auto_save(m.Clone());
+                            break;
+                        }
                     }
                 }
+                if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
+                    LoadVideo(MediaLoad.load);
+
+                if (Settings.AutoBatchEncoding)
+                    EncodeNextTask(); //Запускаем кодирование
+
+                Message mess = new Message(this);
+                mess.ShowMessage(Convert.ToString(files_in_folder) + " - " + Languages.Translate("total files in folder") + Environment.NewLine + Convert.ToString(opened_files) + " - " + Languages.Translate("successfully opened files")
+                     + Environment.NewLine + Convert.ToString(outfiles.Count) + " - " + Languages.Translate("total tasks in queue"), Languages.Translate("Complete"));
             }
-            if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
-                LoadVideo(MediaLoad.load);
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
 
-            if (Settings.AutoBatchEncoding)
-                EncodeNextTask(); //Запускаем кодирование
-
-            Message mess = new Message(this);
-            mess.ShowMessage(Convert.ToString(files_in_folder) + " - " + Languages.Translate("total files in folder") + Environment.NewLine + Convert.ToString(opened_files) + " - " + Languages.Translate("successfully opened files")
-                 + Environment.NewLine + Convert.ToString(outfiles.Count) + " - " + Languages.Translate("total tasks in queue"), Languages.Translate("Complete"));          
         }
 
         private void action_auto_save(Massive mass)

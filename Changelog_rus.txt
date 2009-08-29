@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 26.08.09 pre-Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) Changelog:
 
 
 >>> Добавлена возможность записывать лог кодирования в файл, с сохранением в Темп-папку, или в папку, куда производится
@@ -105,7 +105,7 @@ XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) 26.08.09 pre-Changelog:
 
 
 
-
+Пресеты кодирования by Procrustean, а так-же архив плагинов и пресетов фильтрации by Temter57.
 
 
 

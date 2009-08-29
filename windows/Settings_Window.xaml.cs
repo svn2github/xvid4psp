@@ -74,9 +74,9 @@ namespace XviD4PSP
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding; //автозапуск кодирования (при пакетной обработке)
 
             if (Settings.WriteLog)
-                check_logfile_tempfolder.Visibility = Visibility.Visible;
+                check_logfile_tempfolder.IsEnabled = true;
             else
-                check_logfile_tempfolder.Visibility = Visibility.Collapsed;
+                check_logfile_tempfolder.IsEnabled = false;
 
 
             SetTooltips();
@@ -329,9 +329,9 @@ namespace XviD4PSP
             Settings.WriteLog = check_log_to_file.IsChecked.Value;
 
             if (Settings.WriteLog)
-                check_logfile_tempfolder.Visibility = Visibility.Visible;
+                check_logfile_tempfolder.IsEnabled = true;
             else
-                check_logfile_tempfolder.Visibility = Visibility.Collapsed;        
+                check_logfile_tempfolder.IsEnabled = false;
         }
 
         //Файл с логом кодирования во временную папку
