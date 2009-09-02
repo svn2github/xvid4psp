@@ -725,6 +725,7 @@ namespace XviD4PSP
             SetLog("");
 
             SafeDelete(passlog);
+            SafeDelete(passlog + ".mbtree");
         }
 
         private void make_ffmpeg()
