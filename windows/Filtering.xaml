@@ -11,7 +11,7 @@
     </Window.ContextMenu>
     <Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<TextBox x:Name="script_box" Text="" TextWrapping="Wrap" Margin="8,8,8,8" VerticalScrollBarVisibility="Auto" />
+			<TextBox x:Name="script_box" Text="" TextWrapping="Wrap" Margin="8,8,8,8" VerticalScrollBarVisibility="Auto" SnapsToDevicePixels="False" />
 		</Grid>
 		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38" Background="{DynamicResource black_gradient}">
 			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" BorderThickness="1,1,1,1" Click="button_cancel_Click" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,8,8,8" Width="90" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>

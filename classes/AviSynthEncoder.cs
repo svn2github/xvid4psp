@@ -16,7 +16,7 @@ namespace XviD4PSP
         public string encoderPath = null;
         public int frame;
         public string args = null;
-
+        
         private Massive m;
         private string script;
         private string outfilepath;
@@ -65,7 +65,7 @@ namespace XviD4PSP
             {
                 while (!_encoderProcess.HasExited)
                 {
-                    Thread.Sleep(0);
+                    Thread.Sleep(0); 
                     string text1 = r.ReadToEnd(); //r.ReadLine();
                     //consoletext = text1;
                     if (text1 != null)
@@ -142,7 +142,7 @@ namespace XviD4PSP
                                         locker.WaitOne();
 
                                         frame = (int)(((double)frameSample / (double)a.SamplesCount) * (double)a.num_frames);
-
+                                       
                                         target.Write(frameBuffer, 0, nHowMany * a.ChannelsCount * a.BytesPerSample);
                                         target.Flush();
                                         frameSample += nHowMany;

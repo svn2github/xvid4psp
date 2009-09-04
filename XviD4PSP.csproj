@@ -45,6 +45,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'rrr' ">
+    <OutputPath>bin\rrr\</OutputPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="DirectShowLib-2005, Version=2.0.0.0, Culture=neutral, PublicKeyToken=67e7b740cdfc2d3f, processorArchitecture=MSIL">
@@ -85,6 +88,7 @@
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="classes\aac_arguments.cs" />
+    <Compile Include="classes\AssemblyInfoHelper.cs" />
     <Compile Include="classes\AudioStream.cs" />
     <Compile Include="classes\AviFile\AudioStream.cs" />
     <Compile Include="classes\AviFile\Avi.cs" />

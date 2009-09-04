@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) r24 Changelog:
 
 sorry for my bad english :D    
 
@@ -11,7 +11,7 @@ sorry for my bad english :D
 
 >>> Added batch encoding function (File->Open folder...). First you must select folder in which you stored the source
     files, then you must select destination folder, in which encoded files will be placed (it can be the same folder).
-    To avoid opening all the files in the folder, filter was introduced, that select only files wich specified file-
+    To avoid opening all files in the folder, filter was introduced, that select only files wich specified file-
     extensions. You can edit valid extensions in Settings->Global settings->Batch encoding menu, also here you can choose,
     do you want to programm start encoding your files immediately after opening they all, or no. In case if destination
     file name is exist in selected folder, file name will be changed - full file name (with extension) of the source file
@@ -39,12 +39,13 @@ sorry for my bad english :D
     with 4 digits (like 0358.h264 or 1254.mp3). Also in Settings->Global settings->Temp files was added Open button
     (to open selected Temp-folder).
 
->>> Now from the filtering preset to current script will be replaced and empty lines to (that contains nothing; they are
+>>> Now from the filtering preset to current script will be replaced and empty lines too (that contains nothing; they are
     deleting before) - it must enhances readability of the script.
   
->>> Added --subme10, --no-mbtree, --rc-lookahead and --no-psy options (in the x264 settings window).
+>>> Added --subme10, --no-mbtree, --rc-lookahead and --no-psy options (in the x264 settings window), encoding presets 
+    also was updated (by Procrustean).
 
->>> Added very experimental Custom format. All settings for this format storing in the FormatSettings.ini file, and 
+>>> Added very experimental Custom format. All settings for this format stored in the FormatSettings.ini file, and 
     you can change it manualy, or use for this purpose specially designed new window - Edit format. Maybe in the future
     some other formats also will be transferred from the programm to this ini-file.
 
@@ -87,12 +88,12 @@ sorry for my bad english :D
 Updated components:
 
 
-Updated: FFmpegSource2 (какая-то бета версия, http://www.mod16.org/ffms2)
+Updated: FFmpegSource2 (r197, http://code.google.com/p/ffmpegsource)
 Updated: MediaInfo (0.7.20, http://mediainfo.sourceforge.net)
 Updated: NicAudio (2.0.4, http://www.codeplex.com/NicAudio)
-Updated: ffmpeg (unofficial build r19689, http://ffmpeg.arrozcru.org/autobuilds)
+Updated: ffmpeg (unofficial build r19737, http://ffmpeg.arrozcru.org/autobuilds)
 Updated: MKVtoolnix (2.9.8-build20090824-165, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
-Updated: x264 (1222kMod.generic.x86 by komisar666, http://komisar.gin.by)
+Updated: x264 (r1247 http://x264.nl/) w/o hrd_pd_interlace patch!
 Updated: Ukrainian translation (by Hentaihunter)
 
 
@@ -122,7 +123,7 @@ Encoding presets by Procrustean, and also archive of plugins and filtering prese
 
 
 
-XviD4PSP 5.0.37.3(Unofficial)->5.0.37.4(Unofficial) Changelog:
+XviD4PSP 5.0.37.3(Unofficial)->5.0.37.4(Unofficial) 16.07.09 Changelog:
 
 
 >>> Added function Trim. It will work only for encoding, not for Copy mode.
@@ -273,7 +274,7 @@ fcp (forclip)
 
 
 
-XviD4PSP 5.0.37.1(Unoficial)->5.0.37.2(Unofficial) Changelog:
+XviD4PSP 5.0.37.1(Unoficial)->5.0.37.2(Unofficial) 17.06.09 Changelog:
 
  
 >>> DGAVCIndex was added in the Tools menu.
@@ -338,7 +339,7 @@ fcp (forclip)
 -------
 
 
-XviD4PSP 5.036->5.0.37.1(Unoficial) Changelog:
+XviD4PSP 5.036->5.0.37.1(Unoficial) 10.06.09 Changelog:
  
 >>> For preview-player added volume control. This feature working as well in both player engine (MediaBridge and DirectShow). 
     Current value will store in the Windows registry.

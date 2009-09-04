@@ -22,10 +22,11 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using System.Windows.Media.Imaging;
 
+
 namespace XviD4PSP
 {
     public partial class MainWindow
-    {
+    {      
         public Massive m;
         public ArrayList outfiles = new ArrayList();
         public ArrayList deletefiles = new ArrayList();
@@ -173,7 +174,7 @@ namespace XviD4PSP
 
             worker.RunWorkerAsync();
         }
-
+        
         internal delegate void MainFormLoaderDelegate();
         private void MainFormLoader()
         {
@@ -182,7 +183,12 @@ namespace XviD4PSP
             else
             {
                 try
-                {
+                {   
+                    //Вывод заголовка окна, номера версии и ревизии
+                    AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
+                    this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
+                    asinfo = null;
+                    
                     //загружаем список форматов
                     combo_format.Items.Clear();
                     foreach (string f in Format.GetFormatList())
@@ -813,10 +819,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (Settings.Language == "Russian" || Settings.Language == "Ukrainian")
-                    Process.Start("http://www.ru.winnydows.com");
-                else
-                    Process.Start("http://www.winnydows.com");
+                Process.Start("http://winnydows.com");
             }
             catch (Exception ex)
             {

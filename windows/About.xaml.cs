@@ -21,11 +21,15 @@ namespace XviD4PSP
             
             this.InitializeComponent();
             
-            Assembly ainfo = Assembly.GetExecutingAssembly();
-            AssemblyName aname = ainfo.GetName();
+            //Assembly ainfo = Assembly.GetExecutingAssembly();
+            //AssemblyName aname = ainfo.GetName();
             //SampleTitle.Text = aname.Name + " " + aname.Version + " beta " + DateTime.Now;
+            AssemblyInfoHelper asinfo = new AssemblyInfoHelper();            
+            text_version.Text = "Unofficial v" + asinfo.Version + " " + asinfo.Trademark + " " + "(by fcp)*";
+            asinfo = null;
+
             Title = Languages.Translate("About");
-            text_import.Text = Languages.Translate("Import formats:");
+            text_import.Text = Languages.Translate("Import formats:"); 
             text_export.Text = Languages.Translate("Export formats:");
             button_changelog.Content = Languages.Translate("Changelog") + "*";
             //text_version.Text = aname.Version.ToString(2) + aname.Version.Build + aname.Version.Revision;

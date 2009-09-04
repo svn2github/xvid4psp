@@ -601,7 +601,7 @@ namespace XviD4PSP
                 lock (this)
                 {
                     // Relinquish ownership (IMPORTANT!) after hiding video window
-                    if (!this.isAudioOnly && this.videoWindow != null)
+                    if (!this.isAudioOnly && this.videoWindow != null)//////////////////////////////////////
                     {
                         hr = this.videoWindow.put_Visible(OABool.False);
                         DsError.ThrowExceptionForHR(hr);
@@ -875,10 +875,10 @@ namespace XviD4PSP
                 {
                     hr = this.mediaControl.Stop();
                     this.currentState = PlayState.Stopped;
-
+                    
                     // Seek to the beginning
                     hr = this.mediaSeeking.SetPositions(pos, AMSeekingSeekingFlags.AbsolutePositioning, null, AMSeekingSeekingFlags.NoPositioning);
-
+  
                     // Display the first frame to indicate the reset condition
                     hr = this.mediaControl.Pause();
                 }

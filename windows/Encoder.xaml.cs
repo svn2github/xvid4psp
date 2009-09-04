@@ -4303,7 +4303,11 @@ namespace XviD4PSP
                 {
                     if (m.outvcodec != "Copy")
                     {
-                        SetLog("VideoDecoder: " + m.vdecoder);
+                        if (m.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Settings.FFmpegSource2)
+                            SetLog("VideoDecoder: FFmpegSource2");
+                        else
+                            SetLog("VideoDecoder: " + m.vdecoder);
+
                         if (m.inresw != m.outresw ||
                             m.inresh != m.outresh)
                             SetLog("Resolution: " + m.inresw + "x" + m.inresh + " > " + m.outresw + "x" + m.outresh);
