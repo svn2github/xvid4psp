@@ -26,9 +26,9 @@
 				<MenuItem Header="File" x:Name="mnFile">
 					<MenuItem Header="Open file..." x:Name="mnOpen" Click="mnOpen_Click"/>
 					<MenuItem x:Name="menu_open_folder" Header="Open folder..." Click="menu_open_folder_Click"/>
+                    <MenuItem x:Name="menu_dvd" Header="Open DVD folder..." Click="menu_dvd_Click"/>
                     <MenuItem x:Name="menu_decode_file" Header="Decode file..." Click="menu_decode_file_Click"/>
 					<MenuItem x:Name="menu_join" Header="Join file..." Click="menu_join_Click"/>
-					<MenuItem x:Name="menu_dvd" Header="Open DVD folder..." Click="menu_dvd_Click"/>
 					<Separator/>
 					<MenuItem x:Name="mnCloseFile" Header="Close" Click="mnCloseFile_Click"/>
 					<Separator/>

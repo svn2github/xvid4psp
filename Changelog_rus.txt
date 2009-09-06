@@ -1,5 +1,5 @@
 
-XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) r24 Changelog:
+XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) r25 Changelog:
 
 
 >>> Добавлена возможность записывать лог кодирования в файл, с сохранением в Темп-папку, или в папку, куда производится
@@ -86,16 +86,16 @@ XviD4PSP 5.0.37.4(Unofficial)->5.0.37.5(Unofficial) r24 Changelog:
 >>> Исправлен неправильный вывод fps при кодировании кодеком x264 на некоторых компьютерах.
     --Reported by carbonize.
 
->>> Разные мелкие изменения и исправления..
+>>> Разные другие изменения и исправления..
 
 ------
 
 Обновленные компоненты:
 
-Обновлен: FFmpegSource2 (r197, http://code.google.com/p/ffmpegsource)
+Обновлен: FFmpegSource2 (2.11, http://code.google.com/p/ffmpegsource)
 Обновлен: MediaInfo (0.7.20, http://mediainfo.sourceforge.net)
 Обновлен: NicAudio (2.0.4, http://www.codeplex.com/NicAudio)
-Обновлен: ffmpeg (unofficial build r19737, http://ffmpeg.arrozcru.org/autobuilds)
+Обновлен: ffmpeg (unofficial build r19777, http://ffmpeg.arrozcru.org/autobuilds)
 Обновлен: MKVtoolnix (2.9.8-build20090824-165, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
 Обновлен: x264 (r1247 http://x264.nl/) эта версия без патча hrd_pd_interlace!
 Обновлен: Украинский перевод (by Hentaihunter)

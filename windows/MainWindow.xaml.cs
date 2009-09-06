@@ -819,7 +819,7 @@ namespace XviD4PSP
         {
             try
             {
-                Process.Start("http://winnydows.com");
+                Process.Start("http://www.winnydows.com");
             }
             catch (Exception ex)
             {
@@ -6231,7 +6231,7 @@ namespace XviD4PSP
         private void menu_open_folder_Click(object sender, RoutedEventArgs e)
         {
             CloseChildWindows();
-            
+
             try
             {
                 //Папка с исходниками
@@ -6261,6 +6261,9 @@ namespace XviD4PSP
                 int files_in_folder = Directory.GetFiles(path_to_open).Length; //Кол-во файлов в папке
                 opened_files = 0; //Обнуляем счетчик успешно открытых файлов
 
+                //Вывод первичной инфы об открытии
+                textbox_name.Text = Convert.ToString(files_in_folder) + " - " + "total files, " + Convert.ToString(opened_files) + " - " + "opened files, " + Convert.ToString(outfiles.Count) + " - " + "in queue";
+
                 //Делим строку с валидными расширениями на отдельные строчки
                 string[] separator = new string[] { "/" };
                 string[] goodexts = Settings.GoodFilesExtensions.Split(separator, StringSplitOptions.None);
@@ -6283,6 +6286,10 @@ namespace XviD4PSP
                             break;
                         }
                     }
+
+                    //Обновляем инфу об открытии
+                    textbox_name.Text = Convert.ToString(files_in_folder) + " - " + "total files, " + Convert.ToString(opened_files) + " - " + "opened files, " + Convert.ToString(outfiles.Count) + " - " + "in queue";
+
                 }
                 if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
                     LoadVideo(MediaLoad.load);
@@ -6293,6 +6300,12 @@ namespace XviD4PSP
                 Message mess = new Message(this);
                 mess.ShowMessage(Convert.ToString(files_in_folder) + " - " + Languages.Translate("total files in folder") + Environment.NewLine + Convert.ToString(opened_files) + " - " + Languages.Translate("successfully opened files")
                      + Environment.NewLine + Convert.ToString(outfiles.Count) + " - " + Languages.Translate("total tasks in queue"), Languages.Translate("Complete"));
+
+                if (m != null)
+                    textbox_name.Text = m.taskname;
+                else
+                    textbox_name.Text = "";
+
             }
             catch (Exception ex)
             {
