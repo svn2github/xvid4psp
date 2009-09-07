@@ -2043,7 +2043,6 @@ namespace XviD4PSP
             cmenu_delete_all_tasks.Header = Languages.Translate("Delete all tasks");
             cmenu_delete_encoded_tasks.Header = Languages.Translate("Delete encoded tasks");
             cmenu_delete_task.Header = Languages.Translate("Delete selected task");
-            cmenu_is_always_close_encoding.Content = Languages.Translate("Always close encoding task dialog");
             cmenu_is_always_delete_encoded.Content = Languages.Translate("Always delete from list encoded tasks");
             cmenu_reset_status.Header = Languages.Translate("Reset task status");
 
@@ -2170,8 +2169,7 @@ namespace XviD4PSP
                 menu_auto_volume_onexp.IsChecked = true;
 
             cmenu_is_always_delete_encoded.IsChecked = Settings.AutoDeleteTasks;
-            cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;
-
+            
             //Установка параметров регулятора громкости
             slider_Volume.Minimum = 0; //-10000
             slider_Volume.Maximum = 1; //0
@@ -3991,18 +3989,6 @@ namespace XviD4PSP
         {
             if (cmenu_is_always_delete_encoded.IsFocused)
                 Settings.AutoDeleteTasks = cmenu_is_always_delete_encoded.IsChecked.Value;
-        }
-
-        private void cmenu_is_always_close_encoding_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (cmenu_is_always_close_encoding.IsFocused)
-                Settings.AutoClose = cmenu_is_always_close_encoding.IsChecked.Value;
-        }
-
-        private void cmenu_is_always_close_encoding_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (cmenu_is_always_close_encoding.IsFocused)
-                Settings.AutoClose = cmenu_is_always_close_encoding.IsChecked.Value;
         }
 
         private void button_edit_sbc_Click(object sender, System.Windows.RoutedEventArgs e)

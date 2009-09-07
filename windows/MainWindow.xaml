@@ -232,8 +232,7 @@
 							<MenuItem x:Name = "cmenu_delete_encoded_tasks" Click="cmenu_delete_encoded_tasks_Click" Header="Delete encoded tasks"/>
 							<MenuItem x:Name = "cmenu_delete_all_tasks" Click="cmenu_delete_all_tasks_Click" Header="Delete all tasks"/>
 							<Separator/>
-							<CheckBox x:Name = "cmenu_is_always_delete_encoded" Checked="cmenu_is_always_delete_encoded_Checked" Unchecked="cmenu_is_always_delete_encoded_Unchecked" Content="Always delete from list encoded tasks" IsChecked="True"/>
-							<CheckBox x:Name = "cmenu_is_always_close_encoding" Checked="cmenu_is_always_close_encoding_Checked" Unchecked="cmenu_is_always_close_encoding_Unchecked" Content="Always close encoding task dialog" IsChecked="True"/>
+							<CheckBox x:Name = "cmenu_is_always_delete_encoded" Checked="cmenu_is_always_delete_encoded_Checked" Unchecked="cmenu_is_always_delete_encoded_Unchecked" Content="Always delete from list encoded tasks" IsChecked="True"/>					
 						</ContextMenu>
 					</ListView.ContextMenu>
 				</ListView>

@@ -89,11 +89,11 @@ Updated components:
 
 
 Updated: FFmpegSource2 (2.11, http://code.google.com/p/ffmpegsource)
-Updated: MediaInfo (0.7.20, http://mediainfo.sourceforge.net)
+Updated: MediaInfo (0.7.21, http://mediainfo.sourceforge.net)
 Updated: NicAudio (2.0.4, http://www.codeplex.com/NicAudio)
 Updated: ffmpeg (unofficial build r19777, http://ffmpeg.arrozcru.org/autobuilds)
 Updated: MKVtoolnix (2.9.8-build20090824-165, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
-Updated: x264 (r1247 http://x264.nl/) w/o hrd_pd_interlace patch!
+Updated: x264 (1251kMod.generic.x86, http://komisar.gin.by/)
 Updated: Ukrainian translation (by Hentaihunter)
 
 

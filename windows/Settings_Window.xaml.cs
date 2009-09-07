@@ -41,10 +41,11 @@ namespace XviD4PSP
             check_hide_comments.Content = Languages.Translate("Remove comments (#text) from the AviSynth script");
             check_resize_first.Content = Languages.Translate("Make crop/resize before filtering (otherwise - after filtering)");
             check_read_prmtrs.Content = Languages.Translate("Read parameters from the script when saving a new task");
-            check_log_to_file.Content = Languages.Translate("Write encoding log to a file");
+            check_log_to_file.Content = Languages.Translate("Write encoding log to file");
             check_logfile_tempfolder.Content = Languages.Translate("in Temp folder");
             label_extensions.Content = Languages.Translate("Only files with this extensions will be opened:");
             check_batch_autoencoding.Content = Languages.Translate("Start encoding after opening all files");
+            cmenu_is_always_close_encoding.Content = Languages.Translate("Always close encoding task dialog");
 
             tab_main.Header = Languages.Translate("Misc");
             tab_encoding.Header = Languages.Translate("Encoding log");
@@ -78,6 +79,7 @@ namespace XviD4PSP
             else
                 check_logfile_tempfolder.IsEnabled = false;
 
+            cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;
 
             SetTooltips();
 
@@ -357,7 +359,11 @@ namespace XviD4PSP
         {
             Settings.AutoBatchEncoding = check_batch_autoencoding.IsChecked.Value;
         }
-            
+
+        private void cmenu_is_always_close_encoding_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.AutoClose = cmenu_is_always_close_encoding.IsChecked.Value;
+        }
       
 	}
 }
