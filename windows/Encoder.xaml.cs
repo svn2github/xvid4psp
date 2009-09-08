@@ -3820,7 +3820,7 @@ namespace XviD4PSP
                     Int32.TryParse(svalue, NumberStyles.Integer, null, out size);
 
                 if (size != 0)
-                    split = " --split size:" + size + "M";
+                    split = " --split size:" + size + "M ";
             }
 
             //video
@@ -3839,6 +3839,7 @@ namespace XviD4PSP
                 video += "--sync 0:0 ";
                  
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                 string aext = Path.GetExtension(outstream.audiopath);
                 int aID = outstream.mkvid;
                 if (aext == ".aac" || aext == ".m4a" || aext == ".avi")
@@ -3848,7 +3849,7 @@ namespace XviD4PSP
                     Format.IsDirectRemuxingPossible(m) &&
                     outstream.codec == "Copy")
                 {
-                    audio = "-a " + aID + " ";
+                    audio = "-a " + instream.mkvid + " -D -S \"" + m.infilepath + "\" "; //звук из исходника (режим Copy без демукса)
                 }
                 else
                     audio = "-a " + aID + " -D -S \"" + outstream.audiopath + "\" ";
@@ -3877,14 +3878,7 @@ namespace XviD4PSP
             //"--aspect-ratio " + vID + ":" + Calculate.ConvertDoubleToPointString(m.outaspect) + " " +
             
             //Ввод полученых аргументов коммандной строки, + добавление строки введенной пользователем
-            if (m.mkvstring != null)
-            {
-                info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + tracks + split + " " + " " + m.mkvstring;
-            }
-            else
-            {
-                info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + tracks + split;
-            }
+            info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + tracks + split + m.mkvstring;
 
             //прописываем аргументы команндной строки
             SetLog(" ");
