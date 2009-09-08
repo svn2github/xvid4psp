@@ -234,7 +234,7 @@ namespace XviD4PSP
                         }
                         //делаем первый трек активным
                         m.inaudiostream = 0;
-
+                     
                         //довбиваем duration и frames для join заданий
                         if (m.infileslist.Length > 1)
                         {
@@ -450,7 +450,8 @@ namespace XviD4PSP
                     AudioStream s = (AudioStream)o;
                     if (s.decoder == 0)
                         s = Format.GetValidADecoder(s);
-                }
+                }            
+
             }
             catch (Exception ex)
             {

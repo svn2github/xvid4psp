@@ -1234,7 +1234,7 @@ namespace XviD4PSP
                         if (info.m == null) return;
                         x = info.m.Clone();
                     }
-
+                    
                     //разборка EVO
                     if (ext == ".evo")
                     {
@@ -1437,7 +1437,7 @@ namespace XviD4PSP
 
                     //забиваем-обновляем аудио массивы
                     x = FillAudio(x);
-
+                    
                     //выбираем трек
                     if (x.inaudiostreams.Count > 1)
                     {
@@ -1445,7 +1445,7 @@ namespace XviD4PSP
                         if (ao.m == null) return;
                         x = ao.m.Clone();
                     }
-
+                   
                     //извлечение трека при badmixing
                     if (x.inaudiostreams.Count == 1)
                     {
@@ -1648,7 +1648,7 @@ namespace XviD4PSP
                         x.format == Format.ExportFormats.Mpeg2NTSC)
                         x.dontmuxstreams = Settings.Mpeg2MultiplexDisabled;
                     x.split = Settings.GetFormatPreset(x.format, "split");
-
+                   
                     //передаём массив
                     m = x.Clone();
 

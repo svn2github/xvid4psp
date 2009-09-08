@@ -3837,7 +3837,7 @@ namespace XviD4PSP
             if (m.outaudiostreams.Count > 0)
             {
                 video += "--sync 0:0 ";
-
+                 
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 string aext = Path.GetExtension(outstream.audiopath);
                 int aID = outstream.mkvid;
@@ -3856,7 +3856,7 @@ namespace XviD4PSP
 
             //tracks
             string tracks = "";
-            if (m.outaudiostreams.Count > 0)
+           /* if (m.outaudiostreams.Count > 0)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 string aext = Path.GetExtension(outstream.audiopath);
@@ -3872,8 +3872,8 @@ namespace XviD4PSP
                     tracks = "--track-order 0:" + vID + ",1:" + aID;
             }
             else
-                tracks = "--track-order 0:" + vID;
-
+                tracks = "--track-order 0:" + vID; //tracks = "";
+            */
             //"--aspect-ratio " + vID + ":" + Calculate.ConvertDoubleToPointString(m.outaspect) + " " +
             
             //Ввод полученых аргументов коммандной строки, + добавление строки введенной пользователем
@@ -3952,7 +3952,7 @@ namespace XviD4PSP
             }
 
             encodertext = null;
-
+           
             SetLog("");
         }
 
@@ -4764,8 +4764,9 @@ namespace XviD4PSP
                 else
                 {
                     try
-                    {
-                        string logfilename = Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.outfilepath) + ".error.log";
+                    {   
+                        //Сохранение лога при ошибке
+                        string logfilename = Settings.TempPath + "\\" + Path.GetFileName(m.outfilepath) + ".error.log";
                         FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
                         StreamWriter writer = new StreamWriter(strm);
                         writer.WriteLine(tbxLog.Text);
@@ -4965,9 +4966,9 @@ namespace XviD4PSP
                     {
                         try
                         {
-                            string logfilename = Calculate.RemoveExtention(m.outfilepath, true) + ".encoding.log";
+                            string logfilename = m.outfilepath + ".encoding.log";
                             if (Settings.LogInTemp) //Лог-файл во временную папку
-                                logfilename = Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.outfilepath) + ".encoding.log";
+                                logfilename = Settings.TempPath + "\\" + Path.GetFileName(m.outfilepath) + ".encoding.log";
                             FileStream strm = new FileStream(logfilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                             StreamWriter writer = new StreamWriter(strm);
 
@@ -5011,7 +5012,7 @@ namespace XviD4PSP
         {
             try
             {
-                string logfilename = Calculate.RemoveExtention(m.outfilepath, true) + ".encoding.log";
+                string logfilename = m.outfilepath + ".encoding.log";
                 FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
                 StreamWriter writer = new StreamWriter(strm);
 
