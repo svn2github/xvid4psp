@@ -1,0 +1,5 @@
+D:\SVN\trunk\Launcher\obj\Debug\Launcher.exe
+D:\SVN\trunk\Launcher\obj\Debug\Launcher.pdb
+D:\SVN\trunk\Launcher\bin\Debug\Launcher.exe
+D:\SVN\trunk\Launcher\bin\Debug\Launcher.pdb
+D:\SVN\trunk\Launcher\obj\Debug\ResolveAssemblyReference.cache

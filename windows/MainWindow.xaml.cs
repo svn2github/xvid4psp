@@ -860,13 +860,28 @@ namespace XviD4PSP
 
         private void mnResetSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            string lang = Settings.Language;
-            Settings.ResetAllSettings(this);
-            Settings.Language = lang;
+            try
+            {
+                Message mess = new Message(this);
+                mess.ShowMessage(Languages.Translate("Do you realy want to reset all settings") + "?", Languages.Translate("Warning") + "!", Message.MessageStyle.YesNo);
+                if (mess.result == Message.Result.Yes)
+                {
+                    string lang = Settings.Language;
+                    Settings.ResetAllSettings(this);
+                    Settings.Language = lang;
 
-            Message m = new Message(this);
-            m.ShowMessage(Languages.Translate("Settings reseted. Program need restart."), Languages.Translate("Settings"));
-            Close();
+                    Message m = new Message(this);
+                    m.ShowMessage(Languages.Translate("Settings reseted. Program need restart."), Languages.Translate("Settings"));
+
+                    //Перезапуск 
+                    Process.Start(Calculate.StartupPath + "\\apps\\Launcher.exe", " 30 \"" + Calculate.StartupPath + "\""); //"30" - время ожидания завершения первой копии XviD4PSP, после чего лаунчер просто завершит свою работу
+                    Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
         }
 
         private void mnApps_Folder_Click(object sender, System.Windows.RoutedEventArgs e)
