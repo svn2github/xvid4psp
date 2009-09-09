@@ -5570,58 +5570,36 @@ namespace XviD4PSP
             {
                 try
                 {
-                    //AviFile.AviManager aviManager = new AviFile.AviManager(m.infilepath, true);
-                    //AviFile.VideoStream stream = aviManager.GetVideoStream();
-                    //MessageBox.Show(stream.FrameRate.ToString());
-                    //aviManager.Close();
-
                     System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
+                    s.SupportMultiDottedExtensions = true;
+                    s.DefaultExt = ".png";
                     s.AddExtension = true;
-                    //s.SupportMultiDottedExtensions = true;
-                    s.Title = Languages.Translate("Select unique name for output file:");
-                    //s.DefaultExt = ".png";
-
+                    s.Title = Languages.Translate("Select unique name for output file:");                   
                     s.Filter = "PNG " + Languages.Translate("files") + "|*.png" +
-                        "|JPEG " + Languages.Translate("files") + "|*.jpg";
+                        "|JPEG " + Languages.Translate("files") + "|*.jpg" + "|BMP " + Languages.Translate("files") + "|*.bmp";
+
+                    int frame = (int)(Position.TotalSeconds * Calculate.ConvertStringToDouble(m.outframerate));
+                    s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + " - [" + frame + "]";
 
                     if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
                         string ext = Path.GetExtension(s.FileName).ToLower();
 
-                        //if (!s.DefaultExt.StartsWith("."))
-                        //    s.DefaultExt = "." + s.DefaultExt;
+                        AviSynthReader reader = new AviSynthReader();
+                        reader.ParseScript(m.script);
 
-                        //if (ext != s.DefaultExt)
-                        //    s.FileName += s.DefaultExt;
-
-                        int frame = (int)(Position.TotalSeconds * Calculate.ConvertStringToDouble(m.outframerate));
-
+                        System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
                         if (ext == ".png")
-                        {
-                            AviSynthReader reader = new AviSynthReader();
-                            reader.ParseScript(m.script);
-
-                            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
                             bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-
-                            //завершение
-                            bmp.Dispose();
-                            reader.Close();
-                        }
-
                         if (ext == ".jpg")
-                        {
-                            AviSynthReader reader = new AviSynthReader();
-                            reader.ParseScript(m.script);
-
-                            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
                             bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        if (ext == ".bmp")
+                            bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
 
-                            //завершение
-                            bmp.Dispose();
-                            reader.Close();
-                        }
-                    }
+                        //завершение
+                        bmp.Dispose();
+                        reader.Close();
+                    }   
                 }
                 catch (Exception ex)
                 {
@@ -5671,13 +5649,6 @@ namespace XviD4PSP
                     if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
                         string ext = Path.GetExtension(s.FileName).ToLower();
-
-                        //if (!s.DefaultExt.StartsWith("."))
-                        //    s.DefaultExt = "." + s.DefaultExt;
-
-                        //if (ext != s.DefaultExt)
-                        //    s.FileName += s.DefaultExt;
-
                         int frame = (int)(Position.TotalSeconds * Calculate.ConvertStringToDouble(m.outframerate));
 
                         if (ext == ".png")
