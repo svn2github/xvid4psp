@@ -4228,73 +4228,33 @@ namespace XviD4PSP
         private void menu_info_media_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             string filepath = null;
-            if (m == null)
-            {
-                ArrayList files = OpenDialogs.GetFilesFromConsole("ov");
-                if (files.Count > 0)
-                    filepath = files[0].ToString();
-            }
-            else
+            if (m != null)
                 filepath = m.infilepath;
-
-            if (filepath != null)
-            {
-                MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MediaInfo, this);
-            }
+            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MediaInfo, this);
         }
 
         private void menu_info_mp4_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             string filepath = null;
-            if (m == null)
-            {
-                ArrayList files = OpenDialogs.GetFilesFromConsole("ov");
-                if (files.Count > 0)
-                    filepath = files[0].ToString();
-            }
-            else
+            if (m != null)
                 filepath = m.infilepath;
-
-            if (filepath != null)
-            {
-                MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MP4BOX, this);
-            }
+            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MP4BoxInfo, this);
         }
 
         private void menu_info_mkv_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             string filepath = null;
-            if (m == null)
-            {
-                ArrayList files = OpenDialogs.GetFilesFromConsole("ov");
-                if (files.Count > 0)
-                    filepath = files[0].ToString();
-            }
-            else
+            if (m != null)
                 filepath = m.infilepath;
-
-            if (filepath != null)
-            {
-                MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MKVINFO, this);
-            }
+            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MKVInfo, this);
         }
 
         private void menu_info_ffmpeg_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             string filepath = null; ;
-            if (m == null)
-            {
-                ArrayList files = OpenDialogs.GetFilesFromConsole("ov");
-                if (files.Count > 0)
-                    filepath = files[0].ToString();
-            }
-            else
+            if (m != null)
                 filepath = m.infilepath;
-
-            if (filepath != null)
-            {
-                MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.FFMPEG, this);
-            }
+            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.FFMPEGInfo, this);
         }
 
         private void menu_playinwmp_Click(object sender, System.Windows.RoutedEventArgs e)
