@@ -77,7 +77,8 @@ namespace XviD4PSP
                     media.Option("Complete", "1");//полная инфа
                     //media.Option("Complete");//краткая инфа      
                     ToDisplay += media.Inform();
-
+                    
+                    
                     //прицелная инфа
                     //ToDisplay += "VideoBitrate: " + media.VideoBitrate + " kbps" + Environment.NewLine;
                     //ToDisplay += "AudioBitrate: " + media.AudioBitrate(0) + " kbps" + Environment.NewLine;

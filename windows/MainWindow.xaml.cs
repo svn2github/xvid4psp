@@ -31,6 +31,7 @@ namespace XviD4PSP
         public ArrayList outfiles = new ArrayList();
         public ArrayList deletefiles = new ArrayList();
         private ArrayList ffcache = new ArrayList();
+        private ArrayList dgcache = new ArrayList();
 
         public enum MediaLoad { load = 1, update }
         public enum ShowPreview { show, dntshow } //загружать или нет превью после открытия файла
@@ -581,6 +582,14 @@ namespace XviD4PSP
                     SafeDelete(f);
             }
 
+            //Удаление DGIndex-кеша
+            if (Settings.DeleteDGIndexCache)
+            {
+                foreach (string cache_path in dgcache)
+                {
+                    SafeDirDelete(Path.GetDirectoryName(cache_path));
+                }
+            }
 
             //сообщения о пожертвоаниях
             //if (Convert.ToInt32(Settings.Key) > 10 && !Settings.WasDonate)
@@ -663,13 +672,43 @@ namespace XviD4PSP
             }
         }
 
+        private void clear_dgindex_cache()
+        {
+            try
+            {
+                if (Settings.DeleteDGIndexCache && m != null)
+                {
+                    //Если есть задания, проверяем, занят ли там наш кэш-файл
+                    int busy = 0;
+                    if (list_tasks.Items.Count != 0)
+                    {
+                        foreach (object _task in list_tasks.Items)
+                        {
+                            Task task = (Task)_task;
+                            if (task.Mass.indexfile == m.indexfile)
+                            {
+                                busy += 1;
+                                break;
+                            }
+                        }
+                    }
+                    //Если не занят, или заданий нет - то удаляем кэш-папку и убираем её из списка на удаление                   
+                    if (busy == 0)
+                    {
+                        SafeDirDelete(Path.GetDirectoryName(m.indexfile));
+                        dgcache.Remove(m.indexfile);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
         private void mnOpen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             //закрываем все дочерние окна
             CloseChildWindows();
-
-            //if (m != null)
-            //    m = null; //тууут
 
             //открываем файл
             OpenDialogs.owner = this;
@@ -740,9 +779,6 @@ namespace XviD4PSP
         {
             //закрываем все дочерние окна
             CloseChildWindows();
-
-            // if (m != null)
-            //      m = null; //тууут
 
             //открываем файл
             OpenDialogs.owner = this;
@@ -1212,10 +1248,11 @@ namespace XviD4PSP
                                 Indexing index = new Indexing(x);
                                 if (index.m == null) return;
                                 x = index.m.Clone();
+                                dgcache.Add(x.indexfile); //Добавление кэш-файла в сиписок на удаление
                             }
                         }
                     }
-
+                    
                     //AVC
                     if (ext == ".dga")
                     {
@@ -1833,6 +1870,8 @@ namespace XviD4PSP
 
             CloseClip();
             clear_ff_cache();
+            clear_dgindex_cache();
+            
             SafeDelete(Settings.TempPath + "\\preview.avs");
             SafeDelete(Settings.TempPath + "\\AvsP.avs");
             SafeDelete(Settings.TempPath + "\\AutoCrop.log");
@@ -3647,6 +3686,19 @@ namespace XviD4PSP
             }
         }
 
+        private void SafeDirDelete(string dir)
+        {
+            try
+            {
+                if (Directory.Exists(dir))
+                    Directory.Delete(dir, true);
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
+        }
+ 
         private void grid_player_window_DragEnter(object sender, System.Windows.DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
