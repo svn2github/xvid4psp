@@ -290,7 +290,7 @@ namespace XviD4PSP
                    return new string[] { "DV", "Copy" };
 
                case ExportFormats.Flv:
-                   return new string[] { "FLV1", "Copy" };
+                   return new string[] { "FLV1", "x264", "Copy" };
 
                case ExportFormats.AviiRiverClix2:
                case ExportFormats.Mp4Prada:
@@ -1789,15 +1789,15 @@ namespace XviD4PSP
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
            if (ext == ".avs")
-               return "AVS-script";
-           
+               return "Source - AVS-script";
+
            else if (m.format == ExportFormats.PmpAvc)
            {
                if (instream.codecshort != "AAC" &&
                    instream.codecshort != "MP3")
-                   return instream.codecshort;
+                   return "Codec - " + instream.codecshort;
                if (instream.samplerate != "44100")
-                   return instream.samplerate;
+                   return "Samplerate - " + instream.samplerate;
                else
                    return null;
            }
@@ -1806,7 +1806,7 @@ namespace XviD4PSP
                m.format == ExportFormats.Mp4PSPAVCTV)
            {
                if (instream.codecshort != "AAC")
-                   return instream.codecshort;
+                   return "Codec - " + instream.codecshort;
                else
                    return null;
            }
@@ -1814,7 +1814,7 @@ namespace XviD4PSP
                m.format == ExportFormats.Mpeg1PS)
            {
                if (instream.codecshort != "MP2")
-                   return instream.codecshort;
+                   return "Codec - " + instream.codecshort;
                else
                    return null;
            }
@@ -1823,10 +1823,10 @@ namespace XviD4PSP
            {
                if (instream.codecshort != "MP3" &&
                    instream.codecshort != "MP2")
-                   return instream.codecshort;
+                   return "Codec - " + instream.codecshort;
                else if (m.invcodecshort != "XviD" &&
                    m.invcodecshort != "DivX")
-                   return m.invcodecshort;
+                   return "Codec - " + m.invcodecshort;
                else
                    return null;
            }
@@ -1851,7 +1851,7 @@ namespace XviD4PSP
                if (instream.codecshort != "AAC" &&
                    instream.codecshort != "MP3" &&
                    instream.codecshort != "MP2")
-                   return instream.codecshort;
+                   return "Codec - " + instream.codecshort;
                else if (m.invcodecshort != "MPEG2" &&
                    m.invcodecshort != "MPEG4" &&
                    m.invcodecshort != "MPEG1" &&
@@ -1859,7 +1859,7 @@ namespace XviD4PSP
                    m.invcodecshort != "h263" &&
                    m.invcodecshort != "XviD" &&
                    m.invcodecshort != "DivX")
-                   return m.invcodecshort;
+                   return "Codec - " + m.invcodecshort;
                else
                    return null;
            }
@@ -1870,7 +1870,7 @@ namespace XviD4PSP
                if (instream.codecshort != "AC3" &&
                    instream.codecshort != "WAV" &&
                    instream.codecshort != "MP2")
-                   return instream.codecshort;
+                   return "Codec - " + instream.codecshort;
                else
                    return null;
            }
@@ -1890,7 +1890,19 @@ namespace XviD4PSP
                    instream.codecshort != "DTS" &&
                    instream.codecshort != "WAV" &&
                    instream.codecshort != "PCM")
-                   return instream.codecshort;
+                   return "Codec - " +  instream.codecshort;
+               else
+                   return null;
+           }
+           else if (m.format == ExportFormats.Flv)
+           {
+               if (instream.codecshort != "AAC" &&
+                   instream.codecshort != "MP3")
+                   return "Codec - " + instream.codecshort;
+               if (instream.samplerate != "11025" && instream.samplerate != "22050" && instream.samplerate != "44100")
+                   return "Samplerate - " + instream.samplerate;
+               if (instream.channels > 2)
+                   return instream.channels + " Channels";
                else
                    return null;
            }
@@ -1903,11 +1915,11 @@ namespace XviD4PSP
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
            if (ext == ".avs")
-               return "AVS-script";
+               return "Source - AVS-script";
            else if (ext == ".d2v")
-               return "DGIndex-project";
+               return "Source - DGIndex-project";
            else if (ext == ".dga")
-               return "DGAVCIndex-project";
+               return "Source - DGAVCIndex-project";
            
            else if (m.format == ExportFormats.PmpAvc ||
                m.format == ExportFormats.Mp4PSPAVC ||

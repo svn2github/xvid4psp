@@ -10,12 +10,8 @@
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
 			<GroupBox Foreground="#FFFFFFFF" x:Name="group_muxing" Header="Changelog" Margin="8,8,8,8" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
-				<Grid Width="Auto" Height="Auto">
-                    
-					<TextBox x:Name="changelog_text" Text="" TextWrapping="Wrap" Margin="8,8,8,8" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Visible" IsReadOnly="True" IsUndoEnabled="False" />
-					
-				    
-                    
+				<Grid Width="Auto" Height="Auto">                
+                    <TextBox x:Name="changelog_text" Text="" TextWrapping="Wrap" Margin="8,8,8,8" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Visible" IsReadOnly="True" IsUndoEnabled="False" />
                 </Grid>
 			</GroupBox>
 		</Grid>
