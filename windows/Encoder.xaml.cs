@@ -29,6 +29,7 @@ namespace XviD4PSP
         private Massive m;
         private MainWindow p;
         private string encodertext;
+        private string text_on_exit;
         private bool IsAborted = false;
         private bool IsErrors = false;
         private string estimated = Languages.Translate("estimated");
@@ -1944,6 +1945,11 @@ namespace XviD4PSP
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
                     Environment.NewLine);
+                
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("ffmpeg.exe: " + info.Arguments + Environment.NewLine);
+                }           
             }
 
             if (dmode == Demuxer.DemuxerMode.ExtractVideo)
@@ -1983,6 +1989,11 @@ namespace XviD4PSP
                 outfile = m.outvideofile;
                 info.Arguments = "-i \"" + m.infilepath +
                     "\" -vcodec copy -an" + format + " \"" + outfile + "\"";
+                
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("ffmpeg.exe: " + info.Arguments + Environment.NewLine);
+                }
             }
 
             //удаляем старый файл
@@ -2076,6 +2087,11 @@ namespace XviD4PSP
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
                     Environment.NewLine);
+                
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("mp4box.exe: " + info.Arguments + Environment.NewLine);
+                }
             }
 
             if (dmode == Demuxer.DemuxerMode.ExtractVideo)
@@ -2106,6 +2122,11 @@ namespace XviD4PSP
 
                 outfile = m.outvideofile;
                 info.Arguments = "-raw " + m.invideostream_mkvid + " \"" + m.infilepath + "\" -out \"" + outfile + "\"";
+
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("mp4box.exe: " + info.Arguments + Environment.NewLine);
+                }
             }
 
             //удаляем старый файл
@@ -2201,6 +2222,11 @@ namespace XviD4PSP
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
                     Environment.NewLine);
+            }
+
+            if (Settings.ArgumentsToLog)
+            {
+                SetLog("pmp_demuxer.exe: " + info.Arguments + Environment.NewLine);
             }
 
             encoderProcess.StartInfo = info;
@@ -2319,6 +2345,11 @@ namespace XviD4PSP
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
                     Environment.NewLine);
+                
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("mkvextract.exe: " + info.Arguments + Environment.NewLine);
+                }
             }
 
             if (dmode == Demuxer.DemuxerMode.ExtractVideo)
@@ -2350,6 +2381,11 @@ namespace XviD4PSP
 
                 outfile = m.outvideofile;
                 info.Arguments = "tracks " + flist + m.invideostream_mkvid + ":" + "\"" + outfile + "\"";
+                
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("mkvextract.exe: " + info.Arguments + Environment.NewLine);
+                }
             }
 
             //удаляем старый файл
@@ -2456,7 +2492,7 @@ namespace XviD4PSP
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
-
+            
             //запоминаем настоящее имя
             //не помню зачем такие сложности
             //string savefilepath = m.outfilepath;
@@ -2510,7 +2546,7 @@ namespace XviD4PSP
             {
                 locker.WaitOne();
                 line = encoderProcess.StandardOutput.ReadLine();
-
+                
                 if (line != null)
                 {
                     mat = r.Match(line);
@@ -2521,9 +2557,9 @@ namespace XviD4PSP
                     }
                     else
                     {
-                        //if (encodertext != null)
-                        //    encodertext += Environment.NewLine;
-                        //encodertext += line;
+                        if (encodertext != null)
+                            encodertext += Environment.NewLine;
+                        encodertext += line;
                         //SetLog(line);
                     }
                 }
@@ -2533,6 +2569,13 @@ namespace XviD4PSP
             of = 0;
             cf = 0;
 
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.ExitCode != 0)
+            {
+                IsErrors = true;
+                ErrorExeption(encodertext);
+            }
+            
             //чистим ресурсы
             encoderProcess.Close();
             encoderProcess.Dispose();
@@ -2709,6 +2752,12 @@ namespace XviD4PSP
             cf = (int)((progress / 100.0) * (double)m.outframes);
         }
 
+        //Считывание лога при завершении процесса
+        void encoderProcess_Exited(object sender, EventArgs e)
+        {
+            if (encoderProcess != null)
+                text_on_exit = encoderProcess.StandardError.ReadToEnd();
+        }
 
         private void make_ffmpeg_mux()
         {
@@ -2736,6 +2785,7 @@ namespace XviD4PSP
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
+            encoderProcess.Exited += new EventHandler(encoderProcess_Exited);
 
             string rate = " -r " + m.outframerate;
             if (m.outvcodec == "Copy")
@@ -2745,7 +2795,7 @@ namespace XviD4PSP
                 else
                     rate = "";
             }
-
+    
             string aformat = "";
             string addaudio = "";
             if (m.outaudiostreams.Count > 0)
@@ -2784,12 +2834,13 @@ namespace XviD4PSP
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
             int procent = 0;
-
+            
             while (!encoderProcess.HasExited)
             {
                 locker.WaitOne();
+                                
                 line = encoderProcess.StandardError.ReadLine();
-
+                
                 if (line != null)
                 {
                     mat = r.Match(line);
@@ -2799,16 +2850,25 @@ namespace XviD4PSP
                         procent = (int)(ctime * Calculate.ConvertStringToDouble(m.outframerate));
                         worker.ReportProgress(procent);
                     }
-                    //else
-                    //{
-                    //    if (encodertext != null)
-                    //        encodertext += Environment.NewLine;
-                    //    encodertext += line;
-                    //    SetLog(line);
-                    //}
+                    else
+                    {
+                        // SetLog(full);
+                        // if (full.Contains("not compatible") || full.Contains("ould not write") || full.Contains("nknown format") || full.Contains("incorrect") 
+                        //     || full.Contains("not support"))
+                        // if (encodertext != null)
+                        //     encodertext += Environment.NewLine;
+                        //encodertext += full.Trim();
+                    }
                 }
             }
-
+            
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.ExitCode != 0)
+            {
+                IsErrors = true;
+                ErrorExeption(text_on_exit.Trim());
+            }
+            
             //обнуляем прогресс
             of = 0;
             cf = 0;
@@ -2817,11 +2877,7 @@ namespace XviD4PSP
             encoderProcess.Close();
             encoderProcess.Dispose();
             encoderProcess = null;
-
-            //проверка на ошибки в логе
-            if (encodertext != null && encodertext.Contains("error,"))
-                IsErrors = true;
-
+            
             if (IsAborted || IsErrors) return;
 
             //проверка на удачное завершение
@@ -3911,13 +3967,21 @@ namespace XviD4PSP
                         procent = Convert.ToInt32(mat.Groups[1].Value);
                         worker.ReportProgress(Convert.ToInt32((procent / 100.0) * m.outframes));
                     }
-                    //else
-                    //{
-                    //    if (encodertext != null)
-                    //        encodertext += Environment.NewLine;
-                    //    encodertext += line;
-                    //    SetLog(line);
-                    //}
+                    else
+                    {
+                        if (line.StartsWith("Error"))
+                        {
+                            IsErrors = true;
+                            ErrorExeption(line.Replace("Error:","").Trim());
+                        }
+                        if (line.StartsWith("Warning"))
+                        {
+                            if (encodertext != null)
+                                encodertext += Environment.NewLine;
+                            encodertext += line;
+                            SetLog(line);
+                        }
+                    }
                 }
             }
 
@@ -4268,9 +4332,11 @@ namespace XviD4PSP
 
                 SetLog("XVID4PSP");
                 SetLog("------------------------------");
-                Assembly ainfo = Assembly.GetExecutingAssembly();
-                AssemblyName aname = ainfo.GetName();
-                string ver = aname.Version.ToString(2) + aname.Version.Build + aname.Version.Revision;
+                //Assembly ainfo = Assembly.GetExecutingAssembly();
+                //AssemblyName aname = ainfo.GetName();
+                //string ver = aname.Version.ToString(2) + aname.Version.Build + aname.Version.Revision;
+                AssemblyInfoHelper asinfo = new AssemblyInfoHelper(); 
+                string ver = asinfo.Version + " " + asinfo.Trademark;
                 DateTime ct = File.GetLastWriteTime(Calculate.StartupPath + "\\XviD4PSP.exe");
                 SetLog("Version: " + ver);
                 SetLog("Created: " + ct.ToString());
