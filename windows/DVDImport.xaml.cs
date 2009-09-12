@@ -542,10 +542,12 @@ namespace XviD4PSP
 
                 // Clear global flags
                 this.currentState = PlayState.Stopped;
-                this.isAudioOnly = true;
+                //this.isAudioOnly = true;
 
                 // Free DirectShow interfaces
                 CloseInterfaces();
+
+                this.isAudioOnly = true; //Перенесено сюда
 
                 // Clear file name to allow selection of new file with open dialog
                 //this.filepath = string.Empty;
@@ -878,7 +880,9 @@ namespace XviD4PSP
                     
                     // Seek to the beginning
                     hr = this.mediaSeeking.SetPositions(pos, AMSeekingSeekingFlags.AbsolutePositioning, null, AMSeekingSeekingFlags.NoPositioning);
-  
+                    
+                    Thread.Sleep(100); //Иначе в некоторых случаях будет зависание или вылет после сикинга
+                    
                     // Display the first frame to indicate the reset condition
                     hr = this.mediaControl.Pause();
                 }

@@ -4584,11 +4584,13 @@ namespace XviD4PSP
 
                 if (mediaload != MediaLoad.update)
                     this.currentState = PlayState.Stopped;
-                this.isAudioOnly = true;
+                //this.isAudioOnly = true;
                 //this.isFullScreen = false; //Зачем при закрытии клипа выходить из Фуллскрина?
 
                 // Free DirectShow interfaces
                 CloseInterfaces();
+
+                this.isAudioOnly = true; //Перенесено сюда
 
                 // No current media state
                 if (mediaload != MediaLoad.update)
@@ -4946,6 +4948,8 @@ namespace XviD4PSP
 
                     // Seek to the beginning
                     hr = this.mediaSeeking.SetPositions(pos, AMSeekingSeekingFlags.AbsolutePositioning, null, AMSeekingSeekingFlags.NoPositioning);
+
+                    Thread.Sleep(100); //Иначе в некоторых случаях будет зависание или вылет после сикинга
 
                     // Display the first frame to indicate the reset condition
                     hr = this.mediaControl.Pause();
@@ -5566,6 +5570,9 @@ namespace XviD4PSP
 
             if (folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
+                this.Height = this.Window.Height - 1;
+                
                 Settings.DVDPath = folder.SelectedPath;
                 Massive x = new Massive();
                 x.owner = this;
