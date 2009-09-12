@@ -237,18 +237,31 @@ namespace XviD4PSP
 
         private void button_save_Click(object sender, RoutedEventArgs e)
         {
-            if (tbxInfo.Text != null)
+            if (infilepath != null)
             {
                 try
                 {
-                    string logfilename = infilepath + " - " + infomode.ToString().ToLower() + ".log";
-                    FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                    StreamWriter writer = new StreamWriter(strm);
+                    System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
+                    s.SupportMultiDottedExtensions = true;
+                    s.DefaultExt = ".log";
+                    s.AddExtension = true;                    
+                    s.Title = Languages.Translate("Select unique name for output file:");                   
+                    s.Filter = "LOG " + Languages.Translate("files") + "|*.log" +
+                        "|TXT " + Languages.Translate("files") + "|*.txt";
 
-                    writer.WriteLine(tbxInfo.Text);
-                    writer.Flush();
-                    writer.Dispose();
-                    strm.Dispose();
+                    s.FileName = infilepath + " - " + infomode.ToString(); //.ToLower();
+
+                    if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        string logfilename = s.FileName;
+                        FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                        StreamWriter writer = new StreamWriter(strm);
+
+                        writer.WriteLine(tbxInfo.Text);
+                        writer.Flush();
+                        writer.Dispose();
+                        strm.Dispose();
+                    }
                 }
                 catch (Exception ex)
                 {
