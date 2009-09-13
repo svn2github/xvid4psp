@@ -4618,6 +4618,9 @@ namespace XviD4PSP
                     //this.graph = null;
                     GC.Collect();
                 }
+               
+                Thread.Sleep(100);
+                
                 string url = "MediaBridge://MyDataString";
                 MediaBridge.MediaBridgeManager.UnregisterCallback(url);
             }
