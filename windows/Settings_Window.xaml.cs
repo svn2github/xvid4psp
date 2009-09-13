@@ -46,6 +46,7 @@ namespace XviD4PSP
             label_extensions.Content = Languages.Translate("Only files with this extensions will be opened:");
             check_batch_autoencoding.Content = Languages.Translate("Start encoding after opening all files");
             cmenu_is_always_close_encoding.Content = Languages.Translate("Always close encoding task dialog");
+            check_dgindex_cache_in_temp.Content = Languages.Translate("Create DGIndex cache in Temp folder");
 
             tab_main.Header = Languages.Translate("Misc");
             tab_encoding.Header = Languages.Translate("Encoding log");
@@ -71,8 +72,9 @@ namespace XviD4PSP
             check_read_prmtrs.IsChecked = Settings.ReadScript; //считывать параметры скрипта
             check_log_to_file.IsChecked = Settings.WriteLog; //записывать лог кодирования в файл..
             check_logfile_tempfolder.IsChecked = Settings.LogInTemp; //.. а файл поместить во временную папку
-            textbox_extensions.Text = Settings.GoodFilesExtensions; // окно со списком допустимых расширений файлов (при пакетной обработке)
+            textbox_extensions.Text = Settings.GoodFilesExtensions; //окно со списком допустимых расширений файлов (при пакетной обработке)
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding; //автозапуск кодирования (при пакетной обработке)
+            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp; //помещать DGIndex-кэш в Темп-папку
 
             if (Settings.WriteLog)
                 check_logfile_tempfolder.IsEnabled = true;
@@ -363,6 +365,11 @@ namespace XviD4PSP
         private void cmenu_is_always_close_encoding_Click(object sender, RoutedEventArgs e)
         {
             Settings.AutoClose = cmenu_is_always_close_encoding.IsChecked.Value;
+        }
+
+        private void check_dgindex_cache_in_temp_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DGIndexInTemp = check_dgindex_cache_in_temp.IsChecked.Value;
         }
       
 	}

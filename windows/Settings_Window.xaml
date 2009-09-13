@@ -42,7 +42,8 @@
 						<Label OpacityMask="{x:Null}" x:Name="label_temppath" Content="Temp folder path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,0,0,30" d:LayoutOverrides="Height" VerticalAlignment="Bottom"/>
 						<CheckBox x:Name="check_delete_ff_cache" Width="Auto" Height="Auto" Content="Auto delete FFmpegSource cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,30.62,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width" HorizontalAlignment="Left" Checked="check_delete_ff_cache_Checked" Unchecked="check_delete_ff_cache_Unchecked"/>
 						<CheckBox x:Name="check_delete_dgindex_cache" Width="Auto" Height="Auto" Content="Auto delete DGIndex cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,53.24,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" IsEnabled="True" Checked="check_delete_dgindex_cache_Checked" Unchecked="check_delete_dgindex_cache_Unchecked"/>
-					</Grid>
+					    <CheckBox x:Name="check_dgindex_cache_in_temp" Width="Auto" Height="Auto" Content="Create DGIndex cache in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,75,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Click="check_dgindex_cache_in_temp_Click"/>
+                    </Grid>
 				</TabItem>
 				<TabItem Header="Encoding log" x:Name="tab_encoding">
 					<Grid>

@@ -741,8 +741,8 @@ namespace XviD4PSP
 
            string indexpath = Path.GetDirectoryName(infilepath) + "\\" + dvdname + ".index\\" + dvdname + title + ".d2v";
 
-           //если файл ReadOnly
-           if (IsReadOnly(infilepath))
+           //если файл ReadOnly или если в настройках выбрано создавать DGIndex-кэш в Темп-папке
+           if (IsReadOnly(infilepath) || Settings.DGIndexInTemp)
                indexpath = Settings.TempPath + "\\" + dvdname + ".index\\" + dvdname + title + ".d2v";
 
            return indexpath;
