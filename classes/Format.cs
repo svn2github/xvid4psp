@@ -742,15 +742,20 @@ namespace XviD4PSP
                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-               if (m.format == ExportFormats.PmpAvc)
+               instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
+               
+               if (outstream.codec == "MP2" || outstream.codec == "MP3")
                {
-                   if (instream.channels == 0 ||
-                       instream.channels != 2)
+                   if (instream.channels >= 3)
                        instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
                }
-               else
+
+               if (m.format == ExportFormats.PmpAvc)
                {
-                   if (m.format == ExportFormats.AviDVNTSC ||
+                   if (instream.channels != 2)
+                       instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
+               }
+               else if (m.format == ExportFormats.AviDVNTSC ||
                        m.format == ExportFormats.AviDVPAL ||
                        m.format == ExportFormats.AviiRiverClix2 ||
                        m.format == ExportFormats.Flv ||
@@ -768,31 +773,18 @@ namespace XviD4PSP
                        m.format == ExportFormats.Mp4PSPAVC ||
                        m.format == ExportFormats.Mp4PSPAVCTV ||
                        m.format == ExportFormats.Mp4PSPASP ||
-                       m.format == ExportFormats.Mp4Archos5G  ||
+                       m.format == ExportFormats.Mp4Archos5G ||
                        m.format == ExportFormats.Mp4ToshibaG900 ||
                        m.format == ExportFormats.Mp4Nokia5700 ||
-                       m.format == ExportFormats.AviMeizuM6) //Custom
-                   {
-                       if (instream.channels >= 3)
-                           instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
-                       else
-                           instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
-                   }
-                   else
-                   {
-                       if (outstream.codec == "MP3" ||
-                           outstream.codec == "MP2")
-                       {
-                           if (instream.channels >= 3)
-                               instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
-                           else
-                               instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
-                       }
-                       else
-                       {
-                           instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
-                       }
-                   }
+                       m.format == ExportFormats.AviMeizuM6)
+               {
+                   if (instream.channels >= 3)
+                       instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
+               }
+               else if (m.format == ExportFormats.Custom && instream.channelconverter != AudioOptions.ChannelConverters.ConvertToDolbyProLogicII)
+               {
+                   if (instream.channels >= 3 && FormatReader.GetFormatInfo("Custom", "GetValidChannelsConverter") == "yes")
+                       instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
                }
            }
 
@@ -985,7 +977,7 @@ namespace XviD4PSP
                return FormatReader.GetFormatInfo2("Custom", "GetValidFrameratesList");
 
            else
-               return new string[] { "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970" }; //Custom
+               return new string[] { "11.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970" };
        }
 
        public static string GetValidExtension(Massive m)

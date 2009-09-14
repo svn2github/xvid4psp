@@ -120,6 +120,10 @@ namespace XviD4PSP
             else
                 check_4gb_only.IsChecked = false;
 
+            if (FormatReader.GetFormatInfo(format, "GetValidChannelsConverter") == "yes")
+                check_stereo.IsChecked = true;
+            else
+                check_stereo.IsChecked = false;
 
             TranslateItems();
             SetTooltips();
@@ -176,6 +180,12 @@ namespace XviD4PSP
                             string logval = "no";
                             if (check_4gb_only.IsChecked == true) logval = "yes";
                             line = "\\" + format + "\\Is4GBlimitedFormat\\" + logval + Environment.NewLine;
+                        }
+                        else if (line.StartsWith("\\" + m.format + "\\GetValidChannelsConverter\\"))
+                        {
+                            string logval = "no";
+                            if (check_stereo.IsChecked == true) logval = "yes";
+                            line = "\\" + format + "\\GetValidChannelsConverter\\" + logval + Environment.NewLine;
                         }
                         else
                             if (!reader.EndOfStream)
@@ -245,7 +255,7 @@ namespace XviD4PSP
             combo_Extension.ToolTip = Languages.Translate("File extension:");
             check_4gb_only.ToolTip = Languages.Translate("Maximum filesize is 4Gb");
             textbox_aspects.ToolTip = Languages.Translate("valid values: 1.333 (4:3), 1.500, 1.666, 1.765 (16:9), 1.778 (16:9), 1.850, 2.353, or any...");
-
+            check_stereo.ToolTip = Languages.Translate("Maximum numbers of audio channels for this format is 2");
         }
 
         private void ErrorExeption(string message)
@@ -324,6 +334,11 @@ namespace XviD4PSP
         }
 
         private void check_Interlace_IsPosible_Clicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void check_Stereo(object sender, RoutedEventArgs e)
         {
 
         }

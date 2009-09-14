@@ -679,7 +679,7 @@ namespace XviD4PSP
                 if (Settings.DeleteDGIndexCache && m != null)
                 {
                     //Если есть задания, проверяем, занят ли там наш кэш-файл
-                    int busy = 0;
+                    bool busy = false;
                     if (list_tasks.Items.Count != 0)
                     {
                         foreach (object _task in list_tasks.Items)
@@ -687,13 +687,13 @@ namespace XviD4PSP
                             Task task = (Task)_task;
                             if (task.Mass.indexfile == m.indexfile)
                             {
-                                busy += 1;
+                                busy = true;
                                 break;
                             }
                         }
                     }
                     //Если не занят, или заданий нет - то удаляем кэш-папку и убираем её из списка на удаление                   
-                    if (busy == 0)
+                    if (!busy)
                     {
                         SafeDirDelete(Path.GetDirectoryName(m.indexfile));
                         dgcache.Remove(m.indexfile);
@@ -899,8 +899,9 @@ namespace XviD4PSP
             try
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Do you realy want to reset all settings") + "?", Languages.Translate("Warning") + "!", Message.MessageStyle.YesNo);
-                if (mess.result == Message.Result.Yes)
+                mess.ShowMessage(Languages.Translate("Do you realy want to reset all settings") + "?" + Environment.NewLine +
+                Languages.Translate("After that the program will be restarted") + "!", Languages.Translate("Warning") + "!", Message.MessageStyle.OkCancel);
+                if (mess.result == Message.Result.Ok)
                 {
                     string lang = Settings.Language;
                     Settings.ResetAllSettings(this);
