@@ -244,9 +244,9 @@ namespace XviD4PSP
 
                 //запоминаем разрешение для сравнения
                 int outresw = m.outresw;
-
+                
                 m = Format.GetValidResolution(m, m.outresw); //пересчет высоты
-
+                
                 if (outresw != m.outresw)
                 {
                     m.outresw = outresw;

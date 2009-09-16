@@ -74,8 +74,8 @@ namespace XviD4PSP
 
                     //ToDisplay += media.Option("Info_Parameters");//список ключей
 
-                    media.Option("Complete", "1");//полная инфа
-                    //media.Option("Complete");//краткая инфа      
+                    //media.Option("Complete", "1");//полная инфа
+                    media.Option("Complete");//краткая инфа      
                     ToDisplay += media.Inform();
                     
                     

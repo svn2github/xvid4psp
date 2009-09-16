@@ -1071,7 +1071,7 @@ namespace XviD4PSP
            ArrayList hlist = GetResHList(m);
 
            //блок дл€ форматов с анаморфом
-           if (Settings.SaveAnamorph)
+           if (Settings.SaveAnamorph || m.aspectfix == AspectResolution.AspectFixes.SAR)
            {
                if (m.format == ExportFormats.TS ||
                    m.format == ExportFormats.M2TS ||
@@ -1092,8 +1092,13 @@ namespace XviD4PSP
                            m.outresw = m.inresw;
                            m.outresh = m.inresh;
                            //m.inaspect = m.outaspect;
+                           //≈сли у нас анаморф на входе
                            if ((double)m.inresw / (double)m.inresh != m.inaspect)
+                           {
                                m.aspectfix = AspectResolution.AspectFixes.SAR;
+                               m.outresw = Calculate.GetCloseIntegerAL(m.outresw - m.cropl - m.cropr, wlist); //ѕересчет ширины с учетом откропленного
+                               m.outresh = Calculate.GetCloseIntegerAL(m.inresh - m.cropb - m.cropt, hlist); //ѕересчет высоты с учЄтом откропленного
+                           }
                            return m;
                        }
                    }
@@ -1132,7 +1137,7 @@ namespace XviD4PSP
            else
            {
                MaxW = (int)wlist[wlist.Count - 1];
-               MaxH = (int)hlist[hlist.Count - 1]; //Custom
+               MaxH = (int)hlist[hlist.Count - 1];
            }
 
            //ограничение W*H
@@ -1142,7 +1147,7 @@ namespace XviD4PSP
 
            //первичное получение разрешений
            m.outresw = Calculate.GetCloseIntegerAL(m.inresw, wlist);
-           m.outresh = (int)((double)m.outresw / m.inaspect);
+           m.outresh = (int)((double)m.outresw / m.inaspect); //¬ысота
 
            if (m.outresh > MaxH)
            {
@@ -1151,12 +1156,12 @@ namespace XviD4PSP
            }
            else
            {
-               m.outresw = Calculate.GetCloseIntegerAL(m.inresw, wlist);
-               m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
+               //m.outresw = Calculate.GetCloseIntegerAL(m.inresw, wlist);
+               m.outresh = Calculate.GetCloseIntegerAL(m.outresh, hlist); //(int)(m.outresw / m.inaspect), hlist);
            }
 
            //выбираем по какой стороне подбирать
-           if (m.outresh > MaxH)
+           if (m.outresh > MaxH) 
            {
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
@@ -1165,7 +1170,7 @@ namespace XviD4PSP
                    m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
                }
            }
-           else
+           else 
            {
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
@@ -1195,6 +1200,13 @@ namespace XviD4PSP
            ArrayList wlist = GetResWList(m);
            ArrayList hlist = GetResHList(m);
 
+           //ѕри кодировании с сохранением анаморфа, высота равна исходной высоте минус всЄ что откроплено. 
+           if (m.aspectfix == AspectResolution.AspectFixes.SAR)
+           {
+               m.outresh = Calculate.GetCloseIntegerAL(m.inresh - m.cropb - m.cropt, hlist);
+               return m;
+           }
+           
            //ограничение W*H
            int limit = (int)wlist[wlist.Count - 1] * (int)hlist[hlist.Count - 1];
            if (m.format == ExportFormats.Mp4PSPASP)

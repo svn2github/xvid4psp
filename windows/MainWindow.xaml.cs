@@ -117,7 +117,7 @@ namespace XviD4PSP
                         _process.MainModule.FileName == process.MainModule.FileName &&
                         _process.MainWindowHandle != IntPtr.Zero)
                     {
-                        Close();
+                        process.Kill();
                     }
                 }
             }
@@ -1949,6 +1949,8 @@ namespace XviD4PSP
                 //обновляем счетчик кадров
                 total_frames = Convert.ToString((int)(NaturalDuration.TotalSeconds * Calculate.ConvertStringToDouble(m.outframerate)));
                 textbox_frame.Text = Convert.ToString((int)(Position.TotalSeconds * Calculate.ConvertStringToDouble(m.outframerate))) + "/" + total_frames;
+                textbox_name.Text = m.taskname;
+                slider_pos.Focus(); //Переводит фокус на полосу прокрутки видео
             }
             catch (Exception ex)
             {
@@ -1975,9 +1977,6 @@ namespace XviD4PSP
 
                 return;
             }
-
-            textbox_name.Text = m.taskname;
-            slider_pos.Focus(); //Переводит фокус на полосу прокрутки видео
         }
 
         //переводим лейблы
@@ -2828,7 +2827,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264" && m.isvideo)
                 {
                     m.oldindexfile = m.indexfile;
                     m.indexfile = null;
@@ -2844,7 +2843,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264" && m.isvideo)
                 {
                     m.oldindexfile = m.indexfile;
                     m.indexfile = null;
@@ -2860,7 +2859,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264" && m.isvideo)
                 {
                     m.oldindexfile = m.indexfile;
                     m.indexfile = null;
@@ -2876,7 +2875,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
+                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264" && m.isvideo)
                 {
                     if (m.oldindexfile != null)
                         m.indexfile = m.oldindexfile;
@@ -2892,7 +2891,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath))
+                if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath) && m.isvideo)
                 {
                     reopen_file();
                 }
@@ -2906,7 +2905,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath))
+                if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath) && m.isvideo)
                 {
                     reopen_file();
                 }
@@ -2921,7 +2920,7 @@ namespace XviD4PSP
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath))
+                if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath) && m.isvideo)
                 {
                     reopen_file();
                 }
@@ -4712,11 +4711,8 @@ namespace XviD4PSP
             //      DirectShowLib.IBaseFilter filter = (DirectShowLib.IBaseFilter)new DirectShowLib.VideoMixingRenderer9();
             //       hr = graphBuilder.AddFilter(filter, "Video Mixing Renderer 9");
             //       DirectShowLib.IVMRMonitorConfig9 vmrMonitorConfig = filter as
-            //       DirectShowLib.IVMRMonitorConfig9;
-
-            ///
-
-
+            //       DirectShowLib.IVMRMonitorConfig9;           
+                        
             // Have the graph builder construct its the appropriate graph automatically
             hr = this.graphBuilder.RenderFile(filename, null);
             DsError.ThrowExceptionForHR(hr);
@@ -5227,7 +5223,7 @@ namespace XviD4PSP
                 ///Find WPF renderer.  It's always named the same thing
                 //hr = graphBuilder.FindFilterByName("Avalon EVR", out videoRenderer);//
                 //hr = graphBuilder.FindFilterByName("Video Renderer", out videoRenderer);//
-                hr = graphBuilder.FindFilterByName("Enhanced Video Renderer", out videoRenderer);
+                hr = graphBuilder.FindFilterByName("Enhanced Video Renderer", out videoRenderer);                
                 DsError.ThrowExceptionForHR(hr);
 
                 //hr = this.graphBuilder.AddFilter(videoRenderer, "Enhanced Video Renderer");//
