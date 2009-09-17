@@ -36,11 +36,18 @@ namespace XviD4PSP
         {
             string infilepath = null;
 
-            ArrayList files = GetFilesFromConsole("ov");
+            ArrayList files = GetFilesFromConsole("ovm");
 
-            if (files.Count > 0)
+            if (files.Count > 1) //Мульти-открытие файлов
+            {
+                Massive m = new Massive();
+                m.infileslist = files.ToArray(typeof(string)) as string[]; //Временно будем использовать эту переменную немного не по назначению (для передачи списка файлов)
+                return m;
+            }
+            
+            if (files.Count == 1) //Обычное открытие
                 infilepath = files[0].ToString();
-
+            
             if (infilepath != null)
             {
                 //создаём массив и забиваем в него данные
@@ -48,7 +55,7 @@ namespace XviD4PSP
                 m.infilepath = infilepath;
                 m.infileslist = new string[] { infilepath };
                 m.owner = owner;
-
+                
                 //исключаем DVD меню
                 //if (Path.GetFileName(m.infilepath) == "VIDEO_TS.VOB")
                 //    m.infilepath = Path.GetDirectoryName(m.infilepath) + "\\VTS_01_1.VOB";
@@ -191,6 +198,35 @@ namespace XviD4PSP
             return m;
         }
 
+        public static string OpenFolder()
+        {
+            System.Windows.Forms.FolderBrowserDialog open_folder = new System.Windows.Forms.FolderBrowserDialog();
+            open_folder.Description = Languages.Translate("Select folder where input files is located:");
+            open_folder.ShowNewFolderButton = false;
+            open_folder.SelectedPath = Settings.BatchPath;
+            if (open_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Settings.BatchPath = open_folder.SelectedPath;
+                return open_folder.SelectedPath;
+            }
+            else
+                return null;
+        }
+
+        public static string SaveFolder()
+        {
+            System.Windows.Forms.FolderBrowserDialog save_folder = new System.Windows.Forms.FolderBrowserDialog();
+            save_folder.Description = Languages.Translate("Select folder for the encoded files:");
+            save_folder.ShowNewFolderButton = true;
+            save_folder.SelectedPath = Settings.BatchEncodedPath;
+            if (save_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Settings.BatchEncodedPath = save_folder.SelectedPath;
+                return save_folder.SelectedPath;
+            }
+            else
+                return null;
+        }
 
 
     }

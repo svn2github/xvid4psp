@@ -707,11 +707,22 @@ namespace XviD4PSP
         {
             //закрываем все дочерние окна
             CloseChildWindows();
-
+           
             //открываем файл
             OpenDialogs.owner = this;
             Massive x = OpenDialogs.OpenFile();
-            action_open(x,ShowPreview.show);
+            if (x != null)
+            {
+                if (x.infileslist.Length > 1) //Мульти-открытие
+                {
+                    path_to_save = OpenDialogs.SaveFolder();
+                    if (path_to_save == null)
+                        return;
+                    MultiOpen(x.infileslist);
+                    return;
+                }
+                action_open(x, ShowPreview.show); //Обычное открытие
+            }
         }
 
         private void menu_decode_file_Click(object sender, RoutedEventArgs e)
@@ -781,7 +792,18 @@ namespace XviD4PSP
             //открываем файл
             OpenDialogs.owner = this;
             Massive x = OpenDialogs.OpenFile();
-            action_open(x, ShowPreview.show);
+            if (x != null)
+            {
+                if (x.infileslist.Length > 1) //Мульти-открытие
+                {
+                    path_to_save = OpenDialogs.SaveFolder();
+                    if (path_to_save == null)
+                        return;
+                    MultiOpen(x.infileslist);
+                    return;
+                }
+                action_open(x, ShowPreview.show); //Обычное открытие
+            }
         }
 
         private void button_close_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -3708,14 +3730,10 @@ namespace XviD4PSP
             if (((string[])e.Data.GetData(DataFormats.FileDrop)).Length > 1) //Мульти-открытие
             {
                 //Папка для перекодированного
-                System.Windows.Forms.FolderBrowserDialog save_folder = new System.Windows.Forms.FolderBrowserDialog();
-                save_folder.Description = Languages.Translate("Select folder for the encoded files:");
-                save_folder.ShowNewFolderButton = true;
-                save_folder.SelectedPath = path_to_save;
-                if (save_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    path_to_save = save_folder.SelectedPath;
-                else
-                    return;                
+                OpenDialogs.owner = this;
+                path_to_save = OpenDialogs.SaveFolder();
+                if (path_to_save == null)
+                    return;
                 MultiOpen((string[])e.Data.GetData(DataFormats.FileDrop));
             }
             else //Обычное открытие
@@ -6237,29 +6255,15 @@ namespace XviD4PSP
 
             try
             {
-                //Папка с исходниками
-                System.Windows.Forms.FolderBrowserDialog open_folder = new System.Windows.Forms.FolderBrowserDialog();
-                open_folder.Description = Languages.Translate("Select folder where input files is located:");
-                open_folder.ShowNewFolderButton = false;
-                if (path_to_open != null)
-                    open_folder.SelectedPath = path_to_open;
-                if (open_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    path_to_open = open_folder.SelectedPath;
-                else
+                OpenDialogs.owner = this;
+                path_to_open = OpenDialogs.OpenFolder();
+                path_to_save = OpenDialogs.SaveFolder();
+                
+                if (path_to_open == null || path_to_save == null)
                     return;
 
-                //Папка для перекодированного
-                System.Windows.Forms.FolderBrowserDialog save_folder = new System.Windows.Forms.FolderBrowserDialog();
-                save_folder.Description = Languages.Translate("Select folder for the encoded files:");
-                save_folder.ShowNewFolderButton = true;
-                save_folder.SelectedPath = path_to_open;
-                if (save_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    path_to_save = save_folder.SelectedPath;
-                else
-                    return;
-
-                this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
-                this.Height = this.Window.Height - 1;
+               // this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
+               // this.Height = this.Window.Height - 1;
 
                 if (Directory.GetFiles(path_to_open).Length > 0) 
                     MultiOpen(Directory.GetFiles(path_to_open, "*")); //Открываем-сохраняем

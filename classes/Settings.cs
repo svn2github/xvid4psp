@@ -1552,5 +1552,47 @@ namespace XviD4PSP
             }
         }
 
+        //Папка для batch-encoding исходников
+        public static string BatchPath
+        {
+            get
+            {
+                object value = GetValue("BatchPath");
+                if (value == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("BatchPath", value);
+            }
+        }
+            
+        //Папка для batch-encoding перекодированного
+        public static string BatchEncodedPath
+        {
+            get
+            {
+                object value = GetValue("BatchEncodedPath");
+                if (value == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("BatchEncodedPath", value);
+            }
+        }
+
     }
 }

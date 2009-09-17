@@ -1,0 +1,10 @@
+C:\Users\winnydows\Documents\Visual Studio Codename Orcas\Projects\SafeOpenDialog\SafeOpenDialog\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\winnydows\Documents\Visual Studio Codename Orcas\Projects\SafeOpenDialog\SafeOpenDialog\bin\Debug\SafeOpenDialog.exe
+C:\Users\winnydows\Documents\Visual Studio Codename Orcas\Projects\SafeOpenDialog\SafeOpenDialog\bin\Debug\SafeOpenDialog.pdb
+C:\Users\winnydows\Documents\Visual Studio Codename Orcas\Projects\SafeOpenDialog\SafeOpenDialog\obj\Debug\SafeOpenDialog.exe
+C:\Users\winnydows\Documents\Visual Studio Codename Orcas\Projects\SafeOpenDialog\SafeOpenDialog\obj\Debug\SafeOpenDialog.pdb
+D:\Projects\SafeOpenDialog\SafeOpenDialog\bin\Debug\SafeOpenDialog.exe
+D:\Projects\SafeOpenDialog\SafeOpenDialog\bin\Debug\SafeOpenDialog.pdb
+D:\Projects\SafeOpenDialog\SafeOpenDialog\obj\Debug\ResolveAssemblyReference.cache
+D:\Projects\SafeOpenDialog\SafeOpenDialog\obj\Debug\SafeOpenDialog.exe
+D:\Projects\SafeOpenDialog\SafeOpenDialog\obj\Debug\SafeOpenDialog.pdb
