@@ -713,7 +713,7 @@ namespace XviD4PSP
             Massive x = OpenDialogs.OpenFile();
             if (x != null)
             {
-                if (x.infileslist.Length > 1) //Мульти-открытие
+                if (x.infileslist.Length > 1 && x.infilepath == null) //Мульти-открытие
                 {
                     path_to_save = OpenDialogs.SaveFolder();
                     if (path_to_save == null)
@@ -794,7 +794,7 @@ namespace XviD4PSP
             Massive x = OpenDialogs.OpenFile();
             if (x != null)
             {
-                if (x.infileslist.Length > 1) //Мульти-открытие
+                if (x.infileslist.Length > 1 && x.infilepath == null) //Мульти-открытие
                 {
                     path_to_save = OpenDialogs.SaveFolder();
                     if (path_to_save == null)
@@ -3055,16 +3055,16 @@ namespace XviD4PSP
             else
             {
                 System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
-                s.FileName = Path.GetFileNameWithoutExtension(m.infilepath);
+                s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + ".avs";
 
                 if (Path.GetExtension(m.infilepath).ToLower() == ".vob" && Calculate.IsValidVOBName(m.infilepath))
                 {
                     string title = Calculate.GetTitleNum(m.infilepath);
                     if (title != "")
                         title = "_T" + title;
-                    s.FileName = m.dvdname;
+                    s.FileName = m.dvdname + ".avs";
                 }
-                s.AddExtension = true;
+                
                 s.Title = Languages.Translate("Save script") + ":";
                 s.Filter = "AviSynth " + Languages.Translate("files") + "|*.avs";
 
@@ -6257,9 +6257,10 @@ namespace XviD4PSP
             {
                 OpenDialogs.owner = this;
                 path_to_open = OpenDialogs.OpenFolder();
+                if (path_to_open == null)
+                    return;
                 path_to_save = OpenDialogs.SaveFolder();
-                
-                if (path_to_open == null || path_to_save == null)
+                if (path_to_save == null)
                     return;
 
                // this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
