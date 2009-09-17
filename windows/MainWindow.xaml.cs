@@ -387,9 +387,7 @@ namespace XviD4PSP
                 {
                     ErrorExeption(ex.Message);
                 }
-
             }
-
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
@@ -3707,26 +3705,40 @@ namespace XviD4PSP
 
         private void grid_player_window_Drop(object sender, System.Windows.DragEventArgs e)
         {
-            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
+            if (((string[])e.Data.GetData(DataFormats.FileDrop)).Length > 1) //Мульти-открытие
             {
-                //открываем файл
-                OpenDialogs.owner = this;
-                if (Path.GetFileName(dropfile).ToLower() == "x264.exe")
-                {
-                    File.Copy(dropfile, Calculate.StartupPath + "\\apps\\x264\\x264.exe", true);
-                    return;
-                }
+                //Папка для перекодированного
+                System.Windows.Forms.FolderBrowserDialog save_folder = new System.Windows.Forms.FolderBrowserDialog();
+                save_folder.Description = Languages.Translate("Select folder for the encoded files:");
+                save_folder.ShowNewFolderButton = true;
+                save_folder.SelectedPath = path_to_save;
+                if (save_folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    path_to_save = save_folder.SelectedPath;
                 else
+                    return;                
+                MultiOpen((string[])e.Data.GetData(DataFormats.FileDrop));
+            }
+            else //Обычное открытие
+            {
+                foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
                 {
-                    Massive x = new Massive();
-                    x.infilepath = dropfile;
-                    x.infileslist = new string[] { dropfile };
-                    action_open(x, ShowPreview.show);
-                    return;
+                    if (Path.GetFileName(dropfile).ToLower() == "x264.exe")
+                    {
+                        File.Copy(dropfile, Calculate.StartupPath + "\\apps\\x264\\x264.exe", true);
+                        return;
+                    }
+                    else 
+                    {
+                        Massive x = new Massive();
+                        x.infilepath = dropfile;
+                        x.infileslist = new string[] { dropfile };
+                        action_open(x, ShowPreview.show);
+                        return;
+                    }
                 }
             }
         }
-
+             
         private void list_tasks_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (IsInsertAction) return;
@@ -6249,54 +6261,8 @@ namespace XviD4PSP
                 this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
                 this.Height = this.Window.Height - 1;
 
-                int files_in_folder = Directory.GetFiles(path_to_open).Length; //Кол-во файлов в папке
-                opened_files = 0; //Обнуляем счетчик успешно открытых файлов
-
-                //Вывод первичной инфы об открытии
-                textbox_name.Text = Convert.ToString(files_in_folder) + " - " + "total files, " + Convert.ToString(opened_files) + " - " + "opened files, " + Convert.ToString(outfiles.Count) + " - " + "in queue";
-
-                //Делим строку с валидными расширениями на отдельные строчки
-                string[] separator = new string[] { "/" };
-                string[] goodexts = Settings.GoodFilesExtensions.Split(separator, StringSplitOptions.None);
-
-                foreach (string files in Directory.GetFiles(path_to_open, "*"))
-                {
-                    string ext = Path.GetExtension(files).ToLower().Replace(".", "");
-
-                    //Сравниваем расширение текущего файла со всеми строчками с валидными расширениями, и открываем файл при совпадении
-                    foreach (string goodext in goodexts)
-                    {
-                        if (goodext == ext)
-                        {
-                            Massive x = new Massive();
-                            x.infilepath = files;
-                            x.infileslist = new string[] { files };
-                            action_open(x, ShowPreview.dntshow);
-                            if (m != null)
-                                action_auto_save(m.Clone());
-                            break;
-                        }
-                    }
-
-                    //Обновляем инфу об открытии
-                    textbox_name.Text = Convert.ToString(files_in_folder) + " - " + "total files, " + Convert.ToString(opened_files) + " - " + "opened files, " + Convert.ToString(outfiles.Count) + " - " + "in queue";
-
-                }
-                if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
-                    LoadVideo(MediaLoad.load);
-
-                if (Settings.AutoBatchEncoding)
-                    EncodeNextTask(); //Запускаем кодирование
-
-                Message mess = new Message(this);
-                mess.ShowMessage(Convert.ToString(files_in_folder) + " - " + Languages.Translate("total files in folder") + Environment.NewLine + Convert.ToString(opened_files) + " - " + Languages.Translate("successfully opened files")
-                     + Environment.NewLine + Convert.ToString(outfiles.Count) + " - " + Languages.Translate("total tasks in queue"), Languages.Translate("Complete"));
-
-                if (m != null)
-                    textbox_name.Text = m.taskname;
-                else
-                    textbox_name.Text = "";
-
+                if (Directory.GetFiles(path_to_open).Length > 0) 
+                    MultiOpen(Directory.GetFiles(path_to_open, "*")); //Открываем-сохраняем
             }
             catch (Exception ex)
             {
@@ -6305,14 +6271,72 @@ namespace XviD4PSP
 
         }
 
+        private void MultiOpen(string[] files_to_open) //Для открытия и сохранения группы файлов
+        {
+            try
+            {
+                opened_files = 0; //Обнуляем счетчик успешно открытых файлов
+                int count = files_to_open.Length; //Кол-во файлов для открытия
+
+                //Вывод первичной инфы об открытии
+                textbox_name.Text = count + " - " + "total files, " + opened_files + " - " + "opened files, " + outfiles.Count + " - " + "in queue";
+
+                //Делим строку с валидными расширениями на отдельные строчки
+                string[] separator = new string[] { "/" };
+                string[] goodexts = Settings.GoodFilesExtensions.Split(separator, StringSplitOptions.None);
+
+                foreach (string file in files_to_open)
+                {
+                    string ext = Path.GetExtension(file).ToLower().Replace(".", "");
+
+                    //Сравниваем расширение текущего файла со всеми строчками с валидными расширениями, и открываем файл при совпадении
+                    foreach (string goodext in goodexts)
+                    {
+                        if (goodext == ext)
+                        {
+                            Massive x = new Massive();
+                            x.infilepath = file;
+                            x.infileslist = new string[] { file };
+                            action_open(x, ShowPreview.dntshow);
+                            if (m != null)
+                                action_auto_save(m.Clone());
+                            break;
+                        }
+                    }
+
+                    //Обновляем инфу об открытии
+                    textbox_name.Text = count + " - " + "total files, " + opened_files + " - " + "opened files, " + outfiles.Count + " - " + "in queue";
+                }
+                if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
+                    LoadVideo(MediaLoad.load);
+
+                if (Settings.AutoBatchEncoding)
+                    EncodeNextTask(); //Запускаем кодирование
+
+                Message mess = new Message(this);
+                mess.ShowMessage(count + " - " + Languages.Translate("total files in folder") + Environment.NewLine + opened_files + " - " + Languages.Translate("successfully opened files")
+                     + Environment.NewLine + outfiles.Count + " - " + Languages.Translate("total tasks in queue"), Languages.Translate("Complete"));
+
+                if (m != null)
+                    textbox_name.Text = m.taskname;
+                else
+                    textbox_name.Text = "";
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
+        }
+
         private void action_auto_save(Massive mass)
         {
-            if (mass != null)
+            if (mass != null && path_to_save != null)
             {               
                 //Разбираемся с названием для перекодированного файла
                 mass.outfilepath = path_to_save + "\\" + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
-                if (File.Exists(mass.outfilepath))
-                    mass.outfilepath = path_to_save + "\\(" + Path.GetFileName(m.infilepath) + ") " + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
+                while(File.Exists(mass.outfilepath))
+                    mass.outfilepath = Path.GetDirectoryName(mass.outfilepath) + "\\(" + Path.GetFileName(m.infilepath) + ") " + Path.GetFileName(mass.outfilepath);
+                    //mass.outfilepath = path_to_save + "\\(" + Path.GetFileName(m.infilepath) + ") " + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
                 
                 //Выход отсюда, если такое задание уже имеется (видимо была ошибка при открытии файла, и текущее задание дублирует предыдущее)
                 if (outfiles.Contains(mass.outfilepath))
@@ -6375,10 +6399,6 @@ namespace XviD4PSP
             }
         }
 
-        
-
-        
-        
 
 
     }
