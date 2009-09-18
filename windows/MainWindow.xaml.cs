@@ -297,7 +297,7 @@ namespace XviD4PSP
                         //timer
                         timer = new System.Timers.Timer();
                         timer.Elapsed += new System.Timers.ElapsedEventHandler(timer_Elapsed);
-                        timer.Interval = 10;
+                        timer.Interval = 30;
                         timer.Enabled = true;
                         timer.Start();
 
@@ -2392,7 +2392,7 @@ namespace XviD4PSP
                 if (visual != null && visual.IsDescendantOf(slider_pos))
                 {
                     Position = TimeSpan.FromSeconds(slider_pos.Value);
-
+                    
                     //устанавливаем фрейм для THM
                     if (m != null)
                         m.thmframe = (int)Math.Round(Position.TotalSeconds * fps);
@@ -2557,7 +2557,7 @@ namespace XviD4PSP
                     //timer
                     timer = new System.Timers.Timer();
                     timer.Elapsed += new System.Timers.ElapsedEventHandler(timer_Elapsed);
-                    timer.Interval = 10;
+                    timer.Interval = 30;
                     timer.Enabled = true;
                     timer.Start();
 
@@ -4566,13 +4566,6 @@ namespace XviD4PSP
                 if (this.mediaControl != null)
                     hr = this.mediaControl.Stop();
 
-                // Clear global flags
-
-                if (mediaload != MediaLoad.update)
-                    this.currentState = PlayState.Stopped;
-                //this.isAudioOnly = true;
-                //this.isFullScreen = false; //Зачем при закрытии клипа выходить из Фуллскрина?
-
                 // Free DirectShow interfaces
                 CloseInterfaces();
 
@@ -4588,7 +4581,8 @@ namespace XviD4PSP
                 VideoElement.Stop();
                 VideoElement.Close();
                 VideoElement.Source = null;
-                this.currentState = PlayState.Init;
+                if (mediaload != MediaLoad.update)
+                    this.currentState = PlayState.Init;
                 if (this.graphBuilder != null)
                 {
                     while (Marshal.ReleaseComObject(this.graphBuilder) > 0) ;
@@ -5122,11 +5116,6 @@ namespace XviD4PSP
 
                 if (mediaload == MediaLoad.update)
                 {
-                    if (currentState == PlayState.Paused)
-                    {
-                        currentState = PlayState.Running;
-                        PauseClip();
-                    }
                     if (isDelayUpdate)
                         isDelayUpdate = false;
                     else if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
@@ -5135,13 +5124,10 @@ namespace XviD4PSP
 
                 if (mediaload == MediaLoad.load)
                 {
-                    if (Settings.AfterImportAction == Settings.AfterImportActions.Nothing)
+                    if (Settings.AfterImportAction == Settings.AfterImportActions.Play)
                         PauseClip();
                     else if (Settings.AfterImportAction == Settings.AfterImportActions.Middle)
-                    {
-                        PauseClip();
                         Position = TimeSpan.FromSeconds(NaturalDuration.TotalSeconds / 2.0);
-                    }
                 }
             }
         }
@@ -5191,17 +5177,19 @@ namespace XviD4PSP
             MediaBridge.MediaBridgeManager.RegisterCallback(url, BridgeCallback);
 
             VideoElement.Source = new Uri(url);
-            VideoElement.Play();
-
-            //принудительно ставит на паузу при выборе MediaBridge, если уже не пауза
-            if ((this.currentState != PlayState.Paused))
+            
+            if (currentState != PlayState.Running) //Открытие по-дефолту, сразу на паузе
             {
-                PauseClip();
+                VideoElement.Play();
+                VideoElement.Pause();
+                currentState = PlayState.Paused;
             }
-
-            if (mediaload != MediaLoad.update)
-                this.currentState = PlayState.Running;
-            SetPauseIcon(); 
+            else
+            {
+                VideoElement.Play(); //Продолжение воспроизведения, если оно было до обновления превью
+                currentState = PlayState.Running;
+                SetPauseIcon();
+            }
         }
 
         private void BridgeCallback(MediaBridge.MediaBridgeGraphInfo GraphInfo)
