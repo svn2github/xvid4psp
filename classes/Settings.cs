@@ -1594,5 +1594,26 @@ namespace XviD4PSP
             }
         }
 
+        //OldSeeking - непрерывное позиционирование
+        public static bool OldSeeking
+        {
+            get
+            {
+                object value = GetValue("OldSeeking");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("OldSeeking", value);
+            }
+        }
+
     }
 }
