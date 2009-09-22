@@ -1349,7 +1349,7 @@ namespace XviD4PSP
                             }
                         }
 
-                        //теперь нам надо извлечь звук, если он есть и если точно знаем что за звук
+                        //теперь нам надо извлечь звук, если он есть и если точно знаем что за звук (извлекается только 1-й трек)
                         if (x.inaudiostreams.Count > 0)
                         {
                             AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
@@ -2111,6 +2111,8 @@ namespace XviD4PSP
 
             if (Settings.AVIDecoder == AviSynthScripting.Decoders.DirectShowSource)
                 mn_avi_dec_ds.IsChecked = true;
+            else if (Settings.AVIDecoder == AviSynthScripting.Decoders.DSS2)
+                mn_avi_dec_ds2.IsChecked = true;
             else if (Settings.AVIDecoder == AviSynthScripting.Decoders.FFmpegSource)
                 mn_avi_dec_ff.IsChecked = true;
             else if (Settings.AVIDecoder == AviSynthScripting.Decoders.AVISource)
@@ -2118,6 +2120,8 @@ namespace XviD4PSP
 
             if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DirectShowSource)
                 mn_mpg_dec_ds.IsChecked = true;
+            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DSS2)
+                mn_mpg_dec_ds2.IsChecked = true;
             else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.FFmpegSource)
                 mn_mpg_dec_ff.IsChecked = true;
             else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source)
@@ -2907,7 +2911,8 @@ namespace XviD4PSP
 
             //Получаем информацию через AviSynth и кешируем аудио для FFmpegSource
             Caching cach = new Caching(m);
-            m = cach.m.Clone();
+            if (cach.m != null)
+                m = cach.m.Clone();
 
             //перезабиваем специфику формата
             m = Format.GetOutInterlace(m);
@@ -2946,12 +2951,7 @@ namespace XviD4PSP
             //загружаем видео в плеер
             LoadVideo(MediaLoad.update);
             UpdateTaskMassive(m);
-
         }
-
-
-
-
 
         private void menu_after_i_nothing_Checked(object sender, System.Windows.RoutedEventArgs e)
         {

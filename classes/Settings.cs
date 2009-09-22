@@ -899,7 +899,7 @@ namespace XviD4PSP
                 object value = GetValue("DontDemuxAudio");
                 if (value == null)
                 {
-                    return true;
+                    return false;
                 }
                 else
                 {

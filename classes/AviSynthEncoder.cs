@@ -182,9 +182,10 @@ namespace XviD4PSP
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //throw new Exception(ex.Message);
+                args = "AviSynthEncoder Error: " +  ex.Message.ToString();
                 return;
             }
             finally

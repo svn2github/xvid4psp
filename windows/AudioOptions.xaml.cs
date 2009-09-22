@@ -488,17 +488,17 @@ namespace XviD4PSP
                     }
                 }
 
-                if (m.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
+               /* if (m.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
                 {
                     ////Получаем информацию через AviSynth и кешируем аудио для FFmpegSource
                     //Caching cach = new Caching(m);
                     //m = cach.m.Clone();
-
+                        
                     string script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.FastPreview);
                     AviSynthScripting.WriteScriptToFile(script, "tracker");
                     PlayInWPFPlayer(Settings.TempPath + "\\tracker.avs");
                 }
-                else
+                else   */
                 {
                     if (instream.audiopath != null &&
                         !File.Exists(instream.audiopath))

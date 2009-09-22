@@ -203,7 +203,7 @@ namespace XviD4PSP
 
             if (error != null && error == "Can`t decode audio with DirectShowSource" ||
                 error != null && error.StartsWith("DirectShowSource:") ||
-                error == "Script doesn't contain video")
+                error == "Script doesn't contain video" || error != null && error.Contains("FFmpegSource: Audio decoding error"))
             {
                 //Message message = new Message(this);
                 //message.ShowMessage(Languages.Translate("Can`t decode audio with") + " " + m.adecoder + "!\n" +
@@ -240,6 +240,7 @@ namespace XviD4PSP
                             new FileInfo(outpath).Length != 0)
                         {
                             instream.audiopath = outpath;
+                            //instream.audiofiles = new string[] { outpath };
                             instream = Format.GetValidADecoder(instream);
                         }
                         else

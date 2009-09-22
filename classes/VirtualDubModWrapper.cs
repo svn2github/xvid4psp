@@ -80,6 +80,9 @@ namespace XviD4PSP
            sw.WriteLine("VirtualDub.video.SetIVTC(0, 0, -1, 0);");
            sw.WriteLine("VirtualDub.video.SetCompression();");
            sw.WriteLine("VirtualDub.video.filters.Clear();");
+           //sw.WriteLine("VirtualDub.video.AddComment(0x00000003, \"INAM\", \"Title\");"); //Clip
+           //sw.WriteLine("VirtualDub.video.AddComment(0x00000005, \"IART\", \"Author\");");
+           //sw.WriteLine("VirtualDub.video.AddComment(0x00000006, \"ICOP\", \"Copyright\");");
            sw.WriteLine("VirtualDub.SaveAVI(\"" + Calculate.GetUTF8String(m.outfilepath) + "\");");
            sw.WriteLine("VirtualDub.Close();");
 

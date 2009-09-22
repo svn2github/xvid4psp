@@ -75,6 +75,7 @@ namespace XviD4PSP
             textbox_extensions.Text = Settings.GoodFilesExtensions; //окно со списком допустимых расширений файлов (при пакетной обработке)
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding; //автозапуск кодирования (при пакетной обработке)
             check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp; //помещать DGIndex-кэш в Темп-папку
+            check_demux_audio.ToolTip = "Leave it unchecked to avoid some problems with sound";
 
             if (Settings.WriteLog)
                 check_logfile_tempfolder.IsEnabled = true;

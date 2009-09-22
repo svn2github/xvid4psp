@@ -1801,6 +1801,17 @@ namespace XviD4PSP
                 while (avs.args == null)
                     Thread.Sleep(50);
                 SetLog(" ");
+
+                if (avs.args.Contains("AviSynthEncoder Error:")) 
+                {
+                    IsErrors = true;                 
+                    of = 0;
+                    cf = 0;
+                    string error_txt = avs.args;
+                    avs = null;
+                    throw new Exception(error_txt);
+                }
+
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog(Path.GetFileName(avs.encoderPath) + ": " + avs.args);
@@ -4833,6 +4844,8 @@ namespace XviD4PSP
                         writer.Flush();
                         writer.Dispose();
                         strm.Dispose();
+
+                        SetLog(Environment.NewLine + "This log was saved here: " + logfilename);
                     }
                     catch (Exception ex)
                     {
@@ -5083,6 +5096,8 @@ namespace XviD4PSP
                 //strm.Close();
                 writer.Dispose();
                 strm.Dispose();
+                
+                SetLog(Environment.NewLine + "This log was saved here: " + logfilename + Environment.NewLine);
             }
             catch (Exception ex)
             {
