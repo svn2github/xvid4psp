@@ -15,7 +15,7 @@ namespace XviD4PSP
 {
 	public partial class MediaInfo
 	{
-        public enum InfoMode { MediaInfo = 1, MP4BoxInfo, MKVInfo, FFMPEGInfo };
+        public enum InfoMode { MediaInfo = 1, MediaInfoFull, MP4BoxInfo, MKVInfo, FFMPEGInfo };
 
         private InfoMode infomode;
         private string infilepath;
@@ -32,6 +32,7 @@ namespace XviD4PSP
             button_save.Content = Languages.Translate("Save");
 
             combo_info.Items.Add("MediaInfo");
+            combo_info.Items.Add("MediaInfoFull");
             combo_info.Items.Add("MP4BoxInfo");
             combo_info.Items.Add("MKVInfo");
             combo_info.Items.Add("FFMPEGInfo");
@@ -64,7 +65,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (infomode == InfoMode.MediaInfo)
+                if (infomode == InfoMode.MediaInfo || infomode == InfoMode.MediaInfoFull)
                 {
                     MediaInfoWrapper media = new MediaInfoWrapper();
 
@@ -74,11 +75,13 @@ namespace XviD4PSP
 
                     //ToDisplay += media.Option("Info_Parameters");//список ключей
 
-                    //media.Option("Complete", "1");//полная инфа
-                    media.Option("Complete");//краткая инфа      
+                    if (infomode == InfoMode.MediaInfoFull)
+                        media.Option("Complete", "1");//полная инфа
+                    else
+                        media.Option("Complete");//краткая инфа      
+                    
                     ToDisplay += media.Inform();
-                    
-                    
+
                     //прицелная инфа
                     //ToDisplay += "VideoBitrate: " + media.VideoBitrate + " kbps" + Environment.NewLine;
                     //ToDisplay += "AudioBitrate: " + media.AudioBitrate(0) + " kbps" + Environment.NewLine;
@@ -281,6 +284,8 @@ namespace XviD4PSP
             {
                 if (combo_info.SelectedItem.ToString() == "MediaInfo")
                     infomode = InfoMode.MediaInfo;
+                else if (combo_info.SelectedItem.ToString() == "MediaInfoFull")
+                    infomode = InfoMode.MediaInfoFull;
                 else if (combo_info.SelectedItem.ToString() == "MP4BoxInfo")
                     infomode = InfoMode.MP4BoxInfo;
                 else if (combo_info.SelectedItem.ToString() == "MKVInfo")

@@ -333,7 +333,7 @@
 			<Button x:Name="button_frame_forward" Width="26" Foreground="#FFFFFFFF" HorizontalAlignment="Left" Margin="65.78,6.091,0,6.093" Click="button_frame_forward_Click" Template="{DynamicResource GlassButtonRounded}">
 				<Image Width="18" Height="14" Source="..\pictures\next_frame.png" Stretch="Fill" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2,0,0,0"/>
 			</Button>
-			<Slider x:Name="slider_pos" ValueChanged="slider_pos_ValueChanged" PreviewMouseLeftButtonUp="slider_pos_PreviewMouseLeftButtonUp" MouseRightButtonDown="slider_pos_MouseRightButtonDown" d:LayoutOverrides="VerticalAlignment" Margin="94.144,7.722,7.856,8.294" Style="{DynamicResource GlassSlider}" />
+			<Slider x:Name="slider_pos" ValueChanged="slider_pos_ValueChanged" PreviewMouseLeftButtonUp="slider_pos_PreviewMouseLeftButtonUp" MouseRightButtonDown="slider_pos_MouseRightButtonDown" d:LayoutOverrides="VerticalAlignment" Margin="94.144,7.722,7.856,8.294" Style="{DynamicResource GlassSlider}"/>
 		</Grid>
 
   </Grid>

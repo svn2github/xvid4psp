@@ -2360,7 +2360,7 @@ namespace XviD4PSP
 
         private void slider_pos_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
         {
-            if (m != null && this.graphBuilder != null)
+            if (m != null && this.graphBuilder != null)// && NaturalDuration != TimeSpan.Zero)
             {
                 if (OldSeeking && slider_pos.IsMouseOver) //Непрерывное позиционирование (старый способ)
                 {
@@ -5088,7 +5088,7 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateClockDelegate(UpdateClock));
             else
             {
-                if (this.graphBuilder != null)
+                if (this.graphBuilder != null && NaturalDuration != TimeSpan.Zero)
                 {
                     progress_top.Width = (slider_pos.Value / NaturalDuration.TotalSeconds) * progress_back.ActualWidth;
                     TimeSpan tCode = TimeSpan.Parse(TimeSpan.FromSeconds(slider_pos.Value).ToString().Split('.')[0]);

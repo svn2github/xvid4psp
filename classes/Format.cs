@@ -2067,7 +2067,7 @@ namespace XviD4PSP
                codec == "LPCM")
                return ".wav";
            else if (codec == "AAC")
-               return ".m4a";//.m4a
+               return ".aac";//.m4a
            else
                return "." + codec.ToLower();
        }

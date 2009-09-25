@@ -351,7 +351,7 @@ namespace XviD4PSP
                 s = "MP2";
             if (s == "Vorbis")
                 s = "OGG";
-            if (s == "AAC LC" || s == "AAC LC-SBR" || s == "A_AAC")
+            if (s == "AAC LC" || s == "AAC LC-SBR" || s == "AAC LC-SBR-PS" || s == "A_AAC")
                 s = "AAC";
             if (s == "WMA2" ||
                 s == "WMA3")
