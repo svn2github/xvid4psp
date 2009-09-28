@@ -42,7 +42,7 @@ namespace XviD4PSP
 
             try
             {
-                Settings.WasDonate = true;
+               // Settings.WasDonate = true;
                 Process.Start("mailto:forclip@gmail.com");
             }
             catch (Exception ex)

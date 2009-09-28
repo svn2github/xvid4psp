@@ -124,27 +124,32 @@ namespace XviD4PSP
             }
 
             this.InitializeComponent();
-            
-            
-            //Установка параметров окна из сохраненных настроек (если эта опция включена)
-            if (Settings.WindowResize == true)
-            {
-                this.Width = Settings.WindowWidth;
-                this.Height = Settings.WindowHeight;
-                this.Left = Settings.WindowLeft;
-                this.Top = Settings.WindowTop;
-            }
 
-            //Для правильного отображения таймера
-            this.textbox_time.Visibility = Visibility.Visible;//Показать прошедшее время воспроизведения..
-            this.textbox_duration.Visibility = Visibility.Collapsed;//.. а общее время скрыть.
 
             try
             {
+                //Установка параметров окна из сохраненных настроек (если эта опция включена)
+                if (Settings.WindowResize == true)
+                {
+                    this.Width = Settings.WindowWidth;
+                    this.Height = Settings.WindowHeight;
+                    this.Left = Settings.WindowLeft;
+                    this.Top = Settings.WindowTop;
+                }
+
+                //GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
+                //this.TasksRow.Height = (GridLength)convGridLength.ConvertFromString(Settings.TasksRow);
+
+                //Для правильного отображения таймера
+                this.textbox_time.Visibility = Visibility.Visible;//Показать прошедшее время воспроизведения..
+                this.textbox_duration.Visibility = Visibility.Collapsed;//.. а общее время скрыть.
+
                 textbox_name.Text = "";
                 textbox_time.Text = "00:00:00";
                 textbox_duration.Text = "00:00:00";
                 textbox_frame.Text = "";
+
+                MenuHider(false); //Делаем пункты меню неактивными
 
                 //переводим лейблы
                 SetLanguage();
@@ -521,7 +526,9 @@ namespace XviD4PSP
                 Settings.WindowHeight = Convert.ToInt32(this.Window.ActualHeight); //высота
                 Settings.WindowLeft = Convert.ToInt32(this.Window.Left); //отступ слева
                 Settings.WindowTop = Convert.ToInt32(this.Window.Top); //отступ сверху
-            }
+                //GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
+                //Settings.TasksRow = convGridLength.ConvertToString(this.TasksRow.Height);
+            }           
         }
 
         private ArrayList add_ff_cache(string[] infileslist)
@@ -696,11 +703,6 @@ namespace XviD4PSP
         {
             if (m != null)
                 CloseFile();
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
         }
 
         private void button_open_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -743,11 +745,6 @@ namespace XviD4PSP
         {
             if (m != null)
                 action_save(m.Clone());
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
         }
 
         private void button_save_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -895,32 +892,9 @@ namespace XviD4PSP
                     return;
             }
 
-            if (m == null)
+            if (m != null)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                //if (m.outacodec == "Copy")
-                //{
-                //    Message mess = new Message(this);
-                //    mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
-                //}
-                //else if (m.outacodec == "Disabled")
-                //{
-                //    Message mess = new Message(this);
-                //    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
-                //}
-                //else if (m.inaudiostreams == 0)
-                //{
-                //    Message mess = new Message(this);
-                //    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
-                //}
-                //else
-                //{
                 AudioOptions ao = new AudioOptions(m, this, AudioOptions.AudioOptionsModes.AllOptions);
-                //}
             }
         }
 
@@ -1661,6 +1635,7 @@ namespace XviD4PSP
                     //удаляем старый кеш
                     clear_ff_cache();
 
+                    MenuHider(true); //Делаем пункты меню активными
                 }
                 else
                     return;
@@ -1850,6 +1825,8 @@ namespace XviD4PSP
             }
 
             m = null;
+
+            MenuHider(false); //Делаем пункты меню неактивными
         }
 
         private void ErrorExeption(string message)
@@ -2293,35 +2270,46 @@ namespace XviD4PSP
                 LoadVideo(MediaLoad.update);
                 UpdateTaskMassive(m);
             }
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
         }
 
         private void mnAddSubtitles_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
+            if (m != null)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else if (m.format == Format.ExportFormats.Audio)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                string infilepath = null;
-                ArrayList files = OpenDialogs.GetFilesFromConsole("sub");
-                if (files.Count > 0)
-                    infilepath = files[0].ToString();
-
-                if (infilepath != null)
+                if (m.format == Format.ExportFormats.Audio)
                 {
-                    m.subtitlepath = infilepath;
+                    Message mess = new Message(this);
+                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                }
+                else
+                {
+                    string infilepath = null;
+                    ArrayList files = OpenDialogs.GetFilesFromConsole("sub");
+                    if (files.Count > 0)
+                        infilepath = files[0].ToString();
+
+                    if (infilepath != null)
+                    {
+                        m.subtitlepath = infilepath;
+
+                        //создаём новый AviSynth скрипт
+                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+
+                        //загружаем обновлённый скрипт
+                        LoadVideo(MediaLoad.update);
+                        UpdateTaskMassive(m);
+                    }
+                }
+            }
+        }
+
+        private void mnRemoveSubtitles_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (m != null)
+            {
+                if (m.subtitlepath != null)
+                {
+                    m.subtitlepath = null;
 
                     //создаём новый AviSynth скрипт
                     m = AviSynthScripting.CreateAutoAviSynthScript(m);
@@ -2330,31 +2318,11 @@ namespace XviD4PSP
                     LoadVideo(MediaLoad.update);
                     UpdateTaskMassive(m);
                 }
-            }
-        }
-
-        private void mnRemoveSubtitles_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else if (m.subtitlepath != null)
-            {
-                m.subtitlepath = null;
-
-                //создаём новый AviSynth скрипт
-                m = AviSynthScripting.CreateAutoAviSynthScript(m);
-
-                //загружаем обновлённый скрипт
-                LoadVideo(MediaLoad.update);
-                UpdateTaskMassive(m);
-            }
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Nothing for remove!"), Languages.Translate("Error"));
+                else
+                {
+                    Message mess = new Message(this);
+                    mess.ShowMessage(Languages.Translate("Nothing for remove!"), Languages.Translate("Error"));
+                }
             }
         }
 
@@ -2413,11 +2381,6 @@ namespace XviD4PSP
         {
             if (m != null)
                 PauseClip();
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
         }
 
         private void button_frame_back_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -2449,11 +2412,6 @@ namespace XviD4PSP
                     ErrorExeption(ex.Message);
                 }
             }
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
         }
 
         //Кадр вперед
@@ -2474,11 +2432,6 @@ namespace XviD4PSP
                 {
                     ErrorExeption(ex.Message);
                 }
-            }
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
             }
         }
 
@@ -2586,15 +2539,8 @@ namespace XviD4PSP
 
         private void menu_createautoscript_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else
-            {
+            if (m != null)
                 CreateAutoScript();
-            }
         }
 
         public void Refresh(string script)
@@ -2687,45 +2633,34 @@ namespace XviD4PSP
 
         private void AspectResolutionWindow()
         {
-
-            if (m == null)
+            if (m != null)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else if (m.format == Format.ExportFormats.Audio)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                if (m.outvcodec == "Copy")
+                if (m.format == Format.ExportFormats.Audio)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
-                    //разрешаем только одно окно
-                    //string stitle = "XviD4PSP - AviSynth-based MultiMedia Converter";
-                    //foreach (Window ownedWindow in this.OwnedWindows)
-                    //{
-                    //    if (ownedWindow.Title != stitle)
-                    //        return;
-                    //}                                   
-
-                    AspectResolution asres = new AspectResolution(m, this);
-                    string oldscript = m.script;
-                    AspectResolution.AspectFixes oldafix = m.aspectfix;
-                    m = asres.m.Clone();
-                    //обновление при необходимости
-                    if (m.script != oldscript ||
-                        m.aspectfix != oldafix)
+                    if (m.outvcodec == "Copy")
                     {
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        LoadVideo(MediaLoad.update);
-                        UpdateTaskMassive(m);
+                        Message mess = new Message(this);
+                        mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    }
+                    else
+                    {
+                        AspectResolution asres = new AspectResolution(m, this);
+                        string oldscript = m.script;
+                        AspectResolution.AspectFixes oldafix = m.aspectfix;
+                        m = asres.m.Clone();
+                        //обновление при необходимости
+                        if (m.script != oldscript ||
+                            m.aspectfix != oldafix)
+                        {
+                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                            LoadVideo(MediaLoad.update);
+                            UpdateTaskMassive(m);
+                        }
                     }
                 }
             }
@@ -2991,12 +2926,7 @@ namespace XviD4PSP
 
         private void menu_save_script_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else
+            if (m != null)
             {
                 System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
                 s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + ".avs";
@@ -3008,7 +2938,7 @@ namespace XviD4PSP
                         title = "_T" + title;
                     s.FileName = m.dvdname + ".avs";
                 }
-                
+
                 s.Title = Languages.Translate("Save script") + ":";
                 s.Filter = "AviSynth " + Languages.Translate("files") + "|*.avs";
 
@@ -3749,8 +3679,7 @@ namespace XviD4PSP
                     m.key = Settings.Key;
             }
 
-            //if (m != null)
-            //    Title = m.key;
+            MenuHider(true); //Делаем пункты меню активными
         }
 
         private void RemoveSelectedTask()
@@ -4118,12 +4047,7 @@ namespace XviD4PSP
 
         private void menu_save_wav_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else
+            if (m != null)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
@@ -4170,12 +4094,7 @@ namespace XviD4PSP
 
         private void menu_demux_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else
+            if (m != null)
             {
                 if (m.inaudiostreams.Count == 0)
                 {
@@ -4244,11 +4163,6 @@ namespace XviD4PSP
                     }
                 }
             }
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
         }
 
         private void menu_info_media_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -4287,12 +4201,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (m == null)
-                {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-                }
-                else
+                if (m != null)
                 {
                     if (!File.Exists(m.scriptpath))
                         AviSynthScripting.WriteScriptToFile(m);
@@ -4319,12 +4228,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (m == null)
-                {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-                }
-                else
+                if (m != null)
                 {
                     if (!File.Exists(m.scriptpath))
                         AviSynthScripting.WriteScriptToFile(m);
@@ -4350,12 +4254,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (m == null)
-                {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-                }
-                else
+                if (m != null)
                 {
                     if (!File.Exists(m.scriptpath))
                         AviSynthScripting.WriteScriptToFile(m);
@@ -4398,46 +4297,40 @@ namespace XviD4PSP
 
         private void menu_autocrop_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
+            if (m != null)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else if (!m.isvideo)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                if (m.outvcodec == "Copy")
+                if (!m.isvideo)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
-                    Autocrop acrop = new Autocrop(m);
-                    if (acrop.m == null) return;
-                    m = acrop.m.Clone();
+                    if (m.outvcodec == "Copy")
+                    {
+                        Message mess = new Message(this);
+                        mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    }
+                    else
+                    {
+                        Autocrop acrop = new Autocrop(m);
+                        if (acrop.m == null) return;
+                        m = acrop.m.Clone();
 
-                    //подправляем входной аспект
-                    m = AspectResolution.FixInputAspect(m);
+                        //подправляем входной аспект
+                        m = AspectResolution.FixInputAspect(m);
 
-                    m = Format.GetValidResolution(m);
-                    m = Format.GetValidOutAspect(m);
-                    m = AspectResolution.FixAspectDifference(m);
+                        m = Format.GetValidResolution(m);
+                        m = Format.GetValidOutAspect(m);
+                        m = AspectResolution.FixAspectDifference(m);
 
-                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                    LoadVideo(MediaLoad.update);
-                    UpdateTaskMassive(m);
+                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        LoadVideo(MediaLoad.update);
+                        UpdateTaskMassive(m);
+                    }
                 }
             }
         }
-
-
-
-
 
         public void SwitchToFullScreen()
         {
@@ -5234,42 +5127,40 @@ namespace XviD4PSP
 
         private void menu_detect_interlace_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
+            if (m != null)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else if (!m.isvideo)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                if (m.outvcodec == "Copy")
+                if (!m.isvideo)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
-                    SourceDetector sd = new SourceDetector(m);
-                    if (sd.m != null)
+                    if (m.outvcodec == "Copy")
                     {
-                        DeinterlaceType olddeint = m.deinterlace;
-                        FieldOrder oldfo = m.fieldOrder;
-                        SourceType olditype = m.interlace;
-                        m = sd.m.Clone();
-
-                        if (m.deinterlace != olddeint ||
-                            m.fieldOrder != oldfo ||
-                            m.interlace != olditype)
+                        Message mess = new Message(this);
+                        mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    }
+                    else
+                    {
+                        SourceDetector sd = new SourceDetector(m);
+                        if (sd.m != null)
                         {
-                            m = Format.GetOutInterlace(m);
-                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                            m = Calculate.UpdateOutFrames(m);
-                            LoadVideo(MediaLoad.update);
-                            UpdateTaskMassive(m);
+                            DeinterlaceType olddeint = m.deinterlace;
+                            FieldOrder oldfo = m.fieldOrder;
+                            SourceType olditype = m.interlace;
+                            m = sd.m.Clone();
+
+                            if (m.deinterlace != olddeint ||
+                                m.fieldOrder != oldfo ||
+                                m.interlace != olditype)
+                            {
+                                m = Format.GetOutInterlace(m);
+                                m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                                m = Calculate.UpdateOutFrames(m);
+                                LoadVideo(MediaLoad.update);
+                                UpdateTaskMassive(m);
+                            }
                         }
                     }
                 }
@@ -5283,50 +5174,40 @@ namespace XviD4PSP
 
         private void InterlaceWindow()
         {
-            if (m == null)
+            if (m != null)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else if (m.format == Format.ExportFormats.Audio)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                if (m.outvcodec == "Copy")
+                if (m.format == Format.ExportFormats.Audio)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
-                    //разрешаем только одно окно
-                    //string stitle = "XviD4PSP - AviSynth-based MultiMedia Converter";
-                    //foreach (Window ownedWindow in this.OwnedWindows)
-                    //{
-                    //    if (ownedWindow.Title != stitle)
-                    //        return;
-                    //}               
-
-                    Interlace inter = new Interlace(m, this);
-                    if (inter.m == null) return;
-                    DeinterlaceType olddeint = m.deinterlace;
-                    FieldOrder oldfo = m.fieldOrder;
-                    SourceType olditype = m.interlace;
-                    string oldframerate = m.outframerate;
-                    m = inter.m.Clone();
-
-                    if (m.deinterlace != olddeint ||
-                        m.fieldOrder != oldfo ||
-                        m.interlace != olditype ||
-                        m.outframerate != oldframerate)
+                    if (m.outvcodec == "Copy")
                     {
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        m = Calculate.UpdateOutFrames(m);
-                        LoadVideo(MediaLoad.update);
-                        UpdateTaskMassive(m);
+                        Message mess = new Message(this);
+                        mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    }
+                    else
+                    {
+                        Interlace inter = new Interlace(m, this);
+                        if (inter.m == null) return;
+                        DeinterlaceType olddeint = m.deinterlace;
+                        FieldOrder oldfo = m.fieldOrder;
+                        SourceType olditype = m.interlace;
+                        string oldframerate = m.outframerate;
+                        m = inter.m.Clone();
+
+                        if (m.deinterlace != olddeint ||
+                            m.fieldOrder != oldfo ||
+                            m.interlace != olditype ||
+                            m.outframerate != oldframerate)
+                        {
+                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                            m = Calculate.UpdateOutFrames(m);
+                            LoadVideo(MediaLoad.update);
+                            UpdateTaskMassive(m);
+                        }
                     }
                 }
             }
@@ -5450,25 +5331,7 @@ namespace XviD4PSP
             }
             else
             {
-                //if (m.outacodec == "Copy")
-                //{
-                //    Message mess = new Message(this);
-                //    mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
-                //}
-                //else if (m.outacodec == "Disabled")
-                //{
-                //    Message mess = new Message(this);
-                //    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
-                //}
-                //else if (m.inaudiostreams == 0)
-                //{
-                //    Message mess = new Message(this);
-                //    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
-                //}
-                //else
-                //{
                 AudioOptions ao = new AudioOptions(m, this, AudioOptions.AudioOptionsModes.AllOptions);
-                //}
             }
         }
 
@@ -5614,11 +5477,6 @@ namespace XviD4PSP
                     ErrorExeption(ex.Message);
                 }
             }
-            else if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
             else if (!m.isvideo)
             {
                 Message mess = new Message(this);
@@ -5724,11 +5582,6 @@ namespace XviD4PSP
                 {
                     ErrorExeption(ex.Message);
                 }
-            }
-            else if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
             }
             else if (!m.isvideo)
             {
@@ -6366,13 +6219,46 @@ namespace XviD4PSP
             }
         }
 
-       
-        
-        
-       
-      
+        private void menu_my_mail_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start("mailto:forclip@gmail.com");
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
+        }
 
-
+        private void MenuHider(bool ShowItems)
+        {
+            //Делаем пункты меню (не)активными
+            mnCloseFile.IsEnabled = ShowItems;
+            mnSave.IsEnabled = ShowItems;
+            menu_save_frame.IsEnabled = ShowItems;
+            menu_savethm.IsEnabled = ShowItems;
+            mnUpdateVideo.IsEnabled = ShowItems;
+            menu_demux_video.IsEnabled = ShowItems;
+            menu_autocrop.IsEnabled = ShowItems;
+            menu_detect_interlace.IsEnabled = ShowItems;
+            menu_saturation_brightness.IsEnabled = ShowItems;
+            mnAspectResolution.IsEnabled = ShowItems;
+            menu_interlace.IsEnabled = ShowItems;
+            menu_venc_settings.IsEnabled = ShowItems;
+            menu_demux.IsEnabled = ShowItems;
+            menu_save_wav.IsEnabled = ShowItems;
+            menu_audiooptions.IsEnabled = ShowItems;
+            menu_aenc_settings.IsEnabled = ShowItems;
+            mnAddSubtitles.IsEnabled = ShowItems;
+            mnRemoveSubtitles.IsEnabled = ShowItems;
+            menu_editscript.IsEnabled = ShowItems;
+            menu_createautoscript.IsEnabled = ShowItems;
+            menu_save_script.IsEnabled = ShowItems;
+            menu_playinwmp.IsEnabled = ShowItems;
+            menu_payinmpc.IsEnabled = ShowItems;
+            menu_playinwpf.IsEnabled = ShowItems;
+        }
 
     }
 }

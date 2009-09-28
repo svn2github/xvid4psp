@@ -18,7 +18,7 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="0.235*"/>
+			<RowDefinition x:Name="TasksRow" Height="0.235*"/>
 			<RowDefinition Height="0.765*"/>
 		</Grid.RowDefinitions>
 		<Grid HorizontalAlignment="Stretch" x:Name="grid_menu" Width="Auto" d:LayoutOverrides="VerticalAlignment" VerticalAlignment="Top" Height="Auto" Grid.RowSpan="1" Margin="0,0,0,0">
@@ -185,6 +185,7 @@
 					<MenuItem Header="Support forum" x:Name="menu_support" Click="menu_support_Click"/>
 					<MenuItem x:Name="menu_home" Header="Home page" Click="menu_home_Click"/>
 					<MenuItem x:Name="menu_Google_code" Header="Google-code" Click="menu_Google_code_Click"/>
+                    <MenuItem x:Name="menu_my_mail" Header="forclip@gmail.com" Click="menu_my_mail_Click"/>
                     <Separator/>
 					<MenuItem x:Name="menu_avisynth_guide_en" Header="AviSynth guide (EN)" Click="menu_avisynth_guide_en_Click"/>
 					<MenuItem x:Name="menu_avisynth_guide_ru" Header="AviSynth guide (RU)" Click="menu_avisynth_guide_ru_Click"/>
