@@ -315,9 +315,9 @@
 						</LinearGradientBrush>
 					</Rectangle.OpacityMask>
 				</Rectangle>
-				<TextBlock Opacity="0.4" x:Name="textbox_time" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="{Binding Path=Position, ElementName=_video01_wmv, Mode=Default}" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,0,12.8"/>
-				<TextBlock Opacity="0.4" x:Name="textbox_duration" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="{Binding Path=Position, ElementName=_video01_wmv, Mode=Default}" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,0,12.8"/>
-                <TextBlock Opacity="1" FontFamily="Segoe" FontSize="24" FontWeight="Light" Foreground="#FFFFFFFF" Text="video_name" TextWrapping="Wrap" x:Name="textbox_name" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" Margin="0,0,93.75,15.2"/>
+				<TextBlock Opacity="0.4" x:Name="textbox_time" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="{Binding Path=Position, ElementName=_video01_wmv, Mode=Default}" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,-0.7,0,13.5"/>
+				<TextBlock Opacity="0.4" x:Name="textbox_duration" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="{Binding Path=Position, ElementName=_video01_wmv, Mode=Default}" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,-0.7,0,13.5"/>
+                <TextBlock Opacity="1" FontFamily="Segoe" FontSize="24" FontWeight="Light" Foreground="#FFFFFFFF" Text="video_name" TextWrapping="Wrap" x:Name="textbox_name" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" Margin="0,0,2,15.2" Padding="0,0,97,0" TextTrimming="CharacterEllipsis" />
 			</Grid>
 			<MediaElement Margin="8,56,8,8" x:Name="VideoElement" Focusable="True" Volume="{Binding Path=Value, ElementName=slider_Volume}" />
 		</Grid>

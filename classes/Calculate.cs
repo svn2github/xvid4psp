@@ -430,16 +430,16 @@ namespace XviD4PSP
            if (_aspect < _closeaspect)
            {
                //if (closeaspectindex == 0)
-                   aspectslist.Insert(closeaspectindex, aspect + " (1:1)");
+                   aspectslist.Insert(closeaspectindex, aspect); // + " (1:1)");
                //else
                //    aspectslist.Insert(closeaspectindex - 1, aspect + " (1:1)");
            }
            if (_aspect > _closeaspect)
            {
                if (closeaspectindex == aspectslist.Count)
-                   aspectslist.Insert(closeaspectindex, aspect + " (1:1)");
+                   aspectslist.Insert(closeaspectindex, aspect); // + " (1:1)");
                else
-                   aspectslist.Insert(closeaspectindex + 1, aspect + " (1:1)");
+                   aspectslist.Insert(closeaspectindex + 1, aspect); // + " (1:1)");
            }
 
            return Calculate.ConvertArrayListToStringArray(aspectslist);

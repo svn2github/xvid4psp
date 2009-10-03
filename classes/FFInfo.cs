@@ -184,7 +184,7 @@ namespace XviD4PSP
                         type = "AC3";
                     if (type == "mpeg4aac")
                         type = "AAC";
-                    if (type == "pcm_s16le")
+                    if (type.Contains("pcm") || type.Contains("s16"))
                         type = "PCM";
                     return type.ToUpper();
                 }

@@ -112,14 +112,14 @@ namespace XviD4PSP
             string[] lines = _info.Split(separator, StringSplitOptions.None);
             foreach (string line in lines)
             {
-                if (!line.StartsWith("FFmpeg version") &&
-                    !line.StartsWith("  configuration:") &&
-                    !line.StartsWith("  libavutil version:") &&
-                    !line.StartsWith("  libavcodec version:") &&
-                    !line.StartsWith("  libavformat version:") &&
-                    !line.StartsWith("  libavdevice version:") &&
+                if (!line.StartsWith("  configuration:") &&
+                    !line.StartsWith("  libavutil") &&
+                    !line.StartsWith("  libavcodec") &&
+                    !line.StartsWith("  libavformat") &&
+                    !line.StartsWith("  libavdevice") &&
+                    !line.StartsWith("  libswscale") &&
                     !line.StartsWith("  built on") &&
-                    !line.StartsWith("Must supply at least") &&
+                    !line.StartsWith("At least one output file") &&
                     line != "")
                     sortedinfo += line + Environment.NewLine;
             }
@@ -509,7 +509,28 @@ namespace XviD4PSP
             }
         }
 
+        private void LayoutRoot_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.All;
+                e.Handled = true;
+            }
+        }
 
-
+        private void LayoutRoot_Drop(object sender, DragEventArgs e)
+        {
+            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
+            {
+                textbox_infile.Text = dropfile.ToString();
+                formats _format = (formats)Enum.Parse(typeof(formats), this.combo_format.SelectedItem.ToString());
+                string opath = Calculate.RemoveExtention(textbox_infile.Text, true) + ".remuxed" + Path.GetExtension(textbox_infile.Text);
+                if (_format != formats.AUTO)
+                    opath = Calculate.RemoveExtention(textbox_infile.Text, true) + ".remuxed." + _format.ToString().ToLower();
+                textbox_outfile.Text = opath;
+                SetFFInfo(textbox_infile.Text);
+                return;
+            }
+        }
 	}
 }

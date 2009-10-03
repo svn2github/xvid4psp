@@ -2469,6 +2469,7 @@ namespace XviD4PSP
                     VideoElement.Visibility = Visibility.Visible;
 
                     currentState = cstate;
+                    isAudioOnly = false;
 
                     Settings.PlayerEngine = Settings.PlayerEngines.MediaBridge;
                     if (m != null)
@@ -4334,7 +4335,6 @@ namespace XviD4PSP
 
         public void SwitchToFullScreen()
         {
-
             if (this.isAudioOnly)
                 return;
 
@@ -4364,29 +4364,12 @@ namespace XviD4PSP
                 this.grid_player_window.Margin = new Thickness(0, 0, 0, 0);//
 
 
-
-
-
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                 {
-                    // this.grid_player_window.Visibility = Visibility.Collapsed;
-                    //this.grid_player_window.Margin = new Thickness(0, -250, 0, 0);
-
-                    //  Grid.SetRow(this.grid_player_window, 0);
-                    //   Grid.SetRowSpan(this.grid_player_window, 2);
-                    //  this.grid_player_window.Margin = new Thickness(0, 0, 0, 0);
-
-
-
                     MoveVideoWindow();
                 }
                 else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
                 {
-                    //this.grid_player_window.Background = Brushes.Black;
-                    //oldmargin = this.grid_player_window.Margin;
-                    // Grid.SetRow(this.grid_player_window, 0);
-                    // Grid.SetRowSpan(this.grid_player_window, 2);
-                    // this.grid_player_window.Margin = new Thickness(0, 0, 0, 0);
                     this.VideoElement.Margin = new Thickness(0, 0, 0, 0);
                 }
             }
@@ -4394,7 +4377,6 @@ namespace XviD4PSP
             {
                 //Выход из Фуллскрина
                 this.isFullScreen = false;
-                // this.grid_player_window.Margin = olddmargine;
 
                 Grid.SetRow(this.grid_player_window, 1);//
                 Grid.SetRowSpan(this.grid_player_window, 1);//
@@ -4414,24 +4396,12 @@ namespace XviD4PSP
                 this.LayoutRoot.Background = oldbrush;
                 this.grid_player_buttons.Margin = new Thickness(195.856, 0, 0, 0); //Установить дефолтные отступы для панели управления плейера              
 
-
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                 {
-                    // this.grid_player_window.Margin = olddmargine;
-
-                    //    Grid.SetRow(this.grid_player_window, 1);
-                    //    Grid.SetRowSpan(this.grid_player_window, 1);
-                    //    this.grid_player_window.Margin = oldmargin;
-
-
                     MoveVideoWindow();
                 }
                 else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
                 {
-                    //   this.grid_player_window.Background = oldbrush;
-                    //   Grid.SetRow(this.grid_player_window, 1);
-                    //    Grid.SetRowSpan(this.grid_player_window, 1);
-                    //    this.grid_player_window.Margin = oldmargin;
                     this.VideoElement.Margin = new Thickness(8, 56, 8, 8);
                 }
             }
@@ -5975,7 +5945,6 @@ namespace XviD4PSP
 
         private void button_apply_trim_Click(object sender, RoutedEventArgs e)
         {
-
             if (m != null)
             {
                 if (Convert.ToString(button_apply_trim.Content) != Languages.Translate("Remove Trim") && (trim_start != trim_end))
@@ -6078,8 +6047,8 @@ namespace XviD4PSP
                 if (path_to_save == null)
                     return;
 
-               // this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
-               // this.Height = this.Window.Height - 1;
+                this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
+                this.Height = this.Window.Height - 1;
 
                 if (Directory.GetFiles(path_to_open).Length > 0) 
                     MultiOpen(Directory.GetFiles(path_to_open, "*")); //Открываем-сохраняем

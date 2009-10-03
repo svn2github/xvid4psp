@@ -314,6 +314,7 @@ namespace XviD4PSP
                 if (ext == ".d2v")
                 {
                     m.inaspect = 1.3333;
+                    m.invcodecshort = "MPEG2";
                 }
                 
                 
