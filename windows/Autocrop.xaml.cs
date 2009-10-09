@@ -125,46 +125,13 @@ namespace XviD4PSP
                 int cropr = m.inresw - result1 - result3;  //справа
                 int cropb = m.inresh - result2 - result4; //низ
                 int cropt = result2;  //верх
-                
-                //в массив
-                m.cropl = cropl;
-                m.cropr = cropr;
-                m.cropb = cropb;
-                m.cropt = cropt;
 
-                //дубликаты
-                m.cropl_copy = cropl;
-                m.cropr_copy = cropr;
-                m.cropb_copy = cropb;
-                m.cropt_copy = cropt;
+                //в массив //дубликаты
+                m.cropl = m.cropl_copy = cropl;
+                m.cropr = m.cropr_copy = cropr;
+                m.cropb = m.cropb_copy = cropb;
+                m.cropt = m.cropt_copy = cropt;
 
-            //  Settings.Test = result1;
-                
-             
-                
-          //остатки старого автокропа (по разнице разрешений)      
-          //      if (!IsAborted)
-          //      {
-           //         int cropw = m.inresw - reader.Width;
-           //         if (cropw > 0)
-           //             cropw /= 2;
-           //         int croph = m.inresh - reader.Height;
-           //         if (croph > 0)
-           //             croph /= 2;
-
-  //                  cropw = Calculate.GetValid(cropw, 2);
- //                   croph = Calculate.GetValid(croph, 2);
-
-//                    m.cropl = cropw;
-  //                  m.cropr = cropw;
-    //                m.cropb = croph;
-      //              m.cropt = croph;
-
-                    //дубликаты
-        //            m.cropl_copy = cropw;
-        //            m.cropr_copy = cropw;
-         //           m.cropb_copy = croph;
-         //           m.cropt_copy = croph;
                 }
             }
             catch (Exception ex)
@@ -177,7 +144,7 @@ namespace XviD4PSP
                 {
                     m = null;
                     mess = Languages.Translate("AviSynth is not found!") + Environment.NewLine +
-                        Languages.Translate("Please install AviSynth 2.5.7 or higher.");
+                        Languages.Translate("Please install AviSynth 2.5.7 MT or higher.");
                 }
                 ShowMessage(mess, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }

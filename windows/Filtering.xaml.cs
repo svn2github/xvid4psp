@@ -34,6 +34,7 @@ namespace XviD4PSP
             button_ok.Content = Languages.Translate("OK");
             button_refresh.Content = Languages.Translate("Apply");
             button_refresh.ToolTip = Languages.Translate("Refresh preview");
+            //button_fullscreen.Content = Languages.Translate("Fullscreen");
             //button_auto.Content = Languages.Translate("Auto");
             //button_auto.ToolTip = Languages.Translate("Create auto script");
             

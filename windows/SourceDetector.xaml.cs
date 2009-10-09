@@ -91,7 +91,7 @@ namespace XviD4PSP
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (IsErrors && !IsAborted)
-                ErrorExeption(Languages.Translate("You don`t have YV12 decoder! It`s need for source interlace detection."));
+                ErrorExeption(Languages.Translate("You don`t have YV12 decoder! It`s needed for source interlace detection."));
 
             if (IsErrors)
                 m = null;

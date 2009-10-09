@@ -20,7 +20,7 @@
 						</Grid.RowDefinitions>
 						<StackPanel Margin="8,8,8,0" VerticalAlignment="Top" Height="Auto">
 							<CheckBox x:Name="check_demux_audio" Width="Auto" Height="Auto" Content="Don`t demux audio for preview" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" Unchecked="check_demux_audio_Unchecked" Checked="check_demux_audio_Checked"/>
-							<CheckBox x:Name="check_save_anamorph" Width="Auto" Height="Auto" Content="Save anamorph aspect" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_save_anamorph_Click"/>
+							<CheckBox x:Name="check_save_anamorph" Width="Auto" Height="Auto" Content="Maintain anamorph aspect" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_save_anamorph_Click"/>
 							<CheckBox x:Name="check_alwaysprogressive" Width="Auto" Height="Auto" Content="Always encode to progressive video" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_alwaysprogressive_Click"/>
 							<CheckBox x:Name="check_auto_colormatrix" Width="Auto" Height="Auto" Content="Auto apply ColorMatrix for MPEG2 files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_auto_colormatrix_Click"/>
 						    <CheckBox x:Name="check_window_dim" Width="Auto" Height="Auto" Content="Remember last window location" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_window_pos_Click"/>
@@ -38,7 +38,7 @@
 						<TextBox Margin="8,0,68,8" x:Name="textbox_temp" Text="" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="22"/>
 						<Button x:Name="button_temppath" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="22" Margin="0,0,44,8" VerticalAlignment="Bottom" Height="22" Click="button_temppath_Click"/>
 						<Button x:Name="button_temppath_open" Content="Open" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="36" Margin="0,0,6,8" VerticalAlignment="Bottom" Height="22" Click="button_temppath_open_Click"/>
-                        <CheckBox x:Name="check_search_temp" Width="Auto" Height="Auto" Content="Search best temp folder place when program start" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Checked="check_search_temp_Checked" Unchecked="check_search_temp_Unchecked"/>
+                        <CheckBox x:Name="check_search_temp" Width="Auto" Height="Auto" Content="Search the best temp folder place on program start" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Checked="check_search_temp_Checked" Unchecked="check_search_temp_Unchecked"/>
 						<Label OpacityMask="{x:Null}" x:Name="label_temppath" Content="Temp folder path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,0,0,30" d:LayoutOverrides="Height" VerticalAlignment="Bottom"/>
 						<CheckBox x:Name="check_delete_ff_cache" Width="Auto" Height="Auto" Content="Auto delete FFmpegSource cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,30.62,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width" HorizontalAlignment="Left" Checked="check_delete_ff_cache_Checked" Unchecked="check_delete_ff_cache_Unchecked"/>
 						<CheckBox x:Name="check_delete_dgindex_cache" Width="Auto" Height="Auto" Content="Auto delete DGIndex cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,53.24,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" IsEnabled="True" Checked="check_delete_dgindex_cache_Checked" Unchecked="check_delete_dgindex_cache_Unchecked"/>
@@ -53,14 +53,14 @@
 						<CheckBox x:Name="check_show_script" Width="Auto" Height="Auto" Content="Show AviSynth script" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,75.86,0,0" VerticalAlignment="Top" Checked="check_show_script_Checked" Unchecked="check_show_script_Unchecked" d:LayoutOverrides="Width, Height"/>
 					    <CheckBox x:Name="check_log_to_file" Width="Auto" Height="Auto" Content="Write encoding log to file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,98,0,0" VerticalAlignment="Top" Click="check_log_to_file_Click" d:LayoutOverrides="Width, Height"/>
                         <CheckBox x:Name="check_logfile_tempfolder" Width="Auto" Height="Auto" Content="in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="320,98,0,0" VerticalAlignment="Top" Click="check_logfile_tempfolder_Click" d:LayoutOverrides="Width, Height"/>
-                        <CheckBox x:Name = "cmenu_is_always_close_encoding" Width="Auto" Height="Auto"  Content="Always close encoding task dialog" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8.3,121,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
+                        <CheckBox x:Name = "cmenu_is_always_close_encoding" Width="Auto" Height="Auto"  Content="Autoclose encoding dialog if task was successfully accomplished" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8.3,121,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
                     
                     </Grid>
 				</TabItem>
 			    <TabItem Header="Batch encoding" x:Name="tab_open_folder">
                     <Grid> 
                         <Label OpacityMask="{x:Null}" x:Name="label_extensions" Content="Only files with this extensions will be opened:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="6,4,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
-                        <TextBox Margin="8,30,8,0" Height="54" x:Name="textbox_extensions" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" VerticalScrollBarVisibility="Auto" />
+                        <TextBox Margin="8,30,8,0" Height="60" x:Name="textbox_extensions" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" VerticalScrollBarVisibility="Auto" />
                         <CheckBox x:Name="check_batch_autoencoding" Width="Auto" Height="Auto" Content="Start encoding after opening all files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,98,0,0" VerticalAlignment="Top" Click="check_batch_autoencoding_Click" d:LayoutOverrides="Width, Height"/>
                     </Grid>
                 </TabItem>

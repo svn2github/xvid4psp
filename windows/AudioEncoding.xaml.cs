@@ -206,8 +206,8 @@ namespace XviD4PSP
                     if (CopyProblems != null)
                     {
                         Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
-                            " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
             }
@@ -251,8 +251,8 @@ namespace XviD4PSP
                     if (CopyProblems != null)
                     {
                         Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
-                            " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
 
@@ -541,7 +541,7 @@ namespace XviD4PSP
                 UpdateMassive();
 
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Do you realy want remove profile") + " " + outstream.encoding + "?",
+                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " " + outstream.encoding + "?",
                     Languages.Translate("Question"),
                     Message.MessageStyle.YesNo);
 
@@ -583,8 +583,8 @@ namespace XviD4PSP
                         if (CopyProblems != null)
                         {
                             Message messa = new Message(this);
-                            messa.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
-                                " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
+                            mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                         }
                     }
                 }
@@ -592,7 +592,7 @@ namespace XviD4PSP
             else
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Not allowed remove last profile!"),
+                mess.ShowMessage(Languages.Translate("Not allowed removing the last profile!"),
                     Languages.Translate("Warning"),
                     Message.MessageStyle.Ok);
             }

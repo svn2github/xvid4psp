@@ -46,7 +46,7 @@
                 <TextBox x:Name="textbox_error" VerticalAlignment="Center" HorizontalAlignment="Right" Text="" TextWrapping="Wrap" Width="132" Height="Auto" DockPanel.Dock="Right" Opacity="0.95" IsReadOnly="True"/>
                 </DockPanel>
                 <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
-					<Label OpacityMask="{x:Null}" x:Name="text_aspectfix" Content="How fix aspect difference:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_aspectfix" Content="Aspect adjusting method:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
 					<ComboBox x:Name="combo_aspectfix" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_aspectfix_SelectionChanged" Width="132" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 				</DockPanel>
 				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">

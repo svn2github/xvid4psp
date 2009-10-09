@@ -39,7 +39,7 @@ namespace XviD4PSP
             text_source_res.Content = Languages.Translate("Input resolution:");
             text_final_res.Content = Languages.Translate("Output resolution:");
             text_resizer.Content = Languages.Translate("Resize filter:");
-            text_aspectfix.Content = Languages.Translate("How fix aspect difference:");
+            text_aspectfix.Content = Languages.Translate("Aspect adjusting method:");
             text_inaspect.Content = Languages.Translate("Input aspect:");
             text_outaspect.Content = Languages.Translate("Output aspect:");
             text_crop_tb.Content = Languages.Translate("Crop top, bottom:");
@@ -57,6 +57,7 @@ namespace XviD4PSP
             text_recalculate.Content = Languages.Translate("Recalculate aspect when crop is using:");
             text_runautocrop.Content = Languages.Translate("Run autocrop:");
             button_analyse.Content = Languages.Translate("Analyse");
+            //button_fullscreen.Content = Languages.Translate("Fullscreen");
 
             combo_height.ToolTip = Languages.Translate("Height");
             combo_width.ToolTip = Languages.Translate("Width");

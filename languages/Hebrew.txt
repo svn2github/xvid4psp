@@ -62,7 +62,7 @@ Close file
 Save
 שמור
 
-Save file
+Add task
 שמור קובץ
 
 Open DVD folder
@@ -95,7 +95,7 @@ Can`t find output video file!
 Can`t find output audio file!
 !לא מצליח למצוא את קובץ הפלט של הקול
 
-Select other name for output file!
+Select another name for output file!
 !בחר שם אחר לקובץ הפלט של הוידאו
 
 Resume
@@ -208,7 +208,7 @@ Select subtitles file
 AviSynth is not found!
 !AviSynth לא נמצאה תוכנת
 
-Please install AviSynth 2.5.7 or higher.
+Please install AviSynth 2.5.7 MT or higher.
 או גרסה מתקדמת יותר Avisynth 2.5.7 אנא התקן
 
 
@@ -308,7 +308,7 @@ Hibernate
 Shutdown
 סגור
 
-Volume amplifing to
+Volume Amplifying to
 הגבר עוצמת שמע ל
 
 Input resolution:
@@ -329,7 +329,7 @@ Input aspect:
 Output aspect:
 יחס פלט:
 
-How fix aspect difference:
+Aspect adjusting method:
 כיצד לתקן הבדל יחס:
 
 Width
@@ -473,10 +473,10 @@ Profile with same name already exists.
 Replace profile?
 ?להחליף מתאר
 
-Not allowed remove last profile!
+Not allowed removing the last profile!
 !לא מורשה הסר מתאר אחרון
 
-Do you realy want remove profile
+Do you realy want to remove profile
 ?האם אתה באמת רוצה להסיר את המתאר
 
 Add profile
@@ -500,10 +500,10 @@ Start files encoding
 This task encoding now. Cancel encoding before updating.
 משימה זו עוברת קידוד כעת. בטל קידוד לפני עדכון
 
-Disabled remove tasks in encoding progress!
+The tasks in encoding process are disabled for removal! 
 !נטרל הסר משימות בזמן קידוד
 
-Do you want run one more encoding thread?
+Do you want to run one more encoding thread?
 ?האם ברצונך להריץ שרשור קידוד נוסף
 
 Task list
@@ -533,13 +533,13 @@ Frame back
 Frame forward
 תמונה קדימה
 
-Open file
+Open file(s)
 פתח קובץ
 
-Open new file
+Open new file(s)
 פתח קובץ חדש
 
-Save task to list
+Add task to the list
 שמור משימה ברשימה
 
 Select unique name for output file:
@@ -557,7 +557,7 @@ Delete encoded tasks
 Delete selected task
 מחק משימה נבחרת
 
-Always close encoding task dialog
+Autoclose encoding dialog if task was successfully accomplished
 סגור תמיד דיאלוג קידוד משימה
 
 Always delete from list encoded tasks
@@ -581,7 +581,7 @@ Color correction
 Edit saturation, brightness or contrast
 ערוך רוויה, בהירות או ניגודיות
 
-Need update DirectX files! Do it now?
+DirectX update required! Do it now?
  ?לעשות זאת עכשיו !DirecX-צריך לעדכן את קבצי ה
 
 Hue
@@ -638,13 +638,13 @@ Saturation/Brightness
 Denoise/Sharpen
 הפחתת רעשים/חדות
 
-Input file on CD or DVD! FFmpegSource decode files only from HardDrive.
+Input file on CD or DVD! FFmpegSource decodes files only from HardDrive.
 מקדד קבצים אך ורק מהדיסק הקשיח FFmpegSource !CD או DVD קובץ הקלט נמצא על 
 
 Copy files to HardDrive or use DirectShowSource decoder.
 DirectShouwSource העתק קבצים אל הדיסק הקשיח או השתמש במפענח 
 
-Switch decoder to DirectShowSource and try again?
+Switch decoder to DirectShowSource and try once again?
 ?ולנסות שוב DirectShowSource -להחליף מפענח  ל
 
 Update DirectX
@@ -702,7 +702,7 @@ Audio encoding settings
 Output file will be created without sound.
 קובץ הפלט יווצר ללא שמע
 
-Stream contein parameter incompatible with format
+The stream contains parameters incompatible with this format
 הערוץ מכיל משתנים אשר לא מתאים לתצורה
 
 Auto join
@@ -741,7 +741,7 @@ Framerate converter:
 Samplerate converter:
 ממיר קצב דגימה:
 
-File don`t have audio streams!
+File doesn`t have audio streams!
 !לקובץ אין ערוצי שמע
 
 Can`t change parameters in COPY mode!

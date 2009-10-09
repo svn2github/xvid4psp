@@ -16,11 +16,11 @@ namespace XviD4PSP
         private About p;
 
         public Changelog(About parent)
-		{
+        {
             p = parent;
             Owner = p;
 
-			this.InitializeComponent();
+            this.InitializeComponent();
 
             try
             {
@@ -41,7 +41,7 @@ namespace XviD4PSP
                 Message mes = new Message(p);
                 mes.ShowMessage(ex.Message, "Error");
             }
-       }
+        }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {

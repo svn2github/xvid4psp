@@ -47,7 +47,7 @@
 			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" Click="button_cancel_Click" RenderTransformOrigin="1.122,0.428" d:LayoutOverrides="GridBox" HorizontalAlignment="Right" Margin="0,5,8,5" Width="75" Grid.ColumnSpan="1" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" Width="75" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,5,87,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			<Button x:Name="button_apply" Content="Apply" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,5,0,5" Width="75" Click="button_apply_Click"/>
-		<Button x:Name="button_fullscreen" Content="Fullscreen" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="88,5,0,5" Width="75" Click="button_fullscreen_Click"/>
+		    <Button x:Name="button_fullscreen" Content="Fullscreen" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="88,5,0,5" Width="75" Click="button_fullscreen_Click"/>
         </Grid>
 	</Grid>
 </Window>

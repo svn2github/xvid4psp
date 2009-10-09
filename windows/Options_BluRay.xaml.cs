@@ -31,7 +31,7 @@ namespace XviD4PSP
             Title = Format.EnumToString(m.format) + " " + Languages.Translate("Options").ToLower() + ":";
             label_type.Content = "BluRay " + Languages.Translate("type") + ":";
 
-            check_direct_remux.Content = Languages.Translate("Use direct remuxing when it possible");
+            check_direct_remux.Content = Languages.Translate("Use direct remuxing if possible");
 
             combo_type.Items.Add("UDF 2.50 DVD/BD");
             combo_type.Items.Add("FAT32 HDD/MS");

@@ -30,7 +30,7 @@ namespace XviD4PSP
             button_ok.Content = Languages.Translate("OK");
             Title = Format.EnumToString(m.format) + " " + Languages.Translate("Options").ToLower() + ":";
             label_split.Content = Languages.Translate("Split output file:");
-            check_direct_remux.Content = Languages.Translate("Use direct remuxing when it possible");
+            check_direct_remux.Content = Languages.Translate("Use direct remuxing if possible");
 
             combo_split.Items.Add("Disabled");
             combo_split.Items.Add("700 mb CD");

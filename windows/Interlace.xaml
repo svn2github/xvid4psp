@@ -38,7 +38,7 @@
 			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" BorderThickness="1,1,1,1" Click="button_cancel_Click" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Margin="0,8,92,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="80"/>
 			<Button x:Name="button_refresh" Width="80" Height="Auto" Content="Apply" Click="button_refresh_Click" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,8,0,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-		<Button x:Name="button_fullscreen" Width="80" Height="Auto" Content="Fullscreen" Click="button_fullscreen_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" HorizontalAlignment="Left" Template="{DynamicResource GlassButton}" Margin="92,8,0,8"/>
+		    <Button x:Name="button_fullscreen" Width="80" Height="Auto" Content="Fullscreen" Click="button_fullscreen_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" HorizontalAlignment="Left" Template="{DynamicResource GlassButton}" Margin="92,8,0,8"/>
         </Grid>
 	</Grid>
 </Window>

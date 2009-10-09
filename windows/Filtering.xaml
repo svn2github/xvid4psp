@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.Filtering"
 	x:Name="Window"
 	Title="Filtering"
-	Width="500" Height="279" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="CanResize" Topmost="False" ForceCursor="True" MinWidth="490" MaxHeight="600">
+	Width="505" Height="279" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="CanResize" Topmost="False" ForceCursor="True" MinWidth="497" MaxHeight="600">
     <Window.ContextMenu>
         <ContextMenu IsTextSearchEnabled="True" IsTabStop="True" />
     </Window.ContextMenu>

@@ -13,7 +13,7 @@
 				<Grid Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="label_type" Content="BluRay type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Top"/>
 					<ComboBox Margin="0,6.06,8,6.06" x:Name="combo_type" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="Auto" VerticalAlignment="Top" SelectionChanged="combo_type_SelectionChanged"/>
-					<CheckBox x:Name="check_direct_remux" Width="Auto" Height="Auto" Content="Use direct remuxing when it possible" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,0,0,8" VerticalAlignment="Bottom" d:LayoutOverrides="Width" HorizontalAlignment="Left" Checked="check_direct_remux_Checked" Unchecked="check_direct_remux_Unchecked"/>
+					<CheckBox x:Name="check_direct_remux" Width="Auto" Height="Auto" Content="Use direct remuxing if possible" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,0,0,8" VerticalAlignment="Bottom" d:LayoutOverrides="Width" HorizontalAlignment="Left" Checked="check_direct_remux_Checked" Unchecked="check_direct_remux_Unchecked"/>
 				</Grid>
 			</GroupBox>
 		</Grid>

@@ -1615,5 +1615,44 @@ namespace XviD4PSP
             }
         }
 
+        public static string TasksRow
+        {
+            get
+            {
+                object value = GetValue("TasksRow");
+                if (value == null)
+                {
+                    return "128*";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("TasksRow", value);
+            }
+        }
+
+        public static string TasksRow2
+        {
+            get
+            {
+                object value = GetValue("TasksRow2");
+                if (value == null)
+                {
+                    return "400*";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("TasksRow2", value);
+            }
+        }
     }
 }

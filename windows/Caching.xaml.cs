@@ -40,7 +40,7 @@ namespace XviD4PSP
 
             if (m.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
             {
-                text_info.ToolTip = Languages.Translate("FFmpegSource create CACHE files. It can take long time and hard drive space.") +
+                text_info.ToolTip = Languages.Translate("FFmpegSource creates CACHE files. It can take long time and hard drive space.") +
                     Environment.NewLine +
                     Languages.Translate("Use other decoders for more fast import:") + Environment.NewLine +
                         Languages.Translate("FFmpegSource - slow, but safe and codec independed import.") + Environment.NewLine +
@@ -294,7 +294,7 @@ namespace XviD4PSP
             else if (error != null && error == "Cannot load avisynth.dll")
             {
                 string mess = Languages.Translate("AviSynth is not found!") + Environment.NewLine +
-                    Languages.Translate("Please install AviSynth 2.5.7 or higher.");
+                    Languages.Translate("Please install AviSynth 2.5.7 MT or higher.");
                 ShowMessage(mess, Languages.Translate("Error"), Message.MessageStyle.Ok);
                 error = null;
                 m = null;

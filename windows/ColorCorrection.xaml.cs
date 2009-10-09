@@ -32,6 +32,7 @@ namespace XviD4PSP
             button_apply.Content = Languages.Translate("Apply");
             button_apply.ToolTip = Languages.Translate("Refresh preview");
             button_cancel.Content = Languages.Translate("Cancel");
+            //button_fullscreen.Content = Languages.Translate("Fullscreen");
             button_ok.Content = Languages.Translate("OK");
             button_add.ToolTip = Languages.Translate("Add profile");
             button_remove.ToolTip = Languages.Translate("Remove profile");
@@ -259,7 +260,7 @@ namespace XviD4PSP
             if (combo_profile.Items.Count > 1)
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Do you realy want remove profile") + " " + m.sbc + "?",
+                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " " + m.sbc + "?",
                     Languages.Translate("Question"),
                     Message.MessageStyle.YesNo);
 
@@ -294,7 +295,7 @@ namespace XviD4PSP
             else
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Not allowed remove last profile!"),
+                mess.ShowMessage(Languages.Translate("Not allowed removing the last profile!"),
                     Languages.Translate("Warning"),
                     Message.MessageStyle.Ok);
             }

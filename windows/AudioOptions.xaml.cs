@@ -241,7 +241,7 @@ namespace XviD4PSP
                 //таблички
                 label_delayin.Content = Languages.Translate("Input") + ": " + instream.delay + " ms";
                 label_insamplerate.Content = Languages.Translate("Input") + ": " + instream.samplerate + " Hz";
-                label_volume.Content = Languages.Translate("Amplifing") + ": " + instream.gain + "dB";
+                label_volume.Content = Languages.Translate("Amplifying") + ": " + instream.gain + "dB";
                 label_inchannels.Content = Languages.Translate("Source") + ": " + Calculate.ExplainChannels(instream.channels);
 
                 //панель информации
@@ -262,7 +262,7 @@ namespace XviD4PSP
                 texbox_info.AppendText("Channels: " + outstream.channels + " ch" + Environment.NewLine);
                 texbox_info.AppendText("Samplerate: " + outstream.samplerate + " Hz" + Environment.NewLine);
                 texbox_info.AppendText("Delay: " + outstream.delay + " ms" + Environment.NewLine);
-                texbox_info.AppendText("Amplifing: " + instream.gain + " dB" + Environment.NewLine);
+                texbox_info.AppendText("Amplifying: " + instream.gain + " dB" + Environment.NewLine);
             }
         }
 
@@ -346,7 +346,7 @@ namespace XviD4PSP
                     if (CopyProblems != null)
                     {
                         Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                             " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
@@ -600,7 +600,7 @@ namespace XviD4PSP
                     if (CopyProblems != null)
                     {
                         Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                             " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }

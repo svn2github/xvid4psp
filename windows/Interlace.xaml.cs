@@ -37,11 +37,11 @@ namespace XviD4PSP
             label_source_info.Content = Languages.Translate("Detect source type") + ":";
             label_source_type.Content = Languages.Translate("Source type") + ":";
             label_outinterlace.Content = Languages.Translate("Target type") + ":";
-
             text_in_framerate.Content = Languages.Translate("Input framerate:");
             text_out_framerate.Content = Languages.Translate("Output framerate:");
             text_framerateconvertor.Content = Languages.Translate("Framerate converter:");
             text_in_framerate_value.Content = m.inframerate + " fps";
+            //button_fullscreen.Content = Languages.Translate("Fullscreen");
 
             SetTooltips();
 

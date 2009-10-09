@@ -31,8 +31,8 @@ namespace XviD4PSP
             check_show_script.Content = Languages.Translate("Show AviSynth script");
             check_delete_ff_cache.Content = Languages.Translate("Auto delete FFmpegSource cache");
             check_delete_dgindex_cache.Content = Languages.Translate("Auto delete DGIndex cache");
-            check_search_temp.Content = Languages.Translate("Search best temp folder place when program start");
-            check_save_anamorph.Content = Languages.Translate("Save anamorph aspect");
+            check_search_temp.Content = Languages.Translate("Search the best temp folder place on program start");
+            check_save_anamorph.Content = Languages.Translate("Maintain anamorph aspect");
             check_alwaysprogressive.Content = Languages.Translate("Always encode to progressive video");
             check_auto_colormatrix.Content = Languages.Translate("Auto apply ColorMatrix for MPEG2 files");
             label_temppath.Content = Languages.Translate("Temp folder path:");
@@ -45,7 +45,7 @@ namespace XviD4PSP
             check_logfile_tempfolder.Content = Languages.Translate("in Temp folder");
             label_extensions.Content = Languages.Translate("Only files with this extensions will be opened:");
             check_batch_autoencoding.Content = Languages.Translate("Start encoding after opening all files");
-            cmenu_is_always_close_encoding.Content = Languages.Translate("Always close encoding task dialog");
+            cmenu_is_always_close_encoding.Content = Languages.Translate("Autoclose encoding dialog if task was successfully accomplished");
             check_dgindex_cache_in_temp.Content = Languages.Translate("Create DGIndex cache in Temp folder");
 
             tab_main.Header = Languages.Translate("Misc");

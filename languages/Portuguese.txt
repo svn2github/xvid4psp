@@ -62,7 +62,7 @@ Fechar ficheiro
 Save
 Guardar
 
-Save file
+Add task
 Guardar ficheiro
 
 Open DVD folder
@@ -95,7 +95,7 @@ Vídeo de saída não encontrado!
 Can`t find output audio file!
 Áudio de saída não encontrado!
 
-Select other name for output file!
+Select another name for output file!
 Seleccione outro nome para o ficheiro de saída!
 
 Resume
@@ -206,7 +206,7 @@ Seleccionar ficheiro de legendas
 AviSynth is not found!
 AviSynth não encontrado!
 
-Please install AviSynth 2.5.7 or higher.
+Please install AviSynth 2.5.7 MT or higher.
 Por favor instale AviSynth 2.5.7 ou superior.
 
 Filtering
@@ -302,7 +302,7 @@ Hibernar
 Shutdown
 Encerrar
 
-Volume amplifing to
+Volume Amplifying to
 Volume amplificado em
 
 Input resolution:
@@ -323,7 +323,7 @@ Aspecto de entrada:
 Output aspect:
 Aspecto de saída:
 
-How fix aspect difference:
+Aspect adjusting method:
 Como fixar diferença de aspecto:
 
 Width
@@ -467,10 +467,10 @@ Já existe um profile com o mesmo nome.
 Replace profile?
 Substituir profile?
 
-Not allowed remove last profile!
+Not allowed removing the last profile!
 Impossível remover último profile!
 
-Do you realy want remove profile
+Do you realy want to remove profile
 Deseja remover profile
 
 Add profile
@@ -494,10 +494,10 @@ Iniciar conversão dos ficheiros
 This task encoding now. Cancel encoding before updating.
 A faixa encontra-se em conversão. Cancelar conversão antes de actualizar.
 
-Disabled remove tasks in encoding progress!
+The tasks in encoding process are disabled for removal! 
 Desactivada a remoção de faixas que se encontram em conversão!
 
-Do you want run one more encoding thread?
+Do you want to run one more encoding thread?
 Deseja iniciar nova conversão?
 
 Task list
@@ -527,13 +527,13 @@ Frame anterior
 Frame forward
 Frame seguinte
 
-Open file
+Open file(s)
 Abrir ficheiro
 
-Open new file
+Open new file(s)
 Abrir novo ficheiro
 
-Save task to list
+Add task to the list
 Guardar tarefa na lista
 
 Select unique name for output file:
@@ -551,7 +551,7 @@ Remover tarefas concluídas
 Delete selected task
 Remover tarefas seleccionadas
 
-Always close encoding task dialog
+Autoclose encoding dialog if task was successfully accomplished
 Fechar sempre janela após concluída a conversão
 
 Always delete from list encoded tasks
@@ -575,7 +575,7 @@ Brilho/Contraste
 Edit saturation, brightness or contrast
 Editar saturação, brilho ou contraste
 
-Need update DirectX files! Do it now?
+DirectX update required! Do it now?
 Necessita de actualizar DirectX! Deseja fazer agora?
 
 Hue
@@ -632,13 +632,13 @@ Saturação/Brilho
 Denoise/Sharpen
 Denoise/Sharpen
 
-Input file on CD or DVD! FFmpegSource decode files only from HardDrive.
+Input file on CD or DVD! FFmpegSource decodes files only from HardDrive.
 Ficheiro de entrada em CD ou DVD! FFmpegSource descodifica apenas ficheiros que se encontrem no disco rígido.
 
 Copy files to HardDrive or use DirectShowSource decoder.
 Copia ficheiros do disco rígido ou utiliza descodificador DirectShowSource.
 
-Switch decoder to DirectShowSource and try again?
+Switch decoder to DirectShowSource and try once again?
 Alterar descodificador para DirectShowSource e tentar de novo?
 
 Update DirectX
@@ -695,7 +695,7 @@ Definições de conversão de áudio
 Output file will be created without sound.
 Ficheiro de saída será criado sem som.
 
-Stream contein parameter incompatible with format
+The stream contains parameters incompatible with this format
 Stream contém parâmetro incompatível com o formato
 
 Auto join
@@ -734,7 +734,7 @@ Conversor framerate:
 Samplerate converter:
 Conversor samplerate:
 
-File don`t have audio streams!
+File doesn`t have audio streams!
 Ficheiro não tem streams de áudio!
 
 Can`t change parameters in COPY mode!
@@ -860,5 +860,5 @@ Deinterlace automático
 Support
 Suporte Online
 
-You don`t have YV12 decoder! It`s need for source interlace detection.
+You don`t have YV12 decoder! It`s needed for source interlace detection.
 Não possui descodificador YV12! É necessário para detectar interlace da fonte.

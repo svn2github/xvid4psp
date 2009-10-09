@@ -18,9 +18,9 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition x:Name="TasksRow" Height="0.235*"/>
-			<RowDefinition Height="0.765*"/>
-		</Grid.RowDefinitions>
+            <RowDefinition x:Name="TasksRow" Height="128*" MinHeight="101" />
+            <RowDefinition x:Name="TasksRow2" Height="400*" MinHeight="38" />
+        </Grid.RowDefinitions>
 		<Grid HorizontalAlignment="Stretch" x:Name="grid_menu" Width="Auto" d:LayoutOverrides="VerticalAlignment" VerticalAlignment="Top" Height="Auto" Grid.RowSpan="1" Margin="0,0,0,0">
 			<Menu x:Name="FileMenu" Height="Auto" Background="#FFEDEDED" d:LayoutOverrides="Height" Margin="0,0,0,0">
 				<MenuItem Header="File" x:Name="mnFile">
@@ -199,7 +199,7 @@
 			<Button x:Name="button_configure" Content="Configure" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_configure_Click" Margin="290,9,0,9" HorizontalAlignment="Left" Width="90"/>
 			<Button x:Name="button_save" Content="Save" Width="90" Foreground="#FFFFFFFF" Click="button_save_Click" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="384,9,0,9"/>
 			<Button x:Name="button_encode" Content="Encode" Foreground="#FFFFFFFF" Click="button_encode_Click" Template="{DynamicResource GlassButton}" Margin="478,9,0,9" HorizontalAlignment="Left" Width="90"/>
-            <Slider x:Name="slider_Volume" ValueChanged="Volume_ValueChanged" d:LayoutOverrides="VerticalAlignment" Margin="600,8,4,8" Style="{DynamicResource GlassSlider}" ClipToBounds="False" AutoToolTipPlacement="None" FlowDirection="LeftToRight" HorizontalAlignment="Left" Width="Auto" MinWidth="120" MaxWidth="120" />
+            <Slider x:Name="slider_Volume" ValueChanged="Volume_ValueChanged" d:LayoutOverrides="VerticalAlignment" Margin="600,8,4,8" Style="{DynamicResource GlassSlider}" ClipToBounds="False" MouseWheel="Volume_Wheel" FlowDirection="LeftToRight" HorizontalAlignment="Left" Width="Auto" MinWidth="120" MaxWidth="120" IsMoveToPointEnabled="False" Maximum="1" SmallChange="0.05" LargeChange="0.1" />
             <Image Width="18" Source="..\pictures\Volume1.png" Stretch="None" HorizontalAlignment="Left" Margin="583,6,032,6" x:Name="image_volume"/>
         </Grid>
 

@@ -5,27 +5,42 @@ using System.IO;
 
 namespace XviD4PSP
 {
-   static class Languages
+    static class Languages
     {
-
+        public static string Dictionary; //Словарь
+        
         public static string Translate(string phrase)
         {
-            using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\languages\\" + Settings.Language + ".txt", System.Text.Encoding.Default))
+            try
+            {
+                string[] separator = new string[] { Environment.NewLine };
+                string[] lines = Dictionary.Split(separator, StringSplitOptions.None);
+                int n = 0;
+                foreach (string line in lines)
                 {
-                    string line;
-                    while (sr.EndOfStream == false)
+                    if (line == phrase)
                     {
-                        line = sr.ReadLine();
-                        if (line == phrase)
-                        {
-                            return sr.ReadLine();
-                        }
+                        return lines[n + 1];
                     }
-                    return phrase;
+                    n += 1;
                 }
+            }
+            catch { }
+            return phrase;
 
+           /*using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\languages\\" + Settings.Language + ".txt", System.Text.Encoding.Default))
+            {
+                string line;
+                while (sr.EndOfStream == false)
+                {
+                    line = sr.ReadLine();
+                    if (line == phrase)
+                    {
+                        return sr.ReadLine();
+                    }
+                }
+                return phrase;
+            }*/
         }
-
-
     }
 }

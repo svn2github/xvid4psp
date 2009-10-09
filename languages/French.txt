@@ -62,7 +62,7 @@ Fermer le fichier
 Save
 Enregistrer
 
-Save file
+Add task
 Enregistrer le fichier
 
 Open DVD folder
@@ -95,7 +95,7 @@ Impossible de trouver le fichier de sortie vidéo !
 Can`t find output audio file!
 Impossible de trouver le fichier de sortie audio !
 
-Select other name for output file!
+Select another name for output file!
 Choisissez un autre nom pour le fichier de sortie !
 
 Resume
@@ -206,7 +206,7 @@ Sélectionner le fichier sous-titres
 AviSynth is not found!
 AviSynth n'est pas présent !
 
-Please install AviSynth 2.5.7 or higher.
+Please install AviSynth 2.5.7 MT or higher.
 SVP installer AviSynth 2.5.7 ou supérieur.
 
 Filtering
@@ -302,7 +302,7 @@ Veille prolongée
 Shutdown
 Fermer
 
-Volume amplifing to
+Volume Amplifying to
 Volume amplifié à
 
 Input resolution:
@@ -323,7 +323,7 @@ Aspect en entrée:
 Output aspect:
 Aspect en sortie:
 
-How fix aspect difference:
+Aspect adjusting method:
 Pour fixer la différence d'aspect:
 
 Width
@@ -467,10 +467,10 @@ Un profile du même nom existe déjà.
 Replace profile?
 Remplacer le profile?
 
-Not allowed remove last profile!
+Not allowed removing the last profile!
 Suppression du dernier profile inadmise !
 
-Do you realy want remove profile
+Do you realy want to remove profile
 Voulez-vous vraiment supprimer le profile ?
 
 Add profile
@@ -494,10 +494,10 @@ Commencer l'encodage des fichiers
 This task encoding now. Cancel encoding before updating.
 Cette tâche fait l'encodage maintenant. Annuler l'encodage avant la mise à jour.
 
-Disabled remove tasks in encoding progress!
+The tasks in encoding process are disabled for removal! 
 Désactivé la suppression des tâches pendant l'encodage !
 
-Do you want run one more encoding thread?
+Do you want to run one more encoding thread?
 Voulez-vous lancer un autre processus d'encodage?
 
 Task list
@@ -527,13 +527,13 @@ Reculer
 Frame forward
 Avancer
 
-Open file
+Open file(s)
 Ouvrir un fichier
 
-Open new file
+Open new file(s)
 Ouvrir un nouveau fichier
 
-Save task to list
+Add task to the list
 Enregistrer sous
 
 Select unique name for output file:
@@ -551,7 +551,7 @@ Effacer les tâches d'encodage
 Delete selected task
 Effacer les tâches sélectionnées
 
-Always close encoding task dialog
+Autoclose encoding dialog if task was successfully accomplished
 Toujours fermer la boite de dialogue des tâches d'encodage
 
 Always delete from list encoded tasks
@@ -575,7 +575,7 @@ Luminosité/Contraste
 Edit saturation, brightness or contrast
 Modifier saturation, luminosité ou contraste
 
-Need update DirectX files! Do it now?
+DirectX update required! Do it now?
 Une mise à jour de DirectX est nécessaire! La faire maintenant ?
 
 Hue
@@ -632,13 +632,13 @@ Saturation/Luminosité
 Denoise/Sharpen
 Réduction de bruit/Netteté
 
-Input file on CD or DVD! FFmpegSource decode files only from HardDrive.
+Input file on CD or DVD! FFmpegSource decodes files only from HardDrive.
 Fichier d'entrée sur CD ou DVD! FFmpegSource ne décode les fichiers que depuis le disque dur.
 
 Copy files to HardDrive or use DirectShowSource decoder.
 Copiez les fichiers sur le disque dur ou utilisez le decodeur DirectShowSource.
 
-Switch decoder to DirectShowSource and try again?
+Switch decoder to DirectShowSource and try once again?
 Changer le décodeur pour DirectShowSource et réessayer?
 
 Update DirectX
@@ -695,7 +695,7 @@ Réglages d'encodage audio
 Output file will be created without sound.
 Le fichier de sortie sera crée sans le son.
 
-Stream contein parameter incompatible with format
+The stream contains parameters incompatible with this format
 Le flux contient des paramètres incompatibles avec le format
 
 
@@ -735,7 +735,7 @@ Convertisseur de taux:
 Samplerate converter:
 Convertisseur de taux:
 
-File don`t have audio streams!
+File doesn`t have audio streams!
 Le fichier n'a pas de flux audio!
 
 Can`t change parameters in COPY mode!
@@ -861,5 +861,5 @@ Désentrelacement automatique
 Support
 Support
 
-You don`t have YV12 decoder! It`s need for source interlace detection.
+You don`t have YV12 decoder! It`s needed for source interlace detection.
 Vous n'avez pas le décodeur YV12! Celui ci est necessaire pour détecter la source d'entrelace.

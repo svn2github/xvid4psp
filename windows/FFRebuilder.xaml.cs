@@ -17,8 +17,8 @@ using System.Collections;
 
 namespace XviD4PSP
 {
-	public partial class FFRebuilder
-	{
+    public partial class FFRebuilder
+    {
         private BackgroundWorker worker = null;
         private ManualResetEvent locker = new ManualResetEvent(true);
         private Process encoderProcess = null;
@@ -138,13 +138,13 @@ namespace XviD4PSP
             worker.WorkerReportsProgress = true;
         }
 
-       private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
             progress.Value = e.ProgressPercentage;
-            Title = "(" +  e.ProgressPercentage + "%)";
+            Title = "(" + e.ProgressPercentage + "%)";
         }
 
-       private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try
             {
@@ -201,6 +201,7 @@ namespace XviD4PSP
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
 
+
                 string line;
                 string pat = @"time=(\d+.\d+)";
                 Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -238,7 +239,7 @@ namespace XviD4PSP
             }
         }
 
-       private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             //проверка на удачное завершение
             if (File.Exists(outfile))
@@ -270,12 +271,12 @@ namespace XviD4PSP
         }
 
 
-       private void ErrorExeption(string message)
-       {
-           ShowMessage(message, Languages.Translate("Error"));
-       }
+        private void ErrorExeption(string message)
+        {
+            ShowMessage(message, Languages.Translate("Error"));
+        }
 
-       internal delegate void MessageDelegate(string mtext, string mtitle);
+        internal delegate void MessageDelegate(string mtext, string mtitle);
         private void ShowMessage(string mtext, string mtitle)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
@@ -312,7 +313,7 @@ namespace XviD4PSP
                     encoderProcess.WaitForExit();
                 }
                 SafeDelete(outfile);
-            }    
+            }
         }
 
         private void SafeDelete(string file)
@@ -341,7 +342,7 @@ namespace XviD4PSP
                     }
                 }
             }
-            else if (worker == null || 
+            else if (worker == null ||
                 !worker.IsBusy)
                 Close();
         }
@@ -353,7 +354,7 @@ namespace XviD4PSP
                 if (button_start.Content.ToString() == Languages.Translate("Pause"))
                 {
                     locker.Reset();
-                    button_start.Content = Languages.Translate("Resume");   
+                    button_start.Content = Languages.Translate("Resume");
                 }
                 else
                 {
@@ -367,7 +368,7 @@ namespace XviD4PSP
                     File.Exists(textbox_infile.Text) &&
                     textbox_outfile.Text != "")
                 {
-                    button_start.Content = Languages.Translate("Pause");  
+                    button_start.Content = Languages.Translate("Pause");
                     tabs.SelectedIndex = 1;
 
                     //запоминаем переменные
@@ -400,7 +401,8 @@ namespace XviD4PSP
                     string opath = Calculate.RemoveExtention(textbox_infile.Text, true) + ".remuxed" + Path.GetExtension(textbox_infile.Text);
 
                     if (_format != formats.AUTO)
-                        opath = Calculate.RemoveExtention(textbox_infile.Text, true) + ".remuxed." + _format.ToString().ToLower();                
+                        opath = Calculate.RemoveExtention(textbox_infile.Text, true) + ".remuxed." + _format.ToString().ToLower();
+
 
                     textbox_outfile.Text = opath;
 
@@ -532,5 +534,5 @@ namespace XviD4PSP
                 return;
             }
         }
-	}
+    }
 }

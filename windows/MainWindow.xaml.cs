@@ -135,10 +135,10 @@ namespace XviD4PSP
                     this.Height = Settings.WindowHeight;
                     this.Left = Settings.WindowLeft;
                     this.Top = Settings.WindowTop;
+                    GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
+                    this.TasksRow.Height = (GridLength)convGridLength.ConvertFromString(Settings.TasksRow);
+                    this.TasksRow2.Height = (GridLength)convGridLength.ConvertFromString(Settings.TasksRow2);
                 }
-
-                //GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
-                //this.TasksRow.Height = (GridLength)convGridLength.ConvertFromString(Settings.TasksRow);
 
                 //Для правильного отображения таймера
                 this.textbox_time.Visibility = Visibility.Visible;//Показать прошедшее время воспроизведения..
@@ -189,9 +189,9 @@ namespace XviD4PSP
                 try
                 {   
                     //Вывод заголовка окна, номера версии и ревизии
-                    AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
-                    this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
-                    asinfo = null;
+                    //AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
+                    //this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
+                    //asinfo = null;
                     
                     //загружаем список форматов
                     combo_format.Items.Clear();
@@ -361,7 +361,6 @@ namespace XviD4PSP
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-
             if (this.graphBuilder != null)
             {
                 //     if (e.Key == Key.System && e.SystemKey == Key.Return)
@@ -429,7 +428,7 @@ namespace XviD4PSP
                     InterlaceWindow();
                 }
 
-
+            
             }
         }
 
@@ -474,7 +473,7 @@ namespace XviD4PSP
             if (IsEncoding)
             {
                 Message mes = new Message(this);
-                mes.ShowMessage(Languages.Translate("Some jobs still encoding!"), Languages.Translate("Warning"));
+                mes.ShowMessage(Languages.Translate("Some jobs are still in progress!"), Languages.Translate("Warning"));
                 e.Cancel = true;
                 return;
             }
@@ -526,8 +525,9 @@ namespace XviD4PSP
                 Settings.WindowHeight = Convert.ToInt32(this.Window.ActualHeight); //высота
                 Settings.WindowLeft = Convert.ToInt32(this.Window.Left); //отступ слева
                 Settings.WindowTop = Convert.ToInt32(this.Window.Top); //отступ сверху
-                //GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
-                //Settings.TasksRow = convGridLength.ConvertToString(this.TasksRow.Height);
+                GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
+                Settings.TasksRow = convGridLength.ConvertToString(this.TasksRow.Height);
+                Settings.TasksRow2 = convGridLength.ConvertToString(this.TasksRow2.Height);
             }           
         }
 
@@ -836,15 +836,12 @@ namespace XviD4PSP
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("Do you realy want to reset all settings") + "?" + Environment.NewLine +
-                Languages.Translate("After that the program will be restarted") + "!", Languages.Translate("Warning") + "!", Message.MessageStyle.OkCancel);
+                Languages.Translate("After that the program will be automatically restarted") + "!", Languages.Translate("Warning") + "!", Message.MessageStyle.OkCancel);
                 if (mess.result == Message.Result.Ok)
                 {
                     string lang = Settings.Language;
                     Settings.ResetAllSettings(this);
                     Settings.Language = lang;
-
-                    Message m = new Message(this);
-                    m.ShowMessage(Languages.Translate("Settings reseted. Program need restart."), Languages.Translate("Settings"));
 
                     //Перезапуск 
                     Process.Start(Calculate.StartupPath + "\\apps\\Launcher.exe", " 30 \"" + Calculate.StartupPath + "\""); //"30" - время ожидания завершения первой копии XviD4PSP, после чего лаунчер просто завершит свою работу
@@ -1022,11 +1019,11 @@ namespace XviD4PSP
                         if (Calculate.IsReadOnly(x.infilepath) && !Settings.FFmpegSource2)
                         {
                             Message mess = new Message(this);
-                            mess.ShowMessage(Languages.Translate("Input file on CD or DVD! FFmpegSource decode files only from HardDrive.") +
+                            mess.ShowMessage(Languages.Translate("Input file on CD or DVD! FFmpegSource decodes files only from HardDrive.") +
                                 Environment.NewLine +
                             Languages.Translate("Copy files to HardDrive or use DirectShowSource decoder.") +
                             Environment.NewLine +
-                            Languages.Translate("Switch decoder to DirectShowSource and try again?"),
+                            Languages.Translate("Switch decoder to DirectShowSource and try once again?"),
                                 Languages.Translate("Error"), Message.MessageStyle.YesNo);
 
                             if (mess.result == Message.Result.Yes)
@@ -1604,7 +1601,7 @@ namespace XviD4PSP
                         if (CopyProblems != null)
                         {
                             Message mess = new Message(this);
-                            mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                            mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                                 " " + Format.EnumToString(x.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                         }
                     }
@@ -1630,12 +1627,13 @@ namespace XviD4PSP
 
                     //загружаем скрипт в форму
                     if (showpreview != ShowPreview.no)
-                         LoadVideo(MediaLoad.load);
+                    {
+                        LoadVideo(MediaLoad.load);
+                        MenuHider(true); //Делаем пункты меню активными
+                    }
 
                     //удаляем старый кеш
                     clear_ff_cache();
-
-                    MenuHider(true); //Делаем пункты меню активными
                 }
                 else
                     return;
@@ -1678,7 +1676,7 @@ namespace XviD4PSP
 
                 if (outfiles.Contains(mass.outfilepath) || mass.infilepath == mass.outfilepath)
                 {
-                    ErrorExeption(Languages.Translate("Select other name for output file!"));
+                    ErrorExeption(Languages.Translate("Select another name for output file!"));
                     return;
                 }
 
@@ -1875,7 +1873,7 @@ namespace XviD4PSP
                 if (ex.Message.Contains("DirectX"))
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Need update DirectX files! Do it now?"),
+                    mess.ShowMessage(Languages.Translate("DirectX update required! Do it now?"),
                         Languages.Translate("Error"), Message.MessageStyle.YesNo);
                     if (mess.result == Message.Result.Yes)
                     {
@@ -1895,156 +1893,169 @@ namespace XviD4PSP
         //переводим лейблы
         private void SetLanguage()
         {
-            mnFile.Header = Languages.Translate("File");
-            mnOpen.Header = Languages.Translate("Open file") + "...";
-            menu_decode_file.Header = Languages.Translate("Decode file") + "...";
-            menu_join.Header = Languages.Translate("Join file") + "...";
-            mnSave.Header = Languages.Translate("Save file") + "...";
-            menu_dvd.Header = Languages.Translate("Open DVD folder") + "...";
-            button_dvd.ToolTip = Languages.Translate("Open DVD folder");
-            mnExit.Header = Languages.Translate("Exit");
-            mnCloseFile.Header = Languages.Translate("Close file");
-            menu_save_frame.Header = Languages.Translate("Save frame") + "...";
-            menu_savethm.Header = Languages.Translate("Save") + " THM...";
+            try
+            {
+                //Считываем словарь
+                using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\languages\\" + Settings.Language + ".txt", System.Text.Encoding.Default))
+                {
+                    Languages.Dictionary = sr.ReadToEnd();
+                    sr.Close();
+                }
 
-            mnVideo.Header = Languages.Translate("Video");
-            mnAudio.Header = Languages.Translate("Audio");
-            mnSubtitles.Header = Languages.Translate("Subtitles");
-            //mnPlayer.Header = Languages.Translate("Player");
-            menu_audiooptions.Header = Languages.Translate("Editing options");
-            menu_save_wav.Header = Languages.Translate("Save to WAV");
-            //menu_demux.Header = Languages.Translate("Save to");
-            menu_demux.Header = Languages.Translate("Demux");
-            //menu_demux_video.Header = Languages.Translate("Save to");
-            menu_demux_video.Header = Languages.Translate("Demux");
+                mnFile.Header = Languages.Translate("File");
+                mnOpen.Header = Languages.Translate("Open file(s)") + "...";
+                menu_decode_file.Header = Languages.Translate("Decode file") + "...";
+                menu_join.Header = Languages.Translate("Join file") + "...";
+                mnSave.Header = Languages.Translate("Add task") + "...";
+                menu_dvd.Header = Languages.Translate("Open DVD folder") + "...";
+                button_dvd.ToolTip = Languages.Translate("Open DVD folder");
+                mnExit.Header = Languages.Translate("Exit");
+                mnCloseFile.Header = Languages.Translate("Close file");
+                menu_save_frame.Header = Languages.Translate("Save frame") + "...";
+                menu_savethm.Header = Languages.Translate("Save") + " THM...";
 
-            mnUpdateVideo.Header = Languages.Translate("Refresh preview");
-            menu_createautoscript.Header = Languages.Translate("Create auto script");
-            menu_editscript.Header = Languages.Translate("Edit filtering script");
+                mnVideo.Header = Languages.Translate("Video");
+                mnAudio.Header = Languages.Translate("Audio");
+                mnSubtitles.Header = Languages.Translate("Subtitles");
+                //mnPlayer.Header = Languages.Translate("Player");
+                menu_audiooptions.Header = Languages.Translate("Editing options");
+                menu_save_wav.Header = Languages.Translate("Save to WAV");
+                //menu_demux.Header = Languages.Translate("Save to");
+                menu_demux.Header = Languages.Translate("Demux");
+                //menu_demux_video.Header = Languages.Translate("Save to");
+                menu_demux_video.Header = Languages.Translate("Demux");
 
-            mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
-            menu_interlace.Header = Languages.Translate("Interlace") + "/" + Languages.Translate("Framerate");
+                mnUpdateVideo.Header = Languages.Translate("Refresh preview");
+                menu_createautoscript.Header = Languages.Translate("Create auto script");
+                menu_editscript.Header = Languages.Translate("Edit filtering script");
 
-            mnAddSubtitles.Header = Languages.Translate("Add");
-            mnRemoveSubtitles.Header = Languages.Translate("Remove");
+                mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
+                menu_interlace.Header = Languages.Translate("Interlace") + "/" + Languages.Translate("Framerate");
 
-            menu_save_script.Header = Languages.Translate("Save script");
+                mnAddSubtitles.Header = Languages.Translate("Add");
+                mnRemoveSubtitles.Header = Languages.Translate("Remove");
 
-            menu_playinwmp.Header = Languages.Translate("Play in") + " Windows Media Player";
-            menu_payinmpc.Header = Languages.Translate("Play in") + " Media Player Classic";
-            menu_playinwpf.Header = Languages.Translate("Play in") + " WPF Video Player";
+                menu_save_script.Header = Languages.Translate("Save script");
 
-            mnSettings.Header = Languages.Translate("Settings");
-            menu_settings.Header = Languages.Translate("Global settings");
-            mnLanguage.Header = Languages.Translate("Language");
-            mnResetSettings.Header = Languages.Translate("Reset all settings");
-            mnAfterImport.Header = Languages.Translate("After opening");
-            menu_after_i_play.Content = Languages.Translate("Play");
-            menu_after_i_nothing.Content = Languages.Translate("Nothing");
-            menu_after_i_middle.Content = Languages.Translate("Middle");
+                menu_playinwmp.Header = Languages.Translate("Play in") + " Windows Media Player";
+                menu_payinmpc.Header = Languages.Translate("Play in") + " Media Player Classic";
+                menu_playinwpf.Header = Languages.Translate("Play in") + " WPF Video Player";
 
-            menu_auto_crop.Header = Languages.Translate("Auto crop");
-            menu_auto_volume.Header = Languages.Translate("Auto volume");
-            menu_auto_volume_disabled.Content = Languages.Translate("Disabled");
-            menu_auto_volume_onexp.Content = Languages.Translate("Before encoding");
-            menu_auto_volume_onimp.Content = Languages.Translate("After opening");
-            menu_acrop_mpeg.Content = Languages.Translate("MPEG`s only");
-            menu_acrop_disabled.Content = Languages.Translate("Disabled");
-            menu_acrop_allfiles.Content = Languages.Translate("All files");
+                mnSettings.Header = Languages.Translate("Settings");
+                menu_settings.Header = Languages.Translate("Global settings");
+                mnLanguage.Header = Languages.Translate("Language");
+                mnResetSettings.Header = Languages.Translate("Reset all settings");
+                mnAfterImport.Header = Languages.Translate("After opening");
+                menu_after_i_play.Content = Languages.Translate("Play");
+                menu_after_i_nothing.Content = Languages.Translate("Nothing");
+                menu_after_i_middle.Content = Languages.Translate("Middle");
 
-            menu_auto_deinterlace.Header = Languages.Translate("Auto deinterlace");
-            check_auto_deint_all.Content = Languages.Translate("All files");
-            check_auto_deint_disabled.Content = Languages.Translate("Disabled");
-            check_auto_deint_mpeg.Content = Languages.Translate("MPEG`s only");
+                menu_auto_crop.Header = Languages.Translate("Auto crop");
+                menu_auto_volume.Header = Languages.Translate("Auto volume");
+                menu_auto_volume_disabled.Content = Languages.Translate("Disabled");
+                menu_auto_volume_onexp.Content = Languages.Translate("Before encoding");
+                menu_auto_volume_onimp.Content = Languages.Translate("After opening");
+                menu_acrop_mpeg.Content = Languages.Translate("MPEG`s only");
+                menu_acrop_disabled.Content = Languages.Translate("Disabled");
+                menu_acrop_allfiles.Content = Languages.Translate("All files");
 
-            menu_auto_join.Header = Languages.Translate("Auto join");
-            check_auto_join_disabled.Content = Languages.Translate("Disabled");
-            check_auto_join_enabled.Content = Languages.Translate("Enabled");
-            check_auto_join_onlydvd.Content = Languages.Translate("DVD Only");
+                menu_auto_deinterlace.Header = Languages.Translate("Auto deinterlace");
+                check_auto_deint_all.Content = Languages.Translate("All files");
+                check_auto_deint_disabled.Content = Languages.Translate("Disabled");
+                check_auto_deint_mpeg.Content = Languages.Translate("MPEG`s only");
 
-            mnVideoDecoding.Header = Languages.Translate("Decoding");
-            mnAVIFiles.Header = "AVI " + Languages.Translate("files");
-            mnMPEGFiles.Header = "MPEG " + Languages.Translate("files");
-            mnOtherFiles.Header = Languages.Translate("Other files");
+                menu_auto_join.Header = Languages.Translate("Auto join");
+                check_auto_join_disabled.Content = Languages.Translate("Disabled");
+                check_auto_join_enabled.Content = Languages.Translate("Enabled");
+                check_auto_join_onlydvd.Content = Languages.Translate("DVD Only");
 
-            menu_fix_AVCHD.Header = Languages.Translate("Convert BluRay UDF to FAT32");
+                mnVideoDecoding.Header = Languages.Translate("Decoding");
+                mnAVIFiles.Header = "AVI " + Languages.Translate("files");
+                mnMPEGFiles.Header = "MPEG " + Languages.Translate("files");
+                mnOtherFiles.Header = Languages.Translate("Other files");
 
-            menu_player_engine.Header = Languages.Translate("Player engine");
+                menu_fix_AVCHD.Header = Languages.Translate("Convert BluRay UDF to FAT32");
 
-            mnTools.Header = Languages.Translate("Tools");
-            mnHelp.Header = Languages.Translate("Help");
-            mnAbout.Header = Languages.Translate("About");
+                menu_player_engine.Header = Languages.Translate("Player engine");
 
-            text_vencoding.Content = Languages.Translate("Video encoding") + ":";
-            text_aencoding.Content = Languages.Translate("Audio encoding") + ":";
-            text_filtering.Content = Languages.Translate("Filtering") + ":";
-            text_sbc.Content = Languages.Translate("Color correction") + ":";
-            menu_saturation_brightness.Header = Languages.Translate("Color correction");
-            text_format.Content = Languages.Translate("Format") + ":";
-            button_edit_filters.ToolTip = Languages.Translate("Edit filtering script");
-            button_edit_vencoding.ToolTip = Languages.Translate("Edit video encoding settings");
-            button_edit_aencoding.ToolTip = Languages.Translate("Edit audio encoding settings");
-            menu_aenc_settings.Header = Languages.Translate("Encoding settings");
-            menu_venc_settings.Header = Languages.Translate("Encoding settings");
-            button_edit_sbc.ToolTip = Languages.Translate("Edit saturation, brightness or contrast");
-            button_edit_format.ToolTip = Languages.Translate("Edit format settings");
+                mnTools.Header = Languages.Translate("Tools");
+                mnHelp.Header = Languages.Translate("Help");
+                mnAbout.Header = Languages.Translate("About");
 
-            button_open.Content = Languages.Translate("Open");
-            button_open.ToolTip = Languages.Translate("Open new file");
-            button_configure.Content = Languages.Translate("Configure");
-            button_configure.ToolTip = Languages.Translate("Configure editing and encoding options");
-            button_save.Content = Languages.Translate("Save");
-            button_save.ToolTip = Languages.Translate("Save task to list");
-            button_encode.Content = Languages.Translate("Encode");
-            button_encode.ToolTip = Languages.Translate("Start files encoding");
-            button_close.Content = Languages.Translate("Close");
-            button_close.ToolTip = Languages.Translate("Close current file");
+                text_vencoding.Content = Languages.Translate("Video encoding") + ":";
+                text_aencoding.Content = Languages.Translate("Audio encoding") + ":";
+                text_filtering.Content = Languages.Translate("Filtering") + ":";
+                text_sbc.Content = Languages.Translate("Color correction") + ":";
+                menu_saturation_brightness.Header = Languages.Translate("Color correction");
+                text_format.Content = Languages.Translate("Format") + ":";
+                button_edit_filters.ToolTip = Languages.Translate("Edit filtering script");
+                button_edit_vencoding.ToolTip = Languages.Translate("Edit video encoding settings");
+                button_edit_aencoding.ToolTip = Languages.Translate("Edit audio encoding settings");
+                menu_aenc_settings.Header = Languages.Translate("Encoding settings");
+                menu_venc_settings.Header = Languages.Translate("Encoding settings");
+                button_edit_sbc.ToolTip = Languages.Translate("Edit saturation, brightness or contrast");
+                button_edit_format.ToolTip = Languages.Translate("Edit format settings");
 
-            list_tasks.ToolTip = Languages.Translate("Task list");
+                button_open.Content = Languages.Translate("Open");
+                button_open.ToolTip = Languages.Translate("Open new file(s)");
+                button_configure.Content = Languages.Translate("Configure");
+                button_configure.ToolTip = Languages.Translate("Configure audio-processing options");
+                button_save.Content = Languages.Translate("Enqueue");
+                button_save.ToolTip = Languages.Translate("Add task to the list");
+                button_encode.Content = Languages.Translate("Encode");
+                button_encode.ToolTip = Languages.Translate("Start files encoding");
+                button_close.Content = Languages.Translate("Close");
+                button_close.ToolTip = Languages.Translate("Close current file");
 
-            button_play.ToolTip = Languages.Translate("Play-Pause");
-            button_frame_back.ToolTip = Languages.Translate("Frame back");
-            button_frame_forward.ToolTip = Languages.Translate("Frame forward");
+                list_tasks.ToolTip = Languages.Translate("Task list");
 
-            cmenu_deselect.Header = Languages.Translate("Deselect");
-            cmenu_delete_all_tasks.Header = Languages.Translate("Delete all tasks");
-            cmenu_delete_encoded_tasks.Header = Languages.Translate("Delete encoded tasks");
-            cmenu_delete_task.Header = Languages.Translate("Delete selected task");
-            cmenu_is_always_delete_encoded.Content = Languages.Translate("Always delete from list encoded tasks");
-            cmenu_reset_status.Header = Languages.Translate("Reset task status");
+                button_play.ToolTip = Languages.Translate("Play-Pause");
+                button_frame_back.ToolTip = Languages.Translate("Frame back");
+                button_frame_forward.ToolTip = Languages.Translate("Frame forward");
 
-            menu_directx_update.Header = Languages.Translate("Update DirectX");
-            menu_autocrop.Header = Languages.Translate("Detect black borders");
-            menu_detect_interlace.Header = Languages.Translate("Detect interlace");
-            menu_home.Header = Languages.Translate("Home page");
-            menu_support.Header = Languages.Translate("Support forum");
-            menu_donate.Header = Languages.Translate("Donate");
-            menu_avisynth_guide_en.Header = Languages.Translate("AviSynth guide") + " (EN)";
-            menu_avisynth_guide_ru.Header = Languages.Translate("AviSynth guide") + " (RU)";
+                cmenu_deselect.Header = Languages.Translate("Deselect");
+                cmenu_delete_all_tasks.Header = Languages.Translate("Delete all tasks");
+                cmenu_delete_encoded_tasks.Header = Languages.Translate("Delete encoded tasks");
+                cmenu_delete_task.Header = Languages.Translate("Delete selected task");
+                cmenu_is_always_delete_encoded.Content = Languages.Translate("Always delete encoded tasks from list");
+                cmenu_reset_status.Header = Languages.Translate("Reset task status");
 
-            button_set_start.Content = Languages.Translate("Set Start");
-            button_set_end.Content = Languages.Translate("Set End");
-            button_apply_trim.Content = Languages.Translate("Apply Trim");
-            menu_open_folder.Header = Languages.Translate("Open folder...");
-            mnApps_Folder.Header =Languages.Translate("Open XviD4PSP folder");
+                menu_directx_update.Header = Languages.Translate("Update DirectX");
+                menu_autocrop.Header = Languages.Translate("Detect black borders");
+                menu_detect_interlace.Header = Languages.Translate("Detect interlace");
+                menu_home.Header = Languages.Translate("Home page");
+                menu_support.Header = Languages.Translate("Support forum");
+                menu_donate.Header = Languages.Translate("Donate");
+                menu_avisynth_guide_en.Header = Languages.Translate("AviSynth guide") + " (EN)";
+                menu_avisynth_guide_ru.Header = Languages.Translate("AviSynth guide") + " (RU)";
 
-            //Тултипы для выбора видео-декодера
-            mnAVIFiles.ToolTip = "Choose decoder that will be used for decoding AVI-files.";
-            mn_avi_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
-            mn_avi_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
-            mn_avi_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2).";
-            mnMPEGFiles.ToolTip = "Choose decoder that will be used for decoding MPEG-files.";
-            mn_mpg_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
-            mn_mpg_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
-            mn_mpg_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2).";
-            mn_mpg_dec_mpg.ToolTip = "I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.";
-            check_force_film.ToolTip = "Turns on ForcedFilm for DGIndex(MPEG2Source), it will reduce fps to 23,976. Applies only if video have PullDown flag and 23.976fps (29.970 after PullDown). Read DGIndex manual for more info!" + Environment.NewLine + "NEWER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!";
-            mnOtherFiles.ToolTip = "Choose decoder that will be used for decoding other file-types.";
-            mn_oth_dec_ds.ToolTip = "This decoder will be use installed on your system DirecShow filters-decoders (and theirs settings!) for decoding Audio and Video from your file.";
-            mn_oth_dec_ds2.ToolTip = "Mostly the same as DirectShowSource, but from Haali. This decoder can provide frame-accuracy seeking," + Environment.NewLine + "and didn`t use your system decoders for decoding Audio.";
-            mn_oth_dec_ff.ToolTip = "This decoder (old or new) is fully independed from your system-decoders and theirs settings. But need some time for indexing video (especialy new FFmpegSource2).";
-            mnFFmpegSource.ToolTip = "Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.";
-            check_old_seeking.ToolTip = "Old method of seeking - continuous positioning (all the time that you move slider)," + Environment.NewLine + "New method - positioning applies only when you release the mouse button.";
+                button_set_start.Content = Languages.Translate("Set Start");
+                button_set_end.Content = Languages.Translate("Set End");
+                button_apply_trim.Content = Languages.Translate("Apply Trim");
+                menu_open_folder.Header = Languages.Translate("Open folder...");
+                mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
+                menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
+
+                //Тултипы для выбора видео-декодера
+                //mnAVIFiles.ToolTip = "Choose decoder that will be used for decoding AVI-files.";
+                mn_avi_dec_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
+                mn_avi_dec_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
+                mn_avi_dec_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
+                //mnMPEGFiles.ToolTip = "Choose decoder that will be used for decoding MPEG-files.";
+                mn_mpg_dec_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
+                mn_mpg_dec_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
+                mn_mpg_dec_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
+                mn_mpg_dec_mpg.ToolTip = Languages.Translate("I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.");
+                check_force_film.ToolTip = Languages.Translate("If checked, DGIndex(MPEG2Source) will reduce fps to 23,976. Use only if video has PullDown flag and 23.976fps (29.970 after PullDown). Read DGIndex manual for more info!") + Environment.NewLine + Languages.Translate("NEVER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!");
+                //mnOtherFiles.ToolTip = "Choose decoder that will be used for decoding other file-types.";
+                mn_oth_dec_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
+                mn_oth_dec_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
+                mn_oth_dec_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
+                mnFFmpegSource.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.");
+
+                check_old_seeking.ToolTip = "Old method of seeking - continuous positioning (all the time that you move slider)," + Environment.NewLine + "New method - positioning applies only when you release the mouse button.";
+            }
+            catch { }
         }
 
         //загружаем настройки
@@ -2142,12 +2153,10 @@ namespace XviD4PSP
             cmenu_is_always_delete_encoded.IsChecked = Settings.AutoDeleteTasks;
             
             //Установка параметров регулятора громкости
-            slider_Volume.Minimum = 0; //-10000
-            slider_Volume.Maximum = 1; //0
-            slider_Volume.SmallChange = 0.05;
             slider_Volume.Value = Settings.VolumeLevel; //Установка значения громкости из реестра..
-            //VolumeSet = Convert.ToInt32(-(10000 - Math.Sqrt(slider_Volume.Value) * 10000)); //.. и пересчет его для ДиректШоу
-            VolumeSet = Convert.ToInt32(-(10000 - Math.Pow(slider_Volume.Value, 1.0 / 3) * 10000)); //.. и пересчет его для ДиректШоу (корень кубический)
+            VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //.. и пересчет его для ДиректШоу
+            if (slider_Volume.Value == 0)
+                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume_Disable.png", UriKind.RelativeOrAbsolute));
 
             if (Settings.FFmpegSource2)
                 mn_ffmpeg_new.IsChecked = true;
@@ -2279,7 +2288,7 @@ namespace XviD4PSP
                 if (m.format == Format.ExportFormats.Audio)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -2639,7 +2648,7 @@ namespace XviD4PSP
                 if (m.format == Format.ExportFormats.Audio)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -3158,7 +3167,7 @@ namespace XviD4PSP
                         if (CopyProblems != null)
                         {
                             Message mess = new Message(this);
-                            mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                            mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                                 " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                         }
                     }
@@ -3386,7 +3395,7 @@ namespace XviD4PSP
                             if (CopyProblems != null)
                             {
                                 Message mess = new Message(this);
-                                mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                                mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                                     " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                             }
                         }
@@ -3429,7 +3438,7 @@ namespace XviD4PSP
             else if (m.format == Format.ExportFormats.Audio)
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
             }
             else
             {
@@ -3511,7 +3520,7 @@ namespace XviD4PSP
                 if (m.inaudiostreams.Count == 0 || combo_aencoding.SelectedItem.ToString() == "Disabled")
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -3692,7 +3701,7 @@ namespace XviD4PSP
                 if (task.Status == "Encoding")
                 {
                     Message mes = new Message(this);
-                    mes.ShowMessage(Languages.Translate("Disabled remove tasks in encoding progress!"), Languages.Translate("Error"));
+                    mes.ShowMessage(Languages.Translate("The tasks in encoding process are disabled for removal!"), Languages.Translate("Error"));
                     return;
                 }
 
@@ -3842,7 +3851,7 @@ namespace XviD4PSP
                 if (IsEncoding && IsWaiting)
                 {
                     Message mes = new Message(this);
-                    mes.ShowMessage(Languages.Translate("Do you want run one more encoding thread?"), Languages.Translate("Question"), Message.MessageStyle.YesNo);
+                    mes.ShowMessage(Languages.Translate("Do you want to run one more encoding thread?"), Languages.Translate("Question"), Message.MessageStyle.YesNo);
                     if (mes.result == Message.Result.No)
                         return;
                 }
@@ -3989,7 +3998,7 @@ namespace XviD4PSP
                 else if (m.format == Format.ExportFormats.Audio)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -4057,15 +4066,10 @@ namespace XviD4PSP
                     Message mess = new Message(this);
                     mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
                 }
-                else if (outstream.codec == "Disabled")
+                else if (outstream.codec == "Disabled" || m.inaudiostreams.Count == 0)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
-                }
-                else if (m.inaudiostreams.Count == 0)
-                {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -4086,7 +4090,7 @@ namespace XviD4PSP
             {
                 if (o.FileName == m.infilepath)
                 {
-                    ErrorExeption(Languages.Translate("Select other name for output file!"));
+                    ErrorExeption(Languages.Translate("Select another name for output file!"));
                     return;
                 }
                 Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.DecodeToWAV, o.FileName);
@@ -4100,7 +4104,7 @@ namespace XviD4PSP
                 if (m.inaudiostreams.Count == 0)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have audio streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -4123,7 +4127,7 @@ namespace XviD4PSP
                         {
                             if (o.FileName == m.infilepath)
                             {
-                                ErrorExeption(Languages.Translate("Select other name for output file!"));
+                                ErrorExeption(Languages.Translate("Select another name for output file!"));
                                 return;
                             }
                             Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, o.FileName);
@@ -4140,7 +4144,7 @@ namespace XviD4PSP
                 if (!m.isvideo)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -4156,7 +4160,7 @@ namespace XviD4PSP
                     {
                         if (o.FileName == m.infilepath)
                         {
-                            ErrorExeption(Languages.Translate("Select other name for output file!"));
+                            ErrorExeption(Languages.Translate("Select another name for output file!"));
                             return;
                         }
 
@@ -4303,7 +4307,7 @@ namespace XviD4PSP
                 if (!m.isvideo)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -5102,7 +5106,7 @@ namespace XviD4PSP
                 if (!m.isvideo)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -5149,7 +5153,7 @@ namespace XviD4PSP
                 if (m.format == Format.ExportFormats.Audio)
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
                 }
                 else
                 {
@@ -5359,7 +5363,7 @@ namespace XviD4PSP
                     if (CopyProblems != null)
                     {
                         Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                             " " + Format.EnumToString(mass.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
@@ -5450,7 +5454,7 @@ namespace XviD4PSP
             else if (!m.isvideo)
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
             }
         }
 
@@ -5556,7 +5560,7 @@ namespace XviD4PSP
             else if (!m.isvideo)
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File don`t have video streams!"), Languages.Translate("Error"));
+                mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
             }
         }
 
@@ -5765,7 +5769,7 @@ namespace XviD4PSP
                         //    if (CopyProblems != null)
                         //    {
                         //        Message mess = new Message(this);
-                        //        mess.ShowMessage(Languages.Translate("Stream contein parameter incompatible with format") +
+                        //        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                         //            " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
                         //    }
                         //}
@@ -5778,7 +5782,7 @@ namespace XviD4PSP
                 else
                 {
                     Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("This format don`t have any settings."), Languages.Translate("Format"));
+                    mess.ShowMessage(Languages.Translate("This format doesn`t have any settings."), Languages.Translate("Format"));
                 }
             }
         }
@@ -5813,39 +5817,28 @@ namespace XviD4PSP
         //Обработка изменения положения регулятора громкости, изменение иконки рядом с ним, пересчет значений для ДиректШоу
         private void Volume_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
         {
-            //            if (slider_Volume.IsFocused)
-
-            // VolumeSet = Convert.ToInt32(-(10000 - Math.Sqrt(slider_Volume.Value) * 10000)); //Пересчитывание громкости для ДиректШоу  
-            VolumeSet = Convert.ToInt32(-(10000 - Math.Pow(slider_Volume.Value, 1.0 / 3) * 10000)); //Пересчитывание громкости для ДиректШоу (корень кубический)
+            VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //Пересчитывание громкости для ДиректШоу
             if (this.graphBuilder != null && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) //Если ДиректШоу и Граф не пуст..
-            {
                 basicAudio.put_Volume(VolumeSet); //..то задаем громкость для ДиректШоу
-            }
-
+            
             //Иконка регулятора громкости
             if (slider_Volume.Value <= 0.0)
-            {
-                //Устанавливаем картинку для Громкость=0 
-                BitmapImage Vl2 = new BitmapImage();
-                Vl2.BeginInit();
-                Vl2.UriSource = new Uri(@"../pictures/Volume_Disable.png", UriKind.RelativeOrAbsolute);
-                Vl2.EndInit();
-                image_volume.Source = Vl2; //Выводим картинку Громкость=0    
-            }
+                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume_Disable.png", UriKind.RelativeOrAbsolute));
             else
-            {
-                //Устанавливаем картинку для Громкость>0 
-                BitmapImage Vl1 = new BitmapImage();
-                Vl1.BeginInit();
-                Vl1.UriSource = new Uri(@"../pictures/Volume1.png", UriKind.RelativeOrAbsolute);
-                Vl1.EndInit();
-                image_volume.Source = Vl1; //Выводим картинку Громкость>0  
-            }
+                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume1.png", UriKind.RelativeOrAbsolute));
+            
             //Запись значения громкости в реестр
             Settings.VolumeLevel = slider_Volume.Value;
-
         }
 
+        //Меняем громкость колесиком мышки
+        private void Volume_Wheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta > 0)
+                VolumePlus();
+            else
+                VolumeMinus();
+        }
 
         //Обработка двойного щелчка мыши для ДиректШоу
         private void Direct_Show_Mouse_Click(object sender, MouseButtonEventArgs e)
@@ -5893,10 +5886,9 @@ namespace XviD4PSP
                         trim_start = (int)Math.Round(Position.TotalSeconds * fps);
                         textbox_start.Text = Convert.ToString(trim_start);
                     }
-                    else
-                    {
-                        trim_start = Convert.ToInt32(textbox_start.Text);
-                    }
+                    else if (!int.TryParse(textbox_start.Text, out trim_start)) //Допустимы только числовые значения
+                        return;
+
                     textbox_start.IsReadOnly = true;
                     button_set_start.Content = Languages.Translate("Clear");
                 }
@@ -5907,10 +5899,7 @@ namespace XviD4PSP
                     textbox_start.IsReadOnly = false;
                     button_set_start.Content = Languages.Translate("Set Start");
                 }
-
-
             }
-
         }
 
         private void button_set_end_Click(object sender, RoutedEventArgs e)
@@ -5924,10 +5913,9 @@ namespace XviD4PSP
                         trim_end = (int)Math.Round(Position.TotalSeconds * fps);
                         textbox_end.Text = Convert.ToString(trim_end);
                     }
-                    else
-                    {
-                        trim_end = Convert.ToInt32(textbox_end.Text);
-                    }
+                    else if (!int.TryParse(textbox_end.Text, out trim_end)) //Допустимы только числовые значения
+                        return;
+
                     textbox_end.IsReadOnly = true;
                     button_set_end.Content = Languages.Translate("Clear");
                 }
@@ -5938,9 +5926,7 @@ namespace XviD4PSP
                     textbox_end.IsReadOnly = false;
                     button_set_end.Content = Languages.Translate("Set End");
                 }
-
             }
-
         }
 
         private void button_apply_trim_Click(object sender, RoutedEventArgs e)
@@ -6068,7 +6054,7 @@ namespace XviD4PSP
                 int count = files_to_open.Length; //Кол-во файлов для открытия
 
                 //Вывод первичной инфы об открытии
-                textbox_name.Text = count + " - " + "total files, " + opened_files + " - " + "opened files, " + outfiles.Count + " - " + "in queue";
+                textbox_name.Text = count + " - " + Languages.Translate("total files, ") + opened_files + " - " + Languages.Translate("opened files, ") + outfiles.Count + " - " + Languages.Translate("in queue");
 
                 //Делим строку с валидными расширениями на отдельные строчки
                 string[] separator = new string[] { "/" };
@@ -6094,10 +6080,13 @@ namespace XviD4PSP
                     }
 
                     //Обновляем инфу об открытии
-                    textbox_name.Text = count + " - " + "total files, " + opened_files + " - " + "opened files, " + outfiles.Count + " - " + "in queue";
+                    textbox_name.Text = count + " - " + Languages.Translate("total files, ") + opened_files + " - " + Languages.Translate("opened files, ") + outfiles.Count + " - " + Languages.Translate("in queue");
                 }
                 if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
+                {
                     LoadVideo(MediaLoad.load);
+                    MenuHider(true);
+                }
 
                 if (Settings.AutoBatchEncoding)
                     EncodeNextTask(); //Запускаем кодирование
@@ -6160,7 +6149,7 @@ namespace XviD4PSP
                 {
                     Message mess = new Message(this);
                     mess.ShowMessage(Languages.Translate("Selected temp folder is not empty") + " (" + Settings.TempPath.ToString() + ")." + Environment.NewLine + Languages.Translate("You must delete all unnecessary files before start encoding.")
-                        + Environment.NewLine + Environment.NewLine + Languages.Translate("OK - open folder to view files, Cancel - ignore this message."), Languages.Translate("Temp folder not empty"), Message.MessageStyle.OkCancel);
+                        + Environment.NewLine + Environment.NewLine + Languages.Translate("OK - open folder to view files, Cancel - ignore this message."), Languages.Translate("Temp folder is not empty"), Message.MessageStyle.OkCancel);
                     if (mess.result == Message.Result.Ok)
                         System.Diagnostics.Process.Start("explorer.exe", Settings.TempPath);
                 }
@@ -6227,7 +6216,16 @@ namespace XviD4PSP
             menu_playinwmp.IsEnabled = ShowItems;
             menu_payinmpc.IsEnabled = ShowItems;
             menu_playinwpf.IsEnabled = ShowItems;
+
+            AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
+            if (m != null)
+                this.Title = Path.GetFileName(m.infilepath) + "  - XviD4PSP - v" + asinfo.Version + "  " + asinfo.Trademark;
+            else
+                this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
+            asinfo = null;
         }
+
+       
 
     }
 }

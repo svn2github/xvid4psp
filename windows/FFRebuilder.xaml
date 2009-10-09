@@ -5,66 +5,66 @@
 	x:Class="XviD4PSP.FFRebuilder"
 	x:Name="Window"
 	Title="FFRebuilder"
-	Width="600" Height="500" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SizeToContent="Manual">
+	Width="600" Height="506" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SizeToContent="Manual">
 
-	<Grid x:Name="LayoutRoot" PreviewDragOver="LayoutRoot_DragEnter" PreviewDragEnter="LayoutRoot_DragEnter" Drop="LayoutRoot_Drop" AllowDrop="True">
-		<Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
-			<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
-				<TabItem Header="Main" x:Name="tab_main">
-					<Grid Width="Auto" Height="Auto">
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*"/>
-						</Grid.ColumnDefinitions>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="*"/>
-						</Grid.RowDefinitions>
-						<GroupBox Margin="8,2,8,0" Header="Files" Foreground="#FFFFFFFF" x:Name="group_files" VerticalAlignment="Top" Height="128">
-							<Grid Width="Auto" Height="Auto">
-								<Label OpacityMask="{x:Null}" x:Name="label_infile" Content="Input file path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,0,0,0"/>
-								<Button x:Name="button_open" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Top" Height="22" Width="22" HorizontalAlignment="Right" Click="button_open_Click" Margin="0,28,9.677,0"/>
-								<TextBox Margin="8,28,35.677,0" x:Name="textbox_infile" VerticalAlignment="Top" Text="" TextWrapping="Wrap" Height="22"/>
-								<Label OpacityMask="{x:Null}" x:Name="label_outfile" Content="Output file path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,0,0,28" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-								<TextBox Margin="8,0,35.677,8" x:Name="textbox_outfile" Text="" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="22"/>
-								<Button x:Name="button_save" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="22" Height="22" Click="button_save_Click" Margin="0,0,9.677,8"/>
-							</Grid>
-						</GroupBox>
-						<GroupBox Margin="8,130,8,0" Header="Info" Foreground="#FFFFFFFF" x:Name="group_info" Height="165" VerticalAlignment="Top">
-							<Grid Width="Auto" Height="Auto">
-								<TextBox x:Name="text_info" Text="" TextWrapping="Wrap" Margin="8,8,8,8"/>
-							</Grid>
-						</GroupBox>
-						<GroupBox Margin="8,296.723,8,0" Header="Options" Foreground="#FFFFFFFF" x:Name="group_options" Height="95" VerticalAlignment="Top">
-							<Grid Width="Auto" Height="Auto">
-								<Label OpacityMask="{x:Null}" x:Name="label_vcodec" Content="Video codec:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,5,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
-								<ComboBox x:Name="combo_vcodec" Height="21.96" IsSynchronizedWithCurrentItem="True" Margin="140,11,0,0" VerticalAlignment="Top" Width="115" d:LayoutOverrides="Height" HorizontalAlignment="Left" SelectionChanged="combo_vcodec_SelectionChanged"/>
-								<Label OpacityMask="{x:Null}" x:Name="label_acodec" Content="Audio codec:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,35,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
-								<ComboBox x:Name="combo_acodec" Height="21.96" IsSynchronizedWithCurrentItem="True" Margin="140,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="115" d:LayoutOverrides="Height" SelectionChanged="combo_acodec_SelectionChanged"/>
-								<Label OpacityMask="{x:Null}" x:Name="label_format" Content="Format:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="305,35,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto" />
-								<ComboBox x:Name="combo_format" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,40,8,0" Width="115" d:LayoutOverrides="Height" SelectionChanged="combo_format_SelectionChanged" VerticalAlignment="Top"/>
-								<Label OpacityMask="{x:Null}" x:Name="label_framerate" Content="Framerate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="305,5,0,0" d:LayoutOverrides="Height" Height="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto" />
-								<ComboBox x:Name="combo_framerate" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,11,8,0" Width="115" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
-							</Grid>
-						</GroupBox>
-					</Grid>
-				</TabItem>
-				<TabItem Header="Log" x:Name="tab_log">
-					<Grid Width="Auto" Height="Auto">
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*"/>
-						</Grid.ColumnDefinitions>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="*"/>
-						</Grid.RowDefinitions>
-						<ProgressBar x:Name="progress" Foreground="{DynamicResource StrawBerryBrush}" Margin="8,0,8,6" VerticalAlignment="Bottom" Height="12"/>
-						<TextBox x:Name="textbox_log" Text="" TextWrapping="Wrap" Margin="8,8,8,26"/>
-					</Grid>
-				</TabItem>
-			</TabControl>
-		</Grid>
-		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
-			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" Click="button_cancel_Click" RenderTransformOrigin="1.122,0.428" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" d:LayoutOverrides="GridBox" HorizontalAlignment="Right" Margin="0,7,8,7"/>
-			<Button x:Name="button_start" Height="Auto" Content="Start" RenderTransformOrigin="1.122,0.428" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Margin="0,7,112,7" d:LayoutOverrides="GridBox" Click="button_start_Click"/>
-			<Button x:Name="button_play" Height="Auto" Content="Play" RenderTransformOrigin="1.122,0.428" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,7,0,7" d:LayoutOverrides="GridBox" Visibility="Visible" Click="button_play_Click"/>
-		</Grid>
-	</Grid>
+    <Grid x:Name="LayoutRoot" PreviewDragOver="LayoutRoot_DragEnter" PreviewDragEnter="LayoutRoot_DragEnter" Drop="LayoutRoot_Drop" AllowDrop="True">
+        <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
+            <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
+                <TabItem Header="Main" x:Name="tab_main">
+                    <Grid Width="Auto" Height="Auto">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <GroupBox Margin="8,2,8,0" Header="Files" Foreground="#FFFFFFFF" x:Name="group_files" VerticalAlignment="Top" Height="128">
+                            <Grid Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="label_infile" Content="Input file path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8,0,0,0"/>
+                                <Button x:Name="button_open" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Top" Height="22" Width="22" HorizontalAlignment="Right" Click="button_open_Click" Margin="0,28,9.677,0"/>
+                                <TextBox Margin="8,28,35.677,0" x:Name="textbox_infile" VerticalAlignment="Top" Text="" TextWrapping="Wrap" Height="22"/>
+                                <Label OpacityMask="{x:Null}" x:Name="label_outfile" Content="Output file path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,0,0,28" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                <TextBox Margin="8,0,35.677,8" x:Name="textbox_outfile" Text="" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="22"/>
+                                <Button x:Name="button_save" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="22" Height="22" Click="button_save_Click" Margin="0,0,9.677,8"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Margin="8,130,8,0" Header="Info" Foreground="#FFFFFFFF" x:Name="group_info" Height="177" VerticalAlignment="Top">
+                            <Grid Width="Auto" Height="Auto">
+                                <TextBox x:Name="text_info" Text="" TextWrapping="Wrap" Margin="8,8,8,8"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Margin="8,306,8,0" Header="Options" Foreground="#FFFFFFFF" x:Name="group_options" Height="95" VerticalAlignment="Top">
+                            <Grid Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="label_vcodec" Content="Video codec:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,5,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
+                                <ComboBox x:Name="combo_vcodec" Height="21.96" IsSynchronizedWithCurrentItem="True" Margin="140,11,0,0" VerticalAlignment="Top" Width="115" d:LayoutOverrides="Height" HorizontalAlignment="Left" SelectionChanged="combo_vcodec_SelectionChanged"/>
+                                <Label OpacityMask="{x:Null}" x:Name="label_acodec" Content="Audio codec:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,35,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
+                                <ComboBox x:Name="combo_acodec" Height="21.96" IsSynchronizedWithCurrentItem="True" Margin="140,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="115" d:LayoutOverrides="Height" SelectionChanged="combo_acodec_SelectionChanged"/>
+                                <Label OpacityMask="{x:Null}" x:Name="label_format" Content="Format:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="305,35,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto" />
+                                <ComboBox x:Name="combo_format" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,40,8,0" Width="115" d:LayoutOverrides="Height" SelectionChanged="combo_format_SelectionChanged" VerticalAlignment="Top"/>
+                                <Label OpacityMask="{x:Null}" x:Name="label_framerate" Content="Framerate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="305,5,0,0" d:LayoutOverrides="Height" Height="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto" />
+                                <ComboBox x:Name="combo_framerate" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,11,8,0" Width="115" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
+                            </Grid>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Log" x:Name="tab_log">
+                    <Grid Width="Auto" Height="Auto">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <ProgressBar x:Name="progress" Foreground="{DynamicResource StrawBerryBrush}" Margin="8,0,8,6" VerticalAlignment="Bottom" Height="12"/>
+                        <TextBox x:Name="textbox_log" Text="" TextWrapping="Wrap" Margin="8,8,8,26"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+        <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
+            <Button x:Name="button_cancel" Height="Auto" Content="Cancel" Click="button_cancel_Click" RenderTransformOrigin="1.122,0.428" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" d:LayoutOverrides="GridBox" HorizontalAlignment="Right" Margin="0,7,8,7"/>
+            <Button x:Name="button_start" Height="Auto" Content="Start" RenderTransformOrigin="1.122,0.428" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Margin="0,7,112,7" d:LayoutOverrides="GridBox" Click="button_start_Click"/>
+            <Button x:Name="button_play" Height="Auto" Content="Play" RenderTransformOrigin="1.122,0.428" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,7,0,7" d:LayoutOverrides="GridBox" Visibility="Visible" Click="button_play_Click"/>
+        </Grid>
+    </Grid>
 </Window>

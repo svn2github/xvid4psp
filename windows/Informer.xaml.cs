@@ -115,7 +115,7 @@ namespace XviD4PSP
                     //Это сообщение больше не нужно, т.к. ForceFilm будет только при индексации видео с PullDown и 23.976фпс
                     //if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && !media.ScanOrder.Contains("Pulldown") && m.inframerate != "23.976" && Settings.DGForceFilm)
                     //{
-                    //    ShowMessage(Languages.Translate("This video was indexing with turned on option ForceFilm, but for this video it was not needed. If you forgot to turn it off,") + Environment.NewLine + Languages.Translate("go to menu Video->Decoding->MPEGfiles and turn it off, then delete indexing folder and try again."), Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    //    ShowMessage(Languages.Translate("This video was indexing with the option ForceFilm on, but for this video it was not needed. If you forgot to turn it off,") + Environment.NewLine + Languages.Translate("go to menu Video->Decoding->MPEGfiles and uncheck it, then delete indexing folder and try again."), Languages.Translate("Error"), Message.MessageStyle.Ok);
                     //}
 
                     //забиваем аудио потоки
@@ -329,7 +329,7 @@ namespace XviD4PSP
                     if (!File.Exists(path + "\\" + name + ".log"))//проверяем, на месте ли сам файл, и если его нет, то Ошибка!
                     {
                         ShowMessage(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + path + "\\" + name + ".log" + Environment.NewLine + Environment.NewLine +
-                        Languages.Translate("AR will be set as 16/9, you can change it manualy later."), Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        Languages.Translate("AR will be set as 16/9, you can change it manually later."), Languages.Translate("Error"), Message.MessageStyle.Ok);
                         m.invcodecshort = "h264";
                         m.inaspect = 1.7777;
                     }
