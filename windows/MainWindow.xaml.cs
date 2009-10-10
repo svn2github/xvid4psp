@@ -1918,10 +1918,10 @@ namespace XviD4PSP
                 mnAudio.Header = Languages.Translate("Audio");
                 mnSubtitles.Header = Languages.Translate("Subtitles");
                 //mnPlayer.Header = Languages.Translate("Player");
-                menu_audiooptions.Header = Languages.Translate("Editing options");
-                menu_save_wav.Header = Languages.Translate("Save to WAV");
+                menu_audiooptions.Header = Languages.Translate("Processing options") + "...";
+                menu_save_wav.Header = Languages.Translate("Save to WAV") + "...";
+                menu_demux.Header = menu_demux_video.Header = Languages.Translate("Demux") + "...";
                 //menu_demux.Header = Languages.Translate("Save to");
-                menu_demux.Header = Languages.Translate("Demux");
                 //menu_demux_video.Header = Languages.Translate("Save to");
                 menu_demux_video.Header = Languages.Translate("Demux");
 
@@ -1942,32 +1942,28 @@ namespace XviD4PSP
                 menu_playinwpf.Header = Languages.Translate("Play in") + " WPF Video Player";
 
                 mnSettings.Header = Languages.Translate("Settings");
-                menu_settings.Header = Languages.Translate("Global settings");
+                menu_settings.Header = Languages.Translate("Global settings") + "...";
                 mnLanguage.Header = Languages.Translate("Language");
-                mnResetSettings.Header = Languages.Translate("Reset all settings");
+                mnResetSettings.Header = Languages.Translate("Reset all settings") + "...";
                 mnAfterImport.Header = Languages.Translate("After opening");
-                menu_after_i_play.Content = Languages.Translate("Play");
-                menu_after_i_nothing.Content = Languages.Translate("Nothing");
-                menu_after_i_middle.Content = Languages.Translate("Middle");
+                after_i_play.Header = Languages.Translate("Play");
+                after_i_nothing.Header = Languages.Translate("Nothing");
+                after_i_middle.Header = Languages.Translate("Middle");
 
                 menu_auto_crop.Header = Languages.Translate("Auto crop");
                 menu_auto_volume.Header = Languages.Translate("Auto volume");
-                menu_auto_volume_disabled.Content = Languages.Translate("Disabled");
-                menu_auto_volume_onexp.Content = Languages.Translate("Before encoding");
-                menu_auto_volume_onimp.Content = Languages.Translate("After opening");
-                menu_acrop_mpeg.Content = Languages.Translate("MPEG`s only");
-                menu_acrop_disabled.Content = Languages.Translate("Disabled");
-                menu_acrop_allfiles.Content = Languages.Translate("All files");
+                auto_volume_disabled.Header = acrop_disabled.Header = auto_deint_disabled.Header = auto_join_disabled.Header =
+                    Languages.Translate("Disabled");
+                auto_volume_onexp.Header = Languages.Translate("Before encoding");
+                auto_volume_onimp.Header = Languages.Translate("After opening");
+                acrop_mpeg.Header = auto_deint_mpeg.Header = Languages.Translate("MPEG`s only");
+                acrop_allfiles.Header = auto_deint_all.Header = Languages.Translate("All files");
 
                 menu_auto_deinterlace.Header = Languages.Translate("Auto deinterlace");
-                check_auto_deint_all.Content = Languages.Translate("All files");
-                check_auto_deint_disabled.Content = Languages.Translate("Disabled");
-                check_auto_deint_mpeg.Content = Languages.Translate("MPEG`s only");
 
                 menu_auto_join.Header = Languages.Translate("Auto join");
-                check_auto_join_disabled.Content = Languages.Translate("Disabled");
-                check_auto_join_enabled.Content = Languages.Translate("Enabled");
-                check_auto_join_onlydvd.Content = Languages.Translate("DVD Only");
+                auto_join_enabled.Header = Languages.Translate("Enabled");
+                auto_join_onlydvd.Header = Languages.Translate("DVD Only");
 
                 mnVideoDecoding.Header = Languages.Translate("Decoding");
                 mnAVIFiles.Header = "AVI " + Languages.Translate("files");
@@ -1991,8 +1987,7 @@ namespace XviD4PSP
                 button_edit_filters.ToolTip = Languages.Translate("Edit filtering script");
                 button_edit_vencoding.ToolTip = Languages.Translate("Edit video encoding settings");
                 button_edit_aencoding.ToolTip = Languages.Translate("Edit audio encoding settings");
-                menu_aenc_settings.Header = Languages.Translate("Encoding settings");
-                menu_venc_settings.Header = Languages.Translate("Encoding settings");
+                menu_aenc_settings.Header = menu_venc_settings.Header = Languages.Translate("Encoding settings") + "...";
                 button_edit_sbc.ToolTip = Languages.Translate("Edit saturation, brightness or contrast");
                 button_edit_format.ToolTip = Languages.Translate("Edit format settings");
 
@@ -2037,23 +2032,14 @@ namespace XviD4PSP
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
 
                 //Тултипы для выбора видео-декодера
-                //mnAVIFiles.ToolTip = "Choose decoder that will be used for decoding AVI-files.";
-                mn_avi_dec_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
-                mn_avi_dec_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
-                mn_avi_dec_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
-                //mnMPEGFiles.ToolTip = "Choose decoder that will be used for decoding MPEG-files.";
-                mn_mpg_dec_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
-                mn_mpg_dec_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
-                mn_mpg_dec_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
-                mn_mpg_dec_mpg.ToolTip = Languages.Translate("I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.");
+                avi_ds.ToolTip = o_ds.ToolTip = mpg_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
+                avi_ds2.ToolTip = o_ds2.ToolTip = mpg_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
+                avi_ff.ToolTip = o_ff.ToolTip = mpg_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
+                mpg_mpg.ToolTip = Languages.Translate("I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.");
                 check_force_film.ToolTip = Languages.Translate("If checked, DGIndex(MPEG2Source) will reduce fps to 23,976. Use only if video has PullDown flag and 23.976fps (29.970 after PullDown). Read DGIndex manual for more info!") + Environment.NewLine + Languages.Translate("NEVER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!");
-                //mnOtherFiles.ToolTip = "Choose decoder that will be used for decoding other file-types.";
-                mn_oth_dec_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
-                mn_oth_dec_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
-                mn_oth_dec_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
-                mnFFmpegSource.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.");
-
-                check_old_seeking.ToolTip = "Old method of seeking - continuous positioning (all the time that you move slider)," + Environment.NewLine + "New method - positioning applies only when you release the mouse button.";
+                ff_ff.ToolTip = ff_ff2.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.");
+                check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
+                    Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
             }
             catch { }
         }
@@ -2085,17 +2071,12 @@ namespace XviD4PSP
             else
                 mnEnglish.IsChecked = true;
 
-            if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
-                check_engine_mediabridge.IsChecked = true;
-            else if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
-                check_engine_directshow.IsChecked = true;
+            if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge) check_engine_mediabridge.IsChecked = true;
+            else check_engine_directshow.IsChecked = true;
 
-            if (Settings.AutoJoinMode == Settings.AutoJoinModes.Disabled)
-                check_auto_join_disabled.IsChecked = true;
-            else if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly)
-                check_auto_join_onlydvd.IsChecked = true;
-            else if (Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
-                check_auto_join_enabled.IsChecked = true;
+            if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly) check_auto_join_onlydvd.IsChecked = true;
+            else if (Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled) check_auto_join_enabled.IsChecked = true;
+            else check_auto_join_disabled.IsChecked = true;
 
             if (Settings.AVIDecoder == AviSynthScripting.Decoders.DirectShowSource)
                 mn_avi_dec_ds.IsChecked = true;
@@ -2103,52 +2084,42 @@ namespace XviD4PSP
                 mn_avi_dec_ds2.IsChecked = true;
             else if (Settings.AVIDecoder == AviSynthScripting.Decoders.FFmpegSource)
                 mn_avi_dec_ff.IsChecked = true;
-            else if (Settings.AVIDecoder == AviSynthScripting.Decoders.AVISource)
-                mn_avi_dec_avi.IsChecked = true;
-
-            if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DirectShowSource)
-                mn_mpg_dec_ds.IsChecked = true;
-            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DSS2)
-                mn_mpg_dec_ds2.IsChecked = true;
-            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.FFmpegSource)
-                mn_mpg_dec_ff.IsChecked = true;
-            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source)
-                mn_mpg_dec_mpg.IsChecked = true;
+            else mn_avi_dec_avi.IsChecked = true;
+            
+            if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DirectShowSource) mn_mpg_dec_ds.IsChecked = true;
+            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DSS2) mn_mpg_dec_ds2.IsChecked = true;
+            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.FFmpegSource) mn_mpg_dec_ff.IsChecked = true;
+            else mn_mpg_dec_mpg.IsChecked = true;
 
             if (Settings.OtherDecoder == AviSynthScripting.Decoders.DirectShowSource)
                 mn_oth_dec_ds.IsChecked = true;
             else if (Settings.OtherDecoder == AviSynthScripting.Decoders.DSS2)
                 mn_oth_dec_ds2.IsChecked = true;
-            else if (Settings.OtherDecoder == AviSynthScripting.Decoders.FFmpegSource)
-                mn_oth_dec_ff.IsChecked = true;
+            else mn_oth_dec_ff.IsChecked = true;
 
             if (Settings.AfterImportAction == Settings.AfterImportActions.Middle)
                 menu_after_i_middle.IsChecked = true;
             else if (Settings.AfterImportAction == Settings.AfterImportActions.Nothing)
                 menu_after_i_nothing.IsChecked = true;
-            else if (Settings.AfterImportAction == Settings.AfterImportActions.Play)
-                menu_after_i_play.IsChecked = true;
+            else menu_after_i_play.IsChecked = true;
 
             if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.AllFiles)
                 check_auto_deint_all.IsChecked = true;
             else if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.Disabled)
                 check_auto_deint_disabled.IsChecked = true;
-            else if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs)
-                check_auto_deint_mpeg.IsChecked = true;
+            else check_auto_deint_mpeg.IsChecked = true;
 
             if (Settings.AutocropMode == Autocrop.AutocropMode.AllFiles)
                 menu_acrop_allfiles.IsChecked = true;
             else if (Settings.AutocropMode == Autocrop.AutocropMode.Disabled)
                 menu_acrop_disabled.IsChecked = true;
-            else if (Settings.AutocropMode == Autocrop.AutocropMode.MPEGOnly)
-                menu_acrop_mpeg.IsChecked = true;
+            else menu_acrop_mpeg.IsChecked = true;
 
             if (Settings.AutoVolumeMode == Settings.AutoVolumeModes.Disabled)
                 menu_auto_volume_disabled.IsChecked = true;
             else if (Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnImport)
                 menu_auto_volume_onimp.IsChecked = true;
-            else if (Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnExport)
-                menu_auto_volume_onexp.IsChecked = true;
+            else menu_auto_volume_onexp.IsChecked = true;
 
             cmenu_is_always_delete_encoded.IsChecked = Settings.AutoDeleteTasks;
             
@@ -2175,8 +2146,9 @@ namespace XviD4PSP
 
         private void mnEnglish_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (mnEnglish.IsFocused)
+            if (eng.IsFocused)
             {
+                mnEnglish.IsChecked = true;
                 Settings.Language = "English";
                 SetLanguage();
             }
@@ -2184,8 +2156,9 @@ namespace XviD4PSP
 
         private void mnRussian_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (mnRussian.IsFocused)
+            if (rus.IsFocused)
             {
+                mnRussian.IsChecked = true;
                 Settings.Language = "Russian";
                 SetLanguage();
             }
@@ -2193,8 +2166,9 @@ namespace XviD4PSP
 
         private void check_italian_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_italian.IsFocused)
+            if (ita.IsFocused)
             {
+                check_italian.IsChecked = true;
                 Settings.Language = "Italian";
                 SetLanguage();
             }
@@ -2202,8 +2176,9 @@ namespace XviD4PSP
 
         private void check_chinese_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_chinese.IsFocused)
+            if (chi.IsFocused)
             {
+                check_chinese.IsChecked = true;
                 Settings.Language = "Chinese";
                 SetLanguage();
             }
@@ -2211,8 +2186,9 @@ namespace XviD4PSP
 
         private void check_portuguese_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_portuguese.IsFocused)
+            if (por.IsFocused)
             {
+                check_portuguese.IsChecked = true;
                 Settings.Language = "Portuguese";
                 SetLanguage();
             }
@@ -2220,8 +2196,9 @@ namespace XviD4PSP
 
         private void check_spanish_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_spanish.IsFocused)
+            if (spa.IsFocused)
             {
+                check_spanish.IsChecked = true;
                 Settings.Language = "Spanish";
                 SetLanguage();
             }
@@ -2229,8 +2206,9 @@ namespace XviD4PSP
 
         private void check_german_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_german.IsFocused)
+            if (ger.IsFocused)
             {
+                check_german.IsChecked = true;
                 Settings.Language = "German";
                 SetLanguage();
             }
@@ -2238,8 +2216,9 @@ namespace XviD4PSP
 
         private void check_hungarian_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_hungarian.IsFocused)
+            if (hun.IsFocused)
             {
+                check_hungarian.IsChecked = true;
                 Settings.Language = "Hungarian";
                 SetLanguage();
             }
@@ -2247,8 +2226,9 @@ namespace XviD4PSP
 
         private void check_ukrainian_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_ukrainian.IsFocused)
+            if (ukr.IsFocused)
             {
+                check_ukrainian.IsChecked = true;
                 Settings.Language = "Ukrainian";
                 SetLanguage();
             }
@@ -2256,8 +2236,9 @@ namespace XviD4PSP
 
         private void check_french_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_french.IsFocused)
+            if (fre.IsFocused)
             {
+                check_french.IsChecked = true;
                 Settings.Language = "French";
                 SetLanguage();
             }
@@ -2265,8 +2246,9 @@ namespace XviD4PSP
 
         private void check_hebrew_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_hebrew.IsFocused)
+            if (heb.IsFocused)
             {
+                check_hebrew.IsChecked = true;
                 Settings.Language = "Hebrew";
                 SetLanguage();
             }
@@ -2379,7 +2361,7 @@ namespace XviD4PSP
 
         private void check_Old_Seeking_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_old_seeking.IsChecked.Value == true)
+            if (check_old_seeking.IsChecked == true)
                 OldSeeking = true;
             else
                 OldSeeking = false;
@@ -2446,8 +2428,9 @@ namespace XviD4PSP
 
         private void check_engine_mediabridge_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (check_engine_mediabridge.IsFocused)
+            if (engine_mediabridge.IsFocused)
             {
+                check_engine_mediabridge.IsChecked = true;
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                 {
                     PlayState cstate = currentState;
@@ -2491,8 +2474,9 @@ namespace XviD4PSP
 
         private void check_engine_directshow_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (check_engine_directshow.IsFocused)
+            if (engine_directshow.IsFocused)
             {
+                check_engine_directshow.IsChecked = true;
                 if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
                 {
                     PlayState cstate = currentState;
@@ -2529,22 +2513,31 @@ namespace XviD4PSP
             }
         }
 
-        private void check_auto_join_disabled_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_auto_join_disabled_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_auto_join_disabled.IsFocused)
+            if (auto_join_disabled.IsFocused)
+            {
+                check_auto_join_disabled.IsChecked = true;
                 Settings.AutoJoinMode = Settings.AutoJoinModes.Disabled;
+            }
         }
 
-        private void check_auto_join_enabled_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_auto_join_enabled_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_auto_join_enabled.IsFocused)
+            if (auto_join_enabled.IsFocused)
+            {
+                check_auto_join_enabled.IsChecked = true;
                 Settings.AutoJoinMode = Settings.AutoJoinModes.Enabled;
+            }
         }
 
-        private void check_auto_join_onlydvd_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_auto_join_onlydvd_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_auto_join_onlydvd.IsFocused)
+            if (auto_join_onlydvd.IsFocused)
+            {
+                check_auto_join_onlydvd.IsChecked = true;
                 Settings.AutoJoinMode = Settings.AutoJoinModes.DVDonly;
+            }
         }
 
         private void menu_createautoscript_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -2676,66 +2669,54 @@ namespace XviD4PSP
             }
         }
 
-        private void mn_avi_dec_ds_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_avi_dec_ds_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_avi_dec_ds.IsFocused)
-                Settings.AVIDecoder = AviSynthScripting.Decoders.DirectShowSource;
+            mn_avi_dec_ds.IsChecked = true;
+            if (avi_ds.IsFocused) Settings.AVIDecoder = AviSynthScripting.Decoders.DirectShowSource;
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext == ".avi")
-                {
-                    reopen_file();
-                }
+                if (ext == ".avi") reopen_file();
             }
         }
 
-        private void mn_avi_dec_ds2_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_avi_dec_ds2_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_avi_dec_ds2.IsFocused)
-                Settings.AVIDecoder = AviSynthScripting.Decoders.DSS2;
+            mn_avi_dec_ds2.IsChecked = true;
+            if (avi_ds2.IsFocused) Settings.AVIDecoder = AviSynthScripting.Decoders.DSS2;
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext == ".avi")
-                {
-                    reopen_file();
-                }
+                if (ext == ".avi") reopen_file();
             }
         }
 
-
-        private void mn_avi_dec_ff_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_avi_dec_ff_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_avi_dec_ff.IsFocused)
-                Settings.AVIDecoder = AviSynthScripting.Decoders.FFmpegSource;
+            mn_avi_dec_ff.IsChecked = true;
+            if (avi_ff.IsFocused) Settings.AVIDecoder = AviSynthScripting.Decoders.FFmpegSource;
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext == ".avi")
-                {
-                    reopen_file();
-                }
+                if (ext == ".avi") reopen_file();
             }
         }
 
-        private void mn_avi_dec_avi_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_avi_dec_avi_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_avi_dec_avi.IsFocused)
-                Settings.AVIDecoder = AviSynthScripting.Decoders.AVISource;
+            mn_avi_dec_avi.IsChecked = true;
+            if (avi_avi.IsFocused) Settings.AVIDecoder = AviSynthScripting.Decoders.AVISource;
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext == ".avi")
-                {
-                    reopen_file();
-                }
+                if (ext == ".avi") reopen_file();
             }
         }
 
-        private void mn_mpg_dec_ds_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_mpg_dec_ds_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_mpg_dec_ds.IsFocused)
+            mn_mpg_dec_ds.IsChecked = true;
+            if (mpg_ds.IsFocused)
                 Settings.MPEGDecoder = AviSynthScripting.Decoders.DirectShowSource;
             if (m != null)
             {
@@ -2749,9 +2730,10 @@ namespace XviD4PSP
             }
         }
 
-        private void mn_mpg_dec_ds2_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_mpg_dec_ds2_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_mpg_dec_ds2.IsFocused)
+            mn_mpg_dec_ds2.IsChecked = true;
+            if (mpg_ds2.IsFocused)
                 Settings.MPEGDecoder = AviSynthScripting.Decoders.DSS2;
             if (m != null)
             {
@@ -2765,9 +2747,10 @@ namespace XviD4PSP
             }
         }
 
-        private void mn_mpg_dec_ff_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_mpg_dec_ff_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_mpg_dec_ff.IsFocused)
+            mn_mpg_dec_ff.IsChecked = true;
+            if (mpg_ff.IsFocused)
                 Settings.MPEGDecoder = AviSynthScripting.Decoders.FFmpegSource;
             if (m != null)
             {
@@ -2781,9 +2764,10 @@ namespace XviD4PSP
             }
         }
 
-        private void mn_mpg_dec_mpg_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_mpg_dec_mpg_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_mpg_dec_mpg.IsFocused)
+            mn_mpg_dec_mpg.IsChecked = true;
+            if (mpg_mpg.IsFocused)
                 Settings.MPEGDecoder = AviSynthScripting.Decoders.MPEG2Source;
             if (m != null)
             {
@@ -2797,46 +2781,42 @@ namespace XviD4PSP
             }
         }
 
-        private void mn_oth_dec_ds_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_oth_dec_ds_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_oth_dec_ds.IsFocused)
+            mn_oth_dec_ds.IsChecked = true;
+            if (o_ds.IsFocused)
                 Settings.OtherDecoder = AviSynthScripting.Decoders.DirectShowSource;
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
                 if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath) && m.isvideo)
-                {
                     reopen_file();
-                }
             }
         }
 
-        private void mn_oth_dec_ds2_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_oth_dec_ds2_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_oth_dec_ds2.IsFocused)
+            mn_oth_dec_ds2.IsChecked = true;
+            if (o_ds2.IsFocused)
                 Settings.OtherDecoder = AviSynthScripting.Decoders.DSS2;
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
                 if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath) && m.isvideo)
-                {
                     reopen_file();
-                }
             }
         }
 
-
-        private void mn_oth_dec_ff_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_oth_dec_ff_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_oth_dec_ff.IsFocused)
+            mn_oth_dec_ff.IsChecked = true;
+            if (o_ff.IsFocused)
                 Settings.OtherDecoder = AviSynthScripting.Decoders.FFmpegSource;
             if (m != null)
             {
                 string ext = Path.GetExtension(m.infilepath).ToLower();
                 if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath) && m.isvideo)
-                {
                     reopen_file();
-                }
             }
         }
 
@@ -2898,40 +2878,58 @@ namespace XviD4PSP
             UpdateTaskMassive(m);
         }
 
-        private void menu_after_i_nothing_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_after_i_nothing_Checked(object sender, RoutedEventArgs e)
         {
-            if (menu_after_i_nothing.IsFocused)
+            if (after_i_nothing.IsFocused)
+            {
+                menu_after_i_nothing.IsChecked = true;
                 Settings.AfterImportAction = Settings.AfterImportActions.Nothing;
+            }
         }
 
-        private void menu_after_i_middle_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_after_i_middle_Checked(object sender, RoutedEventArgs e)
         {
-            if (menu_after_i_middle.IsFocused)
+            if (after_i_middle.IsFocused)
+            {
+                menu_after_i_middle.IsChecked = true;
                 Settings.AfterImportAction = Settings.AfterImportActions.Middle;
+            }
         }
 
-        private void menu_after_i_play_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_after_i_play_Checked(object sender, RoutedEventArgs e)
         {
-            if (menu_after_i_play.IsFocused)
+            if (after_i_play.IsFocused)
+            {
+                menu_after_i_play.IsChecked = true;
                 Settings.AfterImportAction = Settings.AfterImportActions.Play;
+            }
         }
 
-        private void menu_acrop_disabled_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_acrop_disabled_Checked(object sender, RoutedEventArgs e)
         {
-            if (menu_acrop_disabled.IsFocused)
+            if (acrop_disabled.IsFocused)
+            {
+                menu_acrop_disabled.IsChecked = true;
                 Settings.AutocropMode = Autocrop.AutocropMode.Disabled;
+            }
         }
 
-        private void menu_acrop_mpeg_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_acrop_mpeg_Checked(object sender, RoutedEventArgs e)
         {
-            if (menu_acrop_mpeg.IsFocused)
+            if (acrop_mpeg.IsFocused)
+            {
+                menu_acrop_mpeg.IsChecked = true;
                 Settings.AutocropMode = Autocrop.AutocropMode.MPEGOnly;
+            }
         }
 
-        private void menu_acrop_allfiles_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_acrop_allfiles_Checked(object sender, RoutedEventArgs e)
         {
-            if (menu_acrop_allfiles.IsFocused)
+            if (acrop_allfiles.IsFocused)
+            {
+                menu_acrop_allfiles.IsChecked = true;
                 Settings.AutocropMode = Autocrop.AutocropMode.AllFiles;
+            }
         }
 
         private void menu_save_script_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -2966,38 +2964,56 @@ namespace XviD4PSP
 
         private void menu_auto_volume_disabled_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (menu_auto_volume_disabled.IsFocused)
+            if (auto_volume_disabled.IsFocused)
+            {
+                menu_auto_volume_disabled.IsChecked = true;
                 Settings.AutoVolumeMode = Settings.AutoVolumeModes.Disabled;
+            }
         }
-
-        private void menu_auto_volume_onexp_Click(object sender, System.Windows.RoutedEventArgs e)
+        
+        private void menu_auto_volume_onexp_Click(object sender, RoutedEventArgs e)
         {
-            if (menu_auto_volume_onexp.IsFocused)
+            if (auto_volume_onexp.IsFocused)
+            {
+                menu_auto_volume_onexp.IsChecked = true;
                 Settings.AutoVolumeMode = Settings.AutoVolumeModes.OnExport;
+            }
         }
 
-        private void menu_auto_volume_onimp_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_auto_volume_onimp_Click(object sender, RoutedEventArgs e)
         {
-            if (menu_auto_volume_onimp.IsFocused)
+            if (auto_volume_onimp.IsFocused)
+            {
+                menu_auto_volume_onimp.IsChecked = true;
                 Settings.AutoVolumeMode = Settings.AutoVolumeModes.OnImport;
+            }
         }
 
-        private void check_auto_deint_disabled_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_auto_deint_disabled_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_auto_deint_disabled.IsFocused)
+            if (auto_deint_disabled.IsFocused)
+            {
+                check_auto_deint_disabled.IsChecked = true;
                 Settings.AutoDeinterlaceMode = Settings.AutoDeinterlaceModes.Disabled;
+            }
         }
 
-        private void check_auto_deint_mpeg_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_auto_deint_mpeg_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_auto_deint_mpeg.IsFocused)
+            if (auto_deint_mpeg.IsFocused)
+            {
+                check_auto_deint_mpeg.IsChecked = true;
                 Settings.AutoDeinterlaceMode = Settings.AutoDeinterlaceModes.MPEGs;
+            }
         }
 
-        private void check_auto_deint_all_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_auto_deint_all_Checked(object sender, RoutedEventArgs e)
         {
-            if (check_auto_deint_all.IsFocused)
+            if (auto_deint_all.IsFocused)
+            {
+                check_auto_deint_all.IsChecked = true;
                 Settings.AutoDeinterlaceMode = Settings.AutoDeinterlaceModes.AllFiles;
+            }
         }
 
         private void LoadVideoPresets()
@@ -3114,9 +3130,12 @@ namespace XviD4PSP
                         m = Format.GetValidFramerate(m);
                         m = Calculate.UpdateOutFrames(m);
 
-                        m = Format.GetValidResolution(m);
-                        m = Format.GetValidOutAspect(m);
-                        m = AspectResolution.FixAspectDifference(m);
+                        //if (m.format != Format.ExportFormats.Mkv && m.format != Format.ExportFormats.Avi && m.format != Format.ExportFormats.Mov && m.format != Format.ExportFormats.Mp4 && m.format != Format.ExportFormats.TS)
+                        {
+                            m = Format.GetValidResolution(m);
+                            m = Format.GetValidOutAspect(m);
+                            m = AspectResolution.FixAspectDifference(m);
+                        }
 
                         //принудительный фикс цвета для DVD
                         if (Settings.AutoColorMatrix &&
@@ -5995,14 +6014,20 @@ namespace XviD4PSP
 
         private void mn_ffmpeg_old_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_ffmpeg_old.IsFocused)
+            if (ff_ff.IsFocused)
+            {
+                mn_ffmpeg_old.IsChecked = true;
                 Settings.FFmpegSource2 = false;
+            }
         }
 
         private void mn_ffmpeg_new_Checked(object sender, RoutedEventArgs e)
         {
-            if (mn_ffmpeg_new.IsFocused)
+            if (ff_ff2.IsFocused)
+            {
+                mn_ffmpeg_new.IsChecked = true;
                 Settings.FFmpegSource2 = true;
+            }
         }
 
         private void menu_Yamb_Click(object sender, RoutedEventArgs e)
@@ -6162,7 +6187,7 @@ namespace XviD4PSP
 
         private void check_Force_Film_Clicked(object sender, RoutedEventArgs e)
         {
-            Settings.DGForceFilm = check_force_film.IsChecked.Value;
+            Settings.DGForceFilm = check_force_film.IsChecked;
         }
 
         private void menu_Google_code_Click(object sender, RoutedEventArgs e)

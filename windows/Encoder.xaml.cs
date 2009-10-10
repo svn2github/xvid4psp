@@ -3927,10 +3927,10 @@ namespace XviD4PSP
                     Format.IsDirectRemuxingPossible(m) &&
                     outstream.codec == "Copy")
                 {
-                    audio = "-a " + instream.mkvid + " -D -S \"" + m.infilepath + "\" "; //звук из исходника (режим Copy без демукса)
+                    audio = "-a " + instream.mkvid + " -D -S --no-chapters \"" + m.infilepath + "\" "; //звук из исходника (режим Copy без демукса)
                 }
                 else
-                    audio = "-a " + aID + sbr + " -D -S \"" + outstream.audiopath + "\" ";
+                    audio = "-a " + aID + sbr + " -D -S --no-chapters \"" + outstream.audiopath + "\" ";
             }
  
             //"--aspect-ratio " + vID + ":" + Calculate.ConvertDoubleToPointString(m.outaspect) + " " +
