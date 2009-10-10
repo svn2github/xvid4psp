@@ -15,10 +15,9 @@ namespace XviD4PSP
 {
 	public partial class About
 	{
-      
-        public About()
+        public About(System.Windows.Window owner)
 		{
-            
+            this.Owner = owner;
             this.InitializeComponent();
             
             //Assembly ainfo = Assembly.GetExecutingAssembly();
@@ -33,6 +32,8 @@ namespace XviD4PSP
             text_export.Text = Languages.Translate("Export formats:");
             button_changelog.Content = Languages.Translate("Changelog") + "*";
             //text_version.Text = aname.Version.ToString(2) + aname.Version.Build + aname.Version.Revision;
+
+            ShowDialog();
 		}
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -43,9 +44,6 @@ namespace XviD4PSP
         private void button_changelog_Click(object sender, RoutedEventArgs e)
         {
             Changelog a = new Changelog(this);
-            a.Owner = this;
         }
-
-
 	}
 }

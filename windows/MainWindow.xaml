@@ -8,11 +8,9 @@
 	x:Name="Window"
 	Title="XviD4PSP - AviSynth-based MultiMedia Converter"
 	Width="747" Height="577" SizeToContent="Manual" Closing="MainWindow_Closing" Icon="..\pictures\main_logo_16_1.png" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
-
 	<Window.Triggers>
 		<EventTrigger RoutedEvent="FrameworkElement.Loaded"/>
 	</Window.Triggers>
-
 	<Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
@@ -53,44 +51,44 @@
 					<Separator/>
                     <MenuItem x:Name="mnVideoDecoding" Header="Decoding">
                         <MenuItem x:Name="mnAVIFiles" Header="AVI files">
-                            <MenuItem x:Name="avi_ds" Header="DirectShowSource" Click="mn_avi_dec_ds_Checked" StaysOpenOnClick="True">
+                            <MenuItem x:Name="avi_ds" Header="DirectShowSource" Click="avi_dec_Click" StaysOpenOnClick="True">
                                 <MenuItem.Icon>
                                     <RadioButton Name="mn_avi_dec_ds"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="avi_ds2" Header="DirectShowSource2" Click="mn_avi_dec_ds2_Checked" StaysOpenOnClick="True">
+                            <MenuItem x:Name="avi_ds2" Header="DirectShowSource2" Click="avi_dec_Click" StaysOpenOnClick="True">
                                 <MenuItem.Icon>
                                     <RadioButton Name="mn_avi_dec_ds2"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="avi_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="mn_avi_dec_ff_Checked">
+                            <MenuItem x:Name="avi_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="avi_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton Name="mn_avi_dec_ff"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="avi_avi" Header="AVISource" StaysOpenOnClick="True" Click="mn_avi_dec_avi_Checked">
+                            <MenuItem x:Name="avi_avi" Header="AVISource" StaysOpenOnClick="True" Click="avi_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton Name="mn_avi_dec_avi"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
                         <MenuItem x:Name="mnMPEGFiles" Header="MPEG files">
-                            <MenuItem x:Name="mpg_ds" Header="DirectShowSource" StaysOpenOnClick="True" Click="mn_mpg_dec_ds_Checked">
+                            <MenuItem x:Name="mpg_ds" Header="DirectShowSource" StaysOpenOnClick="True" Click="mpg_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_mpg_dec_ds"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="mpg_ds2" Header="DirectShowSource2" StaysOpenOnClick="True" Click="mn_mpg_dec_ds2_Checked">
+                            <MenuItem x:Name="mpg_ds2" Header="DirectShowSource2" StaysOpenOnClick="True" Click="mpg_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_mpg_dec_ds2"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="mpg_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="mn_mpg_dec_ff_Checked">
+                            <MenuItem x:Name="mpg_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="mpg_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_mpg_dec_ff"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="mpg_mpg" Header="MPEG2Source" StaysOpenOnClick="True" Click="mn_mpg_dec_mpg_Checked">
+                            <MenuItem x:Name="mpg_mpg" Header="MPEG2Source" StaysOpenOnClick="True" Click="mpg_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_mpg_dec_mpg" />
                                 </MenuItem.Icon>
@@ -98,36 +96,35 @@
                             <MenuItem x:Name="check_force_film" Header="ForceFilm for MPEG2Source" Click="check_Force_Film_Clicked" IsCheckable="True" IsChecked="False" StaysOpenOnClick="True" />
                         </MenuItem>
                         <MenuItem x:Name="mnOtherFiles" Header="Other files">
-                            <MenuItem x:Name="o_ds" Header="DirectShowSource" StaysOpenOnClick="True" Click="mn_oth_dec_ds_Checked">
+                            <MenuItem x:Name="o_ds" Header="DirectShowSource" StaysOpenOnClick="True" Click="oth_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_oth_dec_ds"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="o_ds2" Header="DirectShowSource2" StaysOpenOnClick="True" Click="mn_oth_dec_ds2_Checked">
+                            <MenuItem x:Name="o_ds2" Header="DirectShowSource2" StaysOpenOnClick="True" Click="oth_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_oth_dec_ds2"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="o_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="mn_oth_dec_ff_Checked">
+                            <MenuItem x:Name="o_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="oth_dec_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_oth_dec_ff"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
                         <MenuItem x:Name="mnFFmpegSource" Header="FFmpegSource">
-                            <MenuItem x:Name="ff_ff" Header="Use FFmpegSource (old)" StaysOpenOnClick="True" Click="mn_ffmpeg_old_Checked">
+                            <MenuItem x:Name="ff_ff" Header="Use FFmpegSource (old)" StaysOpenOnClick="True" Click="mn_ffmpeg_old_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_ffmpeg_old"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem x:Name="ff_ff2" Header="Use FFmpegSource2 (new)" StaysOpenOnClick="True" Click="mn_ffmpeg_new_Checked">
+                            <MenuItem x:Name="ff_ff2" Header="Use FFmpegSource2 (new)" StaysOpenOnClick="True" Click="mn_ffmpeg_new_Click">
                                 <MenuItem.Icon>
                                     <RadioButton x:Name="mn_ffmpeg_new"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
-                    </MenuItem>
-           
+                    </MenuItem>           
 					<Separator/>
 					<MenuItem x:Name="menu_autocrop" Header="Detect black borders" Click="menu_autocrop_Click" HorizontalAlignment="Stretch"/>
 					<MenuItem x:Name="menu_detect_interlace" Header="Detect interlace" Click="menu_detect_interlace_Click"/>
@@ -160,57 +157,57 @@
 				</MenuItem>
 				<MenuItem Header="Settings" x:Name="mnSettings">
                     <MenuItem x:Name="mnLanguage" Header="Language">
-                        <MenuItem x:Name="eng" Header="English" StaysOpenOnClick="True" Click="mnEnglish_Checked">
+                        <MenuItem x:Name="English" Header="English" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="mnEnglish"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="rus" Header="Russian" StaysOpenOnClick="True" Click="mnRussian_Checked">
+                        <MenuItem x:Name="Russian" Header="Russian" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="mnRussian"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="ukr" Header="Ukrainian" StaysOpenOnClick="True" Click="check_ukrainian_Checked">
+                        <MenuItem x:Name="Ukrainian" Header="Ukrainian" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_ukrainian"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="ger" Header="German" StaysOpenOnClick="True" Click="check_german_Checked">
+                        <MenuItem x:Name="German" Header="German" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_german"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="ita" Header="Italian" StaysOpenOnClick="True" Click="check_italian_Checked">
+                        <MenuItem x:Name="Italian" Header="Italian" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_italian"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="heb" Header="Hebrew" StaysOpenOnClick="True" Click="check_hebrew_Checked">
+                        <MenuItem x:Name="Hebrew" Header="Hebrew" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_hebrew"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="spa" Header="Spanish" StaysOpenOnClick="True" Click="check_spanish_Checked">
+                        <MenuItem x:Name="Spanish" Header="Spanish" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_spanish"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="fre" Header="French" StaysOpenOnClick="True" Click="check_french_Checked">
+                        <MenuItem x:Name="French" Header="French" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_french"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="por" Header="Portuguese" StaysOpenOnClick="True" Click="check_portuguese_Checked">
+                        <MenuItem x:Name="Portuguese" Header="Portuguese" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_portuguese"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="chi" Header="Chinese" StaysOpenOnClick="True" Click="check_chinese_Checked">
+                        <MenuItem x:Name="Chinese" Header="Chinese" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_chinese"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="hun" Header="Hungarian" StaysOpenOnClick="True" Click="check_hungarian_Checked">
+                        <MenuItem x:Name="Hungarian" Header="Hungarian" StaysOpenOnClick="True" Click="Languages_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_hungarian"/>
                             </MenuItem.Icon>
@@ -218,12 +215,12 @@
                     </MenuItem>
                     <Separator/>
                     <MenuItem x:Name="menu_player_engine" Header="Player engine" Width="Auto" Height="Auto">
-                        <MenuItem x:Name="engine_directshow" Header="DirectShow" StaysOpenOnClick="True" Click="check_engine_directshow_Checked">
+                        <MenuItem x:Name="engine_directshow" Header="DirectShow" StaysOpenOnClick="True" Click="check_engine_directshow_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_engine_directshow"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="engine_mediabridge" Header="MediaBridge" StaysOpenOnClick="True" Click="check_engine_mediabridge_Checked">
+                        <MenuItem x:Name="engine_mediabridge" Header="MediaBridge" StaysOpenOnClick="True" Click="check_engine_mediabridge_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_engine_mediabridge"/>
                             </MenuItem.Icon>
@@ -232,17 +229,17 @@
                     </MenuItem>
                     <Separator/>
                     <MenuItem x:Name="menu_auto_join" Header="Auto join">
-                        <MenuItem x:Name="auto_join_disabled" Header="Disabled" StaysOpenOnClick="True" Click="check_auto_join_disabled_Checked">
+                        <MenuItem x:Name="auto_join_disabled" Header="Disabled" StaysOpenOnClick="True" Click="check_auto_join_disabled_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_auto_join_disabled"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="auto_join_enabled" Header="Enabled" StaysOpenOnClick="True" Click="check_auto_join_enabled_Checked">
+                        <MenuItem x:Name="auto_join_enabled" Header="Enabled" StaysOpenOnClick="True" Click="check_auto_join_enabled_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_auto_join_enabled"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="auto_join_onlydvd" Header="Only DVD" StaysOpenOnClick="True" Click="check_auto_join_onlydvd_Checked">
+                        <MenuItem x:Name="auto_join_onlydvd" Header="Only DVD" StaysOpenOnClick="True" Click="check_auto_join_onlydvd_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_auto_join_onlydvd"/>
                             </MenuItem.Icon>
@@ -266,34 +263,34 @@
                         </MenuItem>
                     </MenuItem>
                     <MenuItem x:Name="menu_auto_crop" Header="Auto crop">
-                        <MenuItem x:Name="acrop_disabled" Header="Disabled" StaysOpenOnClick="True" Click="menu_acrop_disabled_Checked">
+                        <MenuItem x:Name="acrop_disabled" Header="Disabled" StaysOpenOnClick="True" Click="menu_acrop_disabled_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="menu_acrop_disabled"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="acrop_mpeg" Header="MPEG`s only" StaysOpenOnClick="True" Click="menu_acrop_mpeg_Checked">
+                        <MenuItem x:Name="acrop_mpeg" Header="MPEG`s only" StaysOpenOnClick="True" Click="menu_acrop_mpeg_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="menu_acrop_mpeg"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="acrop_allfiles" Header="All files" StaysOpenOnClick="True" Click="menu_acrop_allfiles_Checked">
+                        <MenuItem x:Name="acrop_allfiles" Header="All files" StaysOpenOnClick="True" Click="menu_acrop_allfiles_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="menu_acrop_allfiles"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </MenuItem>
                     <MenuItem x:Name="menu_auto_deinterlace" Header="Auto deinterlace">
-                        <MenuItem x:Name="auto_deint_disabled" Header="Disabled" StaysOpenOnClick="True" Click="check_auto_deint_disabled_Checked">
+                        <MenuItem x:Name="auto_deint_disabled" Header="Disabled" StaysOpenOnClick="True" Click="check_auto_deint_disabled_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_auto_deint_disabled"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="auto_deint_mpeg" Header="MPEG`s only" StaysOpenOnClick="True" Click="check_auto_deint_mpeg_Checked">
+                        <MenuItem x:Name="auto_deint_mpeg" Header="MPEG`s only" StaysOpenOnClick="True" Click="check_auto_deint_mpeg_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_auto_deint_mpeg"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="auto_deint_all" Header="All files" StaysOpenOnClick="True" Click="check_auto_deint_all_Checked">
+                        <MenuItem x:Name="auto_deint_all" Header="All files" StaysOpenOnClick="True" Click="check_auto_deint_all_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_auto_deint_all"/>
                             </MenuItem.Icon>
@@ -301,17 +298,17 @@
                     </MenuItem>
                     <Separator/>
                     <MenuItem x:Name="mnAfterImport" Header="After import">
-                        <MenuItem x:Name="after_i_nothing" Header="Nothing" StaysOpenOnClick="True" Click="menu_after_i_nothing_Checked">
+                        <MenuItem x:Name="after_i_nothing" Header="Nothing" StaysOpenOnClick="True" Click="menu_after_i_nothing_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="menu_after_i_nothing"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="after_i_middle" Header="Set middle" StaysOpenOnClick="True" Click="menu_after_i_middle_Checked">
+                        <MenuItem x:Name="after_i_middle" Header="Set middle" StaysOpenOnClick="True" Click="menu_after_i_middle_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="menu_after_i_middle"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem x:Name="after_i_play" Header="Play" StaysOpenOnClick="True" Click="menu_after_i_play_Checked">
+                        <MenuItem x:Name="after_i_play" Header="Play" StaysOpenOnClick="True" Click="menu_after_i_play_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="menu_after_i_play"/>
                             </MenuItem.Icon>
@@ -373,7 +370,6 @@
             <Slider x:Name="slider_Volume" ValueChanged="Volume_ValueChanged" d:LayoutOverrides="VerticalAlignment" Margin="600,8,4,8" Style="{DynamicResource GlassSlider}" ClipToBounds="False" MouseWheel="Volume_Wheel" FlowDirection="LeftToRight" HorizontalAlignment="Left" Width="Auto" MinWidth="120" MaxWidth="120" IsMoveToPointEnabled="False" Maximum="1" SmallChange="0.05" LargeChange="0.1" />
             <Image Width="18" Source="..\pictures\Volume1.png" Stretch="None" HorizontalAlignment="Left" Margin="583,6,032,6" x:Name="image_volume"/>
         </Grid>
-
 		<Grid x:Name="grid_tasks" Background="{DynamicResource black_gradient_2}" Margin="0,60.96,0,0">
 			<ContentControl x:Name="content_tasks">
 				<ListView IsEnabled="True" x:Name="list_tasks" Background="#FF3B3B3B" Foreground="#FFFFFFFF" SelectionMode="Single" OverridesDefaultStyle="False" Margin="8,8,8,8" Width="Auto" Height="Auto" SelectionChanged="list_tasks_SelectionChanged" MouseDoubleClick="list_tasks_MouseDoubleClick" MouseLeftButtonUp="list_tasks_MouseLeftButtonUp" KeyUp="list_tasks_KeyUp">
@@ -411,11 +407,8 @@
 				</ListView>
 			</ContentControl>
 		</Grid>
-
 		<GridSplitter HorizontalAlignment="Stretch" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom" Height="4" x:Name="splitter_tasks_preview" Margin="0,0,0,-4"/>
-
 		<Grid HorizontalAlignment="Left" Margin="0,4,0,0" x:Name="grid_left_panel" Width="195.856" Grid.Row="1" Background="{DynamicResource black_gradient_2}">
-
             <Grid x:Name="grid_left_panel_paper" HorizontalAlignment="Left" VerticalAlignment="Top" Width="195.856" Height="367">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -457,8 +450,7 @@
         <TextBlock Opacity="0.7" x:Name="textbox_frame" Height="Auto" FontFamily="Segoe" FontSize="25" FontWeight="Bold" Foreground="#FFFFFFFF" TextAlignment="Right" TextWrapping="Wrap" Width="192" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
         </Grid>
 		<Grid x:Name="grid_player_window" Background="{DynamicResource black_gradient_2}" Margin="195.856,4,0,38.184" AllowDrop="True" DragEnter="grid_player_window_DragEnter" Drop="grid_player_window_Drop" Grid.Row="1">
-			<Grid x:Name="grid_player_info" Height="44" RenderTransformOrigin="0.5,0.5" Margin="8,8,8,0" VerticalAlignment="Top">
-    
+			<Grid x:Name="grid_player_info" Height="44" RenderTransformOrigin="0.5,0.5" Margin="8,8,8,0" VerticalAlignment="Top">    
 				<Grid.RenderTransform>
 					<TransformGroup>
 						<ScaleTransform ScaleX="1" ScaleY="1"/>
@@ -467,7 +459,6 @@
 						<TranslateTransform X="0" Y="0"/>
 					</TransformGroup>
 				</Grid.RenderTransform>
-    
 				<Rectangle Fill="#963E4C5B" Stroke="{x:Null}" x:Name="progress_back" Height="9" Margin="0,0,0,4" VerticalAlignment="Bottom">
 					<Rectangle.OpacityMask>
 						<LinearGradientBrush EndPoint="0.479,1.606" StartPoint="0.479,-0.572">
@@ -507,6 +498,5 @@
 			</Button>
 			<Slider x:Name="slider_pos" ValueChanged="slider_pos_ValueChanged" PreviewMouseLeftButtonUp="slider_pos_PreviewMouseLeftButtonUp" MouseRightButtonDown="slider_pos_MouseRightButtonDown" d:LayoutOverrides="VerticalAlignment" Margin="94.144,7.722,7.856,8.294" Style="{DynamicResource GlassSlider}"/>
 		</Grid>
-
   </Grid>
 </Window>

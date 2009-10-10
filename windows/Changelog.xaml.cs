@@ -12,14 +12,9 @@ namespace XviD4PSP
 {
 	public partial class Changelog
 	{
-        
-        private About p;
-
-        public Changelog(About parent)
+        public Changelog(System.Windows.Window owner)
         {
-            p = parent;
-            Owner = p;
-
+            this.Owner = owner;
             this.InitializeComponent();
 
             try
@@ -37,9 +32,9 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                Close();
-                Message mes = new Message(p);
+                Message mes = new Message(this);
                 mes.ShowMessage(ex.Message, "Error");
+                Close();
             }
         }
 
