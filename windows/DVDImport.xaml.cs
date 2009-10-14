@@ -155,6 +155,10 @@ namespace XviD4PSP
 
                             if (isInfoLoading)
                             {
+                                double maximum = 0;
+                                int index_of_maximum = 0;
+                                int num = 0;
+                                
                                 //забиваем длительность
                                 foreach (object obj in dvd)
                                 {
@@ -163,15 +167,28 @@ namespace XviD4PSP
 
                                     if (File.Exists(ifopath))
                                     {
+                                        MediaInfoWrapper media = new MediaInfoWrapper();
+                                        media.Open(ifopath);
+                                        string info = media.Width + "x" + media.Height + " " + media.AspectString + " " + media.Standart;
+                                        media.Close();
+
                                         //получаем информацию из ифо
                                         VStripWrapper vs = new VStripWrapper();
                                         vs.Open(ifopath);
                                         double titleduration = vs.Duration().TotalSeconds;
-                                        string info = vs.Width() + "x" + vs.Height() + " " + vs.System();
+                                        //string   info = vs.Width() + "x" + vs.Height() + " " + vs.System(); //При обращении к ifoGetVideoDesc на некоторых системах происходит вылет VStrip.dll.. Теперь нужная инфа будет браться из МедиаИнфо..
                                         vs.Close();
 
                                         string titlenum = Calculate.GetTitleNum(titles[0]);
-                                        combo_titles.Items.Add("T" + titlenum + " " + info + " " +  Calculate.GetTimeline(titleduration));
+                                        combo_titles.Items.Add("T" + titlenum + " " + info + " " + Calculate.GetTimeline(titleduration) + " - " + titles.Length + " files");
+
+                                        //Ищем самый продолжительный титл
+                                        if (titleduration > maximum)
+                                        {
+                                            maximum = titleduration;
+                                            index_of_maximum = num;
+                                        }
+                                        num += 1;
                                     }
                                     //метод если нет IFO
                                     else
@@ -241,7 +258,7 @@ namespace XviD4PSP
                                 }
 
                                 combo_titles.Items.RemoveAt(0);
-                                combo_titles.SelectedIndex = 0;
+                                combo_titles.SelectedIndex = index_of_maximum;
                                 this.isInfoLoading = false;
                             }
 
@@ -689,7 +706,8 @@ namespace XviD4PSP
 
             // Query for audio interfaces, which may not be relevant for video-only files
             this.basicAudio = this.graphBuilder as IBasicAudio;
-
+            basicAudio.put_Volume(-(int)(10000 - Math.Pow(Settings.VolumeLevel, 1.0 / 5) * 10000)); //Громкость для ДиректШоу
+            
             // Is this an audio-only file (no video component)?
             CheckVisibility();
 
@@ -943,6 +961,7 @@ namespace XviD4PSP
             this.filepath = filepath;
             string url = "MediaBridge://MyDataString";
             MediaBridge.MediaBridgeManager.RegisterCallback(url, BridgeCallback);
+            VideoElement.Volume = Settings.VolumeLevel; //Громкость для МедиаБридж
 
             VideoElement.Source = new Uri(url);
             VideoElement.Play();

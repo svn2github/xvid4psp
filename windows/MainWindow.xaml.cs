@@ -413,8 +413,7 @@ namespace XviD4PSP
 
         private void grid_tasks_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!this.isAudioOnly)
-                MoveVideoWindow();
+            MoveVideoWindow();
         }
 
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -425,14 +424,12 @@ namespace XviD4PSP
 
         private void MainWindow_LocationChanged(object sender, EventArgs e)
         {
-            if (!this.isAudioOnly)
-                MoveVideoWindow();
+            MoveVideoWindow();
         }
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!this.isAudioOnly)
-                MoveVideoWindow();
+            MoveVideoWindow();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -4085,7 +4082,7 @@ namespace XviD4PSP
 
         public void SwitchToFullScreen()
         {
-            if (this.isAudioOnly && this.graphBuilder == null)
+            if (this.isAudioOnly || this.graphBuilder == null)
                 return;
 
             //если не Фуллскрин, то делаем Фуллскрин
@@ -4364,11 +4361,10 @@ namespace XviD4PSP
 
         private void MoveVideoWindow()
         {
-            int hr = 0;
-
             // Track the movement of the container window and resize as needed
             if (this.videoWindow != null)
             {
+                int hr = 0;                
                 int top = (int)(grid_menu.ActualHeight +
                     grid_top.ActualHeight +
                     splitter_tasks_preview.ActualHeight +

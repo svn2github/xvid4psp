@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.DVDImport"
 	x:Name="Window"
 	Title="DVDImport"
-	Width="560" Height="520" ResizeMode="CanResize" ShowInTaskbar="True" SizeToContent="Manual" Topmost="False" WindowStartupLocation="CenterOwner">
+	Width="560" Height="520" MinWidth="560" MinHeight="520" ResizeMode="CanResize" ShowInTaskbar="True" SizeToContent="Manual" Topmost="False" WindowStartupLocation="CenterOwner">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}" AllowDrop="True" DragEnter="LayoutRoot_DragEnter" Drop="LayoutRoot_Drop" Width="Auto" Height="Auto">
 		<Grid x:Name="grid_top" VerticalAlignment="Top" Height="49" Background="{DynamicResource black_gradient_2}">
