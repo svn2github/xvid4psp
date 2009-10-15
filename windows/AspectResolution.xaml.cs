@@ -157,10 +157,13 @@ namespace XviD4PSP
             {
                 m.aspectfix = (AspectFixes)Enum.Parse(typeof(AspectFixes), combo_aspectfix.SelectedItem.ToString());
 
-                m = FixAspectDifference(m);
+                m = FixAspectDifference(m); 
 
                 LoadCrop();
                 LoadBlack();
+
+                LoadInAspect();
+                textbox_error.Text = Calculate.ConvertDoubleToPointString(100 - ((m.outaspect * 100) / m.inaspect), 2) + "%";
 
                 Refresh();
             }
@@ -581,58 +584,31 @@ namespace XviD4PSP
                 mass.cropt = mass.cropt_copy;
                 mass.cropb = mass.cropb_copy;
 
+                //Считаем чистый исходный аспект (без учета откропленного)
+                double inputasp = ((double)mass.inresw / (double)mass.inresh) * mass.pixelaspect; 
                 if (mass.inaspect < mass.outaspect)
                 {
-                    //double diff = ((double)mass.inresh - (double)mass.cropt_copy - (double)mass.cropb_copy) -
-                    //    (((double)mass.inresw - (double)mass.cropl_copy - (double)mass.cropr_copy) / mass.outaspect);
-                    //mass.cropt = Calculate.GetValid((int)(diff / 2), 2);
-                    //mass.cropb = Calculate.GetValid((int)(diff / 2), 2);
-
-                    //mass.cropt = Calculate.GetValid((int)(mass.cropt_copy * aspectdiff), 2);
-                    //mass.cropb = Calculate.GetValid((int)(mass.cropb_copy * aspectdiff), 2);
-
-                    double diff = mass.inresh - (mass.inresw / mass.outaspect);
+                    //double diff = mass.inresh - (mass.inresw / mass.outaspect);
+                    
+                    //Считаем сколько нужно откропить, с учетом аспекта
+                    double diff = mass.inresh - (int)(((double)mass.inresh * inputasp) / mass.outaspect);
                     mass.cropt = Calculate.GetValid((int)(diff / 2) + mass.cropt_copy, 2);
                     mass.cropb = Calculate.GetValid((int)(diff / 2) + mass.cropb_copy, 2);
-
-                    //mass.cropt = Calculate.GetValid((int)(mass.cropt_copy * aspectdiff), 2);
-                    //mass.cropb = Calculate.GetValid((int)(mass.cropb_copy * aspectdiff), 2);
                 }
-                if (mass.inaspect > mass.outaspect)
+                else if (mass.inaspect > mass.outaspect)
                 {
                     //double diff = mass.inresw - (mass.inresh * mass.outaspect);
-                    //mass.cropl = Calculate.GetValid((int)(diff / 2), 2);
-                    //mass.cropr = Calculate.GetValid((int)(diff / 2), 2);
-
-                    double diff = mass.inresw - (mass.inresh * mass.outaspect);
+                    
+                    //Считаем сколько нужно откропить, с учетом аспекта
+                    double diff = mass.inresw - (int)((double)mass.inresw / inputasp) * mass.outaspect;                    
                     mass.cropl = Calculate.GetValid((int)(diff / 2) + mass.cropl_copy, 2);
                     mass.cropr = Calculate.GetValid((int)(diff / 2) + mass.cropr_copy, 2);
-
-                    //mass.cropl = Calculate.GetValid((int)(mass.cropl_copy * aspectdiff), 2);
-                    //mass.cropr = Calculate.GetValid((int)(mass.cropr_copy * aspectdiff), 2);
-
-                    //mass.cropl = Calculate.GetValid((int)((mass.inresw - mass.outresw) / 2), 2);
-                    //mass.cropr = Calculate.GetValid((int)((mass.inresw - mass.outresw) / 2), 2);
                 }
-                //double wdiff = mass.inresw - (mass.inresh * mass.outaspect);
-                //if (wdiff < 0)
-                //{
-                //}
-                //else if (wdiff > 0)
-                //{
-                //}
-                //double hdiff = mass.inresh - (mass.inresw / mass.outaspect);
-                //if (hdiff < 0)
-                //{
-                //}
-                //else if (hdiff > 0)
-                //{
-                //}
-
- 
+                
+                //Входной аспект с учетом откропленного
+                if (Settings.RecalculateAspect == true)
+                    mass.inaspect = ((double)(mass.inresw - mass.cropl - mass.cropr) / (double)(mass.inresh - mass.cropt - mass.cropb)) * mass.pixelaspect;
             }
-
-            //TODO: надо править sar при необходимости (IsAnamorphic)
 
             if (mass.aspectfix == AspectFixes.SAR)
             {

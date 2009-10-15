@@ -313,81 +313,88 @@ namespace XviD4PSP
 
                 if (ext == ".d2v")
                 {
-                    m.inaspect = 1.3333;
+                    //Читаем d2v-файл
+                    int n = 0;
+                    string line = "";
+                    Match mat1;
+                    Match mat2;
+                    Regex r1 = new Regex(@"Picture_Size=(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                    Regex r2 = new Regex(@"Aspect_Ratio=(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                    int result1 = 720; int result2 = 576; double result3 = 4; double result4 = 3; //Значения по-умолчанию
+                    using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                        while (!sr.EndOfStream && n < 15) //Ограничиваемся первыми 15-ю строчками
+                        {
+                            line = sr.ReadLine();
+                            mat1 = r1.Match(line);
+                            mat2 = r2.Match(line);
+                            if (mat1.Success)
+                            {
+                                result1 = Convert.ToInt32(mat1.Groups[1].Value);
+                                result2 = Convert.ToInt32(mat1.Groups[2].Value);
+                            }
+                            if (mat2.Success)
+                            {
+                                result3 = Convert.ToDouble(mat2.Groups[1].Value);
+                                result4 = Convert.ToDouble(mat2.Groups[2].Value);
+                            }
+                            n += 1;
+                        }
+                    m.inresw = result1;
+                    m.inresh = result2;
+                    m.inaspect = result3 / result4;
+                    m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
                     m.invcodecshort = "MPEG2";
                 }
-                
-                
-                
-                //AVC
+                                
                 if(ext == ".dga")
                 {    
-                    //все параметры будут браться из log-файла от DGAVCDec
-                    string logg;
-                    string path = Path.GetDirectoryName(m.infilepath).ToLower(); //определяем путь к log-файлу
-                    string name = Path.GetFileNameWithoutExtension(m.infilepath).ToLower(); //определяем имя файла без расширения
-                    if (!File.Exists(path + "\\" + name + ".log"))//проверяем, на месте ли сам файл, и если его нет, то Ошибка!
+                    //Смотрим, на месте ли log-файл
+                    string path = Path.GetDirectoryName(m.infilepath).ToLower(); 
+                    string name = Path.GetFileNameWithoutExtension(m.infilepath).ToLower(); 
+                    if (!File.Exists(path + "\\" + name + ".log"))
                     {
                         ShowMessage(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + path + "\\" + name + ".log" + Environment.NewLine + Environment.NewLine +
-                        Languages.Translate("AR will be set as 16/9, you can change it manually later."), Languages.Translate("Error"), Message.MessageStyle.Ok);
-                        m.invcodecshort = "h264";
+                        Languages.Translate("AR will be set as 16/9, you can change it manually later."), Languages.Translate("Error"), Message.MessageStyle.Ok);                       
                         m.inaspect = 1.7777;
                     }
                     else
                     {
-                        //а если есть, то
-                        using (StreamReader sr = new StreamReader(path + "\\" + name + ".log", System.Text.Encoding.Default)) //читаем log-файл
-                            logg = sr.ReadToEnd();
-                        //делим на строки
-                        string[] separator = new string[] { Environment.NewLine };
-                        string[] lines = logg.Split(separator, StringSplitOptions.None);
-                        string result1 = "1280"; string result2 = "720"; string result3 = "1"; string result4 = "1"; //дефолтные значения
-
-                        Regex r1 = new Regex(@"Frame.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        //Читаем log-файл
+                        string line = "";
                         Match mat1;
-                        foreach (string line in lines)
-                        {
-
-                            mat1 = r1.Match(line);
-                            if (mat1.Success)
-                            {
-                                result1 = mat1.Groups[1].Value;
-                                result2 = mat1.Groups[2].Value;
-                            }                        
-                        }
-                        m.inresw = Convert.ToInt32(result1);
-                        m.inresh = Convert.ToInt32(result2);
-
-                        //ShowMessage(Convert.ToString(result1) + Convert.ToString(result2), Languages.Translate("Error"), Message.MessageStyle.Ok); 
-
-                        Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                         Match mat2;
-                        foreach (string line in lines)
-                        {
-
-                            mat2 = r2.Match(line);
-                            if (mat2.Success)
+                        Regex r1 = new Regex(@"Frame.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        int result1 = 1280; int result2 = 720; double result3 = 1; double result4 = 1; //Значения по-умолчанию
+                        using (StreamReader sr = new StreamReader(path + "\\" + name + ".log", System.Text.Encoding.Default))
+                            while (!sr.EndOfStream)
                             {
-                                result3 = mat2.Groups[1].Value;
-                                result4 = mat2.Groups[2].Value;
+                                line = sr.ReadLine();                                
+                                mat1 = r1.Match(line);
+                                mat2 = r2.Match(line);
+                                if (mat1.Success)
+                                {
+                                    result1 = Convert.ToInt32(mat1.Groups[1].Value);
+                                    result2 = Convert.ToInt32(mat1.Groups[2].Value);
+                                }
+                                if (mat2.Success)
+                                {
+                                    result3 = Convert.ToDouble(mat2.Groups[1].Value);
+                                    result4 = Convert.ToDouble(mat2.Groups[2].Value);
+                                }
                             }
-                        }
-                        double sar1 = Convert.ToInt32(result3);
-                        double sar2 = Convert.ToInt32(result4);
-
-                        //ShowMessage(Convert.ToString(result3) + Convert.ToString(result4), Languages.Translate("Error"), Message.MessageStyle.Ok); 
-
-                        //вычисляем аспект..
-                        m.inaspect = (sar1 / sar2) * ((double)m.inresw / (double)m.inresh);
-                        //можно еще определить тут фпс, но всё-равно это будет сделано позже через ависинт-скрипт (class Caching).
+                        m.inresw = result1;
+                        m.inresh = result2;
+                        m.inaspect = (result3/result4) * ((double)m.inresw / (double)m.inresh);
+                        m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
+                        //можно еще определить тут фпс, но всё-равно это будет сделано позже через ависинт-скрипт (class Caching). 
                     }
                     m.invcodecshort = "h264";
-                   // m.invbitrate = 9000;
-                   // sizeb += new FileInfo(file).Length;
-                   // m.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511, 1) + " mb"; 
-                }//AVC
+                   //m.invbitrate = 9000;
+                   //sizeb += new FileInfo(file).Length;
+                   //m.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511, 1) + " mb"; 
+                }
                 
-
                 //подправляем кодек, ffID, язык
                 int astream = ff.AudioStream();
                 foreach (object o in m.inaudiostreams)
