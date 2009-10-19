@@ -729,31 +729,37 @@ namespace XviD4PSP
                else
                    outstream.channels = instream.channels;
            }
-
            return m;
+       }
+
+       public static int GetSettingsChannels()
+       {
+           string ch = Settings.ChannelsConverter;
+           if (ch == "KeepOriginalChannels")
+               return 0;
+           else if (ch == "ConvertToMono")
+               return 1;
+           else if (ch == "ConvertToStereo" || ch == "ConvertToDolbyProLogic" || ch == "ConvertToDolbyProLogicII" || ch == "ConvertToDolbyProLogicIILFE")
+               return 2;
+           else return 6;
        }
 
        public static Massive GetValidChannelsConverter(Massive m)
        {
-
-           if (m.inaudiostreams.Count > 0 &&
-    m.inaudiostreams.Count > 0)
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
            {
                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-               instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
-               
-               if (outstream.codec == "MP2" || outstream.codec == "MP3")
-               {
-                   if (instream.channels >= 3)
-                       instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
-               }
+               instream.channelconverter = (AudioOptions.ChannelConverters)Enum.Parse(typeof(AudioOptions.ChannelConverters), Settings.ChannelsConverter, true); //AudioOptions.ChannelConverters.KeepOriginalChannels;
+               int n = GetSettingsChannels();
 
                if (m.format == ExportFormats.PmpAvc)
                {
-                   if (instream.channels != 2)
+                   if (instream.channels != 2 && n != 2)
                        instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
+                   if (instream.channels == 2 && n != 0)
+                       instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
                }
                else if (m.format == ExportFormats.AviDVNTSC ||
                        m.format == ExportFormats.AviDVPAL ||
@@ -776,18 +782,21 @@ namespace XviD4PSP
                        m.format == ExportFormats.Mp4Archos5G ||
                        m.format == ExportFormats.Mp4ToshibaG900 ||
                        m.format == ExportFormats.Mp4Nokia5700 ||
-                       m.format == ExportFormats.AviMeizuM6)
+                       m.format == ExportFormats.AviMeizuM6 ||
+                       outstream.codec == "MP2" ||
+                       outstream.codec == "MP3" ||
+                       m.format == ExportFormats.Custom && FormatReader.GetFormatInfo("Custom", "GetValidChannelsConverter") == "yes")
                {
-                   if (instream.channels >= 3)
+                   if (instream.channels == 1 && n == 6 || instream.channels == 1 && n == 1)
+                       instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
+                   if (instream.channels == 2 && n == 6 || instream.channels == 2 && n == 2)
+                       instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
+                   if (instream.channels > 2 && n == 6 || instream.channels > 2 && n == 0)
                        instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
                }
-               else if (m.format == ExportFormats.Custom && instream.channelconverter != AudioOptions.ChannelConverters.ConvertToDolbyProLogicII)
-               {
-                   if (instream.channels >= 3 && FormatReader.GetFormatInfo("Custom", "GetValidChannelsConverter") == "yes")
-                       instream.channelconverter = AudioOptions.ChannelConverters.ConvertToDolbyProLogicII;
-               }
+               else if (instream.channels == 1 && n == 1 || instream.channels == 2 && n == 2 || instream.channels == 6 && n == 6)
+                   instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
            }
-
            return m;
        }
 
@@ -799,7 +808,6 @@ namespace XviD4PSP
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                outstream.bits = 16;
            }
-
            return m;
        }
 
@@ -811,7 +819,7 @@ namespace XviD4PSP
                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-               if (m.format == ExportFormats.DpgNintendoDS) //Custom
+               if (m.format == ExportFormats.DpgNintendoDS)
                {
                    outstream.samplerate = "32000";
                }
@@ -894,7 +902,7 @@ namespace XviD4PSP
                else if (outstream.codec == "WMA3")
                    return new string[] { "22050", "32000", "44100", "48000" };
                else
-                   return new string[] { "22050", "32000", "44100", "48000" }; //Custom
+                   return new string[] { "22050", "32000", "44100", "48000" };
            }
        }
 
@@ -902,7 +910,7 @@ namespace XviD4PSP
        {
            string[] rates = GetValidFrameratesList(m);
 
-           if (m.format == ExportFormats.DpgNintendoDS) //Custom
+           if (m.format == ExportFormats.DpgNintendoDS)
            {
                if ((double)m.outresw / (double)m.outresh  < 1.5)
                    m.outframerate = "20.000";

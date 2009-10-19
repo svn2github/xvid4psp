@@ -91,6 +91,8 @@ namespace XviD4PSP
             label_converter.Content = Languages.Translate("Converter") + ":";
             label_accurate.Content = Languages.Translate("Accurate") + ":";
             //label_mixing.Content = Languages.Translate("Mixing") + ":";
+            combo_mixing.ToolTip = Languages.Translate("How to convert audio channels");
+            button_fix_channels.ToolTip = Languages.Translate("Remember this selection");
 
             //путь к звуковой дорожке
             combo_atracks.Items.Clear();
@@ -780,7 +782,7 @@ namespace XviD4PSP
                 //получаем колличество каналов на выход
                 m = Format.GetValidChannels(m);
 
-                SetInfo();
+                SetInfo(); 
             }
         }
 
@@ -789,15 +791,15 @@ namespace XviD4PSP
             if (mixing == ChannelConverters.KeepOriginalChannels)
                 return "Keep Original Channels";
             if (mixing == ChannelConverters.ConvertToMono)
-                return "Convert to Mono";
+                return "Convert to 1ch Mono";
             if (mixing == ChannelConverters.ConvertToStereo)
-                return "Convert to Stereo";
+                return "Convert to 2ch Stereo";
             if (mixing == ChannelConverters.ConvertToDolbyProLogic)
-                return "Convert to Dolby Pro Logic";
+                return "Convert to 2ch Dolby Pro Logic";
             if (mixing == ChannelConverters.ConvertToDolbyProLogicII)
-                return "Convert to Dolby Pro Logic II";
+                return "Convert to 2ch Dolby Pro Logic II";
             if (mixing == ChannelConverters.ConvertToDolbyProLogicIILFE)
-                return "Convert to Dolby Pro Logic II (LFE)";
+                return "Convert to 2ch Dolby Pro Logic II (LFE)";
             if (mixing == ChannelConverters.ConvertToUpmixAction)
                 return "Convert to 5.1 channels (Action)";
             if (mixing == ChannelConverters.ConvertToUpmixDialog)
@@ -818,15 +820,15 @@ namespace XviD4PSP
         {
             if (mixing == "Keep Original Channels")
                 return ChannelConverters.KeepOriginalChannels;
-            if (mixing == "Convert to Mono")
+            if (mixing == "Convert to 1ch Mono")
                 return ChannelConverters.ConvertToMono;
-            if (mixing == "Convert to Stereo")
+            if (mixing == "Convert to 2ch Stereo")
                 return ChannelConverters.ConvertToStereo;
-            if (mixing == "Convert to Dolby Pro Logic")
+            if (mixing == "Convert to 2ch Dolby Pro Logic")
                 return ChannelConverters.ConvertToDolbyProLogic;
-            if (mixing == "Convert to Dolby Pro Logic II")
+            if (mixing == "Convert to 2ch Dolby Pro Logic II")
                 return ChannelConverters.ConvertToDolbyProLogicII;
-            if (mixing == "Convert to Dolby Pro Logic II (LFE)")
+            if (mixing == "Convert to 2ch Dolby Pro Logic II (LFE)")
                 return ChannelConverters.ConvertToDolbyProLogicIILFE;
             if (mixing == "Convert to 5.1 channels (Action)")
                 return ChannelConverters.ConvertToUpmixAction;
@@ -842,6 +844,11 @@ namespace XviD4PSP
                 return ChannelConverters.ConvertToUpmixSoundOnSound;
 
             return ChannelConverters.KeepOriginalChannels;
+        }
+
+        private void button_fix_channels_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.ChannelsConverter = StringMixingToEnum(combo_mixing.SelectedItem.ToString()).ToString();
         }
 
 	}

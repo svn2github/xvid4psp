@@ -26,7 +26,7 @@
 
                     <Label OpacityMask="{x:Null}" x:Name="samplerateslist" Content="Valid samplerates:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,154.583,96.75,0" VerticalAlignment="Top" Height="26.9" />
                     <TextBox Margin="4,178.6,4,0" x:Name="textbox_samplerates_list" Text="" TextWrapping="Wrap" FontSize="13" FontFamily="Tahoma" Height="22.757" VerticalAlignment="Top" />
-                    <CheckBox x:Name="check_stereo" Content="Stereo" FontSize="14" Foreground="#FFFFFFFF" Margin="0,159.25,30.486,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Click="check_Stereo" Height="16.9" HorizontalAlignment="Right" Width="62.754" />
+                    <CheckBox x:Name="check_stereo" Content="2ch - max." FontSize="14" Foreground="#FFFFFFFF" Margin="0,159.25,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Click="check_Stereo" Height="16.9" HorizontalAlignment="Right" Width="93.296" />
 
                     <Label OpacityMask="{x:Null}" x:Name="validresolution" Content="Resolution:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="0,222.234,0,0" HorizontalAlignment="Left" Width="94" Height="26.9" VerticalAlignment="Top" />
                     <Label OpacityMask="{x:Null}" x:Name="Max" Content="max" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#ffffff" Margin="239.813,222.234,0,0" Height="23.799" VerticalAlignment="Top" HorizontalAlignment="Left" Width="36.685" />

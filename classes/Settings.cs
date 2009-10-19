@@ -1654,5 +1654,28 @@ namespace XviD4PSP
                 SetString("TasksRow2", value);
             }
         }
+
+        public static string ChannelsConverter
+        {
+            get
+            {
+                object value = GetValue("ChannelsConverter");
+                if (value == null)
+                {
+                    return "KeepOriginalChannels";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("ChannelsConverter", value);
+            }
+        }
+
+
+
     }
 }

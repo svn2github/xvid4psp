@@ -245,16 +245,16 @@ namespace XviD4PSP
         {
             textbox_vcodec_list.ToolTip = Languages.Translate("Codecs that will be selectable in the video-codecs-setting window.") + Environment.NewLine + Languages.Translate("Valid values:")+" x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy";
             combo_VCodec.ToolTip = Languages.Translate("Codec, that usualy used in this format (or maybe i`m wrong)");
-            textbox_framerates_list.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:")+ " 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000";
+            textbox_framerates_list.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000, ..." + Environment.NewLine + Languages.Translate("Separate by comma.");
             textbox_acodec_list.ToolTip = Languages.Translate("Codecs that will be selectable in the audio-codecs-setting window.") + Environment.NewLine + Languages.Translate("Valid values:")+ " PCM, AAC, MP2, MP3, AC3, Disabled, Copy";
             combo_ACodec.ToolTip = Languages.Translate("Codec, that usualy used in this format (or maybe i`m wrong)");
-            textbox_samplerates_list.ToolTip = Languages.Translate("Samplerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:")+ " 22050, 32000, 44100, 48000, 96000, 192000";
+            textbox_samplerates_list.ToolTip = Languages.Translate("Samplerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 22050, 32000, 44100, 48000, 96000, 192000, ..." + Environment.NewLine + Languages.Translate("Separate by comma.");
             validresolution.ToolTip = Languages.Translate("Resolution:");
-            check_fixed_ar.ToolTip = Languages.Translate("WARNING! Use this option provided this format can have only specified (by next setting) AR");
+            check_fixed_ar.ToolTip = Languages.Translate("Use this option provided this format can have only specified (by next setting) AR");
             combo_Muxer.ToolTip = Languages.Translate("Muxer, that will be used for this format.");
             combo_Extension.ToolTip = Languages.Translate("File extension:");
             check_4gb_only.ToolTip = Languages.Translate("Maximum filesize is 4Gb");
-            textbox_aspects.ToolTip = Languages.Translate("Valid values:")+ " 1.333 (4:3), 1.500, 1.666, 1.765 (16:9), 1.778 (16:9), 1.850, 2.353, or any...";
+            textbox_aspects.ToolTip = Languages.Translate("Valid values:")+ " 1.333 (4:3), 1.500, 1.666, 1.765 (16:9), 1.778 (16:9), 1.850, 2.353, ..." + Environment.NewLine + Languages.Translate("Separate by comma.");
             check_stereo.ToolTip = Languages.Translate("Maximum numbers of audio channels for this format is 2");
         }
         private void ErrorExeption(string message)
