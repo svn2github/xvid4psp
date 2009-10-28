@@ -318,6 +318,8 @@ namespace XviD4PSP
 
            m.script += Environment.NewLine;
 
+           //m.script += "selectTotal1=framecount()/100" + Environment.NewLine + "selectTotal2=selectTotal1*2" + Environment.NewLine + "selectrangeevery(selectTotal2,50)";
+
            bool IsAssumeRateConvertion = false;
            if (m.inframerate != m.outframerate)
            {

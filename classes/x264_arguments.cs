@@ -172,8 +172,8 @@ namespace XviD4PSP
             }
         }
 
-        private bool _bpyramid = false;
-        public bool bpyramid
+        private int _bpyramid = 0;
+        public int bpyramid
         {
             get
             {

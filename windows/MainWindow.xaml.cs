@@ -2086,7 +2086,7 @@ namespace XviD4PSP
             slider_Volume.Value = Settings.VolumeLevel; //Установка значения громкости из реестра..
             VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //.. и пересчет его для ДиректШоу
             if (slider_Volume.Value == 0)
-                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume_Disable.png", UriKind.RelativeOrAbsolute));
+                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume2.png", UriKind.RelativeOrAbsolute));
 
             if (Settings.FFmpegSource2)
                 mn_ffmpeg_new.IsChecked = true;
@@ -5528,9 +5528,9 @@ namespace XviD4PSP
             
             //Иконка регулятора громкости
             if (slider_Volume.Value <= 0.0)
-                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume_Disable.png", UriKind.RelativeOrAbsolute));
+                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume2.png", UriKind.RelativeOrAbsolute));
             else
-                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume1.png", UriKind.RelativeOrAbsolute));
+                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume.png", UriKind.RelativeOrAbsolute));
             
             //Запись значения громкости в реестр
             Settings.VolumeLevel = slider_Volume.Value;

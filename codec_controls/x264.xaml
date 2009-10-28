@@ -63,9 +63,8 @@
                 </Grid>
             </TabItem>
             <TabItem Header="B-frames">
-                <Grid Width="304" Height="190">
-                    <StackPanel Margin="8,0,16,16" VerticalAlignment="Bottom">
-                        <CheckBox x:Name="check_bpyramid" Width="Auto" Height="Auto" Content="B-Pyramid" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" Checked="check_bpyramid_Checked" Unchecked="check_bpyramid_Unchecked" />
+                <Grid Width="304" Height="192">
+                    <StackPanel Margin="8,0,16,12" VerticalAlignment="Bottom">
                         <CheckBox x:Name="check_weightedb" Width="Auto" Height="Auto" Content="Weighted B-Prediction" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" d:LayoutOverrides="Height" Checked="check_weightedb_Checked" Unchecked="check_weightedb_Unchecked" />
                     </StackPanel>
                     <ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,20.66,4,0" VerticalAlignment="Top" SelectionChanged="combo_bframes_SelectionChanged" />
@@ -73,10 +72,13 @@
                     <ComboBox x:Name="combo_bframe_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height, GridBox" HorizontalAlignment="Right" Margin="0,49.28,4,0" VerticalAlignment="Top" SelectionChanged="combo_bframe_mode_SelectionChanged" />
                     <Label OpacityMask="{x:Null}" x:Name="text_bframe_mode" Content="B-frames mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,42.62,0,0" VerticalAlignment="Top" />
                     <ComboBox x:Name="combo_badapt_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height, GridBox" HorizontalAlignment="Right" Margin="0,78,4,0" VerticalAlignment="Top" SelectionChanged="combo_badapt_mode_SelectionChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_badapt_mode" Content="Adaptive B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,70.62,0,0" VerticalAlignment="Top" />
-                    <CheckBox x:Name="check_nombtree" Width="115.02" Height="16.9" Content="Disable mb-tree" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" Click="check_nombtree_Clicked" HorizontalAlignment="Left" Margin="8,108.062,0,0" VerticalAlignment="Top" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_lookahead" Content="Lookahead:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" Margin="0,103.062,54,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="81.889" />
-                    <MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,107.062,4,0" VerticalAlignment="Top" Width="51" Height="22" x:Name="num_lookahead" Maximum="250" Minimum="1" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_badapt_mode" Content="Adaptive B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,72,0,0" VerticalAlignment="Top" />
+                    <CheckBox x:Name="check_nombtree" Width="115.02" Height="16.9" Content="Disable mb-tree" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" Click="check_nombtree_Clicked" HorizontalAlignment="Left" Margin="8,137,0,0" VerticalAlignment="Top" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_lookahead" Content="Lookahead:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" Margin="0,133,54,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="81.889" />
+                    <MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,136,4,0" VerticalAlignment="Top" Width="51" Height="22" x:Name="num_lookahead" Maximum="250" Minimum="1" />
+                
+                    <Label OpacityMask="{x:Null}" x:Name="text_bpyramid" Content="B-Pyramid mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" Margin="4,102,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <ComboBox x:Name="combo_bpyramid_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height, GridBox" HorizontalAlignment="Right" Margin="0,107,4,0" VerticalAlignment="Top" SelectionChanged="combo_bpyramid_mode_SelectionChanged" />
                 </Grid>
             </TabItem>
             <TabItem Header="Misc">

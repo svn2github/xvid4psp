@@ -159,7 +159,10 @@ namespace XviD4PSP
             for (int n = -16; n<=16; n++)
                 combo_chroma_qp.Items.Add(Convert.ToString(n));
                        
-            //combo_qcomp.Items.Add("0.0");
+            //--b-pyramid
+            combo_bpyramid_mode.Items.Add("None");
+            combo_bpyramid_mode.Items.Add("Strict");
+            combo_bpyramid_mode.Items.Add("Normal");
             
             LoadFromProfile();
         }
@@ -304,18 +307,13 @@ namespace XviD4PSP
                 combo_bframe_mode.SelectedItem = "Auto";
 
             //b-pyramid
-            check_bpyramid.IsChecked = m.x264options.bpyramid;
+            combo_bpyramid_mode.SelectedIndex = m.x264options.bpyramid;
 
             //weightb
             check_weightedb.IsChecked = m.x264options.weightb;
 
             //trellis
-            if (m.x264options.trellis == 0)
-                combo_trellis.SelectedItem = "0 - Disabled";
-            if (m.x264options.trellis == 1)
-                combo_trellis.SelectedItem = "1 - Final MB";
-            if (m.x264options.trellis == 2)
-                combo_trellis.SelectedItem = "2 - Always";
+            combo_trellis.SelectedIndex = m.x264options.trellis;
 
             //refernce frames
             combo_ref.SelectedItem = m.x264options.reference;
@@ -344,13 +342,8 @@ namespace XviD4PSP
             else
                 combo_threads_count.SelectedItem = m.x264options.threads;
 
-            //-b-adapt
-            if (m.x264options.b_adapt == 0)
-                combo_badapt_mode.SelectedItem = "Disabled";
-            if (m.x264options.b_adapt == 1)
-                combo_badapt_mode.SelectedItem = "Fast";
-            if (m.x264options.b_adapt == 2)
-                combo_badapt_mode.SelectedItem = "Optimal";
+            //-b-adapt            
+            combo_badapt_mode.SelectedIndex = m.x264options.b_adapt;
 
             combo_chroma_qp.SelectedItem = m.x264options.qp_offset;
 
@@ -430,19 +423,6 @@ namespace XviD4PSP
 
         private void SetAVCProfile()
         {
-            //string avcprofile = "Baseline Profile";
-
-            //if (m.x264options.cabac ||
-            //    m.x264options.bframes > 0)
-            //    avcprofile = "Main Profile";
-
-            //if (m.x264options.analyse.Contains("i8x8") ||
-            //    m.x264options.analyse == "all" ||
-            //    m.x264options.adaptivedct ||
-            //    m.outvbitrate == 0 ||
-            //    m.x264options.custommatrix != null)
-            //    avcprofile = "High Profile";
-
             string avcprofile = "Main Profile";
 
             if (!m.x264options.cabac ||
@@ -455,11 +435,6 @@ namespace XviD4PSP
                 m.outvbitrate == 0 ||
                 m.x264options.custommatrix != null)
                 avcprofile = "High Profile";
-
-
-
-
-
 
             combo_avc_profile.SelectedItem = avcprofile;
         }
@@ -500,7 +475,7 @@ namespace XviD4PSP
             check_chroma.ToolTip = "Chroma motion estimation (--no-chroma-me if not checked)";
             combo_bframes.ToolTip = "Number of B-frames between I and P (--bframes, default: 3)";
             combo_bframe_mode.ToolTip = "B-frame mode (--direct, default: Spatial)";
-            check_bpyramid.ToolTip = "Keep some B-frames as references (--b-pyramid if checked)";
+            combo_bpyramid_mode.ToolTip = "Keep some B-frames as references. \r\n -none: disabled \r\n -strict: strictly hierarchical pyramid (Blu-ray compatible)\r\n -normal: non-strict (not Blu-ray compatible) \r\n(--b-pyramid value, default: --b-pyramid none)";
             check_weightedb.ToolTip = "Weighted prediction for B-frames (--no-weightb if not checked)";
             combo_trellis.ToolTip = "Trellis RD quantization. Requires CABAC." + Environment.NewLine +
                 "0: disabled" + Environment.NewLine +
@@ -698,9 +673,14 @@ namespace XviD4PSP
 
                 if (value == "--b-adapt")
                     m.x264options.b_adapt = Convert.ToInt32(cli[n + 1]);
-                               
+
                 if (value == "--b-pyramid")
-                    m.x264options.bpyramid = true;
+                {
+                    if ((cli[n + 1]) == "strict")
+                        m.x264options.bpyramid = 1;
+                    else if ((cli[n + 1]) == "normal")
+                        m.x264options.bpyramid = 2;
+                }
 
                 if (value == "--no-weightb")
                     m.x264options.weightb = false;
@@ -846,8 +826,13 @@ namespace XviD4PSP
             if (m.x264options.b_adapt != 1)
                 line += " --b-adapt " + m.x264options.b_adapt;
 
-            if (m.x264options.bpyramid)
-                line += " --b-pyramid";
+            if (m.x264options.bpyramid != 0)
+            {
+                if (m.x264options.bpyramid == 1)
+                    line += " --b-pyramid strict";
+                else
+                    line += " --b-pyramid normal";
+            }
 
             if (m.x264options.weightb == false)
                 line += " --no-weightb";
@@ -1288,8 +1273,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 {
                     //check_adaptb.IsChecked = false;
                     //m.x264options.badapt = false;
-                    check_bpyramid.IsChecked = false;
-                    m.x264options.bpyramid = false;
+                    combo_bpyramid_mode.SelectedIndex = 0;
+                    m.x264options.bpyramid = 0;
                     check_weightedb.IsChecked = false;
                     m.x264options.weightb = false;
                     combo_bframe_mode.SelectedItem = "Disabled";
@@ -1335,11 +1320,16 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
-        private void check_bpyramid_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void combo_bpyramid_mode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (check_bpyramid.IsFocused)
+            if (combo_bpyramid_mode.IsDropDownOpen || combo_bpyramid_mode.IsSelectionBoxHighlighted)
             {
-                m.x264options.bpyramid = check_bpyramid.IsChecked.Value;
+                if (combo_bpyramid_mode.SelectedItem.ToString() == "Strict")
+                    m.x264options.bpyramid = 1;
+                else if (combo_bpyramid_mode.SelectedItem.ToString() == "Normal")
+                    m.x264options.bpyramid = 2;
+                else
+                    m.x264options.bpyramid = 0;
 
                 if (m.x264options.bframes == 0)
                 {
@@ -1347,17 +1337,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.bframes = 1;
                 }
 
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_bpyramid_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_bpyramid.IsFocused)
-            {
-                m.x264options.bpyramid = check_bpyramid.IsChecked.Value;
                 SetAVCProfile();
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
@@ -1674,8 +1653,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     //m.x264options.badapt = false;
                     combo_badapt_mode.SelectedValue = "Disabled";
                     m.x264options.b_adapt = 0;
-                    check_bpyramid.IsChecked = false;
-                    m.x264options.bpyramid = false;
+                    combo_bpyramid_mode.SelectedIndex = 0;
+                    m.x264options.bpyramid = 0;
                     check_weightedb.IsChecked = false;
                     m.x264options.weightb = false;
                     m.x264options.direct = "none";
@@ -1777,7 +1756,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
                     m.x264options.b_adapt == 1 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == false &&
+                    m.x264options.bpyramid == 0 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
                     m.x264options.custommatrix == null &&
@@ -1806,7 +1785,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
                     m.x264options.b_adapt == 1 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == false &&
+                    m.x264options.bpyramid == 0 &&
                     m.x264options.cabac == true &&
                     m.x264options.custommatrix == null &&
                     m.x264options.dctdecimate == true &&
@@ -1828,7 +1807,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
                     m.x264options.b_adapt == 2 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == false &&
+                    m.x264options.bpyramid == 0 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
                     m.x264options.custommatrix == null &&
@@ -1851,7 +1830,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse == "all" &&
                     m.x264options.b_adapt == 2 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == false &&
+                    m.x264options.bpyramid == 0 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
                     m.x264options.custommatrix == null &&
@@ -1874,7 +1853,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse == "all" &&
                     m.x264options.b_adapt == 2 &&
                     m.x264options.bframes == 16 &&
-                    m.x264options.bpyramid == false &&
+                    m.x264options.bpyramid == 0 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
                     m.x264options.custommatrix == null &&
@@ -1908,7 +1887,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
                     m.x264options.b_adapt = 1;
                     m.x264options.bframes = 3;
-                    m.x264options.bpyramid = false;
+                    m.x264options.bpyramid = 0;
                     m.x264options.cabac = true;
                     m.x264options.chroma = true;
                     m.x264options.custommatrix = null;
@@ -1949,7 +1928,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
                     m.x264options.b_adapt = 1;
                     m.x264options.bframes = 3;
-                    m.x264options.bpyramid = false;
+                    m.x264options.bpyramid = 0;
                     m.x264options.cabac = true;
                     m.x264options.chroma = true;
                     m.x264options.custommatrix = null;
@@ -1973,7 +1952,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
                     m.x264options.b_adapt = 2;
                     m.x264options.bframes = 3;
-                    m.x264options.bpyramid = false;
+                    m.x264options.bpyramid = 0;
                     m.x264options.cabac = true;
                     m.x264options.chroma = true;
                     m.x264options.custommatrix = null;
@@ -1997,7 +1976,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse = "all";
                     m.x264options.b_adapt = 2;
                     m.x264options.bframes = 3;
-                    m.x264options.bpyramid = false;
+                    m.x264options.bpyramid = 0;
                     m.x264options.cabac = true;
                     m.x264options.chroma = true;
                     m.x264options.custommatrix = null;
@@ -2021,7 +2000,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse = "all";
                     m.x264options.b_adapt = 2;
                     m.x264options.bframes = 16;
-                    m.x264options.bpyramid = false;
+                    m.x264options.bpyramid = 0;
                     m.x264options.cabac = true;
                     m.x264options.chroma = true;
                     m.x264options.custommatrix = null;
@@ -2319,7 +2298,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 DetectCodecPreset();
             }
         }
-
 
      }
 }
