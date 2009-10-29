@@ -417,7 +417,7 @@ namespace XviD4PSP
                    return new string[] { "MP3", "AAC", "Disabled", "Copy" };
 
                case ExportFormats.Flv:
-                   return new string[] { "MP3", "Disabled", "Copy" };
+                   return new string[] { "MP3", "AAC", "Disabled", "Copy" };
 
                case ExportFormats.Mp4iPod50G:
                case ExportFormats.Mp4iPod55G:
@@ -2236,10 +2236,10 @@ namespace XviD4PSP
                return Muxers.Disabled;
            else if (m.format == ExportFormats.Audio)
                return Muxers.Disabled;
-
            else if (m.format == ExportFormats.Custom)
            {
                string CustomMuxer = FormatReader.GetFormatInfo("Custom", "GetMuxer");
+               //return (Muxers)Enum.Parse(typeof(Muxers), FormatReader.GetFormatInfo("Custom", "GetMuxer"), true);
                if (CustomMuxer == "pmpavc")
                    return Muxers.pmpavc;
                else if (CustomMuxer == "mkvmerge")
@@ -2256,9 +2256,8 @@ namespace XviD4PSP
                    return Muxers.Disabled;
                else if (CustomMuxer == "mp4box")
                    return Muxers.mp4box;
-               else return Muxers.mp4box;
+               else return Muxers.ffmpeg;
            }
-
            else
                return Muxers.mp4box; 
        }

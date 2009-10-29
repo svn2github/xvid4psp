@@ -344,6 +344,9 @@ namespace XviD4PSP
             if (m.outvideofile == null)
                 m.outvideofile = Settings.TempPath + "\\" + m.key + ".264";
 
+            if (Format.GetMuxer(m) == Format.Muxers.ffmpeg) //ffmpeg криво муксит raw-avc, нужно кодировать в контейнер
+                m.outvideofile = Calculate.RemoveExtention(m.outvideofile, true) + ".mp4";
+                        
             //подхватываем готовый файл
             if (File.Exists(m.outvideofile))
             {
@@ -2815,8 +2818,8 @@ namespace XviD4PSP
             if (m.outaudiostreams.Count > 0)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                if (outstream.codec == "AAC")
-                    aformat = " -f mpeg4aac";
+                //if (outstream.codec == "AAC") //Вообще слабо представляю, зачем тут эта опция.. при муксинге с ней происходит ошибка
+                //    aformat = " -f mpeg4aac"; 
                 if (!File.Exists(outstream.audiopath))
                     addaudio = " -acodec copy";
                 else
