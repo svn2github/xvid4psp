@@ -82,6 +82,7 @@ namespace XviD4PSP
         private int opened_files = 0; //Кол-во открытых файлов при открытии папки
         private double fps = 0; //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
         private bool OldSeeking = false; //Способ позиционирования, old - непрерывное, new - только при отпускании кнопки мыши
+        private double dpi = 1.0; //Для масштабирования окна ДиректШоу-превью
 
 #if DEBUG
         private DsROTEntry rot = null;
@@ -100,6 +101,13 @@ namespace XviD4PSP
             Running,
             Init
         }
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
+        public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+        [DllImport("user32.dll", EntryPoint = "GetDC")]
+        public static extern IntPtr GetDC(IntPtr ptr);
+        [DllImport("user32.dll", EntryPoint = "ReleaseDC")]
+        public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDc);
 
         public MainWindow()
         {
@@ -150,6 +158,12 @@ namespace XviD4PSP
 
                 MenuHider(false); //Делаем пункты меню неактивными
                 SetLanguage(); //переводим лейблы
+
+                //Определяем коэффициент для масштабирования окна ДиректШоу-превью
+                IntPtr ScreenDC = GetDC(IntPtr.Zero); //88-w, 90-h
+                double _dpi = (double)GetDeviceCaps(ScreenDC, 88) / 96.0;
+                if (_dpi != 0) dpi = _dpi;
+                ReleaseDC(IntPtr.Zero, ScreenDC);
             }
             catch (Exception ex)
             {
@@ -183,7 +197,7 @@ namespace XviD4PSP
             else
             {
                 try
-                {   
+                {
                     //загружаем список форматов
                     combo_format.Items.Clear();
                     foreach (string f in Format.GetFormatList())
@@ -4358,13 +4372,13 @@ namespace XviD4PSP
                   else
                       mediaPosition.put_CurrentPosition(NaturalDuration.TotalSeconds); //Ограничиваем позицию длиной клипа */
         }
-
+    
         private void MoveVideoWindow()
         {
             // Track the movement of the container window and resize as needed
             if (this.videoWindow != null)
             {
-                int hr = 0;                
+                int hr = 0;   
                 int top = (int)(grid_menu.ActualHeight +
                     grid_top.ActualHeight +
                     splitter_tasks_preview.ActualHeight +
@@ -4387,25 +4401,18 @@ namespace XviD4PSP
                 if (isFullScreen == true)
                 {
                     top = 0; //h - высота, w - ширина
-                    //this.grid_player_buttons.ActualHeight //высота панели управления плейера
-
                     h = (int)this.LayoutRoot.ActualHeight - (int)this.grid_player_buttons.ActualHeight; //высота экрана минус высота панели
-                    ///h = (int)SystemParameters.WorkArea.Height;
                     w = (int)(m.outaspect * h);
                     left = (int)((this.LayoutRoot.ActualWidth - w) / 2); //ширина
-                    ///left = (int)((SystemParameters.WorkArea.Width - w) / 2);
-
                     if (w > this.LayoutRoot.ActualWidth)
-                    ///if (w > SystemParameters.WorkArea.Width)
                     {
                         w = (int)this.LayoutRoot.ActualWidth;
-                        ///w = (int)SystemParameters.WorkArea.Width;
                         h = (int)((double)w / m.outaspect);
                         left = 0;
                         top = (int)((this.LayoutRoot.ActualHeight - h) / 2.0);
-                        ///top = (int)((SystemParameters.WorkArea.Height - h) / 2.0);
                     }
                 }
+                top = (int)((double)top * dpi); h = (int)((double)h * dpi); w = (int)((double)w * dpi); left = (int)((double)left * dpi); //Масштабируем
                 hr = this.videoWindow.SetWindowPosition(left, top, w, h);
                 DsError.ThrowExceptionForHR(hr);
                 this.videoWindow.put_BorderColor(1);

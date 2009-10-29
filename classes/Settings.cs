@@ -1059,7 +1059,7 @@ namespace XviD4PSP
                 object value = GetValue("PrintAviSynth");
                 if (value == null)
                 {
-                    return false;
+                    return true;
                 }
                 else
                 {
