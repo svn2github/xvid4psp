@@ -460,16 +460,25 @@ namespace XviD4PSP
             if (IsEncoding)
             {
                 Message mes = new Message(this);
-                mes.ShowMessage(Languages.Translate("Some jobs are still in progress!"), Languages.Translate("Warning"));
-                e.Cancel = true;
-                return;
-            }
-            else
-            {
-                if (m != null)
+                mes.ShowMessage(Languages.Translate("Some jobs are still in progress!") + "\r\n" + Languages.Translate("Are you shore you want to quit?"), Languages.Translate("Warning"), Message.MessageStyle.YesNo);
+                if (mes.result == Message.Result.No)
                 {
-                    CloseFile();
+                    e.Cancel = true;
+                    return;
                 }
+
+                while (this.OwnedWindows.Count > 0)
+                {
+                    foreach (Window OwnedWindow in this.OwnedWindows)
+                    {
+                        OwnedWindow.Close();
+                    }
+                }
+            }
+
+            if (m != null)
+            {
+                CloseFile();
             }
 
             //удаляем мусор
@@ -515,7 +524,7 @@ namespace XviD4PSP
                 GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
                 Settings.TasksRow = convGridLength.ConvertToString(this.TasksRow.Height);
                 Settings.TasksRow2 = convGridLength.ConvertToString(this.TasksRow2.Height);
-            }           
+            }
         }
 
         private ArrayList add_ff_cache(string[] infileslist)
@@ -3527,48 +3536,33 @@ namespace XviD4PSP
                 list_tasks.Items.Insert(index, task);
                 IsInsertAction = false;
             }
-
         }
 
         private void UpdateTaskMassive(Massive mass)
         {
-            //проверяем не заблокированно ли задание
-            bool IsEncoding = false;
+            //Перезапись (обновление) задания, если оно не в процессе кодирования
+            int task_index = 0;
+            bool IsTask = false;
+            Task task = null;
 
             foreach (object _task in list_tasks.Items)
             {
-                Task task = (Task)_task;
-                if (task.Id == m.key)
-                    if (task.Status == "Encoding")
-                        IsEncoding = true;
+                task = (Task)_task;
+                if (task.Id == mass.key && task.Status != "Encoding")
+                {
+                    IsTask = true;
+                    break;
+                }
+                task_index++;
             }
 
-            if (!IsEncoding)
+            if (IsTask)
             {
-                int task_index = 0;
-                bool IsTask = false;
-                Task task = null;
-
-                foreach (object _task in list_tasks.Items)
-                {
-                    task = (Task)_task;
-                    if (task.Id == m.key)
-                    {
-                        IsTask = true;
-                        break;
-                    }
-                    task_index++;
-                }
-
-                if (IsTask)
-                {
-                    IsInsertAction = true;
-                    list_tasks.Items.RemoveAt(task_index);
-                    list_tasks.Items.Insert(task_index, new Task(task.THM, "Waiting", mass.Clone()));
-                    list_tasks.SelectedIndex = task_index;
-                    IsInsertAction = false;
-                }
-
+                IsInsertAction = true;
+                list_tasks.Items.RemoveAt(task_index);
+                list_tasks.Items.Insert(task_index, new Task(task.THM, "Waiting", mass.Clone()));
+                list_tasks.SelectedIndex = task_index;
+                IsInsertAction = false;
             }
         }
 

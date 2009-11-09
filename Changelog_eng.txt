@@ -1,9 +1,9 @@
-XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r48 Changelog:
+XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r60 Changelog:
 
 
 >>> Option "Always close encoding window when finished" has been moved to the global setting.
 
->>> Now in the file name of the saved log will be added the full name of the encoding file (with extension).
+>>> Now in the file name of the saved log will be added full name of the encoding file (with extension).
     -requested by crazy-cactus
 
 >>> Fixed non-alignment of the audio track in Copy mode when encoding to MKV, if audio-file was not demuxed before
@@ -15,23 +15,23 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r48 Changelog:
     -requested by Embox
 
 >>> Now when you save the picture (frame) in the save dialog by default will be added name of the source file and current
-    frame number. Added ability to save in the BMP-format.
+    frame number. Added ability to save pictures as BMP.
     -requested by Embox
 
 >>> The MediaInfo window was reworked: added drag-n-drop; added Save button (for saving resulting log into file); added 
     info-switcher (MediaInfo, MediaInfoFull, FFmpeg, MP4Box, mkvinfo) - now you can change source of the info, without
     closing the window.
 
->>> Option "Auto delete DGIndex cache" now works. Deletion will occurs when you close the file (if it is not used in any 
+>>> Option "Auto delete DGIndex cache" now works. Deletion will occurs when you close the file (if it`s not used in any 
     job) or when main window is closing. This option is disabled by default.
      -reported by Embox
 
 >>> Added new option "Create DGIndex-cache in the temp folder". If you will use this option, you must avoid opening mpeg
-    files with identical names, because for this files the name of the folder for the cache will be the same. This option
+    files with identical names, because for this files name of the folder for the cache will be the same. This option
     is disabled by default (cache file will be created in the same folder as the source file).
 
 >>> For the FLV format was changed restrictions on the parameters of the audio file in the Copy-mode, added possibility
-    to choose x264 as a video codec.
+    to create FLV with x264-video and AAC-audio.
 
 >>> For the muxers mkvmerge, ffmpeg and mp4box now when an error occurs while muxing, in the encoding log will be added
     message, recieved from this muxers. Added displaying of the CLI-arguments for the demuxers. Also was fixed bug with
@@ -43,7 +43,7 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r48 Changelog:
 >>> When encoding with preservation anamorph, now after auto-crop width and height will be recalculated on following
     algorithm: (original resolution - cropped) rounded to the nearest acceptable resolution. 
 
->>> In the Custom-format added new option - Stereo (if you want to limit number of channels by two).
+>>> In the Custom-format added new option for limit number of audio-channels by two (2ch - max).
 
 >>> Fixed crash when user change video decoder, but opened file - is audio. Also fixed possible crash, if the new 
     decoder is unable to open the current video file.
@@ -51,13 +51,13 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r48 Changelog:
 
 >>> Enhanced batch opening files. Now, in addition to "Open Folder", in the main window you can drop multiple files,
     and after that will appears dialog of selecting the folder where to save them. After this all files will be opened
-    and added into the queue. Same thing will happen when you select multiple files by clicking on "Open..". For all
-    files opened in this way still will be working filter by extension. 
+    and added into the queue. Same thing will happen if you select multiple files by clicking on "Open..". For all
+    files opened in this way still will be used filter by extensions. 
     -multiple-file selection in the Open menu provides by the modified version of SafeOpenDialog (modified by Stressman).
 
 >>> Some changes for the preview player. For the DirectShow engine significantly improved the accuracy of the frame-counter.
-    Also should disappear the problem when some files start playing for a shirt time imediately after opening. Increased
-    the speed of loading preview after refreshing. For the MediaBridge engine also slightly improved the accuracy of the
+    Also should disappear problem when some files start playing for a shirt time imediately after opening. Increased
+    the speed of loading preview after refreshing. For the MediaBridge engine also slightly improved accuracy of the
     frame-counter, but it still not enough.
 
 >>> For the preview player was changed the way of positioning when moving the slider. Now positioning will be performed
@@ -66,9 +66,9 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r48 Changelog:
     Player engine->Old seeking", or by clicking right mouse button on the slider (these two settings interconnected and
     merged).
 
->>> Due to some problems when opening files with multiple audio tracks, needing to re-create the script before start 
-    encoding (with losing all that was enters/changed by user), as well as for the reason that the sound anyway will be
-    extracted, the option "Don`t demux audio for preview" now is off by default.
+>>> Due to some problems when opening files with multiple audio tracks, needing to re-create Avisynt-script before start 
+    encoding (with losing all data entered/changed by user), as well as for the reason that audio anyway will be
+    extracted, option "Don`t demux audio for preview" now will be off by default.
 
 >>> Fixed problem with (not)copying the AAC-tracks. For the RAW-AAC files now, as it should be, extension will be aac. 
     For mkvmerge added option --aac-is-sbr, it will be added when you copy-AAC audio (except DirectRemux) desired value 
@@ -79,12 +79,23 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r48 Changelog:
 
 >>> Some cosmetic changes in the FFrebuilder window (by Embox), also added drag-n-drop function.
 
+>>> Slightly changed radio-buttons in the menu (decoder, language selection etc) and menu style, also size of the tasks-area
+    now will be stored in settings; some other changes.
+    -by Embox
 
+>>> DVD Import window now will receive some information about DVD from the MediaInfo, because using VStrip.dll produce crashes
+    on some PCs when detecting video-parameters. Preview player now uses the volume stored in settings; added autoselection
+    of the longest DVD-title.
 
+>>> Fixed aspect adjusting method "Crop" - now crop calculating is sensitive to source video aspect; added aspect error
+    re-calculation.
 
+>>> Added ability to store current audiochannels converter method (it will be used provided it meets audiocoder and format
+    restrictions).
 
+>>> Size and location of the DirectShow-preview window now scaled (scaling based on the system DPI).
 
-
+>>> Added ability to exit application even if encoding is running (encoding will be aborted).
 
 
 
