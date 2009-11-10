@@ -198,6 +198,19 @@ namespace XviD4PSP
             }
         }
 
+        private int _weightp = 2;
+        public int weightp
+        {
+            get
+            {
+                return _weightp;
+            }
+            set
+            {
+                _weightp = value;
+            }
+        }
+
         private bool _adaptivedct = true;
         public bool adaptivedct
         {

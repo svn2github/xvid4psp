@@ -163,7 +163,12 @@ namespace XviD4PSP
             combo_bpyramid_mode.Items.Add("None");
             combo_bpyramid_mode.Items.Add("Strict");
             combo_bpyramid_mode.Items.Add("Normal");
-            
+
+            //--weightp
+            combo_weightp_mode.Items.Add("Disabled");
+            combo_weightp_mode.Items.Add("Blind offset");
+            combo_weightp_mode.Items.Add("Smart analysis");
+
             LoadFromProfile();
         }
 
@@ -311,6 +316,9 @@ namespace XviD4PSP
 
             //weightb
             check_weightedb.IsChecked = m.x264options.weightb;
+
+            //weightp
+            combo_weightp_mode.SelectedIndex = m.x264options.weightp;
 
             //trellis
             combo_trellis.SelectedIndex = m.x264options.trellis;
@@ -477,6 +485,7 @@ namespace XviD4PSP
             combo_bframe_mode.ToolTip = "B-frame mode (--direct, default: Spatial)";
             combo_bpyramid_mode.ToolTip = "Keep some B-frames as references. \r\n -none: disabled \r\n -strict: strictly hierarchical pyramid (Blu-ray compatible)\r\n -normal: non-strict (not Blu-ray compatible) \r\n(--b-pyramid value, default: --b-pyramid none)";
             check_weightedb.ToolTip = "Weighted prediction for B-frames (--no-weightb if not checked)";
+            combo_weightp_mode.ToolTip = "Weighted prediction for P-frames (--weightp value, default: Smart)";
             combo_trellis.ToolTip = "Trellis RD quantization. Requires CABAC." + Environment.NewLine +
                 "0: disabled" + Environment.NewLine +
                 "1: enabled only on the final encode of a MB (Default)" + Environment.NewLine +
@@ -685,6 +694,9 @@ namespace XviD4PSP
                 if (value == "--no-weightb")
                     m.x264options.weightb = false;
 
+                if (value == "--weightp")
+                    m.x264options.weightp = Convert.ToInt32(cli[n + 1]);
+
                 if (value == "--no-8x8dct")
                     m.x264options.adaptivedct = false;
 
@@ -836,6 +848,9 @@ namespace XviD4PSP
 
             if (m.x264options.weightb == false)
                 line += " --no-weightb";
+
+            if (m.x264options.weightp != 2)
+                line += " --weightp " + m.x264options.weightp;
 
             if (m.x264options.trellis != 1)
                 line += " --trellis " + m.x264options.trellis;
@@ -1372,6 +1387,17 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
+        private void combo_weightp_mode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_weightp_mode.IsDropDownOpen || combo_weightp_mode.IsSelectionBoxHighlighted)
+            {
+                m.x264options.weightp = combo_weightp_mode.SelectedIndex;
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
         private void check_8x8dct_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
             if (check_8x8dct.IsFocused)
@@ -1657,6 +1683,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.bpyramid = 0;
                     check_weightedb.IsChecked = false;
                     m.x264options.weightb = false;
+                    combo_weightp_mode.SelectedIndex = 0;
+                    m.x264options.weightp = 0;
                     m.x264options.direct = "none";
                     combo_bframe_mode.SelectedItem = "Disabled";
                     m.x264options.adaptivedct = false;
@@ -1681,6 +1709,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.b_adapt = 1;
                     check_weightedb.IsChecked = true;
                     m.x264options.weightb = true;
+                    combo_weightp_mode.SelectedIndex = 2;
+                    m.x264options.weightp = 2;
                     if (m.encodingmode == Settings.EncodingModes.TwoPass ||
                         m.encodingmode == Settings.EncodingModes.ThreePass ||
                         m.encodingmode == Settings.EncodingModes.TwoPassSize ||
@@ -1718,6 +1748,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.b_adapt = 1;
                     check_weightedb.IsChecked = true;
                     m.x264options.weightb = true;
+                    combo_weightp_mode.SelectedIndex = 2;
+                    m.x264options.weightp = 2;
                     if (m.encodingmode == Settings.EncodingModes.TwoPass ||
                         m.encodingmode == Settings.EncodingModes.ThreePass ||
                         m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
@@ -1775,11 +1807,12 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.subme == 7 &&
                     m.x264options.trellis == 1 &&
                     m.x264options.weightb == true &&
+                    m.x264options.weightp == 2 &&
                     m.x264options.slow_frstpass == false)
 
                 preset = CodecPresets.Default;
 
-                  
+
             //Fast
             else if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
@@ -1799,7 +1832,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.reference == 2 &&
                     m.x264options.subme == 5 &&
                     m.x264options.trellis == 1 &&
-                    m.x264options.weightb == true)
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 2)
                 preset = CodecPresets.Fast;
 
             //Slow
@@ -1822,7 +1856,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.reference == 5 &&
                     m.x264options.subme == 8 &&
                     m.x264options.trellis == 1 &&
-                    m.x264options.weightb == true)
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 2)
                 preset = CodecPresets.Slow;
 
             //Slower
@@ -1845,7 +1880,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.reference == 8 &&
                     m.x264options.subme == 9 &&
                     m.x264options.trellis == 2 &&
-                    m.x264options.weightb == true)
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 2)
                 preset = CodecPresets.Slower;
 
             //Placebo
@@ -1868,7 +1904,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.reference == 16 &&
                     m.x264options.subme == 9 &&
                     m.x264options.trellis == 2 &&
-                    m.x264options.weightb == true)
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 2)
                 preset = CodecPresets.Placebo;
 
             combo_codec_preset.SelectedItem = preset.ToString();
@@ -1906,6 +1943,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.subme = 7;
                     m.x264options.trellis = 1;
                     m.x264options.weightb = true;
+                    m.x264options.weightp = 2;
 
                     m.x264options.aqmode = "1";
                     m.x264options.aqstrength = "1.0";
@@ -1944,6 +1982,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.subme = 5;
                     m.x264options.trellis = 1;
                     m.x264options.weightb = true;
+                    m.x264options.weightp = 2;
                 }
 
                 if (preset == CodecPresets.Slow)
@@ -1968,6 +2007,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.subme = 8;
                     m.x264options.trellis = 1;
                     m.x264options.weightb = true;
+                    m.x264options.weightp = 2;
                 }
 
                 if (preset == CodecPresets.Slower)
@@ -1992,10 +2032,11 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.subme = 9;
                     m.x264options.trellis = 2;
                     m.x264options.weightb = true;
+                    m.x264options.weightp = 2;
                 }
 
                 if (preset == CodecPresets.Placebo)
-                {
+                {          
                     m.x264options.adaptivedct = true;
                     m.x264options.analyse = "all";
                     m.x264options.b_adapt = 2;
@@ -2016,6 +2057,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.subme = 9;
                     m.x264options.trellis = 2;
                     m.x264options.weightb = true;
+                    m.x264options.weightp = 2;
                 }
 
                 if (preset != CodecPresets.Custom)
@@ -2173,9 +2215,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 DetectCodecPreset();
 
             }
-                
-                
-                //Settings.ThreadsX264 = combo_threads_count.SelectedItem.ToString();
         }
 
         private void combo_badapt_mode_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2193,7 +2232,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
             }
-
         }
 
         private void num_qcomp_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
