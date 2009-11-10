@@ -46,7 +46,7 @@
 				</MenuItem>
 				<MenuItem x:Name="mnVideo" Header="Video">
 					<MenuItem x:Name="mnUpdateVideo" Header="Refresh preview" Click="mnUpdateVideo_Click"/>
-					<Separator/>
+                    <Separator/>
 					<MenuItem x:Name="menu_demux_video" Header="Save to" Click="menu_demux_video_Click"/>
 					<Separator/>
                     <MenuItem x:Name="mnVideoDecoding" Header="Decoding">
@@ -448,6 +448,8 @@
                 <TextBox x:Name="textbox_end" Text="" TextWrapping="Wrap" Margin="7,312,8,8" VerticalScrollBarVisibility="Disabled" HorizontalAlignment="Left" VerticalAlignment="Top" Width="70" Height="19" Opacity="0.9" HorizontalContentAlignment="Right" />
             </Grid>
         <TextBlock Opacity="0.7" x:Name="textbox_frame" Height="Auto" FontFamily="Segoe" FontSize="25" FontWeight="Bold" Foreground="#FFFFFFFF" TextAlignment="Right" TextWrapping="Wrap" Width="192" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
+        <TextBox Opacity="0.8" PreviewKeyDown="GoTo_KeyDown" PreviewMouseRightButtonDown="GoTo_MouseRightDown" x:Name="textbox_frame_goto" Height="32" FontFamily="Segoe" FontSize="25" FontWeight="Bold" Foreground="#FFFFFFFF" Background="Transparent" TextAlignment="Right" TextWrapping="Wrap" Width="192" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="3,0,0,-2" BorderBrush="Transparent" BorderThickness="0" Visibility="Hidden" ContextMenu="{x:Null}" />
+        <TextBlock  x:Name="target_goto" Width="192" Height="Auto" FontFamily="Segoe" FontSize="25" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,0" MouseDown="GoTo_Click" />            
         </Grid>
 		<Grid x:Name="grid_player_window" Background="{DynamicResource black_gradient_2}" Margin="195.856,4,0,38.184" AllowDrop="True" DragEnter="grid_player_window_DragEnter" Drop="grid_player_window_Drop" Grid.Row="1">
 			<Grid x:Name="grid_player_info" Height="44" RenderTransformOrigin="0.5,0.5" Margin="8,8,8,0" VerticalAlignment="Top">    

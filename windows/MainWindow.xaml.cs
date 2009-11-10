@@ -151,11 +151,9 @@ namespace XviD4PSP
                 this.textbox_time.Visibility = Visibility.Visible;//Показать прошедшее время воспроизведения..
                 this.textbox_duration.Visibility = Visibility.Collapsed;//.. а общее время скрыть.
 
-                textbox_name.Text = "";
-                textbox_time.Text = "00:00:00";
-                textbox_duration.Text = "00:00:00";
-                textbox_frame.Text = "";
-
+                textbox_name.Text = textbox_frame.Text = textbox_frame_goto.Text = "";
+                textbox_time.Text = textbox_duration.Text = "00:00:00";
+               
                 MenuHider(false); //Делаем пункты меню неактивными
                 SetLanguage(); //переводим лейблы
 
@@ -2012,7 +2010,8 @@ namespace XviD4PSP
                 menu_open_folder.Header = Languages.Translate("Open folder...");
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
-
+                target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.");
+                
                 //Тултипы для выбора видео-декодера
                 avi_ds.ToolTip = o_ds.ToolTip = mpg_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
                 avi_ds2.ToolTip = o_ds2.ToolTip = mpg_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
@@ -4201,12 +4200,9 @@ namespace XviD4PSP
             }
 
             //update titles
-            textbox_name.Text = "";
-            textbox_time.Text = "00:00:00";
-            textbox_duration.Text = "00:00:00";
-            progress_top.Width = 0.0;
-            slider_pos.Value = 0.0;
-            textbox_frame.Text = "";
+            textbox_name.Text = textbox_frame.Text = "";
+            textbox_time.Text = textbox_duration.Text = "00:00:00";
+            progress_top.Width = slider_pos.Value = 0.0;
         }
 
         private void CloseInterfaces()
@@ -5916,6 +5912,7 @@ namespace XviD4PSP
             menu_playinwmp.IsEnabled = ShowItems;
             menu_payinmpc.IsEnabled = ShowItems;
             menu_playinwpf.IsEnabled = ShowItems;
+            target_goto.IsEnabled = ShowItems;
 
             AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
             if (m != null)
@@ -5924,7 +5921,42 @@ namespace XviD4PSP
                 this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
             asinfo = null;
         }
-       
+
+        private void GoTo_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                int fr;
+                if (int.TryParse(textbox_frame_goto.Text, out fr))
+                    if ((TimeSpan.FromSeconds((double)fr / fps)) <= NaturalDuration)
+                        Position = TimeSpan.FromSeconds((double)fr / fps);
+                GoTo_Click(null, null);
+            }
+            else if (e.Key == Key.Escape) GoTo_Click(null, null);
+        }
+
+        private void GoTo_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (textbox_frame_goto.Visibility == Visibility.Hidden)
+            {
+                textbox_frame.Visibility = Visibility.Hidden;
+                textbox_frame_goto.Visibility = Visibility.Visible;
+                target_goto.Visibility = Visibility.Collapsed;
+                textbox_frame_goto.Focus();
+            }
+            else
+            {
+                textbox_frame.Visibility = Visibility.Visible;
+                textbox_frame_goto.Visibility = Visibility.Hidden;
+                target_goto.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void GoTo_MouseRightDown(object sender, MouseButtonEventArgs e)
+        {
+             textbox_frame_goto.Text = Math.Round(Position.TotalSeconds * fps).ToString();            
+        }
+
 
     }
 }
