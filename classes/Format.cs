@@ -2076,6 +2076,8 @@ namespace XviD4PSP
                return ".wav";
            else if (codec == "AAC")
                return ".aac";//.m4a
+           else if (codec == "TrueHD")
+               return ".ac3";
            else
                return "." + codec.ToLower();
        }
@@ -2118,8 +2120,13 @@ namespace XviD4PSP
                format == ExportFormats.TS ||
                format == ExportFormats.Mkv ||
                format == ExportFormats.Mp4 ||
+               format == ExportFormats.Mp4PSPAVC ||
+               format == ExportFormats.Mp4PSPAVCTV)
+               return "x264 Q21 HQ Film";
+           else if (format == ExportFormats.Mp4iPod55G ||
+               format == ExportFormats.Mp4iPhone ||
                format == ExportFormats.Mp4PS3)
-               return "x264 Q21 Ultra";
+               return "x264 Q21 HQ";
            else
                return "x264 HQ Ultra";
        }

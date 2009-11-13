@@ -2010,7 +2010,7 @@ namespace XviD4PSP
                 menu_open_folder.Header = Languages.Translate("Open folder...");
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
-                target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.");
+                target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.");
                 
                 //Тултипы для выбора видео-декодера
                 avi_ds.ToolTip = o_ds.ToolTip = mpg_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
@@ -3883,7 +3883,7 @@ namespace XviD4PSP
                     o.Filter = instream.codecshort + " " + Languages.Translate("files") + "|*." + instream.codecshort.ToLower();
                     o.Title = Languages.Translate("Select output file") + ":";
 
-                    o.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + "." + instream.codecshort.ToLower();
+                    o.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidRAWAudioEXT(instream.codecshort);
 
                     if (o.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
@@ -5943,6 +5943,8 @@ namespace XviD4PSP
                 textbox_frame_goto.Visibility = Visibility.Visible;
                 target_goto.Visibility = Visibility.Collapsed;
                 textbox_frame_goto.Focus();
+                if (e != null && e.RightButton == MouseButtonState.Pressed)
+                    GoTo_MouseRightDown(null, null);
             }
             else
             {

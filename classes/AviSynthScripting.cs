@@ -128,7 +128,7 @@ namespace XviD4PSP
 
            if (m.deinterlace == DeinterlaceType.MCBob)
            {
-               m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\MCBob.avs\")" + Environment.NewLine;
+               m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\mt_masktools.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
@@ -555,7 +555,7 @@ namespace XviD4PSP
 
            if (m.deinterlace == DeinterlaceType.MCBob)
            {
-               m.script += "MCBob()" + Environment.NewLine;
+               m.script += "MCBobmod()" + Environment.NewLine;
            }
 
            if (m.deinterlace == DeinterlaceType.NNEDI)

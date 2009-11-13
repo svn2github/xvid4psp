@@ -324,7 +324,7 @@ namespace XviD4PSP
                 object value = GetValue("Format");
                 if (value == null)
                 {
-                    return Format.ExportFormats.M2TS;
+                    return Format.ExportFormats.Mkv;
                 }
                 else
                 {
