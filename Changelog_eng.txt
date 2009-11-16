@@ -1,4 +1,4 @@
-XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r60 Changelog:
+XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 r64 pre Changelog:
 
 
 >>> Option "Always close encoding window when finished" has been moved to the global setting.
@@ -96,6 +96,47 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 pre r60 Changelog:
 >>> Size and location of the DirectShow-preview window now scaled (scaling based on the system DPI).
 
 >>> Added ability to exit application even if encoding is running (encoding will be aborted).
+
+>>> --b-pyramid --weightp, format PMP AVC working again.
+
+>>> Added new function in the frame counter: go to (frame #). To activate it, click on counter, then enter number of
+    requested frame, then press Enter (Escape - cancel). Right-click will insert current frame number.
+    -requested by bugariarmando
+
+>>> Some other changes..
+
+------
+
+Updated components:
+
+
+Updated: FFmpegSource2 (2.13 r234, http://code.google.com/p/ffmpegsource)
+Updated: MediaInfo (0.7.25, http://mediainfo.sourceforge.net)
+Updated: FFmpeg (unofficial build r20542, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
+Updated: MKVtoolnix (2.9.8-build20091111-179, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
+Updated: DGIndex (1.5.6, http://neuron2.net)
+Updated: MP4Box (0.4.6-dev_20091013, http://kurtnoise.free.fr/mp4tools)
+Updated: DirectXWebSetup (9.27.1734)
+Updated: x264 (1342 (32 patched), http://x264.fushizen.eu/)
+Updated: x264pmp (1332, http://gitorious.org/mplayer-ww/x264-pmp)
+
+
+Encoding presets by Procrustean, and also archive of plugins and filtering presets by Tempter57.
+
+
+
+-----------------------
+
+
+
+
+
+
+
+
+
+
+
 
 
 

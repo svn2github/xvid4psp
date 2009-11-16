@@ -369,7 +369,6 @@ namespace XviD4PSP
 
        public static Massive CalculateSAR(Massive m)
        {
-
            double dsar = (double)((double)m.outresw / (double)m.outresh) / m.outaspect;
            double min_diff = 100.0;
            double diff;
@@ -408,7 +407,7 @@ namespace XviD4PSP
                m.sar = "1:1";
 
            return m;
-       }
+       }       
 
        public static string[] InsertAspect(string[] aspects, string aspect)
        {

@@ -400,9 +400,9 @@ namespace XviD4PSP
             ProcessStartInfo info = new ProcessStartInfo();
             string arguments; //начало создания коммандной строчки для x264-го
 
-            //if (m.format == Format.ExportFormats.PmpAvc)
-                //info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
-            //else
+            if (m.format == Format.ExportFormats.PmpAvc)
+                info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
+            else
                 info.FileName = Calculate.StartupPath + "\\apps\\x264\\x264.exe";
 
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
@@ -3645,7 +3645,7 @@ namespace XviD4PSP
 
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
-            SetPriority(Settings.ProcessPriority);
+            //SetPriority(Settings.ProcessPriority); //cfourcc.exe - работает слишком быстро :) иногда успевает закрыться до присвоения приоритета, что приводит к ошибке
             encoderProcess.WaitForExit();
 
             //чистим ресурсы
