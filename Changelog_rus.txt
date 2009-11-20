@@ -1,4 +1,4 @@
-XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 r64 pre Changelog:
+XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6(Unofficial) r65 20.11.09 Changelog:
 
 
 >>> Опция закрытия окна лога после кодирования перенесена в глобальные настройки.
@@ -112,15 +112,15 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 r64 pre Changelog:
 
 Обновленные компоненты:
 
-Обновлен: FFmpegSource2 (2.13 r234, http://code.google.com/p/ffmpegsource)
+Обновлен: FFmpegSource2 (2.13 r234-2, http://code.google.com/p/ffmpegsource)
 Обновлен: MediaInfo (0.7.25, http://mediainfo.sourceforge.net)
-Обновлен: FFmpeg (unofficial build r20542, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
-Обновлен: MKVtoolnix (2.9.8-build20091111-179, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
+Обновлен: FFmpeg (unofficial build r20560, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
+Обновлен: MKVtoolnix (2.9.8-build20091120-180, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
 Обновлен: DGIndex (1.5.6, http://neuron2.net)
 Обновлен: MP4Box (0.4.6-dev_20091013, http://kurtnoise.free.fr/mp4tools)
 Обновлен: DirectXWebSetup (9.27.1734)
-Обновлен: x264 (1342 (32 patched), http://x264.fushizen.eu/)
-Обновлен: x264pmp (1332, http://gitorious.org/mplayer-ww/x264-pmp)
+Обновлен: x264 (x264.1342kMod.generic.x86,  http://komisar.gin.by)
+Обновлен: x264pmp (1342, http://gitorious.org/mplayer-ww/x264-pmp)
 
 
 Пресеты кодирования by Procrustean, а так-же архив плагинов и пресетов фильтрации by Tempter57.

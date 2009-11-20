@@ -458,7 +458,7 @@ namespace XviD4PSP
             if (IsEncoding)
             {
                 Message mes = new Message(this);
-                mes.ShowMessage(Languages.Translate("Some jobs are still in progress!") + "\r\n" + Languages.Translate("Are you shore you want to quit?"), Languages.Translate("Warning"), Message.MessageStyle.YesNo);
+                mes.ShowMessage(Languages.Translate("Some jobs are still in progress!") + "\r\n" + Languages.Translate("Are you sure you want to quit?"), Languages.Translate("Warning"), Message.MessageStyle.YesNo);
                 if (mes.result == Message.Result.No)
                 {
                     e.Cancel = true;

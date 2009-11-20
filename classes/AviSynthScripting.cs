@@ -222,7 +222,7 @@ namespace XviD4PSP
            //пустой клип (черный экран)
            if (m.vdecoder == Decoders.BlankClip)
            {
-               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=720, height=576, fps=" + m.inframerate + ", color=$000000)";
+               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + m.inframerate + ", color=$000000)";
            }
            
            //мпег2 d2v и MPEG2Source
@@ -1022,7 +1022,7 @@ namespace XviD4PSP
            string invideostring = "";
            if (m.vdecoder == Decoders.BlankClip)
            {
-               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=720, height=576, fps=" + m.inframerate + ", color=$000000)";
+               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + m.inframerate + ", color=$000000)";
            }
            else if (ext == ".d2v")
            {

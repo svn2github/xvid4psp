@@ -1,4 +1,4 @@
-XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 r64 pre Changelog:
+XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6(Unofficial) r65 20.11.09 Changelog:
 
 
 >>> Option "Always close encoding window when finished" has been moved to the global setting.
@@ -110,15 +110,15 @@ XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6 r64 pre Changelog:
 Updated components:
 
 
-Updated: FFmpegSource2 (2.13 r234, http://code.google.com/p/ffmpegsource)
+Updated: FFmpegSource2 (2.13 r234-2, http://code.google.com/p/ffmpegsource)
 Updated: MediaInfo (0.7.25, http://mediainfo.sourceforge.net)
-Updated: FFmpeg (unofficial build r20542, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
-Updated: MKVtoolnix (2.9.8-build20091111-179, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
+Updated: FFmpeg (unofficial build r20560, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
+Updated: MKVtoolnix (2.9.8-build20091120-180, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
 Updated: DGIndex (1.5.6, http://neuron2.net)
 Updated: MP4Box (0.4.6-dev_20091013, http://kurtnoise.free.fr/mp4tools)
 Updated: DirectXWebSetup (9.27.1734)
-Updated: x264 (1342 (32 patched), http://x264.fushizen.eu/)
-Updated: x264pmp (1332, http://gitorious.org/mplayer-ww/x264-pmp)
+Updated: x264 (x264.1342kMod.generic.x86,  http://komisar.gin.by)
+Updated: x264pmp (1342, http://gitorious.org/mplayer-ww/x264-pmp)
 
 
 Encoding presets by Procrustean, and also archive of plugins and filtering presets by Tempter57.
