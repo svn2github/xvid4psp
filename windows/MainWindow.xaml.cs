@@ -172,7 +172,7 @@ namespace XviD4PSP
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
             this.KeyUp += new KeyEventHandler(MainWindow_KeyUp);
             this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter);//Мышь вошла в зону с названием файла
-            this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave);//Мышь вышла из зоны с названием файла           
+            this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave);//Мышь вышла из зоны с названием файла 
         }
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -266,7 +266,7 @@ namespace XviD4PSP
                                 drivestring = drive.Name;
                                 dlabel = drive.VolumeLabel;
                             }
-                        if (drivestring != Settings.TempPath.Substring(0, 3))
+                        if (drivestring != Settings.TempPath.Substring(0, 3) || Settings.Key == "0000")
                         {
                             Message mess = new Message(this);
                             mess.ShowMessage(Languages.Translate("Maximum free drive space detected on") + " " +

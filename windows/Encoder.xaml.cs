@@ -755,9 +755,9 @@ namespace XviD4PSP
 
                         newclie = newclie + " -top " + fieldorder;
                         if (newclie.Contains("-flags "))
-                            newclie = newclie.Replace("-flags ", "-flags +ildct +ilme"); //тут
+                            newclie = newclie.Replace("-flags ", "-flags +ildct+ilme");
                         else
-                            newclie = newclie + " -flags +ildct +ilme"; //тут
+                            newclie = newclie + " -flags +ildct+ilme";
 
                         newclis.Add(newclie);
                     }
@@ -974,7 +974,7 @@ namespace XviD4PSP
             {
                 locker.WaitOne();
                 line = encoderProcess.StandardError.ReadLine();
-
+                
                 if (line != null)
                 {
                     //SetLog(line);
