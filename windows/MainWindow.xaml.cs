@@ -1877,11 +1877,8 @@ namespace XviD4PSP
             {
                 //Считываем словарь
                 using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\languages\\" + Settings.Language + ".txt", System.Text.Encoding.Default))
-                {
                     Languages.Dictionary = sr.ReadToEnd();
-                    sr.Close();
-                }
-
+                                
                 mnFile.Header = Languages.Translate("File");
                 mnOpen.Header = Languages.Translate("Open file(s)") + "...";
                 menu_decode_file.Header = Languages.Translate("Decode file") + "...";

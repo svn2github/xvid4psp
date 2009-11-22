@@ -7,40 +7,27 @@ namespace XviD4PSP
 {
     static class Languages
     {
-        public static string Dictionary; //Словарь
-        
+        public static string Dictionary = ""; //Словарь
+
         public static string Translate(string phrase)
         {
             try
             {
-                string[] separator = new string[] { Environment.NewLine };
-                string[] lines = Dictionary.Split(separator, StringSplitOptions.None);
-                int n = 0;
-                foreach (string line in lines)
+                using (StringReader sr = new StringReader(Dictionary))
                 {
-                    if (line == phrase)
+                    string line;
+                    while (true)
                     {
-                        return lines[n + 1];
+                        line = sr.ReadLine();
+                        if (line == null) return phrase;
+                        if (line == phrase) return sr.ReadLine();
                     }
-                    n += 1;
                 }
             }
-            catch { }
-            return phrase;
-
-           /*using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\languages\\" + Settings.Language + ".txt", System.Text.Encoding.Default))
+            catch (Exception)
             {
-                string line;
-                while (sr.EndOfStream == false)
-                {
-                    line = sr.ReadLine();
-                    if (line == phrase)
-                    {
-                        return sr.ReadLine();
-                    }
-                }
                 return phrase;
-            }*/
+            }
         }
     }
 }
