@@ -551,7 +551,7 @@ Effacer les tâches d'encodage
 Delete selected task
 Effacer les tâches sélectionnées
 
-Autoclose encoding dialog if task was successfully accomplished
+Autoclose encoding window if task was successfully accomplished
 Toujours fermer la boite de dialogue des tâches d'encodage
 
 Always delete from list encoded tasks

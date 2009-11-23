@@ -440,7 +440,7 @@ namespace XviD4PSP
                case ExportFormats.Mp4:
                case ExportFormats.Mov:
                case ExportFormats.ThreeGP:
-                   return new string[] { "MP3", "MP2", "AAC", "Disabled", "Copy" };
+                   return new string[] { "MP3", "MP2", "AC3", "AAC", "Disabled", "Copy" };
 
                case ExportFormats.Mkv:
                    return new string[] { "PCM", "AC3", "MP3", "MP2", "AAC", "Disabled", "Copy" };
@@ -1842,7 +1842,7 @@ namespace XviD4PSP
                else
                    return null;
            }
-           else if (m.format == ExportFormats.Mp4 ||
+           else if (m.format == ExportFormats.Mp4 && instream.codecshort != "AC3" ||
                           m.format == ExportFormats.Mp4AppleTV ||
                           m.format == ExportFormats.Mp4BlackBerry8100 ||
                           m.format == ExportFormats.Mp4BlackBerry8800 ||
@@ -1902,7 +1902,7 @@ namespace XviD4PSP
                    instream.codecshort != "DTS" &&
                    instream.codecshort != "WAV" &&
                    instream.codecshort != "PCM")
-                   return "Codec - " +  instream.codecshort;
+                   return "Codec - " + instream.codecshort;
                else
                    return null;
            }

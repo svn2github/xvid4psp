@@ -26,20 +26,20 @@ namespace XviD4PSP
 
             this.num_bitrate.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_bitrate_ValueChanged);
             this.num_psyrdo.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_psyrdo_ValueChanged);
-            this.num_qcomp.ValueChanged +=new RoutedPropertyChangedEventHandler<decimal>(num_qcomp_ValueChanged);
+            this.num_qcomp.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_qcomp_ValueChanged);
             this.num_psytrellis.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_psytrellis_ValueChanged);
             this.num_vbv_buf.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_vbv_buf_ValueChanged);
             this.num_vbv_max.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_vbv_max_ValueChanged);
-            this.num_lookahead.ValueChanged +=new RoutedPropertyChangedEventHandler<decimal>(num_lookahead_ValueChanged);
-            this.textbox_string1.TextChanged +=new TextChangedEventHandler(textbox_string1_TextChanged);
+            this.num_lookahead.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_lookahead_ValueChanged);
+            this.textbox_string1.TextChanged += new TextChangedEventHandler(textbox_string1_TextChanged);
             this.textbox_string2.TextChanged += new TextChangedEventHandler(textbox_string2_TextChanged);
             this.textbox_string3.TextChanged += new TextChangedEventHandler(textbox_string3_TextChanged);
-            
+
 
             this.m = mass.Clone();
             this.root_window = VideoEncWindow;
             this.p = parent;
-            
+
             combo_mode.Items.Add("1-Pass Bitrate");
             combo_mode.Items.Add("2-Pass Bitrate");
             combo_mode.Items.Add("3-Pass Bitrate");
@@ -69,16 +69,14 @@ namespace XviD4PSP
             combo_level.Items.Add("5.1");
 
             //Adaptive Quantization
-           // combo_adapt_quant.Items.Add("Disabled");
-          //  combo_adapt_quant.Items.Add("Auto");
-            for (double n = 0.1; n <= 2.1; n+=0.1)
+            for (double n = 0.1; n <= 2.1; n += 0.1)
                 combo_adapt_quant.Items.Add(Calculate.ConvertDoubleToPointString(n, 1));
 
             combo_adapt_quant_mode.Items.Add("Disabled");
             combo_adapt_quant_mode.Items.Add("1");
             combo_adapt_quant_mode.Items.Add("2");
-            
-            
+
+
             //прогружаем деблокинг
             for (int n = -6; n <= 6; n++)
             {
@@ -96,7 +94,7 @@ namespace XviD4PSP
             combo_subme.Items.Add("7 - RD on all frames");
             combo_subme.Items.Add("8 - RD refinement on I/P frames");
             combo_subme.Items.Add("9 - RD refinement on all frames");
-            combo_subme.Items.Add("10 - QP-RD reg. trellis=2,AQ-mode>0");  
+            combo_subme.Items.Add("10 - QP-RD reg. trellis=2,AQ-mode>0");
 
             //прописываем me алгоритм
             combo_me.Items.Add("Diamond");
@@ -155,10 +153,10 @@ namespace XviD4PSP
             combo_badapt_mode.Items.Add("Disabled");
             combo_badapt_mode.Items.Add("Fast");
             combo_badapt_mode.Items.Add("Optimal");
-            
-            for (int n = -16; n<=16; n++)
+
+            for (int n = -16; n <= 16; n++)
                 combo_chroma_qp.Items.Add(Convert.ToString(n));
-                       
+
             //--b-pyramid
             combo_bpyramid_mode.Items.Add("None");
             combo_bpyramid_mode.Items.Add("Strict");
@@ -218,7 +216,7 @@ namespace XviD4PSP
 
             combo_adapt_quant.SelectedItem = m.x264options.aqstrength;
             combo_adapt_quant_mode.SelectedItem = m.x264options.aqmode;
-            
+
             num_psyrdo.Value = m.x264options.psyrdo;
             num_psytrellis.Value = m.x264options.psytrellis;
             num_qcomp.Value = m.x264options.qcomp;
@@ -358,12 +356,12 @@ namespace XviD4PSP
             check_slow_first.IsChecked = m.x264options.slow_frstpass;
 
             check_nombtree.IsChecked = m.x264options.no_mbtree;
-            
+
             if (m.x264options.no_mbtree == true)
                 num_lookahead.IsEnabled = false;
             else
                 num_lookahead.IsEnabled = true;
-            
+
             num_lookahead.Value = m.x264options.lookahead;
 
             check_enable_psy.IsChecked = !m.x264options.no_psy;
@@ -431,18 +429,29 @@ namespace XviD4PSP
 
         private void SetAVCProfile()
         {
-            string avcprofile = "Main Profile";
+            /* x264.exe
+               if( sps->b_qpprime_y_zero_transform_bypass )
+                   sps->i_profile_idc  = PROFILE_HIGH444_PREDICTIVE;
+               else if( param->analyse.b_transform_8x8 || param->i_cqm_preset != X264_CQM_FLAT )
+                   sps->i_profile_idc  = PROFILE_HIGH;
+               else if( param->b_cabac || param->i_bframe > 0 || param->b_interlaced || param->analyse.i_weighted_pred > 0 )
+                   sps->i_profile_idc  = PROFILE_MAIN;
+               else
+                   sps->i_profile_idc  = PROFILE_BASELINE;
+            */
 
-            if (!m.x264options.cabac ||
-                m.x264options.bframes == 0)
-                avcprofile = "Baseline Profile";
+            string avcprofile = "Baseline Profile";
 
-            if (m.x264options.analyse.Contains("i8x8") ||
-                m.x264options.analyse == "all" ||
-                m.x264options.adaptivedct ||
-                m.outvbitrate == 0 ||
-                m.x264options.custommatrix != null)
+            if (m.x264options.adaptivedct ||
+                  m.x264options.adaptivedct && m.x264options.cabac ||
+                  m.outvbitrate == 0 ||
+                  m.x264options.custommatrix != null)
                 avcprofile = "High Profile";
+            else if (m.x264options.cabac ||
+                       m.x264options.bframes > 0 ||
+                       m.x264options.weightb ||
+                       m.x264options.weightp > 0)
+                avcprofile = "Main Profile";
 
             combo_avc_profile.SelectedItem = avcprofile;
         }
@@ -518,26 +527,26 @@ namespace XviD4PSP
                     "Placebo - high quality encoding, very slow" + Environment.NewLine +
                     "Custom - custom codec settings";
             }
-        combo_badapt_mode.ToolTip = "Adaptive B-frame decision method (--b-adapt, default: Fast)";
-        combo_adapt_quant_mode.ToolTip = "AQ method (--aq-mode, default: 1)" + Environment.NewLine +
-                    "0: Disabled" + Environment.NewLine +
-                    "1: Variance AQ (Default)" + Environment.NewLine +
-                    "2: Variance-Hadamard AQ (AutoVAQ patch)";
-        combo_adapt_quant.ToolTip = "AQ Strength (--ag-strength, default: 1.0)" + Environment.NewLine +
-                    "Reduces blocking and blurring in flat and textured areas" + Environment.NewLine +
-                    "0.5: weak AQ, 1.5: strong AQ";
-        num_psyrdo.ToolTip = "Strength of psychovisual RD optimization (--psy-rd, default: 1.0:0.0)";
-        num_psytrellis.ToolTip = "Strength of psychovisual Trellis optimization (--psy-rd, default: 0.0)";
-        num_vbv_buf.ToolTip = "Enable CBR and set VBV buffer size (--vbv-bufsize, default: 0)";
-        num_vbv_max.ToolTip = "Set maximum local bitrate (--vbv-maxrate, default: 0)";
-        num_qcomp.ToolTip = "QP curve compression (--qcomp, default: 0.6)" + Environment.NewLine +
-                    "0.0 => CBR, 1.0 => CQP";
-        combo_chroma_qp.ToolTip = "QP difference between chroma and luma (--qp-chroma-offset Default: 0)";
-        combo_threads_count.ToolTip = "Set number of threads for encoding (--threads, default: Auto)";
-        check_slow_first.ToolTip = "Enable slow 1-st pass for multipassing encoding (off by default)" + Environment.NewLine + "(--slow-firstpass if checked)";
-        check_nombtree.ToolTip = "Disable mb-tree ratecontrol (off by default, --no-mbtree if checked)";
-        num_lookahead.ToolTip = "Number of frames for frametype lookahead (--rc-lookahead, default: 40)";
-        check_enable_psy.ToolTip = "If unchecked disable all visual optimizations that worsen both PSNR and SSIM" + Environment.NewLine + "(--no-psy if not checked)";
+            combo_badapt_mode.ToolTip = "Adaptive B-frame decision method (--b-adapt, default: Fast)";
+            combo_adapt_quant_mode.ToolTip = "AQ method (--aq-mode, default: 1)" + Environment.NewLine +
+                        "0: Disabled" + Environment.NewLine +
+                        "1: Variance AQ (Default)" + Environment.NewLine +
+                        "2: Variance-Hadamard AQ (AutoVAQ patch)";
+            combo_adapt_quant.ToolTip = "AQ Strength (--ag-strength, default: 1.0)" + Environment.NewLine +
+                        "Reduces blocking and blurring in flat and textured areas" + Environment.NewLine +
+                        "0.5: weak AQ, 1.5: strong AQ";
+            num_psyrdo.ToolTip = "Strength of psychovisual RD optimization (--psy-rd, default: 1.0:0.0)";
+            num_psytrellis.ToolTip = "Strength of psychovisual Trellis optimization (--psy-rd, default: 0.0)";
+            num_vbv_buf.ToolTip = "Enable CBR and set VBV buffer size (--vbv-bufsize, default: 0)";
+            num_vbv_max.ToolTip = "Set maximum local bitrate (--vbv-maxrate, default: 0)";
+            num_qcomp.ToolTip = "QP curve compression (--qcomp, default: 0.6)" + Environment.NewLine +
+                        "0.0 => CBR, 1.0 => CQP";
+            combo_chroma_qp.ToolTip = "QP difference between chroma and luma (--qp-chroma-offset Default: 0)";
+            combo_threads_count.ToolTip = "Set number of threads for encoding (--threads, default: Auto)";
+            check_slow_first.ToolTip = "Enable slow 1-st pass for multipassing encoding (off by default)" + Environment.NewLine + "(--slow-firstpass if checked)";
+            check_nombtree.ToolTip = "Disable mb-tree ratecontrol (off by default, --no-mbtree if checked)";
+            num_lookahead.ToolTip = "Number of frames for frametype lookahead (--rc-lookahead, default: 40)";
+            check_enable_psy.ToolTip = "If unchecked disable all visual optimizations that worsen both PSNR and SSIM" + Environment.NewLine + "(--no-psy if not checked)";
 
         }
 
@@ -625,9 +634,9 @@ namespace XviD4PSP
                 {
                     string aqvalue = cli[n + 1];
                     //if (aqvalue == "0.0")
-                     //   m.x264options.aqstrength = "Disabled";
+                    //   m.x264options.aqstrength = "Disabled";
                     //else
-                        m.x264options.aqstrength = aqvalue;
+                    m.x264options.aqstrength = aqvalue;
                 }
 
                 if (value == "--aq-mode")
@@ -640,7 +649,7 @@ namespace XviD4PSP
 
                 if (value == "--no-psy")
                     m.x264options.no_psy = true;
-                
+
                 if (value == "--psy-rd")
                 {
                     string psy = cli[n + 1];
@@ -734,11 +743,11 @@ namespace XviD4PSP
                     m.x264options.threads = cli[n + 1];
 
                 if (value == "--qcomp")
-                    m.x264options.qcomp = (decimal)Calculate.ConvertStringToDouble(cli[n+1]);
+                    m.x264options.qcomp = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
 
                 if (value == "--vbv-bufsize")
                     m.x264options.vbv_bufsize = Convert.ToInt32(cli[n + 1]);
-                
+
                 if (value == "--vbv-maxrate")
                     m.x264options.vbv_maxrate = Convert.ToInt32(cli[n + 1]);
 
@@ -753,13 +762,13 @@ namespace XviD4PSP
 
                 if (value == "--rc-lookahead")
                     m.x264options.lookahead = Convert.ToInt32(cli[n + 1]);
-                
+
                 n++;
             }
 
             //прописываем вычисленное колличество проходов
             m.encodingmode = mode;
-           
+
             return m;
         }
 
@@ -800,11 +809,11 @@ namespace XviD4PSP
                 else
                     line += " --aq-mode " + m.x264options.aqmode;
             }
-            
+
             //if (m.x264options.aqstrength == "Disabled")
-             //   line += " --aq-strength 0.0";
+            //   line += " --aq-strength 0.0";
             //else if (m.x264options.aqstrength != "Auto")
-              //  line += " --aq-strength " + m.x264options.aqstrength;
+            //  line += " --aq-strength " + m.x264options.aqstrength;
             if (m.x264options.aqstrength != "1.0" && m.x264options.aqmode != "Disabled")
                 line += " --aq-strength " + m.x264options.aqstrength;
 
@@ -895,7 +904,7 @@ namespace XviD4PSP
 
             if (m.x264options.qp_offset != "0")
                 line += " --chroma-qp-offset " + m.x264options.qp_offset;
-           
+
             if (m.x264options.analyse != null)
                 line += " --partitions " + m.x264options.analyse;
 
@@ -907,7 +916,7 @@ namespace XviD4PSP
 
             if (m.x264options.me != "hex")
                 line += " --me " + m.x264options.me;
-   
+
             if (m.x264options.slow_frstpass == true)
                 line += " --slow-firstpass";
 
@@ -916,7 +925,7 @@ namespace XviD4PSP
 
             if (!m.x264options.no_mbtree && m.x264options.lookahead != 40)
                 line += " --rc-lookahead " + m.x264options.lookahead;
-                        
+
             line_turbo = line;
 
             //удаляем пустоту в начале
@@ -958,7 +967,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 m.vpasses.Add("--pass 3 " + line);
                 m.vpasses.Add("--pass 2 " + line);
             }
-            
+
             return m;
         }
 
@@ -1082,7 +1091,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     MessageBox.Show(ex.Message);
                 }
             }
-            
+
         }
 
         private void SetDefaultBitrates()
@@ -1159,24 +1168,11 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
-        private void check_deblocking_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_deblocking_Click(object sender, RoutedEventArgs e)
         {
-            if (check_deblocking.IsFocused)
-            {
-                m.x264options.deblocking = check_deblocking.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_deblocking_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_deblocking.IsFocused)
-            {
-                m.x264options.deblocking = check_deblocking.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.deblocking = check_deblocking.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_dstrength_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1206,22 +1202,22 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 m.x264options.subme = combo_subme.SelectedIndex + 1;
 
                 //subme10
-               // if (combo_subme.SelectedIndex == 9)
-               // {
-               //     //Включаем trellis=2
-               //    if (m.x264options.trellis != 2)
-               //     {
-               //         m.x264options.trellis = 2;
-               //         combo_trellis.SelectedItem = "2 - Always";
-               //         SetAVCProfile();
-               //     }
-               //     //Включаем AQ=1
-               //     if (m.x264options.aqmode == "Disabled")
-               //     {
-               //         m.x264options.aqmode = "1";
-               //         combo_adapt_quant_mode.SelectedItem = "1";
-               //     }
-               //}               
+                // if (combo_subme.SelectedIndex == 9)
+                // {
+                //     //Включаем trellis=2
+                //    if (m.x264options.trellis != 2)
+                //     {
+                //         m.x264options.trellis = 2;
+                //         combo_trellis.SelectedItem = "2 - Always";
+                //         SetAVCProfile();
+                //     }
+                //     //Включаем AQ=1
+                //     if (m.x264options.aqmode == "Disabled")
+                //     {
+                //         m.x264options.aqmode = "1";
+                //         combo_adapt_quant_mode.SelectedItem = "1";
+                //     }
+                //}               
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
             }
@@ -1258,24 +1254,11 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
-        private void check_chroma_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_chroma_Click(object sender, RoutedEventArgs e)
         {
-            if (check_chroma.IsFocused)
-            {
-                m.x264options.chroma = check_chroma.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_chroma_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_chroma.IsFocused)
-            {
-                m.x264options.chroma = check_chroma.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.chroma = check_chroma.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_bframes_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1319,13 +1302,13 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 if (bmode != "Disabled" &&
                     m.x264options.bframes == 0)
                 {
-                    combo_bframes.SelectedItem = "1";
+                    combo_bframes.SelectedItem = 1;
                     m.x264options.bframes = 1;
                 }
 
                 if (bmode == "Disabled")
                 {
-                    combo_bframes.SelectedItem = "0";
+                    combo_bframes.SelectedItem = 0;
                     m.x264options.bframes = 0;
                 }
 
@@ -1348,7 +1331,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
 
                 if (m.x264options.bframes == 0)
                 {
-                    combo_bframes.SelectedItem = "1";
+                    combo_bframes.SelectedItem = 1;
                     m.x264options.bframes = 1;
                 }
 
@@ -1358,33 +1341,19 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
-        private void check_weightedb_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_weightedb_Click(object sender, RoutedEventArgs e)
         {
-            if (check_weightedb.IsFocused)
+            m.x264options.weightb = check_weightedb.IsChecked.Value;
+
+            if (m.x264options.weightb && m.x264options.bframes == 0)
             {
-                m.x264options.weightb = check_weightedb.IsChecked.Value;
-
-                if (m.x264options.bframes == 0)
-                {
-                    combo_bframes.SelectedItem = "1";
-                    m.x264options.bframes = 1;
-                }
-
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
+                combo_bframes.SelectedItem = 1;
+                m.x264options.bframes = 1;
             }
-        }
 
-        private void check_weightedb_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_weightedb.IsFocused)
-            {
-                m.x264options.weightb = check_weightedb.IsChecked.Value;
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_weightp_mode_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1392,147 +1361,65 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             if (combo_weightp_mode.IsDropDownOpen || combo_weightp_mode.IsSelectionBoxHighlighted)
             {
                 m.x264options.weightp = combo_weightp_mode.SelectedIndex;
-
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_8x8dct_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_8x8dct.IsFocused)
-            {
-                m.x264options.adaptivedct = check_8x8dct.IsChecked.Value;
                 SetAVCProfile();
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
             }
         }
 
-        private void check_8x8dct_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_8x8dct_Click(object sender, RoutedEventArgs e)
         {
-            if (check_8x8dct.IsFocused)
-            {
-                m.x264options.adaptivedct = check_8x8dct.IsChecked.Value;
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.adaptivedct = check_8x8dct.IsChecked.Value;
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_i4x4_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_i4x4_Click(object sender, RoutedEventArgs e)
         {
-            if (check_i4x4.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.analyse = GetMackroblocks();
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_i4x4_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_p4x4_Click(object sender, RoutedEventArgs e)
         {
-            if (check_i4x4.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            if (check_p4x4.IsChecked.Value && !check_p8x8.IsChecked.Value)
+                check_p8x8.IsChecked = true;
+            m.x264options.analyse = GetMackroblocks();
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_p4x4_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_i8x8_Click(object sender, RoutedEventArgs e)
         {
-            if (check_p4x4.IsFocused)
+            if (check_i8x8.IsChecked.Value && !check_8x8dct.IsChecked.Value)
             {
-                if (!check_p8x8.IsChecked.Value)
-                    check_p8x8.IsChecked = true;
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_p4x4_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_p4x4.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_i8x8_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_i8x8.IsFocused)
-            {
-                if (!check_8x8dct.IsChecked.Value)
-                    check_8x8dct.IsChecked = true;
+                check_8x8dct.IsChecked = true;
                 m.x264options.adaptivedct = true;
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
             }
+            m.x264options.analyse = GetMackroblocks();
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_i8x8_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_p8x8_Click(object sender, RoutedEventArgs e)
         {
-            if (check_i8x8.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.analyse = GetMackroblocks();
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_p8x8_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_b8x8_Click(object sender, RoutedEventArgs e)
         {
-            if (check_p8x8.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_p8x8_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_p8x8.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_b8x8_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_b8x8.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_b8x8_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_b8x8.IsFocused)
-            {
-                m.x264options.analyse = GetMackroblocks();
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.analyse = GetMackroblocks();
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_trellis_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1548,11 +1435,11 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.trellis = 2;
 
                 //subme10
-               // if (m.x264options.trellis != 2 && m.x264options.subme == 10)
-               // {
-               //     m.x264options.subme = 9;
-               //     combo_subme.SelectedIndex = 8;
-               // }
+                // if (m.x264options.trellis != 2 && m.x264options.subme == 10)
+                // {
+                //     m.x264options.subme = 9;
+                //     combo_subme.SelectedIndex = 8;
+                // }
 
                 SetAVCProfile();
                 root_window.UpdateManualProfile();
@@ -1580,86 +1467,33 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
-        private void check_mixed_ref_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_mixed_ref_Click(object sender, RoutedEventArgs e)
         {
-            if (check_mixed_ref.IsFocused)
-            {
-                m.x264options.mixedrefs = check_mixed_ref.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.mixedrefs = check_mixed_ref.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_mixed_ref_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_cabac_Click(object sender, RoutedEventArgs e)
         {
-            if (check_mixed_ref.IsFocused)
-            {
-                m.x264options.mixedrefs = check_mixed_ref.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.cabac = check_cabac.IsChecked.Value;
+            SetAVCProfile();
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_cabac_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_fast_pskip_Click(object sender, RoutedEventArgs e)
         {
-            if (check_cabac.IsFocused)
-            {
-                m.x264options.cabac = check_cabac.IsChecked.Value;
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.fastpskip = check_fast_pskip.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_cabac_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_dct_decimate_Click(object sender, RoutedEventArgs e)
         {
-            if (check_cabac.IsFocused)
-            {
-                m.x264options.cabac = check_cabac.IsChecked.Value;
-                SetAVCProfile();
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_fast_pskip_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_fast_pskip.IsFocused)
-            {
-                m.x264options.fastpskip = check_fast_pskip.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_fast_pskip_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_fast_pskip.IsFocused)
-            {
-                m.x264options.fastpskip = check_fast_pskip.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_dct_decimate_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_dct_decimate.IsFocused)
-            {
-                m.x264options.dctdecimate = check_dct_decimate.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_dct_decimate_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_dct_decimate.IsFocused)
-            {
-                m.x264options.dctdecimate = check_dct_decimate.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.x264options.dctdecimate = check_dct_decimate.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_avc_profile_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1812,7 +1646,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
 
                 preset = CodecPresets.Default;
 
-
             //Fast
             else if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
@@ -1918,6 +1751,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             {
                 CodecPresets preset = (CodecPresets)Enum.Parse(typeof(CodecPresets), combo_codec_preset.SelectedItem.ToString());
 
+                //ultrafast, veryfast, faster, fast, medium, slow, slower, veryslow, placebo
                 if (preset == CodecPresets.Default) //туууут
                 {
                     m.x264options.adaptivedct = true;
@@ -1944,7 +1778,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.trellis = 1;
                     m.x264options.weightb = true;
                     m.x264options.weightp = 2;
-
                     m.x264options.aqmode = "1";
                     m.x264options.aqstrength = "1.0";
                     m.x264options.psytrellis = 0;
@@ -1955,7 +1788,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.qp_offset = "0";
                     m.x264options.threads = "auto";
                     m.x264options.slow_frstpass = false;
-
 
                     SetDefaultBitrates();
                 }
@@ -2036,7 +1868,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 }
 
                 if (preset == CodecPresets.Placebo)
-                {          
+                {
                     m.x264options.adaptivedct = true;
                     m.x264options.analyse = "all";
                     m.x264options.b_adapt = 2;
@@ -2181,7 +2013,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 //    m.x264options.subme = 9;
                 //    combo_subme.SelectedIndex = 8;
                 //}
-                
+
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
             }
@@ -2206,14 +2038,9 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
         {
             if (combo_threads_count.IsDropDownOpen || combo_threads_count.IsSelectionBoxHighlighted)
             {
-                if (combo_threads_count.SelectedItem.ToString() == "Auto")
-                    m.x264options.threads = "auto";
-                else
-                    m.x264options.threads = combo_threads_count.SelectedItem.ToString();
-
+                m.x264options.threads = combo_threads_count.SelectedItem.ToString().ToLower();
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
-
             }
         }
 
@@ -2283,7 +2110,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             if (check_slow_first.IsFocused)
             {
                 m.x264options.slow_frstpass = check_slow_first.IsChecked.Value;
-                
+
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
             }
@@ -2331,11 +2158,10 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     num_psyrdo.IsEnabled = true;
                     num_psytrellis.IsEnabled = true;
                 }
-                
+
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
             }
         }
-
-     }
+    }
 }

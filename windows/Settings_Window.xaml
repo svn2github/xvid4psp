@@ -53,7 +53,7 @@
 						<CheckBox x:Name="check_show_script" Width="Auto" Height="Auto" Content="Show AviSynth script" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,75.86,0,0" VerticalAlignment="Top" Checked="check_show_script_Checked" Unchecked="check_show_script_Unchecked" d:LayoutOverrides="Width, Height"/>
 					    <CheckBox x:Name="check_log_to_file" Width="Auto" Height="Auto" Content="Write encoding log to file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,98,0,0" VerticalAlignment="Top" Click="check_log_to_file_Click" d:LayoutOverrides="Width, Height"/>
                         <CheckBox x:Name="check_logfile_tempfolder" Width="Auto" Height="Auto" Content="in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="320,98,0,0" VerticalAlignment="Top" Click="check_logfile_tempfolder_Click" d:LayoutOverrides="Width, Height"/>
-                        <CheckBox x:Name = "cmenu_is_always_close_encoding" Width="Auto" Height="Auto"  Content="Autoclose encoding dialog if task was successfully accomplished" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8.3,121,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
+                        <CheckBox x:Name = "cmenu_is_always_close_encoding" Width="Auto" Height="Auto"  Content="Autoclose encoding window if task was successfully accomplished" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8.3,121,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
                     
                     </Grid>
 				</TabItem>

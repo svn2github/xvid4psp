@@ -557,7 +557,7 @@ Delete encoded tasks
 Delete selected task
 מחק משימה נבחרת
 
-Autoclose encoding dialog if task was successfully accomplished
+Autoclose encoding window if task was successfully accomplished
 סגור תמיד דיאלוג קידוד משימה
 
 Always delete from list encoded tasks

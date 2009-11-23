@@ -551,7 +551,7 @@ Remover tarefas concluídas
 Delete selected task
 Remover tarefas seleccionadas
 
-Autoclose encoding dialog if task was successfully accomplished
+Autoclose encoding window if task was successfully accomplished
 Fechar sempre janela após concluída a conversão
 
 Always delete from list encoded tasks

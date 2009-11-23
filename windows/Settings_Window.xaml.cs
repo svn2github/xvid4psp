@@ -45,7 +45,7 @@ namespace XviD4PSP
             check_logfile_tempfolder.Content = Languages.Translate("in Temp folder");
             label_extensions.Content = Languages.Translate("Only files with this extensions will be opened:");
             check_batch_autoencoding.Content = Languages.Translate("Start encoding after opening all files");
-            cmenu_is_always_close_encoding.Content = Languages.Translate("Autoclose encoding dialog if task was successfully accomplished");
+            cmenu_is_always_close_encoding.Content = Languages.Translate("Autoclose encoding window if task was successfully accomplished");
             check_dgindex_cache_in_temp.Content = Languages.Translate("Create DGIndex cache in Temp folder");
 
             tab_main.Header = Languages.Translate("Misc");
