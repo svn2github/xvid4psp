@@ -987,15 +987,7 @@ namespace XviD4PSP
                 if (x != null)
                 {
                     //сразу-же обнуляем трим и его кнопки
-                    trim_start = 0;
-                    trim_end = 0;
-                    textbox_start.Text = "";
-                    textbox_end.Text = "";
-                    button_set_start.Content = Languages.Translate("Set Start");
-                    button_set_end.Content = Languages.Translate("Set End");
-                    button_apply_trim.Content = Languages.Translate("Apply Trim");
-                    textbox_start.IsReadOnly = false;
-                    textbox_end.IsReadOnly = false;
+                    ResetTrim();
 
                     string ext = Path.GetExtension(x.infilepath).ToLower();
 
@@ -1770,40 +1762,24 @@ namespace XviD4PSP
             SafeDelete(Settings.TempPath + "\\AutoCrop.log");
 
             //обнуляем всё что связано с тримом
-            trim_start = 0;
-            trim_end = 0;
-            textbox_start.Text = "";
-            textbox_end.Text = "";
-            button_set_start.Content = Languages.Translate("Set Start");
-            button_set_end.Content = Languages.Translate("Set End");
-            button_apply_trim.Content = Languages.Translate("Apply Trim");
-            textbox_start.IsReadOnly = false;
-            textbox_end.IsReadOnly = false;
+            ResetTrim();
 
-            //Вот тут происходило удаление исходника..
+            //Вот тут происходило удаление исходника.. исходников.. :)
             if (m.infilepath != null && Path.GetFileNameWithoutExtension(m.infilepath) != m.taskname &&
-    Path.GetDirectoryName(m.infilepath) == Settings.TempPath)
+                Path.GetDirectoryName(m.infilepath) == Settings.TempPath)
                 SafeDelete(m.infilepath);
 
             foreach (object s in m.inaudiostreams)
             {
                 AudioStream a = (AudioStream)s;
                 if (a.audiopath != null &&
-                    Path.GetDirectoryName(a.audiopath) == Settings.TempPath)
+                    Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
+                    a.audiopath != m.infilepath) //Защита от удаления исходника
                     SafeDelete(a.audiopath);
                 SafeDelete(a.gainfile);
             }
 
-            foreach (object s in m.outaudiostreams)
-            {
-                AudioStream a = (AudioStream)s;
-                if (a.audiopath != null &&
-                    Path.GetDirectoryName(a.audiopath) == Settings.TempPath)
-                    SafeDelete(a.audiopath);
-            }
-
             m = null;
-
             MenuHider(false); //Делаем пункты меню неактивными
         }
 
@@ -5566,9 +5542,18 @@ namespace XviD4PSP
             {
                 ErrorExeption(ex.Message);
             }
-
         }
 
+        private void ResetTrim()
+        {
+            trim_start = trim_end = 0;
+            textbox_start.Text = textbox_end.Text = "";
+            button_set_start.Content = Languages.Translate("Set Start");
+            button_set_end.Content = Languages.Translate("Set End");
+            button_apply_trim.Content = Languages.Translate("Apply Trim");
+            textbox_start.IsReadOnly = textbox_end.IsReadOnly = false;
+        }
+        
         private void button_set_start_Click(object sender, RoutedEventArgs e)
         {
             if (m != null && Convert.ToString(button_apply_trim.Content) != Languages.Translate("Remove Trim"))

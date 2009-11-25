@@ -4813,7 +4813,8 @@ namespace XviD4PSP
                     {
                         AudioStream a = (AudioStream)s;
                         if (a.audiopath != null &&
-                            Path.GetDirectoryName(a.audiopath) == Settings.TempPath)
+                            Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
+                            a.audiopath != m.infilepath) //Защита от удаления исходника
                             p.deletefiles.Add(a.audiopath);
                         p.deletefiles.Add(a.gainfile);
                     }
@@ -4822,7 +4823,8 @@ namespace XviD4PSP
                     {
                         AudioStream a = (AudioStream)s;
                         if (a.audiopath != null &&
-                            Path.GetDirectoryName(a.audiopath) == Settings.TempPath)
+                            Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
+                            a.audiopath != m.outfilepath) //Защита от удаления результата кодирования
                             p.deletefiles.Add(a.audiopath);
                     }
                 }
