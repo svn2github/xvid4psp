@@ -2906,22 +2906,15 @@ namespace XviD4PSP
 
                         //принудительный фикс цвета для DVD
                         if (Settings.AutoColorMatrix &&
-                            Calculate.IsMPEG(m.infilepath))
+                            Calculate.IsMPEG(m.infilepath) &&
+                            m.iscolormatrix == false &&
+                            m.invcodecshort == "MPEG2")
                         {
-                            if (m.outvcodec == "MPEG2")
-                                m.iscolormatrix = false;
-                            else
-                                m.iscolormatrix = true;
+                            m.iscolormatrix = true;
+                            if (combo_sbc.Items.Contains("MPEG2Fix") &&
+                                Settings.SBC == "Disabled")
+                                combo_sbc.SelectedItem = "MPEG2Fix";
                         }
-                        //   if (x.iscolormatrix == false &&
-                        //       x.invcodecshort == "MPEG2")
-                        //   {
-                        //       x.iscolormatrix = true;
-                        //        if (combo_sbc.Items.Contains("MPEG2Fix") &&
-                        ////            Settings.SBC == "Disabled")
-                        ///            combo_sbc.SelectedItem = "MPEG2Fix";
-                        //    }
-
                     }
 
                     m.outfilesize = Calculate.GetEncodingSize(m);
@@ -2959,13 +2952,13 @@ namespace XviD4PSP
                     }
                 }
                 else
-                {
+                {                   
                     //загружаем профили
                     if (Settings.FormatOut != Format.ExportFormats.Audio)
                         LoadVideoPresets();
                     LoadAudioPresets();
                 }
-
+                
                 if (Settings.FormatOut != Format.ExportFormats.Audio)
                     SetVideoPresetFromSettings();
                 SetAudioPresetFromSettings();
@@ -2991,8 +2984,8 @@ namespace XviD4PSP
                 {
                     //обновляем дочерние окна
                     ReloadChildWindows();
+                    ValidateTrim(m);
                 }
-
             }
         }
 
@@ -3107,6 +3100,7 @@ namespace XviD4PSP
 
                         //обновляем дочерние окна
                         ReloadChildWindows();
+                        ValidateTrim(m);
                     }
                 }
             }
@@ -3184,9 +3178,11 @@ namespace XviD4PSP
                                 mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                                     " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                             }
+                            else ValidateTrim(m);
                         }
                     }
 
+                    /*Ну тогда уж надо и скрипт обновлять, иначе толку ноль..
                     if (combo_vencoding.SelectedItem.ToString() == "Copy")
                     {
                         combo_filtering.SelectedItem = "Disabled";
@@ -3196,12 +3192,11 @@ namespace XviD4PSP
                         {
                             m.sbc = "Disabled";
                             m.filtering = "Disabled";
-
                             Settings.SBC = "Disabled";
                             Settings.Filtering = "Disabled";
                         }
-                    }
-
+                    }*/
+                    
                     //обновляем дочерние окна
                     ReloadChildWindows();
                 }
@@ -5074,7 +5069,6 @@ namespace XviD4PSP
                     outstream.audiopath = Settings.TempPath + "\\" + mass.key + aext;
                 }
             }
-
             return mass;
         }
 
@@ -5440,12 +5434,14 @@ namespace XviD4PSP
                         m = AspectResolution.FixAspectDifference(m);
                         //принудительный фикс цвета для DVD
                         if (Settings.AutoColorMatrix &&
-                            Calculate.IsMPEG(m.infilepath))
+                            Calculate.IsMPEG(m.infilepath) &&
+                            m.iscolormatrix == false &&
+                            m.invcodecshort == "MPEG2")
                         {
-                            if (m.outvcodec == "MPEG2")
-                                m.iscolormatrix = false;
-                            else
-                                m.iscolormatrix = true;
+                            m.iscolormatrix = true;
+                            if (combo_sbc.Items.Contains("MPEG2Fix") &&
+                                Settings.SBC == "Disabled")
+                                combo_sbc.SelectedItem = "MPEG2Fix";
                         }
                         m.outfilesize = Calculate.GetEncodingSize(m);
                         //перезабиваем настройки форматов
@@ -5656,10 +5652,11 @@ namespace XviD4PSP
                 button_apply_trim.Content = Languages.Translate("Remove Trim");
                 textbox_start.IsReadOnly = true;
                 textbox_end.IsReadOnly = true;
-                return;
+
+                ValidateTrim(m);
             }
 
-            if (Convert.ToString(button_apply_trim.Content) == Languages.Translate("Remove Trim"))
+            else if (Convert.ToString(button_apply_trim.Content) == Languages.Translate("Remove Trim"))
             {
                 if (Convert.ToString(button_set_start.Content) != Languages.Translate("Clear")) textbox_start.IsReadOnly = false;
                 if (Convert.ToString(button_set_end.Content) != Languages.Translate("Clear")) textbox_end.IsReadOnly = false;
@@ -5736,7 +5733,6 @@ namespace XviD4PSP
             {
                 ErrorExeption(ex.Message);
             }
-
         }
 
         private void MultiOpen(string[] files_to_open) //Для открытия и сохранения группы файлов
@@ -5956,6 +5952,14 @@ namespace XviD4PSP
              textbox_frame_goto.Text = Math.Round(Position.TotalSeconds * fps).ToString();            
         }
 
-
+        private void ValidateTrim(Massive mass)
+        {
+            if (mass.trim_start == 0 && mass.trim_end == 0) return;
+            if (combo_aencoding.SelectedItem.ToString() == "Copy" || combo_vencoding.SelectedItem.ToString() == "Copy")
+            {
+                Message mess = new Message(this);
+                mess.ShowMessage(Languages.Translate("Trimming feature doesn't affect the track(s) in Copy mode!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
+            }
+        }
     }
 }

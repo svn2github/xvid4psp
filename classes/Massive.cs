@@ -1016,19 +1016,6 @@ namespace XviD4PSP
             }
         }
 
-       // private string _trim;
-       // public string trim
-       // {
-       //     get
-       //     {
-       //         return _trim;
-       //     }
-       //     set
-       //     {
-       //         _trim = value;
-       //     }
-       // }
-
         private x264_arguments _x264options;
         public x264_arguments x264options
         {
@@ -1387,8 +1374,5 @@ namespace XviD4PSP
                 _trim_end = value;
             }
         }
-
-
-
     }
 }

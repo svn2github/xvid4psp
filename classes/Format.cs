@@ -439,8 +439,10 @@ namespace XviD4PSP
 
                case ExportFormats.Mp4:
                case ExportFormats.Mov:
-               case ExportFormats.ThreeGP:
                    return new string[] { "MP3", "MP2", "AC3", "AAC", "Disabled", "Copy" };
+
+               case ExportFormats.ThreeGP:
+                   return new string[] { "MP3", "MP2", "AAC", "Disabled", "Copy" };
 
                case ExportFormats.Mkv:
                    return new string[] { "PCM", "AC3", "MP3", "MP2", "AAC", "Disabled", "Copy" };
