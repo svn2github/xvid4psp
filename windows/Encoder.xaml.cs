@@ -374,9 +374,6 @@ namespace XviD4PSP
 
             string passlog = Calculate.RemoveExtention(m.outvideofile) + "log";
 
-            //узнаём колличество процессоров
-            //int cpucount = Environment.ProcessorCount; //cpucount.ToString()
-
             //info строка
             SetLog("Encoding video to: " + m.outvideofile);
             if (m.encodingmode == Settings.EncodingModes.Quality ||
@@ -418,7 +415,7 @@ namespace XviD4PSP
             if (Settings.x264_SSIM)
                 ssim = " --ssim";
 
-            arguments = m.vpasses[0] + " " + m.userstring1 + psnr + ssim;// +" ";//cpucount.ToString()
+            arguments = m.vpasses[0] + psnr + ssim;
 
             //прописываем sar
             if (m.sar != null || m.IsAnamorphic)
@@ -537,7 +534,7 @@ namespace XviD4PSP
                     SetLog("...second pass...");
 
                 step++;
-                arguments = m.vpasses[1] + " " + m.userstring2 + psnr + ssim + " --stats \"" + passlog + "\"";//
+                arguments = m.vpasses[1] + psnr + ssim + " --stats \"" + passlog + "\"";//
 
                 //прописываем sar
                 if (m.sar != null || m.IsAnamorphic)
@@ -636,7 +633,7 @@ namespace XviD4PSP
                 SetLog("...last pass...");
 
                 step++;
-                arguments = m.vpasses[2] + " " + m.userstring3 + psnr + ssim + " --stats \"" + passlog + "\"";
+                arguments = m.vpasses[2] + psnr + ssim + " --stats \"" + passlog + "\"";
 
                 //прописываем sar
                 if (m.sar != null || m.IsAnamorphic)

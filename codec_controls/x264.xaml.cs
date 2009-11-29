@@ -19,6 +19,7 @@ namespace XviD4PSP
         private VideoEncoding root_window;
         private MainWindow p;
         public enum CodecPresets { Default = 1, Fast, Slow, Slower, Placebo, Custom }
+        private ArrayList good_cli = null;
 
         public x264(Massive mass, VideoEncoding VideoEncWindow, MainWindow parent)
         {
@@ -31,10 +32,6 @@ namespace XviD4PSP
             this.num_vbv_buf.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_vbv_buf_ValueChanged);
             this.num_vbv_max.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_vbv_max_ValueChanged);
             this.num_lookahead.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_lookahead_ValueChanged);
-            this.textbox_string1.TextChanged += new TextChangedEventHandler(textbox_string1_TextChanged);
-            this.textbox_string2.TextChanged += new TextChangedEventHandler(textbox_string2_TextChanged);
-            this.textbox_string3.TextChanged += new TextChangedEventHandler(textbox_string3_TextChanged);
-
 
             this.m = mass.Clone();
             this.root_window = VideoEncWindow;
@@ -139,11 +136,6 @@ namespace XviD4PSP
             foreach (string preset in Enum.GetNames(typeof(CodecPresets)))
                 combo_codec_preset.Items.Add(preset);
 
-            //введенные пользователем параметры х264-го
-            textbox_string1.Text = m.userstring1;
-            textbox_string2.Text = m.userstring2;
-            textbox_string3.Text = m.userstring3;
-
             //Кол-во потоков для x264-го
             combo_threads_count.Items.Add("Auto");
             for (int n = 1; n <= 8; n++)
@@ -166,6 +158,10 @@ namespace XviD4PSP
             combo_weightp_mode.Items.Add("Disabled");
             combo_weightp_mode.Items.Add("Blind offset");
             combo_weightp_mode.Items.Add("Smart analysis");
+
+            Apply_CLI.Content = Languages.Translate("Apply");
+            Reset_CLI.Content = Languages.Translate("Reset");
+            Reset_CLI.ToolTip = "Reset to last good CLI";
 
             LoadFromProfile();
         }
@@ -279,16 +275,11 @@ namespace XviD4PSP
             combo_subme.SelectedItem = combo_subme.Items[m.x264options.subme - 1];
 
             //прописываем me алгоритм
-            if (m.x264options.me == "dia")
-                combo_me.SelectedItem = "Diamond";
-            if (m.x264options.me == "hex")
-                combo_me.SelectedItem = "Hexagon";
-            if (m.x264options.me == "umh")
-                combo_me.SelectedItem = "Multi Hexagon";
-            if (m.x264options.me == "esa")
-                combo_me.SelectedItem = "Exhaustive";
-            if (m.x264options.me == "tesa")
-                combo_me.SelectedItem = "SATD Exhaustive";
+            if (m.x264options.me == "dia") combo_me.SelectedItem = "Diamond";
+            else if (m.x264options.me == "hex") combo_me.SelectedItem = "Hexagon";
+            else if (m.x264options.me == "umh") combo_me.SelectedItem = "Multi Hexagon";
+            else if (m.x264options.me == "esa") combo_me.SelectedItem = "Exhaustive";
+            else if (m.x264options.me == "tesa") combo_me.SelectedItem = "SATD Exhaustive";
 
             //прописываем me range
             combo_merange.SelectedItem = m.x264options.merange;
@@ -300,14 +291,10 @@ namespace XviD4PSP
             combo_bframes.SelectedItem = m.x264options.bframes;
 
             //режим B фреймов
-            if (m.x264options.direct == "none")
-                combo_bframe_mode.SelectedItem = "Disabled";
-            if (m.x264options.direct == "spatial")
-                combo_bframe_mode.SelectedItem = "Spatial";
-            if (m.x264options.direct == "temporal")
-                combo_bframe_mode.SelectedItem = "Temporal";
-            if (m.x264options.direct == "auto")
-                combo_bframe_mode.SelectedItem = "Auto";
+            if (m.x264options.direct == "none") combo_bframe_mode.SelectedItem = "Disabled";
+            else if (m.x264options.direct == "spatial") combo_bframe_mode.SelectedItem = "Spatial";
+            else if (m.x264options.direct == "temporal") combo_bframe_mode.SelectedItem = "Temporal";
+            else if (m.x264options.direct == "auto") combo_bframe_mode.SelectedItem = "Auto";
 
             //b-pyramid
             combo_bpyramid_mode.SelectedIndex = m.x264options.bpyramid;
@@ -343,10 +330,8 @@ namespace XviD4PSP
             combo_min_quant.SelectedItem = m.x264options.minquant;
 
             //Кол-во потоков для x264-го
-            if (m.x264options.threads == "auto")
-                combo_threads_count.SelectedItem = "Auto";
-            else
-                combo_threads_count.SelectedItem = m.x264options.threads;
+            if (m.x264options.threads == "auto") combo_threads_count.SelectedItem = "Auto";
+            else combo_threads_count.SelectedItem = m.x264options.threads;
 
             //-b-adapt            
             combo_badapt_mode.SelectedIndex = m.x264options.b_adapt;
@@ -357,10 +342,8 @@ namespace XviD4PSP
 
             check_nombtree.IsChecked = m.x264options.no_mbtree;
 
-            if (m.x264options.no_mbtree == true)
-                num_lookahead.IsEnabled = false;
-            else
-                num_lookahead.IsEnabled = true;
+            if (m.x264options.no_mbtree == true) num_lookahead.IsEnabled = false;
+            else num_lookahead.IsEnabled = true;
 
             num_lookahead.Value = m.x264options.lookahead;
 
@@ -378,7 +361,7 @@ namespace XviD4PSP
             }
 
             SetToolTips();
-            DetectCodecPreset();
+            DetectCodecPreset();          
         }
 
         private string GetMackroblocks()
@@ -547,7 +530,6 @@ namespace XviD4PSP
             check_nombtree.ToolTip = "Disable mb-tree ratecontrol (off by default, --no-mbtree if checked)";
             num_lookahead.ToolTip = "Number of frames for frametype lookahead (--rc-lookahead, default: 40)";
             check_enable_psy.ToolTip = "If unchecked disable all visual optimizations that worsen both PSNR and SSIM" + Environment.NewLine + "(--no-psy if not checked)";
-
         }
 
         public static Massive DecodeLine(Massive m)
@@ -571,75 +553,53 @@ namespace XviD4PSP
 
             foreach (string value in cli)
             {
+                if (m.vpasses.Count == 1)
+                {
+                    if (value == "--crf")
+                    {
+                        mode = Settings.EncodingModes.Quality;
+                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                    }
+                    if (value == "--qp" || value == "-q")
+                    {
+                        mode = Settings.EncodingModes.Quantizer;
+                        m.outvbitrate = Convert.ToInt32(cli[n + 1]);
+                    }
+                }
+                else if (m.vpasses.Count == 2 && value == "--crf")
+                {
+                    mode = Settings.EncodingModes.TwoPassQuality;
+                    m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                }
+                else if (m.vpasses.Count == 3 && value == "--crf")
+                {
+                    mode = Settings.EncodingModes.ThreePassQuality;
+                    m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                }
+
                 if (value == "--size")
                 {
                     m.outvbitrate = Convert.ToInt32(cli[n + 1]);
-                    if (m.vpasses.Count == 3)
-                        mode = Settings.EncodingModes.ThreePassSize;
-                    else if (m.vpasses.Count == 2)
-                        mode = Settings.EncodingModes.TwoPassSize;
+                    if (m.vpasses.Count == 3) mode = Settings.EncodingModes.ThreePassSize;
+                    else if (m.vpasses.Count == 2) mode = Settings.EncodingModes.TwoPassSize;
                 }
-
-                if (value == "--bitrate" || value == "-B")
+                
+                else if (value == "--bitrate" || value == "-B")
                     m.outvbitrate = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--level")
+                else if (value == "--level")
                     m.x264options.level = cli[n + 1];
 
-                if (m.vpasses.Count == 1)
-                {
-                    if (m.vpasses.Count == 1)
-                    {
-                        if (value == "--crf")
-                        {
-                            mode = Settings.EncodingModes.Quality;
-                            m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
-                        }
-                        if (value == "--qp" || value == "-q")
-                        {
-                            mode = Settings.EncodingModes.Quantizer;
-                            m.outvbitrate = Convert.ToInt32(cli[n + 1]);
-                        }
-                    }
-                    else
-                    {
-                        if (value == "--crf")
-                        {
-                            mode = Settings.EncodingModes.TwoPassQuality;
-                            m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
-                        }
-                    }
-                }
-                if (m.vpasses.Count == 2)
-                {
-                    if (value == "--crf")
-                    {
-                        mode = Settings.EncodingModes.TwoPassQuality;
-                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
-                    }
-                }
-                if (m.vpasses.Count == 3)
-                {
-                    if (value == "--crf")
-                    {
-                        mode = Settings.EncodingModes.ThreePassQuality;
-                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
-                    }
-                }
-
-                if (value == "--ref" || value == "-r")
+                else if (value == "--ref" || value == "-r")
                     m.x264options.reference = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--aq-strength")
+                else if (value == "--aq-strength")
                 {
                     string aqvalue = cli[n + 1];
-                    //if (aqvalue == "0.0")
-                    //   m.x264options.aqstrength = "Disabled";
-                    //else
                     m.x264options.aqstrength = aqvalue;
                 }
 
-                if (value == "--aq-mode")
+                else if (value == "--aq-mode")
                 {
                     if (cli[n + 1] == "0")
                         m.x264options.aqmode = "Disabled";
@@ -647,10 +607,10 @@ namespace XviD4PSP
                         m.x264options.aqmode = cli[n + 1];
                 }
 
-                if (value == "--no-psy")
+                else if (value == "--no-psy")
                     m.x264options.no_psy = true;
 
-                if (value == "--psy-rd")
+                else if (value == "--psy-rd")
                 {
                     string psy = cli[n + 1];
                     string[] psyseparator = new string[] { ":" };
@@ -659,10 +619,10 @@ namespace XviD4PSP
                     m.x264options.psytrellis = (decimal)Calculate.ConvertStringToDouble(psyvalues[1]);
                 }
 
-                if (value == "--partitions" || value == "--analyse" || value == "-A") //--analyse
+                else if (value == "--partitions" || value == "--analyse" || value == "-A")
                     m.x264options.analyse = cli[n + 1];
 
-                if (value == "--deblock" || value == "--filter" || value == "-f") //--filter
+                else if (value == "--deblock" || value == "--filter" || value == "-f")
                 {
                     string filtervalues = cli[n + 1];
                     string[] fseparator = new string[] { ":" };
@@ -671,28 +631,28 @@ namespace XviD4PSP
                     m.x264options.deblockt = Convert.ToInt32(fvalues[1]);
                 }
 
-                if (value == "--subme" || value == "-m")
+                else if (value == "--subme" || value == "-m")
                     m.x264options.subme = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--me")
+                else if (value == "--me")
                     m.x264options.me = cli[n + 1];
 
-                if (value == "--merange")
+                else if (value == "--merange")
                     m.x264options.merange = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--no-chroma-me")
+                else if (value == "--no-chroma-me")
                     m.x264options.chroma = false;
 
-                if (value == "--bframes" || value == "-b")
+                else if (value == "--bframes" || value == "-b")
                     m.x264options.bframes = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--direct")
+                else if (value == "--direct")
                     m.x264options.direct = cli[n + 1];
 
-                if (value == "--b-adapt")
+                else if (value == "--b-adapt")
                     m.x264options.b_adapt = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--b-pyramid")
+                else if (value == "--b-pyramid")
                 {
                     if ((cli[n + 1]) == "strict")
                         m.x264options.bpyramid = 1;
@@ -700,67 +660,67 @@ namespace XviD4PSP
                         m.x264options.bpyramid = 2;
                 }
 
-                if (value == "--no-weightb")
+                else if (value == "--no-weightb")
                     m.x264options.weightb = false;
 
-                if (value == "--weightp")
+                else if (value == "--weightp")
                     m.x264options.weightp = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--no-8x8dct")
+                else if (value == "--no-8x8dct")
                     m.x264options.adaptivedct = false;
 
-                if (value == "--trellis" || value == "-t")
+                else if (value == "--trellis" || value == "-t")
                     m.x264options.trellis = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--no-mixed-refs")
+                else if (value == "--no-mixed-refs")
                     m.x264options.mixedrefs = false;
 
-                if (value == "--no-cabac")
+                else if (value == "--no-cabac")
                     m.x264options.cabac = false;
 
-                if (value == "--no-fast-pskip")
+                else if (value == "--no-fast-pskip")
                     m.x264options.fastpskip = false;
 
-                if (value == "--no-dct-decimate")
+                else if (value == "--no-dct-decimate")
                     m.x264options.dctdecimate = false;
 
-                if (value == "--cqm")
+                else if (value == "--cqm")
                     m.x264options.custommatrix = cli[n + 1];
 
-                if (value == "--no-deblock" || value == "--nf")//--nf
+                else if (value == "--no-deblock" || value == "--nf")
                     m.x264options.deblocking = false;
 
-                if (value == "--qpmin")
+                else if (value == "--qpmin")
                     m.x264options.minquant = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--aud")
+                else if (value == "--aud")
                     m.x264options.aud = true;
 
-                if (value == "--pictiming")
+                else if (value == "--pictiming")
                     m.x264options.pictiming = true;
 
-                if (value == "--threads")
+                else if (value == "--threads")
                     m.x264options.threads = cli[n + 1];
 
-                if (value == "--qcomp")
+                else if (value == "--qcomp")
                     m.x264options.qcomp = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
 
-                if (value == "--vbv-bufsize")
+                else if (value == "--vbv-bufsize")
                     m.x264options.vbv_bufsize = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--vbv-maxrate")
+                else if (value == "--vbv-maxrate")
                     m.x264options.vbv_maxrate = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "--chroma-qp-offset")
+                else if (value == "--chroma-qp-offset")
                     m.x264options.qp_offset = cli[n + 1];
 
-                if (value == "--slow-firstpass")
+                else if (value == "--slow-firstpass")
                     m.x264options.slow_frstpass = true;
 
-                if (value == "--no-mbtree")
+                else if (value == "--no-mbtree")
                     m.x264options.no_mbtree = true;
 
-                if (value == "--rc-lookahead")
+                else if (value == "--rc-lookahead")
                     m.x264options.lookahead = Convert.ToInt32(cli[n + 1]);
 
                 n++;
@@ -768,7 +728,6 @@ namespace XviD4PSP
 
             //прописываем вычисленное колличество проходов
             m.encodingmode = mode;
-
             return m;
         }
 
@@ -777,23 +736,20 @@ namespace XviD4PSP
             //обнуляем старые строки
             m.vpasses.Clear();
 
-            string line_turbo = "";
             string line = "";
 
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.TwoPass ||
                 m.encodingmode == Settings.EncodingModes.ThreePass)
                 line += "--bitrate " + m.outvbitrate;
-            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
                 line += "--size " + m.outvbitrate;
-
-            if (m.encodingmode == Settings.EncodingModes.Quality ||
+            else if (m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
                 line += "--crf " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1);
-
-            if (m.encodingmode == Settings.EncodingModes.Quantizer)
+            else if (m.encodingmode == Settings.EncodingModes.Quantizer)
                 line += "--qp " + m.outvbitrate;
 
             if (m.x264options.level != "unrestricted")
@@ -810,10 +766,6 @@ namespace XviD4PSP
                     line += " --aq-mode " + m.x264options.aqmode;
             }
 
-            //if (m.x264options.aqstrength == "Disabled")
-            //   line += " --aq-strength 0.0";
-            //else if (m.x264options.aqstrength != "Auto")
-            //  line += " --aq-strength " + m.x264options.aqstrength;
             if (m.x264options.aqstrength != "1.0" && m.x264options.aqmode != "Disabled")
                 line += " --aq-strength " + m.x264options.aqstrength;
 
@@ -926,44 +878,36 @@ namespace XviD4PSP
             if (!m.x264options.no_mbtree && m.x264options.lookahead != 40)
                 line += " --rc-lookahead " + m.x264options.lookahead;
 
-            line_turbo = line;
-
             //удаляем пустоту в начале
             if (line.StartsWith(" "))
-                line = line.Remove(0, 1);
-            if (line_turbo.StartsWith(" "))
-                line_turbo = line_turbo.Remove(0, 1);
+                line = line.Remove(0, 1);          
 
             //забиваем данные в массив
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
-m.encodingmode == Settings.EncodingModes.Quality ||
-m.encodingmode == Settings.EncodingModes.Quantizer)
+                m.encodingmode == Settings.EncodingModes.Quality ||
+                m.encodingmode == Settings.EncodingModes.Quantizer)
                 m.vpasses.Add(line);
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
             {
                 m.vpasses.Add("--pass 1 " + line);
                 m.vpasses.Add("--pass 2 " + line);
             }
-
-            if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+            else if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
                 m.vpasses.Add("--pass 1 " + line);
                 m.vpasses.Add("--pass 3 " + line);
                 m.vpasses.Add("--pass 2 " + line);
             }
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPass ||
+            else if (m.encodingmode == Settings.EncodingModes.TwoPass ||
                 m.encodingmode == Settings.EncodingModes.TwoPassSize)
             {
-                m.vpasses.Add("--pass 1 " + line_turbo);
+                m.vpasses.Add("--pass 1 " + line);
                 m.vpasses.Add("--pass 2 " + line);
             }
-
-            if (m.encodingmode == Settings.EncodingModes.ThreePass ||
+            else if (m.encodingmode == Settings.EncodingModes.ThreePass ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
-                m.vpasses.Add("--pass 1 " + line_turbo);
+                m.vpasses.Add("--pass 1 " + line);
                 m.vpasses.Add("--pass 3 " + line);
                 m.vpasses.Add("--pass 2 " + line);
             }
@@ -1105,8 +1049,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 num_bitrate.Value = (decimal)m.outvbitrate;
                 text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
             }
-
-            if (m.encodingmode == Settings.EncodingModes.OnePass ||
+            else if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.TwoPass ||
                 m.encodingmode == Settings.EncodingModes.ThreePass)
             {
@@ -1114,8 +1057,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 num_bitrate.Value = (decimal)m.outvbitrate;
                 text_bitrate.Content = Languages.Translate("Bitrate") + ": (kbps)";
             }
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
                 m.outvbitrate = m.infilesizeint;
@@ -1228,16 +1170,11 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             if (combo_me.IsDropDownOpen || combo_me.IsSelectionBoxHighlighted)
             {
                 string me = combo_me.SelectedItem.ToString();
-                if (me == "Diamond")
-                    m.x264options.me = "dia";
-                if (me == "Hexagon")
-                    m.x264options.me = "hex";
-                if (me == "Multi Hexagon")
-                    m.x264options.me = "umh";
-                if (me == "Exhaustive")
-                    m.x264options.me = "esa";
-                if (me == "SATD Exhaustive")
-                    m.x264options.me = "tesa";
+                if (me == "Diamond") m.x264options.me = "dia";
+                else if (me == "Hexagon") m.x264options.me = "hex";
+                else if (me == "Multi Hexagon") m.x264options.me = "umh";
+                else if (me == "Exhaustive") m.x264options.me = "esa";
+                else if (me == "SATD Exhaustive") m.x264options.me = "tesa";
 
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
@@ -1290,14 +1227,10 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             if (combo_bframe_mode.IsDropDownOpen || combo_bframe_mode.IsSelectionBoxHighlighted)
             {
                 string bmode = combo_bframe_mode.SelectedItem.ToString();
-                if (bmode == "Disabled")
-                    m.x264options.direct = "none";
-                if (bmode == "Spatial")
-                    m.x264options.direct = "spatial";
-                if (bmode == "Temporal")
-                    m.x264options.direct = "temporal";
-                if (bmode == "Auto")
-                    m.x264options.direct = "auto";
+                if (bmode == "Disabled") m.x264options.direct = "none";
+                else if (bmode == "Spatial") m.x264options.direct = "spatial";
+                else if (bmode == "Temporal") m.x264options.direct = "temporal";
+                else if (bmode == "Auto") m.x264options.direct = "auto";
 
                 if (bmode != "Disabled" &&
                     m.x264options.bframes == 0)
@@ -1426,14 +1359,8 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
         {
             if (combo_trellis.IsDropDownOpen || combo_trellis.IsSelectionBoxHighlighted)
             {
-                string trellis = combo_trellis.SelectedItem.ToString();
-                if (trellis == "0 - Disabled")
-                    m.x264options.trellis = 0;
-                if (trellis == "1 - Final MB")
-                    m.x264options.trellis = 1;
-                if (trellis == "2 - Always")
-                    m.x264options.trellis = 2;
-
+                m.x264options.trellis = combo_trellis.SelectedIndex;
+               
                 //subme10
                 // if (m.x264options.trellis != 2 && m.x264options.subme == 10)
                 // {
@@ -1528,7 +1455,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse = GetMackroblocks();
                 }
 
-                if (avcprofile == "Main Profile")
+                else if (avcprofile == "Main Profile")
                 {
                     m.x264options.cabac = true;
                     check_cabac.IsChecked = true;
@@ -1567,7 +1494,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.analyse = GetMackroblocks();
                 }
 
-                if (avcprofile == "High Profile")
+                else if (avcprofile == "High Profile")
                 {
                     m.x264options.cabac = true;
                     check_cabac.IsChecked = true;
@@ -1643,7 +1570,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.weightb == true &&
                     m.x264options.weightp == 2 &&
                     m.x264options.slow_frstpass == false)
-
                 preset = CodecPresets.Default;
 
             //Fast
@@ -1742,7 +1668,10 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 preset = CodecPresets.Placebo;
 
             combo_codec_preset.SelectedItem = preset.ToString();
-
+            textbox_cli.Clear();
+            foreach (string aa in m.vpasses)
+                textbox_cli.Text += aa + "\r\n\r\n";
+            good_cli = (ArrayList)m.vpasses.Clone(); //Клонируем CLI, не вызывающую ошибок (раз дошли сюда - значит ошибок не было)
         }
 
         private void combo_codec_preset_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1792,7 +1721,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     SetDefaultBitrates();
                 }
 
-                if (preset == CodecPresets.Fast)
+                else if (preset == CodecPresets.Fast)
                 {
                     m.x264options.adaptivedct = true;
                     m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
@@ -1817,7 +1746,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.weightp = 2;
                 }
 
-                if (preset == CodecPresets.Slow)
+                else if (preset == CodecPresets.Slow)
                 {
                     m.x264options.adaptivedct = true;
                     m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
@@ -1842,7 +1771,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.weightp = 2;
                 }
 
-                if (preset == CodecPresets.Slower)
+                else if (preset == CodecPresets.Slower)
                 {
                     m.x264options.adaptivedct = true;
                     m.x264options.analyse = "all";
@@ -1867,7 +1796,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     m.x264options.weightp = 2;
                 }
 
-                if (preset == CodecPresets.Placebo)
+                else if (preset == CodecPresets.Placebo)
                 {
                     m.x264options.adaptivedct = true;
                     m.x264options.analyse = "all";
@@ -1897,6 +1826,10 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                     LoadFromProfile();
                     root_window.UpdateOutSize();
                     root_window.UpdateManualProfile();
+                    textbox_cli.Clear();
+                    foreach (string aa in m.vpasses)
+                        textbox_cli.Text += aa + "\r\n\r\n";
+                    good_cli = (ArrayList)m.vpasses.Clone(); //Клонируем CLI, не вызывающую ошибок
                 }
             }
         }
@@ -1924,8 +1857,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 num_bitrate.Minimum = 1;
                 num_bitrate.Maximum = Format.GetMaxVBitrate(m);
             }
-
-            if (m.encodingmode == Settings.EncodingModes.Quality ||
+            else if (m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
@@ -1933,8 +1865,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
                 num_bitrate.Minimum = 0;
                 num_bitrate.Maximum = 51;
             }
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
                 num_bitrate.Minimum = 1;
@@ -2019,21 +1950,6 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
             }
         }
 
-        private void textbox_string1_TextChanged(object sender, TextChangedEventArgs e)//прес
-        {
-            m.userstring1 = textbox_string1.Text;
-        }
-
-        private void textbox_string2_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            m.userstring2 = textbox_string2.Text;
-        }
-
-        private void textbox_string3_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            m.userstring3 = textbox_string3.Text;
-        }
-
         private void combo_threads_count_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (combo_threads_count.IsDropDownOpen || combo_threads_count.IsSelectionBoxHighlighted)
@@ -2048,13 +1964,7 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
         {
             if (combo_badapt_mode.IsDropDownOpen || combo_badapt_mode.IsSelectionBoxHighlighted)
             {
-                string b_adapt = combo_badapt_mode.SelectedItem.ToString();
-                if (b_adapt == "Disabled")
-                    m.x264options.b_adapt = 0;
-                if (b_adapt == "Fast")
-                    m.x264options.b_adapt = 1;
-                if (b_adapt == "Optimal")
-                    m.x264options.b_adapt = 2;
+                m.x264options.b_adapt = combo_badapt_mode.SelectedIndex;
 
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
@@ -2161,6 +2071,52 @@ m.encodingmode == Settings.EncodingModes.Quantizer)
 
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
+            }
+        }
+
+        private void button_Apply_CLI_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                StringReader sr = new StringReader(textbox_cli.Text);
+                m.vpasses.Clear();
+                string line = "";
+                while (true)
+                {
+                    line = sr.ReadLine();
+                    if (line == null) break;
+                    if (line != "") m.vpasses.Add(line);
+                }
+                DecodeLine(m);                       //- Загружаем в массив m.x264 значения, на основе текущего содержимого m.vpasses[x]
+                LoadFromProfile();                   //- Загружаем в форму значения, на основе значений массива m.x264
+                m.vencoding = "Custom CLI";          //- Изменяем название пресета           
+                PresetLoader.CreateVProfile(m);      //- Перезаписываем файл пресета (m.vpasses[x])
+                root_window.m = this.m.Clone();      //- Передаем массив в основное окно
+                root_window.LoadProfiles();          //- Обновляем название выбранного пресета в основном окне (Custom CLI)
+            }
+            catch (Exception)
+            {
+                Message mm = new Message(root_window);
+                mm.ShowMessage(Languages.Translate("Attention! Seems like CLI line contains errors!") + "\r\n" + Languages.Translate("Check all keys and theirs values and try again!") + "\r\n\r\n" + 
+                    Languages.Translate("OK - restore line (recommended)") + "\r\n" + Languages.Translate("Cancel - ignore (not recommended)"),Languages.Translate("Error"),Message.MessageStyle.OkCancel);
+                if (mm.result == Message.Result.Ok)                  
+                    button_Reset_CLI_Click(null, null);
+            }
+        }
+
+        private void button_Reset_CLI_Click(object sender, RoutedEventArgs e)
+        {
+            if (good_cli != null)
+            {
+                m.vpasses = (ArrayList)good_cli.Clone(); //- Восстанавливаем CLI до версии, не вызывавшей ошибок
+                DecodeLine(m);                           //- Загружаем в массив m.x264 значения, на основе текущего содержимого m.vpasses[x]
+                LoadFromProfile();                       //- Загружаем в форму значения, на основе значений массива m.x264
+                root_window.m = this.m.Clone();          //- Передаем массив в основное окно
+            }
+            else
+            {
+                Message mm = new Message(root_window);
+                mm.ShowMessage("Can`t find good CLI...", Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
     }

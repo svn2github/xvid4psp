@@ -5,11 +5,10 @@
 	x:Class="XviD4PSP.x264"
 	x:Name="UserControl"
 	Width="Auto" Height="Auto" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
-
 	<Grid x:Name="LayoutRoot" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient_2}">
 		<Image Margin="0,0,0,0" Source="..\pictures\logo_x264.png" Stretch="None" VerticalAlignment="Top" Height="95" d:LayoutOverrides="Width" HorizontalAlignment="Center"/>
-		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,92,0,0">
-            <TabItem Header="Main">
+        <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,92,0,0">
+            <TabItem Header="Main" >
                 <Grid Width="304" Height="250">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -136,12 +135,9 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Label OpacityMask="{x:Null}" x:Name="text_cli1" Content="Arguments for the 1st pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,0,0,0" />
-                    <TextBox Margin="4,27,4,4" Width="Auto" Height="40" x:Name="textbox_string1" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_cli2" Content="Arguments for the 2nd pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,75,0,0" />
-                    <TextBox Margin="4,102,4,4" Width="Auto" Height="40" x:Name="textbox_string2" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_cli3" Content="Arguments for the 3rd pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,150,0,0" />
-                    <TextBox Margin="4,177,4,4" Width="Auto" Height="40" x:Name="textbox_string3" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
+                    <TextBox Margin="-5,0,-5,31.654" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
+                    <Button x:Name="Apply_CLI" Height="22" Content="Apply" Click="button_Apply_CLI_Click" Width="144.8" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,0,-4.98,4" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Bottom" />
+                    <Button x:Name="Reset_CLI" Height="22" Content="Reset" Click="button_Reset_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="-4.981,0,0,3.6" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="139.2" />
                 </Grid>
             </TabItem>
         </TabControl>

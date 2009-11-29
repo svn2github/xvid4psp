@@ -14,6 +14,7 @@ namespace XviD4PSP
 	{
         public Massive m;
         private Massive oldm;
+        private bool profile_was_changed = false;
 
         x264 x264c;
         XviD xvid;
@@ -45,9 +46,7 @@ namespace XviD4PSP
             }
             combo_codec.SelectedItem = m.outvcodec;
             text_incodec_value.Content = m.invcodecshort;
-
             text_insize_value.Content = m.infilesize;
-
             text_outsize_value.Content = m.outfilesize;
 
             //загружаем правильную страницу
@@ -81,62 +80,52 @@ namespace XviD4PSP
                 x264c = new x264(m, this, p);
                 grid_codec.Children.Add(x264c);
             }
-
-            if (m.outvcodec == "XviD")
+            else if (m.outvcodec == "XviD")
             {
                 xvid = new XviD(m, this, p);
                 grid_codec.Children.Add(xvid);
             }
-
-            if (m.outvcodec == "MPEG1")
+            else if (m.outvcodec == "MPEG1")
             {
                 mpeg1 = new FMPEG1(m, this, p);
                 grid_codec.Children.Add(mpeg1);
             }
-
-            if (m.outvcodec == "MPEG2")
+            else if (m.outvcodec == "MPEG2")
             {
                 mpeg2 = new FMPEG2(m, this, p);
                 grid_codec.Children.Add(mpeg2);
             }
-
-            if (m.outvcodec == "MPEG4")
+            else if (m.outvcodec == "MPEG4")
             {
                 mpeg4 = new FMPEG4(m, this, p);
                 grid_codec.Children.Add(mpeg4);
             }
-
-            if (m.outvcodec == "DV")
+            else if (m.outvcodec == "DV")
             {
                 dv = new FDV(m, this, p);
                 grid_codec.Children.Add(dv);
             }
-
-            if (m.outvcodec == "HUFF")
+            else if (m.outvcodec == "HUFF")
             {
                 huff = new FFHUFF(m, this, p);
                 grid_codec.Children.Add(huff);
             }
-
-            if (m.outvcodec == "FFV1")
+            else if (m.outvcodec == "FFV1")
             {
                 ffv1 = new FFV1(m, this, p);
                 grid_codec.Children.Add(ffv1);
             }
-
-            if (m.outvcodec == "FLV1")
+            else if (m.outvcodec == "FLV1")
             {
                 flv = new FLV1(m, this, p);
                 grid_codec.Children.Add(flv);
             }
-
-            if (m.outvcodec == "MJPEG")
+            else if (m.outvcodec == "MJPEG")
             {
                 mjpeg = new FMJPEG(m, this, p);
                 grid_codec.Children.Add(mjpeg);
             }
-
-            if (m.outvcodec == "Copy")
+            else if (m.outvcodec == "Copy")
             {
                 copyordisabled = new CopyOrDisabled();
                     copyordisabled.text_info.Content = "Codec: " + m.invcodecshort + Environment.NewLine;
@@ -155,62 +144,52 @@ namespace XviD4PSP
                 grid_codec.Children.Remove(x264c);
                 x264c = null;
             }
-
-            if (xvid != null)
+            else if (xvid != null)
             {
                 grid_codec.Children.Remove(xvid);
                 xvid = null;
             }
-
-            if (mpeg1 != null)
+            else if (mpeg1 != null)
             {
                 grid_codec.Children.Remove(mpeg1);
                 mpeg1 = null;
             }
-
-            if (mpeg2 != null)
+            else if (mpeg2 != null)
             {
                 grid_codec.Children.Remove(mpeg2);
                 mpeg2 = null;
             }
-
-            if (mpeg4 != null)
+            else if (mpeg4 != null)
             {
                 grid_codec.Children.Remove(mpeg4);
                 mpeg4 = null;
             }
-
-            if (dv != null)
+            else if (dv != null)
             {
                 grid_codec.Children.Remove(dv);
                 dv = null;
             }
-
-            if (huff != null)
+            else if (huff != null)
             {
                 grid_codec.Children.Remove(huff);
                 huff = null;
             }
-
-            if (ffv1 != null)
+            else if (ffv1 != null)
             {
                 grid_codec.Children.Remove(ffv1);
                 ffv1 = null;
             }
-
-            if (flv != null)
+            else if (flv != null)
             {
                 grid_codec.Children.Remove(flv);
                 flv = null;
             }
-
-            if (mjpeg != null)
+            else if (mjpeg != null)
             {
                 grid_codec.Children.Remove(mjpeg);
                 mjpeg = null;
             }
-
-            if (copyordisabled != null)
+            else if (copyordisabled != null)
             {
                 grid_codec.Children.Remove(copyordisabled);
                 copyordisabled = null;
@@ -219,7 +198,7 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            UpdateMassive();
+            if (x264c == null) UpdateMassive();////////////////////////////////CLI
             Close();
         }
 
@@ -238,9 +217,11 @@ namespace XviD4PSP
                 //правим выходной битрейт
                 if (m.outvcodec == "Copy")
                     m.outvbitrate = m.invbitrate;
-
+                
+                profile_was_changed = true;
                 UpdateOutSize();
-
+                profile_was_changed = false;
+                
                 //проверяем можно ли копировать данный формат
                 if (m.outvcodec == "Copy")
                 {
@@ -332,7 +313,6 @@ namespace XviD4PSP
                         LoadCodecWindow();
                     }
                 }
-
                 LoadProfileToCodec();
                 combo_codec.SelectedItem = m.outvcodec;
             }
@@ -343,58 +323,49 @@ namespace XviD4PSP
             if (x264c != null)
             {
                 m = x264c.m.Clone();
-                m = x264.EncodeLine(m);
+                m = x264.EncodeLine(m); //Обнуляет vpasses[x] и перезабивает заново на основе m.x264options (т.е. только предусмотренные ключи)
             }
-
-            if (xvid != null)
+            else if (xvid != null)
             {
                 m = xvid.m.Clone();
                 m = XviD.EncodeLine(m);
             }
-
-            if (mpeg1 != null)
+            else if (mpeg1 != null)
             {
                 m = mpeg1.m.Clone();
                 m = FMPEG1.EncodeLine(m);
             }
-
-            if (mpeg2 != null)
+            else if (mpeg2 != null)
             {
                 m = mpeg2.m.Clone();
                 m = FMPEG2.EncodeLine(m);
             }
-
-            if (mpeg4 != null)
+            else if (mpeg4 != null)
             {
                 m = mpeg4.m.Clone();
                 m = FMPEG4.EncodeLine(m);
             }
-
-            if (dv != null)
+            else if (dv != null)
             {
                 m = dv.m.Clone();
                 m = FDV.EncodeLine(m);
             }
-
-            if (huff != null)
+            else if (huff != null)
             {
                 m = huff.m.Clone();
                 m = FFHUFF.EncodeLine(m);
             }
-
-            if (ffv1 != null)
+            else if (ffv1 != null)
             {
                 m = ffv1.m.Clone();
                 m = FFV1.EncodeLine(m);
             }
-
-            if (flv != null)
+            else if (flv != null)
             {
                 m = flv.m.Clone();
                 m = FLV1.EncodeLine(m);
             }
-
-            if (mjpeg != null)
+            else if (mjpeg != null)
             {
                 m = mjpeg.m.Clone();
                 m = FMJPEG.EncodeLine(m);
@@ -403,38 +374,19 @@ namespace XviD4PSP
 
         private void UpdateCodecMassive()
         {
-            if (x264c != null)
-                x264c.m = m.Clone();
-
-            if (xvid != null)
-                xvid.m = m.Clone();
-
-            if (mpeg1 != null)
-                mpeg1.m = m.Clone();
-
-            if (mpeg2 != null)
-                mpeg2.m = m.Clone();
-
-            if (mpeg4 != null)
-                mpeg4.m = m.Clone();
-
-            if (dv != null)
-                dv.m = m.Clone();
-
-            if (huff != null)
-                huff.m = m.Clone();
-
-            if (ffv1 != null)
-                ffv1.m = m.Clone();
-
-            if (flv != null)
-                flv.m = m.Clone();
-
-            if (mjpeg != null)
-                mjpeg.m = m.Clone();
+            if (x264c != null) x264c.m = m.Clone();
+            else if (xvid != null) xvid.m = m.Clone();
+            else if (mpeg1 != null) mpeg1.m = m.Clone();
+            else if (mpeg2 != null) mpeg2.m = m.Clone();
+            else if (mpeg4 != null) mpeg4.m = m.Clone();
+            else if (dv != null) dv.m = m.Clone();
+            else if (huff != null) huff.m = m.Clone();
+            else if (ffv1 != null) ffv1.m = m.Clone();
+            else if (flv != null) flv.m = m.Clone();
+            else if (mjpeg != null) mjpeg.m = m.Clone();
         }
 
-        private void LoadProfiles()
+        public void LoadProfiles()
         {
             //загружаем список фильтров
             combo_profile.Items.Clear();
@@ -462,8 +414,7 @@ namespace XviD4PSP
                 x264c.m = PresetLoader.DecodePresets(x264c.m);
                 x264c.LoadFromProfile();
             }
-
-            if (xvid != null)
+            else if (xvid != null)
             {
                 //забиваем настройки из профиля
                 xvid.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -472,8 +423,7 @@ namespace XviD4PSP
                 xvid.m = PresetLoader.DecodePresets(xvid.m);
                 xvid.LoadFromProfile();
             }
-
-            if (mpeg1 != null)
+            else if (mpeg1 != null)
             {
                 //забиваем настройки из профиля
                 mpeg1.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -482,8 +432,7 @@ namespace XviD4PSP
                 mpeg1.m = PresetLoader.DecodePresets(mpeg1.m);
                 mpeg1.LoadFromProfile();
             }
-
-            if (mpeg2 != null)
+            else if (mpeg2 != null)
             {
                 //забиваем настройки из профиля
                 mpeg2.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -492,8 +441,7 @@ namespace XviD4PSP
                 mpeg2.m = PresetLoader.DecodePresets(mpeg2.m);
                 mpeg2.LoadFromProfile();
             }
-
-            if (mpeg4 != null)
+            else if (mpeg4 != null)
             {
                 //забиваем настройки из профиля
                 mpeg4.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -502,8 +450,7 @@ namespace XviD4PSP
                 mpeg4.m = PresetLoader.DecodePresets(mpeg4.m);
                 mpeg4.LoadFromProfile();
             }
-
-            if (dv != null)
+            else if (dv != null)
             {
                 //забиваем настройки из профиля
                 dv.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -512,8 +459,7 @@ namespace XviD4PSP
                 dv.m = PresetLoader.DecodePresets(dv.m);
                 dv.LoadFromProfile();
             }
-
-            if (huff != null)
+            else if (huff != null)
             {
                 //забиваем настройки из профиля
                 huff.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -522,8 +468,7 @@ namespace XviD4PSP
                 huff.m = PresetLoader.DecodePresets(huff.m);
                 huff.LoadFromProfile();
             }
-
-            if (ffv1 != null)
+            else if (ffv1 != null)
             {
                 //забиваем настройки из профиля
                 ffv1.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -532,8 +477,7 @@ namespace XviD4PSP
                 ffv1.m = PresetLoader.DecodePresets(ffv1.m);
                 ffv1.LoadFromProfile();
             }
-
-            if (flv != null)
+            else if (flv != null)
             {
                 //забиваем настройки из профиля
                 flv.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -542,8 +486,7 @@ namespace XviD4PSP
                 flv.m = PresetLoader.DecodePresets(flv.m);
                 flv.LoadFromProfile();
             }
-
-            if (mjpeg != null)
+            else if (mjpeg != null)
             {
                 //забиваем настройки из профиля
                 mjpeg.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -556,10 +499,9 @@ namespace XviD4PSP
 
         private void button_add_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m.outvcodec == "Copy")
-                return;
+            if (m.outvcodec == "Copy") return;
 
-            UpdateMassive();
+            if (x264c == null) UpdateMassive();///////////////////////////////CLI
 
             string auto_name = m.outvcodec + " ";
 
@@ -576,7 +518,6 @@ namespace XviD4PSP
             }
             else
             {
-
                 if (m.outvbitrate == 0)
                     auto_name += "LL";
                 else
@@ -596,19 +537,15 @@ namespace XviD4PSP
 
                 if (m.outvcodec != "MJPEG")
                 {
-                    //if (m.encodingmode == Settings.EncodingModes.OnePass ||
-                    //    m.encodingmode == Settings.EncodingModes.OnePassSize)
-                    //    auto_name += " 1P";
                     if (m.encodingmode == Settings.EncodingModes.TwoPass ||
                         m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                         m.encodingmode == Settings.EncodingModes.TwoPassQuality)
                         auto_name += " 2P";
-                    if (m.encodingmode == Settings.EncodingModes.ThreePass ||
+                    else if (m.encodingmode == Settings.EncodingModes.ThreePass ||
                         m.encodingmode == Settings.EncodingModes.ThreePassSize ||
                         m.encodingmode == Settings.EncodingModes.ThreePassQuality)
                         auto_name = " 3P";
                 }
-
                 auto_name += " Custom";
             }
 
@@ -620,7 +557,6 @@ namespace XviD4PSP
                 PresetLoader.CreateVProfile(m);
                 LoadProfiles();
             }
-
             LoadProfileToCodec();
             UpdateOutSize();
             UpdateCodecMassive();         
@@ -628,8 +564,7 @@ namespace XviD4PSP
 
         private void button_remove_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m.outvcodec == "Copy")
-                return;
+            if (m.outvcodec == "Copy") return;
 
             if (combo_profile.Items.Count > 1)
             {
@@ -694,7 +629,9 @@ namespace XviD4PSP
 
         public void UpdateOutSize()
         {
-            UpdateMassive();
+            if (profile_was_changed && x264c != null) m = x264c.m.Clone();
+            else UpdateMassive();
+
             if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
                 text_outsize_value.Content = m.outvbitrate + " mb";
@@ -713,13 +650,13 @@ namespace XviD4PSP
         {
             try
             {                
-                UpdateMassive();
+                UpdateMassive(); //Клонирует массивы и пересоздает vpasses[x]
 
                 m.vencoding = "Custom";
                 PresetLoader.CreateVProfile(m);
 
-                LoadProfiles();
-                UpdateCodecMassive();
+                LoadProfiles(); //Пересоздание списка пресетов, выбор текущего
+                UpdateCodecMassive(); //Копирует m отсюда в m.кодека
             }
             catch (Exception ex)
             {
@@ -727,6 +664,5 @@ namespace XviD4PSP
                 mes.ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok); 
             }
         }
-
 	}
 }

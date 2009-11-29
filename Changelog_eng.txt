@@ -1,3 +1,17 @@
+XviD4PSP r65->r70 26.11.09, main changes:
+
+>>> (r70) Fixed deletion of Source/Output audiofiles from the Temp-folder (thx to Embox for some help and testing).
+>>> (r69) Warning message if Trim is on but audio or video encoding mode is Copy.
+>>> (r68, r69) AC3-audio now enabled for the MP4 and MOV formats.
+>>> (r68) x264 settings window: AVC-profile detector reworked, some other changes.
+>>> (r67) Faster languages translator.
+>>> (r66) Fixed broken (by me :) many weeks ago) interlacing encoding with ffmpeg (rep. by txporter).
+>>> (r66) In some cases select Temp-folder dialog is not appearing at the first start (reported by Embox).
+
+
+
+-----------------------------------
+
 XviD4PSP 5.0.37.5(Unofficial)->5.0.37.6(Unofficial) r65 20.11.09 Changelog:
 
 
