@@ -369,45 +369,24 @@ namespace XviD4PSP
 
        public static Massive CalculateSAR(Massive m)
        {
-           double dsar = (double)((double)m.outresw / (double)m.outresh) / m.outaspect;
-           double min_diff = 100.0;
-           double diff;
-           double current_sar;
-           int sarX = 1;
-           int sarY = 1;
-           double dsarX = 1.0;
-           double i = 1.0;
-
+           double dsar = m.outresw / m.outaspect / m.outresh;
+           double diff, dsarX, min_diff = 100.0;
+           int sarX = 1, sarY = 1, i = 1;
            while (i < 1000)
            {
                dsarX = dsar * i;
-               current_sar = Convert.ToInt32(dsarX) / i;
-               if (dsar > current_sar)
-                   diff = dsar - current_sar;
-               else
-                   diff = current_sar - dsar;
-
+               diff = Math.Abs(dsar - Math.Round(dsarX) / i);
                if (diff < min_diff)
                {
-                   if (dsar > current_sar)
-                       min_diff = dsar - current_sar;
-                   else
-                       min_diff = current_sar - dsar;
+                   min_diff = diff;
                    sarX = Convert.ToInt32(dsarX);
-                   sarY = Convert.ToInt32(i);
+                   sarY = i;
                }
                i += 1;
            }
-
-           if (sarX > sarY)
-               m.sar = sarX.ToString() + ":" + sarY.ToString();
-           else if (sarY > sarX)
-               m.sar = sarY.ToString() + ":" + sarX.ToString();
-           else
-               m.sar = "1:1";
-
+           m.sar = sarY.ToString() + ":" + sarX.ToString();
            return m;
-       }       
+       }
 
        public static string[] InsertAspect(string[] aspects, string aspect)
        {

@@ -272,52 +272,32 @@ namespace XviD4PSP
 
                 if (s == "Sorenson H263")
                     s = "h263";
-
-                if (s == "DivX 5" ||
-                    s == "DivX 3 Low")
+                else if (s == "DivX 5" || s == "DivX 3 Low")
                     s = "DivX";
-
-                if (s == "XVID / V_MS/VFW/FOURCC")
+                else if (s == "XVID / V_MS/VFW/FOURCC")
                     s = "XviD";
-
-                if (s == "MPEG-1 Video" ||
-                    s == "V_MPEG - 1")
+                else if (s == "MPEG-1 Video" || s == "V_MPEG - 1")
                     s = "MPEG1";
-
-                if (s == "MPEG-2 Video" ||
-                    s == "V_MPEG-2")
+                else if (s == "MPEG-2 Video" || s == "V_MPEG-2" || s == "MPEG-PS")
                     s = "MPEG2";
-
-                if (s == "WMV3")
+                else if (s == "WMV3")
                     s = "WMV";
-
-                if (s == "V_MS/VFW/WVC1" ||
-                    s == "V_MS/VFW/FOURCC" ||
-                    s == "WVC1" ||
-                    s == "VC-1")
+                else if (s == "V_MS/VFW/WVC1" || s == "V_MS/VFW/FOURCC" || s == "WVC1" || s == "VC-1")
                     s = "VC1";
-
-                if (s == "H.264" ||
-                    s == "MPEG-4 AVC" ||
-                    s == "AVC" ||
-                    s == "V_MPEG4/ISO/AVC")
+                else if (s == "H.264" || s == "MPEG-4 AVC" || s == "AVC" || s == "V_MPEG4/ISO/AVC")
                     s = "h264";
-
-                if (s == "MPEG-4" ||
-                    s == "MPEG-4 Visual")
+                else if (s == "MPEG-4" || s == "MPEG-4 Visual")
                 {
                     if (fcc == "20")
                         s = "MPEG4";
-                    else if (fcc == "DX50" ||
-                        fcc == "DIVX")
+                    else if (fcc == "DX50" || fcc == "DIVX")
                         s = "DivX";
                     else if (fcc == "XVID")
                         s = "XviD";
                     else
                         s = "h264";
                 }
-
-                if (s == "Flash Video")
+                else if (s == "Flash Video")
                     s = "FLV";
                 return s;
             }
