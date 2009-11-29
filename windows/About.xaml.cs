@@ -43,7 +43,17 @@ namespace XviD4PSP
 
         private void button_changelog_Click(object sender, RoutedEventArgs e)
         {
-            Changelog a = new Changelog(this);
+            try
+            {
+                string file = "\\Changelog_eng.txt";
+                if (Settings.Language == "Russian") file = "\\Changelog_rus.txt";
+                using (StreamReader sr = new StreamReader(Calculate.StartupPath + file, System.Text.Encoding.Default))
+                    new ShowWindow(this, "Changelog", sr.ReadToEnd(), new FontFamily("Tahoma"));
+            }
+            catch (Exception ex)
+            {
+                new Message(this).ShowMessage(ex.Message, "Error");
+            }
         }
 	}
 }

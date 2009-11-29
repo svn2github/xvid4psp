@@ -128,18 +128,19 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="CLI">
-                <Grid Width="304" Height="230.48">
+                <Grid Width="304" Height="250">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBox Margin="-5,0,-5,31.654" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
-                    <Button x:Name="Apply_CLI" Height="22" Content="Apply" Click="button_Apply_CLI_Click" Width="144.8" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,0,-4.98,4" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Bottom" />
-                    <Button x:Name="Reset_CLI" Height="22" Content="Reset" Click="button_Reset_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="-4.981,0,0,3.6" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="139.2" />
+                    <TextBox Margin="-5,0,-5,30.8" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
+                    <Button x:Name="Apply_CLI" Content="Apply" Click="button_Apply_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="219,225.2,-5,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="Reset_CLI" Content="Reset" Click="button_Reset_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="107.2,225.2,106.6,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="x264_help" Content="Help" Click="button_x264_help_Click" d:LayoutOverrides="HorizontalAlignment" Margin="-4.98,225.266,218.98,2.734" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
                 </Grid>
             </TabItem>
         </TabControl>
-	</Grid>
+    </Grid>
 </UserControl>

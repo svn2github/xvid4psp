@@ -201,8 +201,8 @@
     <Compile Include="windows\AudioEncoding.xaml.cs">
       <DependentUpon>AudioEncoding.xaml</DependentUpon>
     </Compile>
-    <Compile Include="windows\Changelog.xaml.cs">
-      <DependentUpon>Changelog.xaml</DependentUpon>
+    <Compile Include="windows\ShowWindow.xaml.cs">
+      <DependentUpon>ShowWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="windows\ColorCorrection.xaml.cs">
       <DependentUpon>ColorCorrection.xaml</DependentUpon>
@@ -326,7 +326,7 @@
     <Page Include="windows\Autocrop.xaml" />
     <Page Include="windows\Caching.xaml" />
     <Page Include="windows\AudioEncoding.xaml" />
-    <Page Include="windows\Changelog.xaml">
+    <Page Include="windows\ShowWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -445,6 +445,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="main.ico" />
+    <Resource Include="pictures\volume2.png" />
+    <Resource Include="pictures\volume.png" />
     <Resource Include="pictures\settings13.png" />
     <Resource Include="pictures\settings11.png" />
     <Resource Include="pictures\edit2.png" />

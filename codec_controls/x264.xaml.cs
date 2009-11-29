@@ -161,7 +161,9 @@ namespace XviD4PSP
 
             Apply_CLI.Content = Languages.Translate("Apply");
             Reset_CLI.Content = Languages.Translate("Reset");
+            x264_help.Content = Languages.Translate("Help");
             Reset_CLI.ToolTip = "Reset to last good CLI";
+            x264_help.ToolTip = "Show x264.exe --fullhelp screen";
 
             LoadFromProfile();
         }
@@ -2115,9 +2117,25 @@ namespace XviD4PSP
             }
             else
             {
-                Message mm = new Message(root_window);
-                mm.ShowMessage("Can`t find good CLI...", Languages.Translate("Error"), Message.MessageStyle.Ok);
+                new Message(root_window).ShowMessage("Can`t find good CLI...", Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
+        }
+
+        private void button_x264_help_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.ProcessStartInfo help = new System.Diagnostics.ProcessStartInfo();
+                help.FileName = Calculate.StartupPath + "\\apps\\x264\\x264.exe";
+                help.WorkingDirectory = Path.GetDirectoryName(help.FileName);
+                help.Arguments = " --fullhelp";
+                help.UseShellExecute = false;
+                help.CreateNoWindow = true;
+                help.RedirectStandardOutput = true;
+                System.Diagnostics.Process p = System.Diagnostics.Process.Start(help);
+                new ShowWindow(root_window, "x264 help", p.StandardOutput.ReadToEnd(), new FontFamily("Lucida Console"));
+            }
+            catch (Exception) { }
         }
     }
 }
