@@ -418,10 +418,13 @@ namespace XviD4PSP
             arguments = m.vpasses[0] + psnr + ssim;
 
             //прописываем sar
-            if (m.sar != null || m.IsAnamorphic)
-                arguments += " --sar " + m.sar;
-            else
-                arguments += " --sar 1:1";
+            string sar = "";
+            if (!m.vpasses[m.vpasses.Count - 1].ToString().Contains(" --sar "))
+            {
+                if (m.sar != null || m.IsAnamorphic) sar = " --sar " + m.sar;
+                else sar = " --sar 1:1";
+            }
+            arguments += sar;
 
             if (m.vpasses.Count == 1)
                 info.Arguments = arguments + " --output \"" + m.outvideofile + "\" \"" + m.scriptpath + "\"";
@@ -537,10 +540,7 @@ namespace XviD4PSP
                 arguments = m.vpasses[1] + psnr + ssim + " --stats \"" + passlog + "\"";//
 
                 //прописываем sar
-                if (m.sar != null || m.IsAnamorphic)
-                    arguments += " --sar " + m.sar;
-                else
-                    arguments += " --sar 1:1";
+                arguments += sar;
 
                 if (m.vpasses.Count == 2)
                     info.Arguments = arguments + " --output \"" + m.outvideofile + "\" \"" + m.scriptpath + "\"";
@@ -636,10 +636,7 @@ namespace XviD4PSP
                 arguments = m.vpasses[2] + psnr + ssim + " --stats \"" + passlog + "\"";
 
                 //прописываем sar
-                if (m.sar != null || m.IsAnamorphic)
-                    arguments += " --sar " + m.sar;
-                else
-                    arguments += " --sar 1:1";
+                arguments += sar;
 
                 info.Arguments = arguments + " --output \"" + m.outvideofile + "\" \"" + m.scriptpath + "\"";
 
