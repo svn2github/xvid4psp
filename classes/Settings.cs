@@ -1164,87 +1164,25 @@ namespace XviD4PSP
             }
         }
 
-        //Ширина окна
-        public static int WindowWidth
+        //Положение окна
+        public static string WindowLocation
         {
             get
             {
-                object value = GetValue("WindowWidth");
+                object value = GetValue("WindowLocation");
                 if (value == null)
                 {
-                    SetInt("WindowWidth", 747);
-                    return 747;
+                    return "747/577/100/100";
                 }
-                return Convert.ToInt32(value);
+                return Convert.ToString(value);
             }
 
             set
             {
-                SetInt("WindowWidth", value);
+                SetString("WindowLocation", value);
             }
         }
-
-
-        //Высота окна
-        public static int WindowHeight
-        {
-            get
-            {
-                object value = GetValue("WindowHeight");
-                if (value == null)
-                {
-                    SetInt("WindowHeight", 577);
-                    return 577;
-                }
-                return Convert.ToInt32(value);
-            }
-
-            set
-            {
-                SetInt("WindowHeight", value);
-            }
-        }
-
-        //Отступ слева
-        public static int WindowLeft
-        {
-            get
-            {
-                object value = GetValue("WindowLeft");
-                if (value == null)
-                {
-                    SetInt("WindowLeft", 100);
-                    return 100;
-                }
-                return Convert.ToInt32(value);
-            }
-
-            set
-            {
-                SetInt("WindowLeft", value);
-            }
-        }
-
-        //Отступ сверху
-        public static int WindowTop
-        {
-            get
-            {
-                object value = GetValue("WindowTop");
-                if (value == null)
-                {
-                    SetInt("WindowTop", 100);
-                    return 100;
-                }
-                return Convert.ToInt32(value);
-            }
-
-            set
-            {
-                SetInt("WindowTop", value);
-            }
-        }
-
+        
         //Разрешает или запрещает обновлять скрипт при изменении настроек аудио/видео кодека
         public static bool RenewScript
         {
@@ -1622,7 +1560,7 @@ namespace XviD4PSP
                 object value = GetValue("TasksRow");
                 if (value == null)
                 {
-                    return "128*";
+                    return "128*/400*";
                 }
                 else
                 {

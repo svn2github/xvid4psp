@@ -147,13 +147,13 @@
 					<MenuItem x:Name="mnRemoveSubtitles" Header="Remove" Click="mnRemoveSubtitles_Click"/>
 				</MenuItem>
 				<MenuItem x:Name="menu_script" Header="AviSynth">
-					<MenuItem x:Name="menu_editscript" Header="Edit filtering script" Width="Auto" Height="Auto" Click="menu_editscript_Click"/>
-					<MenuItem x:Name="menu_createautoscript" Header="Create auto script" Width="Auto" Height="Auto" Click="menu_createautoscript_Click"/>
-					<MenuItem x:Name="menu_save_script" Header="Save script" Click="menu_save_script_Click" Width="Auto" Height="Auto"/>
+					<MenuItem x:Name="menu_editscript" Header="Edit filtering script" Width="Auto" Height="Auto" Click="menu_script_Click"/>
+					<MenuItem x:Name="menu_createautoscript" Header="Create auto script" Width="Auto" Height="Auto" Click="menu_script_Click"/>
+					<MenuItem x:Name="menu_save_script" Header="Save script" Click="menu_script_Click" Width="Auto" Height="Auto"/>
 					<Separator/>
-					<MenuItem x:Name="menu_playinwmp" Header="Play in Windows Media Player" Click="menu_playinwmp_Click"/>
-					<MenuItem x:Name="menu_payinmpc" Header="Play in Media Player Classic" Click="menu_payinmpc_Click"/>
-					<MenuItem x:Name="menu_playinwpf" Header="Play in WPF Video Player" Click="menu_playinwpf_Click"/>
+					<MenuItem x:Name="menu_playinwmp" Header="Play in Windows Media Player" Click="menu_play_in_Click"/>
+					<MenuItem x:Name="menu_playinmpc" Header="Play in Media Player Classic" Click="menu_play_in_Click"/>
+					<MenuItem x:Name="menu_playinwpf" Header="Play in WPF Video Player" Click="menu_play_in_Click"/>
 				</MenuItem>
 				<MenuItem Header="Settings" x:Name="mnSettings">
                     <MenuItem x:Name="mnLanguage" Header="Language">
@@ -321,27 +321,24 @@
 				</MenuItem>
 				<MenuItem x:Name="mnTools" Header="Tools">
 					<MenuItem Header="Media Info" x:Name="menu_info_media" Click="menu_info_media_Click"/>
-					<MenuItem x:Name="menu_info_mkv" Header="MKV Info" Click="menu_info_mkv_Click"/>
-					<MenuItem x:Name="menu_info_ffmpeg" Header="FFMPEG Info" Click="menu_info_ffmpeg_Click"/>
-					<MenuItem x:Name="menu_info_mp4" Header="MP4BOX Info" Click="menu_info_mp4_Click"/>
-					<Separator/>
-					<MenuItem x:Name="mnApps_Folder" Header="Open XviD4PSP folder" Click="mnApps_Folder_Click"/>
+                    <Separator/>
+					<MenuItem x:Name="mnApps_Folder" Header="Open XviD4PSP folder" Click="mn_apps_Click"/>
 					<Separator/>
 					<MenuItem Header="FFRebuilder" x:Name="menu_ffrebuilder" Click="menu_ffrebuilder_Click"/>
 					<MenuItem x:Name="menu_mkvrebuilder" Header="MKVRebuilder" Click="menu_mkvrebuilder_Click"/>
 					<Separator/>
-					<MenuItem x:Name="mnDGIndex" Header="DGIndex" Click="mnDGIndex_Click" Width="Auto" Height="Auto"/>
-					<MenuItem x:Name="menu_dgpulldown" Header="DGPulldown" Click="menu_dgpulldown_Click"/>
-                    <MenuItem x:Name="mnDGAVCIndex" Header="DGAVCIndex" Click="mnDGAVCIndex_Click" Width="Auto" Height="Auto"/>
+					<MenuItem x:Name="mnDGIndex" Header="DGIndex" Click="mn_apps_Click" Width="Auto" Height="Auto"/>
+					<MenuItem x:Name="menu_dgpulldown" Header="DGPulldown" Click="mn_apps_Click"/>
+                    <MenuItem x:Name="mnDGAVCIndex" Header="DGAVCIndex" Click="mn_apps_Click" Width="Auto" Height="Auto"/>
                     <Separator/>
-                    <MenuItem x:Name="menu_virtualdubmod" Header="VirtualDubMod" Click="menu_virtualdubmod_Click"/>
-					<MenuItem x:Name="menu_avimux" Header="AVI-Mux" Click="menu_avimux_Click"/>
-                    <MenuItem x:Name="menu_tsmuxer" Header="tsMuxeR" Click="menu_tsmuxer_Click"/>
-					<MenuItem x:Name="menu_mkvextract" Header="MKVExtract" Click="menu_mkvextract_Click"/>
-                    <MenuItem x:Name="menu_mkvmerge" Header="MKVMerge" Click="menu_mkvmerge_Click"/>
-                    <MenuItem x:Name="menu_yamb" Header="Yamb" Click="menu_Yamb_Click"/>
+                    <MenuItem x:Name="menu_virtualdubmod" Header="VirtualDubMod" Click="mn_apps_Click"/>
+					<MenuItem x:Name="menu_avimux" Header="AVI-Mux" Click="mn_apps_Click"/>
+                    <MenuItem x:Name="menu_tsmuxer" Header="tsMuxeR" Click="mn_apps_Click"/>
+					<MenuItem x:Name="menu_mkvextract" Header="MKVExtract" Click="mn_apps_Click"/>
+                    <MenuItem x:Name="menu_mkvmerge" Header="MKVMerge" Click="mn_apps_Click"/>
+                    <MenuItem x:Name="menu_yamb" Header="Yamb" Click="mn_apps_Click"/>
                     <Separator/>
-					<MenuItem x:Name="menu_directx_update" Header="Update DirectX" Click="menu_directx_update_Click"/>
+					<MenuItem x:Name="menu_directx_update" Header="Update DirectX" Click="mn_apps_Click"/>
 					<Separator/>
 					<MenuItem Header="Fix AVCHD folder for MS" x:Name="menu_fix_AVCHD" Click="menu_fix_AVCHD_Click"/>
 				</MenuItem>
@@ -350,13 +347,13 @@
 					<Separator/>
 					<MenuItem x:Name="menu_donate" Header="Donate" Click="menu_donate_Click"/>
 					<Separator/>
-					<MenuItem Header="Support forum" x:Name="menu_support" Click="menu_support_Click"/>
-					<MenuItem x:Name="menu_home" Header="Home page" Click="menu_home_Click"/>
-					<MenuItem x:Name="menu_Google_code" Header="Google-code" Click="menu_Google_code_Click"/>
-                    <MenuItem x:Name="menu_my_mail" Header="forclip@gmail.com" Click="menu_my_mail_Click"/>
+					<MenuItem Header="Support forum" x:Name="menu_support" Click="menu_help_Click"/>
+					<MenuItem x:Name="menu_home" Header="Home page" Click="menu_help_Click"/>
+					<MenuItem x:Name="menu_Google_code" Header="Google-code" Click="menu_help_Click"/>
+                    <MenuItem x:Name="menu_my_mail" Header="forclip@gmail.com" Click="menu_help_Click"/>
                     <Separator/>
-					<MenuItem x:Name="menu_avisynth_guide_en" Header="AviSynth guide (EN)" Click="menu_avisynth_guide_en_Click"/>
-					<MenuItem x:Name="menu_avisynth_guide_ru" Header="AviSynth guide (RU)" Click="menu_avisynth_guide_ru_Click"/>
+					<MenuItem x:Name="menu_avisynth_guide_en" Header="AviSynth guide (EN)" Click="menu_help_Click"/>
+					<MenuItem x:Name="menu_avisynth_guide_ru" Header="AviSynth guide (RU)" Click="menu_help_Click"/>
 				</MenuItem>
 			</Menu>
 		</Grid>

@@ -138,13 +138,14 @@ namespace XviD4PSP
                 //Установка параметров окна из сохраненных настроек (если эта опция включена)
                 if (Settings.WindowResize == true)
                 {
-                    this.Width = Settings.WindowWidth;
-                    this.Height = Settings.WindowHeight;
-                    this.Left = Settings.WindowLeft;
-                    this.Top = Settings.WindowTop;
-                    GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
-                    this.TasksRow.Height = (GridLength)convGridLength.ConvertFromString(Settings.TasksRow);
-                    this.TasksRow2.Height = (GridLength)convGridLength.ConvertFromString(Settings.TasksRow2);
+                    string[] value = (Settings.WindowLocation + "/" + Settings.TasksRow).Split('/');
+                    this.Width = Convert.ToDouble(value[0]);
+                    this.Height = Convert.ToDouble(value[1]);
+                    this.Left = Convert.ToDouble(value[2]);
+                    this.Top = Convert.ToDouble(value[3]);
+                    GridLengthConverter conv = new GridLengthConverter();
+                    this.TasksRow.Height = (GridLength)conv.ConvertFromString(value[4]);
+                    this.TasksRow2.Height = (GridLength)conv.ConvertFromString(value[5]);
                 }
 
                 //Для правильного отображения таймера
@@ -425,7 +426,7 @@ namespace XviD4PSP
 
         private void grid_tasks_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            MoveVideoWindow();
+            if(!isFullScreen) MoveVideoWindow();
         }
 
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -436,12 +437,12 @@ namespace XviD4PSP
 
         private void MainWindow_LocationChanged(object sender, EventArgs e)
         {
-            MoveVideoWindow();
+            if (!isFullScreen) MoveVideoWindow();
         }
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            MoveVideoWindow();
+            if (!isFullScreen) MoveVideoWindow();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -515,13 +516,9 @@ namespace XviD4PSP
             //Определяем и сохраняем размер и положение окна при выходе
             if (this.WindowState != System.Windows.WindowState.Maximized && this.WindowState != System.Windows.WindowState.Minimized) //но только если окно не развернуто на весь экран и не свернуто
             {
-                Settings.WindowWidth = Convert.ToInt32(this.Window.ActualWidth); //ширина
-                Settings.WindowHeight = Convert.ToInt32(this.Window.ActualHeight); //высота
-                Settings.WindowLeft = Convert.ToInt32(this.Window.Left); //отступ слева
-                Settings.WindowTop = Convert.ToInt32(this.Window.Top); //отступ сверху
-                GridLengthConverter convGridLength = new System.Windows.GridLengthConverter();
-                Settings.TasksRow = convGridLength.ConvertToString(this.TasksRow.Height);
-                Settings.TasksRow2 = convGridLength.ConvertToString(this.TasksRow2.Height);
+                Settings.WindowLocation = (int)this.Window.ActualWidth + "/" + (int)this.Window.ActualHeight + "/" + (int)this.Window.Left + "/" + (int)this.Window.Top;
+                GridLengthConverter conv = new GridLengthConverter();
+                Settings.TasksRow = conv.ConvertToString(this.TasksRow.Height) + "/" + conv.ConvertToString(this.TasksRow2.Height);
             }
         }
 
@@ -753,11 +750,22 @@ namespace XviD4PSP
             Close();
         }
 
-        private void mnDGIndex_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void mn_apps_Click(object sender, RoutedEventArgs e)
         {
+            string path = Calculate.StartupPath;
+            if (sender == mnDGIndex) path += "\\apps\\DGMPGDec\\DGIndex.exe";
+            else if (sender == menu_dgpulldown) path += "\\apps\\DGPulldown\\DGPulldown.exe";
+            else if (sender == mnDGAVCIndex) path += "\\apps\\DGAVCDec\\DGAVCIndex.exe";
+            else if (sender == menu_virtualdubmod) path += "\\apps\\VirtualDubMod\\VirtualDubMod.exe";
+            else if (sender == menu_avimux) path += "\\apps\\AVI-Mux\\AVIMux_GUI.exe";
+            else if (sender == menu_tsmuxer) path += "\\apps\\tsMuxeR\\tsMuxerGUI.exe";
+            else if (sender == menu_mkvextract) path += "\\apps\\MKVtoolnix\\MKVextractGUI.exe";
+            else if (sender == menu_mkvmerge) path += "\\apps\\MKVtoolnix\\mmg.exe";
+            else if (sender == menu_yamb) path += "\\apps\\MP4Box\\Yamb.exe";
+            else if (sender == menu_directx_update) path += "\\apps\\DirectX_Update\\dxwebsetup.exe";
             try
             {
-                Process.Start(Calculate.StartupPath + "\\apps\\DGMPGDec\\DGIndex.exe");
+                Process.Start(path);
             }
             catch (Exception ex)
             {
@@ -765,47 +773,17 @@ namespace XviD4PSP
             }
         }
 
-        private void menu_virtualdubmod_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_help_Click(object sender, RoutedEventArgs e)
         {
+            string path = "http://forum.winnydows.com";
+            if (sender == menu_home) path = "http://www.winnydows.com";
+            else if (sender == menu_Google_code) path = "http://code.google.com/p/xvid4psp/";
+            else if (sender == menu_my_mail) path = "mailto:forclip@gmail.com";
+            else if (sender == menu_avisynth_guide_en) path = "http://avisynth.org/mediawiki/Internal_filters";
+            else if (sender == menu_avisynth_guide_ru) path = "http://avisynth.org.ru/docs/russian/index.htm";
             try
             {
-                Process.Start(Calculate.StartupPath + "\\apps\\VirtualDubMod\\VirtualDubMod.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
-        private void menu_home_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start("http://www.winnydows.com");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
-        private void menu_avisynth_guide_ru_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start("http://avisynth.org.ru/docs/russian/index.htm");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
-        private void menu_avisynth_guide_en_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start("http://avisynth.org/mediawiki/Internal_filters");
+                Process.Start(path);
             }
             catch (Exception ex)
             {
@@ -840,18 +818,6 @@ namespace XviD4PSP
             {
                 ErrorExeption(ex.Message);
                 Close();
-            }
-        }
-
-        private void mnApps_Folder_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath);
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
             }
         }
 
@@ -1891,7 +1857,7 @@ namespace XviD4PSP
                 menu_save_script.Header = Languages.Translate("Save script");
 
                 menu_playinwmp.Header = Languages.Translate("Play in") + " Windows Media Player";
-                menu_payinmpc.Header = Languages.Translate("Play in") + " Media Player Classic";
+                menu_playinmpc.Header = Languages.Translate("Play in") + " Media Player Classic";
                 menu_playinwpf.Header = Languages.Translate("Play in") + " WPF Video Player";
 
                 mnSettings.Header = Languages.Translate("Settings");
@@ -2387,12 +2353,6 @@ namespace XviD4PSP
             Settings.AutoJoinMode = Settings.AutoJoinModes.DVDonly;
         }
 
-        private void menu_createautoscript_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (m != null)
-                CreateAutoScript();
-        }
-
         public void Refresh(string script)
         {
             m.script = script;
@@ -2404,7 +2364,6 @@ namespace XviD4PSP
         public Massive CreateAutoScript()
         {
             string oldscript = m.script;
-
             if (m.inaudiostreams.Count > 0 &&
                 m.outaudiostreams.Count > 0)
             {
@@ -2434,11 +2393,6 @@ namespace XviD4PSP
             return m;
         }
 
-        private void menu_editscript_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            EditScript();
-        }
-
         public void EditScript()
         {
             if (m == null)
@@ -2448,14 +2402,6 @@ namespace XviD4PSP
             }
             else
             {
-                //разрешаем только одно окно
-                //string stitle = "XviD4PSP - AviSynth-based MultiMedia Converter";
-                //foreach (Window ownedWindow in this.OwnedWindows)
-                //{
-                //    if (ownedWindow.Title != stitle)
-                //       return;
-                //}            
-
                 try
                 {
                     Filtering f = new Filtering(m, this);
@@ -2695,28 +2641,24 @@ namespace XviD4PSP
             Settings.AutocropMode = Autocrop.AutocropMode.AllFiles;
         }
 
-        private void menu_save_script_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void menu_script_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender == menu_createautoscript && m != null) CreateAutoScript();
+            else if (sender == menu_editscript) EditScript();
+            else SaveScript();
+        }
+
+        private void SaveScript()
         {
             if (m == null) return;
             System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
-            s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + ".avs";
-
-            if (Path.GetExtension(m.infilepath).ToLower() == ".vob" && Calculate.IsValidVOBName(m.infilepath))
-            {
-                string title = Calculate.GetTitleNum(m.infilepath);
-                if (title != "")
-                    title = "_T" + title;
-                s.FileName = m.dvdname + ".avs";
-            }
-
+            s.FileName = m.taskname + ".avs";
             s.Title = Languages.Translate("Save script") + ":";
             s.Filter = "AviSynth " + Languages.Translate("files") + "|*.avs";
-
             if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 StreamWriter sw = new StreamWriter(s.FileName, false, System.Text.Encoding.Default);
-                string[] separator = new string[] { Environment.NewLine };
-                string[] lines = m.script.Split(separator, StringSplitOptions.None);
+                string[] lines = m.script.Split( new string[] { Environment.NewLine }, StringSplitOptions.None);
                 foreach (string line in lines)
                     sw.WriteLine(line);
                 sw.Close();
@@ -3783,11 +3725,6 @@ namespace XviD4PSP
             }
         }
 
-        private void menu_directx_update_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            Process.Start(Calculate.StartupPath + "\\apps\\DirectX_Update\\dxwebsetup.exe");
-        }
-
         private void menu_save_wav_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null) return;
@@ -3904,113 +3841,33 @@ namespace XviD4PSP
                 filepath = m.infilepath;
             MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MediaInfo, this);
         }
-
-        private void menu_info_mp4_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            string filepath = null;
-            if (m != null)
-                filepath = m.infilepath;
-            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MP4BoxInfo, this);
-        }
-
-        private void menu_info_mkv_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            string filepath = null;
-            if (m != null)
-                filepath = m.infilepath;
-            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MKVInfo, this);
-        }
-
-        private void menu_info_ffmpeg_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            string filepath = null; ;
-            if (m != null)
-                filepath = m.infilepath;
-            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.FFMPEGInfo, this);
-        }
-
-        private void menu_playinwmp_Click(object sender, System.Windows.RoutedEventArgs e)
+       
+        private void menu_play_in_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null) return;
             try
             {
-                if (!File.Exists(m.scriptpath))
-                    AviSynthScripting.WriteScriptToFile(m);
+                string path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Windows Media Player\\wmplayer.exe";
+                if (sender == menu_playinwpf) path = Calculate.StartupPath + "\\WPF_VideoPlayer.exe";
+                else if (sender == menu_playinmpc)
+                    if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mplayerc.exe"))
+                        path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Media Player Classic\\mplayerc.exe";
 
-                Process pr = new Process();
+                if (!File.Exists(m.scriptpath)) AviSynthScripting.WriteScriptToFile(m);
                 ProcessStartInfo info = new ProcessStartInfo();
-
-                info.FileName = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) +
-                    "\\Windows Media Player\\wmplayer.exe";
+                if (File.Exists(path)) info.FileName = path; else return;
                 info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
                 info.Arguments = Settings.TempPath + "\\preview.avs";
+                Process pr = new Process();
                 pr.StartInfo = info;
                 pr.Start();
             }
             catch (Exception ex)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(ex.Message, Languages.Translate("Error"));
+                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
             }
         }
-
-        private void menu_playinwpf_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (m == null) return;
-            try
-            {
-                if (!File.Exists(m.scriptpath))
-                    AviSynthScripting.WriteScriptToFile(m);
-
-                Process pr = new Process();
-                ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = Calculate.StartupPath +
-                    "\\WPF_VideoPlayer.exe";
-                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                info.Arguments = Settings.TempPath + "\\preview.avs";
-                pr.StartInfo = info;
-                pr.Start();
-            }
-            catch (Exception ex)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(ex.Message, Languages.Translate("Error"));
-            }
-        }
-
-        private void menu_payinmpc_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (m == null) return;
-            try
-            {
-                if (!File.Exists(m.scriptpath))
-                    AviSynthScripting.WriteScriptToFile(m);
-
-                Process pr = new Process();
-                ProcessStartInfo info = new ProcessStartInfo();
-
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) +
-                    "\\K-Lite Codec Pack\\Media Player Classic\\mplayerc.exe"))
-                    info.FileName = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) +
-                        "\\K-Lite Codec Pack\\Media Player Classic\\mplayerc.exe"; //mplayerc.exe
-
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) +
-                   "\\Media Player Classic\\mplayerc.exe"))
-                    info.FileName = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) +
-                        "\\Media Player Classic\\mplayerc.exe";
-
-                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                info.Arguments = Settings.TempPath + "\\preview.avs";
-                pr.StartInfo = info;
-                pr.Start();
-            }
-            catch (Exception ex)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(ex.Message, Languages.Translate("Error"));
-            }
-        }
-
+               
         private void list_tasks_KeyUp(object sender, System.Windows.Input.KeyEventArgs e) //keyup
         {
             if (e.Key == System.Windows.Input.Key.Delete)
@@ -4057,29 +3914,24 @@ namespace XviD4PSP
 
         public void SwitchToFullScreen()
         {
-            if (this.isAudioOnly || this.graphBuilder == null)
-                return;
+            if (this.isAudioOnly || this.graphBuilder == null) return;
 
             //если не Фуллскрин, то делаем Фуллскрин
             if (isFullScreen == false)
             {
+                this.isFullScreen = true;
                 this.grid_tasks.Visibility = Visibility.Collapsed;
                 this.grid_menu.Visibility = Visibility.Collapsed;
                 this.grid_left_panel.Visibility = Visibility.Collapsed;
                 this.splitter_tasks_preview.Visibility = Visibility.Collapsed;
-                //this.grid_player_buttons.Visibility = Visibility.Collapsed; //убрать кнопки плейера
                 this.grid_player_info.Visibility = Visibility.Collapsed;
                 this.grid_top.Visibility = Visibility.Collapsed;
-                //this.slider_pos.Visibility = Visibility.Collapsed; //убрать панель управления плейера
                 this.WindowStyle = System.Windows.WindowStyle.None;  //стиль окна (без стиля)
                 this.WindowState = System.Windows.WindowState.Maximized; //размер окна (максимальный)
                 this.grid_player_buttons.Margin = new Thickness(0, 0, 0, 0); //Убрать отступы для панели управления плейера
-
                 oldbrush = this.LayoutRoot.Background;
                 oldmargin = this.grid_player_window.Margin;
                 this.LayoutRoot.Background = Brushes.Black;
-                this.isFullScreen = true;
-
                 Grid.SetRow(this.grid_player_window, 0);//
                 Grid.SetRowSpan(this.grid_player_window, 2);//
                 this.grid_player_window.Margin = new Thickness(0, 0, 0, 0);//
@@ -4092,12 +3944,9 @@ namespace XviD4PSP
             else
             {
                 //Выход из Фуллскрина
-                this.isFullScreen = false;
-
                 Grid.SetRow(this.grid_player_window, 1);//
                 Grid.SetRowSpan(this.grid_player_window, 1);//
                 this.grid_player_window.Margin = oldmargin;//
-
                 this.grid_tasks.Visibility = Visibility.Visible;
                 this.grid_menu.Visibility = Visibility.Visible;
                 this.grid_left_panel.Visibility = Visibility.Visible;
@@ -4111,6 +3960,7 @@ namespace XviD4PSP
                 this.slider_pos.Visibility = Visibility.Visible;
                 this.LayoutRoot.Background = oldbrush;
                 this.grid_player_buttons.Margin = new Thickness(195.856, 0, 0, 0); //Установить дефолтные отступы для панели управления плейера              
+                this.isFullScreen = false;
 
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                     MoveVideoWindow();
@@ -4330,50 +4180,50 @@ namespace XviD4PSP
                   else
                       mediaPosition.put_CurrentPosition(NaturalDuration.TotalSeconds); //Ограничиваем позицию длиной клипа */
         }
-    
+
         private void MoveVideoWindow()
         {
-            // Track the movement of the container window and resize as needed
+            //Track the movement of the container window and resize as needed
             if (this.videoWindow != null)
             {
-                int hr = 0;   
-                int top = (int)(grid_menu.ActualHeight +
-                    grid_top.ActualHeight +
-                    splitter_tasks_preview.ActualHeight +
-                    grid_tasks.ActualHeight +
-                    grid_player_info.ActualHeight + 10);
-                int h = (int)(grid_player_window.ActualHeight -
-                    grid_player_info.ActualHeight - 12);
-                int w = (int)(m.outaspect * h);
-                int left = (int)((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
-
-                if (w > (int)progress_back.ActualWidth)
+                int hr = 0;
+                double left = 0, top = 0, w = 0, h = 0; //h - высота, w - ширина
+                if (!isFullScreen)
                 {
-                    w = (int)progress_back.ActualWidth;
-                    h = (int)((double)w / m.outaspect);
-                    left = (int)((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
-                    top += (int)((this.grid_player_window.ActualHeight - h) / 2.0) - (int)(grid_player_info.ActualHeight) + 14;
-                }
-
-                //Пересчет размера и положения видео-окна для ДиректШоу, если используется Фуллскрин
-                if (isFullScreen == true)
-                {
-                    top = 0; //h - высота, w - ширина
-                    h = (int)this.LayoutRoot.ActualHeight - (int)this.grid_player_buttons.ActualHeight; //высота экрана минус высота панели
-                    w = (int)(m.outaspect * h);
-                    left = (int)((this.LayoutRoot.ActualWidth - w) / 2); //ширина
-                    if (w > this.LayoutRoot.ActualWidth)
+                    top = (grid_menu.ActualHeight +
+                        grid_top.ActualHeight +
+                        splitter_tasks_preview.ActualHeight +
+                        grid_tasks.ActualHeight +
+                        grid_player_info.ActualHeight + 10);
+                    h = (grid_player_window.ActualHeight -
+                        grid_player_info.ActualHeight - 12);
+                    w = (m.outaspect * h);
+                    left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
+                    if (w > progress_back.ActualWidth)
                     {
-                        w = (int)this.LayoutRoot.ActualWidth;
-                        h = (int)((double)w / m.outaspect);
-                        left = 0;
-                        top = (int)((this.LayoutRoot.ActualHeight - h) / 2.0);
+                        w = progress_back.ActualWidth;
+                        h = (w / m.outaspect);
+                        left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
+                        top += ((this.grid_player_window.ActualHeight - h) / 2.0) - (grid_player_info.ActualHeight) + 14;
                     }
                 }
-                top = (int)((double)top * dpi); h = (int)((double)h * dpi); w = (int)((double)w * dpi); left = (int)((double)left * dpi); //Масштабируем
-                hr = this.videoWindow.SetWindowPosition(left, top, w, h);
+                else //Для ФуллСкрина
+                {
+                    h = this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight; //высота экрана минус высота панели
+                    w = (m.outaspect * h);
+                    left = ((this.LayoutRoot.ActualWidth - w) / 2);
+                    if (w > this.LayoutRoot.ActualWidth)
+                    {
+                        w = this.LayoutRoot.ActualWidth;
+                        h = (w / m.outaspect);
+                        left = 0;
+                        top = ((this.LayoutRoot.ActualHeight - h) / 2.0);
+                    }
+                }
+                hr = this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(w * dpi), (int)(h * dpi)); //Масштабируем и вводим
                 DsError.ThrowExceptionForHR(hr);
-                this.videoWindow.put_BorderColor(1);
+                hr = this.videoWindow.put_BorderColor(1);
+                DsError.ThrowExceptionForHR(hr);
             }
         }
 
@@ -4872,18 +4722,6 @@ namespace XviD4PSP
             }
         }
 
-        private void menu_support_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start("http://forum.winnydows.com");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
         private void menu_ffrebuilder_Click(object sender, RoutedEventArgs e)
         {
             FFRebuilder ff = new FFRebuilder(this);
@@ -4942,18 +4780,6 @@ namespace XviD4PSP
                     AudioOptions ao = (AudioOptions)ownedWindow;
                     ao.Reload(m);
                 }
-            }
-        }
-
-        private void menu_tsmuxer_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath + "\\apps\\tsMuxeR\\tsMuxerGUI.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
             }
         }
 
@@ -5269,54 +5095,6 @@ namespace XviD4PSP
             return mass;
         }
 
-        private void menu_mkvmerge_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath + "\\apps\\MKVtoolnix\\mmg.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
-        private void menu_mkvextract_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath + "\\apps\\MKVtoolnix\\MKVextractGUI.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
-        private void menu_avimux_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath + "\\apps\\AVI-Mux\\AVIMux_GUI.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
-        private void menu_dgpulldown_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath + "\\apps\\DGPulldown\\DGPulldown.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
         private void menu_fix_AVCHD_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -5531,19 +5309,7 @@ namespace XviD4PSP
             this.textbox_time.Visibility = Visibility.Visible;
             this.textbox_duration.Visibility = Visibility.Collapsed;
         }
-
-        private void mnDGAVCIndex_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCIndex.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
+     
         private void ResetTrim()
         {
             trim_start = trim_end = 0;
@@ -5678,19 +5444,6 @@ namespace XviD4PSP
 
             mn_ffmpeg_new.IsChecked = true;
             Settings.FFmpegSource2 = true;
-        }
-
-        private void menu_Yamb_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start(Calculate.StartupPath + "\\apps\\MP4Box\\Yamb.exe");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-
         }
 
         //Открытие папки (пакетная обработка)
@@ -5839,30 +5592,6 @@ namespace XviD4PSP
             Settings.DGForceFilm = check_force_film.IsChecked;
         }
 
-        private void menu_Google_code_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start("http://code.google.com/p/xvid4psp/");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
-        private void menu_my_mail_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Process.Start("mailto:forclip@gmail.com");
-            }
-            catch (Exception ex)
-            {
-                ErrorExeption(ex.Message);
-            }
-        }
-
         private void MenuHider(bool ShowItems)
         {
             //Делаем пункты меню (не)активными
@@ -5888,7 +5617,7 @@ namespace XviD4PSP
             menu_createautoscript.IsEnabled = ShowItems;
             menu_save_script.IsEnabled = ShowItems;
             menu_playinwmp.IsEnabled = ShowItems;
-            menu_payinmpc.IsEnabled = ShowItems;
+            menu_playinmpc.IsEnabled = ShowItems;
             menu_playinwpf.IsEnabled = ShowItems;
             target_goto.IsEnabled = ShowItems;
 
@@ -5945,6 +5674,6 @@ namespace XviD4PSP
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("Trimming feature doesn't affect the track(s) in Copy mode!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
             }
-        }
+        }   
     }
 }
