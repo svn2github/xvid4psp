@@ -407,19 +407,19 @@ namespace XviD4PSP
                 //C - Цветокоррекция
                 if (e.Key == Key.C && slider_pos.IsFocused)
                 {
-                    SaturationBrightness();
+                    ColorCorrection_Click(null, null);
                 }
 
                 //R - кроп\ресайз
                 if (e.Key == Key.R && slider_pos.IsFocused)
                 {
-                    AspectResolutionWindow();
+                    AspectResolution_Click(null, null);
                 }
 
                 //I - деинтерлейс
                 if (e.Key == Key.I && slider_pos.IsFocused)
                 {
-                    InterlaceWindow();
+                    menu_interlace_Click(null, null);
                 }            
             }
         }
@@ -619,7 +619,7 @@ namespace XviD4PSP
             }
         }
 
-        private void mnOpen_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void OpenFile_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             //закрываем все дочерние окна
             CloseChildWindows();
@@ -632,8 +632,7 @@ namespace XviD4PSP
                 if (x.infileslist.Length > 1 && x.infilepath == null) //Мульти-открытие
                 {
                     path_to_save = OpenDialogs.SaveFolder();
-                    if (path_to_save == null)
-                        return;
+                    if (path_to_save == null) return;
                     MultiOpen(x.infileslist);
                     return;
                 }
@@ -693,28 +692,6 @@ namespace XviD4PSP
         {
             if (m != null)
                 CloseFile();
-        }
-
-        private void button_open_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            //закрываем все дочерние окна
-            CloseChildWindows();
-
-            //открываем файл
-            OpenDialogs.owner = this;
-            Massive x = OpenDialogs.OpenFile();
-            if (x != null)
-            {
-                if (x.infileslist.Length > 1 && x.infilepath == null) //Мульти-открытие
-                {
-                    path_to_save = OpenDialogs.SaveFolder();
-                    if (path_to_save == null)
-                        return;
-                    MultiOpen(x.infileslist);
-                    return;
-                }
-                action_open(x, ShowPreview.yes); //Обычное открытие
-            }
         }
 
         private void button_close_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -831,22 +808,6 @@ namespace XviD4PSP
                 OpenDialogs.owner = this;
                 Massive x = OpenDialogs.OpenFile();
                 action_open(x, ShowPreview.yes);
-            }
-        }
-
-        private void menu_audiooptions_Click(object sender, RoutedEventArgs e)
-        {
-            //разрешаем только одно окно
-            string stitle = Languages.Translate("Editing audio options") + ":";
-            foreach (Window ownedWindow in this.OwnedWindows)
-            {
-                if (ownedWindow.Title == stitle)
-                    return;
-            }
-
-            if (m != null)
-            {
-                AudioOptions ao = new AudioOptions(m, this, AudioOptions.AudioOptionsModes.AllOptions);
             }
         }
 
@@ -2421,12 +2382,7 @@ namespace XviD4PSP
             }
         }
 
-        private void mnAspectResolution_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            AspectResolutionWindow();
-        }
-
-        private void AspectResolutionWindow()
+        private void AspectResolution_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null) return;
             if (m.format == Format.ExportFormats.Audio)
@@ -3126,7 +3082,7 @@ namespace XviD4PSP
             EditScript();
         }
 
-        private void VideoEncodingSetting()
+        private void VideoEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null)
             {
@@ -3185,28 +3141,8 @@ namespace XviD4PSP
                 }
             }
         }
-
-        private void button_edit_vencoding_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            VideoEncodingSetting();
-        }
-
-        private void menu_venc_settings_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            VideoEncodingSetting();
-        }
-
-        private void button_edit_aencoding_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            AudioEncodingSetting();
-        }
-
-        private void menu_aenc_settings_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            AudioEncodingSetting();
-        }
-
-        private void AudioEncodingSetting()
+      
+        private void AudioEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null)
             {
@@ -3654,17 +3590,7 @@ namespace XviD4PSP
                 Settings.AutoDeleteTasks = cmenu_is_always_delete_encoded.IsChecked.Value;
         }
 
-        private void button_edit_sbc_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            SaturationBrightness();
-        }
-
-        private void menu_saturation_brightness_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            SaturationBrightness();
-        }
-
-        private void SaturationBrightness()
+        private void ColorCorrection_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null)
             {
@@ -4633,11 +4559,6 @@ namespace XviD4PSP
             }
         }
 
-        private void menu_dvd_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            action_open_dvd();
-        }
-
         private void menu_detect_interlace_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null) return;
@@ -4678,12 +4599,7 @@ namespace XviD4PSP
             }
         }
 
-        private void menu_interlace_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            InterlaceWindow();
-        }
-
-        private void InterlaceWindow()
+        private void menu_interlace_Click(object sender, System.Windows.RoutedEventArgs e)       
         {
             if (m == null) return;
             if (m.format == Format.ExportFormats.Audio)
@@ -4783,7 +4699,7 @@ namespace XviD4PSP
             }
         }
 
-        private void button_configure_Click(object sender, RoutedEventArgs e)
+        private void AudioOptions_Click(object sender, RoutedEventArgs e)
         {
             //разрешаем только одно окно
             string stitle = Languages.Translate("Editing audio options") + ":";
@@ -4795,7 +4711,6 @@ namespace XviD4PSP
                     return;
                 }
             }
-
             if (m == null)
             {
                 Message mess = new Message(this);
@@ -4874,12 +4789,7 @@ namespace XviD4PSP
             return mass;
         }
 
-        private void button_dvd_Click(object sender, RoutedEventArgs e)
-        {
-            action_open_dvd();
-        }
-
-        private void action_open_dvd()
+        private void OpenDVD_Click(object sender, RoutedEventArgs e)
         {
             //закрываем все дочерние окна
             CloseChildWindows();

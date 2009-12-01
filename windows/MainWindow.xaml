@@ -29,9 +29,9 @@
                     </Style>
                 </Menu.Resources>
 				<MenuItem Header="File" x:Name="mnFile">
-					<MenuItem Header="Open file..." x:Name="mnOpen" Click="mnOpen_Click"/>
+					<MenuItem Header="Open file..." x:Name="mnOpen" Click="OpenFile_Click"/>
 					<MenuItem x:Name="menu_open_folder" Header="Open folder..." Click="menu_open_folder_Click"/>
-                    <MenuItem x:Name="menu_dvd" Header="Open DVD folder..." Click="menu_dvd_Click"/>
+                    <MenuItem x:Name="menu_dvd" Header="Open DVD folder..." Click="OpenDVD_Click"/>
                     <MenuItem x:Name="menu_decode_file" Header="Decode file..." Click="menu_decode_file_Click"/>
 					<MenuItem x:Name="menu_join" Header="Join file..." Click="menu_join_Click"/>
 					<Separator/>
@@ -129,18 +129,18 @@
 					<MenuItem x:Name="menu_autocrop" Header="Detect black borders" Click="menu_autocrop_Click" HorizontalAlignment="Stretch"/>
 					<MenuItem x:Name="menu_detect_interlace" Header="Detect interlace" Click="menu_detect_interlace_Click"/>
 					<Separator/>
-					<MenuItem x:Name="menu_saturation_brightness" Header="Saturation/Brightness" Click="menu_saturation_brightness_Click"/>
-					<MenuItem x:Name="mnAspectResolution" Header="Resolution/Aspect" Click="mnAspectResolution_Click"/>
+					<MenuItem x:Name="menu_saturation_brightness" Header="Saturation/Brightness" Click="ColorCorrection_Click"/>
+					<MenuItem x:Name="mnAspectResolution" Header="Resolution/Aspect" Click="AspectResolution_Click"/>
 					<MenuItem Header="Interlace/Framerate" x:Name="menu_interlace" Click="menu_interlace_Click"/>
 					<Separator/>
-					<MenuItem x:Name="menu_venc_settings" Header="Encoding settings" Click="menu_venc_settings_Click"/>
+					<MenuItem x:Name="menu_venc_settings" Header="Encoding settings" Click="VideoEncodingSettings_Click"/>
 				</MenuItem>
 				<MenuItem x:Name="mnAudio" Header="Audio">
 					<MenuItem x:Name="menu_demux" Header="Demux" Click="menu_demux_Click"/>
 					<MenuItem x:Name="menu_save_wav" Header="Save to WAV" Click="menu_save_wav_Click"/>
 					<Separator/>
-					<MenuItem x:Name="menu_audiooptions" Header="Editing options" Click="menu_audiooptions_Click"/>
-					<MenuItem x:Name="menu_aenc_settings" Header="Encoding settings" Click="menu_aenc_settings_Click"/>
+					<MenuItem x:Name="menu_audiooptions" Header="Editing options" Click="AudioOptions_Click"/>
+					<MenuItem x:Name="menu_aenc_settings" Header="Encoding settings" Click="AudioEncodingSettings_Click"/>
 				</MenuItem>
 				<MenuItem x:Name="mnSubtitles" Header="Subtitles">
 					<MenuItem x:Name="mnAddSubtitles" Header="Add" Click="mnAddSubtitles_Click"/>
@@ -358,10 +358,10 @@
 			</Menu>
 		</Grid>
 		<Grid Margin="0,20.96,0,0" x:Name="grid_top" VerticalAlignment="Top" Height="40" Background="{DynamicResource black_gradient}">
-			<Button x:Name="button_open" Width="90" Content="Open" Foreground="#FFFFFFFF" Click="button_open_Click" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,9,0,9" VerticalAlignment="Stretch"/>
-			<Button x:Name="button_dvd" Content="DVD" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_dvd_Click" Margin="102,9,0,9" Width="90" HorizontalAlignment="Left"/>
+			<Button x:Name="button_open" Width="90" Content="Open" Foreground="#FFFFFFFF" Click="OpenFile_Click" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,9,0,9" VerticalAlignment="Stretch"/>
+			<Button x:Name="button_dvd" Content="DVD" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="OpenDVD_Click" Margin="102,9,0,9" Width="90" HorizontalAlignment="Left"/>
 			<Button x:Name="button_close" Width="90" Content="Close" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_close_Click" HorizontalAlignment="Left" Margin="196,9,0,9"/>
-			<Button x:Name="button_configure" Content="Configure" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_configure_Click" Margin="290,9,0,9" HorizontalAlignment="Left" Width="90"/>
+			<Button x:Name="button_configure" Content="Configure" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="AudioOptions_Click" Margin="290,9,0,9" HorizontalAlignment="Left" Width="90"/>
 			<Button x:Name="button_save" Content="Save" Width="90" Foreground="#FFFFFFFF" Click="button_save_Click" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="384,9,0,9"/>
 			<Button x:Name="button_encode" Content="Encode" Foreground="#FFFFFFFF" Click="button_encode_Click" Template="{DynamicResource GlassButton}" Margin="478,9,0,9" HorizontalAlignment="Left" Width="90"/>
             <Slider x:Name="slider_Volume" ValueChanged="Volume_ValueChanged" d:LayoutOverrides="VerticalAlignment" Margin="600,8,4,8" Style="{DynamicResource GlassSlider}" ClipToBounds="False" MouseWheel="Volume_Wheel" FlowDirection="LeftToRight" HorizontalAlignment="Left" Width="Auto" MinWidth="120" MaxWidth="120" IsMoveToPointEnabled="False" Maximum="1" SmallChange="0.05" LargeChange="0.1" />
@@ -421,17 +421,17 @@
                 <Image  Stretch="None" x:Name="image_settings5" Source="..\pictures\settings1.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="LeftToRight" />
                 </Button>
                 <Label x:Name="text_sbc" Height="Auto" Content="Saturation/Brightness:" Foreground="#FFFFFFFF" Width="Auto" FontSize="14" HorizontalAlignment="Left" Margin="0,101.16,0,0" VerticalAlignment="Top"/>
-                <Button x:Name="button_edit_sbc" Height="26" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" HorizontalAlignment="Right" Margin="0,127.78,3,0" VerticalAlignment="Top" Click="button_edit_sbc_Click">
+                <Button x:Name="button_edit_sbc" Height="26" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" HorizontalAlignment="Right" Margin="0,127.78,3,0" VerticalAlignment="Top" Click="ColorCorrection_Click">
                 <Image  Stretch="None" x:Name="image_settings2" Source="..\pictures\settings.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="RightToLeft" />
                 </Button>
                 <ComboBox x:Name="combo_vencoding" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Stretch" Margin="4,180.36,30.55,0" Width="Auto" SelectionChanged="combo_vencoding_SelectionChanged" VerticalAlignment="Top" Style="{DynamicResource ComboBoxGlass}" MaxDropDownHeight="341.333333333333"/>
                 <Label x:Name="text_vencoding" Height="Auto" Content="Video encoding:" Foreground="#FFFFFFFF" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" Margin="0,151.74,0,0" FontSize="14" Grid.RowSpan="1" VerticalAlignment="Top"/>
-                <Button x:Name="button_edit_vencoding" Margin="0,178.36,3,0" Click="button_edit_vencoding_Click" d:LayoutOverrides="VerticalAlignment" HorizontalAlignment="Right" VerticalAlignment="Top" Width="26" Foreground="#FFFFFFFF" Height="26" Template="{DynamicResource GlassButtonRounded}">
+                <Button x:Name="button_edit_vencoding" Margin="0,178.36,3,0" Click="VideoEncodingSettings_Click" d:LayoutOverrides="VerticalAlignment" HorizontalAlignment="Right" VerticalAlignment="Top" Width="26" Foreground="#FFFFFFFF" Height="26" Template="{DynamicResource GlassButtonRounded}">
                 <Image  Stretch="None" x:Name="image_settings3" Source="..\pictures\settings.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="RightToLeft" />
                 </Button>
                 <Label x:Name="text_aencoding" Height="Auto" Content="Audio encoding:" Foreground="#FFFFFFFF" FontSize="14" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Left" Margin="0,0,0,136.06" VerticalAlignment="Bottom"/>
                 <ComboBox x:Name="combo_aencoding" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="Auto" d:LayoutOverrides="Height" Margin="4,0,30.55,114.1" SelectionChanged="combo_aencoding_SelectionChanged" VerticalAlignment="Bottom"/>
-                <Button x:Name="button_edit_aencoding" Margin="0,0,3,112.06" Click="button_edit_aencoding_Click" HorizontalAlignment="Right" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" VerticalAlignment="Bottom" Height="26">
+                <Button x:Name="button_edit_aencoding" Margin="0,0,3,112.06" Click="AudioEncodingSettings_Click" HorizontalAlignment="Right" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" VerticalAlignment="Bottom" Height="26">
                 <Image  Stretch="None" x:Name="image_settings4" Source="..\pictures\settings.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="RightToLeft" />
                 </Button>
                 <ComboBox Margin="4,129.82,30.55,0" x:Name="combo_sbc" VerticalAlignment="Top" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_sbc_SelectionChanged"/>

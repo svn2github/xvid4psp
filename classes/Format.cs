@@ -1882,7 +1882,7 @@ namespace XviD4PSP
            }
            else if (m.format == ExportFormats.Mp4PSPAVCTV)
            {
-               if (m.inresw != 720 && m.inresh != 480)
+               if (m.inresw != 720 || m.inresh != 480)
                    return m.inresw + "x" + m.inresh;
            }
            else if (m.format == ExportFormats.AviiRiverClix2 || m.format == ExportFormats.AviMeizuM6)
