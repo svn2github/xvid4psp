@@ -577,7 +577,6 @@ namespace XviD4PSP
                m.vdecoder = 0;
                return m;
            }
-
            string ext = Path.GetExtension(m.infilepath).ToLower();
            if (Calculate.IsMPEG(m.infilepath) && (m.invcodecshort == "MPEG1" || m.invcodecshort == "MPEG2")) //m.invcodecshort != "h264")
            {
@@ -585,31 +584,21 @@ namespace XviD4PSP
                    m.vdecoder = AviSynthScripting.Decoders.MPEG2Source;
                else
                {
-                   if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source &&
-                       m.indexfile == null)
-                   {                       
-                           m.vdecoder = Settings.OtherDecoder; //FFmpegSource
-                   }
+                   if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source && m.indexfile == null)
+                       m.vdecoder = Settings.OtherDecoder; //FFmpegSource
                    else
                        m.vdecoder = Settings.MPEGDecoder;
                }
            }
            else
            {
-               if (ext == ".avi")
-                   m.vdecoder = Settings.AVIDecoder;
-               else if (ext == ".evo")
-                   m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
-               else if (ext == ".pmp")
-                   m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
-               else if (ext == ".vdr")
-                   m.vdecoder = AviSynthScripting.Decoders.AVISource;
-               else if (ext == ".avs")
-                   m.vdecoder = AviSynthScripting.Decoders.Import;
-               else if (ext == ".dga")
-                   m.vdecoder = AviSynthScripting.Decoders.AVCSource; //AVC               
-               else
-                   m.vdecoder = Settings.OtherDecoder;
+               if (ext == ".avi") m.vdecoder = Settings.AVIDecoder;
+               else if (ext == ".evo") m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
+               else if (ext == ".pmp") m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
+               else if (ext == ".vdr") m.vdecoder = AviSynthScripting.Decoders.AVISource;
+               else if (ext == ".avs") m.vdecoder = AviSynthScripting.Decoders.Import;
+               else if (ext == ".dga") m.vdecoder = AviSynthScripting.Decoders.AVCSource;           
+               else m.vdecoder = Settings.OtherDecoder;
            }
            return m;
        }
@@ -619,22 +608,14 @@ namespace XviD4PSP
            if (instream.audiopath != null)
            {
                string aext = Path.GetExtension(instream.audiopath).ToLower();
-               if (aext == ".ac3")
-                   instream.decoder = AviSynthScripting.Decoders.NicAC3Source;
-               else if (aext == ".mpa")
-                   instream.decoder = AviSynthScripting.Decoders.NicMPG123Source; //NicMPASource
-               else if (aext == ".dts")
-                   instream.decoder = AviSynthScripting.Decoders.NicDTSSource;
-               else if (aext == ".wav")
-                   instream.decoder = AviSynthScripting.Decoders.WAVSource;
-               else if (aext == ".wma")
-                   instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
-               else
-                   instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
+               if (aext == ".ac3") instream.decoder = AviSynthScripting.Decoders.NicAC3Source;
+               else if (aext == ".mpa") instream.decoder = AviSynthScripting.Decoders.NicMPG123Source;
+               else if (aext == ".dts") instream.decoder = AviSynthScripting.Decoders.NicDTSSource;
+               else if (aext == ".wav") instream.decoder = AviSynthScripting.Decoders.WAVSource;
+               else if (aext == ".wma") instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
+               else instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
            }
-           else
-               instream.decoder = 0;
-
+           else instream.decoder = 0;
            return instream;
        }
 
@@ -1793,100 +1774,67 @@ namespace XviD4PSP
                return true;
            else
            return false;
-           
        }
 
        public static string ValidateCopyAudio(Massive m)
        {
            AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           if (ext == ".avs")
-               return "Source - AVS-script";
-
+           if (ext == ".avs") return "Source - AVS-script";
            else if (m.format == ExportFormats.PmpAvc)
            {
-               if (instream.codecshort != "AAC" &&
-                   instream.codecshort != "MP3")
+               if (instream.codecshort != "AAC" && instream.codecshort != "MP3")
                    return "Codec - " + instream.codecshort;
-               if (instream.samplerate != "44100")
+               else if (instream.samplerate != "44100")
                    return "Samplerate - " + instream.samplerate;
-               else
-                   return null;
+               else return null;
            }
-           else if (m.format == ExportFormats.Mp4PSPAVC ||
-               m.format == ExportFormats.Mp4PSPASP ||
-               m.format == ExportFormats.Mp4PSPAVCTV)
+           else if (m.format == ExportFormats.Mp4PSPAVC || m.format == ExportFormats.Mp4PSPASP || m.format == ExportFormats.Mp4PSPAVCTV)
            {
                if (instream.codecshort != "AAC")
                    return "Codec - " + instream.codecshort;
-               else
-                   return null;
+               else return null;
            }
-           else if (m.format == ExportFormats.DpgNintendoDS ||
-               m.format == ExportFormats.Mpeg1PS)
+           else if (m.format == ExportFormats.DpgNintendoDS || m.format == ExportFormats.Mpeg1PS)
            {
                if (instream.codecshort != "MP2")
                    return "Codec - " + instream.codecshort;
-               else
-                   return null;
+               else return null;
            }
-           else if (m.format == ExportFormats.AviiRiverClix2 ||
-               m.format == ExportFormats.AviMeizuM6)
+           else if (m.format == ExportFormats.AviiRiverClix2 || m.format == ExportFormats.AviMeizuM6)
            {
-               if (instream.codecshort != "MP3" &&
-                   instream.codecshort != "MP2")
+               if (instream.codecshort != "MP3" && instream.codecshort != "MP2")
                    return "Codec - " + instream.codecshort;
-               else if (m.invcodecshort != "XviD" &&
-                   m.invcodecshort != "DivX")
-                   return "Codec - " + m.invcodecshort;
-               else
-                   return null;
+               else return null;
            }
            else if (m.format == ExportFormats.Mp4 && instream.codecshort != "AC3" ||
-                          m.format == ExportFormats.Mp4AppleTV ||
-                          m.format == ExportFormats.Mp4BlackBerry8100 ||
-                          m.format == ExportFormats.Mp4BlackBerry8800 ||
-                          m.format == ExportFormats.Mp4BlackBerry8830 ||
-               m.format == ExportFormats.Mp4SonyEricssonK800 ||
-               m.format == ExportFormats.Mp4SonyEricssonK610 ||
-               m.format == ExportFormats.Mp4Nokia5700 ||
-                          m.format == ExportFormats.Mp4MotorolaK1 ||
-                          m.format == ExportFormats.Mp4iPhone ||
-                          m.format == ExportFormats.Mp4iPod50G ||
-                          m.format == ExportFormats.Mp4iPod55G ||
-                          m.format == ExportFormats.Mp4Prada ||
-                          m.format == ExportFormats.Mp4PS3 ||
-                          m.format == ExportFormats.Mp4PSPAVC ||
-                          m.format == ExportFormats.Mp4PSPAVCTV ||
-                          m.format == ExportFormats.ThreeGP)
+                    m.format == ExportFormats.Mp4AppleTV ||
+                    m.format == ExportFormats.Mp4BlackBerry8100 ||
+                    m.format == ExportFormats.Mp4BlackBerry8800 ||
+                    m.format == ExportFormats.Mp4BlackBerry8830 ||
+                    m.format == ExportFormats.Mp4SonyEricssonK800 ||
+                    m.format == ExportFormats.Mp4SonyEricssonK610 ||
+                    m.format == ExportFormats.Mp4Nokia5700 ||
+                    m.format == ExportFormats.Mp4MotorolaK1 ||
+                    m.format == ExportFormats.Mp4iPhone ||
+                    m.format == ExportFormats.Mp4iPod50G ||
+                    m.format == ExportFormats.Mp4iPod55G ||
+                    m.format == ExportFormats.Mp4Prada ||
+                    m.format == ExportFormats.Mp4PS3 ||
+                    m.format == ExportFormats.ThreeGP)
            {
                if (instream.codecshort != "AAC" &&
                    instream.codecshort != "MP3" &&
                    instream.codecshort != "MP2")
                    return "Codec - " + instream.codecshort;
-               else if (m.invcodecshort != "MPEG2" &&
-                   m.invcodecshort != "MPEG4" &&
-                   m.invcodecshort != "MPEG1" &&
-                   m.invcodecshort != "h264" &&
-                   m.invcodecshort != "h263" &&
-                   m.invcodecshort != "XviD" &&
-                   m.invcodecshort != "DivX")
-                   return "Codec - " + m.invcodecshort;
-               else
-                   return null;
+               else return null;
            }
-           else if (m.format == ExportFormats.Mpeg2PS ||
-               m.format == ExportFormats.Mpeg2PAL ||
-               m.format == ExportFormats.Mpeg2NTSC)
+           else if (m.format == ExportFormats.Mpeg2PS || m.format == ExportFormats.Mpeg2PAL || m.format == ExportFormats.Mpeg2NTSC)
            {
-               if (instream.codecshort != "AC3" &&
-                   instream.codecshort != "WAV" &&
-                   instream.codecshort != "MP2")
+               if (instream.codecshort != "AC3" && instream.codecshort != "WAV" && instream.codecshort != "MP2")
                    return "Codec - " + instream.codecshort;
-               else
-                   return null;
+               else return null;
            }
            //else if (m.format == ExportFormats.TS ||
            //    m.format == ExportFormats.M2TS)
@@ -1900,58 +1848,47 @@ namespace XviD4PSP
            //}
            else if (m.format == ExportFormats.BluRay)
            {
-               if (instream.codecshort != "AC3" &&
-                   instream.codecshort != "DTS" &&
-                   instream.codecshort != "WAV" &&
-                   instream.codecshort != "PCM")
+               if (instream.codecshort != "AC3" && instream.codecshort != "DTS" &&
+                   instream.codecshort != "WAV" && instream.codecshort != "PCM")
                    return "Codec - " + instream.codecshort;
-               else
-                   return null;
+               else return null;
            }
            else if (m.format == ExportFormats.Flv)
            {
-               if (instream.codecshort != "AAC" &&
-                   instream.codecshort != "MP3")
+               if (instream.codecshort != "AAC" && instream.codecshort != "MP3")
                    return "Codec - " + instream.codecshort;
-               if (instream.samplerate != "11025" && instream.samplerate != "22050" && instream.samplerate != "44100")
+               else if (instream.samplerate != "11025" && instream.samplerate != "22050" && instream.samplerate != "44100")
                    return "Samplerate - " + instream.samplerate;
-               if (instream.channels > 2)
+               else if (instream.channels > 2)
                    return instream.channels + " Channels";
-               else
-                   return null;
+               else return null;
            }
-           else
-               return null;
+           else return null;
        }
 
        public static string ValidateCopyVideo(Massive m)
        {
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           if (ext == ".avs")
-               return "Source - AVS-script";
-           else if (ext == ".d2v")
-               return "Source - DGIndex-project";
-           else if (ext == ".dga")
-               return "Source - DGAVCIndex-project";
-           
+           if (ext == ".avs") return "Source - AVS-script";
+           else if (ext == ".d2v") return "Source - DGIndex-project";
+           else if (ext == ".dga") return "Source - DGAVCIndex-project";
            else if (m.format == ExportFormats.PmpAvc ||
-               m.format == ExportFormats.Mp4PSPAVC ||
-               m.format == ExportFormats.Mp4PSPASP)
+                    m.format == ExportFormats.Mp4PSPAVC ||
+                    m.format == ExportFormats.Mp4PSPASP)
            {
-               if (m.inresw > 480 ||
-                   m.inresh > 272)
+               if (m.inresw > 480 || m.inresh > 272)
                    return m.inresw + "x" + m.inresh;
-               else
-                   return null;
            }
            else if (m.format == ExportFormats.Mp4PSPAVCTV)
            {
-               if (m.inresw == 720 && m.inresh == 480)
-                   return null;
-               else
+               if (m.inresw != 720 && m.inresh != 480)
                    return m.inresw + "x" + m.inresh;
-
+           }
+           else if (m.format == ExportFormats.AviiRiverClix2 || m.format == ExportFormats.AviMeizuM6)
+           {
+               if (m.invcodecshort != "XviD" && m.invcodecshort != "DivX")
+                   return "Codec - " + m.invcodecshort;
            }
            else if (m.format == ExportFormats.BluRay)
            {
@@ -1963,8 +1900,18 @@ namespace XviD4PSP
                else
                    return m.inresw + "x" + m.inresh;
            }
-           else
-               return null;
+           if (m.format.ToString().StartsWith("Mp4"))
+           {
+               if (m.invcodecshort != "MPEG2" &&
+                   m.invcodecshort != "MPEG4" &&
+                   m.invcodecshort != "MPEG1" &&
+                   m.invcodecshort != "h264" &&
+                   m.invcodecshort != "h263" &&
+                   m.invcodecshort != "XviD" &&
+                   m.invcodecshort != "DivX")
+                   return "Codec - " + m.invcodecshort;
+           }
+           return null;
        }
 
        public static bool IsDirectRemuxingPossible(Massive m)
@@ -2332,23 +2279,9 @@ namespace XviD4PSP
                {
                    m.outaspect = (double)m.outresw / (double)m.outresh;
                    m.sar = null;
-
-                  //тут
-                  // if (m.outresw == 720 && m.outresh == 480)
-                  //    m.outaspect *= 0.8885;
-                  // else if (m.outresw == 352 && m.outresh == 480)
-                  //     m.outaspect *= 1.818;
-                  // else if (m.outresw == 720 && m.outresh == 576)
-                  //     m.outaspect *= 1.066;
-                  // else if (m.outresw == 544 && m.outresh == 576)
-                  //     m.outaspect *= 1.411;
-
                    m.aspectfix = AspectResolution.AspectFixes.Disabled;
                }
-
-
            }
-
            return m;
        }
 
