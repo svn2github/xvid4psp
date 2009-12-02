@@ -7,7 +7,7 @@
 	x:Class="XviD4PSP.MainWindow"
 	x:Name="Window"
 	Title="XviD4PSP - AviSynth-based MultiMedia Converter"
-	Width="747" Height="577" SizeToContent="Manual" Closing="MainWindow_Closing" Icon="..\pictures\main_logo_16_1.png" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
+	Width="747" Height="577" SizeToContent="Manual" Closing="MainWindow_Closing" MouseLeftButtonDown="Window_MouseLeftButtonDown" Icon="..\pictures\main_logo_16_1.png" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
 	<Window.Triggers>
 		<EventTrigger RoutedEvent="FrameworkElement.Loaded"/>
 	</Window.Triggers>

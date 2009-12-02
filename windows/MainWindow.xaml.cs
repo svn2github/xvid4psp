@@ -38,13 +38,13 @@ namespace XviD4PSP
 
         private bool IsInsertAction = false;
 
-        public TimeSpan oldpos;
-        public MediaLoad mediaload;
-        public ShowPreview showpreview;
-
         //player
         private Brush oldbrush;
+        public TimeSpan oldpos;
+        private System.Windows.WindowState oldstate;
         private const int WMGraphNotify = 0x0400 + 13;
+        public ShowPreview showpreview;
+        public MediaLoad mediaload;
         private int VolumeSet; //Громкость DirectShow плейера
 
         private string total_frames = "";
@@ -66,8 +66,7 @@ namespace XviD4PSP
         public bool isDelayUpdate = false;
         public PlayState currentState = PlayState.Init;
 
-        private IntPtr hDrain = IntPtr.Zero; //хз что
-        private IntPtr Handle = IntPtr.Zero; //добавлено для хз чего
+        private IntPtr Handle = IntPtr.Zero;
 
         private HwndSource source;
         private System.Timers.Timer timer;
@@ -138,7 +137,7 @@ namespace XviD4PSP
                 //Установка параметров окна из сохраненных настроек (если эта опция включена)
                 if (Settings.WindowResize == true)
                 {
-                    string[] value = (Settings.WindowLocation + "/" + Settings.TasksRow).Split('/');
+                    string[] value = (Settings.WindowLocation + "/" + Settings.TasksRows).Split('/');
                     this.Width = Convert.ToDouble(value[0]);
                     this.Height = Convert.ToDouble(value[1]);
                     this.Left = Convert.ToDouble(value[2]);
@@ -518,7 +517,7 @@ namespace XviD4PSP
             {
                 Settings.WindowLocation = (int)this.Window.ActualWidth + "/" + (int)this.Window.ActualHeight + "/" + (int)this.Window.Left + "/" + (int)this.Window.Top;
                 GridLengthConverter conv = new GridLengthConverter();
-                Settings.TasksRow = conv.ConvertToString(this.TasksRow.Height) + "/" + conv.ConvertToString(this.TasksRow2.Height);
+                Settings.TasksRows = conv.ConvertToString(this.TasksRow.Height) + "/" + conv.ConvertToString(this.TasksRow2.Height);
             }
         }
 
@@ -3846,6 +3845,7 @@ namespace XviD4PSP
             if (isFullScreen == false)
             {
                 this.isFullScreen = true;
+                oldstate = this.WindowState;
                 this.grid_tasks.Visibility = Visibility.Collapsed;
                 this.grid_menu.Visibility = Visibility.Collapsed;
                 this.grid_left_panel.Visibility = Visibility.Collapsed;
@@ -3862,17 +3862,15 @@ namespace XviD4PSP
                 Grid.SetRowSpan(this.grid_player_window, 2);//
                 this.grid_player_window.Margin = new Thickness(0, 0, 0, 0);//
 
-                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
-                    MoveVideoWindow();
-                else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
-                    this.VideoElement.Margin = new Thickness(0, 0, 0, 0);
+                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) MoveVideoWindow();
+                else this.VideoElement.Margin = new Thickness(0, 0, 0, 0);
             }
             else
             {
                 //Выход из Фуллскрина
-                Grid.SetRow(this.grid_player_window, 1);//
-                Grid.SetRowSpan(this.grid_player_window, 1);//
-                this.grid_player_window.Margin = oldmargin;//
+                Grid.SetRow(this.grid_player_window, 1);
+                Grid.SetRowSpan(this.grid_player_window, 1);
+                this.grid_player_window.Margin = oldmargin;
                 this.grid_tasks.Visibility = Visibility.Visible;
                 this.grid_menu.Visibility = Visibility.Visible;
                 this.grid_left_panel.Visibility = Visibility.Visible;
@@ -3880,7 +3878,7 @@ namespace XviD4PSP
                 this.grid_player_buttons.Visibility = Visibility.Visible;
                 this.grid_player_window.Visibility = Visibility.Visible;
                 this.grid_player_info.Visibility = Visibility.Visible;
-                this.WindowState = System.Windows.WindowState.Normal; //размер окна (дефолтный)
+                this.WindowState = oldstate; //размер окна (сохранённый)
                 this.WindowStyle = System.Windows.WindowStyle.SingleBorderWindow;
                 this.grid_top.Visibility = Visibility.Visible;
                 this.slider_pos.Visibility = Visibility.Visible;
@@ -3888,10 +3886,8 @@ namespace XviD4PSP
                 this.grid_player_buttons.Margin = new Thickness(195.856, 0, 0, 0); //Установить дефолтные отступы для панели управления плейера              
                 this.isFullScreen = false;
 
-                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
-                    MoveVideoWindow();
-                else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
-                    this.VideoElement.Margin = new Thickness(8, 56, 8, 8);
+                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) MoveVideoWindow();
+                else this.VideoElement.Margin = new Thickness(8, 56, 8, 8);
             }
         }
 
@@ -4061,8 +4057,8 @@ namespace XviD4PSP
                 hr = this.videoWindow.put_Owner(this.source.Handle);
                 DsError.ThrowExceptionForHR(hr);
 
-               //hr = this.videoWindow.put_MessageDrain(this.source.Handle);
-               //DsError.ThrowExceptionForHR(hr);
+                hr = this.videoWindow.put_MessageDrain(this.source.Handle);
+                DsError.ThrowExceptionForHR(hr);
                
                 hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings
                     | DirectShowLib.WindowStyle.ClipChildren);
@@ -4291,15 +4287,15 @@ namespace XviD4PSP
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            //if (msg == 0x0201) //0x0203
-            //    SwitchToFullScreen();
-
             switch (msg)
             {
                 case WMGraphNotify:
                     {
-                        HandleGraphEvent();
-                        break;
+                        HandleGraphEvent(); break;
+                    }
+                case 0x0203: //0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP, 0x0203 WM_LBUTTONDBLCLK, 0x0206 WM_RBUTTONDBLCLK
+                    {
+                        SwitchToFullScreen(); break;
                     }
             }
             return IntPtr.Zero;
@@ -5584,6 +5580,11 @@ namespace XviD4PSP
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("Trimming feature doesn't affect the track(s) in Copy mode!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
             }
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
         }   
     }
 }

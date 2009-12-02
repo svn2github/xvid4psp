@@ -1182,7 +1182,28 @@ namespace XviD4PSP
                 SetString("WindowLocation", value);
             }
         }
-        
+
+        //–азмер области дл€ заданий
+        public static string TasksRows
+        {
+            get
+            {
+                object value = GetValue("TasksRows");
+                if (value == null)
+                {
+                    return "128*/400*";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("TasksRows", value);
+            }
+        }
+
         //–азрешает или запрещает обновл€ть скрипт при изменении настроек аудио/видео кодека
         public static bool RenewScript
         {
@@ -1550,46 +1571,6 @@ namespace XviD4PSP
             set
             {
                 SetBool("OldSeeking", value);
-            }
-        }
-
-        public static string TasksRow
-        {
-            get
-            {
-                object value = GetValue("TasksRow");
-                if (value == null)
-                {
-                    return "128*/400*";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("TasksRow", value);
-            }
-        }
-
-        public static string TasksRow2
-        {
-            get
-            {
-                object value = GetValue("TasksRow2");
-                if (value == null)
-                {
-                    return "400*";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("TasksRow2", value);
             }
         }
 
