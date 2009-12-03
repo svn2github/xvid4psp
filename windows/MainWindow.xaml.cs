@@ -34,7 +34,6 @@ namespace XviD4PSP
         private ArrayList dgcache = new ArrayList();
 
         public enum MediaLoad { load = 1, update }
-        public enum ShowPreview { yes, no } //Загружать или нет превью после открытия файла
 
         private bool IsInsertAction = false;
 
@@ -43,7 +42,6 @@ namespace XviD4PSP
         public TimeSpan oldpos;
         private System.Windows.WindowState oldstate;
         private const int WMGraphNotify = 0x0400 + 13;
-        public ShowPreview showpreview;
         public MediaLoad mediaload;
         private int VolumeSet; //Громкость DirectShow плейера
 
@@ -82,6 +80,7 @@ namespace XviD4PSP
         private double fps = 0; //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
         private bool OldSeeking = false; //Способ позиционирования, old - непрерывное, new - только при отпускании кнопки мыши
         private double dpi = 1.0; //Для масштабирования окна ДиректШоу-превью
+        private bool IsBatchOpening = false;
 
 #if DEBUG
         private DsROTEntry rot = null;
@@ -346,7 +345,7 @@ namespace XviD4PSP
                                 Calculate.IsValidVOBName(x.infilepath))
                                 x = OpenDialogs.GetFriendFilesList(x);
                             if (x != null)
-                                action_open(x, ShowPreview.yes);
+                                action_open(x);
                         }
                     }
                 }
@@ -543,7 +542,6 @@ namespace XviD4PSP
             {
                 if (Settings.DeleteFFCache)
                 {
-
                     ArrayList filesinwork = new ArrayList();
 
                     //все файлы в текущем массиве
@@ -589,33 +587,21 @@ namespace XviD4PSP
         {
             try
             {
-                if (Settings.DeleteDGIndexCache && m != null)
+                if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && Settings.DeleteDGIndexCache)
                 {
-                    //Если есть задания, проверяем, занят ли там наш кэш-файл
-                    bool busy = false;
+                    //Если есть задания, проверяем, занят ли там наш кэш-файл, если не занят - то удаляем его
                     if (list_tasks.Items.Count != 0)
                     {
                         foreach (object _task in list_tasks.Items)
                         {
-                            Task task = (Task)_task;
-                            if (task.Mass.indexfile == m.indexfile)
-                            {
-                                busy = true;
-                                break;
-                            }
+                            if (((Task)_task).Mass.indexfile == m.indexfile) return;
                         }
                     }
-                    //Если не занят, или заданий нет - то удаляем кэш-папку и убираем её из списка на удаление                   
-                    if (!busy)
-                    {
-                        SafeDirDelete(Path.GetDirectoryName(m.indexfile));
-                        dgcache.Remove(m.indexfile);
-                    }
+                    SafeDirDelete(Path.GetDirectoryName(m.indexfile));
+                    dgcache.Remove(m.indexfile);
                 }
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
         }
 
         private void OpenFile_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -635,7 +621,7 @@ namespace XviD4PSP
                     MultiOpen(x.infileslist);
                     return;
                 }
-                action_open(x, ShowPreview.yes); //Обычное открытие
+                action_open(x); //Обычное открытие
             }
         }
 
@@ -684,7 +670,7 @@ namespace XviD4PSP
                 x.inaudiostreams.Add(s.Clone());
             }
 
-            action_open(x, ShowPreview.yes);
+            action_open(x);
         }
 
         private void mnCloseFile_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -806,7 +792,7 @@ namespace XviD4PSP
                 //открываем файл
                 OpenDialogs.owner = this;
                 Massive x = OpenDialogs.OpenFile();
-                action_open(x, ShowPreview.yes);
+                action_open(x);
             }
         }
 
@@ -906,7 +892,7 @@ namespace XviD4PSP
         }
 
         //начало открытия файла
-        private void action_open(Massive x, ShowPreview showpreview)
+        private void action_open(Massive x)
         {
             try
             {
@@ -914,6 +900,9 @@ namespace XviD4PSP
                 {
                     //сразу-же обнуляем трим и его кнопки
                     ResetTrim();
+
+                    //Пока-что вот так..
+                    if (!IsBatchOpening && m != null /*&& list_tasks.Items.Count == 0*/) CloseFile();
 
                     string ext = Path.GetExtension(x.infilepath).ToLower();
 
@@ -1082,12 +1071,10 @@ namespace XviD4PSP
                             {
                                 //забиваем в список все найденные треки
                                 MediaInfoWrapper med = new MediaInfoWrapper();
-                                //    med.Open(apath);
                                 AudioStream stream = med.GetAudioInfoFromAFile(apath);
                                 stream.delay = Calculate.GetDelay(apath);
                                 stream.gainfile = Settings.TempPath + "\\" + x.key + "_" + n + "_gain.wav";
                                 x.inaudiostreams.Add(stream.Clone());
-                                //    med.Close();
                                 n++;
                             }
                             x.inaudiostream = 0;
@@ -1525,7 +1512,7 @@ namespace XviD4PSP
                     //OldSelectedIndex = -1;
 
                     //загружаем скрипт в форму
-                    if (showpreview == ShowPreview.yes)
+                    if (!IsBatchOpening)
                     {
                         LoadVideo(MediaLoad.load);
                         MenuHider(true); //Делаем пункты меню активными
@@ -1680,33 +1667,50 @@ namespace XviD4PSP
             CloseChildWindows();
 
             CloseClip();
-            clear_ff_cache();
-            clear_dgindex_cache();
-            
+            clear_ff_cache();                // - Кэш от FFmpegSource1            
+            clear_dgindex_cache();           // - Кэш от DGIndex
+            clear_audio_and_video_caches();  // - Извлеченные или декодированные аудио и видео файлы
+
             SafeDelete(Settings.TempPath + "\\preview.avs");
             SafeDelete(Settings.TempPath + "\\AvsP.avs");
             SafeDelete(Settings.TempPath + "\\AutoCrop.log");
 
-            //обнуляем всё что связано с тримом
-            ResetTrim();
-
-            //Вот тут происходило удаление исходника.. исходников.. :)
-            if (m.infilepath != null && Path.GetFileNameWithoutExtension(m.infilepath) != m.taskname &&
-                Path.GetDirectoryName(m.infilepath) == Settings.TempPath)
-                SafeDelete(m.infilepath);
-
-            foreach (object s in m.inaudiostreams)
-            {
-                AudioStream a = (AudioStream)s;
-                if (a.audiopath != null &&
-                    Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
-                    a.audiopath != m.infilepath) //Защита от удаления исходника
-                    SafeDelete(a.audiopath);
-                SafeDelete(a.gainfile);
-            }
-
             m = null;
+            ResetTrim(); //обнуляем всё что связано с тримом
             MenuHider(false); //Делаем пункты меню неактивными
+        }
+        
+        private void clear_audio_and_video_caches()
+        {
+            try
+            {
+                //Если есть задания, проверяем, занят ли там наш файл
+                bool busy = false;
+                if (list_tasks.Items.Count != 0)
+                {
+                    foreach (object _task in list_tasks.Items)
+                    {
+                        if (((Task)_task).Mass.infilepath == m.infilepath) //m.taskname, m.infilepath
+                        {
+                            busy = true; break;
+                        }
+                    }
+                }
+                //Удаляем кэши сразу, или помещаем их в список на удаление, если они участвует в кодировании
+                foreach (object s in m.inaudiostreams) //Аудио
+                {
+                    AudioStream a = (AudioStream)s;
+                    if (a.audiopath != null &&
+                        Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
+                        a.audiopath != m.infilepath) //Защита от удаления исходника
+                        if (!busy) SafeDelete(a.audiopath); else deletefiles.Add(a.audiopath);
+                    if (!busy) SafeDelete(a.gainfile); else deletefiles.Add(a.gainfile);
+                }
+                if (Path.GetFileNameWithoutExtension(m.infilepath) != m.taskname && //Видео
+                    Path.GetDirectoryName(m.infilepath) == Settings.TempPath)
+                    if (!busy) SafeDelete(m.infilepath); else deletefiles.Add(m.infilepath);
+            }
+            catch (Exception) { }
         }
 
         private void ErrorExeption(string message)
@@ -3267,7 +3271,7 @@ namespace XviD4PSP
                         Massive x = new Massive();
                         x.infilepath = dropfile;
                         x.infileslist = new string[] { dropfile };
-                        action_open(x, ShowPreview.yes);
+                        action_open(x);
                         return;
                     }
                 }
@@ -4808,7 +4812,7 @@ namespace XviD4PSP
                 DVDImport dvd = new DVDImport(x, folder.SelectedPath);
 
                 if (dvd.m != null)
-                    action_open(dvd.m, ShowPreview.yes);
+                    action_open(dvd.m);
             }
         }
 
@@ -4843,12 +4847,9 @@ namespace XviD4PSP
                         reader.ParseScript(m.script);
 
                         System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
-                        if (ext == ".png")
-                            bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                        if (ext == ".jpg")
-                            bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
-                        if (ext == ".bmp")
-                            bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+                        if (ext == ".png") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        if (ext == ".jpg") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        if (ext == ".bmp") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
 
                         //завершение
                         bmp.Dispose();
@@ -5405,9 +5406,10 @@ namespace XviD4PSP
                             Massive x = new Massive();
                             x.infilepath = file;
                             x.infileslist = new string[] { file };
-                            action_open(x, ShowPreview.no);
-                            if (m != null)
-                                action_auto_save(m.Clone());
+                            IsBatchOpening = true;
+                            action_open(x);
+                            IsBatchOpening = false;
+                            if (m != null) action_auto_save(m.Clone());
                             break;
                         }
                     }
@@ -5421,17 +5423,14 @@ namespace XviD4PSP
                     MenuHider(true);
                 }
 
-                if (Settings.AutoBatchEncoding)
-                    EncodeNextTask(); //Запускаем кодирование
+                if (Settings.AutoBatchEncoding) EncodeNextTask(); //Запускаем кодирование
 
                 Message mess = new Message(this);
                 mess.ShowMessage(count + " - " + Languages.Translate("total files in folder") + Environment.NewLine + opened_files + " - " + Languages.Translate("successfully opened files")
                      + Environment.NewLine + outfiles.Count + " - " + Languages.Translate("total tasks in queue"), Languages.Translate("Complete"));
 
-                if (m != null)
-                    textbox_name.Text = m.taskname;
-                else
-                    textbox_name.Text = "";
+                if (m != null) textbox_name.Text = m.taskname;
+                else textbox_name.Text = "";
             }
             catch (Exception ex)
             {
