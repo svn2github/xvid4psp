@@ -318,8 +318,6 @@ namespace XviD4PSP
 
            m.script += Environment.NewLine;
 
-           //m.script += "selectTotal1=framecount()/100" + Environment.NewLine + "selectTotal2=selectTotal1*2" + Environment.NewLine + "selectrangeevery(selectTotal2,50)";
-
            bool IsAssumeRateConvertion = false;
            if (m.inframerate != m.outframerate)
            {
@@ -814,24 +812,15 @@ namespace XviD4PSP
                    }
                }
            }
-
-           ////прописываем обрезку по времени
-           //if (m.trim != "")
-           //{
-           //    int SF = Calculate.GetSplittedValue(m.trim, 1);
-           //   int EF = Calculate.GetSplittedValue(m.trim, 2);
-           //     m.script += );
-           //     m.script += Languages.Translate("#Cut movie length"));
-           //    if (m.outacodec == "Disabled")
-           //         m.script += "video = video.Trim(" + SF + "," + EF + ")");
-           //    else
-           //         m.script += "Trim(" + SF + "," + EF + ")");
-           //}
-
+           
            //“рим
            if (m.trim_start != 0 || m.trim_end != 0)
                m.script += "Trim(" + m.trim_start + "," + m.trim_end + ")" + Environment.NewLine;
 
+           //“естова€ нарезка
+           if (m.testscript)
+               m.script += "SelectRangeEvery(FrameCount()/50,50) #2500 frames test-script\r\n\r\n";
+           
            //взвращаем спр€танный путь к звуку
            if (hidden_apath != null)
                instream.audiopath = hidden_apath;

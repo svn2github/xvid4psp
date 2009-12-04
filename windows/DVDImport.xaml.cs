@@ -180,7 +180,7 @@ namespace XviD4PSP
                                         vs.Close();
 
                                         string titlenum = Calculate.GetTitleNum(titles[0]);
-                                        combo_titles.Items.Add("T" + titlenum + " " + info + " " + Calculate.GetTimeline(titleduration) + " - " + titles.Length + " files");
+                                        combo_titles.Items.Add("T" + titlenum + " " + info + " " + Calculate.GetTimeline(titleduration) + " - " + titles.Length + " file(s)");
 
                                         //Ищем самый продолжительный титл
                                         if (titleduration > maximum)

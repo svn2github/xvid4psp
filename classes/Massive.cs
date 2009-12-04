@@ -1374,5 +1374,19 @@ namespace XviD4PSP
                 _trim_end = value;
             }
         }
+
+        //Тест-скрипт (нарезка)
+        private bool _testscript = false;
+        public bool testscript
+        {
+            get
+            {
+                return _testscript;
+            }
+            set
+            {
+                _testscript = value;
+            }
+        }
     }
 }

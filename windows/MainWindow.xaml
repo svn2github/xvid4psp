@@ -147,9 +147,10 @@
 					<MenuItem x:Name="mnRemoveSubtitles" Header="Remove" Click="mnRemoveSubtitles_Click"/>
 				</MenuItem>
 				<MenuItem x:Name="menu_script" Header="AviSynth">
-					<MenuItem x:Name="menu_editscript" Header="Edit filtering script" Width="Auto" Height="Auto" Click="menu_script_Click"/>
-					<MenuItem x:Name="menu_createautoscript" Header="Create auto script" Width="Auto" Height="Auto" Click="menu_script_Click"/>
-					<MenuItem x:Name="menu_save_script" Header="Save script" Click="menu_script_Click" Width="Auto" Height="Auto"/>
+					<MenuItem x:Name="menu_editscript" Header="Edit filtering script" Width="Auto" Height="Auto" Click="EditScript"/>
+					<MenuItem x:Name="menu_createautoscript" Header="Create auto script" Width="Auto" Height="Auto" Click="CreateAutoScript"/>
+					<MenuItem x:Name="menu_createtestscript" Header="Test script on/off" Width="Auto" Height="Auto" Click="ApplyTestScript"/>
+                    <MenuItem x:Name="menu_save_script" Header="Save script" Click="SaveScript" Width="Auto" Height="Auto"/>
 					<Separator/>
 					<MenuItem x:Name="menu_playinwmp" Header="Play in Windows Media Player" Click="menu_play_in_Click"/>
 					<MenuItem x:Name="menu_playinmpc" Header="Play in Media Player Classic" Click="menu_play_in_Click"/>
@@ -417,7 +418,7 @@
                 <ComboBox x:Name="combo_format" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_format_SelectionChanged" Width="Auto" d:LayoutOverrides="VerticalAlignment, Height" HorizontalAlignment="Stretch" Margin="4,28.62,30.55,0" VerticalAlignment="Top"/>
                 <Label x:Name="text_filtering" Height="Auto" Content="Denoise/Sharpen:" Foreground="#FFFFFFFF" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" VerticalAlignment="Top" Width="Auto" Margin="0,50.58,0,0" FontSize="14"/>
                 <ComboBox x:Name="combo_filtering" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_filtering_SelectionChanged" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Stretch" Margin="4,79.2,30.55,0" Width="Auto" VerticalAlignment="Top"/>
-                <Button x:Name="button_edit_filters" Click="button_edit_filters_Click" Height="26" Margin="0,77.2,3,0" HorizontalAlignment="Right" Width="26" Grid.ColumnSpan="1" d:LayoutOverrides="VerticalAlignment" VerticalAlignment="Top" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}">
+                <Button x:Name="button_edit_filters" Click="EditScript" Height="26" Margin="0,77.2,3,0" HorizontalAlignment="Right" Width="26" Grid.ColumnSpan="1" d:LayoutOverrides="VerticalAlignment" VerticalAlignment="Top" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}">
                 <Image  Stretch="None" x:Name="image_settings5" Source="..\pictures\settings1.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="LeftToRight" />
                 </Button>
                 <Label x:Name="text_sbc" Height="Auto" Content="Saturation/Brightness:" Foreground="#FFFFFFFF" Width="Auto" FontSize="14" HorizontalAlignment="Left" Margin="0,101.16,0,0" VerticalAlignment="Top"/>

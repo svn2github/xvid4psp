@@ -399,7 +399,7 @@ namespace XviD4PSP
                 //F - Фильтрация
                 if (e.Key == Key.F && slider_pos.IsFocused)
                 {
-                    EditScript();
+                    EditScript(null, null);
                 }
                 
                 //C - Цветокоррекция
@@ -1810,6 +1810,7 @@ namespace XviD4PSP
 
                 mnUpdateVideo.Header = Languages.Translate("Refresh preview");
                 menu_createautoscript.Header = Languages.Translate("Create auto script");
+                menu_createtestscript.Header = Languages.Translate("Test script on/off");
                 menu_editscript.Header = Languages.Translate("Edit filtering script");
 
                 mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
@@ -2325,7 +2326,7 @@ namespace XviD4PSP
             UpdateTaskMassive(m);
         }
 
-        public Massive CreateAutoScript()
+        private void CreateAutoScript(object sender, RoutedEventArgs e)
         {
             string oldscript = m.script;
             if (m.inaudiostreams.Count > 0 &&
@@ -2354,10 +2355,9 @@ namespace XviD4PSP
                 LoadVideo(MediaLoad.update);
                 UpdateTaskMassive(m);
             }
-            return m;
         }
 
-        public void EditScript()
+        public void EditScript(object sender, RoutedEventArgs e)
         {
             if (m == null)
             {
@@ -2600,14 +2600,7 @@ namespace XviD4PSP
             Settings.AutocropMode = Autocrop.AutocropMode.AllFiles;
         }
 
-        private void menu_script_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender == menu_createautoscript && m != null) CreateAutoScript();
-            else if (sender == menu_editscript) EditScript();
-            else SaveScript();
-        }
-
-        private void SaveScript()
+        private void SaveScript(object sender, RoutedEventArgs e)
         {
             if (m == null) return;
             System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
@@ -3078,11 +3071,6 @@ namespace XviD4PSP
                     ReloadChildWindows();
                 }
             }
-        }
-
-        private void button_edit_filters_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            EditScript();
         }
 
         private void VideoEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -3893,6 +3881,7 @@ namespace XviD4PSP
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) MoveVideoWindow();
                 else this.VideoElement.Margin = new Thickness(8, 56, 8, 8);
             }
+            slider_pos.Focus();
         }
 
         private void CloseClip()
@@ -4301,6 +4290,12 @@ namespace XviD4PSP
                     {
                         SwitchToFullScreen(); break;
                     }
+                case 0x020A: //0x020A WM_MOUSEWHEEL
+                    if (isFullScreen) 
+                    {
+                        if (wParam.ToInt32() > 0) VolumePlus(); else VolumeMinus();
+                    }
+                    break;
             }
             return IntPtr.Zero;
         }
@@ -5286,34 +5281,18 @@ namespace XviD4PSP
             if (m == null) return;
             if (Convert.ToString(button_apply_trim.Content) != Languages.Translate("Remove Trim") && (trim_start != trim_end))
             {
-                if (trim_end != 0 && trim_start > trim_end)
-                    return;
+                if (trim_end != 0 && trim_start > trim_end) return;
 
                 m.trim_start = trim_start;
                 m.trim_end = trim_end;
-
-                //Обновляем скрипт
-                m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                LoadVideo(MediaLoad.update);
-
-                //пересчет кол-ва кадров в видео, его продолжительности и размера получаемого файла
-                AviSynthReader reader = new AviSynthReader();
-                reader.ParseScript(m.script);
-                m.outframes = reader.FrameCount;
-                reader.Close();
-                reader = null;
-                m.outduration = TimeSpan.FromSeconds((double)m.outframes / fps);
-                m.outfilesize = Calculate.GetEncodingSize(m);
-
-                UpdateTaskMassive(m);
 
                 button_apply_trim.Content = Languages.Translate("Remove Trim");
                 textbox_start.IsReadOnly = true;
                 textbox_end.IsReadOnly = true;
 
+                UpdateScriptAndDuration();
                 ValidateTrim(m);
             }
-
             else if (Convert.ToString(button_apply_trim.Content) == Languages.Translate("Remove Trim"))
             {
                 if (Convert.ToString(button_set_start.Content) != Languages.Translate("Clear")) textbox_start.IsReadOnly = false;
@@ -5321,23 +5300,27 @@ namespace XviD4PSP
                 m.trim_start = 0;
                 m.trim_end = 0;
 
-                //Обновляем скрипт
-                m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                LoadVideo(MediaLoad.update);
-
-                //пересчет кол-ва кадров в видео, его продолжительности и размера получаемого файла
-                AviSynthReader reader = new AviSynthReader();
-                reader.ParseScript(m.script);
-                m.outframes = reader.FrameCount;
-                reader.Close();
-                reader = null;
-                m.outduration = TimeSpan.FromSeconds((double)m.outframes / fps);
-                m.outfilesize = Calculate.GetEncodingSize(m);
-
-                UpdateTaskMassive(m);
-
+                UpdateScriptAndDuration();
                 button_apply_trim.Content = Languages.Translate("Apply Trim");
             }
+        }
+
+        private void UpdateScriptAndDuration()
+        {
+            //Обновляем скрипт
+            m = AviSynthScripting.CreateAutoAviSynthScript(m);
+            LoadVideo(MediaLoad.update);
+
+            //пересчет кол-ва кадров в видео, его продолжительности и размера получаемого файла
+            AviSynthReader reader = new AviSynthReader();
+            reader.ParseScript(m.script);
+            m.outframes = reader.FrameCount;
+            reader.Close();
+            reader = null;
+            m.outduration = TimeSpan.FromSeconds((double)m.outframes / fps);
+            m.outfilesize = Calculate.GetEncodingSize(m);
+
+            UpdateTaskMassive(m);
         }
 
         private void mn_ffmpeg_old_Click(object sender, RoutedEventArgs e)
@@ -5525,6 +5508,7 @@ namespace XviD4PSP
             menu_playinmpc.IsEnabled = ShowItems;
             menu_playinwpf.IsEnabled = ShowItems;
             target_goto.IsEnabled = ShowItems;
+            menu_createtestscript.IsEnabled = ShowItems;
 
             AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
             if (m != null)
@@ -5584,6 +5568,12 @@ namespace XviD4PSP
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }   
+        }
+
+        private void ApplyTestScript(object sender, RoutedEventArgs e)
+        {
+            m.testscript = !m.testscript;
+            UpdateScriptAndDuration();
+        }
     }
 }

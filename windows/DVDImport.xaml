@@ -10,7 +10,7 @@
 	<Grid x:Name="LayoutRoot" Background="{x:Null}" AllowDrop="True" DragEnter="LayoutRoot_DragEnter" Drop="LayoutRoot_Drop" Width="Auto" Height="Auto">
 		<Grid x:Name="grid_top" VerticalAlignment="Top" Height="49" Background="{DynamicResource black_gradient_2}">
 			<Label OpacityMask="{x:Null}" x:Name="label_title" Content="Title:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" HorizontalAlignment="Left" Margin="8,8,0,8" VerticalAlignment="Center"/>
-			<ComboBox x:Name="combo_titles" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,13.52,8,13.52" Width="239" SelectionChanged="combo_titles_SelectionChanged"/>
+			<ComboBox x:Name="combo_titles" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,13.52,8,13.52" Width="256" SelectionChanged="combo_titles_SelectionChanged"/>
 		</Grid>
 		<Grid Margin="0,49,0,40" x:Name="grid_player" Background="{DynamicResource black_gradient_2}">
 			<Grid x:Name="grid_player_info" Height="44" RenderTransformOrigin="0.5,0.5" Margin="8,8,8,0" VerticalAlignment="Top">
