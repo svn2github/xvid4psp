@@ -55,15 +55,13 @@ namespace XviD4PSP
             text_autocropframes.Content = Languages.Translate("Frames to analyze:");
             text_aspecterror.Content = Languages.Translate("Aspect error:");
             text_recalculate.Content = Languages.Translate("Recalculate aspect when crop is using:");
-            text_runautocrop.Content = Languages.Translate("Run autocrop:");
-            button_analyse.Content = Languages.Translate("Analyse");
-            //button_fullscreen.Content = Languages.Translate("Fullscreen");
+            button_analyse.ToolTip = Languages.Translate("Autocrop black borders");
+            button_vcrop.ToolTip = Languages.Translate("Crop black borders manually");
+            button_analyse.Content = Languages.Translate("Auto crop");
+            button_vcrop.Content = Languages.Translate("Manual crop");
 
             combo_height.ToolTip = Languages.Translate("Height");
             combo_width.ToolTip = Languages.Translate("Width");
-
-            //button_autocrop.Content = Languages.Translate("Autocrop");
-            button_analyse.ToolTip = Languages.Translate("Detection of crop values");
 
             textbox_error.Text = "";
 
@@ -695,10 +693,21 @@ namespace XviD4PSP
             
             Autocrop acrop = new Autocrop(m);
             m = acrop.m.Clone();
+            ApplyCrop();
+        }
 
-            //подправляем входной аспект
-            m = AspectResolution.FixInputAspect(m);
+        private void button_vcrop_Click(object sender, RoutedEventArgs e)
+        {
+            VisualCrop vcrop = new VisualCrop(m, this);
+            if (m.cropl != vcrop.m.cropl || m.cropr != vcrop.m.cropr || m.cropt != vcrop.m.cropt || m.cropb != vcrop.m.cropb)
+            {
+                m = vcrop.m.Clone();
+                ApplyCrop();
+            }
+        }
 
+        private void ApplyCrop()
+        {
             combo_crop_b.SelectedItem = m.cropb;
             combo_crop_l.SelectedItem = m.cropl;
             combo_crop_r.SelectedItem = m.cropr;
@@ -707,16 +716,13 @@ namespace XviD4PSP
             m = FixInputAspect(m);
             m = Format.GetValidResolution(m);
             m = Format.GetValidOutAspect(m);
-            m = AspectResolution.FixAspectDifference(m);
+            m = FixAspectDifference(m);
 
             LoadResolutions();
             LoadInAspect();
             LoadOutAspect();
 
             Refresh();
-
-        } 
-        
-
+        }
 	}
 }

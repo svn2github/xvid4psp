@@ -45,6 +45,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'rrr' ">
     <OutputPath>bin\rrr\</OutputPath>
@@ -303,6 +304,9 @@
     <Compile Include="windows\AudioOptions.xaml.cs">
       <DependentUpon>AudioOptions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="windows\VisualCrop.xaml.cs">
+      <DependentUpon>VisualCrop.xaml</DependentUpon>
+    </Compile>
     <Page Include="codec_controls\AftenAC3.xaml" />
     <Page Include="codec_controls\FMPEG1.xaml" />
     <Page Include="codec_controls\FLV1.xaml" />
@@ -381,6 +385,10 @@
     <Page Include="windows\Message.xaml" />
     <Page Include="windows\Normalizer.xaml" />
     <Page Include="windows\AudioOptions.xaml" />
+    <Page Include="windows\VisualCrop.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Resource Include="pictures\back_frame.png" />
     <Resource Include="pictures\donate_notable copy.png" />
     <Resource Include="pictures\frame_r.png" />
@@ -445,6 +453,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="main.ico" />
+    <Resource Include="pictures\Bottom.ico" />
+    <Resource Include="pictures\Left.ico" />
+    <Resource Include="pictures\Right.ico" />
+    <Resource Include="pictures\Top.ico" />
     <Resource Include="pictures\volume2.png" />
     <Resource Include="pictures\volume.png" />
     <Resource Include="pictures\settings13.png" />

@@ -81,57 +81,36 @@ namespace XviD4PSP
         {
             try
             {
-                //запускаем таймер
-                //timer = new System.Timers.Timer();
-                //timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-                //timer.Interval = 10;
-                //timer.Enabled = true;
-
                 //получаем автокроп инфу
                 string script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Autocrop);
 
                 reader = new AviSynthReader();
                 reader.ParseScript(script);
-               
-             
-                
-            //отсюда начинается чтение и анализ лог-файла
-            if (!IsAborted)
-            {   
-                string croplog;
-                using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AutoCrop.log", System.Text.Encoding.Default))
-                          croplog = sr.ReadToEnd();
-                int result1; int result2; int result3; int result4;
 
-                Regex r = new Regex(@"Crop.(\d+),(\d+),(\d+),(\d+).", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                Match mat;
-                mat = r.Match(croplog);
-                if (mat.Success == true)
+                //отсюда начинается чтение и анализ лог-файла
+                if (!IsAborted)
                 {
-                    result1 = Convert.ToInt32(mat.Groups[1].Value);
-                    result2 = Convert.ToInt32(mat.Groups[2].Value);
-                    result3 = Convert.ToInt32(mat.Groups[3].Value);
-                    result4 = Convert.ToInt32(mat.Groups[4].Value);
-                }
-                else
-                {
-                    result1 = 0;
-                    result2 = 0;
-                    result3 = m.inresw;
-                    result4 = m.inresh;
-                }
+                    string croplog;
+                    using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AutoCrop.log", System.Text.Encoding.Default))
+                        croplog = sr.ReadToEnd();
+                    int result1 = 0, result2 = 0, result3 = m.inresw, result4 = m.inresh;
 
-                int cropl = result1; //слева
-                int cropr = m.inresw - result1 - result3;  //справа
-                int cropb = m.inresh - result2 - result4; //низ
-                int cropt = result2;  //верх
+                    Regex r = new Regex(@"Crop.(\d+),(\d+),(\d+),(\d+).", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                    Match mat;
+                    mat = r.Match(croplog);
+                    if (mat.Success == true)
+                    {
+                        result1 = Convert.ToInt32(mat.Groups[1].Value);
+                        result2 = Convert.ToInt32(mat.Groups[2].Value);
+                        result3 = Convert.ToInt32(mat.Groups[3].Value);
+                        result4 = Convert.ToInt32(mat.Groups[4].Value);
+                    }
 
-                //в массив //дубликаты
-                m.cropl = m.cropl_copy = cropl;
-                m.cropr = m.cropr_copy = cropr;
-                m.cropb = m.cropb_copy = cropb;
-                m.cropt = m.cropt_copy = cropt;
-
+                    //в массив //дубликаты
+                    m.cropl = m.cropl_copy = result1;                       //слева
+                    m.cropr = m.cropr_copy = m.inresw - result1 - result3;  //справа
+                    m.cropb = m.cropb_copy = m.inresh - result2 - result4;  //низ
+                    m.cropt = m.cropt_copy = result2;                       //верх
                 }
             }
             catch (Exception ex)
@@ -168,10 +147,6 @@ namespace XviD4PSP
 
         private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            //timer.Close();
-            //timer.Enabled = false;
-            //timer.Elapsed -= new ElapsedEventHandler(OnTimedEvent);
-
             Close();
         }
 
