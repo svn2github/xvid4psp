@@ -1,5 +1,21 @@
-XviD4PSP r65->r70 26.11.09, main changes:
+XviD4PSP r65->r70->r80 05.12.09, main changes:
 
+>>> (r80) Added test-script (50x50 frames from the original video), menu AviSynth->Test script (reg. by crazy-cactus).
+>>> (r79) Now before new file will start opening, previsious opened file will be closed first.
+>>> (r79) If "Close file" is pressed, now  this file will be checked, is it still used in one of the saved tasks. If it 
+          still used, then audio and video caches will be added to the list of files, that will be deleted when program
+          is closing. Otherwise they will be deleted immediately.
+>>> (r78) Main window now can be moved by mouse dragging.
+>>> (r78) Now after leaving FullScreen will be restored previsious window state (like it was before FullScreen).
+>>> (r78) FullScreen now also available by double clicking on the preview area (like in any regular players).
+>>> (r76) All video restrictions from the ValidateCopyAudio moved to the ValidateCopyVideo.
+>>> (r75, r77) Various code simplifications in the MainVindow (mostly by Embox).
+>>> (r75) Fixed multiple calls of the MoveVideoWindow when entering/leaving Fullscreen mode (rep. by Embox).
+>>> (r74) In the x264 settings window added Help-button (to show x264.exe --longhelp log).
+>>> (r73) Fixed wrong SAR calculation for some resolutions and aspects (720x480@4:3 for example).
+>>> (r72) If user specified --sar value in the custom cli, then internal sar will be ignored.
+>>> (r71) A new CLI-editor in the x264 window, now custom-cli line can be saved as preset.
+---
 >>> (r70) Fixed deletion of Source/Output audiofiles from the Temp-folder (thx to Embox for some help and testing).
 >>> (r69) Warning message if Trim is on but audio or video encoding mode is Copy.
 >>> (r68, r69) AC3-audio now enabled for the MP4 and MOV formats.

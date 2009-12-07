@@ -48,6 +48,7 @@ namespace XviD4PSP
         private string total_frames = "";
         private int trim_start = 0;
         private int trim_end = 0;
+        private bool trim_is_on = false;
 
         private IGraphBuilder graphBuilder = null;
         private IMediaControl mediaControl = null;
@@ -152,7 +153,7 @@ namespace XviD4PSP
 
                 textbox_name.Text = textbox_frame.Text = textbox_frame_goto.Text = "";
                 textbox_time.Text = textbox_duration.Text = "00:00:00";
-               
+             
                 MenuHider(false); //Делаем пункты меню неактивными
                 SetLanguage(); //переводим лейблы
 
@@ -1810,7 +1811,7 @@ namespace XviD4PSP
 
                 mnUpdateVideo.Header = Languages.Translate("Refresh preview");
                 menu_createautoscript.Header = Languages.Translate("Create auto script");
-                menu_createtestscript.Header = Languages.Translate("Test script on/off");
+                menu_createtestscript.Header = Languages.Translate("Test script");
                 menu_editscript.Header = Languages.Translate("Edit filtering script");
 
                 mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
@@ -5219,12 +5220,12 @@ namespace XviD4PSP
             button_set_start.Content = Languages.Translate("Set Start");
             button_set_end.Content = Languages.Translate("Set End");
             button_apply_trim.Content = Languages.Translate("Apply Trim");
-            textbox_start.IsReadOnly = textbox_end.IsReadOnly = false;
+            textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = false;
         }
         
         private void button_set_start_Click(object sender, RoutedEventArgs e)
         {
-            if (m != null && Convert.ToString(button_apply_trim.Content) != Languages.Translate("Remove Trim"))
+            if (m != null && !trim_is_on)
             {
                 if (Convert.ToString(button_set_start.Content) != Languages.Translate("Clear"))
                 {
@@ -5251,7 +5252,7 @@ namespace XviD4PSP
 
         private void button_set_end_Click(object sender, RoutedEventArgs e)
         {
-            if (m != null && Convert.ToString(button_apply_trim.Content) != Languages.Translate("Remove Trim"))
+            if (m != null && !trim_is_on)
             {
                 if (Convert.ToString(button_set_end.Content) != Languages.Translate("Clear"))
                 {
@@ -5279,29 +5280,25 @@ namespace XviD4PSP
         private void button_apply_trim_Click(object sender, RoutedEventArgs e)
         {
             if (m == null) return;
-            if (Convert.ToString(button_apply_trim.Content) != Languages.Translate("Remove Trim") && (trim_start != trim_end))
+            if (!trim_is_on && trim_start != trim_end)
             {
                 if (trim_end != 0 && trim_start > trim_end) return;
 
                 m.trim_start = trim_start;
                 m.trim_end = trim_end;
-
                 button_apply_trim.Content = Languages.Translate("Remove Trim");
-                textbox_start.IsReadOnly = true;
-                textbox_end.IsReadOnly = true;
-
+                textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = true;
                 UpdateScriptAndDuration();
                 ValidateTrim(m);
             }
-            else if (Convert.ToString(button_apply_trim.Content) == Languages.Translate("Remove Trim"))
+            else if (trim_is_on)
             {
                 if (Convert.ToString(button_set_start.Content) != Languages.Translate("Clear")) textbox_start.IsReadOnly = false;
                 if (Convert.ToString(button_set_end.Content) != Languages.Translate("Clear")) textbox_end.IsReadOnly = false;
-                m.trim_start = 0;
-                m.trim_end = 0;
-
-                UpdateScriptAndDuration();
                 button_apply_trim.Content = Languages.Translate("Apply Trim");
+                m.trim_start = m.trim_end = 0;
+                trim_is_on = false;
+                UpdateScriptAndDuration();
             }
         }
 
@@ -5512,9 +5509,25 @@ namespace XviD4PSP
 
             AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
             if (m != null)
+            {
                 this.Title = Path.GetFileName(m.infilepath) + "  - XviD4PSP - v" + asinfo.Version + "  " + asinfo.Trademark;
+                this.menu_createtestscript.IsChecked = m.testscript;
+                if (m.trim_start != 0 || m.trim_end != 0) //Восстанавливаем трим (из сохраненного задания)
+                {
+                    textbox_start.Text = (trim_start = m.trim_start).ToString();
+                    textbox_end.Text = (trim_end = m.trim_end).ToString();
+                    textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = true;
+                    button_set_start.Content = button_set_end.Content = Languages.Translate("Clear"); 
+                    button_apply_trim.Content = Languages.Translate("Remove Trim");
+                }
+                else
+                    ResetTrim();
+             }
             else
+            {
                 this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
+                this.menu_createtestscript.IsChecked = false;
+            }
             asinfo = null;
         }
 

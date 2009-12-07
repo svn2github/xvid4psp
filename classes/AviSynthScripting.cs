@@ -931,7 +931,6 @@ namespace XviD4PSP
            if (m.vdecoder == Decoders.MPEG2Source)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine; //AVC
 
-
            if (instream.decoder == Decoders.NicAC3Source ||
                instream.decoder == Decoders.NicMPG123Source ||
                instream.decoder == Decoders.NicDTSSource)
@@ -1186,8 +1185,6 @@ namespace XviD4PSP
           //AVC
            if (m.vdecoder == Decoders.AVCSource)
                script += m.vdecoder.ToString() + "(\"" + m.indexfile + "\")" + Environment.NewLine;//AVC
-
-          
 
            if (m.vdecoder == Decoders.DirectShowSource)
                script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\",audio=false)" + Environment.NewLine;

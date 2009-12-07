@@ -1,5 +1,0 @@
-D:\Documents and Settings\1\Мои документы\Visual Studio 2008\Projects\ConsoleApplication1\ConsoleApplication1\obj\Debug\ResolveAssemblyReference.cache
-D:\Documents and Settings\1\Мои документы\Visual Studio 2008\Projects\ConsoleApplication1\ConsoleApplication1\bin\Debug\Launcher.exe
-D:\Documents and Settings\1\Мои документы\Visual Studio 2008\Projects\ConsoleApplication1\ConsoleApplication1\bin\Debug\Launcher.pdb
-D:\Documents and Settings\1\Мои документы\Visual Studio 2008\Projects\ConsoleApplication1\ConsoleApplication1\obj\Debug\Launcher.exe
-D:\Documents and Settings\1\Мои документы\Visual Studio 2008\Projects\ConsoleApplication1\ConsoleApplication1\obj\Debug\Launcher.pdb

@@ -12,4 +12,4 @@ using System.Reflection;
 [assembly: AssemblyCopyrightAttribute("Copyright © Winnydows 2008 and  OtherPeople 2009")]
 [assembly: AssemblyVersionAttribute("5.0.37.6")]
 [assembly: AssemblyFileVersionAttribute("5.0.37.6")]
-[assembly: AssemblyTrademarkAttribute("rev80")]
+[assembly: AssemblyTrademarkAttribute("rev81")]
