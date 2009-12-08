@@ -15,7 +15,7 @@
         </Grid>
         <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38" Background="{DynamicResource black_gradient}">
             <Button x:Name="button_ok" Content="Ok" Click="button_ok_Click" HorizontalAlignment="Right" Margin="0,8,8,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-            <Button x:Name="button_chancel" Content="Chancel" Click="button_cancel_Click" HorizontalAlignment="Right" Margin="8,8,88,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+            <Button x:Name="button_cancel" Content="Cancel" Click="button_cancel_Click" HorizontalAlignment="Right" Margin="8,8,88,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
             <Button x:Name="button_autocrop" Content="Analyse" Click="button_AutoCrop_Click" HorizontalAlignment="Left" Margin="324,8,0,8" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
             <Button x:Name="button_fullscreen" Content="Fullscreen" Click="button_fullscreen_Click" HorizontalAlignment="Left" Margin="428,8,0,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
             
@@ -29,6 +29,8 @@
             <MyUserControl:NumericUpDown Margin="97,6,0,7.6" Change="2" x:Name="numt" ValueChanged="changedt" HorizontalAlignment="Left" Width="58" />
             <MyUserControl:NumericUpDown Margin="259,6,0,7.2" x:Name="numb" ValueChanged="changedb" Change="2" HorizontalAlignment="Left" Width="58" />
             <MyUserControl:NumericUpDown HorizontalAlignment="Left" Margin="17,6,0,7.6" Change="2" Width="58" x:Name="numl" ValueChanged="changedl" />
+            
+            <TextBlock FontFamily="Segoe" FontSize="19" FontWeight="Light" Foreground="#FFFFFFFF" Text="{Binding Path=Title, ElementName=Window}" TextWrapping="Wrap" x:Name="txt_info" OpacityMask="{DynamicResource opasity_1}" Margin="510,7,0,7" Visibility="Collapsed" HorizontalAlignment="Left" Width="Auto" />
         </Grid>
     </Grid>
 </Window>

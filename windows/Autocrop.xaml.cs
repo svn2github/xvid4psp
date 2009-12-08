@@ -32,11 +32,11 @@ namespace XviD4PSP
             this.InitializeComponent();
         }
 
-        public Autocrop(Massive mass)
+        public Autocrop(Massive mass, System.Windows.Window owner)
         {
             this.InitializeComponent();
 
-            this.Owner = mass.owner;
+            this.Owner = owner;
 
             m = mass.Clone();
 

@@ -28,6 +28,7 @@ namespace XviD4PSP
 
         private string script = "";
         private bool WindowLoaded = false;
+        private bool Handled;
 
         private Bitmap bmp;
         private ImageSource picture;
@@ -36,7 +37,7 @@ namespace XviD4PSP
         public Massive m;
         private Massive oldm;
 
-        private bool OldSeeking = Settings.OldSeeking;
+        private bool OldSeeking = false;// Settings.OldSeeking;
 
         public VisualCrop(Massive mass, System.Windows.Window owner)
         {
@@ -55,7 +56,7 @@ namespace XviD4PSP
 
             Title = m.inresw + "x" + m.inresh + " -> " + (m.inresw - left - right) + "x" + (m.inresh - top - bottom) + " (cropped size)";
             button_autocrop.Content = Languages.Translate("Analyse");
-            button_chancel.Content = Languages.Translate("Cancel");
+            button_cancel.Content = Languages.Translate("Cancel");
 
             slider_pos.Maximum = m.outframes;
             slider_pos.Value = m.thmframe;
@@ -194,14 +195,14 @@ namespace XviD4PSP
         {
             if (WindowLoaded)
             {
-                //if (Convert.ToInt32(numl.Value) % 2 == 0)
+                if (Convert.ToInt32(numl.Value) % 2 == 0)
                 {
                     left = (int)numl.Value;
                     if (left + right < width) PutBorders();
                     else numl.Value = width - right - 1;
                 }
-                //  else
-                //      numl.Value = left;
+                else
+                    numl.Value -= 1;
             }
         }
 
@@ -209,15 +210,14 @@ namespace XviD4PSP
         {
             if (WindowLoaded)
             {
-                //if (Convert.ToInt32(numr.Value) % 2 == 0)
+                if (Convert.ToInt32(numr.Value) % 2 == 0)
                 {
                     right = (int)numr.Value;
-                    PutBorders();
                     if (left + right < width) PutBorders();
                     else numr.Value = width - left - 1;
                 }
-                //  else
-                //     numl.Value = right;
+                else
+                    numr.Value -= 1;
             }
         }
 
@@ -225,14 +225,14 @@ namespace XviD4PSP
         {
             if (WindowLoaded)
             {
-                //if (Convert.ToInt32(numt.Value) % 2 == 0)
+                if (Convert.ToInt32(numt.Value) % 2 == 0)
                 {
                     top = (int)numt.Value;
                     if (top + bottom < height) PutBorders();
                     else numt.Value = height - bottom - 1;
                 }
-                // else
-                //   numt.Value = top;
+                else
+                    numt.Value -= 1;
             }
         }
 
@@ -240,14 +240,14 @@ namespace XviD4PSP
         {
             if (WindowLoaded)
             {
-                //if (Convert.ToInt32(numb.Value) % 2 == 0)
+                if (Convert.ToInt32(numb.Value) % 2 == 0)
                 {
                     bottom = (int)numb.Value;
                     if (top + bottom < height) PutBorders();
                     else numb.Value = height - top - 1;
                 }
-                // else
-                //   numb.Value = bottom;
+                else
+                    numb.Value -= 1;
             }
         }
 
@@ -277,13 +277,15 @@ namespace XviD4PSP
 
         private void slider_pos_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            OldSeeking = !OldSeeking;
-            Settings.OldSeeking = OldSeeking;
+            /*Settings.OldSeeking =*/ OldSeeking = !OldSeeking;
+            if (OldSeeking) Title = "Old Seeking"; else Title = "New Seeking";
+            //((MainWindow)(Owner.Owner)).check_old_seeking.IsChecked = OldSeeking;
         }
 
         private void MouseLeft(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             ChageZones(e.GetPosition(Pic), 2);
+            if (e.ClickCount == 2 && !Handled) button_fullscreen_Click(null, null);
         }
 
         private void MouseRight(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -299,15 +301,17 @@ namespace XviD4PSP
 
         private void ChageZones(System.Windows.Point point, int d)
         {
+            Handled = true;
             if (point.Y < Pic.ActualHeight / 3) numt.Value = numt.Value + d;         //Верх
             else if (point.Y > Pic.ActualHeight / 1.5) numb.Value = numb.Value + d;  //Низ
             else if (point.X < Pic.ActualWidth / 3) numl.Value = numl.Value + d;     //Лево
             else if (point.X > Pic.ActualWidth / 1.5) numr.Value = numr.Value + d;   //Право
+            else Handled = false;                                                    //Центр 
         }
 
         private void button_AutoCrop_Click(object sender, RoutedEventArgs e)
         {
-            Autocrop acrop = new Autocrop(m);
+            Autocrop acrop = new Autocrop(m, this);
             m = acrop.m.Clone();
             numl.Value = left = m.cropl;
             numr.Value = right = m.cropr;
@@ -323,11 +327,13 @@ namespace XviD4PSP
                 this.SizeToContent = SizeToContent.Manual;
                 this.WindowStyle = WindowStyle.None;
                 this.WindowState = WindowState.Maximized;
+                txt_info.Visibility = Visibility.Visible;
             }
             else
             {
                 this.WindowState = WindowState.Normal;
                 this.WindowStyle = WindowStyle.SingleBorderWindow;
+                txt_info.Visibility = Visibility.Collapsed;
             }
         }
     }

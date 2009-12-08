@@ -469,67 +469,20 @@ namespace XviD4PSP
         public static Massive FixInputAspect(Massive mass)
         {
             //правим входной аспект с учётом кропа
-            //mass.inaspect = ((double)(mass.inresw - mass.cropl_copy - mass.cropr_copy) /
-            //    (double)(mass.inresh - mass.cropt_copy - mass.cropb_copy)) * mass.pixelaspect;
 
             //подправляем аспект
-            if (mass.cropb_copy == 0 &&
-                mass.cropl_copy == 0 &&
-                mass.cropr_copy == 0 &&
-                mass.cropt_copy == 0)
-            {
-                //if (mass.inaspectstring == "4:3")
-                //{
-                //    mass.inaspect = 1.333;
-                //}
-                //if (mass.inaspectstring == "16:9")
-                //{
-                //    mass.inaspect = 1.778;
-                //}
-                //if (mass.inaspectstring == "2.35")
-                //{
-                //    mass.inaspect = 2.351;
-                //}
-                //else if (mass.inresw == 1440 && mass.inresh == 1080)
-                //{
-                //    if (mass.inaspectstring == "16:9")
-                //        mass.inaspect *= 1.334;
-                //}
-                //else if (mass.inresw == 720 && mass.inresh == 480)
-                //{
-                //    if (mass.inaspectstring == "16:9")
-                //        mass.inaspect *= 1.185;
-                //    if (mass.inaspectstring == "4:3")
-                //        mass.inaspect *= 0.889;
-                //}
-                //else if (mass.inresw == 352 && mass.inresh == 480)
-                //{
-                //    if (mass.inaspectstring == "16:9")
-                //        mass.inaspect *= 2.425;
-                //    if (mass.inaspectstring == "4:3")
-                //        mass.inaspect *= 1.818;
-                //}
-                //else if (mass.inresw == 720 && mass.inresh == 576)
-                //{
-                //    if (mass.inaspectstring == "16:9")
-                //        mass.inaspect *= 1.422;
-                //    if (mass.inaspectstring == "4:3")
-                //        mass.inaspect *= 1.066;
-                //}
-                //else if (mass.inresw == 544 && mass.inresh == 576)
-                //{
-                //    if (mass.inaspectstring == "16:9")
-                //        mass.inaspect *= 1.883;
-                //    if (mass.inaspectstring == "4:3")
-                //        mass.inaspect *= 1.411;
-                //}
-            }
-            else
+            //if (mass.cropb_copy == 0 &&
+            //    mass.cropl_copy == 0 &&
+            //    mass.cropr_copy == 0 &&
+            //    mass.cropt_copy == 0)
+            //{
+            //  
+            //}
+            //else
             {
                 mass.inaspect = ((double)(mass.inresw - mass.cropl_copy - mass.cropr_copy) /
-    (double)(mass.inresh - mass.cropt_copy - mass.cropb_copy)) * mass.pixelaspect;
+                    (double)(mass.inresh - mass.cropt_copy - mass.cropb_copy)) * mass.pixelaspect;
             }
-
             return mass;
         }
 
@@ -542,46 +495,35 @@ namespace XviD4PSP
 
         public static Massive FixAspectDifference(Massive mass)
         {
-            //вычисляем разницу аспектов
-            double aspectdiff = mass.inaspect / mass.outaspect;
+            mass.blackh = 0;
+            mass.blackw = 0;
+            mass.cropb = mass.cropb_copy;
+            mass.cropl = mass.cropl_copy;
+            mass.cropr = mass.cropr_copy;
+            mass.cropt = mass.cropt_copy;
 
             //правим по чёрному
             if (mass.aspectfix == AspectFixes.Black)
             {
                 //mass.sar = null;
-                mass.cropb = mass.cropb_copy;
-                mass.cropl = mass.cropl_copy;
-                mass.cropr = mass.cropr_copy;
-                mass.cropt = mass.cropt_copy;
-
-                mass.blackh = 0;
-                mass.blackw = 0;
-
+                
                 if (mass.inaspect < mass.outaspect)
                 {
                     double diff = ((double)mass.outresw - ((double)mass.outresw / (double)mass.outaspect) * (double)mass.inaspect);
                     mass.blackw = Calculate.GetValid((int)(diff / 2), 2);
                     mass.blackh = 0;
                 }
-                if (mass.inaspect > mass.outaspect)
+                else if (mass.inaspect > mass.outaspect)
                 {
                     double diff = (((double)mass.outresw / (double)mass.outaspect) - ((double)mass.outresw / (double)mass.inaspect));
                     mass.blackw = 0;
                     mass.blackh = Calculate.GetValid((int)(diff / 2), 2);
                 }
             }
-
-            if (mass.aspectfix == AspectFixes.Crop)
+            else if (mass.aspectfix == AspectFixes.Crop)
             {
                 //mass.sar = null;
-                mass.blackh = 0;
-                mass.blackw = 0;
-
-                mass.cropl = mass.cropl_copy;
-                mass.cropr = mass.cropr_copy;
-                mass.cropt = mass.cropt_copy;
-                mass.cropb = mass.cropb_copy;
-
+                
                 //Считаем чистый исходный аспект (без учета откропленного)
                 double inputasp = ((double)mass.inresw / (double)mass.inresh) * mass.pixelaspect; 
                 if (mass.inaspect < mass.outaspect)
@@ -604,31 +546,16 @@ namespace XviD4PSP
                 }
                 
                 //Входной аспект с учетом откропленного
-                if (Settings.RecalculateAspect == true)
+                if (Settings.RecalculateAspect)
                     mass.inaspect = ((double)(mass.inresw - mass.cropl - mass.cropr) / (double)(mass.inresh - mass.cropt - mass.cropb)) * mass.pixelaspect;
             }
-
-            if (mass.aspectfix == AspectFixes.SAR)
+            else if (mass.aspectfix == AspectFixes.SAR)
             {
-                mass.blackh = 0;
-                mass.blackw = 0;
-                mass.cropb = mass.cropb_copy;
-                mass.cropl = mass.cropl_copy;
-                mass.cropr = mass.cropr_copy;
-                mass.cropt = mass.cropt_copy;
-
                 mass = Calculate.CalculateSAR(mass);
             }
-
-            if (mass.aspectfix == AspectFixes.Disabled)
+            else if (mass.aspectfix == AspectFixes.Disabled)
             {
                 //mass.sar = null;
-                mass.blackh = 0;
-                mass.blackw = 0;
-                mass.cropb = mass.cropb_copy;
-                mass.cropl = mass.cropl_copy;
-                mass.cropr = mass.cropr_copy;
-                mass.cropt = mass.cropt_copy;
             }
 
             return mass;
@@ -690,8 +617,7 @@ namespace XviD4PSP
 
         private void button_analyse_Click(object sender, RoutedEventArgs e)
         {
-            
-            Autocrop acrop = new Autocrop(m);
+            Autocrop acrop = new Autocrop(m, this);
             m = acrop.m.Clone();
             ApplyCrop();
         }

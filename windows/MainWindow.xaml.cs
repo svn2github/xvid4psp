@@ -1403,7 +1403,7 @@ namespace XviD4PSP
                         {
                             if (x.format != Format.ExportFormats.BluRay)
                             {
-                                Autocrop acrop = new Autocrop(x);
+                                Autocrop acrop = new Autocrop(x, this);
                                 if (acrop.m == null) return;
                                 x = acrop.m.Clone();
                             }
@@ -3812,7 +3812,7 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    Autocrop acrop = new Autocrop(m);
+                    Autocrop acrop = new Autocrop(m, this);
                     if (acrop.m == null) return;
                     m = acrop.m.Clone();
 
@@ -5580,7 +5580,7 @@ namespace XviD4PSP
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            DragMove();
+            if (e.LeftButton == MouseButtonState.Pressed) DragMove();
         }
 
         private void ApplyTestScript(object sender, RoutedEventArgs e)
