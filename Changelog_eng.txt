@@ -1,5 +1,9 @@
-XviD4PSP r65->r70->r80 05.12.09, main changes:
+XviD4PSP r65->r70->r80->r85 09.12.09, main changes:
 
+>>> (r83) Some changes in the Resolution/Aspect window; fixed possibility of crash when switching to fullscreen (r78).
+>>> (r82-r85) Added "VisualCrop" (for manual cropping black borders).
+>>> (r81) Restore Trim and Test-script from saved tasks.
+---
 >>> (r80) Added test-script (50x50 frames from the original video), menu AviSynth->Test script (reg. by crazy-cactus).
 >>> (r79) Now before new file will start opening, previsious opened file will be closed first.
 >>> (r79) If "Close file" is pressed, now  this file will be checked, is it still used in one of the saved tasks. If it 

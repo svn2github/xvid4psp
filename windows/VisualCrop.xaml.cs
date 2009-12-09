@@ -28,6 +28,7 @@ namespace XviD4PSP
 
         private string script = "";
         private bool WindowLoaded = false;
+        private bool GreenLight = false;
 
         private Bitmap bmp;
         private ImageSource picture;
@@ -282,26 +283,34 @@ namespace XviD4PSP
         }
 
         private void MouseClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (e.GetPosition(Pic).Y < Pic.ActualHeight / 3)
-                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
-                    numt.Value = Convert.ToInt32(((double)height * e.GetPosition(Pic).Y) / Pic.ActualHeight);          //Сверху
-                else numt.Value = 0;
-            else if (e.GetPosition(Pic).Y > Pic.ActualHeight / 1.5)
-                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
-                    numb.Value = Convert.ToInt32(height - ((double)height * e.GetPosition(Pic).Y) / Pic.ActualHeight); //Снизу
-                else numb.Value = 0;
-            else if (e.GetPosition(Pic).X < Pic.ActualWidth / 3)
-                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
-                    numl.Value = Convert.ToInt32(((double)width * e.GetPosition(Pic).X) / Pic.ActualWidth);            //Слева
-                else numl.Value = 0;
-            else if (e.GetPosition(Pic).X > Pic.ActualWidth / 1.5)
-                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
-                    numr.Value = Convert.ToInt32(width - ((double)width * e.GetPosition(Pic).X) / Pic.ActualWidth);    //Справа
-                else numr.Value = 0;
-            else if (e.ChangedButton == System.Windows.Input.MouseButton.Left && e.ClickCount == 2) button_fullscreen_Click(null, null); //Центр - Фуллскрин
+        {  
+            ChageZones(e.GetPosition(Pic), (e.ChangedButton == System.Windows.Input.MouseButton.Left), (e.ClickCount == 2));
         }
 
+        private void MoveMouse(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed && GreenLight)
+                ChageZones(e.GetPosition(Pic), true, false);
+        }
+
+        private void ChageZones(System.Windows.Point point, bool left, bool twice)
+        {
+            GreenLight = true;
+            if (point.Y < Pic.ActualHeight / 3)
+                if (left) numt.Value = Convert.ToInt32(((double)height * point.Y) / Pic.ActualHeight);          //Сверху
+                else numt.Value = 0;
+            else if (point.Y > Pic.ActualHeight / 1.5)
+                if (left) numb.Value = Convert.ToInt32(height - ((double)height * point.Y) / Pic.ActualHeight); //Снизу
+                else numb.Value = 0;
+            else if (point.X < Pic.ActualWidth / 3)
+                if (left) numl.Value = Convert.ToInt32(((double)width * point.X) / Pic.ActualWidth);            //Слева
+                else numl.Value = 0;
+            else if (point.X > Pic.ActualWidth / 1.5)
+                if (left) numr.Value = Convert.ToInt32(width - ((double)width * point.X) / Pic.ActualWidth);    //Справа
+                else numr.Value = 0;
+            else if (left && twice) button_fullscreen_Click(null, null);                                        //Центр - Фуллскрин
+        }
+        
         private void WheelMouse(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
             int d = 2;
@@ -338,6 +347,11 @@ namespace XviD4PSP
                 this.WindowStyle = WindowStyle.SingleBorderWindow;
                 txt_info.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            GreenLight = false; //Чтоб кроп не срабатывал при включении Фуллскрина
         }
     }
 }
