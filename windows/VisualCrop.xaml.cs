@@ -28,7 +28,6 @@ namespace XviD4PSP
 
         private string script = "";
         private bool WindowLoaded = false;
-        private bool Handled;
 
         private Bitmap bmp;
         private ImageSource picture;
@@ -282,31 +281,35 @@ namespace XviD4PSP
             //((MainWindow)(Owner.Owner)).check_old_seeking.IsChecked = OldSeeking;
         }
 
-        private void MouseLeft(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MouseClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            ChageZones(e.GetPosition(Pic), 2);
-            if (e.ClickCount == 2 && !Handled) button_fullscreen_Click(null, null);
-        }
-
-        private void MouseRight(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            ChageZones(e.GetPosition(Pic), -2);
+            if (e.GetPosition(Pic).Y < Pic.ActualHeight / 3)
+                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                    numt.Value = Convert.ToInt32(((double)height * e.GetPosition(Pic).Y) / Pic.ActualHeight);          //Сверху
+                else numt.Value = 0;
+            else if (e.GetPosition(Pic).Y > Pic.ActualHeight / 1.5)
+                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                    numb.Value = Convert.ToInt32(height - ((double)height * e.GetPosition(Pic).Y) / Pic.ActualHeight); //Снизу
+                else numb.Value = 0;
+            else if (e.GetPosition(Pic).X < Pic.ActualWidth / 3)
+                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                    numl.Value = Convert.ToInt32(((double)width * e.GetPosition(Pic).X) / Pic.ActualWidth);            //Слева
+                else numl.Value = 0;
+            else if (e.GetPosition(Pic).X > Pic.ActualWidth / 1.5)
+                if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                    numr.Value = Convert.ToInt32(width - ((double)width * e.GetPosition(Pic).X) / Pic.ActualWidth);    //Справа
+                else numr.Value = 0;
+            else if (e.ChangedButton == System.Windows.Input.MouseButton.Left && e.ClickCount == 2) button_fullscreen_Click(null, null); //Центр - Фуллскрин
         }
 
         private void WheelMouse(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
-            if (e.Delta > 0) ChageZones(e.GetPosition(Pic), 2);
-            else ChageZones(e.GetPosition(Pic), -2);
-        }
-
-        private void ChageZones(System.Windows.Point point, int d)
-        {
-            Handled = true;
-            if (point.Y < Pic.ActualHeight / 3) numt.Value = numt.Value + d;         //Верх
-            else if (point.Y > Pic.ActualHeight / 1.5) numb.Value = numb.Value + d;  //Низ
-            else if (point.X < Pic.ActualWidth / 3) numl.Value = numl.Value + d;     //Лево
-            else if (point.X > Pic.ActualWidth / 1.5) numr.Value = numr.Value + d;   //Право
-            else Handled = false;                                                    //Центр 
+            int d = 2;
+            if (e.Delta < 0) d = -2;
+            if (e.GetPosition(Pic).Y < Pic.ActualHeight / 3) numt.Value = numt.Value + d;         //Сверху
+            else if (e.GetPosition(Pic).Y > Pic.ActualHeight / 1.5) numb.Value = numb.Value + d;  //Снизу
+            else if (e.GetPosition(Pic).X < Pic.ActualWidth / 3) numl.Value = numl.Value + d;     //Слева
+            else if (e.GetPosition(Pic).X > Pic.ActualWidth / 1.5) numr.Value = numr.Value + d;   //Справа
         }
 
         private void button_AutoCrop_Click(object sender, RoutedEventArgs e)

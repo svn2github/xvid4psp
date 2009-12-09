@@ -6,7 +6,7 @@
 	Title="Crop"
 	Width="700" Height="400" MinWidth="700" MinHeight="380" ResizeMode="CanResize" SizeToContent="Height" WindowStartupLocation="CenterOwner" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
     <Grid x:Name="LayoutRoot" Width="Auto" Height="Auto" Background="{x:Null}">
-        <Grid Margin="0,0,0,74" x:Name="Picture" Width="Auto" Height="Auto" MouseLeftButtonDown="MouseLeft" MouseRightButtonDown="MouseRight" MouseWheel="WheelMouse" Background="{DynamicResource black_gradient_2}">
+        <Grid Margin="0,0,0,74" x:Name="Picture" Width="Auto" Height="Auto" MouseLeftButtonDown="MouseClick" MouseRightButtonDown="MouseClick" MouseWheel="WheelMouse" Background="{DynamicResource black_gradient_2}">
             <Image x:Name="Pic" Margin="0,0,0,0" Width="Auto" Height="Auto" Stretch="Uniform" Source="..\pictures\donate_notable copy.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             <Image x:Name="PicBack" Margin="0,0,0,0" Opacity="0.25" Width="Auto" Height="Auto" Stretch="Uniform"  Source="..\pictures\donate_notable copy.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>        
         </Grid>
