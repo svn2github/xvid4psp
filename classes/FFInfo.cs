@@ -13,6 +13,7 @@ namespace XviD4PSP
    public class FFInfo
     {
        public string info = null;
+       string[] global_lines = null;
        Process encoderProcess;
 
         public void Open(string filepath)
@@ -48,6 +49,8 @@ namespace XviD4PSP
             }
 
             info = encoderProcess.StandardError.ReadToEnd();
+            //Сразу делим на строки, чтоб не делать одну и ту же работу по 10 раз
+            if (info != null) global_lines = info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
         }
 
         public void Close()
@@ -59,19 +62,17 @@ namespace XviD4PSP
                 encoderProcess.WaitForExit();
             }
             info = null;
+            global_lines = null;
         }
 
         private string SearchRegEx(string pattern, out int times)
         {
-            //делим на строки
-            string[] separator = new string[] { Environment.NewLine };
-            string[] lines = info.Split(separator, StringSplitOptions.None);
             string result = null;
             times = 0;
 
             Regex r = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
-            foreach (string line in lines)
+            foreach (string line in global_lines)
             {
                 Match m = r.Match(line);
                 if (m.Success)
@@ -89,9 +90,7 @@ namespace XviD4PSP
             if (info != null)
             {
                 int streams = 0;
-                string[] separator = new string[] { Environment.NewLine };
-                string[] lines = info.Split(separator, StringSplitOptions.None);
-                foreach (string line in lines)
+                foreach (string line in global_lines)
                 {
                     if (line.StartsWith("    Stream #0."))
                         streams += 1;
@@ -107,9 +106,7 @@ namespace XviD4PSP
             if (info != null)
             {
                 int streams = 0;
-                string[] separator = new string[] { Environment.NewLine };
-                string[] lines = info.Split(separator, StringSplitOptions.None);
-                foreach (string line in lines)
+                foreach (string line in global_lines)
                 {
                     if (line.StartsWith("    Stream #0.") && line.Contains(": Audio:"))
                         streams++;
@@ -387,6 +384,25 @@ namespace XviD4PSP
                 return "Unknown";
         }
 
+        public double CalculatePAR(int stream)
+        {
+            if (info != null)
+            {
+                int times;
+                string type = SearchRegEx(@"Stream..0." + stream + @".+\[PAR\s(\d+:\d+)", out times);
+                if (times == 0)
+                {
+                    type = SearchRegEx(@"Stream..0." + stream + @".+PAR\s(\d+:\d+)", out times);
+                }
+                if (times != 0)
+                {
+                    string[] results = type.Split(':');
+                    return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);
+                }
+            }
+            return 0;
+        }
+
         public string StreamDAR(int stream)
         {
             if (info != null)
@@ -400,6 +416,25 @@ namespace XviD4PSP
             }
             else
                 return "Unknown";
+        }
+
+        public double CalculateDAR(int stream)
+        {
+            if (info != null)
+            {
+                int times;
+                string type = SearchRegEx(@"Stream..0." + stream + @".+DAR\s(\d+:\d+)\]", out times);
+                if (times == 0)
+                {
+                    type = SearchRegEx(@"Stream..0." + stream + @".+DAR\s(\d+:\d+)", out times);
+                }
+                if (times != 0)
+                {
+                    string[] results = type.Split(':');
+                    return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);
+                }
+            }
+            return 0;
         }
 
         public string Timeline()
@@ -423,15 +458,12 @@ namespace XviD4PSP
         {
             if (info != null)
             {
-                //делим на строки
-                string[] separator = new string[] { Environment.NewLine };
-                string[] lines = info.Split(separator, StringSplitOptions.None);
                 string result = null;
                 int stream = 1;
 
                 Regex r = new Regex(@"Stream.+0\.(\d).+Audio", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
-                foreach (string line in lines)
+                foreach (string line in global_lines)
                 {
                     Match m = r.Match(line);
                     if (m.Success)
@@ -501,7 +533,5 @@ namespace XviD4PSP
             else
                 return TimeSpan.Zero;
         }
-
-
     }
 }

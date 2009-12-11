@@ -316,9 +316,9 @@ namespace XviD4PSP
         public string ACodecShort(int track)
         {
             string s = Get(StreamKind.Audio, track, "Codec/String");
-            if (s == "MPEG-1 Audio layer 3" || 
-                s == "MPEG-1/2 L3" || 
-                s == "MPEG-1L3" || 
+            if (s == "MPEG-1 Audio layer 3" ||
+                s == "MPEG-1/2 L3" ||
+                s == "MPEG-1L3" ||
                 s == "MPEG1/2 L3" ||
                 s == "MPEG-1 Audio Layer 3" ||
                 s == "MPA1L3" ||
@@ -327,23 +327,23 @@ namespace XviD4PSP
                 s == "A_MP3" ||
                 s == "MPEG-1 Audio")
                 s = "MP3";
-            if (s == "MPEG-1 Audio layer 2")
+            else if (s == "MPEG-1 Audio layer 2")
                 s = "MP2";
-            if (s == "Vorbis")
+            else if (s == "Vorbis")
                 s = "OGG";
-            if (s == "AAC LC" || s == "AAC LC-SBR" || s == "AAC LC-SBR-PS" || s == "A_AAC")
+            else if (s == "AAC LC" || s == "AAC LC-SBR" || s == "AAC LC-SBR-PS" || s == "A_AAC")
                 s = "AAC";
-            if (s == "WMA2" ||
+            else if (s == "WMA2" ||
                 s == "WMA3")
                 s = "WMA";
-            if (s == "A_AC3")
+            else if (s == "A_AC3")
                 s = "AC3";
-            if (s == "A_DTS" ||
+            else if (s == "A_DTS" ||
                 s == "DTS-HD")
                 s = "DTS";
-            if (s == "A_AAC")
+            else if (s == "A_AAC")
                 s = "AAC";
-            if (s == "A_LPCM")
+            else if (s == "A_LPCM")
                 s = "LPCM";
             return s;
         }
@@ -385,8 +385,10 @@ namespace XviD4PSP
             get
             {
                 string s = Get(StreamKind.Video, 0, "AspectRatio");
-                if (s == "")
-                    return 1.333;
+                if (s == "" || s == "1.333")
+                    return 4.0 / 3.0;
+                if (s == "1.778")
+                    return 16.0 / 9.0;
                 return Calculate.ConvertStringToDouble(s);
             }
         }

@@ -59,16 +59,14 @@ namespace XviD4PSP
             button_vcrop.ToolTip = Languages.Translate("Crop black borders manually");
             button_analyse.Content = Languages.Translate("Auto crop");
             button_vcrop.Content = Languages.Translate("Manual crop");
-
             combo_height.ToolTip = Languages.Translate("Height");
             combo_width.ToolTip = Languages.Translate("Width");
-
-            textbox_error.Text = "";
-
             tab_main.Header = Languages.Translate("Main");
             tab_settings.Header = Languages.Translate("Settings");
-            
             Title = Languages.Translate("Resolution/Aspect");
+            textbox_error.Text = "";
+            text_ffmpeg_ar.Content = Languages.Translate("Use FFmpeg AR info:");
+            text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg");
 
             //ресайзеры
             foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
@@ -84,8 +82,8 @@ namespace XviD4PSP
             combo_autocropframes.SelectedItem = Settings.AutocropFrames;
 
             check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
+            check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
 
-            
             //аспект фиксы
             foreach (string afix in Enum.GetNames(typeof(AspectFixes)))
                 combo_aspectfix.Items.Add(afix);
@@ -204,7 +202,7 @@ namespace XviD4PSP
                     combo_width.SelectedItem = m.outresw;
                     combo_height.SelectedItem = m.outresh;
                 }
-
+               
                 m = FixAspectDifference(m);
 
                 LoadBlack();
@@ -294,12 +292,12 @@ namespace XviD4PSP
 
         private void LoadInAspect()
         {
-            string inaspect = Calculate.ConvertDoubleToPointString(m.inaspect);
+            string inaspect = Calculate.ConvertDoubleToPointString(m.inaspect, 4);
 
             combo_inaspect.Items.Clear();
 
             //подбираем наиболее подходящий аспект из стандартных аспектов
-            string[] aspects = Calculate.InsertAspect(new string[] { "1.333 (4:3)", "1.778 (16:9)", "1.850", "2.353" }, inaspect);
+            string[] aspects = Calculate.InsertAspect(new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" }, inaspect);
             foreach (string _asp in aspects)
                 combo_inaspect.Items.Add(_asp);
             combo_inaspect.SelectedItem = Calculate.GetClosePointDouble(inaspect, aspects);
@@ -309,8 +307,8 @@ namespace XviD4PSP
         {
             try
             {
-                string outaspect = Calculate.ConvertDoubleToPointString(m.outaspect);
-                string inaspect = Calculate.ConvertDoubleToPointString(m.inaspect);
+                string outaspect = Calculate.ConvertDoubleToPointString(m.outaspect, 4);
+                string inaspect = Calculate.ConvertDoubleToPointString(m.inaspect, 4);
 
                 combo_outaspect.Items.Clear();
 
@@ -327,19 +325,17 @@ namespace XviD4PSP
                     combo_outaspect.Items.Add(_asp);
 
                 string closeaspect = Calculate.GetClosePointDouble(outaspect, aspects);
-                if (m.IsAnamorphic && closeaspect == "1.333 (4:3)")
-                    combo_outaspect.SelectedItem = "Anamorphic (4:3)";
-                else if (m.IsAnamorphic && closeaspect == "1.778 (16:9)")
-                    combo_outaspect.SelectedItem = "Anamorphic (16:9)";
-                else if (m.IsAnamorphic && closeaspect == "2.353")
-                    combo_outaspect.SelectedItem = "Anamorphic (2.353)";
-                else
+                //if (m.IsAnamorphic && closeaspect == "1.333 (4:3)")
+                //    combo_outaspect.SelectedItem = "Anamorphic (4:3)";
+                //else if (m.IsAnamorphic && closeaspect == "1.778 (16:9)")
+                //    combo_outaspect.SelectedItem = "Anamorphic (16:9)";
+                //else if (m.IsAnamorphic && closeaspect == "2.353")
+                //    combo_outaspect.SelectedItem = "Anamorphic (2.353)";
+                //else
                     combo_outaspect.SelectedItem = closeaspect;
                 
                 //ошибка в выходном аспекте
                 textbox_error.Text = Calculate.ConvertDoubleToPointString(100 - ((m.outaspect * 100) / m.inaspect), 2) + "%";
-            
-            
             }
             catch (Exception ex)
             {
@@ -649,6 +645,11 @@ namespace XviD4PSP
             LoadOutAspect();
 
             Refresh();
+        }
+
+        private void check_use_ffmpeg_ar_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.UseFFmpegAR = check_use_ffmpeg_ar.IsChecked.Value;
         }
 	}
 }

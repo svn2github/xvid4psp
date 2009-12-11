@@ -910,20 +910,16 @@ namespace XviD4PSP
         public static string ConvertDoubleToPointString(double value, int decimalplaces)
         {
             string aspect = value.ToString("0.0");
-            if (decimalplaces == 2)
-                aspect = value.ToString("0.00");
-            if (decimalplaces == 3)
-                aspect = value.ToString("0.000");
-            if (aspect.Contains(","))
-                aspect = aspect.Replace(",", ".");
+            if (decimalplaces == 2) aspect = value.ToString("0.00");
+            else if (decimalplaces == 3) aspect = value.ToString("0.000");
+            else if (decimalplaces == 4) aspect = value.ToString("0.0000");
+            if (aspect.Contains(",")) aspect = aspect.Replace(",", ".");
             return aspect;
         }
 
        public static double ConvertStringToDouble(string value)
        {
-           if (value == null ||
-               value == "")
-               return 0.0;
+           if (value == null || value == "") return 0.0;
 
            if (value.Contains(".") && "." != DecimalSeparator)
                value = value.Replace(".", DecimalSeparator);

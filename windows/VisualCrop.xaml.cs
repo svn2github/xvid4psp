@@ -284,16 +284,16 @@ namespace XviD4PSP
 
         private void MouseClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {  
-            ChageZones(e.GetPosition(Pic), (e.ChangedButton == System.Windows.Input.MouseButton.Left), (e.ClickCount == 2));
+            ChangeZones(e.GetPosition(Pic), (e.ChangedButton == System.Windows.Input.MouseButton.Left), (e.ClickCount == 2));
         }
 
         private void MoveMouse(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed && GreenLight)
-                ChageZones(e.GetPosition(Pic), true, false);
+                ChangeZones(e.GetPosition(Pic), true, false);
         }
 
-        private void ChageZones(System.Windows.Point point, bool left, bool twice)
+        private void ChangeZones(System.Windows.Point point, bool left, bool twice)
         {
             GreenLight = true;
             if (point.Y < Pic.ActualHeight / 3)

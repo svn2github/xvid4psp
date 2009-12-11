@@ -82,7 +82,7 @@ namespace XviD4PSP
                 else
                     ext = Path.GetExtension(m.infilepath).ToLower();
 
-                if (ext != ".d2v" && ext != ".avs" && ext!= ".dga") //AVC
+                if (ext != ".d2v" && ext != ".avs" && ext!= ".dga")
                 {
                     //забиваем максимум параметров файла
                     MediaInfoWrapper media = new MediaInfoWrapper();
@@ -91,20 +91,20 @@ namespace XviD4PSP
                     m.invcodec = media.VCodecString;
                     m.invcodecshort = media.VCodecShort;
                     m.invbitrate = media.VideoBitrate;
+                    m.inresw = media.Width;
+                    m.inresh = media.Height;
                     m.inaspect = media.Aspect;
+                    //m.pixelaspect = (m.inresw != 0 && m.inresh != 0) ? (m.inaspect / ((double)m.inresw / (double)m.inresh)) : 1.0;
                     m.pixelaspect = media.PixelAspect;
-                    m.inaspectstring = media.AspectString;
                     m.invideostream_mkvid = media.VideoID();
                     m.intextstreams = media.CountTextStreams;
                     m.inframerate = media.FrameRate;
-                    m.inresw = media.Width;
-                    m.inresh = media.Height;
                     m.induration = TimeSpan.FromMilliseconds(media.Milliseconds);
                     m.outduration = m.induration;
                     m.interlace = media.Interlace;
                     m.inframes = media.Frames;
                     m.standart = media.Standart;
-
+                                 
                     //Возвращаем 29фпс для мпег2 видео с пуллдауном, т.к. MediaInfo выдает для него 23фпс, а MPEG2Source из-за пуллдауна декодирует с 29-ю..
                     if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && media.ScanOrder.Contains("Pulldown") && m.inframerate == "23.976" && !Settings.DGForceFilm)
                     { 
@@ -310,8 +310,7 @@ namespace XviD4PSP
                     m.inresh = ff.StreamH(m.invideostream_ffid);
                     m.inaspect = (double)m.inresw / (double)m.inresh;
                 }
-
-                if (ext == ".d2v")
+                else if (ext == ".d2v")
                 {
                     //Читаем d2v-файл
                     int n = 0;
@@ -345,17 +344,16 @@ namespace XviD4PSP
                     m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
                     m.invcodecshort = "MPEG2";
                 }
-                                
-                if(ext == ".dga")
-                {    
+                else if (ext == ".dga")
+                {
                     //Смотрим, на месте ли log-файл
-                    string path = Path.GetDirectoryName(m.infilepath).ToLower(); 
-                    string name = Path.GetFileNameWithoutExtension(m.infilepath).ToLower(); 
+                    string path = Path.GetDirectoryName(m.infilepath).ToLower();
+                    string name = Path.GetFileNameWithoutExtension(m.infilepath).ToLower();
                     if (!File.Exists(path + "\\" + name + ".log"))
                     {
                         ShowMessage(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + path + "\\" + name + ".log" + Environment.NewLine + Environment.NewLine +
-                        Languages.Translate("AR will be set as 16/9, you can change it manually later."), Languages.Translate("Error"), Message.MessageStyle.Ok);                       
-                        m.inaspect = 1.7777;
+                        Languages.Translate("AR will be set as 16/9, you can change it manually later."), Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        m.inaspect = 16.0 / 9.0;
                     }
                     else
                     {
@@ -369,7 +367,7 @@ namespace XviD4PSP
                         using (StreamReader sr = new StreamReader(path + "\\" + name + ".log", System.Text.Encoding.Default))
                             while (!sr.EndOfStream)
                             {
-                                line = sr.ReadLine();                                
+                                line = sr.ReadLine();
                                 mat1 = r1.Match(line);
                                 mat2 = r2.Match(line);
                                 if (mat1.Success)
@@ -385,16 +383,20 @@ namespace XviD4PSP
                             }
                         m.inresw = result1;
                         m.inresh = result2;
-                        m.inaspect = (result3/result4) * ((double)m.inresw / (double)m.inresh);
+                        m.inaspect = (result3 / result4) * ((double)m.inresw / (double)m.inresh);
                         m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
                         //можно еще определить тут фпс, но всё-равно это будет сделано позже через ависинт-скрипт (class Caching). 
                     }
                     m.invcodecshort = "h264";
-                   //m.invbitrate = 9000;
-                   //sizeb += new FileInfo(file).Length;
-                   //m.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511, 1) + " mb"; 
                 }
-                
+                else if (m.isvideo && Settings.UseFFmpegAR) 
+                {
+                    double par = ff.CalculatePAR(m.invideostream_ffid);
+                    if (par != 0) m.pixelaspect = par;
+                    double dar = ff.CalculateDAR(m.invideostream_ffid);
+                    if (dar != 0) m.inaspect = dar;
+                }
+
                 //подправляем кодек, ffID, язык
                 int astream = ff.AudioStream();
                 foreach (object o in m.inaudiostreams)
@@ -418,8 +420,8 @@ namespace XviD4PSP
                 }
 
                 //забиваем аудио, если они ещё не забиты
-                if (m.inaudiostreams.Count < ff.AudioStreamCount() && m.indexfile == null ||
-                    m.inaudiostreams.Count < ff.AudioStreamCount() && ext == ".avs")
+                if (m.indexfile == null && m.inaudiostreams.Count < ff.AudioStreamCount() ||
+                    ext == ".avs" && m.inaudiostreams.Count < ff.AudioStreamCount())
                 {
                     for (int snum = ff.AudioStream(); snum <= ff.AudioStreamCount(); snum++)
                     {

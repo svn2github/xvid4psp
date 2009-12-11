@@ -81,7 +81,7 @@
                         <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                       <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Autocrop" Margin="0,3,0,65" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                       <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Autocrop" Margin="0,3,0,94" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                           <StackPanel>
                                 <DockPanel Margin="8,5,8,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_autocropframes" Content="Frames to analyze:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
@@ -98,10 +98,14 @@
                         </GroupBox>
                       <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="0,100,0,5" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
-                                 <DockPanel Margin="8,0,8,5" Width="Auto" Height="Auto">
+                                 <DockPanel Margin="8,0,8,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate aspect when crop is using:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,86,0"/>
-                                </DockPanel>                
+                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,6,0"/>
+                                </DockPanel> 
+                                <DockPanel Margin="8,0,8,5" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_ffmpeg_ar" Content="Use FFmpeg AR info:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
+                                    <CheckBox x:Name="check_use_ffmpeg_ar" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_ffmpeg_ar_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,6,0"/>
+                                </DockPanel>
                             </StackPanel>
                       </GroupBox>    
                </Grid> 

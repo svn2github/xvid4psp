@@ -1594,7 +1594,25 @@ namespace XviD4PSP
             }
         }
 
-
-
+        //Использовать FFmpeg-инфу об AR открываемого файла
+        public static bool UseFFmpegAR
+        {
+            get
+            {
+                object value = GetValue("UseFFmpegAR");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("UseFFmpegAR", value);
+            }
+        }
     }
 }

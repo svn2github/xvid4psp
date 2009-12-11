@@ -2304,34 +2304,34 @@ namespace XviD4PSP
        {
            if (m.format == ExportFormats.AviDVNTSC ||
                m.format == ExportFormats.AviDVPAL)
-               return new string[] { "1.333 (4:3)" };
+               return new string[] { "1.3333 (4:3)" };
 
            else if (m.format == ExportFormats.Mpeg2NTSC ||
                m.format == ExportFormats.Mpeg2PAL)
-               return new string[] { "1.333 (4:3)", "1.778 (16:9)" };
+               return new string[] { "1.3333 (4:3)", "1.7778 (16:9)" };
 
            else if (m.format == ExportFormats.Mp4PSPAVCTV)
-               return new string[] { "1.333 (4:3)" };
+               return new string[] { "1.3333 (4:3)" };
 
            else if (m.format == ExportFormats.BluRay)
-               return new string[] { "1.333 (4:3)", "1.778 (16:9)", "1.850", "2.353" };
+               return new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };
 
            else if (m.format == ExportFormats.Mp4PSPAVC ||
                m.format == ExportFormats.Mp4PSPASP ||
                m.format == ExportFormats.PmpAvc)
-               return new string[] { "1.333 (4:3)", "1.765 (16:9)", "1.850", "2.353" };
+               return new string[] { "1.3333 (4:3)", "1.7647 (16:9)", "1.8500", "2.3529" };
 
            else if (m.format == ExportFormats.Mp4iPhone)
-               return new string[] { "1.333 (4:3)", "1.500", "1.778 (16:9)", "1.850", "2.353" };
+               return new string[] { "1.3333 (4:3)", "1.5000", "1.7778 (16:9)", "1.8500", "2.3529" };
 
            else if (m.format == ExportFormats.Mp4ToshibaG900)
-               return new string[] { "1.333 (4:3)", "1.666", "1.778 (16:9)", "1.850", "2.353" };
-           
+               return new string[] { "1.3333 (4:3)", "1.6667", "1.7778 (16:9)", "1.8500", "2.3529" };
+
            else if (m.format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo2("Custom","GetValidOutAspects");
-           
+               return FormatReader.GetFormatInfo2("Custom", "GetValidOutAspects");
+
            else
-               return new string[] { "1.333 (4:3)", "1.778 (16:9)", "1.850", "2.353" }; //Custom
+               return new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };
        }
 
        public static int GetMaxBFrames(Massive m)
