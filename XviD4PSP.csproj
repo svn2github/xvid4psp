@@ -390,7 +390,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Resource Include="pictures\back_frame.png" />
-    <Resource Include="pictures\donate_notable copy.png" />
     <Resource Include="pictures\frame_r.png" />
     <Resource Include="pictures\logo_aften.png" />
     <Resource Include="pictures\logo_FF_dv.png" />
@@ -453,6 +452,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="main.ico" />
+    <Resource Include="pictures\vc_background.PNG" />
     <Resource Include="pictures\Bottom.ico" />
     <Resource Include="pictures\Left.ico" />
     <Resource Include="pictures\Right.ico" />

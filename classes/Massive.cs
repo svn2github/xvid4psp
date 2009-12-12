@@ -339,19 +339,6 @@ namespace XviD4PSP
             }
         }
 
-        private string _inaspectstring;
-        public string inaspectstring
-        {
-            get
-            {
-                return _inaspectstring;
-            }
-            set
-            {
-                _inaspectstring = value;
-            }
-        }
-
         private double _outaspect;
         public double outaspect
         {

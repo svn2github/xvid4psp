@@ -65,8 +65,8 @@ namespace XviD4PSP
             if (left != 0 || right != 0 || top != 0 || bottom != 0) PutBorders();
 
             WindowLoaded = true;
-            ShowDialog();
 
+            ShowDialog();
             GC.Collect();
         }
 
@@ -76,39 +76,60 @@ namespace XviD4PSP
         private void ShowFrame(int frame)
         {
             AviSynthReader reader = new AviSynthReader();
-            reader.ParseScript(script); //Читаем скрипт
-            image = reader.ReadFrameBitmap(frame); //Получаем картинку
-            bmp = new System.Drawing.Bitmap(image);
-            IntPtr hObject = bmp.GetHbitmap();
-            picture = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hObject, IntPtr.Zero, Int32Rect.Empty,
-               System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); //Переводим картинку в Source
+            IntPtr hObject = IntPtr.Zero;
+            try
+            {
+                reader.ParseScript(script); //Читаем скрипт
+                image = reader.ReadFrameBitmap(frame); //Получаем картинку
+                bmp = new System.Drawing.Bitmap(image);
+                hObject = bmp.GetHbitmap();
+                picture = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hObject, IntPtr.Zero, Int32Rect.Empty,
+                   System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); //Переводим картинку в Source
 
-            //Определяем ограничения
-            numl.Maximum = numr.Maximum = width = bmp.Width;
-            numt.Maximum = numb.Maximum = height = bmp.Height;
+                //Определяем ограничения
+                numl.Maximum = numr.Maximum = width = bmp.Width;
+                numt.Maximum = numb.Maximum = height = bmp.Height;
 
-            Pic.Source = PicBack.Source = picture;
-          
-            bmp.Dispose();
-            reader.Close();
-            DeleteObject(hObject);
-            GC.Collect();
+                Pic.Source = PicBack.Source = picture;
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
+            finally
+            {
+                reader.Close();
+                if (bmp != null) bmp.Dispose();
+                DeleteObject(hObject);
+                GC.Collect();
+            }
         }
 
         private void PutBorders()
         {
-            bmp = new System.Drawing.Bitmap(image);
-            CropImage(ref bmp);
-            IntPtr hObject = bmp.GetHbitmap();
-            ImageSource picture = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hObject, IntPtr.Zero, Int32Rect.Empty,
-               System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+            if (image == null) return;
+            IntPtr hObject = IntPtr.Zero;
+            try
+            {
+                bmp = new System.Drawing.Bitmap(image);
+                CropImage(ref bmp);
+                hObject = bmp.GetHbitmap();
+                ImageSource picture = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hObject, IntPtr.Zero, Int32Rect.Empty,
+                   System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
 
-            Pic.Source = picture;
-            Title = m.inresw + "x" + m.inresh + " -> " + (m.inresw - left - right) + "x" + (m.inresh - top - bottom) + " (cropped size)";
-
-            DeleteObject(hObject);
-            bmp.Dispose();
-            GC.Collect();
+                Pic.Source = picture;
+                Title = m.inresw + "x" + m.inresh + " -> " + (m.inresw - left - right) + "x" + (m.inresh - top - bottom) + " (cropped size)";
+            }
+            catch (Exception ex)
+            {
+                ErrorExeption(ex.Message);
+            }
+            finally
+            {
+                if (bmp != null) bmp.Dispose();
+                DeleteObject(hObject);
+                GC.Collect();
+            }
         }
 
         //Закрашивание пикселей (позаимствовано из MeGUI`я)
@@ -188,7 +209,7 @@ namespace XviD4PSP
 
         private void ErrorExeption(string message)
         {
-            new Message(this).ShowMessage(message, Languages.Translate("Error"));
+            new Message((Window.IsLoaded) ? this : Owner).ShowMessage(message, Languages.Translate("Error"));
         }
 
         private void changedl(object sender, RoutedPropertyChangedEventArgs<decimal> e)
