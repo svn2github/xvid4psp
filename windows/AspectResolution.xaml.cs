@@ -57,8 +57,8 @@ namespace XviD4PSP
             text_recalculate.Content = Languages.Translate("Recalculate aspect when crop is using:");
             button_analyse.ToolTip = Languages.Translate("Autocrop black borders");
             button_vcrop.ToolTip = Languages.Translate("Crop black borders manually");
-            button_analyse.Content = Languages.Translate("Auto crop");
-            button_vcrop.Content = Languages.Translate("Manual crop");
+            button_analyse.Content = group_autocrop.Header = Languages.Translate("Auto crop");
+            button_vcrop.Content = group_visualcrop.Header = Languages.Translate("Manual crop");
             combo_height.ToolTip = Languages.Translate("Height");
             combo_width.ToolTip = Languages.Translate("Width");
             tab_main.Header = Languages.Translate("Main");
@@ -67,6 +67,9 @@ namespace XviD4PSP
             textbox_error.Text = "";
             text_ffmpeg_ar.Content = Languages.Translate("Use FFmpeg AR info:");
             text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg");
+            text_visualcrop_opacity.Content = Languages.Translate("Background opacity:");
+            text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
+            text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
 
             //ресайзеры
             foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
@@ -80,6 +83,18 @@ namespace XviD4PSP
             for (int n = 5; n < 31; n++)
                 combo_autocropframes.Items.Add(n);
             combo_autocropframes.SelectedItem = Settings.AutocropFrames;
+
+            for (int n = 0; n < 10; n ++)
+                combo_visualcrop_opacity.Items.Add(n);
+            combo_visualcrop_opacity.SelectedItem = Settings.VCropOpacity;
+
+            for (int n = 0; n < 26; n++)
+                combo_visualcrop_brightness.Items.Add(n);
+            combo_visualcrop_brightness.SelectedItem = Settings.VCropBrightness;
+
+            combo_visualcrop_frame.Items.Add("THM-frame");
+            combo_visualcrop_frame.Items.Add("1-st frame");
+            combo_visualcrop_frame.SelectedItem = Settings.VCropFrame;
 
             check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
             check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
@@ -650,6 +665,33 @@ namespace XviD4PSP
         private void check_use_ffmpeg_ar_Click(object sender, RoutedEventArgs e)
         {
             Settings.UseFFmpegAR = check_use_ffmpeg_ar.IsChecked.Value;
+        }
+
+        private void combo_visualcrop_opacity_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_visualcrop_opacity.IsDropDownOpen || combo_visualcrop_opacity.IsSelectionBoxHighlighted)
+            {
+                Settings.VCropOpacity = (int)combo_visualcrop_opacity.SelectedItem;
+            }
+        }
+
+        private void combo_visualcrop_brightness_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_visualcrop_brightness.IsDropDownOpen || combo_visualcrop_brightness.IsSelectionBoxHighlighted)
+            {
+                Settings.VCropBrightness = (int)combo_visualcrop_brightness.SelectedItem;
+            }
+        }
+
+        private void combo_visualcrop_frame_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_visualcrop_frame.IsDropDownOpen || combo_visualcrop_frame.IsSelectionBoxHighlighted)
+            {
+                if (combo_visualcrop_frame.IsDropDownOpen || combo_visualcrop_frame.IsSelectionBoxHighlighted)
+                {
+                    Settings.VCropFrame = combo_visualcrop_frame.SelectedItem.ToString();
+                }
+            }
         }
 	}
 }

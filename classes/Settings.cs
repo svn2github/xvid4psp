@@ -1614,5 +1614,65 @@ namespace XviD4PSP
                 SetBool("UseFFmpegAR", value);
             }
         }
+
+        public static int VCropOpacity
+        {
+            get
+            {
+                object value = GetValue("VCropOpacity");
+                if (value == null)
+                {
+                    return 2;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("VCropOpacity", value);
+            }
+        }
+
+        public static int VCropBrightness
+        {
+            get
+            {
+                object value = GetValue("VCropBrightness");
+                if (value == null)
+                {
+                    return 25;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("VCropBrightness", value);
+            }
+        }
+
+        public static string VCropFrame
+        {
+            get
+            {
+                object value = GetValue("VCropFrame");
+                if (value == null)
+                {
+                    return "THM-frame";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("VCropFrame", value);
+            }
+        }
     }
 }

@@ -81,30 +81,43 @@
                         <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                       <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Autocrop" Margin="0,3,0,94" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                       <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Auto crop" Margin="2,3,2,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                           <StackPanel>
-                                <DockPanel Margin="8,5,8,0" Width="Auto" Height="Auto">
+                                <DockPanel Margin="6,3,6,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_autocropframes" Content="Frames to analyze:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
                                     <ComboBox x:Name="combo_autocropframes" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_autocropframes_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </DockPanel>
-                                <DockPanel Margin="8,0,8,5" Width="Auto" Height="Auto">
+                                <DockPanel Margin="6,0,6,3" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_autocropsens" Content="Autocrop sensivity:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
                                     <ComboBox x:Name="combo_autocropsens" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_autocropsens_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </DockPanel>
-                                
-                            
-                            
                             </StackPanel>
                         </GroupBox>
-                      <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="0,100,0,5" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_visualcrop" Header="Manual crop" Margin="2,88,2,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
-                                 <DockPanel Margin="8,0,8,0" Width="Auto" Height="Auto">
+                                <DockPanel Margin="6,3,6,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_opacity" Content="Background opacity:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <ComboBox x:Name="combo_visualcrop_opacity" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_visualcrop_opacity_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                                <DockPanel Margin="6,0,6,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_brightness" Content="Brightness of the mask:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <ComboBox x:Name="combo_visualcrop_brightness" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_visualcrop_brightness_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                                <DockPanel Margin="6,0,6,3" Width="Auto" Height="Auto" >
+                                    <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_frame" Content="Startup frame:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <ComboBox x:Name="combo_visualcrop_frame" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_visualcrop_frame_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="2,200,2,5" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                 <DockPanel Margin="6,0,6,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate aspect when crop is using:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,6,0"/>
+                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,4,0"/>
                                 </DockPanel> 
-                                <DockPanel Margin="8,0,8,5" Width="Auto" Height="Auto">
+                                <DockPanel Margin="6,0,6,3" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_ffmpeg_ar" Content="Use FFmpeg AR info:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                    <CheckBox x:Name="check_use_ffmpeg_ar" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_ffmpeg_ar_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,6,0"/>
+                                    <CheckBox x:Name="check_use_ffmpeg_ar" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_ffmpeg_ar_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,4,0"/>
                                 </DockPanel>
                             </StackPanel>
                       </GroupBox>    

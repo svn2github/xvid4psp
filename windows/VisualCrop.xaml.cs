@@ -20,11 +20,11 @@ namespace XviD4PSP
     {
         private int width;
         private int height;
-
         private int left = 0;
         private int top = 0;
         private int right = 0;
         private int bottom = 0;
+        private int brightness = 0;
 
         private string script = "";
         private bool WindowLoaded = false;
@@ -54,14 +54,17 @@ namespace XviD4PSP
             numt.Value = top = m.cropt;
             numb.Value = bottom = m.cropb;
 
+            PicBack.Opacity = Settings.VCropOpacity / 10.0;
+            brightness = Settings.VCropBrightness * 10;
+
             Title = m.inresw + "x" + m.inresh + " -> " + (m.inresw - left - right) + "x" + (m.inresh - top - bottom) + " (cropped size)";
             button_autocrop.Content = Languages.Translate("Analyse");
             button_cancel.Content = Languages.Translate("Cancel");
 
             slider_pos.Maximum = m.outframes;
-            slider_pos.Value = m.thmframe;
+            slider_pos.Value = (Settings.VCropFrame == "THM-frame") ? m.thmframe : 0;
 
-            ShowFrame(m.thmframe);
+            ShowFrame((int)slider_pos.Value);
             if (left != 0 || right != 0 || top != 0 || bottom != 0) PutBorders();
 
             WindowLoaded = true;
@@ -139,7 +142,7 @@ namespace XviD4PSP
             byte* pointer = (byte*)image.Scan0.ToPointer();
             byte* pixel;
             int stride = image.Stride;
-            byte white = (byte)255;
+            byte white = (byte)brightness;
            
             pixel = pointer;
             int width = b.Width;
