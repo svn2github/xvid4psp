@@ -66,8 +66,7 @@ namespace XviD4PSP
                 media.Close();
 
                 //проверка на невалидную индексацию
-                if (m.invcodecshort != "MPEG2" &&
-                    m.invcodecshort != "MPEG1")
+                if (m.invcodecshort != "MPEG2" && m.invcodecshort != "MPEG1")
                 {
                     //m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
                     return; //Просто выходим отсюда, декодер будет выбран позже (Settings.OtherDecoder)
@@ -79,54 +78,45 @@ namespace XviD4PSP
                 //определяем видео декодер
                 m = Format.GetValidVDecoder(m);
 
-                //проверяем папки
-                string script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
-                reader = new AviSynthReader();
-                reader.ParseScript(script);
-                m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
-
-                //проверка на устаревшую индекс папку
-                string ifopath = Calculate.GetIFO(m.infilepath);
-                if (File.Exists(ifopath))
+                if (File.Exists(m.indexfile))
                 {
-                    VStripWrapper vs = new VStripWrapper();
-                    vs.Open(ifopath);
-                    TimeSpan duration = vs.Duration();
-                    vs.Close();
+                    //проверяем папки
+                    string script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
+                    reader = new AviSynthReader();
+                    reader.ParseScript(script);
+                    m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
 
-                    //папка устарела
-                    if ((long)m.induration.Duration().TotalSeconds != (long)duration.TotalSeconds)
+                    //проверка на устаревшую индекс папку
+                    string ifopath = Calculate.GetIFO(m.infilepath);
+                    if (File.Exists(ifopath))
                     {
-                        string indexfolder = Path.GetDirectoryName(m.indexfile);
-                        try
+                        VStripWrapper vs = new VStripWrapper();
+                        vs.Open(ifopath);
+                        TimeSpan duration = vs.Duration();
+                        vs.Close();
+
+                        //папка устарела
+                        if ((long)m.induration.Duration().TotalSeconds != (long)duration.TotalSeconds)
                         {
-                            reader.Close();
-                            reader = null;
-                            Directory.Delete(indexfolder, true);
-                        }
-                        catch
-                        {
-                            //
+                            try
+                            {
+                                Directory.Delete(Path.GetDirectoryName(m.indexfile), true);
+                            }
+                            catch { }
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                //старая папка
+                //Проблемы при открытии существующего d2v-файла (возможно это кэш от другого файла, уже не существующего)
                 if (ex.Message.StartsWith("MPEG2Source"))
                 {
-                    string indexfolder = Path.GetDirectoryName(m.indexfile);
                     try
                     {
-                        reader.Close();
-                        reader = null;
-                        Directory.Delete(indexfolder, true);
+                        Directory.Delete(Path.GetDirectoryName(m.indexfile), true);
                     }
-                    catch
-                    {
-                        //
-                    }
+                    catch { }
                 }
                 else
                 {

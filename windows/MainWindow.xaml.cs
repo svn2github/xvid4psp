@@ -4133,7 +4133,7 @@ namespace XviD4PSP
                         w = this.LayoutRoot.ActualWidth;
                         h = (w / m.outaspect);
                         left = 0;
-                        top = ((this.LayoutRoot.ActualHeight - h) / 2.0);
+                        top = ((this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight - h) / 2.0);
                     }
                 }
                 hr = this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(w * dpi), (int)(h * dpi)); //Масштабируем и вводим
