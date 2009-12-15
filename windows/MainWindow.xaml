@@ -35,9 +35,9 @@
                     <MenuItem x:Name="menu_decode_file" Header="Decode file..." Click="menu_decode_file_Click"/>
 					<MenuItem x:Name="menu_join" Header="Join file..." Click="menu_join_Click"/>
 					<Separator/>
-					<MenuItem x:Name="mnCloseFile" Header="Close" Click="mnCloseFile_Click"/>
+					<MenuItem x:Name="mnCloseFile" Header="Close" Click="button_close_Click"/>
 					<Separator/>
-					<MenuItem x:Name="mnSave" Header="Save" Click="mnSave_Click"/>
+					<MenuItem x:Name="mnSave" Header="Save" Click="button_save_Click"/>
 					<Separator/>
 					<MenuItem Header="Save frame..." x:Name="menu_save_frame" Click="menu_save_frame_Click"/>
 					<MenuItem x:Name="menu_savethm" Header="Save THM..." Click="menu_savethm_Click" IsEnabled="True"/>

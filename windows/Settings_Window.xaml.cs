@@ -47,6 +47,10 @@ namespace XviD4PSP
             check_batch_autoencoding.Content = Languages.Translate("Start encoding after opening all files");
             cmenu_is_always_close_encoding.Content = Languages.Translate("Autoclose encoding window if task was successfully accomplished");
             check_dgindex_cache_in_temp.Content = Languages.Translate("Create DGIndex cache in Temp folder");
+            label_clone.Content = Languages.Translate("Clone from the already opened file to each other:");
+            check_clone_ar.Content = Languages.Translate("Aspect/Resolution info (crop, aspect, etc)");
+            check_clone_trim.Content = Languages.Translate("Trim");
+            check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
 
             tab_main.Header = Languages.Translate("Misc");
             tab_encoding.Header = Languages.Translate("Encoding log");
@@ -76,6 +80,9 @@ namespace XviD4PSP
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding; //автозапуск кодирования (при пакетной обработке)
             check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp; //помещать DGIndex-кэш в Темп-папку
             check_demux_audio.ToolTip = "Leave it unchecked to avoid some problems with sound";
+            check_clone_ar.IsChecked = Settings.BatchCloneAR; //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
+            check_clone_trim.IsChecked = Settings.BatchCloneTrim; //То-же что и выше, но для обрезки
+            check_batch_pause.IsChecked = Settings.BatchPause; //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
 
             if (Settings.WriteLog)
                 check_logfile_tempfolder.IsEnabled = true;
@@ -372,6 +379,20 @@ namespace XviD4PSP
         {
             Settings.DGIndexInTemp = check_dgindex_cache_in_temp.IsChecked.Value;
         }
-      
+
+        private void check_clone_ar_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.BatchCloneAR = check_clone_ar.IsChecked.Value;
+        }
+
+        private void check_clone_trim_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.BatchCloneTrim = check_clone_trim.IsChecked.Value;
+        }
+        
+        private void check_batch_pause_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.BatchPause = check_batch_pause.IsChecked.Value;
+        }
 	}
 }

@@ -1674,5 +1674,65 @@ namespace XviD4PSP
                 SetString("VCropFrame", value);
             }
         }
+
+        public static bool BatchCloneAR
+        {
+            get
+            {
+                object value = GetValue("BatchCloneAR");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("BatchCloneAR", value);
+            }
+        }
+
+        public static bool BatchCloneTrim
+        {
+            get
+            {
+                object value = GetValue("BatchCloneTrim");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("BatchCloneTrim", value);
+            }
+        }
+
+        public static bool BatchPause
+        {
+            get
+            {
+                object value = GetValue("BatchClonePath");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("BatchClonePath", value);
+            }
+        }
     }
 }

@@ -81,7 +81,10 @@ namespace XviD4PSP
         private double fps = 0; //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
         private bool OldSeeking = false; //Способ позиционирования, old - непрерывное, new - только при отпускании кнопки мыши
         private double dpi = 1.0; //Для масштабирования окна ДиректШоу-превью
-        private bool IsBatchOpening = false;
+        
+        private bool IsBatchOpening = false; //true при пакетном открытии
+        private bool PauseAfterFirst = false; //Пакетное открытие с паузой после 1-го файла
+        private string[] batch_files; //Сохраненный список файлов для пакетного открытия с паузой
 
 #if DEBUG
         private DsROTEntry rot = null;
@@ -617,8 +620,12 @@ namespace XviD4PSP
             {
                 if (x.infileslist.Length > 1 && x.infilepath == null) //Мульти-открытие
                 {
-                    path_to_save = OpenDialogs.SaveFolder();
-                    if (path_to_save == null) return;
+                    PauseAfterFirst = Settings.BatchPause;
+                    if (!PauseAfterFirst)
+                    {
+                        path_to_save = OpenDialogs.SaveFolder();
+                        if (path_to_save == null) return;
+                    }
                     MultiOpen(x.infileslist);
                     return;
                 }
@@ -673,13 +680,7 @@ namespace XviD4PSP
 
             action_open(x);
         }
-
-        private void mnCloseFile_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (m != null)
-                CloseFile();
-        }
-
+      
         private void button_close_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m != null)
@@ -689,12 +690,6 @@ namespace XviD4PSP
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
             }
-        }
-
-        private void mnSave_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (m != null)
-                action_save(m.Clone());
         }
 
         private void button_save_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -1395,27 +1390,45 @@ namespace XviD4PSP
                     //автокроп
                     if (x.format != Format.ExportFormats.Audio)
                     {
-                        if (Settings.AutocropMode == Autocrop.AutocropMode.AllFiles &&
+                        //Клонируем АР от предыдущего файла
+                        if (IsBatchOpening && Settings.BatchCloneAR && m != null)
+                        {
+                            x.outresw = m.outresw;
+                            x.outresh = m.outresh;
+                            x.cropl = x.cropl_copy = m.cropl;
+                            x.cropt = x.cropt_copy = m.cropt;
+                            x.cropr = x.cropr_copy = m.cropr;
+                            x.cropb = x.cropb_copy = m.cropb;
+                            x.blackw = m.blackw;
+                            x.blackh = m.blackh;
+                            x.sar = m.sar;
+                            x.outaspect = m.outaspect;
+                            x.aspectfix = m.aspectfix;
+                        }
+                        else
+                        {
+                            if (Settings.AutocropMode == Autocrop.AutocropMode.AllFiles &&
                             x.outvcodec != "Copy" ||
                             Settings.AutocropMode == Autocrop.AutocropMode.MPEGOnly &&
                             Calculate.IsMPEG(x.infilepath) &&
                             x.outvcodec != "Copy")
-                        {
-                            if (x.format != Format.ExportFormats.BluRay)
                             {
-                                Autocrop acrop = new Autocrop(x, this);
-                                if (acrop.m == null) return;
-                                x = acrop.m.Clone();
+                                if (x.format != Format.ExportFormats.BluRay)
+                                {
+                                    Autocrop acrop = new Autocrop(x, this);
+                                    if (acrop.m == null) return;
+                                    x = acrop.m.Clone();
+                                }
                             }
+
+                            //подправляем входной аспект
+                            x = AspectResolution.FixInputAspect(x);
+
+                            //забиваем видео параметры на выход
+                            x = Format.GetValidResolution(x);
+                            x = Format.GetValidOutAspect(x);
+                            x = AspectResolution.FixAspectDifference(x);
                         }
-
-                        //подправляем входной аспект
-                        x = AspectResolution.FixInputAspect(x);
-
-                        //забиваем видео параметры на выход
-                        x = Format.GetValidResolution(x);
-                        x = Format.GetValidOutAspect(x);
-                        x = AspectResolution.FixAspectDifference(x);
                         x = Format.GetValidFramerate(x);
                         x = Calculate.UpdateOutFrames(x);
 
@@ -1448,10 +1461,22 @@ namespace XviD4PSP
                     //переполучаем параметры из профилей
                     x = PresetLoader.DecodePresets(x);
 
+                    //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
+                    x = Calculate.UpdateOutFrames(x);
+
+                    //Клонируем Трим от предыдущего файла и пересчитываем кол-во кадров и продолжительность 
+                    if (IsBatchOpening && Settings.BatchCloneTrim && m != null)
+                    {                       
+                        x.trim_start = m.trim_start;
+                        x.trim_end = m.trim_end;
+                        x.outframes = ((x.trim_end == 0) ? x.outframes : x.trim_end) - x.trim_start;
+                        x.outduration = TimeSpan.FromSeconds((double)x.outframes / Calculate.ConvertStringToDouble(x.outframerate));
+                    }
+
                     //создаём AviSynth скрипт
                     x = AviSynthScripting.CreateAutoAviSynthScript(x);
 
-                    //проверяем скрипт на ошибки и пытаемся их автоматически исправить
+                    //Автогромкость
                     if (x.inaudiostreams.Count > 0)
                     {
                         //определяем громкоcть
@@ -1465,9 +1490,6 @@ namespace XviD4PSP
                             x = AviSynthScripting.CreateAutoAviSynthScript(x);
                         }
                     }
-
-                    //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
-                    x = Calculate.UpdateOutFrames(x);
 
                     //проверка на размер
                     x.outfilesize = Calculate.GetEncodingSize(x);
@@ -1599,6 +1621,15 @@ namespace XviD4PSP
                         //добавляем задание в список
                         mass = UpdateOutAudioPath(mass);
                         AddTask(mass, "Waiting");
+                    }
+                    if (PauseAfterFirst)
+                    {
+                        PauseAfterFirst = false;
+                        button_save.Content = Languages.Translate("Enqueue");
+                        button_encode.Content = Languages.Translate("Encode");
+                        path_to_save = Path.GetDirectoryName(mass.outfilepath);
+                        MultiOpen(batch_files);
+                        batch_files = null;
                     }
                 }
             }
@@ -3239,11 +3270,13 @@ namespace XviD4PSP
         {
             if (((string[])e.Data.GetData(DataFormats.FileDrop)).Length > 1) //Мульти-открытие
             {
-                //Папка для перекодированного
-                OpenDialogs.owner = this;
-                path_to_save = OpenDialogs.SaveFolder();
-                if (path_to_save == null)
-                    return;
+                PauseAfterFirst = Settings.BatchPause;
+                if (!PauseAfterFirst)
+                {
+                    OpenDialogs.owner = this;
+                    path_to_save = OpenDialogs.SaveFolder();
+                    if (path_to_save == null) return;
+                }
                 MultiOpen((string[])e.Data.GetData(DataFormats.FileDrop));
             }
             else //Обычное открытие
@@ -3446,6 +3479,7 @@ namespace XviD4PSP
 
         private void button_encode_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            if (m != null && PauseAfterFirst){ action_save(m.Clone()); return; }
             if (m != null || list_tasks.Items.Count > 0)
             {
                 bool IsEncoding = false;
@@ -3453,10 +3487,8 @@ namespace XviD4PSP
                 foreach (object _task in list_tasks.Items)
                 {
                     Task task = (Task)_task;
-                    if (task.Status == "Encoding")
-                        IsEncoding = true;
-                    if (task.Status == "Waiting")
-                        IsWaiting = true;
+                    if (task.Status == "Encoding") IsEncoding = true;
+                    if (task.Status == "Waiting") IsWaiting = true;
                 }
 
                 if (IsEncoding && IsWaiting)
@@ -3467,9 +3499,7 @@ namespace XviD4PSP
                         return;
                 }
 
-                if (!IsWaiting)
-                    action_save(m.Clone());
-
+                if (!IsWaiting) action_save(m.Clone());
                 EncodeNextTask();
             }
             else
@@ -5342,17 +5372,19 @@ namespace XviD4PSP
             {
                 OpenDialogs.owner = this;
                 string path_to_open = OpenDialogs.OpenFolder();
-                if (path_to_open == null)
-                    return;
-                path_to_save = OpenDialogs.SaveFolder();
-                if (path_to_save == null)
-                    return;
+                if (path_to_open == null || Directory.GetFiles(path_to_open).Length == 0) return;
+
+                PauseAfterFirst = Settings.BatchPause;
+                if (!PauseAfterFirst)
+                {
+                    path_to_save = OpenDialogs.SaveFolder();
+                    if (path_to_save == null) return;
+                }
 
                 this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
                 this.Height = this.Window.Height - 1;
 
-                if (Directory.GetFiles(path_to_open).Length > 0) 
-                    MultiOpen(Directory.GetFiles(path_to_open, "*")); //Открываем-сохраняем
+                MultiOpen(Directory.GetFiles(path_to_open, "*")); //Открываем-сохраняем
             }
             catch (Exception ex)
             {
@@ -5371,8 +5403,7 @@ namespace XviD4PSP
                 textbox_name.Text = count + " - " + Languages.Translate("total files, ") + opened_files + " - " + Languages.Translate("opened files, ") + outfiles.Count + " - " + Languages.Translate("in queue");
 
                 //Делим строку с валидными расширениями на отдельные строчки
-                string[] separator = new string[] { "/" };
-                string[] goodexts = Settings.GoodFilesExtensions.Split(separator, StringSplitOptions.None);
+                string[] goodexts = Settings.GoodFilesExtensions.Split(new string[] { "/" }, StringSplitOptions.None);
 
                 foreach (string file in files_to_open)
                 {
@@ -5386,6 +5417,17 @@ namespace XviD4PSP
                             Massive x = new Massive();
                             x.infilepath = file;
                             x.infileslist = new string[] { file };
+                            if (PauseAfterFirst) //Пакетное открытие с паузой после первого файла
+                            {
+                                ArrayList newArray = new ArrayList(); //Удаляем этот файл из общего списка
+                                foreach (string f in files_to_open) { if (f != file) newArray.Add(f); }
+                                batch_files = (string[])newArray.ToArray(typeof(string));
+                                action_open(x);
+                                if (m == null) { PauseAfterFirst = false; return; }
+                                button_save.Content = button_encode.Content = Languages.Translate("Resume");
+                                textbox_name.Text = Languages.Translate("Press Resume to continue batch opening");
+                                return;
+                            }
                             IsBatchOpening = true;
                             action_open(x);
                             IsBatchOpening = false;

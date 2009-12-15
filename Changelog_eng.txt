@@ -1,5 +1,9 @@
-XviD4PSP r65->r70->r80->r85 09.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r90 15.12.09, main changes:
 
+>>> (r90) Batch opening: added ability to make a pause after 1-st opened file (for setup encoding settings), added ability
+          to clone Aspect/Resolution settings from the already opened file to each other (will be copied mostly all settings
+          from this window), and same thing added for the Trim. Settings->Global settings->Batch encoding.
+>>> (r89) Some fixes for MPEG-opening (cache-folder deletion) and Fullscreen (preview positioning). 
 >>> (r88) VisualCrop: some settings have been added to the Resolution/Aspect window on the Settings tab.
 >>> (r87) VisualCrop: fixed possibility of crash if some problems with recieving or processing the picture is exist.
 >>> (r86) MediaInfo provides rounded values, so for better precision now by default AR info will be recieved from the FFmpeg

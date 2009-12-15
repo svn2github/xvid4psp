@@ -59,9 +59,13 @@
 				</TabItem>
 			    <TabItem Header="Batch encoding" x:Name="tab_open_folder">
                     <Grid> 
-                        <Label OpacityMask="{x:Null}" x:Name="label_extensions" Content="Only files with this extensions will be opened:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="6,4,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
+                        <Label OpacityMask="{x:Null}" x:Name="label_extensions" Content="Only files with this extensions will be opened:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="3,4,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
                         <TextBox Margin="8,30,8,0" Height="60" x:Name="textbox_extensions" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" VerticalScrollBarVisibility="Auto" />
-                        <CheckBox x:Name="check_batch_autoencoding" Width="Auto" Height="Auto" Content="Start encoding after opening all files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,98,0,0" VerticalAlignment="Top" Click="check_batch_autoencoding_Click" d:LayoutOverrides="Width, Height"/>
+                        <CheckBox x:Name="check_batch_autoencoding" Height="16.9" Content="Start encoding after opening all files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,173,0,0" VerticalAlignment="Top" Click="check_batch_autoencoding_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
+                        <Label OpacityMask="{x:Null}" x:Name="label_clone" Content="Clone from the already opened file to each other:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" Margin="3,90,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto" />
+                        <CheckBox x:Name="check_clone_ar" Height="16.9" Content="Aspect/Resolution info (crop, aspect, etc)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,115,0,0" VerticalAlignment="Top" Click="check_clone_ar_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
+                        <CheckBox x:Name="check_batch_pause" Height="16.9" Content="Make a pause after 1-st opened file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,155,0,0" VerticalAlignment="Top" Click="check_batch_pause_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
+                        <CheckBox x:Name="check_clone_trim" Height="16.9" Content="Trim" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,133,0,0" VerticalAlignment="Top" Click="check_clone_trim_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
                     </Grid>
                 </TabItem>
             </TabControl>
