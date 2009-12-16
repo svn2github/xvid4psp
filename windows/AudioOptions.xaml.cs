@@ -91,8 +91,6 @@ namespace XviD4PSP
             label_converter.Content = Languages.Translate("Converter") + ":";
             label_accurate.Content = Languages.Translate("Accurate") + ":";
             //label_mixing.Content = Languages.Translate("Mixing") + ":";
-            combo_mixing.ToolTip = Languages.Translate("How to convert audio channels");
-            button_fix_channels.ToolTip = Languages.Translate("Remember this selection");
 
             //путь к звуковой дорожке
             combo_atracks.Items.Clear();
@@ -124,6 +122,8 @@ namespace XviD4PSP
                     textbox_apath.Text = instream.audiopath;
             }
 
+            check_apply_delay.IsChecked = Settings.ApplyDelay;
+
             //только для all режима
             if (mode == AudioOptionsModes.AllOptions)
             {
@@ -139,7 +139,7 @@ namespace XviD4PSP
                 //прописываем громкость
                 combo_volume.Items.Clear();
                 combo_volume.Items.Add("Disabled");
-                for (int y = 90; y < 402; y += 2)
+                for (int y = 30; y < 401; y += 10)
                     combo_volume.Items.Add(y + "%");
 
                 //прописываем аккуратность определения громкости
@@ -290,6 +290,11 @@ namespace XviD4PSP
             button_openapath.ToolTip = Languages.Translate("Open external audio file");
             button_analysevolume.ToolTip = Languages.Translate("Analyse");
             button_play.ToolTip = Languages.Translate("Play selected track");
+            combo_mixing.ToolTip = Languages.Translate("How to convert audio channels");
+            button_fix_channels.ToolTip = Languages.Translate("Remember this selection");
+            check_apply_delay.ToolTip = Languages.Translate("Auto apply to output");
+            combo_volume.ToolTip = Languages.Translate("Normalize to this (peak) level:") + "\r\n30% = -10.5dB\r\n40% = -8dB\r\n50% = -6dB\r\n60% = -4.5dB\r\n70% = -3dB\r\n80% = -1.9dB\r\n" + 
+                "90% = -0.9dB\r\n100% = 0dB (Nominal level)\r\n150% = 3.5dB\r\n200% = 6dB\r\n250% = 8dB\r\n300% = 9.5dB\r\n350% = 11dB\r\n400% = 12dB";
         }
 
         private void combo_atracks_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -317,7 +322,7 @@ namespace XviD4PSP
                 AudioStream stream = new AudioStream();
                 m.outaudiostreams.Clear();
                 stream.gainfile = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + "_gain.wav";
-                stream.delay = instream.delay;
+                if (Settings.ApplyDelay) stream.delay = instream.delay;
                 m.outaudiostreams.Add(stream);
 
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
@@ -851,5 +856,16 @@ namespace XviD4PSP
             Settings.ChannelsConverter = StringMixingToEnum(combo_mixing.SelectedItem.ToString()).ToString();
         }
 
+        private void check_apply_delay_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.ApplyDelay = check_apply_delay.IsChecked.Value;
+            if (check_apply_delay.IsChecked.Value == true)
+            {
+                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                num_delay.Value = outstream.delay = instream.delay;
+                SetInfo();
+            }
+        }
 	}
 }

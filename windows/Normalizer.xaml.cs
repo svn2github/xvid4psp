@@ -143,13 +143,13 @@ namespace XviD4PSP
             encoderProcess = null;
 
             //забиваем гейн
-            string pat = @"(\d+.\d+)\DdB";
+            string pat = @"(.\d+.\d+)\DdB";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat = r.Match(encodertext);
 
             if (mat.Success == true)
             {
-                stream.gain = mat.Groups[1].Value;
+                stream.gain = mat.Groups[1].Value.Trim();
                 stream.gaindetected = true;
             }
             else

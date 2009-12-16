@@ -1177,8 +1177,7 @@ namespace XviD4PSP
                         }
                     }
 
-                    if (x == null)
-                        return;
+                    if (x == null) return;
 
                     //блок авто извлечения для быстрого и правильного декодирования через FFMpegSource
                     if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
@@ -4758,7 +4757,7 @@ namespace XviD4PSP
                 AudioStream stream = new AudioStream();
                 mass.outaudiostreams.Clear();
                 AudioStream instream = (AudioStream)mass.inaudiostreams[mass.inaudiostream];
-                stream.delay = instream.delay;
+                if (Settings.ApplyDelay) stream.delay = instream.delay;
                 mass.outaudiostreams.Add(stream);
                 //}
 

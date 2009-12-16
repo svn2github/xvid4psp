@@ -1734,5 +1734,25 @@ namespace XviD4PSP
                 SetBool("BatchClonePath", value);
             }
         }
+
+        public static bool ApplyDelay
+        {
+            get
+            {
+                object value = GetValue("ApplyDelay");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("ApplyDelay", value);
+            }
+        }
     }
 }

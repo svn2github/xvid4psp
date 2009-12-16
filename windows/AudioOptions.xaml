@@ -92,13 +92,14 @@
 			</GroupBox>
 			<GroupBox Margin="8,100,190,0" Header="Delay" Foreground="#FFFFFFFF" x:Name="group_delay" Height="66" VerticalAlignment="Top">
 				<Grid Width="Auto" Height="Auto">
-					<Label OpacityMask="{x:Null}" x:Name="label_delayin" Content="Input: 0 ms" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,8,0,8" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Center"/>
-					<Label OpacityMask="{x:Null}" x:Name="label_delayout" Content="Output:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,8,142,8" d:LayoutOverrides="Width, Height" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+					<Label OpacityMask="{x:Null}" x:Name="label_delayin" Content="Input: 0 ms" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="22,8,0,8" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="check_apply_delay" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="10,1,0,0" Click="check_apply_delay_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="90" VerticalAlignment="Center"  />
+                    <Label OpacityMask="{x:Null}" x:Name="label_delayout" Content="Output:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,8,142,8" d:LayoutOverrides="Width, Height" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 					<Label OpacityMask="{x:Null}" x:Name="label_ms" Content="ms" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,8,6,8" d:LayoutOverrides="Width, Height" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 					<MyUserControl:NumericUpDown x:Name="num_delay" Width="104" HorizontalAlignment="Right" Margin="0,8,34,8" Maximum="50000" Minimum="-50000" Change="10" VerticalAlignment="Center"/>
 				</Grid>
 			</GroupBox>
-			<GroupBox Margin="9,170,190,0" Header="Samplerate" Foreground="#FFFFFFFF" x:Name="group_samplerate" Height="95" VerticalAlignment="Top">
+			<GroupBox Margin="8,170,190,0" Header="Samplerate" Foreground="#FFFFFFFF" x:Name="group_samplerate" Height="95" VerticalAlignment="Top">
 				<Grid Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="label_insamplerate" Content="Input: 44100 Hz" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
 					<Label OpacityMask="{x:Null}" x:Name="label_outsamplerate" Content="Output:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,8,142,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height" HorizontalAlignment="Right"/>
@@ -108,7 +109,7 @@
 					<Label OpacityMask="{x:Null}" x:Name="label_hz" Content="Hz" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Right" Margin="0,8,8,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
 				</Grid>
 			</GroupBox>
-			<GroupBox Margin="9,269,190,0" Header="Channels" Foreground="#FFFFFFFF" x:Name="group_channels" Height="66" VerticalAlignment="Top">
+			<GroupBox Margin="8,269,190,0" Header="Channels" Foreground="#FFFFFFFF" x:Name="group_channels" Height="66" VerticalAlignment="Top">
 				<Grid Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="label_inchannels" Content="Source: Stereo" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
 					<ComboBox x:Name="combo_mixing" Height="Auto" IsSynchronizedWithCurrentItem="True" Margin="176,11.5,34,0" d:LayoutOverrides="Height" VerticalAlignment="Top" SelectionChanged="combo_mixing_SelectionChanged" HorizontalAlignment="Right"/>

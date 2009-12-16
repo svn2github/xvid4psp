@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r90 15.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r91 16.12.09, main changes:
 
+>>> (r91) Fixed autogain with negative values ("-" was not used), expanded the range of adjustment.
+>>> (r91) Added ability to disable auto delay insertion for the output audio track (Audio->Processing options).
 >>> (r90) Batch opening: added ability to make a pause after 1-st opened file (for setup encoding settings), added ability
           to clone Aspect/Resolution settings from the already opened file to each other (will be copied mostly all settings
           from this window), and same thing added for the Trim. Settings->Global settings->Batch encoding.
