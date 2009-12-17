@@ -344,8 +344,14 @@ namespace XviD4PSP
             if (m.outvideofile == null)
                 m.outvideofile = Settings.TempPath + "\\" + m.key + ".264";
 
-            if (Format.GetMuxer(m) == Format.Muxers.ffmpeg) //ffmpeg криво муксит raw-avc, нужно кодировать в контейнер
+            Format.Muxers muxer = Format.GetMuxer(m);
+            if (muxer == Format.Muxers.ffmpeg) //ffmpeg криво муксит raw-avc, нужно кодировать в контейнер
                 m.outvideofile = Calculate.RemoveExtention(m.outvideofile, true) + ".mp4";
+            else if (muxer == Format.Muxers.Disabled) //Если можно кодировать сразу в контейнер
+            { 
+                m.outvideofile = m.outfilepath;
+                m.dontmuxstreams = true;
+            }
                         
             //подхватываем готовый файл
             if (File.Exists(m.outvideofile))
@@ -4507,7 +4513,7 @@ namespace XviD4PSP
                 else if (muxer == Format.Muxers.Disabled &&
                     m.format != Format.ExportFormats.Audio)
                 {
-                    SetLog("VIDEO & AUDIO ENCODING");
+                    SetLog((m.outvcodec == "x264") ? "VIDEO ENCODING" : "VIDEO & AUDIO ENCODING");
                     SetLog("------------------------------");
                 }
                 else if (m.outvcodec != "Disabled" &&

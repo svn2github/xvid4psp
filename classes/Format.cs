@@ -2126,7 +2126,10 @@ namespace XviD4PSP
            if (m.format == Format.ExportFormats.PmpAvc)
                return Muxers.pmpavc;
            else if (m.format == Format.ExportFormats.Mkv)
-               return Muxers.mkvmerge;
+           {
+               if (m.outaudiostreams.Count > 0) return Muxers.mkvmerge;
+               else return Muxers.Disabled; //Кодирование сразу в МКВ
+           }
            else if (m.format == Format.ExportFormats.Mpeg2PS ||
                m.format == Format.ExportFormats.Flv ||
                m.format == ExportFormats.Mpeg1PS)
@@ -2220,7 +2223,7 @@ namespace XviD4PSP
 
       public static Demuxers GetDemuxer(Massive m)
       {
-          Muxers mux = GetMuxer(m);
+          //Muxers mux = GetMuxer(m);
           string ext = Path.GetExtension(m.infilepath);
 
           if (ext == ".mkv")

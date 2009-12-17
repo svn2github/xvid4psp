@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r91 16.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r92 17.12.09, main changes:
 
+>>> (r92) Some changes in the MediaPlayerClassic call (now player is checked in 4 possible folders).
+>>> (r92) Direct encoding (w/o intermediate files) to MKV if format=MKV, encoder=x264 and audio=Disabled.
 >>> (r91) Fixed autogain with negative values ("-" was not used), expanded the range of adjustment.
 >>> (r91) Added ability to disable auto delay insertion for the output audio track (Audio->Processing options).
 >>> (r90) Batch opening: added ability to make a pause after 1-st opened file (for setup encoding settings), added ability

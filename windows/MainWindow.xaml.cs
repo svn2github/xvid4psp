@@ -3796,9 +3796,11 @@ namespace XviD4PSP
             {
                 string path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Windows Media Player\\wmplayer.exe";
                 if (sender == menu_playinwpf) path = Calculate.StartupPath + "\\WPF_VideoPlayer.exe";
-                else if (sender == menu_playinmpc)
-                    if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mplayerc.exe"))
-                        path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Media Player Classic\\mplayerc.exe";
+                else if (sender == menu_playinmpc) //Ох и развелось же их, МедиаПлейерКлассиков...
+                    if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mpc-hc.exe"))
+                        if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\MPC HomeCinema\\mpc-hc.exe"))
+                            if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mplayerc.exe"))
+                                path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Media Player Classic\\mplayerc.exe";
 
                 if (!File.Exists(m.scriptpath)) AviSynthScripting.WriteScriptToFile(m);
                 ProcessStartInfo info = new ProcessStartInfo();
