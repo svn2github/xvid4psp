@@ -1,5 +1,10 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r93 20.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95 20.12.09, main changes:
 
+>>> (r95) Fixed direct encoding to MKV if video coder other than x264 (it can be direct only if x264 is used, bug since r92).
+          Also added direct encoding to MP4 and FLV, if video=x264 and audio=Disabled.
+>>> (r95) Fixed bug with AVI encoding using x264 and disabled audio (rep. by electricway, bug since r58).
+>>> (r94) Added enhanced HotKeys support, every hotkey can be redefined by user in the "Global settings->HotKeys" menu. 
+          Simply select "Action", then press "Edit", then enter desired combination on the keyboard, and then press "Save".
 >>> (r93) Added support for 64-bit x264.exe (via avs4x264.exe). To use it, you must add x264_64.exe and avs4x264.exe into
           x264 folder, and turn on this option it settings (Global settings->Encoding).
 >>> (r92) Some changes in the MediaPlayerClassic call (now player is checked in 4 possible folders).

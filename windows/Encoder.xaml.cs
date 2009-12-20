@@ -346,15 +346,16 @@ namespace XviD4PSP
 
             Format.Muxers muxer = Format.GetMuxer(m);
             if (muxer == Format.Muxers.ffmpeg) //ffmpeg криво муксит raw-avc, нужно кодировать в контейнер
-                m.outvideofile = Calculate.RemoveExtention(m.outvideofile, true) + ".mp4";
-            else if (muxer == Format.Muxers.Disabled) //Если можно кодировать сразу в контейнер
-            { 
+            {
+                if (Path.GetExtension(m.outfilepath).ToLower() != ".avi") //А в АВИ наоборот, криво муксит из контейнера.. :(
+                    m.outvideofile = Calculate.RemoveExtention(m.outvideofile, true) + ".mp4";
+            }
+            if (muxer == Format.Muxers.Disabled) //Если можно кодировать сразу в контейнер
+            {
                 m.outvideofile = m.outfilepath;
                 m.dontmuxstreams = true;
             }
-                        
-            //подхватываем готовый файл
-            if (File.Exists(m.outvideofile))
+            else if (File.Exists(m.outvideofile)) //подхватываем готовый файл
             {
                 if (File.Exists(m.outvideofile) &&
                     new FileInfo(m.outvideofile).Length != 0)

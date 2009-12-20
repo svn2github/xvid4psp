@@ -2127,32 +2127,35 @@ namespace XviD4PSP
                return Muxers.pmpavc;
            else if (m.format == Format.ExportFormats.Mkv)
            {
-               if (m.outaudiostreams.Count > 0) return Muxers.mkvmerge;
-               else return Muxers.Disabled; //Кодирование сразу в МКВ
+               //Кодирование сразу в MKV
+               if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
+               else return Muxers.mkvmerge; 
            }
            else if (m.format == Format.ExportFormats.Mpeg2PS ||
-               m.format == Format.ExportFormats.Flv ||
-               m.format == ExportFormats.Mpeg1PS)
+                    m.format == ExportFormats.Mpeg1PS)
                return Muxers.ffmpeg;
+           else if (m.format == Format.ExportFormats.Flv)
+           {
+               //Кодирование сразу в FLV
+               if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
+               else return Muxers.ffmpeg; 
+           }
            else if (m.format == ExportFormats.M2TS ||
-               m.format == ExportFormats.TS ||
-               m.format == ExportFormats.BluRay)
+                    m.format == ExportFormats.TS ||
+                    m.format == ExportFormats.BluRay)
                return Muxers.tsmuxer;
-           //else if (m.format == Format.ExportFormats.Mpeg2NTSC ||
-           //    m.format == Format.ExportFormats.Mpeg2PAL)
-           //    return Muxers.mplex;
            else if (m.format == Format.ExportFormats.Mpeg2NTSC ||
-               m.format == Format.ExportFormats.Mpeg2PAL)
+                    m.format == Format.ExportFormats.Mpeg2PAL)
            {
                return Muxers.ffmpeg;
            }
            else if (m.format == ExportFormats.DpgNintendoDS)
                return Muxers.dpgmuxer;
            else if (m.format == Format.ExportFormats.Avi ||
-               m.format == Format.ExportFormats.AviHardware ||
-               m.format == ExportFormats.AviHardwareHD ||
-               m.format == ExportFormats.AviiRiverClix2 ||
-               m.format == ExportFormats.AviMeizuM6)
+                    m.format == Format.ExportFormats.AviHardware ||
+                    m.format == ExportFormats.AviHardwareHD ||
+                    m.format == ExportFormats.AviiRiverClix2 ||
+                    m.format == ExportFormats.AviMeizuM6)
            {
                if (m.outaudiostreams.Count == 0)
                    return Muxers.ffmpeg;
@@ -2191,7 +2194,7 @@ namespace XviD4PSP
                }
            }
            else if (m.format == Format.ExportFormats.AviDVNTSC ||
-               m.format == Format.ExportFormats.AviDVPAL)
+                    m.format == Format.ExportFormats.AviDVPAL)
                return Muxers.Disabled;
            else if (m.format == ExportFormats.Audio)
                return Muxers.Disabled;
@@ -2199,26 +2202,23 @@ namespace XviD4PSP
            {
                string CustomMuxer = FormatReader.GetFormatInfo("Custom", "GetMuxer");
                //return (Muxers)Enum.Parse(typeof(Muxers), FormatReader.GetFormatInfo("Custom", "GetMuxer"), true);
-               if (CustomMuxer == "pmpavc")
-                   return Muxers.pmpavc;
-               else if (CustomMuxer == "mkvmerge")
-                   return Muxers.mkvmerge;
-               else if (CustomMuxer == "ffmpeg")
-                   return Muxers.ffmpeg;
-               else if (CustomMuxer == "tsmuxer")
-                   return Muxers.tsmuxer;
-               else if (CustomMuxer == "dpgmuxer")
-                   return Muxers.dpgmuxer;
-               else if (CustomMuxer == "virtualdubmod")
-                   return Muxers.virtualdubmod;
-               else if (CustomMuxer == "disabled")
-                   return Muxers.Disabled;
-               else if (CustomMuxer == "mp4box")
-                   return Muxers.mp4box;
+               if (CustomMuxer == "pmpavc") return Muxers.pmpavc;
+               else if (CustomMuxer == "mkvmerge") return Muxers.mkvmerge;
+               else if (CustomMuxer == "ffmpeg") return Muxers.ffmpeg;
+               else if (CustomMuxer == "tsmuxer") return Muxers.tsmuxer;
+               else if (CustomMuxer == "dpgmuxer") return Muxers.dpgmuxer;
+               else if (CustomMuxer == "virtualdubmod") return Muxers.virtualdubmod;
+               else if (CustomMuxer == "disabled") return Muxers.Disabled;
+               else if (CustomMuxer == "mp4box") return Muxers.mp4box;
                else return Muxers.ffmpeg;
            }
-           else
-               return Muxers.mp4box; 
+           else if (m.format == Format.ExportFormats.Mp4)
+           {
+               //Кодирование сразу в MP4
+               if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
+               else return Muxers.mp4box;
+           }
+           else return Muxers.mp4box;
        }
 
       public static Demuxers GetDemuxer(Massive m)
