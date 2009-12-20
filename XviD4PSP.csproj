@@ -106,6 +106,7 @@
     <Compile Include="classes\AviSynthEncoder.cs" />
     <Compile Include="classes\ac3_arguments.cs" />
     <Compile Include="classes\FormatReader.cs" />
+    <Compile Include="classes\HotKeys.cs" />
     <Compile Include="classes\wmv_arguments.cs" />
     <Compile Include="classes\FFInfo.cs" />
     <Compile Include="classes\ffmpeg_arguments.cs" />

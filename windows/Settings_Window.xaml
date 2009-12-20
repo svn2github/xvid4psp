@@ -9,7 +9,7 @@
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,0,0,0" VerticalAlignment="Stretch">
+			<TabControl Height="Auto" SelectionChanged="Menu_Changed" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,0,0,0" VerticalAlignment="Stretch">
 				<TabItem Header="Main" x:Name="tab_main">
 					<Grid Width="Auto" Height="Auto">
 						<Grid.ColumnDefinitions>
@@ -29,8 +29,6 @@
                             <CheckBox x:Name="check_resize_first" Width="Auto" Height="Auto" Content="Make crop/resize before filtering (otherwise - after filtering)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_resize_first_Click"/>
                             <CheckBox x:Name="check_read_prmtrs" Width="Auto" Height="Auto" Content="Read parameters from the script when saving a new task" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_read_prmtrs_Click"/>
                         </StackPanel>
-					       
-                       
                     </Grid>
 				</TabItem>
 				<TabItem x:Name="tab_temp" Header="Temp files">
@@ -55,7 +53,6 @@
 					    <CheckBox x:Name="check_log_to_file" Width="Auto" Height="Auto" Content="Write encoding log to file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,98,0,0" VerticalAlignment="Top" Click="check_log_to_file_Click" d:LayoutOverrides="Width, Height"/>
                         <CheckBox x:Name="check_logfile_tempfolder" Width="Auto" Height="Auto" Content="in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="320,98,0,0" VerticalAlignment="Top" Click="check_logfile_tempfolder_Click" d:LayoutOverrides="Width, Height"/>
                         <CheckBox x:Name = "cmenu_is_always_close_encoding" Width="Auto" Height="Auto"  Content="Autoclose encoding window if task was successfully accomplished" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8.3,121,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
-                    
                     </Grid>
 				</TabItem>
 			    <TabItem Header="Batch encoding" x:Name="tab_open_folder">
@@ -67,6 +64,18 @@
                         <CheckBox x:Name="check_clone_ar" Height="16.9" Content="Aspect/Resolution info (crop, aspect, etc)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,115,0,0" VerticalAlignment="Top" Click="check_clone_ar_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
                         <CheckBox x:Name="check_batch_pause" Height="16.9" Content="Make a pause after 1-st opened file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,155,0,0" VerticalAlignment="Top" Click="check_batch_pause_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
                         <CheckBox x:Name="check_clone_trim" Height="16.9" Content="Trim" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,133,0,0" VerticalAlignment="Top" Click="check_clone_trim_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="HotKeys" x:Name="tab_hotkeys">
+                    <Grid>
+                        <Label OpacityMask="{x:Null}" x:Name="label_action" Content="Action:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,48,44,0" d:LayoutOverrides="Height" VerticalAlignment="Top" HorizontalAlignment="Right" Width="129" Height="26.9" />
+                        <Label OpacityMask="{x:Null}" x:Name="label_combination" Content="Combination:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,94,46,0" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="129" Height="29.263" VerticalAlignment="Top" />
+                        <TextBox Margin="6,6,176.5,6" x:Name="textbox_hotkeys" Text="" TextWrapping="NoWrap" FontSize="13" VerticalScrollBarVisibility="Visible" AcceptsReturn="True" IsReadOnly="True" FontFamily="Lucida Console" AllowDrop="False" />
+                        <Button x:Name="button_restore_hotkeys" Content="Restore default settings" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="164" Margin="0,18,6,0" Click="button_restore_hotkeys_Click" Height="27" VerticalAlignment="Top" />
+                        <ComboBox x:Name="combo_action" Height="21" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_action_SelectionChanged" d:LayoutOverrides="VerticalAlignment, Height" Margin="0,72,6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="164" />
+                        <TextBox Margin="0,118,6,0" x:Name="textbox_combination" Text="" TextWrapping="Wrap" FontSize="13" IsReadOnly="True" HorizontalAlignment="Right" Width="164" Height="20" VerticalAlignment="Top" />
+                        <Button x:Name="button_edit_hotkeys" Content="Edit" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="78" Margin="0,0,92.5,13" Click="button_edit_hotkeys_Click" Height="27" VerticalAlignment="Bottom" />
+                        <Button x:Name="button_save_hotkeys" Content="Save" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="78" Margin="0,0,6,13" Click="button_save_hotkeys_Click" Height="26.735" VerticalAlignment="Bottom" />
                     </Grid>
                 </TabItem>
             </TabControl>

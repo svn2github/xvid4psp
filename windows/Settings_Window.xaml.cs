@@ -7,12 +7,16 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
+using System.Collections;
+using System.Windows.Input;
 
 namespace XviD4PSP
 {
 	public partial class Settings_Window
 	{
         private MainWindow p;
+        private bool edit = false;
+        private ArrayList tr = new ArrayList();
 
         public Settings_Window(MainWindow parent, int set_focus_to)
 		{
@@ -53,10 +57,17 @@ namespace XviD4PSP
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
             check_use_64bit.Content = Languages.Translate("Use 64 bit x264");
 
+            button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
+            button_edit_hotkeys.Content = Languages.Translate("Edit");
+            button_save_hotkeys.Content = Languages.Translate("Save");
+            label_action.Content = Languages.Translate("Action") + ":";
+            label_combination.Content = Languages.Translate("Combination") + ":";
+
             tab_main.Header = Languages.Translate("Misc");
             tab_encoding.Header = Languages.Translate("Encoding");
             tab_temp.Header = Languages.Translate("Temp files");
             tab_open_folder.Header = Languages.Translate("Batch encoding");
+            //tab_hotkeys.Header = Languages.Translate("HotKeys");
 
             check_demux_audio.IsChecked = Settings.DontDemuxAudio;
             check_show_psnr.IsChecked = Settings.x264_PSNR;
@@ -86,6 +97,22 @@ namespace XviD4PSP
             check_batch_pause.IsChecked = Settings.BatchPause; //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
             check_use_64bit.IsChecked = Settings.Use64x264; //Использовать 64-битную версию x264.exe
 
+            //Загружаем HotKeys (плюс перевод к действиям)
+            foreach (string line in HotKeys.Data)
+            {
+                if (line.Contains("="))
+                {
+                    string[] action = line.Split(new string[] { "=" }, StringSplitOptions.None);
+                    tr.Add(action[0].Trim());
+                    string traction = (Languages.Translate(action[0].Trim()));
+                    combo_action.Items.Add(traction);
+                    int length = (traction.Length > 28) ? (28) : (traction.Length);
+                    textbox_hotkeys.Text += traction + "...............................".Substring(1, 28 - length) + action[1] + Environment.NewLine;
+                }
+            }
+            combo_action.SelectedIndex = 0;
+            textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+            
             if (Settings.WriteLog)
                 check_logfile_tempfolder.IsEnabled = true;
             else
@@ -99,9 +126,22 @@ namespace XviD4PSP
             if (set_focus_to == 2) tab_temp.Focus();
             else if (set_focus_to == 3) tab_encoding.Focus();
             else if (set_focus_to == 4) tab_open_folder.Focus();
+            else if (set_focus_to == 5) tab_hotkeys.Focus();
 
             ShowDialog();
 		}
+
+        //Нажатия кнопок для HotKeys
+        private void Settings_KeyDown(object sender, KeyEventArgs e)
+        {
+            string PressedKeys = "";
+            if (Keyboard.Modifiers == ModifierKeys.Control) PressedKeys = "Ctrl+";
+            if (Keyboard.Modifiers == ModifierKeys.Shift) PressedKeys = "Shift+";
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) PressedKeys = "Ctrl+Alt+";
+            PressedKeys += e.Key.ToString();
+            textbox_combination.Text = PressedKeys;
+            e.Handled = true;
+        }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -397,6 +437,93 @@ namespace XviD4PSP
         private void check_use_64bit_Click(object sender, RoutedEventArgs e)
         {
             Settings.Use64x264 = check_use_64bit.IsChecked.Value;
+        }
+
+        private void button_restore_hotkeys_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.HotKeys = "";
+            p.SetHotKeys(); //Тут происходит обновление HotKeys.Data
+            UpdateHotKeysBox();
+            Menu_Changed(null, null);
+            textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+        }
+
+        private void button_edit_hotkeys_Click(object sender, RoutedEventArgs e)
+        {
+            edit = !edit;
+            if (edit)
+            {
+                button_save_hotkeys.Foreground = Brushes.Red;
+                this.PreviewKeyDown += new KeyEventHandler(Settings_KeyDown);
+            }
+            else
+            {
+                button_save_hotkeys.Foreground = Brushes.White;
+                this.PreviewKeyDown -= new KeyEventHandler(Settings_KeyDown);
+                textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+            }
+        }
+
+        private void combo_action_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_action.IsDropDownOpen)
+                textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+        }
+
+        private void button_save_hotkeys_Click(object sender, RoutedEventArgs e)
+        {
+            if (edit)
+            {
+                string Action = HotKeys.GetAction("=" + textbox_combination.Text);
+                if (Action != "" && Action != tr[combo_action.SelectedIndex].ToString())
+                {
+                    new Message(this).ShowMessage(Languages.Translate("Combination") + " \"" + textbox_combination.Text + "\" " + Languages.Translate("already used for") + " \"" + Languages.Translate(Action) + "\".", Languages.Translate("Error"));
+                }
+                else
+                {
+                    string output = "", res = "";
+                    foreach (string line in HotKeys.Data)
+                    {
+                        if (line.Contains("="))
+                        {
+                            string[] action = line.Trim().Split(new string[] { "=" }, StringSplitOptions.None);
+                            if (action[0] == tr[combo_action.SelectedIndex].ToString())
+                            {
+                                res = action[0] + "=" + textbox_combination.Text + "; ";
+                            }
+                            else 
+                                res = line.Trim() + "; ";
+                            output += res;
+                        }
+                    }
+                    Settings.HotKeys = output;
+                    p.SetHotKeys(); //Тут происходит обновление HotKeys.Data
+                    UpdateHotKeysBox();
+                    Menu_Changed(null, null);
+                }
+            }
+        }
+
+        private void Menu_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            edit = false;
+            button_save_hotkeys.Foreground = Brushes.White;
+            this.PreviewKeyDown -= new KeyEventHandler(Settings_KeyDown);
+        }
+
+        private void UpdateHotKeysBox()
+        {
+            textbox_hotkeys.Clear();
+            foreach (string line in HotKeys.Data)
+            {
+                if (line.Contains("="))
+                {
+                    string[] action = line.Split(new string[] { "=" }, StringSplitOptions.None);
+                    string traction = (Languages.Translate(action[0].Trim()));
+                    int length = (traction.Length > 28) ? (28) : (traction.Length);
+                    textbox_hotkeys.Text += traction + "...............................".Substring(1, 28 - length) + action[1] + Environment.NewLine;
+                }
+            }
         }
 	}
 }

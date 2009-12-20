@@ -158,7 +158,8 @@ namespace XviD4PSP
                 textbox_time.Text = textbox_duration.Text = "00:00:00";
              
                 MenuHider(false); //Делаем пункты меню неактивными
-                SetLanguage(); //переводим лейблы
+                SetHotKeys();     //Загружаем HotKeys
+                SetLanguage();    //переводим лейблы
 
                 //Определяем коэффициент для масштабирования окна ДиректШоу-превью
                 IntPtr ScreenDC = GetDC(IntPtr.Zero); //88-w, 90-h
@@ -173,7 +174,7 @@ namespace XviD4PSP
 
             //events
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
-            this.KeyUp += new KeyEventHandler(MainWindow_KeyUp);
+            this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown); 
             this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter);//Мышь вошла в зону с названием файла
             this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave);//Мышь вышла из зоны с названием файла 
         }
@@ -360,69 +361,80 @@ namespace XviD4PSP
             }
         }
 
-        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (this.graphBuilder != null)
+            if (this.OwnedWindows.Count > 0 || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused) return;
+            string PressedKeys = "=";
+            if (Keyboard.Modifiers == ModifierKeys.Control) PressedKeys = "=Ctrl+";
+            if (Keyboard.Modifiers == ModifierKeys.Shift) PressedKeys = "=Shift+";
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) PressedKeys = "=Ctrl+Alt+";
+            PressedKeys += e.Key.ToString();
+            //textbox_frame.Text = PressedKeys;
+            string Action = HotKeys.GetAction(PressedKeys);
+            e.Handled = (Action.Length > 0);
+            //textbox_frame.Text = Action;
+
+            switch (Action)
             {
-                //Enter или Escape - переход в Фуллскрин и обратно     
-                if (e.Key == Key.Escape && slider_pos.IsFocused)
-                {
-                    SwitchToFullScreen();
-                }
-                
-                //Left - кадр назад
-                if (e.Key == Key.Left && slider_pos.IsFocused)
-                {
-                    Frame_Back(1000.0);
-                }
-                
-                //Right - кадр вперед        
-                if (e.Key == Key.Right && slider_pos.IsFocused)
-                {
-                    Frame_Forward(1000.0);
-                }
-
-                //Пробел - пауза
-                if (e.Key == Key.Space && slider_pos.IsFocused)
-                {
-                    PauseClip();
-                }
-
-                //Вверх - громкость+
-                if (e.Key == Key.Up && slider_pos.IsFocused)
-                {
-                    VolumePlus();
-                }
-
-                //Вниз - громкость-
-                if (e.Key == Key.Down && slider_pos.IsFocused)
-                {
-                    VolumeMinus();
-                }
-
-                //F - Фильтрация
-                if (e.Key == Key.F && slider_pos.IsFocused)
-                {
-                    EditScript(null, null);
-                }
-                
-                //C - Цветокоррекция
-                if (e.Key == Key.C && slider_pos.IsFocused)
-                {
-                    ColorCorrection_Click(null, null);
-                }
-
-                //R - кроп\ресайз
-                if (e.Key == Key.R && slider_pos.IsFocused)
-                {
-                    AspectResolution_Click(null, null);
-                }
-
-                //I - деинтерлейс
-                if (e.Key == Key.I && slider_pos.IsFocused)
-                {
-                    menu_interlace_Click(null, null);
-                }            
+                //File
+                case ("Open file(s)"): OpenFile_Click(null, null); break;
+                case ("Open folder"): menu_open_folder_Click(null, null); break;
+                case ("Open DVD folder"): OpenDVD_Click(null, null); break;
+                case ("Decode file"): menu_decode_file_Click(null, null); break;
+                case ("Join file"): menu_join_Click(null, null); break;
+                case ("Close file"): button_close_Click(null, null); break;
+                case ("Save task"): button_save_Click(null, null); break;
+                case ("Save frame"): menu_save_frame_Click(null, null); break;
+                case ("Save THM frame"): menu_savethm_Click(null, null); break;
+                //Video
+                case ("Refresh preview"): mnUpdateVideo_Click(null, null); break;
+                case ("VDemux"): menu_demux_video_Click(null, null); break;
+                case ("Detect black borders"): menu_autocrop_Click(null, null); break;
+                case ("Detect interlace"): menu_detect_interlace_Click(null, null); break;
+                case ("Color correction"): ColorCorrection_Click(null, null); break;
+                case ("Resolution/Aspect"): AspectResolution_Click(null, null); break;
+                case ("Interlace/Framerate"): menu_interlace_Click(null, null); break;
+                case ("VEncoding settings"): VideoEncodingSettings_Click(null, null); break;
+                //Audio
+                case ("ADemux"): menu_demux_Click(null, null); break;
+                case ("Save to WAV"): menu_save_wav_Click(null, null); break;
+                case ("Editing options"): AudioOptions_Click(null, null); break;
+                case ("AEncoding settings"): AudioEncodingSettings_Click(null, null); break;
+                //Subtitles
+                case ("Add subtitles"): mnAddSubtitles_Click(null, null); break;
+                case ("Remove subtitles"): mnRemoveSubtitles_Click(null, null); break;
+                //AviSynth
+                case ("Edit filtering script"): EditScript(null, null); break;
+                case ("Test script"): if (m != null) { ApplyTestScript(null, null); menu_createtestscript.IsChecked = m.testscript; }; break;
+                case ("Save script"): SaveScript(null, null); break;
+                case ("Windows Media Player"): menu_play_in_Click(menu_playinwmp, null); break;
+                case ("Media Player Classic"): menu_play_in_Click(menu_playinmpc, null); break;
+                case ("WPF Video Player"): menu_play_in_Click(menu_playinwpf, null); break;
+                //Tools
+                case ("Media Info"): menu_info_media_Click(menu_info_media, null); break;
+                case ("FFRebuilder"): menu_ffrebuilder_Click(null, null); break;
+                case ("MKVRebuilder"): menu_mkvrebuilder_Click(null, null); break;
+                case ("DGIndex"): mn_apps_Click(mnDGIndex, null); break;
+                case ("DGPulldown"): mn_apps_Click(menu_dgpulldown, null); break;
+                case ("DGAVCIndex"): mn_apps_Click(mnDGAVCIndex, null); break;
+                case ("VirtualDubMod"): mn_apps_Click(menu_virtualdubmod, null); break;
+                case ("AVI-Mux"): mn_apps_Click(menu_avimux, null); break;
+                case ("tsMuxeR"): mn_apps_Click(menu_tsmuxer, null); break;
+                case ("MKVExtract"): mn_apps_Click(menu_mkvextract, null); break;
+                case ("MKVMerge"): mn_apps_Click(menu_mkvmerge, null); break;
+                case ("Yamb"): mn_apps_Click(menu_yamb, null); break;
+                //Other
+                case ("Frame forward"): Frame_Forward(1000.0); break;
+                case ("Frame back"): Frame_Back(1000.0); break;
+                case ("10 frames forward"): Frame_Forward(10000.0); break;
+                case ("10 frames backward"): Frame_Back(10000.0); ; break;
+                case ("Play-Pause"): PauseClip(); break;
+                case ("Fullscreen"): SwitchToFullScreen(); break;
+                case ("Volume+"): VolumePlus(); break;
+                case ("Volume-"): VolumeMinus(); break;
+                case ("Set Start"): button_set_start_Click(null, null); break;
+                case ("Set End"): button_set_end_Click(null, null); break;
+                case ("Apply Trim"): button_apply_trim_Click(null, null); break;
             }
         }
 
@@ -680,27 +692,15 @@ namespace XviD4PSP
 
             action_open(x);
         }
-      
+
         private void button_close_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m != null)
-                CloseFile();
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
+            if (m != null) CloseFile();
         }
 
         private void button_save_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m != null)
-                action_save(m.Clone());
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
+            if (m != null)                action_save(m.Clone());
         }
 
         private void mnExit_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -1807,6 +1807,63 @@ namespace XviD4PSP
             }
         }
 
+        public void SetHotKeys()
+        {
+            try
+            {
+                HotKeys.FillData(); //Обновляем список действий и ключей к ним
+                //File
+                mnOpen.InputGestureText = HotKeys.GetKeys("Open file(s)");
+                menu_open_folder.InputGestureText = HotKeys.GetKeys("Open folder");
+                menu_dvd.InputGestureText = HotKeys.GetKeys("Open DVD folder");
+                menu_decode_file.InputGestureText = HotKeys.GetKeys("Decode file");
+                menu_join.InputGestureText = HotKeys.GetKeys("Join file");
+                mnCloseFile.InputGestureText = HotKeys.GetKeys("Close file");
+                mnSave.InputGestureText = HotKeys.GetKeys("Save task");
+                menu_save_frame.InputGestureText = HotKeys.GetKeys("Save frame");
+                menu_savethm.InputGestureText = HotKeys.GetKeys("Save THM frame");
+                mnExit.InputGestureText = "Alt+F4";
+                //Video
+                mnUpdateVideo.InputGestureText = HotKeys.GetKeys("Refresh preview");
+                menu_demux_video.InputGestureText = HotKeys.GetKeys("VDemux");                //
+                menu_autocrop.InputGestureText = HotKeys.GetKeys("Detect black borders");
+                menu_detect_interlace.InputGestureText = HotKeys.GetKeys("Detect interlace");
+                menu_saturation_brightness.InputGestureText = HotKeys.GetKeys("Color correction");
+                mnAspectResolution.InputGestureText = HotKeys.GetKeys("Resolution/Aspect");
+                menu_interlace.InputGestureText = HotKeys.GetKeys("Interlace/Framerate");
+                menu_venc_settings.InputGestureText = HotKeys.GetKeys("VEncoding settings");
+                //Audio
+                menu_demux.InputGestureText = HotKeys.GetKeys("ADemux");                      //
+                menu_save_wav.InputGestureText = HotKeys.GetKeys("Save to WAV");
+                menu_audiooptions.InputGestureText = HotKeys.GetKeys("Editing options");      //
+                menu_aenc_settings.InputGestureText = HotKeys.GetKeys("AEncoding settings");  //
+                //Subtitles
+                mnAddSubtitles.InputGestureText = HotKeys.GetKeys("Add subtitles");           //
+                mnRemoveSubtitles.InputGestureText = HotKeys.GetKeys("Remove subtitles");     //
+                //AviSynth
+                menu_editscript.InputGestureText = HotKeys.GetKeys("Edit filtering script");
+                menu_createtestscript.InputGestureText = HotKeys.GetKeys("Test script");
+                menu_save_script.InputGestureText = HotKeys.GetKeys("Save script");
+                menu_playinwmp.InputGestureText = HotKeys.GetKeys("Windows Media Player");
+                menu_playinmpc.InputGestureText = HotKeys.GetKeys("Media Player Classic");
+                menu_playinwpf.InputGestureText = HotKeys.GetKeys("WPF Video Player");
+                //Tools
+                menu_info_media.InputGestureText = HotKeys.GetKeys("Media Info");
+                menu_ffrebuilder.InputGestureText = HotKeys.GetKeys("FFRebuilder");
+                menu_mkvrebuilder.InputGestureText = HotKeys.GetKeys("MKVRebuilder");
+                mnDGIndex.InputGestureText = HotKeys.GetKeys("DGIndex");
+                menu_dgpulldown.InputGestureText = HotKeys.GetKeys("DGPulldown");
+                mnDGAVCIndex.InputGestureText = HotKeys.GetKeys("DGAVCIndex");
+                menu_virtualdubmod.InputGestureText = HotKeys.GetKeys("VirtualDubMod");
+                menu_avimux.InputGestureText = HotKeys.GetKeys("AVI-Mux");
+                menu_tsmuxer.InputGestureText = HotKeys.GetKeys("tsMuxeR");
+                menu_mkvextract.InputGestureText = HotKeys.GetKeys("MKVExtract");
+                menu_mkvmerge.InputGestureText = HotKeys.GetKeys("MKVMerge");
+                menu_yamb.InputGestureText = HotKeys.GetKeys("Yamb");
+            }
+            catch { }
+        }
+
         //переводим лейблы
         private void SetLanguage()
         {
@@ -1845,7 +1902,7 @@ namespace XviD4PSP
                 menu_editscript.Header = Languages.Translate("Edit filtering script");
 
                 mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
-                menu_interlace.Header = Languages.Translate("Interlace") + "/" + Languages.Translate("Framerate");
+                menu_interlace.Header = Languages.Translate("Interlace/Framerate");
 
                 mnAddSubtitles.Header = Languages.Translate("Add");
                 mnRemoveSubtitles.Header = Languages.Translate("Remove");
@@ -1942,7 +1999,7 @@ namespace XviD4PSP
                 button_set_start.Content = Languages.Translate("Set Start");
                 button_set_end.Content = Languages.Translate("Set End");
                 button_apply_trim.Content = Languages.Translate("Apply Trim");
-                menu_open_folder.Header = Languages.Translate("Open folder...");
+                menu_open_folder.Header = Languages.Translate("Open folder") + "...";
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
                 target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.");
@@ -2390,29 +2447,22 @@ namespace XviD4PSP
 
         public void EditScript(object sender, RoutedEventArgs e)
         {
-            if (m == null)
+            if (m == null) return;
+            try
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
+                Filtering f = new Filtering(m, this);
+                string oldscript = m.script;
+                m = f.m.Clone();
+                //обновление при необходимости
+                if (m.script != oldscript)
+                {
+                    LoadVideo(MediaLoad.update);
+                    UpdateTaskMassive(m);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    Filtering f = new Filtering(m, this);
-                    string oldscript = m.script;
-                    m = f.m.Clone();
-                    //обновление при необходимости
-                    if (m.script != oldscript)
-                    {
-                        LoadVideo(MediaLoad.update);
-                        UpdateTaskMassive(m);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ErrorExeption(ex.Message);
-                }
+                ErrorExeption(ex.Message);
             }
         }
 
@@ -3106,11 +3156,7 @@ namespace XviD4PSP
 
         private void VideoEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
+            if (m == null) return;
             else if (m.format == Format.ExportFormats.Audio)
             {
                 Message mess = new Message(this);
@@ -3163,73 +3209,66 @@ namespace XviD4PSP
                 }
             }
         }
-      
+
         private void AudioEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
+            if (m == null) return;
+            if (m.inaudiostreams.Count == 0 || combo_aencoding.SelectedItem.ToString() == "Disabled")
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
+                mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
             }
             else
             {
-                if (m.inaudiostreams.Count == 0 || combo_aencoding.SelectedItem.ToString() == "Disabled")
-                {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
-                }
+                //определяем аудио потоки
+                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+
+                string oldacodec = outstream.codec;
+                string oldsrate = outstream.samplerate;
+
+                AudioEncoding enc = new AudioEncoding(m);
+                m = enc.m.Clone();
+                LoadAudioPresets();
+
+                //защита от удаления профиля
+                if (!combo_aencoding.Items.Contains(outstream.encoding))
+                    outstream.encoding = "Copy";
+
+                combo_aencoding.SelectedItem = outstream.encoding;
+
+                Format.ExportFormats format;
+                if (m == null)
+                    format = Settings.FormatOut;
                 else
+                    format = m.format;
+
+                if (combo_aencoding.SelectedItem.ToString() != "Disabled")
+                    Settings.SetAEncodingPreset(format, outstream.encoding);
+
+                //прописываем правильную частоту
+                if (outstream.codec != "Disabled" &&
+                    outstream.codec != "Copy" &&
+                    outstream.codec != oldacodec)
+                    m = Format.GetValidSamplerate(m);
+
+                //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). audio encoding settings
+                if (Settings.RenewScript == true)
                 {
-                    //определяем аудио потоки
-                    AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-
-                    string oldacodec = outstream.codec;
-                    string oldsrate = outstream.samplerate;
-
-                    AudioEncoding enc = new AudioEncoding(m);
-                    m = enc.m.Clone();
-                    LoadAudioPresets();
-
-                    //защита от удаления профиля
-                    if (!combo_aencoding.Items.Contains(outstream.encoding))
-                        outstream.encoding = "Copy";
-
-                    combo_aencoding.SelectedItem = outstream.encoding;
-
-                    Format.ExportFormats format;
-                    if (m == null)
-                        format = Settings.FormatOut;
-                    else
-                        format = m.format;
-
-                    if (combo_aencoding.SelectedItem.ToString() != "Disabled")
-                        Settings.SetAEncodingPreset(format, outstream.encoding);
-
-                    //прописываем правильную частоту
-                    if (outstream.codec != "Disabled" &&
-                        outstream.codec != "Copy" &&
-                        outstream.codec != oldacodec)
-                        m = Format.GetValidSamplerate(m);
-
-                    //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). audio encoding settings
-                    if (Settings.RenewScript == true)
-                    {
-                        // string old_script2 = m.script; //сохраняем 
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        // m.script = old_script2; //восстанавливаем
-                    }
-
-                    //проверка на размер
-                    //m.outfilesize = Calculate.GetEncodingSize(m);
-
-                    //загружаем обновлённый скрипт
-                    if (outstream.codec == "Disabled" ||
-                        oldacodec == "Disabled" ||
-                        oldsrate != outstream.samplerate)
-                        LoadVideo(MediaLoad.update);
-                    UpdateTaskMassive(m);
+                    // string old_script2 = m.script; //сохраняем 
+                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                    // m.script = old_script2; //восстанавливаем
                 }
+
+                //проверка на размер
+                //m.outfilesize = Calculate.GetEncodingSize(m);
+
+                //загружаем обновлённый скрипт
+                if (outstream.codec == "Disabled" ||
+                    oldacodec == "Disabled" ||
+                    oldsrate != outstream.samplerate)
+                    LoadVideo(MediaLoad.update);
+                UpdateTaskMassive(m);
             }
         }
 
@@ -3501,11 +3540,6 @@ namespace XviD4PSP
                 if (!IsWaiting) action_save(m.Clone());
                 EncodeNextTask();
             }
-            else
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
         }
 
         private void list_tasks_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -3613,61 +3647,54 @@ namespace XviD4PSP
 
         private void ColorCorrection_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null)
+            if (m == null) return;
+            if (m.outvcodec == "Copy")
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
+                mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+            }
+            else if (m.format == Format.ExportFormats.Audio)
+            {
+                Message mess = new Message(this);
+                mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
             }
             else
             {
-                if (m.outvcodec == "Copy")
+                ColorCorrection col = new ColorCorrection(m, this);
+                bool oldcolormatrix = m.iscolormatrix;
+                double oldsaturation = m.saturation;
+                int oldhue = m.hue;
+                int oldbrightness = m.brightness;
+                double oldcontrast = m.contrast;
+
+                m = col.m.Clone();
+
+                //загружаем списки профилей цвето коррекции
+                combo_sbc.Items.Clear();
+                combo_sbc.Items.Add("Disabled");
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
                 {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                    string name = Path.GetFileNameWithoutExtension(file);
+                    combo_sbc.Items.Add(name);
                 }
-                else if (m.format == Format.ExportFormats.Audio)
-                {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
-                }
+                //прописываем текущий профиль
+                if (combo_sbc.Items.Contains(m.sbc))
+                    combo_sbc.SelectedItem = m.sbc;
                 else
+                    combo_sbc.SelectedItem = "Disabled";
+
+                Settings.SBC = m.sbc; //сохраняет название текущего профиля в реестре
+
+                //обновление при необходимости
+                if (oldbrightness != m.brightness ||
+                    oldcolormatrix != m.iscolormatrix ||
+                    oldcontrast != m.contrast ||
+                    oldhue != m.hue ||
+                    oldsaturation != m.saturation)
                 {
-                    ColorCorrection col = new ColorCorrection(m, this);
-                    bool oldcolormatrix = m.iscolormatrix;
-                    double oldsaturation = m.saturation;
-                    int oldhue = m.hue;
-                    int oldbrightness = m.brightness;
-                    double oldcontrast = m.contrast;
-
-                    m = col.m.Clone();
-
-                    //загружаем списки профилей цвето коррекции
-                    combo_sbc.Items.Clear();
-                    combo_sbc.Items.Add("Disabled");
-                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
-                    {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        combo_sbc.Items.Add(name);
-                    }
-                    //прописываем текущий профиль
-                    if (combo_sbc.Items.Contains(m.sbc))
-                        combo_sbc.SelectedItem = m.sbc;
-                    else
-                        combo_sbc.SelectedItem = "Disabled";
-
-                    Settings.SBC = m.sbc; //сохраняет название текущего профиля в реестре
-
-                    //обновление при необходимости
-                    if (oldbrightness != m.brightness ||
-                        oldcolormatrix != m.iscolormatrix ||
-                        oldcontrast != m.contrast ||
-                        oldhue != m.hue ||
-                        oldsaturation != m.saturation)
-                    {
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        LoadVideo(MediaLoad.update);
-                        UpdateTaskMassive(m);
-                    }
+                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                    LoadVideo(MediaLoad.update);
+                    UpdateTaskMassive(m);
                 }
             }
         }
@@ -4738,14 +4765,9 @@ namespace XviD4PSP
                     return;
                 }
             }
-            if (m == null)
+            if (m != null)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                AudioOptions ao = new AudioOptions(m, this, AudioOptions.AudioOptionsModes.AllOptions);
+                new AudioOptions(m, this, AudioOptions.AudioOptionsModes.AllOptions);
             }
         }
 
@@ -5069,12 +5091,7 @@ namespace XviD4PSP
 
         private void button_edit_format_Click(object sender, RoutedEventArgs e)
         {
-            if (m == null)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Open file before do something!"), Languages.Translate("Error"));
-            }
-            else
+            if (m != null)
             {
                 if (m.format == Format.ExportFormats.M2TS ||
                     m.format == Format.ExportFormats.TS ||
