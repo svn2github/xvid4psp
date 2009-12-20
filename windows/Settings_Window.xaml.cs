@@ -25,8 +25,8 @@ namespace XviD4PSP
             button_ok.Content = Languages.Translate("OK");
             Title = Languages.Translate("Settings") + ":";
             check_demux_audio.Content = Languages.Translate("Don`t demux audio for preview");
-            check_show_psnr.Content = Languages.Translate("Show x264 PSNR info");
-            check_show_ssim.Content = Languages.Translate("Show x264 SSIM info");
+            check_show_psnr.ToolTip = Languages.Translate("Show x264 PSNR info");
+            check_show_ssim.ToolTip = Languages.Translate("Show x264 SSIM info");
             check_show_arguments.Content = Languages.Translate("Show encoding arguments");
             check_show_script.Content = Languages.Translate("Show AviSynth script");
             check_delete_ff_cache.Content = Languages.Translate("Auto delete FFmpegSource cache");
@@ -51,9 +51,10 @@ namespace XviD4PSP
             check_clone_ar.Content = Languages.Translate("Aspect/Resolution info (crop, aspect, etc)");
             check_clone_trim.Content = Languages.Translate("Trim");
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
+            check_use_64bit.Content = Languages.Translate("Use 64 bit x264");
 
             tab_main.Header = Languages.Translate("Misc");
-            tab_encoding.Header = Languages.Translate("Encoding log");
+            tab_encoding.Header = Languages.Translate("Encoding");
             tab_temp.Header = Languages.Translate("Temp files");
             tab_open_folder.Header = Languages.Translate("Batch encoding");
 
@@ -83,6 +84,7 @@ namespace XviD4PSP
             check_clone_ar.IsChecked = Settings.BatchCloneAR; //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
             check_clone_trim.IsChecked = Settings.BatchCloneTrim; //То-же что и выше, но для обрезки
             check_batch_pause.IsChecked = Settings.BatchPause; //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
+            check_use_64bit.IsChecked = Settings.Use64x264; //Использовать 64-битную версию x264.exe
 
             if (Settings.WriteLog)
                 check_logfile_tempfolder.IsEnabled = true;
@@ -94,12 +96,9 @@ namespace XviD4PSP
             SetTooltips();
 
             //Чтоб открыть окно на нужной вкладке
-            if (set_focus_to == 2)
-                tab_temp.Focus();
-            else if (set_focus_to == 3)
-                tab_encoding.Focus();
-            else if (set_focus_to == 4)
-                tab_open_folder.Focus();
+            if (set_focus_to == 2) tab_temp.Focus();
+            else if (set_focus_to == 3) tab_encoding.Focus();
+            else if (set_focus_to == 4) tab_open_folder.Focus();
 
             ShowDialog();
 		}
@@ -393,6 +392,11 @@ namespace XviD4PSP
         private void check_batch_pause_Click(object sender, RoutedEventArgs e)
         {
             Settings.BatchPause = check_batch_pause.IsChecked.Value;
+        }
+
+        private void check_use_64bit_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Use64x264 = check_use_64bit.IsChecked.Value;
         }
 	}
 }

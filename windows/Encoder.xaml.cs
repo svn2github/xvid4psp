@@ -406,7 +406,7 @@ namespace XviD4PSP
             if (m.format == Format.ExportFormats.PmpAvc)
                 info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
             else
-                info.FileName = Calculate.StartupPath + "\\apps\\x264\\x264.exe";
+                info.FileName = Calculate.StartupPath + "\\apps\\x264\\" + ((Settings.Use64x264) ? "avs4x264.exe" : "x264.exe");
 
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
@@ -414,12 +414,8 @@ namespace XviD4PSP
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
-            string psnr = "";
-            if (Settings.x264_PSNR)
-                psnr = " --psnr";
-            string ssim = "";
-            if (Settings.x264_SSIM)
-                ssim = " --ssim";
+            string psnr = (Settings.x264_PSNR) ? " --psnr" : "";
+            string ssim = (Settings.x264_SSIM) ? " --ssim" : "";
 
             arguments = m.vpasses[0] + psnr + ssim;
 
@@ -450,7 +446,7 @@ namespace XviD4PSP
             SetLog(" ");
             if (Settings.ArgumentsToLog)
             {
-                SetLog("x264.exe:" + " " + info.Arguments);
+                SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
                 SetLog(" ");
             }
 
@@ -571,7 +567,7 @@ namespace XviD4PSP
                 SetLog(" ");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog("x264.exe:" + " " + info.Arguments);
+                    SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
                     SetLog(" ");
                 }
 
@@ -650,7 +646,7 @@ namespace XviD4PSP
                 SetLog(" ");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog("x264.exe:" + " " + info.Arguments);
+                    SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
                     SetLog(" ");
                 }
 

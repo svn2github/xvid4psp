@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r92 17.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r93 20.12.09, main changes:
 
+>>> (r93) Added support for 64-bit x264.exe (via avs4x264.exe). To use it, you must add x264_64.exe and avs4x264.exe into
+          x264 folder, and turn on this option it settings (Global settings->Encoding).
 >>> (r92) Some changes in the MediaPlayerClassic call (now player is checked in 4 possible folders).
 >>> (r92) Direct encoding (w/o intermediate files) to MKV if format=MKV, encoder=x264 and audio=Disabled.
 >>> (r91) Fixed autogain with negative values ("-" was not used), expanded the range of adjustment.

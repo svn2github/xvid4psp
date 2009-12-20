@@ -1754,5 +1754,25 @@ namespace XviD4PSP
                 SetBool("ApplyDelay", value);
             }
         }
+
+        public static bool Use64x264
+        {
+            get
+            {
+                object value = GetValue("Use64x264");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("Use64x264", value);
+            }
+        }
     }
 }

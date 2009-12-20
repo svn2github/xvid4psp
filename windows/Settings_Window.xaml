@@ -45,10 +45,11 @@
 					    <CheckBox x:Name="check_dgindex_cache_in_temp" Width="Auto" Height="Auto" Content="Create DGIndex cache in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,75,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Click="check_dgindex_cache_in_temp_Click"/>
                     </Grid>
 				</TabItem>
-				<TabItem Header="Encoding log" x:Name="tab_encoding">
+				<TabItem Header="Encoding" x:Name="tab_encoding">
 					<Grid>
-						<CheckBox x:Name="check_show_psnr" Width="Auto" Height="Auto" Content="Show x264 PSNR info" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Checked="check_show_psnr_Checked" Unchecked="check_show_psnr_Unchecked"/>
-						<CheckBox x:Name="check_show_ssim" Width="Auto" Height="Auto" Content="Show x264 SSIM info" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,30.62,0,0" VerticalAlignment="Top" Checked="check_show_ssim_Checked" Unchecked="check_show_ssim_Unchecked" d:LayoutOverrides="Height"/>
+						<CheckBox x:Name="check_use_64bit" Width="Auto" Height="Auto" Content="Use 64 bit x264" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,30.62,0,0" VerticalAlignment="Top" Click="check_use_64bit_Click"/>
+                        <CheckBox x:Name="check_show_psnr" Width="Auto" Height="Auto" Content="PSNR" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="70,8,0,0" VerticalAlignment="Top" Checked="check_show_psnr_Checked" Unchecked="check_show_psnr_Unchecked"/>
+						<CheckBox x:Name="check_show_ssim" Width="Auto" Height="Auto" Content="SSIM" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Checked="check_show_ssim_Checked" Unchecked="check_show_ssim_Unchecked" d:LayoutOverrides="Height"/>
 						<CheckBox x:Name="check_show_arguments" Width="Auto" Height="Auto" Content="Show encoding arguments" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,53.24,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Checked="check_show_arguments_Checked" Unchecked="check_show_arguments_Unchecked"/>
 						<CheckBox x:Name="check_show_script" Width="Auto" Height="Auto" Content="Show AviSynth script" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,75.86,0,0" VerticalAlignment="Top" Checked="check_show_script_Checked" Unchecked="check_show_script_Unchecked" d:LayoutOverrides="Width, Height"/>
 					    <CheckBox x:Name="check_log_to_file" Width="Auto" Height="Auto" Content="Write encoding log to file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,98,0,0" VerticalAlignment="Top" Click="check_log_to_file_Click" d:LayoutOverrides="Width, Height"/>
