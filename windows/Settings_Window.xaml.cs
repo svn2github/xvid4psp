@@ -15,8 +15,8 @@ namespace XviD4PSP
 	public partial class Settings_Window
 	{
         private MainWindow p;
-        private bool edit = false;
-        private ArrayList tr = new ArrayList();
+        private bool edit = false, list_loaded = false;
+        private ArrayList raw_action = new ArrayList(); //Action, не переведенные
 
         public Settings_Window(MainWindow parent, int set_focus_to)
 		{
@@ -102,16 +102,17 @@ namespace XviD4PSP
             {
                 if (line.Contains("="))
                 {
-                    string[] action = line.Split(new string[] { "=" }, StringSplitOptions.None);
-                    tr.Add(action[0].Trim());
-                    string traction = (Languages.Translate(action[0].Trim()));
-                    combo_action.Items.Add(traction);
-                    int length = (traction.Length > 28) ? (28) : (traction.Length);
-                    textbox_hotkeys.Text += traction + "...............................".Substring(1, 28 - length) + action[1] + Environment.NewLine;
+                    string[] action_and_combination = line.Split(new string[] { "=" }, StringSplitOptions.None);
+                    raw_action.Add(action_and_combination[0].Trim());
+                    string translated_action = Languages.Translate(action_and_combination[0].Trim());
+                    combo_action.Items.Add(translated_action);
+                    int length = (translated_action.Length > 30) ? (30) : (translated_action.Length);
+                    listview_hotkeys.Items.Add(translated_action + "...............................".Substring(1, 30 - length) + action_and_combination[1]);
                 }
             }
-            combo_action.SelectedIndex = 0;
-            textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+            combo_action.SelectedIndex = listview_hotkeys.SelectedIndex = 0;
+            textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
+            list_loaded = true;
             
             if (Settings.WriteLog)
                 check_logfile_tempfolder.IsEnabled = true;
@@ -180,8 +181,7 @@ namespace XviD4PSP
 
         private void ErrorExeption(string message)
         {
-            Message mes = new Message(this);
-            mes.ShowMessage(message, Languages.Translate("Error"));
+            new Message(this).ShowMessage(message, Languages.Translate("Error"));
         }
 
         private void check_demux_audio_Unchecked(object sender, RoutedEventArgs e)
@@ -335,13 +335,11 @@ namespace XviD4PSP
         {
             Settings.AlwaysProgressive = check_alwaysprogressive.IsChecked.Value;
         }
-        
  
         private void check_auto_colormatrix_Click(object sender, RoutedEventArgs e)
         {
             Settings.AutoColorMatrix = check_auto_colormatrix.IsChecked.Value;
         }
-
         
         //Обработка чекбокса "помнить позицию окна"
         private void check_window_pos_Click(object sender, RoutedEventArgs e)
@@ -445,7 +443,7 @@ namespace XviD4PSP
             p.SetHotKeys(); //Тут происходит обновление HotKeys.Data
             UpdateHotKeysBox();
             Menu_Changed(null, null);
-            textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+            textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
         }
 
         private void button_edit_hotkeys_Click(object sender, RoutedEventArgs e)
@@ -460,14 +458,20 @@ namespace XviD4PSP
             {
                 button_save_hotkeys.Foreground = Brushes.White;
                 this.PreviewKeyDown -= new KeyEventHandler(Settings_KeyDown);
-                textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+                textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
             }
         }
 
         private void combo_action_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (combo_action.IsDropDownOpen)
-                textbox_combination.Text = HotKeys.GetKeys(tr[combo_action.SelectedIndex].ToString());
+            {
+                list_loaded = false;
+                textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
+                listview_hotkeys.SelectedIndex = combo_action.SelectedIndex;
+                listview_hotkeys.Focus();
+                list_loaded = true;
+            }
         }
 
         private void button_save_hotkeys_Click(object sender, RoutedEventArgs e)
@@ -475,25 +479,24 @@ namespace XviD4PSP
             if (edit)
             {
                 string Action = HotKeys.GetAction("=" + textbox_combination.Text);
-                if (Action != "" && Action != tr[combo_action.SelectedIndex].ToString())
+                if (Action != "" && Action != raw_action[combo_action.SelectedIndex].ToString())
                 {
                     new Message(this).ShowMessage(Languages.Translate("Combination") + " \"" + textbox_combination.Text + "\" " + Languages.Translate("already used for") + " \"" + Languages.Translate(Action) + "\".", Languages.Translate("Error"));
                 }
                 else
                 {
-                    string output = "", res = "";
+                    string output = "";
                     foreach (string line in HotKeys.Data)
                     {
                         if (line.Contains("="))
                         {
                             string[] action = line.Trim().Split(new string[] { "=" }, StringSplitOptions.None);
-                            if (action[0] == tr[combo_action.SelectedIndex].ToString())
+                            if (action[0] == raw_action[combo_action.SelectedIndex].ToString())
                             {
-                                res = action[0] + "=" + textbox_combination.Text + "; ";
+                                output += action[0] + "=" + textbox_combination.Text + "; ";
                             }
                             else 
-                                res = line.Trim() + "; ";
-                            output += res;
+                                output += line.Trim() + "; ";
                         }
                     }
                     Settings.HotKeys = output;
@@ -513,16 +516,29 @@ namespace XviD4PSP
 
         private void UpdateHotKeysBox()
         {
-            textbox_hotkeys.Clear();
+            list_loaded = false;
+            listview_hotkeys.Items.Clear();
             foreach (string line in HotKeys.Data)
             {
                 if (line.Contains("="))
                 {
-                    string[] action = line.Split(new string[] { "=" }, StringSplitOptions.None);
-                    string traction = (Languages.Translate(action[0].Trim()));
-                    int length = (traction.Length > 28) ? (28) : (traction.Length);
-                    textbox_hotkeys.Text += traction + "...............................".Substring(1, 28 - length) + action[1] + Environment.NewLine;
+                    string[] action_and_combination = line.Split(new string[] { "=" }, StringSplitOptions.None);
+                    string translated_action = (Languages.Translate(action_and_combination[0].Trim()));
+                    int length = (translated_action.Length > 30) ? (30) : (translated_action.Length);
+                    listview_hotkeys.Items.Add(translated_action + "...............................".Substring(1, 30 - length) + action_and_combination[1]);
                 }
+            }
+            listview_hotkeys.SelectedIndex = combo_action.SelectedIndex;
+            listview_hotkeys.Focus();
+            list_loaded = true;
+        }
+
+        private void listview_hotkeys_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (list_loaded && listview_hotkeys.SelectedIndex != -1)
+            {
+                combo_action.SelectedIndex = listview_hotkeys.SelectedIndex;
+                textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
             }
         }
 	}

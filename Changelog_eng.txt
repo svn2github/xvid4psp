@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95 20.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r96 21.12.09, main changes:
 
+>>> (r96) ListView instead of TextBox (HotKeys settings), desired action now can be choosen directly from the list.
+---
 >>> (r95) Fixed direct encoding to MKV if video coder other than x264 (it can be direct only if x264 is used, bug since r92).
           Also added direct encoding to MP4 and FLV, if video=x264 and audio=Disabled.
 >>> (r95) Fixed bug with AVI encoding using x264 and disabled audio (rep. by electricway, bug since r58).
