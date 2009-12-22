@@ -1292,48 +1292,6 @@ namespace XviD4PSP
 
         }
 
-        //Пользовательская строчка для 1-го прохода
-        private string _userstring1 = "";
-        public string userstring1
-        {
-            get
-            {
-                return _userstring1;
-            }
-            set
-            {
-                _userstring1 = value;
-            }
-        }
-
-        //Пользовательская строчка для 2-го прохода
-        private string _userstring2 = "";
-        public string userstring2
-        {
-            get
-            {
-                return _userstring2;
-            }
-            set
-            {
-                _userstring2 = value;
-            }
-        }
-
-        //Пользовательская строчка для 3-го прохода
-        private string _userstring3 = "";
-        public string userstring3
-        {
-            get
-            {
-                return _userstring3;
-            }
-            set
-            {
-                _userstring3 = value;
-            }
-        }
-
         //Трим - начало
         private int _trim_start = 0;
         public int trim_start

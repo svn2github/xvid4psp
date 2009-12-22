@@ -1295,7 +1295,6 @@ namespace XviD4PSP
                 //}
             }
 
-
             //FOURCC
             if (m.XviD_options.fourcc != "XVID")
             {
@@ -1390,7 +1389,7 @@ namespace XviD4PSP
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
-            arguments = m.vpasses[0] + " " + m.userstring1 + " -threads " + cpucount.ToString();//
+            arguments = m.vpasses[0] + " -threads " + cpucount.ToString();//
 
             //прописываем sar
             if (m.sar != null || m.IsAnamorphic)
@@ -1499,7 +1498,7 @@ namespace XviD4PSP
                     SetLog("...second pass...");
 
                 step++;
-                arguments = m.vpasses[1] + " " + m.userstring2 + " -threads " + cpucount.ToString();//
+                arguments = m.vpasses[1] + " -threads " + cpucount.ToString();//
 
                 //прописываем sar
                 if (m.sar != null || m.IsAnamorphic)
@@ -1581,7 +1580,7 @@ namespace XviD4PSP
                 SetLog("...last pass...");
 
                 step++;
-                arguments = m.vpasses[2] + " " + m.userstring3 + " -threads " + cpucount.ToString();//
+                arguments = m.vpasses[2] + " -threads " + cpucount.ToString();//
 
                 //прописываем sar
                 if (m.sar != null || m.IsAnamorphic)

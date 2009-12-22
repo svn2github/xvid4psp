@@ -1670,10 +1670,15 @@ namespace XviD4PSP
                 preset = CodecPresets.Placebo;
 
             combo_codec_preset.SelectedItem = preset.ToString();
+            UpdateCLI();
+        }
+
+        public void UpdateCLI()
+        {
             textbox_cli.Clear();
             foreach (string aa in m.vpasses)
                 textbox_cli.Text += aa + "\r\n\r\n";
-            good_cli = (ArrayList)m.vpasses.Clone(); //Клонируем CLI, не вызывающую ошибок (раз дошли сюда - значит ошибок не было)
+            good_cli = (ArrayList)m.vpasses.Clone(); //Клонируем CLI, не вызывающую ошибок
         }
 
         private void combo_codec_preset_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1828,10 +1833,7 @@ namespace XviD4PSP
                     LoadFromProfile();
                     root_window.UpdateOutSize();
                     root_window.UpdateManualProfile();
-                    textbox_cli.Clear();
-                    foreach (string aa in m.vpasses)
-                        textbox_cli.Text += aa + "\r\n\r\n";
-                    good_cli = (ArrayList)m.vpasses.Clone(); //Клонируем CLI, не вызывающую ошибок
+                    UpdateCLI();
                 }
             }
         }
@@ -2091,10 +2093,10 @@ namespace XviD4PSP
                 }
                 DecodeLine(m);                       //- Загружаем в массив m.x264 значения, на основе текущего содержимого m.vpasses[x]
                 LoadFromProfile();                   //- Загружаем в форму значения, на основе значений массива m.x264
-                m.vencoding = "Custom CLI";          //- Изменяем название пресета           
+                m.vencoding = "Custom x264 CLI";     //- Изменяем название пресета           
                 PresetLoader.CreateVProfile(m);      //- Перезаписываем файл пресета (m.vpasses[x])
                 root_window.m = this.m.Clone();      //- Передаем массив в основное окно
-                root_window.LoadProfiles();          //- Обновляем название выбранного пресета в основном окне (Custom CLI)
+                root_window.LoadProfiles();          //- Обновляем название выбранного пресета в основном окне (Custom x264 CLI)
             }
             catch (Exception)
             {

@@ -72,7 +72,7 @@
 		<Image Margin="0,0,0,0" Source="..\pictures\logo_xvid.png" Stretch="None" VerticalAlignment="Top" Height="95" HorizontalAlignment="Center"/>
 		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,92,0,0">
 			<TabItem Header="Main">
-				<Grid Width="304" Height="211.48">
+				<Grid Width="304" Height="210">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
@@ -126,19 +126,17 @@
 				</Grid>
 			</TabItem>
 		<TabItem Header="CLI">
-                <Grid Width="304" Height="230.48">
+                <Grid Width="304" Height="210">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Label OpacityMask="{x:Null}" x:Name="text_cli1" Content="Arguments for the 1st pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                    <TextBox Margin="4,27,4,4" Width="Auto" Height="40" x:Name="textbox_string1" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma"  />
-                    <Label OpacityMask="{x:Null}" x:Name="text_cli2" Content="Arguments for the 2nd pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,75,0,0"/>
-                    <TextBox Margin="4,102,4,4" Width="Auto" Height="40" x:Name="textbox_string2" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_cli3" Content="Arguments for the 3rd pass:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="0,150,0,0"/>
-                    <TextBox Margin="4,177,4,4" Width="Auto" Height="40" x:Name="textbox_string3" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontFamily="Tahoma" />
+                    <TextBox Margin="-5,0,-5,30.8" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
+                    <Button x:Name="Apply_CLI" Content="Apply" Click="button_Apply_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="219,185.2,-5,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="Reset_CLI" Content="Reset" Click="button_Reset_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="107.2,185.2,106.6,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="xvid_help" Content="Help" Click="button_xvid_help_Click" d:LayoutOverrides="HorizontalAlignment" Margin="-4.98,185.266,218.98,2.734" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
                 </Grid>
             </TabItem>
         

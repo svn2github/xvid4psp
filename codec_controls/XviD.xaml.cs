@@ -19,15 +19,13 @@ namespace XviD4PSP
         private VideoEncoding root_window;
         private MainWindow p;
         public enum CodecPresets { Default = 1, Turbo, Ultra, Extreme, Custom }
+        private ArrayList good_cli = null;
 
         public XviD(Massive mass, VideoEncoding VideoEncWindow, MainWindow parent)
 		{
 			this.InitializeComponent();
 
             this.num_bitrate.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_bitrate_ValueChanged);
-            this.textbox_string1.TextChanged += new TextChangedEventHandler(textbox_string1_TextChanged);
-            this.textbox_string2.TextChanged += new TextChangedEventHandler(textbox_string2_TextChanged);
-            this.textbox_string3.TextChanged += new TextChangedEventHandler(textbox_string3_TextChanged);
 
             this.m = mass.Clone();
             this.p = parent;
@@ -79,10 +77,11 @@ namespace XviD4PSP
             foreach (string preset in Enum.GetNames(typeof(CodecPresets)))
                 combo_codec_preset.Items.Add(preset);
 
-            //введенные пользователем параметры х264-го
-            textbox_string1.Text = m.userstring1;
-            textbox_string2.Text = m.userstring2;
-            textbox_string3.Text = m.userstring3;
+            Apply_CLI.Content = Languages.Translate("Apply");
+            Reset_CLI.Content = Languages.Translate("Reset");
+            xvid_help.Content = Languages.Translate("Help");
+            Reset_CLI.ToolTip = "Reset to last good CLI";
+            xvid_help.ToolTip = "Show xvid_encraw.exe -help screen";
 
             LoadFromProfile();
 		}
@@ -278,10 +277,10 @@ namespace XviD4PSP
                 if (value == "-quality")
                     m.XviD_options.quality = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "-nochromame")
+                else if (value == "-nochromame")
                     m.XviD_options.chromame = false;
 
-                if (value == "-qtype")
+                else if (value == "-qtype")
                 {
                     int qtype = Convert.ToInt32(cli[n + 1]);
                     if (qtype == 0)
@@ -289,20 +288,21 @@ namespace XviD4PSP
                     if (qtype == 1)
                         m.XviD_options.qmatrix = "MPEG";
                 }
-                if (value == "-qmatrix")
+
+                else if (value == "-qmatrix")
                 {
                     string mpath = cli[n + 1].Replace("\"", "");
                     if (File.Exists(mpath))
                         m.XviD_options.qmatrix = Path.GetFileNameWithoutExtension(mpath);
                 }
 
-                if (value == "-notrellis")
+                else if (value == "-notrellis")
                     m.XviD_options.trellis = false;
 
-                if (value == "-vhqmode")
+                else if (value == "-vhqmode")
                     m.XviD_options.vhqmode = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "-zones")
+                else if (value == "-zones")
                 {
                     string zone = cli[n + 1];
                     if (zone == "0,w,1.0,-5G/1000,q,4")
@@ -316,29 +316,29 @@ namespace XviD4PSP
                     }
                 }
 
-                if (value == "-nopacked")
+                else if (value == "-nopacked")
                     m.XviD_options.packedmode = false;
 
-                if (value == "-gmc")
+                else if (value == "-gmc")
                     m.XviD_options.gmc = true;
 
-                if (value == "-qpel")
+                else if (value == "-qpel")
                     m.XviD_options.qpel = true;
 
-                if (value == "-bvhq")
+                else if (value == "-bvhq")
                     m.XviD_options.bvhq = true;
 
-                if (value == "-noclosed_gop")
+                else if (value == "-noclosed_gop")
                     m.XviD_options.closedgop = false;
 
                 //-max_bframes
-                if (value == "-max_bframes")
+                else if (value == "-max_bframes")
                     m.XviD_options.bframes = Convert.ToInt32(cli[n + 1]);
 
-                if (value == "-lumimasking")
+                else if (value == "-lumimasking")
                     m.XviD_options.limimasking = true;
 
-                if (value == "-fourcc")
+                else if (value == "-fourcc")
                     m.XviD_options.fourcc = cli[n + 1];
 
                 n++;
@@ -520,11 +520,10 @@ namespace XviD4PSP
                         SetDefaultBitrates();
                     }
                 }
-
                 //сброс на битрейт
-                if (oldmode != Settings.EncodingModes.OnePass &&
-                    oldmode != Settings.EncodingModes.TwoPass &&
-                    oldmode != Settings.EncodingModes.ThreePass)
+                else if (oldmode != Settings.EncodingModes.OnePass &&
+                         oldmode != Settings.EncodingModes.TwoPass &&
+                         oldmode != Settings.EncodingModes.ThreePass)
                 {
                     if (m.encodingmode == Settings.EncodingModes.OnePass ||
                         m.encodingmode == Settings.EncodingModes.TwoPass ||
@@ -533,10 +532,9 @@ namespace XviD4PSP
                         SetDefaultBitrates();
                     }
                 }
-
                 //сброс на размер
-                if (oldmode != Settings.EncodingModes.TwoPassSize &&
-                    oldmode != Settings.EncodingModes.ThreePassSize)
+                else if (oldmode != Settings.EncodingModes.TwoPassSize &&
+                         oldmode != Settings.EncodingModes.ThreePassSize)
                 {
                     if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                         m.encodingmode == Settings.EncodingModes.ThreePassSize)
@@ -575,8 +573,7 @@ namespace XviD4PSP
                 num_bitrate.Value = (decimal)m.outvbitrate;
                 text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
             }
-
-            if (m.encodingmode == Settings.EncodingModes.OnePass ||
+            else if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.TwoPass ||
                 m.encodingmode == Settings.EncodingModes.ThreePass)
             {
@@ -584,8 +581,7 @@ namespace XviD4PSP
                 num_bitrate.Value = (decimal)m.outvbitrate;
                 text_bitrate.Content = Languages.Translate("Bitrate") + ": (kbps)";
             }
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
                 m.outvbitrate = m.infilesizeint;
@@ -888,8 +884,7 @@ namespace XviD4PSP
                     m.XviD_options.fourcc = "XVID";
                     SetDefaultBitrates();
                 }
-
-                if (preset == CodecPresets.Turbo)
+                else if (preset == CodecPresets.Turbo)
                 {
                     m.XviD_options.bframes = Format.GetMaxBFrames(m);
                     m.XviD_options.bvhq = false;
@@ -904,8 +899,7 @@ namespace XviD4PSP
                     m.XviD_options.trellis = false;
                     m.XviD_options.vhqmode = 0;
                 }
-
-                if (preset == CodecPresets.Ultra)
+                else if (preset == CodecPresets.Ultra)
                 {
                     m.XviD_options.bframes = Format.GetMaxBFrames(m);
                     m.XviD_options.bvhq = Format.GetValidBiValue(m);
@@ -920,8 +914,7 @@ namespace XviD4PSP
                     m.XviD_options.trellis = true;
                     m.XviD_options.vhqmode = 1;
                 }
-
-                if (preset == CodecPresets.Extreme)
+                else if (preset == CodecPresets.Extreme)
                 {
                     m.XviD_options.bframes = Format.GetMaxBFrames(m);
                     m.XviD_options.bvhq = Format.GetValidBiValue(m);
@@ -942,8 +935,17 @@ namespace XviD4PSP
                     LoadFromProfile();
                     root_window.UpdateOutSize();
                     root_window.UpdateManualProfile();
+                    UpdateCLI();
                 }
             }
+        }
+
+        public void UpdateCLI()
+        {
+            textbox_cli.Clear();
+            foreach (string aa in m.vpasses)
+                textbox_cli.Text += aa + "\r\n\r\n";
+            good_cli = (ArrayList)m.vpasses.Clone(); //Клонируем CLI, не вызывающую ошибок
         }
 
         private void DetectCodecPreset()
@@ -996,7 +998,6 @@ namespace XviD4PSP
                 m.XviD_options.vhqmode == 1)
                 preset = CodecPresets.Ultra;
 
-
             //Extreme
             else if (m.XviD_options.bframes == Format.GetMaxBFrames(m) &&
                 m.XviD_options.bvhq == Format.GetValidBiValue(m) &&
@@ -1013,6 +1014,7 @@ namespace XviD4PSP
                 preset = CodecPresets.Extreme;
 
             combo_codec_preset.SelectedItem = preset.ToString();
+            UpdateCLI();
         }
 
         private void num_bitrate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
@@ -1039,20 +1041,18 @@ namespace XviD4PSP
                 num_bitrate.Minimum = 1;
                 num_bitrate.Maximum = Format.GetMaxVBitrate(m);
             }
-
-            if (m.encodingmode == Settings.EncodingModes.Quality ||
-                m.encodingmode == Settings.EncodingModes.Quantizer ||
-                m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
-                m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+            else if (m.encodingmode == Settings.EncodingModes.Quality ||
+                     m.encodingmode == Settings.EncodingModes.Quantizer ||
+                     m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                     m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
                 num_bitrate.DecimalPlaces = 1;
                 num_bitrate.Change = 0.1m;
                 num_bitrate.Minimum = 1;
                 num_bitrate.Maximum = 31;
             }
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
-                m.encodingmode == Settings.EncodingModes.ThreePassSize)
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
+                     m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
                 num_bitrate.DecimalPlaces = 0;
                 num_bitrate.Change = 1;
@@ -1072,22 +1072,67 @@ namespace XviD4PSP
             }
         }
 
-        private void textbox_string1_TextChanged(object sender, TextChangedEventArgs e)
+        private void button_Apply_CLI_Click(object sender, RoutedEventArgs e)
         {
-            m.userstring1 = textbox_string1.Text;
+            try
+            {
+                StringReader sr = new StringReader(textbox_cli.Text);
+                m.vpasses.Clear();
+                string line = "";
+                while (true)
+                {
+                    line = sr.ReadLine();
+                    if (line == null) break;
+                    if (line != "") m.vpasses.Add(line);
+                }
+                DecodeLine(m);                       //- Загружаем в массив m.xvid значения, на основе текущего содержимого m.vpasses[x]
+                LoadFromProfile();                   //- Загружаем в форму значения, на основе значений массива m.xvid
+                m.vencoding = "Custom XviD CLI";     //- Изменяем название пресета           
+                PresetLoader.CreateVProfile(m);      //- Перезаписываем файл пресета (m.vpasses[x])
+                root_window.m = this.m.Clone();      //- Передаем массив в основное окно
+                root_window.LoadProfiles();          //- Обновляем название выбранного пресета в основном окне (Custom XviD CLI)
+            }
+            catch (Exception)
+            {
+                Message mm = new Message(root_window);
+                mm.ShowMessage(Languages.Translate("Attention! Seems like CLI line contains errors!") + "\r\n" + Languages.Translate("Check all keys and theirs values and try again!") + "\r\n\r\n" +
+                    Languages.Translate("OK - restore line (recommended)") + "\r\n" + Languages.Translate("Cancel - ignore (not recommended)"), Languages.Translate("Error"), Message.MessageStyle.OkCancel);
+                if (mm.result == Message.Result.Ok)
+                    button_Reset_CLI_Click(null, null);
+            }
         }
 
-        private void textbox_string2_TextChanged(object sender, TextChangedEventArgs e)
+        private void button_Reset_CLI_Click(object sender, RoutedEventArgs e)
         {
-            m.userstring2 = textbox_string2.Text;
+            if (good_cli != null)
+            {
+                m.vpasses = (ArrayList)good_cli.Clone(); //- Восстанавливаем CLI до версии, не вызывавшей ошибок
+                DecodeLine(m);                           //- Загружаем в массив m.xvid значения, на основе текущего содержимого m.vpasses[x]
+                LoadFromProfile();                       //- Загружаем в форму значения, на основе значений массива m.xvid
+                root_window.m = this.m.Clone();          //- Передаем массив в основное окно
+            }
+            else
+            {
+                new Message(root_window).ShowMessage("Can`t find good CLI...", Languages.Translate("Error"), Message.MessageStyle.Ok);
+            }
         }
 
-        private void textbox_string3_TextChanged(object sender, TextChangedEventArgs e)
+        private void button_xvid_help_Click(object sender, RoutedEventArgs e)
         {
-            m.userstring3 = textbox_string3.Text;
+            try
+            {
+                System.Diagnostics.ProcessStartInfo help = new System.Diagnostics.ProcessStartInfo();
+                help.FileName = Calculate.StartupPath + "\\apps\\xvid_encraw\\xvid_encraw.exe";
+                help.WorkingDirectory = Path.GetDirectoryName(help.FileName);
+                help.Arguments = " -help";
+                help.UseShellExecute = false;
+                help.CreateNoWindow = true;
+                help.RedirectStandardOutput = true;
+                help.RedirectStandardError = true;
+                System.Diagnostics.Process p = System.Diagnostics.Process.Start(help);
+                new ShowWindow(root_window, "XviD help", p.StandardError.ReadToEnd(), new FontFamily("Lucida Console"));
+            }
+            catch (Exception) { }
         }
-
-
-
 	}
 }

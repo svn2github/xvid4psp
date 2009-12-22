@@ -198,7 +198,7 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (x264c == null) UpdateMassive();////////////////////////////////CLI
+            if (x264c == null && xvid == null) UpdateMassive(); //CustomCLI
             Close();
         }
 
@@ -272,10 +272,12 @@ namespace XviD4PSP
                 }
 
                 //правим выходной битрейт
-                if (m.outvcodec == "Copy")
-                    m.outvbitrate = m.invbitrate;
-
+                if (m.outvcodec == "Copy") m.outvbitrate = m.invbitrate;
+                
                 UpdateOutSize();
+                
+                if (x264c != null) x264c.UpdateCLI();
+                if (xvid != null) xvid.UpdateCLI();
             }
         }
 
@@ -501,7 +503,7 @@ namespace XviD4PSP
         {
             if (m.outvcodec == "Copy") return;
 
-            if (x264c == null) UpdateMassive();///////////////////////////////CLI
+            if (x264c == null && xvid == null) UpdateMassive(); //CustomCLI
 
             string auto_name = m.outvcodec + " ";
 
@@ -558,7 +560,7 @@ namespace XviD4PSP
                 LoadProfiles();                 //Обновляется содержимое комбобокса с пресетами, выбирается текущий пресет
             }
             //Не совсем понятно, зачем нужно перезагружаться с пресета, который мы только что сохранили..
-            if (x264c == null) //CLI
+            if (x264c == null && xvid == null) //CustomCLI
             {
                 LoadProfileToCodec();
                 UpdateOutSize();
@@ -633,7 +635,11 @@ namespace XviD4PSP
 
         public void UpdateOutSize()
         {
-            if (profile_was_changed && x264c != null) m = x264c.m.Clone();
+            if (profile_was_changed)
+            {
+                if (x264c != null) m = x264c.m.Clone();
+                else if (xvid != null) m = xvid.m.Clone();
+            }
             else UpdateMassive();
 
             if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
