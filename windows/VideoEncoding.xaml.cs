@@ -553,13 +553,17 @@ namespace XviD4PSP
 
             if (newp.profile != null)
             {
-                m.vencoding = newp.profile;
-                PresetLoader.CreateVProfile(m);
-                LoadProfiles();
+                m.vencoding = newp.profile;     //Название для нового пресета
+                PresetLoader.CreateVProfile(m); //Пресет записывается в файл
+                LoadProfiles();                 //Обновляется содержимое комбобокса с пресетами, выбирается текущий пресет
             }
-            LoadProfileToCodec();
-            UpdateOutSize();
-            UpdateCodecMassive();         
+            //Не совсем понятно, зачем нужно перезагружаться с пресета, который мы только что сохранили..
+            if (x264c == null) //CLI
+            {
+                LoadProfileToCodec();
+                UpdateOutSize();
+                UpdateCodecMassive();
+            }       
         }
 
         private void button_remove_Click(object sender, System.Windows.RoutedEventArgs e)

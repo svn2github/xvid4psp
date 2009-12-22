@@ -3174,14 +3174,7 @@ namespace XviD4PSP
 
                 combo_vencoding.SelectedItem = m.vencoding;
 
-                Format.ExportFormats format;
-                if (m == null)
-                    format = Settings.FormatOut;
-                else
-                    format = m.format;
-
-                Settings.SetVEncodingPreset(format, m.vencoding);
-
+                Settings.SetVEncodingPreset(m.format, m.vencoding);
 
                 //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). video encoding settings
                 if (Settings.RenewScript == true)

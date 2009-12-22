@@ -87,31 +87,17 @@ namespace XviD4PSP
 
        public static string EncodingModeEnumToString(Settings.EncodingModes mode)
        {
-           if (mode == Settings.EncodingModes.OnePass)
-               return "1-Pass Bitrate";
-           if (mode == Settings.EncodingModes.TwoPass)
-               return "2-Pass Bitrate";
-           if (mode == Settings.EncodingModes.ThreePass)
-               return "3-Pass Bitrate";
-
-           if (mode == Settings.EncodingModes.OnePassSize)
-               return "1-Pass Size";
-           if (mode == Settings.EncodingModes.TwoPassSize)
-               return "2-Pass Size";
-           if (mode == Settings.EncodingModes.ThreePassSize)
-               return "3-Pass Size";
-
-           if (mode == Settings.EncodingModes.Quality)
-               return "Constant Quality";
-           if (mode == Settings.EncodingModes.Quantizer)
-               return "Constant Quantizer";
-
-           if (mode == Settings.EncodingModes.TwoPassQuality)
-               return "2-Pass Quality";
-           if (mode == Settings.EncodingModes.ThreePassQuality)
-               return "3-Pass Quality";
-
-           return "1-Pass Bitrate";
+           if (mode == Settings.EncodingModes.OnePass) return "1-Pass Bitrate";
+           else if (mode == Settings.EncodingModes.TwoPass) return "2-Pass Bitrate";
+           else if (mode == Settings.EncodingModes.ThreePass) return "3-Pass Bitrate";
+           else if (mode == Settings.EncodingModes.OnePassSize) return "1-Pass Size";
+           else if (mode == Settings.EncodingModes.TwoPassSize) return "2-Pass Size";
+           else if (mode == Settings.EncodingModes.ThreePassSize) return "3-Pass Size";
+           else if (mode == Settings.EncodingModes.Quality) return "Constant Quality";
+           else if (mode == Settings.EncodingModes.Quantizer) return "Constant Quantizer";
+           else if (mode == Settings.EncodingModes.TwoPassQuality) return "2-Pass Quality";
+           else if (mode == Settings.EncodingModes.ThreePassQuality) return "3-Pass Quality";
+           return null; //null, чтоб сработала защита от пустого профиля
        }
 
        public static Settings.EncodingModes EncodingModeStringToEnum(string mode)
