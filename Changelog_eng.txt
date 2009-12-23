@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r98 22.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r99 24.12.09, main changes:
 
+>>> (r99) A small changes in the "About" window.
 >>> (r98) Custom CLI added and for the XviD too.
 >>> (r97) Fixed problem with reset Custom CLI after storing it as preset (rep. by NewmanOZ).
 >>> (r96) ListView instead of TextBox (HotKeys settings), desired action now can be choosen directly from the list.

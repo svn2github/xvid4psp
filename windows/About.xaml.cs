@@ -20,18 +20,14 @@ namespace XviD4PSP
             this.Owner = owner;
             this.InitializeComponent();
             
-            //Assembly ainfo = Assembly.GetExecutingAssembly();
-            //AssemblyName aname = ainfo.GetName();
-            //SampleTitle.Text = aname.Name + " " + aname.Version + " beta " + DateTime.Now;
-            AssemblyInfoHelper asinfo = new AssemblyInfoHelper();            
-            text_version.Text = "Unofficial v" + asinfo.Version + " " + asinfo.Trademark + " " + "(by fcp)*";
+            AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
+            text_version.Text = "Version " + asinfo.Version + ", SVN revision " + asinfo.Trademark.Replace("rev", "");
             asinfo = null;
 
             Title = Languages.Translate("About");
-            text_import.Text = Languages.Translate("Import formats:"); 
-            text_export.Text = Languages.Translate("Export formats:");
-            button_changelog.Content = Languages.Translate("Changelog") + "*";
-            //text_version.Text = aname.Version.ToString(2) + aname.Version.Build + aname.Version.Revision;
+            text_import.Text = Languages.Translate("Output codecs:");
+            text_export.Text = Languages.Translate("Output containers:");
+            button_changelog.Content = Languages.Translate("Changelog");
 
             ShowDialog();
 		}
