@@ -372,18 +372,21 @@
 			<ContentControl x:Name="content_tasks">
 				<ListView IsEnabled="True" x:Name="list_tasks" Background="#FF3B3B3B" Foreground="#FFFFFFFF" SelectionMode="Single" OverridesDefaultStyle="False" Margin="8,8,8,8" Width="Auto" Height="Auto" SelectionChanged="list_tasks_SelectionChanged" MouseDoubleClick="list_tasks_MouseDoubleClick" MouseLeftButtonUp="list_tasks_MouseLeftButtonUp" KeyUp="list_tasks_KeyUp">
 					<ListView.Resources>
-						<ResourceDictionary/>
-					</ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ToolTip" Value="{Binding Path=THM}"/>
+                        </Style>
+                    </ListView.Resources>
 					<ListView.View>
 						<GridView AllowsColumnReorder="False">
-							<GridView.ColumnHeaderContainerStyle>
-	<Style TargetType="{x:Type GridViewColumnHeader}">
-	<Setter Property="Visibility" Value="Hidden" />
-	<Setter Property="Height" Value="0" />
-	</Style>
-	</GridView.ColumnHeaderContainerStyle>
-							<GridViewColumn Header="ID" DisplayMemberBinding="{Binding Path=Id}"/>
-						    <GridViewColumn Header="THM" DisplayMemberBinding="{Binding Path=THM}"/>
+                            <GridView.ColumnHeaderContainerStyle>
+                                <Style TargetType="{x:Type GridViewColumnHeader}">
+                                    <Setter Property="Height" Value="3"/>
+                                    <Setter Property="Background" Value="#FF3B3B3B"/>
+                                    <!--Setter Property="Opacity" Value="0.1"/-->
+                                </Style>
+                            </GridView.ColumnHeaderContainerStyle>
+                            <GridViewColumn Header="ID"  DisplayMemberBinding="{Binding Path=Id}"/>
+						    <!--GridViewColumn Header="THM" DisplayMemberBinding="{Binding Path=THM}"/-->
 						    <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Path=Status}"/>
 							<GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=Name}"/>
 							<GridViewColumn Header="Info" DisplayMemberBinding="{Binding Path=Info}"/>	                      

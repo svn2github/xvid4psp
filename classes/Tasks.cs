@@ -19,7 +19,7 @@ namespace XviD4PSP
         private string _thm;
         public string THM
         {
-            get { return _thm; }
+            get { return _name + "   " + _info; }
             set { _thm = value; }
         }
 

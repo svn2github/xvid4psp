@@ -106,8 +106,7 @@ namespace XviD4PSP
                     raw_action.Add(action_and_combination[0].Trim());
                     string translated_action = Languages.Translate(action_and_combination[0].Trim());
                     combo_action.Items.Add(translated_action);
-                    int length = (translated_action.Length > 30) ? (30) : (translated_action.Length);
-                    listview_hotkeys.Items.Add(translated_action + "...............................".Substring(1, 30 - length) + action_and_combination[1]);
+                    listview_hotkeys.Items.Add(new { Column1 = translated_action, Column2 = action_and_combination[1] }); 
                 }
             }
             combo_action.SelectedIndex = listview_hotkeys.SelectedIndex = 0;
@@ -524,8 +523,7 @@ namespace XviD4PSP
                 {
                     string[] action_and_combination = line.Split(new string[] { "=" }, StringSplitOptions.None);
                     string translated_action = (Languages.Translate(action_and_combination[0].Trim()));
-                    int length = (translated_action.Length > 30) ? (30) : (translated_action.Length);
-                    listview_hotkeys.Items.Add(translated_action + "...............................".Substring(1, 30 - length) + action_and_combination[1]);
+                    listview_hotkeys.Items.Add(new { Column1 = translated_action, Column2 = action_and_combination[1] });
                 }
             }
             listview_hotkeys.SelectedIndex = combo_action.SelectedIndex;
@@ -540,6 +538,18 @@ namespace XviD4PSP
                 combo_action.SelectedIndex = listview_hotkeys.SelectedIndex;
                 textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
             }
+        }
+
+        private void listview_hotkeys_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                if (!edit) button_edit_hotkeys_Click(null, null);
+                else button_save_hotkeys_Click(null, null);
+        }
+
+        private void listview_hotkeys_RightUp(object sender, MouseButtonEventArgs e)
+        {
+            if (edit) button_edit_hotkeys_Click(null, null);
         }
 	}
 }
