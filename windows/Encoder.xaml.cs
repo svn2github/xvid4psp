@@ -403,7 +403,7 @@ namespace XviD4PSP
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
             string arguments; //начало создания коммандной строчки для x264-го
-
+             
             if (m.format == Format.ExportFormats.PmpAvc)
                 info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
             else
@@ -2494,9 +2494,12 @@ namespace XviD4PSP
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
 
-            if (m.format == Format.ExportFormats.Mp4iPod55G &&
-                File.Exists(Calculate.StartupPath + "\\apps\\NicMP4Box\\NicMP4Box.exe"))
-                info.FileName = Calculate.StartupPath + "\\apps\\NicMP4Box\\NicMP4Box.exe";
+            bool old_muxer = false; //Использование старого NicMP4Box в случае его наличия - необходим для воспроизведения на Иподе файлов с большим разрешением
+            if (m.format == Format.ExportFormats.Mp4iPod55G && (m.outvcodec == "x264" || m.outvcodec == "Copy") && File.Exists(Calculate.StartupPath + "\\apps\\MP4Box\\NicMP4Box.exe"))
+            {
+                old_muxer = true;
+                info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\NicMP4Box.exe";
+            }
             else
                 info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
 
@@ -2521,10 +2524,8 @@ namespace XviD4PSP
                     rate = "";
             }
 
-            //пробный агрумент для ипода
-            string ipod = "";
-            if (m.format == Format.ExportFormats.Mp4iPod50G ||
-                m.format == Format.ExportFormats.Mp4iPod55G)
+            string ipod = ""; //пробный агрумент для ипода (для больших разрешений и 5.5G его все-равно не достаточно)
+            if (!old_muxer && (m.format == Format.ExportFormats.Mp4iPod50G || m.format == Format.ExportFormats.Mp4iPod55G))
                 ipod = "-ipod ";
 
             string addaudio = "";
@@ -2541,7 +2542,7 @@ namespace XviD4PSP
             SetLog(" ");
             if (Settings.ArgumentsToLog)
             {
-                SetLog("mp4box.exe:" + " " + info.Arguments);
+                SetLog((old_muxer ? "NicMP4Box.exe: " : "MP4Box.exe: ") + info.Arguments);
                 SetLog(" ");
             }
             

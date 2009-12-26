@@ -2129,7 +2129,7 @@ namespace XviD4PSP
            {
                //Кодирование сразу в MKV
                if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
-               else return Muxers.mkvmerge; 
+               else return Muxers.mkvmerge;
            }
            else if (m.format == Format.ExportFormats.Mpeg2PS ||
                     m.format == ExportFormats.Mpeg1PS)
@@ -2138,7 +2138,7 @@ namespace XviD4PSP
            {
                //Кодирование сразу в FLV
                if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
-               else return Muxers.ffmpeg; 
+               else return Muxers.ffmpeg;
            }
            else if (m.format == ExportFormats.M2TS ||
                     m.format == ExportFormats.TS ||

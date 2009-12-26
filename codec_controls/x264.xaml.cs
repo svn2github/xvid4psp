@@ -428,14 +428,14 @@ namespace XviD4PSP
             string avcprofile = "Baseline Profile";
 
             if (m.x264options.adaptivedct ||
-                  m.x264options.adaptivedct && m.x264options.cabac ||
-                  m.outvbitrate == 0 ||
-                  m.x264options.custommatrix != null)
+                m.x264options.adaptivedct && m.x264options.cabac ||
+                m.outvbitrate == 0 ||
+                m.x264options.custommatrix != null)
                 avcprofile = "High Profile";
             else if (m.x264options.cabac ||
-                       m.x264options.bframes > 0 ||
-                       m.x264options.weightb ||
-                       m.x264options.weightp > 0)
+                     m.x264options.bframes > 0 ||
+                     //m.x264options.weightb ||
+                     m.x264options.weightp > 0)
                 avcprofile = "Main Profile";
 
             combo_avc_profile.SelectedItem = avcprofile;

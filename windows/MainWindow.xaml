@@ -382,7 +382,7 @@
                                 <Style TargetType="{x:Type GridViewColumnHeader}">
                                     <Setter Property="Height" Value="3"/>
                                     <Setter Property="Background" Value="#FF3B3B3B"/>
-                                    <!--Setter Property="Opacity" Value="0.1"/-->
+                                    <Setter Property="Opacity" Value="0"/>
                                 </Style>
                             </GridView.ColumnHeaderContainerStyle>
                             <GridViewColumn Header="ID"  DisplayMemberBinding="{Binding Path=Id}"/>
