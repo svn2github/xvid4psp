@@ -368,6 +368,7 @@ namespace XviD4PSP
             if (Keyboard.Modifiers == ModifierKeys.Control) PressedKeys = "=Ctrl+";
             if (Keyboard.Modifiers == ModifierKeys.Shift) PressedKeys = "=Shift+";
             if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) PressedKeys = "=Ctrl+Alt+";
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)) PressedKeys = "=Ctrl+Shift+";
             PressedKeys += e.Key.ToString();
             //textbox_frame.Text = PressedKeys;
             string Action = HotKeys.GetAction(PressedKeys);
@@ -700,7 +701,7 @@ namespace XviD4PSP
 
         private void button_save_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m != null)                action_save(m.Clone());
+            if (m != null) action_save(m.Clone());
         }
 
         private void mnExit_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -5570,12 +5571,12 @@ namespace XviD4PSP
                     textbox_start.Text = (trim_start = m.trim_start).ToString();
                     textbox_end.Text = (trim_end = m.trim_end).ToString();
                     textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = true;
-                    button_set_start.Content = button_set_end.Content = Languages.Translate("Clear"); 
+                    button_set_start.Content = button_set_end.Content = Languages.Translate("Clear");
                     button_apply_trim.Content = Languages.Translate("Remove Trim");
                 }
                 else
                     ResetTrim();
-             }
+            }
             else
             {
                 this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;

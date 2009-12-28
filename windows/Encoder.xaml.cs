@@ -47,7 +47,7 @@ namespace XviD4PSP
         //private string enc_fps = "";
         private string busyfile;
         private DateTime start_time;
-        private Shutdown.ShutdownMode ending = Shutdown.ShutdownMode.Wait;
+        private Shutdown.ShutdownMode ending = Settings.FinalAction;
 
         private AviSynthEncoder avs;
 
@@ -208,10 +208,11 @@ namespace XviD4PSP
 
 
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
-        {
+        {  
             cbxPriority.Items.Add(Languages.Translate("Idle"));
             cbxPriority.Items.Add(Languages.Translate("Normal"));
-            cbxPriority.Text = Settings.ProcessPriority;
+            cbxPriority.Items.Add(Languages.Translate("Above normal"));
+            cbxPriority.SelectedIndex = Settings.ProcessPriority;
             button_pause.Content = Languages.Translate("Pause");
             button_cancel.Content = Languages.Translate("Cancel");
             tbxLog.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
@@ -4922,9 +4923,9 @@ namespace XviD4PSP
 
         private void cbxPriority_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (cbxPriority.SelectedItem != null)
+            if (cbxPriority.SelectedItem != null && cbxPriority.IsDropDownOpen)
             {
-                Settings.ProcessPriority = cbxPriority.SelectedItem.ToString();
+                Settings.ProcessPriority = cbxPriority.SelectedIndex;
                 SetPriority(Settings.ProcessPriority);
             }
         }
@@ -4946,25 +4947,29 @@ namespace XviD4PSP
             MediaInfo media = new MediaInfo(m.outfilepath, MediaInfo.InfoMode.MediaInfo, this);
         }
 
-        private void SetPriority(string prioritet)
+        private void SetPriority(int prioritet)
         {
             if (encoderProcess != null)
             {
-                if (prioritet == Languages.Translate("Idle"))
+                if (prioritet == 0)
                 {
                     encoderProcess.PriorityClass = ProcessPriorityClass.Idle;
                     encoderProcess.PriorityBoostEnabled = false;
                 }
-                else if (prioritet == Languages.Translate("Normal"))
+                else if (prioritet == 1)
                 {
                     encoderProcess.PriorityClass = ProcessPriorityClass.Normal;
                     encoderProcess.PriorityBoostEnabled = true;
                 }
+                else if (prioritet == 2)
+                {
+                    encoderProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
+                    encoderProcess.PriorityBoostEnabled = true;
+                }
             }
-
             if (avs != null && avs.IsBusy())
             {
-                avs.SetPriority(Settings.ProcessPriority);
+                avs.SetPriority(prioritet);
             }
         }
 
@@ -5069,6 +5074,7 @@ namespace XviD4PSP
                         ending = Shutdown.ShutdownMode.Shutdown;
                     if (combo_ending.SelectedItem.ToString() == Languages.Translate("Exit"))
                         ending = Shutdown.ShutdownMode.Exit;
+                    Settings.FinalAction = ending;
                 }
             }
         }

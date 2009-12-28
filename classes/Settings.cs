@@ -274,23 +274,23 @@ namespace XviD4PSP
             }
         }
 
-        public static string ProcessPriority
+        public static int ProcessPriority
         {
             get
             {
-                object value = GetValue("ProcessPriority");
+                object value = GetValue("EncProcessPriority");
                 if (value == null)
                 {
-                    return Languages.Translate("Idle");
+                    return 1;
                 }
                 else
                 {
-                    return Convert.ToString(value);
+                    return Convert.ToInt32(value);
                 }
             }
             set
             {
-                SetString("ProcessPriority", value);
+                SetInt("EncProcessPriority", value);
             }
         }
 
@@ -1796,6 +1796,22 @@ namespace XviD4PSP
             set
             {
                 SetString("HotKeys", value);
+            }
+        }
+
+        public static Shutdown.ShutdownMode FinalAction
+        {
+            get
+            {
+                object value = GetValue("FinalAction");
+                if (value == null)
+                    return Shutdown.ShutdownMode.Wait;
+                else
+                    return (Shutdown.ShutdownMode)Enum.Parse(typeof(Shutdown.ShutdownMode), value.ToString());
+            }
+            set
+            {
+                SetString("FinalAction", value.ToString());
             }
         }
     }

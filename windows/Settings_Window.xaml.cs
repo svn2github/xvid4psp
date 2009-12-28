@@ -138,6 +138,7 @@ namespace XviD4PSP
             if (Keyboard.Modifiers == ModifierKeys.Control) PressedKeys = "Ctrl+";
             if (Keyboard.Modifiers == ModifierKeys.Shift) PressedKeys = "Shift+";
             if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) PressedKeys = "Ctrl+Alt+";
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)) PressedKeys = "Ctrl+Shift+";
             PressedKeys += e.Key.ToString();
             textbox_combination.Text = PressedKeys;
             e.Handled = true;

@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r101 26.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r102 28.12.09, main changes:
 
+>>> (r102) Added encoding process priority "Above normal".
+>>> (r102) Selected "Final action" now will be stored (rep. by Ghostlamer).
 >>> (r101) NicMP4Box will be used if format = iPod 5.5G, video = x264 (or Copy) and NicMP4Box.exe exists here: \apps\MP4Box.
            This option already was implemented but can`t be used because 3-years old NicMP4Box didn`t know anything about
            the "-ipod" key, so there was error when muxing.
