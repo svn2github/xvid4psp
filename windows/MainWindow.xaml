@@ -123,6 +123,7 @@
                                     <RadioButton x:Name="mn_ffmpeg_new"/>
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem x:Name="check_assume_fps" Header="Add AssumeFPS() to force FPS" Click="check_Assume_FPS_Clicked" IsCheckable="True" IsChecked="False" StaysOpenOnClick="True" />
                         </MenuItem>
                     </MenuItem>           
 					<Separator/>

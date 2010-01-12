@@ -189,7 +189,7 @@ namespace XviD4PSP
 
            //принудительная установка fps
            string fps = "";
-           if (m.vdecoder == Decoders.DirectShowSource && m.inframerate != "" || m.vdecoder == Decoders.DSS2 && m.inframerate != "")// && m.isforcefps
+           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")// && m.isforcefps
                fps = ", fps=" + m.inframerate;
 
            //выбор видео трека
@@ -265,12 +265,22 @@ namespace XviD4PSP
                    //Изменения под FFmpegSource2
                    string ffmpegsource2 = "";
                    string cache_path = "";
-                   if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
+                   string assume_fps = "";
+                   if (m.vdecoder == Decoders.FFmpegSource)
                    {
-                       ffmpegsource2 = "2";
-                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                       //Корректировка кривого fps от FFmpegSource (1 и 2) - не самое лучшее решение, и обязательно приведет к новым проблемам..
+                       //Так-же как и принудительная установка частоты для DirectShowSource (1 и 2) - не самое лучшее решение, и тоже приводит к другим проблемам..
+                       //Лучшее решение - писать скрипт вручную! Внимательно анализируя исходник, и разбираясь, отчего-же декодер выдает не тот фпс!
+                       //С другой стороны, при муксинге все-равно муксер получит фпс, с которым должен будет муксить - получится тот-же самый AssumeFPS, только после кодирования.
+                       //Ну а если исходная частота, и частота, с которой декодирует декодер, совпадают - то AssumeFPS вообще ни на что не повлияет..
+                       assume_fps = (m.inframerate != "" && Settings.FFmpegAssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
+                       if (Settings.FFmpegSource2 == true)
+                       {
+                           ffmpegsource2 = "2";
+                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                       }
                    }
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path + ")" + assume_fps;
                    n++;
                    if (n < m.infileslist.Length)
                        invideostring += " + ";
@@ -982,7 +992,7 @@ namespace XviD4PSP
 
            //принудительная установка fps
            string fps = "";
-           if (m.vdecoder == Decoders.DirectShowSource && m.inframerate != "" || m.vdecoder == Decoders.DSS2 && m.inframerate != "")// && m.isforcefps
+           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")// && m.isforcefps
                fps = ", fps=" + m.inframerate;
 
            //принудительная конвертация частоты
@@ -1048,12 +1058,18 @@ namespace XviD4PSP
                    //Изменения под FFmpegSource2
                    string ffmpegsource2 = "";
                    string cache_path = "";
-                   if (m.vdecoder == Decoders.FFmpegSource && Settings.FFmpegSource2 == true)
+                   string assume_fps = "";
+                   if (m.vdecoder == Decoders.FFmpegSource)
                    {
-                       ffmpegsource2 = "2";
-                       cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                       //Стоит-ли повторяться? :) 
+                       assume_fps = (m.inframerate != "" && Settings.FFmpegAssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
+                       if (Settings.FFmpegSource2 == true)
+                       {
+                           ffmpegsource2 = "2";
+                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                       }
                    }
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")";
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path +")" + assume_fps;
                    n += 1;
                    if (n < m.infileslist.Length)
                        invideostring += " + ";

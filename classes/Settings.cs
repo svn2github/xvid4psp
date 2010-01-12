@@ -1814,5 +1814,25 @@ namespace XviD4PSP
                 SetString("FinalAction", value.ToString());
             }
         }
+
+        public static bool FFmpegAssumeFPS
+        {
+            get
+            {
+                object value = GetValue("FFmpegAssumeFPS");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("FFmpegAssumeFPS", value);
+            }
+        }
     }
 }

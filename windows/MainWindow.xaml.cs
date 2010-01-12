@@ -2010,6 +2010,7 @@ namespace XviD4PSP
                 avi_ff.ToolTip = o_ff.ToolTip = mpg_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
                 mpg_mpg.ToolTip = Languages.Translate("I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.");
                 check_force_film.ToolTip = Languages.Translate("If checked, DGIndex(MPEG2Source) will reduce fps to 23,976. Use only if video has PullDown flag and 23.976fps (29.970 after PullDown). Read DGIndex manual for more info!") + Environment.NewLine + Languages.Translate("NEVER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!");
+                check_assume_fps.ToolTip = Languages.Translate("Force FPS");
                 ff_ff.ToolTip = ff_ff2.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.");
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
@@ -2106,6 +2107,7 @@ namespace XviD4PSP
             else mn_ffmpeg_old.IsChecked = true;
 
             check_force_film.IsChecked = Settings.DGForceFilm;
+            check_assume_fps.IsChecked = Settings.FFmpegAssumeFPS;
 
             if (Settings.OldSeeking)
             {
@@ -5525,6 +5527,11 @@ namespace XviD4PSP
         private void check_Force_Film_Clicked(object sender, RoutedEventArgs e)
         {
             Settings.DGForceFilm = check_force_film.IsChecked;
+        }
+
+        private void check_Assume_FPS_Clicked(object sender, RoutedEventArgs e)
+        {
+            Settings.FFmpegAssumeFPS = check_assume_fps.IsChecked;
         }
 
         private void MenuHider(bool ShowItems)
