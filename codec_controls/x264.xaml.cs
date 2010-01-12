@@ -520,12 +520,12 @@ namespace XviD4PSP
             combo_adapt_quant.ToolTip = "AQ Strength (--ag-strength, default: 1.0)" + Environment.NewLine +
                         "Reduces blocking and blurring in flat and textured areas" + Environment.NewLine +
                         "0.5: weak AQ, 1.5: strong AQ";
-            num_psyrdo.ToolTip = "Strength of psychovisual RD optimization (--psy-rd, default: 1.0:0.0)";
+            num_psyrdo.ToolTip = "Strength of psychovisual RD optimization (--psy-rd, default: 1.0)";
             num_psytrellis.ToolTip = "Strength of psychovisual Trellis optimization (--psy-rd, default: 0.0)";
             num_vbv_buf.ToolTip = "Enable CBR and set VBV buffer size (--vbv-bufsize, default: 0)";
             num_vbv_max.ToolTip = "Set maximum local bitrate (--vbv-maxrate, default: 0)";
-            num_qcomp.ToolTip = "QP curve compression (--qcomp, default: 0.6)" + Environment.NewLine +
-                        "0.0 => CBR, 1.0 => CQP";
+            num_qcomp.ToolTip = "QP curve compression (--qcomp, default: 0.60)" + Environment.NewLine +
+                        "0.00 => CBR, 1.00 => CQP";
             combo_chroma_qp.ToolTip = "QP difference between chroma and luma (--qp-chroma-offset Default: 0)";
             combo_threads_count.ToolTip = "Set number of threads for encoding (--threads, default: Auto)";
             check_slow_first.ToolTip = "Enable slow 1-st pass for multipassing encoding (off by default)" + Environment.NewLine + "(--slow-firstpass if checked)";
@@ -848,7 +848,7 @@ namespace XviD4PSP
                 line += " --threads " + m.x264options.threads;
 
             if (m.x264options.qcomp != 0.6m)
-                line += " --qcomp " + Calculate.ConvertDoubleToPointString((double)m.x264options.qcomp, 1);
+                line += " --qcomp " + Calculate.ConvertDoubleToPointString((double)m.x264options.qcomp, 2);
 
             if (m.x264options.vbv_bufsize != 0)
                 line += " --vbv-bufsize " + m.x264options.vbv_bufsize;

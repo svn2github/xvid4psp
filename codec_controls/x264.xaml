@@ -111,7 +111,7 @@
                             <MyUserControl:NumericUpDown Height="22" x:Name="num_vbv_max" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="99999" Minimum="0" Value="0" />
                         </Grid>
                         <Grid Width="Auto" Height="Auto">
-                            <MyUserControl:NumericUpDown Height="22" x:Name="num_qcomp" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Center" Width="127" Change="0.1" DecimalPlaces="1" Maximum="1.0" Minimum="0.0" Value="0.6" />
+                            <MyUserControl:NumericUpDown Height="22" x:Name="num_qcomp" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Center" Width="127" Change="0.01" DecimalPlaces="2" Maximum="1.00" Minimum="0.00" Value="0.60" />
                             <Label OpacityMask="{x:Null}" x:Name="text_qcomp" Content="QP curve compression:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,0,136,0" d:LayoutOverrides="Width, Height" />
                         </Grid>
                         <Grid Width="Auto" Height="Auto">

@@ -371,7 +371,7 @@ namespace XviD4PSP
             }
         }
 
-        private decimal _psyrdo = 1;
+        private decimal _psyrdo = 1.0m;
         public decimal psyrdo
         {
             get
@@ -384,7 +384,7 @@ namespace XviD4PSP
             }
         }
 
-        private decimal _psytrellis = 0;
+        private decimal _psytrellis = 0.0m;
         public decimal psytrellis
         {
             get
@@ -423,7 +423,7 @@ namespace XviD4PSP
             }
         }
 
-        private decimal _qcomp = 0.6m;
+        private decimal _qcomp = 0.60m;
         public decimal qcomp
         {
             get

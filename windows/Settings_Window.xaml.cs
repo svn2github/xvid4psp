@@ -134,13 +134,10 @@ namespace XviD4PSP
         //Нажатия кнопок для HotKeys
         private void Settings_KeyDown(object sender, KeyEventArgs e)
         {
-            string PressedKeys = "";
-            if (Keyboard.Modifiers == ModifierKeys.Control) PressedKeys = "Ctrl+";
-            if (Keyboard.Modifiers == ModifierKeys.Shift) PressedKeys = "Shift+";
-            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) PressedKeys = "Ctrl+Alt+";
-            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)) PressedKeys = "Ctrl+Shift+";
-            PressedKeys += e.Key.ToString();
-            textbox_combination.Text = PressedKeys;
+            string key = new System.Windows.Input.KeyConverter().ConvertToString(e.Key);
+            string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
+            textbox_combination.Text = ((mod.Length > 0) ? mod + "+" : "") + key;
+            
             e.Handled = true;
         }
 
@@ -478,32 +475,33 @@ namespace XviD4PSP
         {
             if (edit)
             {
-                string Action = HotKeys.GetAction("=" + textbox_combination.Text);
-                if (Action != "" && Action != raw_action[combo_action.SelectedIndex].ToString())
+                if (textbox_combination.Text != "")
                 {
-                    new Message(this).ShowMessage(Languages.Translate("Combination") + " \"" + textbox_combination.Text + "\" " + Languages.Translate("already used for") + " \"" + Languages.Translate(Action) + "\".", Languages.Translate("Error"));
-                }
-                else
-                {
-                    string output = "";
-                    foreach (string line in HotKeys.Data)
+                    string Action = HotKeys.GetAction("=" + textbox_combination.Text);
+                    if (Action != "" && Action != raw_action[combo_action.SelectedIndex].ToString())
                     {
-                        if (line.Contains("="))
-                        {
-                            string[] action = line.Trim().Split(new string[] { "=" }, StringSplitOptions.None);
-                            if (action[0] == raw_action[combo_action.SelectedIndex].ToString())
-                            {
-                                output += action[0] + "=" + textbox_combination.Text + "; ";
-                            }
-                            else 
-                                output += line.Trim() + "; ";
-                        }
+                        new Message(this).ShowMessage(Languages.Translate("Combination") + " \"" + textbox_combination.Text + "\" " + Languages.Translate("already used for") + " \"" + Languages.Translate(Action) + "\".", Languages.Translate("Error"));
+                        return;
                     }
-                    Settings.HotKeys = output;
-                    p.SetHotKeys(); //Тут происходит обновление HotKeys.Data
-                    UpdateHotKeysBox();
-                    Menu_Changed(null, null);
                 }
+                string output = "";
+                foreach (string line in HotKeys.Data)
+                {
+                    if (line.Contains("="))
+                    {
+                        string[] action = line.Trim().Split(new string[] { "=" }, StringSplitOptions.None);
+                        if (action[0] == raw_action[combo_action.SelectedIndex].ToString())
+                        {
+                            output += action[0] + "=" + textbox_combination.Text + "; ";
+                        }
+                        else
+                            output += line.Trim() + "; ";
+                    }
+                }
+                Settings.HotKeys = output;
+                p.SetHotKeys(); //Тут происходит обновление HotKeys.Data
+                UpdateHotKeysBox();
+                Menu_Changed(null, null);
             }
         }
 
@@ -550,7 +548,9 @@ namespace XviD4PSP
 
         private void listview_hotkeys_RightUp(object sender, MouseButtonEventArgs e)
         {
-            if (edit) button_edit_hotkeys_Click(null, null);
+            edit = true;
+            textbox_combination.Text = "";
+            button_save_hotkeys_Click(null, null);
         }
 	}
 }

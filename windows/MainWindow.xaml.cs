@@ -364,13 +364,12 @@ namespace XviD4PSP
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (this.OwnedWindows.Count > 0 || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused) return;
-            string PressedKeys = "=";
-            if (Keyboard.Modifiers == ModifierKeys.Control) PressedKeys = "=Ctrl+";
-            if (Keyboard.Modifiers == ModifierKeys.Shift) PressedKeys = "=Shift+";
-            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt)) PressedKeys = "=Ctrl+Alt+";
-            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift)) PressedKeys = "=Ctrl+Shift+";
-            PressedKeys += e.Key.ToString();
+            string PressedKeys;
+            string key = new System.Windows.Input.KeyConverter().ConvertToString(e.Key);
+            string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
+            PressedKeys = "=" + ((mod.Length > 0) ? mod + "+" : "") + key;
             //textbox_frame.Text = PressedKeys;
+            
             string Action = HotKeys.GetAction(PressedKeys);
             e.Handled = (Action.Length > 0);
             //textbox_frame.Text = Action;
@@ -2103,13 +2102,10 @@ namespace XviD4PSP
             if (slider_Volume.Value == 0)
                 image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume2.png", UriKind.RelativeOrAbsolute));
 
-            if (Settings.FFmpegSource2)
-                mn_ffmpeg_new.IsChecked = true;
-            else
-                mn_ffmpeg_old.IsChecked = true;
+            if (Settings.FFmpegSource2) mn_ffmpeg_new.IsChecked = true;
+            else mn_ffmpeg_old.IsChecked = true;
 
-            if (Settings.DGForceFilm)
-                check_force_film.IsChecked = true;
+            check_force_film.IsChecked = Settings.DGForceFilm;
 
             if (Settings.OldSeeking)
             {
