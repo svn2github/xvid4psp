@@ -477,9 +477,6 @@ namespace XviD4PSP
                     }
                     else
                     {
-                        //if (line.StartsWith("x264 [error]") ||
-                        //    line.StartsWith("x264 [info]") ||
-                        //    line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
                         if (line.StartsWith("encoded"))
                         {
                             encodertext += Environment.NewLine + line;
@@ -487,14 +484,16 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            if (encodertext != null)
-                                encodertext += Environment.NewLine;
+                            if (encodertext != null) encodertext += Environment.NewLine;
                             encodertext += line;
                             SetLog(line);
                         }
                     }
                 }
             }
+
+            //Дочитываем остатки лога, если что-то не успело считаться
+            SetLog(encoderProcess.StandardError.ReadToEnd());
 
             //обнуляем прогресс
             of = 0;
@@ -583,7 +582,6 @@ namespace XviD4PSP
                     line = encoderProcess.StandardError.ReadLine();
                     if (line != null)
                     {
-
                         mat = r.Match(line);
                         if (mat.Success == true)
                         {
@@ -592,9 +590,6 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            //if (line.StartsWith("x264 [error]") ||
-                            //    line.StartsWith("x264 [info]") ||
-                            //    line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
                             if (line.StartsWith("encoded"))
                             {
                                 encodertext += Environment.NewLine + line;
@@ -602,34 +597,36 @@ namespace XviD4PSP
                             }
                             else
                             {
-                                if (encodertext != null)
-                                    encodertext += Environment.NewLine;
+                                if (encodertext != null) encodertext += Environment.NewLine;
                                 encodertext += line;
                                 SetLog(line);
                             }
                         }
                     }
                 }
+
+                //Дочитываем остатки лога, если что-то не успело считаться
+                SetLog(encoderProcess.StandardError.ReadToEnd());
+
+                //обнуляем прогресс
+                of = 0;
+                cf = 0;
+                encoder_fps = 0.0;
+
+                //проверка на завершение
+                if (!encoderProcess.HasExited)
+                {
+                    encoderProcess.Kill();
+                    encoderProcess.WaitForExit();
+                }
+
+                //проверка на ошибки в логе
+                if (encodertext != null && encodertext.Contains("[error]"))
+                    IsErrors = true;
+
+                //ResetCounter();
+                if (IsAborted || IsErrors) return;
             }
-
-            //обнуляем прогресс
-            of = 0;
-            cf = 0;
-            encoder_fps = 0.0;
-
-            //проверка на завершение
-            if (!encoderProcess.HasExited)
-            {
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
-            }
-
-            //проверка на ошибки в логе
-            if (encodertext != null && encodertext.Contains("[error]"))
-                IsErrors = true;
-
-            //ResetCounter();
-            if (IsAborted || IsErrors) return;
 
             //третий проход
             if (m.vpasses.Count == 3)
@@ -670,9 +667,6 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            //if (line.StartsWith("x264 [error]") ||
-                            //    line.StartsWith("x264 [info]") ||
-                            //    line.StartsWith("[warning]") && !line.StartsWith("x264 [warning]: width or height"))
                             if (line.StartsWith("encoded"))
                             {
                                 encodertext += Environment.NewLine + line;
@@ -680,42 +674,43 @@ namespace XviD4PSP
                             }
                             else
                             {
-                                if (encodertext != null)
-                                    encodertext += Environment.NewLine;
+                                if (encodertext != null) encodertext += Environment.NewLine;
                                 encodertext += line;
                                 SetLog(line);
                             }
                         }
                     }
                 }
+
+                //Дочитываем остатки лога, если что-то не успело считаться
+                SetLog(encoderProcess.StandardError.ReadToEnd());
+
+                //обнуляем прогресс
+                of = 0;
+                cf = 0;
+                encoder_fps = 0.0;
+
+                //проверка на завершение
+                if (!encoderProcess.HasExited)
+                {
+                    encoderProcess.Kill();
+                    encoderProcess.WaitForExit();
+                }
+
+                //проверка на ошибки в логе
+                if (encodertext != null && encodertext.Contains("[error]"))
+                    IsErrors = true;
+
+                //чистим ресурсы
+                encoderProcess.Close();
+                encoderProcess.Dispose();
+                encoderProcess = null;
+
+                if (IsAborted || IsErrors) return;
             }
-
-            //обнуляем прогресс
-            of = 0;
-            cf = 0;
-            encoder_fps = 0.0;
-
-            //проверка на завершение
-            if (!encoderProcess.HasExited)
-            {
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
-            }
-
-            //проверка на ошибки в логе
-            if (encodertext != null && encodertext.Contains("[error]"))
-                IsErrors = true;
-
-            //чистим ресурсы
-            encoderProcess.Close();
-            encoderProcess.Dispose();
-            encoderProcess = null;
-
-            if (IsAborted || IsErrors) return;
 
             //проверка на удачное завершение
-            if (!File.Exists(m.outvideofile) ||
-                new FileInfo(m.outvideofile).Length == 0)
+            if (!File.Exists(m.outvideofile) || new FileInfo(m.outvideofile).Length == 0)
             {
                 IsErrors = true;
                 ErrorExeption(encodertext);

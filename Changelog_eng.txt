@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r105 15.01.10, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106 15.01.10, main changes:
 
+>>> (r106) Fixed issue with loosing log from the x264.exe.
 >>> (r105) Some fixes and changes in the Decoder.xaml.cs, Demuxer.xaml.cs, Caching.xaml.cs and MainWindow.xaml.cs.
            Opening files, demuxing streams..
 >>> (r105) Option "Don`t demux audio for preview" now also work for FFmpegSource decoders. If it enabled, then files will
