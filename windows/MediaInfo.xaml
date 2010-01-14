@@ -8,7 +8,7 @@
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<TextBox x:Name="tbxInfo" Text="" TextWrapping="Wrap" Margin="8,8,8,8" AllowDrop="True" PreviewDragEnter="grid_main_DragEnter" PreviewDragOver="grid_main_DragEnter" PreviewDrop="grid_main_Drop" IsReadOnly="True" ToolTip="Drag file here" FontFamily="Lucida Console" FontSize="11" />
+			<TextBox x:Name="tbxInfo" Text="" TextWrapping="Wrap" Margin="8,8,8,8" AllowDrop="True" PreviewDragEnter="grid_main_DragEnter" PreviewDragOver="grid_main_DragEnter" PreviewDrop="grid_main_Drop" IsReadOnly="True" ToolTip="Drop your file here" FontFamily="Lucida Console" FontSize="11" />
 		</Grid>
 		<Grid x:Name="grid_buttons" Height="38" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom">
 			<Button x:Name="button_open" Width="75" Content="Open" HorizontalAlignment="Left" Margin="8,0,0,8" VerticalAlignment="Bottom" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_open_Click"/>    

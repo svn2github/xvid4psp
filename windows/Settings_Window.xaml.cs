@@ -56,6 +56,7 @@ namespace XviD4PSP
             check_clone_trim.Content = Languages.Translate("Trim");
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
             check_use_64bit.Content = Languages.Translate("Use 64 bit x264");
+            check_demux_audio.ToolTip = Languages.Translate("Leave it unchecked to avoid some problems with sound");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -90,8 +91,7 @@ namespace XviD4PSP
             check_logfile_tempfolder.IsChecked = Settings.LogInTemp; //.. а файл поместить во временную папку
             textbox_extensions.Text = Settings.GoodFilesExtensions; //окно со списком допустимых расширений файлов (при пакетной обработке)
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding; //автозапуск кодирования (при пакетной обработке)
-            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp; //помещать DGIndex-кэш в Темп-папку
-            check_demux_audio.ToolTip = "Leave it unchecked to avoid some problems with sound";
+            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp; //помещать DGIndex-кэш в Темп-папку            
             check_clone_ar.IsChecked = Settings.BatchCloneAR; //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
             check_clone_trim.IsChecked = Settings.BatchCloneTrim; //То-же что и выше, но для обрезки
             check_batch_pause.IsChecked = Settings.BatchPause; //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)

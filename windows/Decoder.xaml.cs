@@ -16,8 +16,8 @@ using System.Text.RegularExpressions;
 
 namespace XviD4PSP
 {
-	public partial class Decoder
-	{
+    public partial class Decoder
+    {
         public enum DecoderModes { DecodeVideo, DecodeAudio, DecodeAV };
         private BackgroundWorker worker = null;
         private Process encoderProcess = null;
@@ -27,8 +27,10 @@ namespace XviD4PSP
         private FFInfo ff;
 
         private bool IsAborted = false;
-        private bool IsErrors = false;
-        private string error_message;
+        public bool IsErrors = false;
+        public string error_message;
+        private int exit_code;
+        private string source_file;
 
         public Decoder(Massive mass, DecoderModes mode, string outfile)
         {
@@ -42,12 +44,12 @@ namespace XviD4PSP
 
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
 
-            if (mode == DecoderModes.DecodeAudio)
-                Title = Languages.Translate("Audio decoding") + "...";
-            else if (mode == DecoderModes.DecodeVideo)
-                Title = Languages.Translate("Video decoding") + "...";
-            else if (mode == DecoderModes.DecodeAV)
-                Title = Languages.Translate("LossLess decoding") + "...";
+            if (mode == DecoderModes.DecodeAudio) Title = Languages.Translate("Audio decoding") + "...";
+            else if (mode == DecoderModes.DecodeVideo) Title = Languages.Translate("Video decoding") + "...";
+            else if (mode == DecoderModes.DecodeAV) Title = Languages.Translate("LossLess decoding") + "...";
+
+            //Определяем исходный файл
+            source_file = (m.infilepath_source != null) ? m.infilepath_source : m.infilepath;
 
             //фоновое кодирование
             CreateBackgoundWorker();
@@ -66,7 +68,7 @@ namespace XviD4PSP
             worker.WorkerReportsProgress = true;
         }
 
-       private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
             if (progress.IsIndeterminate)
             {
@@ -84,7 +86,7 @@ namespace XviD4PSP
             Title = "(" + e.ProgressPercentage + "%)";
         }
 
-       private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try
             {
@@ -97,7 +99,7 @@ namespace XviD4PSP
 
                 //получаем колличество секунд
                 ff = new FFInfo();
-                ff.Open(m.infilepath);
+                ff.Open(source_file);
                 int seconds = (int)ff.Duration().TotalSeconds;
 
                 encoderProcess = new Process();
@@ -111,7 +113,6 @@ namespace XviD4PSP
                 info.CreateNoWindow = true;
 
                 string _format = "";
-
                 string _vcodec = "-vn";
                 string _acodec = "-an";
                 string yv12 = "";
@@ -142,7 +143,7 @@ namespace XviD4PSP
                 //закрываем фф
                 ff.Close();
 
-                info.Arguments = "-i \"" + m.infilepath +
+                info.Arguments = "-i \"" + source_file +
                     "\" " + _vcodec + " " + _acodec + _format + yv12 + _framerate + aspect + " \"" + outfile + "\"";
 
                 encoderProcess.StartInfo = info;
@@ -171,17 +172,23 @@ namespace XviD4PSP
                 }
 
                 //чистим ресурсы
+                exit_code = encoderProcess.ExitCode;
+                string encodertext = encoderProcess.StandardError.ReadToEnd();
                 encoderProcess.Close();
                 encoderProcess.Dispose();
                 encoderProcess = null;
 
                 //проверка на удачное завершение
+                if (exit_code > 0 && encodertext != null)
+                {
+                    //Оставляем только последнюю строчку из всего лога
+                    string[] log = encodertext.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                    throw new Exception(log[log.Length - 1]);
+                }
                 if (!File.Exists(outfile) || new FileInfo(outfile).Length == 0)
                 {
-                    if (mode == DecoderModes.DecodeVideo)
-                        throw new Exception(Languages.Translate("Can`t find output video file!"));
-                    if (mode == DecoderModes.DecodeAudio)
-                        throw new Exception(Languages.Translate("Can`t find output audio file!"));
+                    if (mode == DecoderModes.DecodeVideo) throw new Exception(Languages.Translate("Can`t find output video file!"));
+                    if (mode == DecoderModes.DecodeAudio) throw new Exception(Languages.Translate("Can`t find output audio file!"));
                 }
             }
             catch (Exception ex)
@@ -191,7 +198,7 @@ namespace XviD4PSP
             }
         }
 
-       private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             //if (IsErrors)
             //{
@@ -202,12 +209,12 @@ namespace XviD4PSP
         }
 
 
-       private void ErrorExeption(string message)
-       {
-           ShowMessage(message, Languages.Translate("Error"));
-       }
+        private void ErrorExeption(string message)
+        {
+            ShowMessage(message, Languages.Translate("Error"));
+        }
 
-       internal delegate void MessageDelegate(string mtext, string mtitle);
+        internal delegate void MessageDelegate(string mtext, string mtitle);
         private void ShowMessage(string mtext, string mtitle)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
@@ -261,6 +268,5 @@ namespace XviD4PSP
                 ErrorExeption(ex.Message);
             }
         }
-
-	}
+    }
 }

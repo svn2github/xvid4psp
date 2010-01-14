@@ -76,11 +76,7 @@ namespace XviD4PSP
         {
             try
             {
-                string ext;
-                if (m.infilepath_source != null)
-                    ext = Path.GetExtension(m.infilepath_source).ToLower();
-                else
-                    ext = Path.GetExtension(m.infilepath).ToLower();
+                string ext = Path.GetExtension((m.infilepath_source != null) ? m.infilepath_source : m.infilepath).ToLower();
 
                 if (ext != ".d2v" && ext != ".avs" && ext!= ".dga")
                 {

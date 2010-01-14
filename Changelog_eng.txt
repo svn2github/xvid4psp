@@ -1,5 +1,15 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r102 28.12.09, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r105 15.01.10, main changes:
 
+>>> (r105) Some fixes and changes in the Decoder.xaml.cs, Demuxer.xaml.cs, Caching.xaml.cs and MainWindow.xaml.cs.
+           Opening files, demuxing streams..
+>>> (r105) Option "Don`t demux audio for preview" now also work for FFmpegSource decoders. If it enabled, then files will
+           be opened w/o audio demuxing, so audio will be decoded by FFmpegSource (but if it can`t decode, audio will be
+           demuxed as usually). Remember that for many reasons it is not recommended to use this option!
+>>> (r104) Added new option "Add AssumeFPS() to force FPS" for the FFmpegSource decoders (both). It must resolve problems
+           with wrong fps sometimes received from this decoders, but it also can produce some new problems. This option is
+           on by default and can be disabled in the Video->Decoding->FFmpegSource menu.
+>>> (r103) Step for adjusting --qcomp now 0.01 (reg. by bugariarmando).
+>>> (r103) Unneeded HotKey now can be disabled by right-clicking on it (reg. by Embox).
 >>> (r102) Added encoding process priority "Above normal".
 >>> (r102) Selected "Final action" now will be stored (rep. by Ghostlamer).
 >>> (r101) NicMP4Box will be used if format = iPod 5.5G, video = x264 (or Copy) and NicMP4Box.exe exists here: \apps\MP4Box.

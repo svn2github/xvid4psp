@@ -952,8 +952,8 @@ namespace XviD4PSP
                     x.filtering = Settings.Filtering;
                     x.resizefilter = Settings.ResizeFilter;
 
-                    //блок для импорта d2v файлов
-                    if (ext == ".d2v")
+                    //Звук для d2v и dga файлов
+                    if (ext == ".d2v" || ext == ".dga")
                     {
                         x.indexfile = x.infilepath;
                         ArrayList atracks = Indexing.GetTracks(x.indexfile);
@@ -964,12 +964,10 @@ namespace XviD4PSP
                             {
                                 //забиваем в список все найденные треки
                                 MediaInfoWrapper med = new MediaInfoWrapper();
-                                // med.Open(apath);
                                 AudioStream stream = med.GetAudioInfoFromAFile(apath);
                                 stream.delay = Calculate.GetDelay(apath);
                                 stream.gainfile = Settings.TempPath + "\\" + x.key + "_" + n + "_gain.wav";
                                 x.inaudiostreams.Add(stream.Clone());
-                                //  med.Close();
                                 n++;
                             }
                             x.inaudiostream = 0;
@@ -1055,27 +1053,6 @@ namespace XviD4PSP
                             }
                         }
                     }
-                    
-                    if (ext == ".dga")
-                    {
-                        x.indexfile = x.infilepath;
-                        ArrayList atracks = Indexing.GetTracks(x.indexfile);
-                        int n = 0;
-                        if (atracks.Count > 0)
-                        {
-                            foreach (string apath in atracks)
-                            {
-                                //забиваем в список все найденные треки
-                                MediaInfoWrapper med = new MediaInfoWrapper();
-                                AudioStream stream = med.GetAudioInfoFromAFile(apath);
-                                stream.delay = Calculate.GetDelay(apath);
-                                stream.gainfile = Settings.TempPath + "\\" + x.key + "_" + n + "_gain.wav";
-                                x.inaudiostreams.Add(stream.Clone());
-                                n++;
-                            }
-                            x.inaudiostream = 0;
-                        }
-                    }
 
                     //получаем информацию через MediaInfo
                     if (ext != ".vdr")
@@ -1086,7 +1063,7 @@ namespace XviD4PSP
                     }
                     
                     //разборка EVO
-                    if (ext == ".evo")
+                    //if (ext == ".evo")
                     {
                         //string outext = Format.GetValidRAWVideoEXT(x);
                         //string vpath = Settings.TempPath + "\\" + x.key + "." + outext;
@@ -1179,10 +1156,10 @@ namespace XviD4PSP
 
                     if (x == null) return;
 
-                    //блок авто извлечения для быстрого и правильного декодирования через FFMpegSource
+                    //Извлечение видео для FFMpegSource
                     if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
                     {
-                        //проверяем надо ли извлекать видео в отдельный поток
+                        //проверяем надо ли извлекать видео
                         FFMpegSourceHelper fhelp = new FFMpegSourceHelper(x);
                         if (fhelp.NeedVExtract)
                         {
@@ -1196,8 +1173,7 @@ namespace XviD4PSP
                             Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, outpath);
 
                             //проверка на удачное завершение
-                            if (File.Exists(outpath) &&
-                                new FileInfo(outpath).Length != 0)
+                            if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
                             {
                                 x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
                                 x.infilepath_source = x.infilepath;
@@ -1205,37 +1181,37 @@ namespace XviD4PSP
                                 x.infileslist = new string[] { x.infilepath };
                             }
                         }
+                    }
 
-                        //теперь нам надо извлечь звук, если он есть и если точно знаем что за звук (извлекается только 1-й трек)
-                        if (x.inaudiostreams.Count > 0)
+                    //Извлечение звука для FFmpegSource и DirectShowSource2 (извлекается 1-й трек)
+                    if (x.inaudiostreams.Count > 0 && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource && !Settings.DontDemuxAudio ||
+                        x.vdecoder == AviSynthScripting.Decoders.DSS2))
+                    {
+                        AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
+                        if (instream.audiopath == null)
                         {
-                            AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
-                            if (instream.audiopath == null)
+                            string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
+                            string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
+
+                            //удаляем старый файл
+                            SafeDelete(outpath);
+
+                            //извлекаем новый файл
+                            if (outext == ".wav")
                             {
-                                string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
-                                string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
+                                Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
+                            }
+                            else
+                            {
+                                Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, outpath);
+                            }
 
-                                //удаляем старый файл
-                                SafeDelete(outpath);
-
-                                //извлекаем новый файл
-                                if (outext == ".wav")
-                                {
-                                    Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
-                                }
-                                else
-                                {
-                                    Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, outpath);
-                                }
-
-                                //проверка на удачное завершение
-                                if (File.Exists(outpath) &&
-                                    new FileInfo(outpath).Length != 0)
-                                {
-                                    instream.audiopath = outpath;
-                                    instream.audiofiles = new string[] { outpath };
-                                    instream = Format.GetValidADecoder(instream);
-                                }
+                            //проверка на удачное завершение
+                            if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                            {
+                                instream.audiopath = outpath;
+                                instream.audiofiles = new string[] { outpath };
+                                instream = Format.GetValidADecoder(instream);
                             }
                         }
                     }
@@ -1244,21 +1220,7 @@ namespace XviD4PSP
                     x = Format.GetValidFramerate(x);
                     x = Calculate.UpdateOutFrames(x);
 
-                    ////авто ассум fps
-                    //double diff;
-                    //double infr = Calculate.ConvertStringToDouble(x.inframerate);
-                    //double outfr = Calculate.ConvertStringToDouble(x.outframerate);
-                    //if (infr > outfr)
-                    //    diff = infr - outfr;
-                    //else
-                    //    diff = outfr - infr;
-                    //if (diff > 0 && diff < 1)
-                    //    x.frameratemodifer = AviSynthScripting.FramerateModifers.AssumeFPS;
-                    ////////////////////////////////////////////////
-                    //может вызать проблемы с синхронизацией
-                    ////////////////////////////////////////
-
-                    //Получаем информацию через AviSynth и кешируем аудио для FFmpegSource
+                    //Получаем информацию через AviSynth и ловим ошибки
                     Caching cach = new Caching(x);
                     if (cach.m == null) return;
                     x = cach.m.Clone();
@@ -1311,8 +1273,7 @@ namespace XviD4PSP
                                 !Settings.DontDemuxAudio)
                             {
                                 Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                                if (dem.m != null)
-                                    x = dem.m.Clone();
+                                if (dem.m != null) x = dem.m.Clone();
                             }
                         }
                     }
@@ -1655,8 +1616,7 @@ namespace XviD4PSP
                         outstream.codec != "Copy")
                     {
                         Demuxer dem = new Demuxer(mass, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                        if (dem.m != null)
-                            mass = dem.m.Clone();
+                        if (dem.m != null) mass = dem.m.Clone();
 
                         //обновляем скрипт
                         mass = AviSynthScripting.CreateAutoAviSynthScript(mass);
@@ -2589,6 +2549,10 @@ namespace XviD4PSP
         //повторное открытие файла после смены декодера
         private void reopen_file()
         {
+            //Дублируем текущий массив для возможности восстановления
+            Massive old_m = new Massive();
+            old_m = m.Clone();
+            
             m = Format.GetValidVDecoder(m);
 
             //определяем аудио декодер
@@ -2600,10 +2564,17 @@ namespace XviD4PSP
 
             m = AviSynthScripting.CreateAutoAviSynthScript(m);
 
-            //Получаем информацию через AviSynth и кешируем аудио для FFmpegSource
+            //Получаем информацию через AviSynth и ловим ошибки
             Caching cach = new Caching(m);
-            if (cach.m != null)
-                m = cach.m.Clone();
+            if (cach.m == null)
+            {
+                //Восстанавливаем массив из сохраненного
+                m = old_m.Clone();
+                old_m = null;
+                return;
+            }
+            m = cach.m.Clone();
+            old_m = null;
 
             //перезабиваем специфику формата
             m = Format.GetOutInterlace(m);
@@ -3694,30 +3665,18 @@ namespace XviD4PSP
         private void menu_save_wav_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null) return;
-            AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-
-            if (outstream.codec == "Copy")
+            if (m.inaudiostreams.Count == 0)
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
+                new Message(this).ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
             }
-            else if (outstream.codec == "Disabled" || m.inaudiostreams.Count == 0)
-            {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
-            }
-            else
-            {
-                action_save_wav();
-            }
-        }
+            else action_save_wav();
+        }        
 
         private void action_save_wav()
         {
             System.Windows.Forms.SaveFileDialog o = new System.Windows.Forms.SaveFileDialog();
             o.Filter = Languages.Translate("Windows PCM (*.wav)") + "|*.wav";
             o.Title = Languages.Translate("Select output file") + ":";
-
             o.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + ".wav";
 
             if (o.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -3728,6 +3687,10 @@ namespace XviD4PSP
                     return;
                 }
                 Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.DecodeToWAV, o.FileName);
+                if (dem.IsErrors)
+                {
+                    new Message(this).ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                }
             }
         }
 
@@ -3742,28 +3705,22 @@ namespace XviD4PSP
             else
             {
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                System.Windows.Forms.SaveFileDialog o = new System.Windows.Forms.SaveFileDialog();
+                o.Filter = instream.codecshort + " " + Languages.Translate("files") + "|*." + instream.codecshort.ToLower();
+                o.Title = Languages.Translate("Select output file") + ":";
+                o.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidRAWAudioEXT(instream.codecshort);
 
-                if (instream.codecshort == "PCM" ||
-                    instream.codecshort == "LPCM")
+                if (o.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    action_save_wav();
-                }
-                else
-                {
-                    System.Windows.Forms.SaveFileDialog o = new System.Windows.Forms.SaveFileDialog();
-                    o.Filter = instream.codecshort + " " + Languages.Translate("files") + "|*." + instream.codecshort.ToLower();
-                    o.Title = Languages.Translate("Select output file") + ":";
-
-                    o.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidRAWAudioEXT(instream.codecshort);
-
-                    if (o.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    if (o.FileName == m.infilepath)
                     {
-                        if (o.FileName == m.infilepath)
-                        {
-                            ErrorExeption(Languages.Translate("Select another name for output file!"));
-                            return;
-                        }
-                        Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, o.FileName);
+                        ErrorExeption(Languages.Translate("Select another name for output file!"));
+                        return;
+                    }
+                    Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, o.FileName);
+                    if (dem.IsErrors)
+                    {
+                        new Message(this).ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
                     }
                 }
             }
@@ -3784,7 +3741,6 @@ namespace XviD4PSP
                 System.Windows.Forms.SaveFileDialog o = new System.Windows.Forms.SaveFileDialog();
                 o.Filter = ext.ToUpper() + " " + Languages.Translate("Video").ToLower() + Languages.Translate("files") + "|*." + ext;
                 o.Title = Languages.Translate("Select output file") + ":";
-
                 o.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + "." + ext;
 
                 if (o.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -3794,8 +3750,11 @@ namespace XviD4PSP
                         ErrorExeption(Languages.Translate("Select another name for output file!"));
                         return;
                     }
-
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractVideo, o.FileName);
+                    if (dem.IsErrors)
+                    {
+                        new Message(this).ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    }
                 }
             }
         }

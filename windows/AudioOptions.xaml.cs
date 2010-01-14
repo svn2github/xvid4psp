@@ -306,9 +306,8 @@ namespace XviD4PSP
                 //передаём активный трек на выход
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
-                if (instream.audiopath == null &&
-                    instream.decoder == 0 &&
-                    m.inaudiostream > 0)
+                if (instream.audiopath == null && instream.decoder == 0 && m.inaudiostream > 0 &&
+                    !(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Settings.DontDemuxAudio))
                 {
                     string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
                     instream.audiopath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
@@ -405,8 +404,7 @@ namespace XviD4PSP
                     !File.Exists(instream.audiopath))
                 {
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                    if (dem.m != null)
-                        m = dem.m.Clone();
+                    if (dem.m != null) m = dem.m.Clone();
                 }
 
                 if (m.volume != "Disabled" &&
@@ -713,8 +711,7 @@ namespace XviD4PSP
                 !File.Exists(instream.audiopath))
             {
                 Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                if (dem.m != null)
-                    m = dem.m.Clone();
+                if (dem.m != null) m = dem.m.Clone();
 
                 //обновляем скрипт
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);

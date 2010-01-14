@@ -1904,12 +1904,19 @@ namespace XviD4PSP
 
             //запускаем кодер
             avs.start();
-
+            
             //извлекаем кусок на ext_frames фреймов
             while (avs.IsBusy())
             {
                 worker.ReportProgress(avs.frame);
                 Thread.Sleep(100);
+            }
+
+            //Ловим ошибки, если они были
+            if (avs.args != null && avs.args.StartsWith("AviSynthEncoder Error: "))
+            {
+                IsErrors = true;
+                ErrorExeption(avs.args);                
             }
 
             //чистим ресурсы
@@ -2326,7 +2333,6 @@ namespace XviD4PSP
 
         private void demux_mkv(Demuxer.DemuxerMode dmode)
         {
-
            //список файлов
             string flist = "";
             foreach (string _file in m.infileslist)
@@ -2585,7 +2591,7 @@ namespace XviD4PSP
             cf = 0;
 
             //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.ExitCode != 0)
+            if (encoderProcess.ExitCode > 0)
             {
                 IsErrors = true;
                 ErrorExeption(encodertext);
@@ -2878,7 +2884,7 @@ namespace XviD4PSP
             }
             
             //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.ExitCode != 0)
+            if (encoderProcess.ExitCode > 0)
             {
                 IsErrors = true;
                 ErrorExeption(text_on_exit.Trim());

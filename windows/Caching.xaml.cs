@@ -167,8 +167,7 @@ namespace XviD4PSP
                     }
                 }
             }                
- 
-    }
+        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -187,11 +186,10 @@ namespace XviD4PSP
             }
         }
 
-       private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
            //выходим при отмене
-            if (m == null)
-                return;
+            if (m == null) return;
 
             string ext = Path.GetExtension(m.infilepath).ToLower();
 
@@ -201,21 +199,14 @@ namespace XviD4PSP
             else
                 instream = new AudioStream();
 
-            if (error != null && error == "Can`t decode audio with DirectShowSource" ||
-                error != null && error.StartsWith("DirectShowSource:") ||
-                error == "Script doesn't contain video" || error != null && error.Contains("FFmpegSource: Audio decoding error"))
+            if (error == null) Close(); 
+            
+            else if (error == "Can`t decode audio with DirectShowSource" || error.StartsWith("DirectShowSource:") || error == "Script doesn't contain video" ||
+                error.Contains("FFmpegSource: Audio decoding error") || error.StartsWith("FFAudioSource:") || error.Contains("audio track"))
             {
-                //Message message = new Message(this);
-                //message.ShowMessage(Languages.Translate("Can`t decode audio with") + " " + m.adecoder + "!\n" +
-                //                    Languages.Translate("Try switch decoder to FFmpegSource?"),
-                //    Languages.Translate("Question"), Message.MessageStyle.YesNo);
-
-                //if (message.result == Message.Result.Yes)
-                //{              
-                            
-                //Нет звука, переключение с DirectShowSource на FFmpegSource, но только если декодер не DSS2
-                if(m.vdecoder != AviSynthScripting.Decoders.DSS2)
-                    m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;///
+                //Переключение с DirectShowSource на FFmpegSource (если DirectShowSource не может декодировать видео)
+                if (error.StartsWith("DirectShowSource:") || error.Contains("contain video"))
+                    m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
 
                     if (m.inaudiostreams.Count > 0)
                     {
@@ -229,18 +220,30 @@ namespace XviD4PSP
                         if (outext == ".wav")
                         {
                             Decoder dec = new Decoder(m, Decoder.DecoderModes.DecodeAudio, outpath);
+                            if (dec.IsErrors)
+                            {
+                                ShowMessage("Demuxer: " + dec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                                m = null;
+                                Close();
+                            }
                         }
                         else
                         {
                             Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, outpath);
+                            if (dem.IsErrors)
+                            {
+                                //Вместо вывода сообщения об ошибке тут можно назначить декодирование в WAV, но тогда в режиме Copy будет копироваться WAV..
+                                ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                                m = null;
+                                Close();
+                            }
                         }
 
                         //проверка на удачное завершение
-                        if (File.Exists(outpath) &&
-                            new FileInfo(outpath).Length != 0)
+                        if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
                         {
                             instream.audiopath = outpath;
-                            //instream.audiofiles = new string[] { outpath };
+                            instream.audiofiles = new string[] { outpath };
                             instream = Format.GetValidADecoder(instream);
                         }
                         else
@@ -259,39 +262,26 @@ namespace XviD4PSP
                 //    m.inaudiostreams = 0;
                 //}
             }
-
-                //ситуация когда стоит попробовать декодировать аудио в wav
+            //ситуация когда стоит попробовать декодировать аудио в wav
             else if (error == "FFmpegSource: Audio codec not found")
             {
-                Close();
+                Close(); //Позже будет декодирование в WAV
             }
-
-            else if (error == "File could not be opened!" &&
-                instream.decoder == AviSynthScripting.Decoders.bassAudioSource)
+            else if (error == "File could not be opened!" && instream.decoder == AviSynthScripting.Decoders.bassAudioSource)
             {
                 instream.decoder = AviSynthScripting.Decoders.FFAudioSource;
                 error = null;
                 worker.RunWorkerAsync();
                 return;
             }
-
-            //else if (error != null && error.Contains("determine the frame rate"))
-            //{
-            //    error = null;
-            //    m.isforcefps = true;
-            //    worker.RunWorkerAsync();
-            //    return;
-            //}
-
-            else if (error != null && error.Contains("convertfps"))
+            else if (error.Contains("convertfps") && m.vdecoder == AviSynthScripting.Decoders.DirectShowSource)
             {
                 error = null;
                 m.isconvertfps = false;
                 worker.RunWorkerAsync();
                 return;
             }
-
-            else if (error != null && error == "Cannot load avisynth.dll")
+            else if (error == "Cannot load avisynth.dll")
             {
                 string mess = Languages.Translate("AviSynth is not found!") + Environment.NewLine +
                     Languages.Translate("Please install AviSynth 2.5.7 MT or higher.");
@@ -299,10 +289,8 @@ namespace XviD4PSP
                 error = null;
                 m = null;
             }
-
             //файл плохой надо пересобирать
-            else if (error != null && error.StartsWith("FFmpegSource: Can't parse Matroska file") ||
-                error != null && error == "FFmpegSource: Audio codec not found" && ext == ".mkv")
+            else if (error.StartsWith("FFmpegSource: Can't parse Matroska file"))
             {
                 Message message = new Message(this);
                 message.ShowMessage(Languages.Translate("Matroska file is corrupted! Try repair file?"),
@@ -342,19 +330,16 @@ namespace XviD4PSP
                     m = null;
                 }
             }
-
-            else if (error != null)
+            else
             {
                 ShowMessage(error, Languages.Translate("Error"), Message.MessageStyle.Ok);
                 error = null;
                 m = null;
             }
-
             //закрываем таймер
             //timer.Close();
             //timer.Enabled = false;
             //timer.Elapsed -= new ElapsedEventHandler(OnTimedEvent);
-
             Close();
         }
 
