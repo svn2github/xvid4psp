@@ -1,5 +1,14 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106 15.01.10, основные изменения:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r107 18.01.10, основные изменения:
 
+>>> (r107) Для форматов AVI, MKV, MP4, MOV и Custom добавлена возможность выбора допустимой кратности сторон изображения
+           (mod16, mod8, и т.д.). Видео->Разрешение/Аспект->Настройки.
+---
+Обновлен:  FFmpegSource2 (2.13 r257_test, http://code.google.com/p/ffmpegsource)
+Обновлен:  MediaInfo (0.7.27, http://mediainfo.sourceforge.net)
+Обновлен:  FFmpeg (unofficial build r21221, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
+Обновлен:  MKVtoolnix (3.0.0-build20100111-207, http://www.bunkus.org/videotools/mkvtoolnix/win32/pre)
+Обновлен:  neroAacEnc (1.5.1.0, http://www.nero.com/eng/downloads-nerodigital-nero-aac-codec.php)
+---
 >>> (r106) Исправлена проблема с потерей лога от х264.exe.
 >>> (r105) Некоторые изменения и исправления в Decoder.xaml.cs, Demuxer.xaml.cs, Caching.xaml.cs и MainWindow.xaml.cs.
            Открытие файлов, демукс потоков..

@@ -73,40 +73,35 @@ namespace XviD4PSP
             combo_Extension.SelectedItem = FormatReader.GetFormatInfo(format, "GetValidExtension");
 
             int n = 16;
-            int step = 16;
+            int step = Settings.LimitModW;
+            string val = "";
             while (n < 1920 + step)
             {
+                combo_MinResolutionW.Items.Add(n.ToString());
                 combo_MaxResolutionW.Items.Add(n.ToString());
                 n = n + step;
             }
-            combo_MaxResolutionW.SelectedItem = FormatReader.GetFormatInfo(format, "MaxResolutionW");
+            val = FormatReader.GetFormatInfo(format, "MinResolutionW");
+            if (!combo_MinResolutionW.Items.Contains(val)) combo_MinResolutionW.Items.Add(val);
+            combo_MinResolutionW.SelectedItem = val;
+            val = FormatReader.GetFormatInfo(format, "MaxResolutionW");
+            if (!combo_MaxResolutionW.Items.Contains(val)) combo_MaxResolutionW.Items.Add(val);
+            combo_MaxResolutionW.SelectedItem = val;
 
             n = 16;
-            step = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetResolutionHMod"));
-            while (n < 1088 + step)
-            {
-                combo_MaxResolutionH.Items.Add(n.ToString());
-                n = n + step;
-            }
-            combo_MaxResolutionH.SelectedItem = FormatReader.GetFormatInfo(format, "MaxResolutionH");
-
-            n = 16;
-            step = 16;
-            while (n< 1920 + step)
-            {
-                combo_MinResolutionW.Items.Add(n.ToString());
-                n = n + step;
-            }
-            combo_MinResolutionW.SelectedItem = FormatReader.GetFormatInfo(format, "MinResolutionW");
-
-            n = 16;
-            step = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetResolutionHMod"));
+            step = Settings.LimitModH;
             while (n < 1088 + step)
             {
                 combo_MinResolutionH.Items.Add(n.ToString());
+                combo_MaxResolutionH.Items.Add(n.ToString());
                 n = n + step;
             }
-            combo_MinResolutionH.SelectedItem = FormatReader.GetFormatInfo(format, "MinResolutionH");
+            val = FormatReader.GetFormatInfo(format, "MinResolutionH");
+            if (!combo_MinResolutionH.Items.Contains(val)) combo_MinResolutionH.Items.Add(val);
+            combo_MinResolutionH.SelectedItem = val;
+            val = FormatReader.GetFormatInfo(format, "MaxResolutionH");
+            if (!combo_MaxResolutionH.Items.Contains(val)) combo_MaxResolutionH.Items.Add(val);
+            combo_MaxResolutionH.SelectedItem = val;
            
             if (FormatReader.GetFormatInfo(format, "IsLockedOutAspect") == "yes")
                 check_fixed_ar.IsChecked = true;

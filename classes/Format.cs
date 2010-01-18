@@ -1152,21 +1152,21 @@ namespace XviD4PSP
            }
 
            //выбираем по какой стороне подбирать
-           if (m.outresh > MaxH) 
+           if (m.outresh > MaxH)
            {
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
-                   m.outresh = Calculate.GetCloseIntegerAL(m.outresh - 8, hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(m.outresh - GetWalidModH(m), hlist);
                    m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
                }
            }
-           else 
+           else
            {
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
-                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - 16, wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetWalidModW(m), wlist);
                    m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
                }
            }
@@ -1215,7 +1215,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
-                   m.outresh = Calculate.GetCloseIntegerAL(m.inresh - 8, hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(m.inresh - GetWalidModH(m), hlist);
                    m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
                }
            }
@@ -1226,12 +1226,32 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
-                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - 16, wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetWalidModW(m), wlist);
                    m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
                }
            }
 
            return m;
+       }
+
+       public static int GetWalidModW(Massive m)
+       {
+           int modw = 16;
+           if (m.format == ExportFormats.Avi || m.format == ExportFormats.Mkv ||
+               m.format == ExportFormats.Mov || m.format == ExportFormats.Mp4 ||
+               m.format == ExportFormats.Custom)
+               modw = Settings.LimitModW;
+           return modw;
+       }
+
+       public static int GetWalidModH(Massive m)
+       {
+           int modh = 8;
+           if (m.format == ExportFormats.Avi || m.format == ExportFormats.Mkv ||
+               m.format == ExportFormats.Mov || m.format == ExportFormats.Mp4 ||
+               m.format == ExportFormats.Custom)
+               modh = Settings.LimitModH;
+           return modh;
        }
 
        public static ArrayList GetResWList(Massive m)
@@ -1240,13 +1260,9 @@ namespace XviD4PSP
            int n = 16;
            int step = 16;
 
-           if (m.format == ExportFormats.Avi ||
-               m.format == ExportFormats.AviHardware ||
+           if (m.format == ExportFormats.AviHardware ||
                m.format == ExportFormats.AviHardwareHD ||
-               m.format == ExportFormats.Mkv ||
-               m.format == ExportFormats.Mp4 ||
                m.format == ExportFormats.Mp4PS3 ||
-               m.format == ExportFormats.Mov ||
                m.format == ExportFormats.Mpeg2PS ||
                m.format == ExportFormats.Mpeg1PS ||
                m.format == ExportFormats.M2TS ||
@@ -1261,29 +1277,37 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.BluRay)
+           else if (m.format == ExportFormats.Avi ||
+               m.format == ExportFormats.Mkv ||
+               m.format == ExportFormats.Mp4 ||
+               m.format == ExportFormats.Mov)
+           {
+               step = Settings.LimitModW;
+               while (n < 1920 + step)
+               {
+                   reswlist.Add(n);
+                   n = n + step;
+               }
+           }
+           else if (m.format == ExportFormats.BluRay)
            {
                reswlist.Add(720);
                reswlist.Add(1280);
                reswlist.Add(1440);
                reswlist.Add(1920);
            }
-
-           if (m.format == ExportFormats.Mpeg2PAL ||
+           else if (m.format == ExportFormats.Mpeg2PAL ||
                m.format == ExportFormats.AviDVPAL)
            {
                    reswlist.Add(720);
            }
-
-           if (m.format == ExportFormats.Mpeg2NTSC ||
+           else if (m.format == ExportFormats.Mpeg2NTSC ||
                m.format == ExportFormats.AviDVNTSC ||
                m.format == ExportFormats.Mp4PSPAVCTV)
            {
                    reswlist.Add(720);
            }
-
-           if (m.format == ExportFormats.Mp4Archos5G)
+           else if (m.format == ExportFormats.Mp4Archos5G)
            {
                while (n < 720 + step)
                {
@@ -1291,8 +1315,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4ToshibaG900)
+           else if (m.format == ExportFormats.Mp4ToshibaG900)
            {
                while (n < 800 + step)
                {
@@ -1300,8 +1323,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4PSPAVC)
+           else if (m.format == ExportFormats.Mp4PSPAVC)
            {
                while (n < 480 + step)
                {
@@ -1309,8 +1331,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.PmpAvc)
+           else if (m.format == ExportFormats.PmpAvc)
            {
                while (n < 480 + step)
                {
@@ -1318,9 +1339,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-
-           if (m.format == ExportFormats.Mp4PSPASP)
+           else if (m.format == ExportFormats.Mp4PSPASP)
            {
                while (n < 480 + step)
                {
@@ -1328,8 +1347,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.DpgNintendoDS)
+           else if (m.format == ExportFormats.DpgNintendoDS)
            {
                while (n < 256 + step)
                {
@@ -1337,8 +1355,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4BlackBerry8100)
+           else if (m.format == ExportFormats.Mp4BlackBerry8100)
            {
                while (n < 240 + step)
                {
@@ -1346,8 +1363,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4BlackBerry8800 ||
+           else if (m.format == ExportFormats.Mp4BlackBerry8800 ||
                m.format == ExportFormats.Mp4BlackBerry8830 ||
                m.format == ExportFormats.Mp4SonyEricssonK800 ||
                m.format == ExportFormats.Mp4Nokia5700 ||
@@ -1359,8 +1375,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4SonyEricssonK610)
+           else if (m.format == ExportFormats.Mp4SonyEricssonK610)
            {
                while (n < 176 + step)
                {
@@ -1368,8 +1383,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4MotorolaK1)
+           else if (m.format == ExportFormats.Mp4MotorolaK1)
            {
                while (n < 352 + step)
                {
@@ -1377,8 +1391,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4iPod50G ||
+           else if (m.format == ExportFormats.Mp4iPod50G ||
                m.format == ExportFormats.AviiRiverClix2 ||
                m.format == ExportFormats.ThreeGP)
            {
@@ -1388,8 +1401,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4iPod55G)
+           else if (m.format == ExportFormats.Mp4iPod55G)
            {
                while (n < 640 + step)
                {
@@ -1397,8 +1409,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4Prada)
+           else if (m.format == ExportFormats.Mp4Prada)
            {
                while (n < 400 + step)
                {
@@ -1406,8 +1417,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4iPhone)
+           else if (m.format == ExportFormats.Mp4iPhone)
            {
                while (n < 720 + step)
                {
@@ -1415,8 +1425,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4AppleTV)
+           else if (m.format == ExportFormats.Mp4AppleTV)
            {
                while (n < 1280 + step)
                {
@@ -1424,18 +1433,9 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           //if (m.format == ExportFormats.Flv)
-           //{
-           //    while (n < 640 + step)
-           //    {
-           //        reswlist.Add(n);
-           //        n = n + step;
-           //    }
-           //}
-
-           if (m.format == ExportFormats.Custom)
+           else if (m.format == ExportFormats.Custom)
            {
+               step = Settings.LimitModW;
                n = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MinResolutionW"));
                while (n < Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MaxResolutionW")) + step)
                {
@@ -1443,9 +1443,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-           
-           
-           
+
            return reswlist;
        }
 
@@ -1453,19 +1451,11 @@ namespace XviD4PSP
        {
            ArrayList reshlist = new ArrayList();
            int n = 16;
+           int step = 8;
 
-           int step = 8;//
-           //ограничение для формата pmp
-           if (m.format == ExportFormats.PmpAvc)
-               step = 8;
-
-           if (m.format == ExportFormats.Avi ||
-               m.format == ExportFormats.AviHardware ||
+           if (m.format == ExportFormats.AviHardware ||
                m.format == ExportFormats.AviHardwareHD ||
-               m.format == ExportFormats.Mkv ||
-               m.format == ExportFormats.Mp4 ||
                m.format == ExportFormats.Mp4PS3 ||
-               m.format == ExportFormats.Mov ||
                m.format == ExportFormats.Mpeg2PS ||
                m.format == ExportFormats.Mpeg1PS ||
                m.format == ExportFormats.M2TS ||
@@ -1479,29 +1469,37 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.BluRay)
+           else  if (m.format == ExportFormats.Avi ||
+               m.format == ExportFormats.Mkv ||
+               m.format == ExportFormats.Mp4 ||
+               m.format == ExportFormats.Mov)
+           {
+               step = Settings.LimitModH;
+               while (n < 1088 + step)
+               {
+                   reshlist.Add(n);
+                   n = n + step;
+               }
+           }
+           else if (m.format == ExportFormats.BluRay)
            {
                reshlist.Add(480);
                reshlist.Add(576);
                reshlist.Add(720);
                reshlist.Add(1080);
            }
-
-           if (m.format == ExportFormats.Mpeg2PAL ||
+           else if (m.format == ExportFormats.Mpeg2PAL ||
                m.format == ExportFormats.AviDVPAL)
            {
                reshlist.Add(576);
            }
-
-           if (m.format == ExportFormats.Mpeg2NTSC ||
+           else if (m.format == ExportFormats.Mpeg2NTSC ||
                m.format == ExportFormats.AviDVNTSC ||
                m.format == ExportFormats.Mp4PSPAVCTV)
            {
                reshlist.Add(480);
            }
-
-           if (m.format == ExportFormats.Mp4Archos5G)
+           else if (m.format == ExportFormats.Mp4Archos5G)
            {
                while (n < 576 + step)
                {
@@ -1509,8 +1507,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4ToshibaG900)
+           else if (m.format == ExportFormats.Mp4ToshibaG900)
            {
                while (n < 480 + step)
                {
@@ -1518,8 +1515,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4PSPAVC)
+           else if (m.format == ExportFormats.Mp4PSPAVC)
            {
                while (n < 272 + step)
                {
@@ -1527,8 +1523,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.PmpAvc)
+           else if (m.format == ExportFormats.PmpAvc)
            {
                step = 16;
                while (n < 272 + step)
@@ -1537,8 +1532,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4PSPASP)
+           else if (m.format == ExportFormats.Mp4PSPASP)
            {
                while (n < 272 + step)
                {
@@ -1546,8 +1540,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.DpgNintendoDS)
+           else if (m.format == ExportFormats.DpgNintendoDS)
            {
                while (n < 192 + step)
                {
@@ -1555,8 +1548,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4BlackBerry8100)
+           else if (m.format == ExportFormats.Mp4BlackBerry8100)
            {
                while (n < 180 + step)
                {
@@ -1564,8 +1556,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4BlackBerry8800)
+           else if (m.format == ExportFormats.Mp4BlackBerry8800)
            {
                while (n < 180 + step)
                {
@@ -1573,8 +1564,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4BlackBerry8830 ||
+           else if (m.format == ExportFormats.Mp4BlackBerry8830 ||
                m.format == ExportFormats.Mp4SonyEricssonK800 ||
                m.format == ExportFormats.Mp4Nokia5700 ||
                m.format == ExportFormats.AviMeizuM6)
@@ -1585,8 +1575,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4MotorolaK1)
+           else if (m.format == ExportFormats.Mp4MotorolaK1)
            {
                while (n < 288 + step)
                {
@@ -1594,8 +1583,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4SonyEricssonK610)
+           else if (m.format == ExportFormats.Mp4SonyEricssonK610)
            {
                while (n < 144 + step)
                {
@@ -1603,8 +1591,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4iPod50G ||
+           else if (m.format == ExportFormats.Mp4iPod50G ||
                m.format == ExportFormats.AviiRiverClix2 ||
                m.format == ExportFormats.ThreeGP)
            {
@@ -1614,8 +1601,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4iPod55G)
+           else if (m.format == ExportFormats.Mp4iPod55G)
            {
                while (n < 480 + step)
                {
@@ -1623,8 +1609,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4Prada)
+           else if (m.format == ExportFormats.Mp4Prada)
            {
                while (n < 240 + step)
                {
@@ -1632,8 +1617,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4iPhone)
+           else if (m.format == ExportFormats.Mp4iPhone)
            {
                while (n < 576 + step)
                {
@@ -1641,8 +1625,7 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           if (m.format == ExportFormats.Mp4AppleTV)
+           else if (m.format == ExportFormats.Mp4AppleTV)
            {
                while (n < 720 + step)
                {
@@ -1650,20 +1633,10 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-
-           //if (m.format == ExportFormats.Flv)
-           //{
-           //    while (n < 480 + step)
-           //    {
-           //        reshlist.Add(n);
-           //        n = n + step;
-           //    }
-           //}
-
-           if (m.format == ExportFormats.Custom)
+           else if (m.format == ExportFormats.Custom)
            {
+               step = Settings.LimitModH;
                n = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MinResolutionH"));
-               step = Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "GetResolutionHMod"));
                while (n < Convert.ToInt32(FormatReader.GetFormatInfo("Custom", "MaxResolutionH")) + step)
                {
                    reshlist.Add(n);

@@ -1834,5 +1834,45 @@ namespace XviD4PSP
                 SetBool("FFmpegAssumeFPS", value);
             }
         }
+
+        public static int LimitModW
+        {
+            get
+            {
+                object value = GetValue("LimitModW");
+                if (value == null)
+                {
+                    return 16;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("LimitModW", value);
+            }
+        }
+
+        public static int LimitModH
+        {
+            get
+            {
+                object value = GetValue("LimitModH");
+                if (value == null)
+                {
+                    return 8;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("LimitModH", value);
+            }
+        }
     }
 }

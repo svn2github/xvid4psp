@@ -376,16 +376,18 @@ namespace XviD4PSP
            //прописываем цветовое пространство
            m.script += "AutoYV12()" + Environment.NewLine;
 
-           //mod2 protection
+           //Mod protection
            string mod2 = null;
-           if (Calculate.GetValid(m.inresw, 16) != m.inresw ||
-               Calculate.GetValid(m.inresh, 8) != m.inresh)
+           int modw = Format.GetWalidModW(m), modh = Format.GetWalidModH(m);
+           if (m.inresw % modw != 0 || m.inresh % modh != 0)
            {
-               m.script += "#mod2 protection" + Environment.NewLine;
-               mod2 = Resizers.Lanczos4Resize + "(" + Calculate.GetValid(m.inresw, 16) + ", " +
-                   Calculate.GetValid(m.inresh, 8) + ")";
+               m.script += "#Mod" + modw + "xMod" + modh + " protection" + Environment.NewLine;
+               if (m.resizefilter == Resizers.BicubicResizePlus)
+                   mod2 = "BicubicResize(" + Calculate.GetValid(m.inresw, modw) + ", " + Calculate.GetValid(m.inresh, modh) + ", 0, 0.75)";
+               else
+                   mod2 = m.resizefilter + "(" + Calculate.GetValid(m.inresw, modw) + ", " + Calculate.GetValid(m.inresh, modh) + ")";
                m.script += mod2 + Environment.NewLine;
-           }   
+           }
 
            //colormatrix
            if (m.iscolormatrix)
@@ -448,13 +450,6 @@ namespace XviD4PSP
                    m.script += "SeparateFields()" + Environment.NewLine;
                }
            }
-
-           //проверяем на чётность
-           //if (Calculate.IsValid(m.inresw, 16) == false || Calculate.IsValid(m.inresh, 8) == false)
-           //{
-           //    m.script += Environment.NewLine;
-           //    m.script += "BicubicResize(" + Calculate.GetValid(m.inresw, 16) + ", " + Calculate.GetValid(m.inresh, 8) + ")" + Environment.NewLine;
-           //}
 
            //деинтерлейсинг
            if (m.deinterlace == DeinterlaceType.TomsMoComp)
@@ -662,7 +657,7 @@ namespace XviD4PSP
 
                string newres = null;
                if (m.resizefilter == Resizers.BicubicResizePlus)
-                   newres = "BicubicResize(" + (outresw - (blackw * 2)) + ", " + (outresh - (blackh * 2)) + ",0,0.75)";
+                   newres = "BicubicResize(" + (outresw - (blackw * 2)) + ", " + (outresh - (blackh * 2)) + ", 0, 0.75)";
                else
                    newres = m.resizefilter + "(" + (outresw - (blackw * 2)) + ", " + (outresh - (blackh * 2)) + ")";
 

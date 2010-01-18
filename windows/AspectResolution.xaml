@@ -113,12 +113,18 @@
                             <StackPanel>
                                  <DockPanel Margin="6,0,6,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate aspect when crop is using:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,4,0"/>
+                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,2,0"/>
                                 </DockPanel> 
-                                <DockPanel Margin="6,0,6,3" Width="Auto" Height="Auto">
+                                <DockPanel Margin="6,0,6,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_ffmpeg_ar" Content="Use FFmpeg AR info:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                    <CheckBox x:Name="check_use_ffmpeg_ar" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_ffmpeg_ar_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,4,0"/>
+                                    <CheckBox x:Name="check_use_ffmpeg_ar" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_ffmpeg_ar_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,2,0"/>
                                 </DockPanel>
+                                <DockPanel Margin="6,0,6,3" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_mod" Content="Allow resolutions divisible by:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto"/>
+                                    <ComboBox x:Name="combo_modh" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_modh_SelectionChanged" Width="46" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" IsEnabled="False"/>
+                                    <ComboBox x:Name="combo_modw" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_modw_SelectionChanged" Width="46" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right" IsEnabled="False"/>
+                                </DockPanel>
+
                             </StackPanel>
                       </GroupBox>    
                </Grid> 

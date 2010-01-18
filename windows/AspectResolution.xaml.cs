@@ -59,8 +59,8 @@ namespace XviD4PSP
             button_vcrop.ToolTip = Languages.Translate("Crop black borders manually");
             button_analyse.Content = group_autocrop.Header = Languages.Translate("Auto crop");
             button_vcrop.Content = group_visualcrop.Header = Languages.Translate("Manual crop");
-            combo_height.ToolTip = Languages.Translate("Height");
-            combo_width.ToolTip = Languages.Translate("Width");
+            combo_modw.ToolTip = Languages.Translate("Width") + "\r\n" + Languages.Translate("Default: 16") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "4, 8");
+            combo_modh.ToolTip = Languages.Translate("Height") + "\r\n" + Languages.Translate("Default: 8") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "2, 4");
             tab_main.Header = Languages.Translate("Main");
             tab_settings.Header = Languages.Translate("Settings");
             Title = Languages.Translate("Resolution/Aspect");
@@ -70,6 +70,7 @@ namespace XviD4PSP
             text_visualcrop_opacity.Content = Languages.Translate("Background opacity:");
             text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
+            text_mod.Content = Languages.Translate("Allow resolutions divisible by:");
 
             //ресайзеры
             foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
@@ -96,6 +97,20 @@ namespace XviD4PSP
             combo_visualcrop_frame.Items.Add("1-st frame");
             combo_visualcrop_frame.SelectedItem = Settings.VCropFrame;
 
+            //ModW-ограничение
+            for (int n = 4; n <= 16; n *= 2) combo_modw.Items.Add(n);
+            combo_modw.SelectedItem = Settings.LimitModW;
+            
+            //ModH-ограничение
+            for (int n = 2; n <= 16; n *= 2) combo_modh.Items.Add(n);
+            combo_modh.SelectedItem = Settings.LimitModH;
+
+            if (m.format == Format.ExportFormats.Avi || m.format == Format.ExportFormats.Mkv || m.format == Format.ExportFormats.Mov
+                || m.format == Format.ExportFormats.Mp4 || m.format == Format.ExportFormats.Custom)
+            {
+                combo_modw.IsEnabled = combo_modh.IsEnabled = true;
+            }
+
             check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
             check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
 
@@ -118,6 +133,8 @@ namespace XviD4PSP
 
             //загружаем выходной аспект
             LoadOutAspect();
+
+            CalculateMod();
 
             ShowDialog();
 		}
@@ -502,6 +519,8 @@ namespace XviD4PSP
             m = AviSynthScripting.CreateAutoAviSynthScript(m);
             p.m = m.Clone();
             p.Refresh(m.script);
+
+            CalculateMod();
         }
 
         public static Massive FixAspectDifference(Massive mass)
@@ -692,6 +711,38 @@ namespace XviD4PSP
                     Settings.VCropFrame = combo_visualcrop_frame.SelectedItem.ToString();
                 }
             }
+        }
+
+        private void combo_modw_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_modw.IsDropDownOpen || combo_modw.IsSelectionBoxHighlighted)
+            {
+                Settings.LimitModW = Convert.ToInt32(combo_modw.SelectedItem);
+                ApplyCrop();
+            }
+        }
+        
+        private void combo_modh_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_modh.IsDropDownOpen || combo_modh.IsSelectionBoxHighlighted)
+            {
+                Settings.LimitModH = Convert.ToInt32(combo_modh.SelectedItem);
+                ApplyCrop();
+            }
+        }
+
+        private void CalculateMod()
+        {
+            if (m.outresw % 16 == 0) combo_width.ToolTip = ":16 ";
+            else if (m.outresw % 8 == 0) combo_width.ToolTip = ":8 ";
+            else combo_width.ToolTip = ":4 ";
+            combo_width.ToolTip += Languages.Translate("Width");
+
+            if (m.outresh % 16 == 0) combo_height.ToolTip = ":16 ";
+            else if (m.outresh % 8 == 0) combo_height.ToolTip = ":8 ";
+            else if (m.outresh % 4 == 0) combo_height.ToolTip = ":4 ";
+            else combo_height.ToolTip = ":2 ";
+            combo_height.ToolTip += Languages.Translate("Height");
         }
 	}
 }
