@@ -15,8 +15,9 @@ namespace XviD4PSP
 
         public string encoderPath = null;
         public int frame;
-        public string args = null;
-        
+        public string args = null, error_text = "";
+        public bool IsAborted = false, IsErrors = false;
+
         private Massive m;
         private string script;
         private string outfilepath;
@@ -28,7 +29,7 @@ namespace XviD4PSP
         private string _encoderStdErr = null;
         private string _encoderStdOut = null;
         private static readonly Regex _cleanUpStringRegex = new Regex(@"\n[^\n]+\r", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
+        
         public AviSynthEncoder(Massive mass, string script, string outfilepath)
         {
             m = mass.Clone();
@@ -65,9 +66,8 @@ namespace XviD4PSP
             {
                 while (!_encoderProcess.HasExited)
                 {
-                    Thread.Sleep(0); 
-                    string text1 = r.ReadToEnd(); //r.ReadLine();
-                    //consoletext = text1;
+                    Thread.Sleep(0);
+                    string text1 = r.ReadToEnd();
                     if (text1 != null)
                     {
                         if (text1.Length > 0)
@@ -92,14 +92,12 @@ namespace XviD4PSP
         {
             try
             {
-
                 using (AviSynthScriptEnvironment env = new AviSynthScriptEnvironment())
                 {
                     using (AviSynthClip a = env.ParseScript(script, AviSynthColorspace.RGB24))
                     //using (AviSynthClip a = env.OpenScriptFile(inFilePath, AviSynthColorspace.RGB24))
                     {
-                        if (0 == a.ChannelsCount)
-                            throw new Exception("Can't find audio stream");
+                        if (0 == a.ChannelsCount) throw new Exception("Can't find audio stream");
 
                         const int MAX_SAMPLES_PER_ONCE = 4096;
                         int frameSample = 0;
@@ -107,94 +105,90 @@ namespace XviD4PSP
                         //MeGUI
                         int frameBufferTotalSize = MAX_SAMPLES_PER_ONCE * a.ChannelsCount * a.BytesPerSample;
 
-                        //BEHAPPY
-                        //int samplesRead = 0;
-                        //int frameBufferTotalSize = MAX_SAMPLES_PER_ONCE * a.ChannelsCount * a.BitsPerSample / 8;
-                        //int bytesRead = 0; //frameBufferTotalSize;
-
                         byte[] frameBuffer = new byte[frameBufferTotalSize];
 
-                        if (encoderPath != null)
-                            createEncoderProcess(a);
+                        if (encoderPath != null) createEncoderProcess();
 
-                        try
+                        using (Stream target = getOutputStream())
                         {
-                            using (Stream target = getOutputStream())
+                            //let's write WAV Header
+                            writeHeader(target, a);
+
+                            GCHandle h = GCHandle.Alloc(frameBuffer, GCHandleType.Pinned);
+                            IntPtr address = h.AddrOfPinnedObject();
+                            try
                             {
-                                // let's write WAV Header
-                                writeHeader(target, a);
-
-                                GCHandle h = GCHandle.Alloc(frameBuffer, GCHandleType.Pinned);
-                                IntPtr address = h.AddrOfPinnedObject();
-                                try
+                                while (frameSample < a.SamplesCount)
                                 {
-                                    while (frameSample < a.SamplesCount)
-                                    {
-                                        locker.WaitOne();
+                                    locker.WaitOne();
+                                    int nHowMany = Math.Min((int)(a.SamplesCount - frameSample), MAX_SAMPLES_PER_ONCE);
+                                    a.ReadAudio(address, frameSample, nHowMany);
 
-                                        //if (_encoderProcess != null)
-                                        if (encoderPath != null)
-                                            if (_encoderProcess.HasExited)
-                                                throw new Exception("Abnormal encoder termination " + _encoderProcess.ExitCode.ToString());
-                                        int nHowMany = Math.Min((int)(a.SamplesCount - frameSample), MAX_SAMPLES_PER_ONCE);
-                                        a.ReadAudio(address, frameSample, nHowMany);
+                                    locker.WaitOne();
+                                    frame = (int)(((double)frameSample / (double)a.SamplesCount) * (double)a.num_frames);
 
-                                        locker.WaitOne();
-
-                                        frame = (int)(((double)frameSample / (double)a.SamplesCount) * (double)a.num_frames);
-                                       
-                                        target.Write(frameBuffer, 0, nHowMany * a.ChannelsCount * a.BytesPerSample);
-                                        target.Flush();
-                                        frameSample += nHowMany;
-                                        Thread.Sleep(0);
-                                    }
+                                    target.Write(frameBuffer, 0, nHowMany * a.ChannelsCount * a.BytesPerSample);
+                                    target.Flush();
+                                    frameSample += nHowMany;
+                                    Thread.Sleep(0);
                                 }
-                                finally
-                                {
-                                    h.Free();
-                                }
-
-                                if (a.BytesPerSample % 2 == 1)
-                                    target.WriteByte(0);
                             }
-                            if (encoderPath != null)
+                            catch (Exception ex)
                             {
-                                _encoderProcess.WaitForExit();
-                                _readFromStdErrThread.Join();
-                                _readFromStdOutThread.Join();
-                                if (0 != _encoderProcess.ExitCode)
+                                if (encoderPath != null && _encoderProcess.HasExited)
                                     throw new Exception("Abnormal encoder termination " + _encoderProcess.ExitCode.ToString());
+                                else throw new Exception(ex.Message, ex);
                             }
+                            finally
+                            {
+                                h.Free();
+                            }
+
+                            if (a.BytesPerSample % 2 == 1)
+                                target.WriteByte(0);
                         }
-                        finally
+                        if (encoderPath != null)
                         {
-                            if (encoderPath != null)
-                                if (!_encoderProcess.HasExited)
-                                {
-                                    _encoderProcess.Kill();
-                                    _encoderProcess.WaitForExit();
-                                    _readFromStdErrThread.Join();
-                                    _readFromStdOutThread.Join();
-                                }
-                            _readFromStdErrThread = null;
-                            _readFromStdOutThread = null;
+                            _encoderProcess.WaitForExit();
+                            _readFromStdErrThread.Join();
+                            _readFromStdOutThread.Join();
+                            if (_encoderProcess.ExitCode != 0)
+                                throw new Exception("Abnormal encoder termination " + _encoderProcess.ExitCode.ToString());
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                //throw new Exception(ex.Message);
-                args = "AviSynthEncoder Error: " +  ex.Message.ToString();
-                return;
+                if (!IsAborted)
+                {
+                    IsErrors = true;
+                    error_text = "AviSynth Encoder Error: " + ex.Message.ToString() + ((_encoderProcess != null && _encoderProcess.HasExited &&
+                        _encoderProcess.ExitCode != 0) ? "\r\n" + (!string.IsNullOrEmpty(_encoderStdErr) ? "\r\n" + _encoderStdErr : "") +
+                        (!string.IsNullOrEmpty(_encoderStdOut) ? "\r\n" + _encoderStdOut : "") : "");
+                }
             }
             finally
             {
+                if (_encoderProcess != null && !_encoderProcess.HasExited)
+                {
+                    try
+                    {
+                        _encoderProcess.Kill();
+                        _encoderProcess.WaitForExit();
+                        _readFromStdErrThread.Join();
+                        _readFromStdOutThread.Join();
+                    }
+                    catch { }
+                }
+                _readFromStdErrThread = null;
+                _readFromStdOutThread = null;
+
                 _encoderThread = null;
             }
         }
 
-        private void createEncoderProcess(AviSynthClip a)
+        private void createEncoderProcess()
         {
             try
             {
@@ -204,22 +198,21 @@ namespace XviD4PSP
                 AudioStream stream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
                 if (encoderPath.Contains("neroAacEnc.exe"))
+                {
                     info.Arguments = "-ignorelength " + PresetLoader.GetACodecPasses(m) + " -if - -of \"" + outfilepath + "\"";
-
-                if (encoderPath.Contains("lame.exe"))
+                }
+                else if (encoderPath.Contains("lame.exe"))
                 {
                     string resample = "";
                     if (m.mp3_options.forcesamplerate)
-                        resample = Calculate.ConvertDoubleToPointString(Convert.ToDouble(stream.samplerate) / 1000.0 , 1);
+                        resample = Calculate.ConvertDoubleToPointString(Convert.ToDouble(stream.samplerate) / 1000.0, 1);
                     info.Arguments = PresetLoader.GetACodecPasses(m) + resample + " - \"" + outfilepath + "\"";
                     if (stream.channels == 1)
                         info.Arguments = info.Arguments.Replace(" -m s", " -m m").Replace(" -m j", " -m m").Replace(" -m f", " -m m");
                 }
-
-                if (encoderPath.Contains("ffmpeg.exe"))
+                else if (encoderPath.Contains("ffmpeg.exe"))
                     info.Arguments = "-i - " + PresetLoader.GetACodecPasses(m) + " -vn \"" + outfilepath + "\"";
-
-                if (encoderPath.Contains("aften.exe"))
+                else if (encoderPath.Contains("aften.exe"))
                     info.Arguments = PresetLoader.GetACodecPasses(m) + " - \"" + outfilepath + "\"";
 
                 //запоминаем аргументы для лога
@@ -265,15 +258,10 @@ namespace XviD4PSP
             target.Write(BitConverter.GetBytes(a.AvgBytesPerSec), 0, 4);
             target.Write(BitConverter.GetBytes(a.BytesPerSample * a.ChannelsCount), 0, 2);
 
-            //BEHAPPY
-            //target.Write(BitConverter.GetBytes(a.BitsPerSample * a.AudioSampleRate * a.ChannelsCount / 8), 0, 4);
-            //target.Write(BitConverter.GetBytes(a.ChannelsCount * a.BitsPerSample / 8), 0, 2);
-
             target.Write(BitConverter.GetBytes(a.BitsPerSample), 0, 2);
             target.Write(System.Text.Encoding.ASCII.GetBytes("data"), 0, 4);
             target.Write(BitConverter.GetBytes(useFaadTrick ? (FAAD_MAGIC_VALUE - WAV_HEADER_SIZE) : (uint)a.AudioSizeInBytes), 0, 4);
         }
-
 
         private void Start()
         {
@@ -284,6 +272,7 @@ namespace XviD4PSP
 
         private void Abort()
         {
+            IsAborted = true;
             locker.Set();
             if (_encoderThread != null)
              _encoderThread.Abort();

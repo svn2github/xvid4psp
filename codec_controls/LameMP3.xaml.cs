@@ -23,6 +23,10 @@ namespace XviD4PSP
             this.m = mass.Clone();
             this.root_window = AudioEncWindow;
 
+            combo_mode.Items.Add("CBR");
+            combo_mode.Items.Add("VBR");
+            combo_mode.Items.Add("ABR");
+
             combo_channels_mode.Items.Add("Stereo");
             combo_channels_mode.Items.Add("Joint Stereo");
             combo_channels_mode.Items.Add("Forced Join Stereo");
@@ -79,9 +83,6 @@ namespace XviD4PSP
                         n += 8;
                     }
                 }
-            
-            
-            
             }
             catch (Exception ex)
             {
@@ -91,11 +92,7 @@ namespace XviD4PSP
 
         public void LoadFromProfile()
         {
-
-            combo_mode.Items.Clear();
             //забиваем режимы кодирования
-            foreach (string mode in Enum.GetNames(typeof(Settings.AudioEncodingModes)))
-                combo_mode.Items.Add(mode);
             combo_mode.SelectedItem = m.mp3_options.encodingmode.ToString();
 
             //прогружаем битрейты

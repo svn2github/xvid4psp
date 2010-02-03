@@ -150,6 +150,7 @@ namespace XviD4PSP
                 encoderProcess.Start();
 
                 string line;
+                string encodertext = null;
                 string pat = @"time=(\d+.\d+)";
                 Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                 Match mat;
@@ -168,18 +169,26 @@ namespace XviD4PSP
                             double pr = ((double)ctime / (double)seconds) * 100.0;
                             worker.ReportProgress((int)pr);
                         }
+                        else
+                        {
+                            if (encodertext != null)
+                                encodertext += Environment.NewLine;
+                            encodertext += line;
+                        }
                     }
                 }
 
                 //чистим ресурсы
                 exit_code = encoderProcess.ExitCode;
-                string encodertext = encoderProcess.StandardError.ReadToEnd();
+                encodertext += encoderProcess.StandardError.ReadToEnd();
                 encoderProcess.Close();
                 encoderProcess.Dispose();
                 encoderProcess = null;
 
+                if (IsAborted) return;
+
                 //проверка на удачное завершение
-                if (exit_code > 0 && encodertext != null)
+                if (exit_code != 0 && encodertext != null)
                 {
                     //Оставляем только последнюю строчку из всего лога
                     string[] log = encodertext.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
@@ -244,12 +253,12 @@ namespace XviD4PSP
 
             if (encoderProcess != null)
             {
+                IsAborted = true;
                 if (!encoderProcess.HasExited)
                 {
                     encoderProcess.Kill();
                     encoderProcess.WaitForExit();
                 }
-                IsAborted = true;
             }
 
             if (IsAborted || IsErrors)

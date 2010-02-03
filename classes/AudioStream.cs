@@ -282,5 +282,17 @@ namespace XviD4PSP
             }
         }
 
+        private string _nerotemp;
+        public string nerotemp
+        {
+            get
+            {
+                return _nerotemp;
+            }
+            set
+            {
+                _nerotemp = value;
+            }
+        }
     }
 }

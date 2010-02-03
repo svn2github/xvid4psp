@@ -23,6 +23,12 @@ namespace XviD4PSP
             this.m = mass.Clone();
             this.root_window = AudioEncWindow;
 
+            combo_mode.Items.Add("CBR");
+            combo_mode.Items.Add("VBR");
+            combo_mode.Items.Add("ABR");
+            combo_mode.Items.Add("ABR 2-Pass");
+
+            combo_aac_profile.Items.Add("Auto");
             combo_aac_profile.Items.Add("AAC-LC");
             combo_aac_profile.Items.Add("AAC-HE");
             combo_aac_profile.Items.Add("AAC-HEv2");
@@ -32,11 +38,12 @@ namespace XviD4PSP
 
         public void LoadFromProfile()
         {
-            combo_mode.Items.Clear();
             //забиваем режимы кодирования
-            foreach (string mode in Enum.GetNames(typeof(Settings.AudioEncodingModes)))
-                combo_mode.Items.Add(mode);
-            combo_mode.SelectedItem = m.aac_options.encodingmode.ToString();
+            string mode = m.aac_options.encodingmode.ToString();
+            if (mode == "CBR") combo_mode.SelectedItem = "CBR";
+            else if (mode == "VBR") combo_mode.SelectedItem = "VBR";
+            else if (mode == "ABR") combo_mode.SelectedItem = "ABR";
+            else combo_mode.SelectedItem = "ABR 2-Pass";
 
             //прогружаем битрейты
             LoadBitrates();
@@ -44,14 +51,12 @@ namespace XviD4PSP
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
             //значение по умолчанию
-            if (!combo_bitrate.Items.Contains(outstream.bitrate) ||
-                outstream.bitrate == 0)
+            if (!combo_bitrate.Items.Contains(outstream.bitrate) || outstream.bitrate == 0)
                 outstream.bitrate = 128;
 
             if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 combo_bitrate.SelectedItem = m.aac_options.quality.ToString("0.00").Replace(",", ".");
-            else
-                combo_bitrate.SelectedItem = outstream.bitrate;
+            else combo_bitrate.SelectedItem = outstream.bitrate;
 
             combo_aac_profile.SelectedItem = m.aac_options.aacprofile;
         }
@@ -73,8 +78,7 @@ namespace XviD4PSP
                 else
                 {
                     int n = 16;
-                    int maximum = Format.GetMaxAACBitrate(m);
-                    while (n <= maximum)
+                    while (n <= Format.GetMaxAACBitrate(m))
                     {
                         combo_bitrate.Items.Add(n);
                         n += 4;
@@ -99,36 +103,33 @@ namespace XviD4PSP
 
             string[] separator = new string[] { " " };
             string[] cli = line.Split(separator, StringSplitOptions.None);
-            int n = 0;
+            int n = 0; bool auto = true;
 
             foreach (string value in cli)
             {
+                if (value == "-2pass") m.aac_options.encodingmode = Settings.AudioEncodingModes.TwoPass;
                 if (value == "-q")
                 {
                     m.aac_options.encodingmode = Settings.AudioEncodingModes.VBR;
                     m.aac_options.quality = Calculate.ConvertStringToDouble(cli[n + 1]);
                 }
 
-                if (value == "-br")
+                if (value == "-br" || value == "-cbr")
                 {
-                    m.aac_options.encodingmode = Settings.AudioEncodingModes.ABR;
+                    if (m.aac_options.encodingmode != Settings.AudioEncodingModes.TwoPass)
+                        if (value == "-br") m.aac_options.encodingmode = Settings.AudioEncodingModes.ABR;
+                        else m.aac_options.encodingmode = Settings.AudioEncodingModes.CBR;
                     outstream.bitrate = Convert.ToInt32(cli[n + 1].Replace("000", ""));
                 }
 
-                if (value == "-cbr")
+                if (value == "-lc" || value == "-he" || value == "-hev2")
                 {
-                    m.aac_options.encodingmode = Settings.AudioEncodingModes.CBR;
-                    outstream.bitrate = Convert.ToInt32(cli[n + 1].Replace("000", ""));
+                    auto = false;
+                    if (value == "-lc") m.aac_options.aacprofile = "AAC-LC";
+                    else if (value == "-he") m.aac_options.aacprofile = "AAC-HE";
+                    else m.aac_options.aacprofile = "AAC-HEv2";
                 }
-
-                if (value == "-lc")
-                    m.aac_options.aacprofile = "AAC-LC";
-
-                if (value == "-he")
-                    m.aac_options.aacprofile = "AAC-HE";
-
-                if (value == "-hev2")
-                    m.aac_options.aacprofile = "AAC-HEv2";
+                if (auto) m.aac_options.aacprofile = "Auto";
 
                 n++;
             }
@@ -142,6 +143,9 @@ namespace XviD4PSP
 
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
+            if (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass)
+                line += "-2pass -br " + outstream.bitrate + "000";
+
             if (m.aac_options.encodingmode == Settings.AudioEncodingModes.ABR)
                 line += "-br " + outstream.bitrate + "000";
 
@@ -151,14 +155,9 @@ namespace XviD4PSP
             if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 line += "-q " + m.aac_options.quality.ToString("0.00").Replace(",", ".");
 
-            if (m.aac_options.aacprofile == "AAC-LC")
-                line += " -lc";
-
-            if (m.aac_options.aacprofile == "AAC-HE")
-                line += " -he";
-
-            if (m.aac_options.aacprofile == "AAC-HEv2")
-                line += " -hev2";
+            if (m.aac_options.aacprofile == "AAC-LC") line += " -lc";
+            if (m.aac_options.aacprofile == "AAC-HE") line += " -he";
+            if (m.aac_options.aacprofile == "AAC-HEv2") line += " -hev2";
 
             //забиваем данные в массив
             outstream.passes = line;
@@ -171,15 +170,18 @@ namespace XviD4PSP
             if (combo_mode.IsDropDownOpen || combo_mode.IsSelectionBoxHighlighted)
             {
                 string mode = combo_mode.SelectedItem.ToString();
-                m.aac_options.encodingmode = (Settings.AudioEncodingModes)Enum.Parse(typeof(Settings.AudioEncodingModes), mode);
+                if (mode == "CBR") m.aac_options.encodingmode = Settings.AudioEncodingModes.CBR;
+                else if (mode == "VBR") m.aac_options.encodingmode = Settings.AudioEncodingModes.VBR;
+                else if (mode == "ABR") m.aac_options.encodingmode = Settings.AudioEncodingModes.ABR;
+                else m.aac_options.encodingmode = Settings.AudioEncodingModes.TwoPass;
+                
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
                 LoadBitrates();
 
                 if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                     combo_bitrate.SelectedItem = m.aac_options.quality.ToString("0.00").Replace(",", ".");
-                else
-                    combo_bitrate.SelectedItem = outstream.bitrate;
+                else combo_bitrate.SelectedItem = outstream.bitrate;
 
                 root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();
@@ -191,10 +193,10 @@ namespace XviD4PSP
             if (combo_bitrate.IsDropDownOpen || combo_bitrate.IsSelectionBoxHighlighted)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                
                 if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                     m.aac_options.quality = Calculate.ConvertStringToDouble(combo_bitrate.SelectedItem.ToString());
-                else
-                    outstream.bitrate = Convert.ToInt32(combo_bitrate.SelectedItem);
+                else outstream.bitrate = Convert.ToInt32(combo_bitrate.SelectedItem);
 
                 root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();
@@ -212,7 +214,5 @@ namespace XviD4PSP
                 root_window.UpdateManualProfile();
             }
         }
-
-
 	}
 }

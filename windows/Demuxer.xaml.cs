@@ -18,7 +18,7 @@ namespace XviD4PSP
 {
 	public partial class Demuxer
 	{
-        public enum DemuxerMode { DecodeToWAV = 1, ExtractVideo, ExtractAudio, ExtractSub, ExtractTimecode, RepairMKV};
+        public enum DemuxerMode { DecodeToWAV = 1, NeroTempWAV, ExtractVideo, ExtractAudio, ExtractSub, ExtractTimecode, RepairMKV };
         private BackgroundWorker worker = null;
         private AviSynthEncoder avs = null;
         private Process encoderProcess = null;
@@ -49,6 +49,7 @@ namespace XviD4PSP
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
 
             if (mode == DemuxerMode.DecodeToWAV) Title = Languages.Translate("Decoding to Windows PCM") + "...";
+            else if (mode == DemuxerMode.NeroTempWAV) Title = Languages.Translate("Creating Nero temp file") + "...";
             else if (mode == DemuxerMode.ExtractAudio) Title = Languages.Translate("Audio demuxing") + "...";
             else if (mode == DemuxerMode.ExtractVideo) Title = Languages.Translate("Video demuxing") + "...";
             else if (mode == DemuxerMode.RepairMKV) Title = Languages.Translate("Remuxing Matroska file") + "...";
@@ -94,9 +95,9 @@ namespace XviD4PSP
             }
 
             //Ловим ошибки, если они были
-            if (avs.args != null && avs.args.StartsWith("AviSynthEncoder Error: "))
+            if (avs.IsErrors)
             {
-                encodertext = avs.args;
+                encodertext = avs.error_text;
                 avs = null;
                 throw new Exception(encodertext);
             }
@@ -167,18 +168,26 @@ namespace XviD4PSP
                         double p = ((double)(ctime) / (double)m.induration.TotalSeconds) * 100.0;
                         worker.ReportProgress((int)p);
                     }
+                    else
+                    {
+                        if (encodertext != null)
+                            encodertext += Environment.NewLine;
+                        encodertext += line;
+                    }
                 }
             }
 
             //чистим ресурсы
             exit_code = encoderProcess.ExitCode;
-            encodertext = encoderProcess.StandardError.ReadToEnd();
+            encodertext += encoderProcess.StandardError.ReadToEnd();
             encoderProcess.Close();
             encoderProcess.Dispose();
             encoderProcess = null;
 
+            if (IsAborted) return;
+
             //проверка на удачное завершение
-            if (exit_code > 0 && encodertext != null)
+            if (exit_code != 0 && encodertext != null)
             {
                 //Оставляем только последнюю строчку из всего лога
                 string[] log = encodertext.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
@@ -260,10 +269,10 @@ namespace XviD4PSP
             encoderProcess.Dispose();
             encoderProcess = null;
 
-            if (IsAborted || IsErrors) return;
+            if (IsAborted) return;
 
             //проверка на удачное завершение
-            if (exit_code > 0)
+            if (exit_code != 0)
             {
                 throw new Exception(encodertext);
             }
@@ -491,8 +500,10 @@ namespace XviD4PSP
             encoderProcess.Dispose();
             encoderProcess = null;
 
+            if (IsAborted) return;
+
             //проверка на удачное завершение
-            if (exit_code > 0)
+            if (exit_code != 0)
             {
                 throw new Exception(encodertext);
             }
@@ -514,7 +525,7 @@ namespace XviD4PSP
             try
             {
                 //декодируем звук
-                if (mode == DemuxerMode.DecodeToWAV) ExtractSound();
+                if (mode == DemuxerMode.DecodeToWAV || mode == DemuxerMode.NeroTempWAV) ExtractSound();
 
                 //извлекаем аудио или видео
                 else
@@ -574,14 +585,11 @@ namespace XviD4PSP
                 {
                     progress.IsIndeterminate = false;
 
-                    if (mode == DemuxerMode.DecodeToWAV)
-                        label_info.Content = Languages.Translate("Decoding to Windows PCM") + "...";
-                    else if (mode == DemuxerMode.ExtractAudio)
-                        label_info.Content = Languages.Translate("Audio demuxing") + "...";
-                    else if (mode == DemuxerMode.ExtractVideo)
-                        label_info.Content = Languages.Translate("Video demuxing") + "...";
-                    else if (mode == DemuxerMode.RepairMKV)
-                        label_info.Content = Languages.Translate("Remuxing Matroska file") + "...";
+                    if (mode == DemuxerMode.DecodeToWAV) label_info.Content = Languages.Translate("Decoding to Windows PCM") + "...";
+                    else if (mode == DemuxerMode.NeroTempWAV) label_info.Content = Languages.Translate("Creating Nero temp file") + "...";
+                    else if (mode == DemuxerMode.ExtractAudio) label_info.Content = Languages.Translate("Audio demuxing") + "...";
+                    else if (mode == DemuxerMode.ExtractVideo) label_info.Content = Languages.Translate("Video demuxing") + "...";
+                    else if (mode == DemuxerMode.RepairMKV) label_info.Content = Languages.Translate("Remuxing Matroska file") + "...";
                 }
 
                 Title = progress_value.ToString("##0.00") + "%";
@@ -593,12 +601,12 @@ namespace XviD4PSP
         {
             if (encoderProcess != null)
             {
+                IsAborted = true;
                 if (!encoderProcess.HasExited)
                 {
                     encoderProcess.Kill();
                     encoderProcess.WaitForExit();
                 }
-                IsAborted = true;
             }
 
             if (avs != null && avs.IsBusy())

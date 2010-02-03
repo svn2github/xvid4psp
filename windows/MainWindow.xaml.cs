@@ -1639,6 +1639,28 @@ namespace XviD4PSP
 
                     UpdateTaskMassive(mass);
                 }
+                //Временный WAV-файл для 2pass AAC
+                if (outstream.codec == "AAC" && mass.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass)
+                {
+                    if (File.Exists(instream.audiopath) && Path.GetExtension(instream.audiopath) == ".wav" && mass.script == AviSynthScripting.CreateAutoAviSynthScript(mass).script &&
+                        mass.trim_start == 0 && mass.trim_end == 0 && !m.testscript && instream.bits == outstream.bits && instream.channels == outstream.channels && instream.delay ==
+                        outstream.delay && instream.gain == outstream.gain && instream.samplerate == outstream.samplerate)
+                    {
+                        outstream.nerotemp = instream.audiopath;
+                    }
+                    else
+                    {
+                        outstream.nerotemp = Settings.TempPath + "\\" + mass.key + "_nerotemp.wav";
+                        Demuxer dem = new Demuxer(mass, Demuxer.DemuxerMode.NeroTempWAV, outstream.nerotemp);
+                        if (dem.IsErrors)
+                        {
+                            ErrorExeption("Demuxer: " + dem.error_message);
+                            UpdateTaskStatus(mass.key, "Errors");
+                            return;
+                        }
+                        deletefiles.Add(outstream.nerotemp);
+                    }
+                }
             }
 
             try

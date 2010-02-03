@@ -14,7 +14,7 @@ namespace XviD4PSP
         public enum EncodingModes { OnePass = 1, TwoPass, ThreePass, Quality, Quantizer, OnePassSize, TwoPassSize, ThreePassSize, TwoPassQuality, ThreePassQuality }
         public enum PlayerEngines { DirectShow = 1, MediaBridge }
         public enum AfterImportActions { Nothing = 1, Middle, Play }
-        public enum AudioEncodingModes { CBR = 1, VBR, ABR }
+        public enum AudioEncodingModes { CBR = 1, VBR, ABR, TwoPass }
         public enum AutoDeinterlaceModes { AllFiles = 1, MPEGs, Disabled }
 
         private static void SetString(string Key, string Value)

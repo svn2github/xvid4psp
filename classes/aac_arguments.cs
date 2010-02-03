@@ -54,6 +54,5 @@ namespace XviD4PSP
                 _quality = value;
             }
         }
-
     }
 }
