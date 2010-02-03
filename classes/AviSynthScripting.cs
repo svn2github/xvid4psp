@@ -378,7 +378,7 @@ namespace XviD4PSP
 
            //Mod protection
            string mod2 = null;
-           int modw = Format.GetWalidModW(m), modh = Format.GetWalidModH(m);
+           int modw = Format.GetValidModW(m), modh = Format.GetValidModH(m);
            if (m.inresw % modw != 0 || m.inresh % modh != 0)
            {
                m.script += "#Mod" + modw + "xMod" + modh + " protection" + Environment.NewLine;

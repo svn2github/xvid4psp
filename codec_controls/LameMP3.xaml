@@ -23,7 +23,7 @@
 			<Label OpacityMask="{x:Null}" x:Name="text_channels_mode" Content="Channels mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="10.534,47.62,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 			<ComboBox x:Name="combo_quality" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,109.52,6.733,0" SelectionChanged="combo_quality_SelectionChanged" VerticalAlignment="Top"/>
 			<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="Quality:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9.267,104.86,0,0" VerticalAlignment="Top"/>
-			<CheckBox x:Name="check_force_samplearte" Width="Auto" Height="Auto" Content="Don`t change samplerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,0,119.777,12" Checked="check_force_samplearte_Checked" Unchecked="check_force_samplearte_Unchecked" d:LayoutOverrides="Width, Height" VerticalAlignment="Bottom"/>
+			<CheckBox x:Name="check_force_samplearte" Width="Auto" Height="Auto" Content="Don`t change samplerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="14,0,0,12" Checked="check_force_samplearte_Checked" Unchecked="check_force_samplearte_Unchecked" d:LayoutOverrides="Width, Height" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
 		</Grid>
 	</Grid>
 </UserControl>

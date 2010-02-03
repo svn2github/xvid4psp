@@ -1157,7 +1157,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
-                   m.outresh = Calculate.GetCloseIntegerAL(m.outresh - GetWalidModH(m), hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(m.outresh - GetValidModH(m), hlist);
                    m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
                }
            }
@@ -1166,7 +1166,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
-                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetWalidModW(m), wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m), wlist);
                    m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
                }
            }
@@ -1215,7 +1215,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
-                   m.outresh = Calculate.GetCloseIntegerAL(m.inresh - GetWalidModH(m), hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(m.inresh - GetValidModH(m), hlist);
                    m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
                }
            }
@@ -1226,7 +1226,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
-                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetWalidModW(m), wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m), wlist);
                    m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
                }
            }
@@ -1234,7 +1234,7 @@ namespace XviD4PSP
            return m;
        }
 
-       public static int GetWalidModW(Massive m)
+       public static int GetValidModW(Massive m)
        {
            int modw = 16;
            if (m.format == ExportFormats.Avi || m.format == ExportFormats.Mkv ||
@@ -1244,7 +1244,7 @@ namespace XviD4PSP
            return modw;
        }
 
-       public static int GetWalidModH(Massive m)
+       public static int GetValidModH(Massive m)
        {
            int modh = 8;
            if (m.format == ExportFormats.Avi || m.format == ExportFormats.Mkv ||

@@ -82,7 +82,8 @@ namespace XviD4PSP
             {
                 if (muxer != Format.Muxers.Disabled)
                     steps++;
-                if (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass && ((AudioStream)(m.outaudiostreams[m.outaudiostream])).codec == "AAC")
+                if (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass && m.outaudiostreams.Count > 0
+                    && ((AudioStream)(m.outaudiostreams[m.outaudiostream])).codec == "AAC")
                     steps++;
             }
 
@@ -401,8 +402,7 @@ namespace XviD4PSP
                 m.outvinfo = m.outvcodec + " " + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " +
                     m.outframerate + "fps (" + m.outframes + " frames)";
             SetLog(m.outvinfo);
-            if (m.vpasses.Count > 1)
-                SetLog("...first pass...");
+            if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -529,10 +529,8 @@ namespace XviD4PSP
                     }
                 }
 
-                if (m.vpasses.Count == 2)
-                    SetLog("...last pass...");
-                else if (m.vpasses.Count == 3)
-                    SetLog("...second pass...");
+                if (m.vpasses.Count == 2) SetLog("...last pass...");
+                else if (m.vpasses.Count == 3) SetLog("...second pass...");
 
                 step++;
                 arguments = m.vpasses[1] + psnr + ssim + " --stats \"" + passlog + "\"";//
@@ -875,8 +873,7 @@ namespace XviD4PSP
                 }            
             }
 
-            if (m.vpasses.Count > 1)
-                SetLog("...first pass...");
+            if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -936,10 +933,9 @@ namespace XviD4PSP
             SetPriority(Settings.ProcessPriority);
 
             string line;
-            string pat = @"time=(\d+.\d+)";
-            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match mat;
-            int procent = 0;
+            double fps = Calculate.ConvertStringToDouble(m.outframerate);
+            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match mat;            
 
             //первый проход
             while (!encoderProcess.HasExited)
@@ -953,9 +949,7 @@ namespace XviD4PSP
                     mat = r.Match(line);
                     if (mat.Success == true)
                     {
-                        double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                        procent = (int)(ctime * Calculate.ConvertStringToDouble(m.outframerate));
-                        worker.ReportProgress(procent);
+                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
                     }
                     else
                     {
@@ -998,14 +992,11 @@ namespace XviD4PSP
                     }
                 }
 
-                if (m.vpasses.Count == 2)
-                    SetLog("...last pass...");
-                else if (m.vpasses.Count == 3)
-                    SetLog("...second pass...");
+                if (m.vpasses.Count == 2) SetLog("...last pass...");
+                else if (m.vpasses.Count == 3) SetLog("...second pass...");
 
                 step++;
                 arguments = "-threads " + cpucount.ToString() + " " + m.vpasses[1];
-                procent = 0;
 
                 //прописываем аспект
                 if (m.sar != null || m.IsAnamorphic)
@@ -1051,9 +1042,7 @@ namespace XviD4PSP
                         mat = r.Match(line);
                         if (mat.Success == true)
                         {
-                            double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                            procent = (int)(ctime * Calculate.ConvertStringToDouble(m.outframerate));
-                            worker.ReportProgress(procent);
+                            worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
                         }
                         else
                         {
@@ -1084,7 +1073,6 @@ namespace XviD4PSP
 
                 step++;
                 arguments = "-threads " + cpucount.ToString() + " " + m.vpasses[2];
-                procent = 0;
 
                 //прописываем аспект
                 if (m.sar != null || m.IsAnamorphic)
@@ -1113,9 +1101,7 @@ namespace XviD4PSP
                         mat = r.Match(line);
                         if (mat.Success == true)
                         {
-                            double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                            procent = (int)(ctime * Calculate.ConvertStringToDouble(m.outframerate));
-                            worker.ReportProgress(procent);
+                            worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
                         }
                         else
                         {
@@ -1311,8 +1297,7 @@ namespace XviD4PSP
                 m.outvinfo = m.outvcodec + " " + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " +
                     m.outframerate + "fps (" + m.outframes + " frames)";
             SetLog(m.outvinfo);
-            if (m.vpasses.Count > 1)
-                SetLog("...first pass...");
+            if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -1428,10 +1413,8 @@ namespace XviD4PSP
                     }
                 }
 
-                if (m.vpasses.Count == 2)
-                    SetLog("...last pass...");
-                else if (m.vpasses.Count == 3)
-                    SetLog("...second pass...");
+                if (m.vpasses.Count == 2) SetLog("...last pass...");
+                else if (m.vpasses.Count == 3) SetLog("...second pass...");
 
                 step++;
                 arguments = m.vpasses[1] + " -threads " + cpucount.ToString();//
@@ -1819,15 +1802,12 @@ namespace XviD4PSP
                     if (mat.Success == true)
                     {
                         worker.ReportProgress((int)(Convert.ToInt32(mat.Groups[2].Value) * fps));
-                        if (mat.Groups[1].Value == "First")
+                        if (oldpass == 0 && mat.Groups[1].Value == "First")
                         {
-                            if (oldpass == 0)
-                            {
-                                SetLog("...first pass...");
-                                oldpass = 1;
-                            }
+                            SetLog("...first pass...");
+                            oldpass = 1;
                         }
-                        else if (oldpass == 1)
+                        else if (oldpass == 1 && mat.Groups[1].Value == "Second")
                         {
                             SetLog("...last pass...");
                             oldpass = 2;
@@ -1849,11 +1829,16 @@ namespace XviD4PSP
             if (outstream.nerotemp != m.infilepath && Path.GetDirectoryName(outstream.nerotemp) == Settings.TempPath)
                 SafeDelete(outstream.nerotemp);
 
-            //Ошибки
-            if (encoderProcess.ExitCode > 0)
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.ExitCode != 0 && !IsAborted)
             {
-                throw new Exception(encodertext + "\r\n" + encoderProcess.StandardError.ReadToEnd() + "\r\n" + encoderProcess.StandardOutput.ReadToEnd());
+                ErrorExeption(encodertext + "\r\n" + encoderProcess.StandardError.ReadToEnd() + "\r\n" + encoderProcess.StandardOutput.ReadToEnd());
             }
+
+            //чистим ресурсы
+            encoderProcess.Close();
+            encoderProcess.Dispose();
+            encoderProcess = null;
 
             encodertext = null;
         }
@@ -2813,10 +2798,9 @@ namespace XviD4PSP
             SetPriority(Settings.ProcessPriority);
 
             string line;
-            string pat = @"time=(\d+.\d+)";
-            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            double fps = Calculate.ConvertStringToDouble(m.outframerate);
+            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
-            int procent = 0;
             
             while (!encoderProcess.HasExited)
             {
@@ -2829,9 +2813,7 @@ namespace XviD4PSP
                     mat = r.Match(line);
                     if (mat.Success == true)
                     {
-                        double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                        procent = (int)(ctime * Calculate.ConvertStringToDouble(m.outframerate));
-                        worker.ReportProgress(procent);
+                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
                     }
                     else
                     {
@@ -2901,10 +2883,9 @@ namespace XviD4PSP
             SetPriority(Settings.ProcessPriority);
 
             string line;
-            string pat = @"time=(\d+.\d+)";
-            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            double fps = Calculate.ConvertStringToDouble(m.outframerate);
+            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
-            int procent = 0;
 
             while (!encoderProcess.HasExited)
             {
@@ -2916,9 +2897,7 @@ namespace XviD4PSP
                     mat = r.Match(line);
                     if (mat.Success == true)
                     {
-                        double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                        procent = (int)(ctime * Calculate.ConvertStringToDouble(m.outframerate));
-                        worker.ReportProgress(procent);
+                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
                     }
                     else
                     {
@@ -3010,10 +2989,9 @@ namespace XviD4PSP
             SetPriority(Settings.ProcessPriority);
 
             string line;
-            string pat = @"time=(\d+.\d+)";
-            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            double fps = Calculate.ConvertStringToDouble(m.outframerate);
+            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
-            int procent = 0;
 
             while (!encoderProcess.HasExited)
             {
@@ -3025,9 +3003,7 @@ namespace XviD4PSP
                     mat = r.Match(line);
                     if (mat.Success == true)
                     {
-                        double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                        procent = (int)(ctime * Calculate.ConvertStringToDouble(m.outframerate));
-                        worker.ReportProgress(procent);
+                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
                     }
                     else
                     {

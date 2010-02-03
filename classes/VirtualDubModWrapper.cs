@@ -51,13 +51,13 @@ namespace XviD4PSP
 
                    //SRT 0x0301 
                    //Для правильного муксинга вбр и абр мп3-звука (0 - переписывать заголовок, 1 - не переписывать заголовок мп3-файла)
-                   if (m.mp3_options.encodingmode == Settings.AudioEncodingModes.VBR || m.mp3_options.encodingmode == Settings.AudioEncodingModes.ABR)//для VBR и ABR 1
+                   if (outstream.codec == "MP3" && m.mp3_options.encodingmode != Settings.AudioEncodingModes.CBR)//для VBR и ABR 1
                    {
-                       sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 1);");//1
+                       sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 1);");
                    }
                    else //для CBR 0
                    {
-                       sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 0);");//0
+                       sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 0);");
                    }
                    sw.WriteLine("VirtualDub.stream[0].DeleteComments(1);");
                    sw.WriteLine("VirtualDub.stream[0].AdjustChapters(1);");
