@@ -445,15 +445,15 @@ namespace XviD4PSP
                 flpcm.m = PresetLoader.DecodePresets(flpcm.m);
                 flpcm.LoadFromProfile();
             }
-            else if (fmp2 != null)
+            else if (fflac != null)
             {
                 AudioStream outstream = (AudioStream)fflac.m.outaudiostreams[fflac.m.outaudiostream];
                 //забиваем настройки из профиля
                 outstream.encoding = combo_profile.SelectedItem.ToString();
                 outstream.codec = PresetLoader.GetACodec(fflac.m.format, outstream.encoding);
                 outstream.passes = PresetLoader.GetACodecPasses(fflac.m);
-                fmp2.m = PresetLoader.DecodePresets(fflac.m);
-                fmp2.LoadFromProfile();
+                fflac.m = PresetLoader.DecodePresets(fflac.m);
+                fflac.LoadFromProfile();
             }
         }
 
