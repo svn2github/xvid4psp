@@ -2004,28 +2004,18 @@ namespace XviD4PSP
         private void LoadSettings()
         {
             string l = Settings.Language;
-            if (l == "Russian")
-                mnRussian.IsChecked = true;
-            else if (l == "Ukrainian")
-                check_ukrainian.IsChecked = true;
-            else if (l == "Italian")
-                check_italian.IsChecked = true;
-            else if (l == "German")
-                check_german.IsChecked = true;
-            else if (l == "Hebrew")
-                check_hebrew.IsChecked = true;
-            else if (l == "Spanish")
-                check_spanish.IsChecked = true;
-            else if (l == "French")
-                check_french.IsChecked = true;
-            else if (l == "Portuguese")
-                check_portuguese.IsChecked = true;
-            else if (l == "Chinese")
-                check_chinese.IsChecked = true;
-            else if (l == "Hungarian")
-                check_hungarian.IsChecked = true;
-            else
-                mnEnglish.IsChecked = true;
+            if (l == "Russian") mnRussian.IsChecked = true;
+            else if (l == "Ukrainian") check_ukrainian.IsChecked = true;
+            else if (l == "Italian") check_italian.IsChecked = true;
+            else if (l == "German") check_german.IsChecked = true;
+            else if (l == "Hebrew") check_hebrew.IsChecked = true;
+            else if (l == "Spanish") check_spanish.IsChecked = true;
+            else if (l == "French") check_french.IsChecked = true;
+            else if (l == "Portuguese") check_portuguese.IsChecked = true;
+            else if (l == "Chinese") check_chinese.IsChecked = true;
+            else if (l == "Hungarian") check_hungarian.IsChecked = true;
+            else if (l == "Estonian") check_estonian.IsChecked = true;
+            else mnEnglish.IsChecked = true;
 
             if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge) check_engine_mediabridge.IsChecked = true;
             else check_engine_directshow.IsChecked = true;
@@ -2111,6 +2101,7 @@ namespace XviD4PSP
             else if (Ukrainian.IsFocused) check_ukrainian.IsChecked = true;
             else if (French.IsFocused) check_french.IsChecked = true;
             else if (Hebrew.IsFocused) check_hebrew.IsChecked = true;
+            else if (Estonian.IsFocused) check_estonian.IsChecked = true;
 
             Settings.Language = ((MenuItem)sender).Header.ToString();
             SetLanguage();

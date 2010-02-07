@@ -214,6 +214,11 @@
                                 <RadioButton x:Name="check_hungarian"/>
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem x:Name="Estonian" Header="Estonian" StaysOpenOnClick="True" Click="Languages_Click">
+                            <MenuItem.Icon>
+                                <RadioButton x:Name="check_estonian"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
                     </MenuItem>
                     <Separator/>
                     <MenuItem x:Name="menu_player_engine" Header="Player engine" Width="Auto" Height="Auto">
