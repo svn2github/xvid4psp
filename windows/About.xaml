@@ -20,7 +20,7 @@
 			<Grid x:Name="grid_io_formats" Margin="27,0,-1,6" VerticalAlignment="Bottom" Height="124.8">
 				<TextBlock d:LayoutOverrides="Height" FontSize="14" Foreground="#FFFFFFFF" Text="Output codecs:" TextWrapping="Wrap" x:Name="text_import" Margin="0,3.6,297,99.2" />
 				<TextBlock d:LayoutOverrides="Height" FontSize="14" Margin="0,22,0,78" FontFamily="Segoe UI"  Foreground="#FFFFFFFF" Text="x264, XviD, MPEG4, MPEG2, MPEG1, FLV1, MJPEG, HUFF, FFV1, DV" TextWrapping="Wrap" />
-				<TextBlock d:LayoutOverrides="Height" FontSize="14" Margin="0,38.4,0,61.6" FontFamily="Segoe UI"  Foreground="#FFFFFFFF" Text="MP3, MP2, AC3, AAC, PCM" TextWrapping="Wrap" />
+				<TextBlock d:LayoutOverrides="Height" FontSize="14" Margin="0,38.4,0,61.6" FontFamily="Segoe UI"  Foreground="#FFFFFFFF" Text="MP3, MP2, AC3, AAC, FLAC, PCM" TextWrapping="Wrap" />
                 <TextBlock FontSize="14" Margin="0,70.8,301.4,31.6" Foreground="#FFFFFFFF" Text="Output containers:" TextWrapping="Wrap" x:Name="text_export" />
 				<TextBlock Margin="0,89.6,0,12" FontSize="14" Foreground="#FFFFFFFF" Text="MKV, AVI, MP4, MOV, 3GP, MPG, FLV, TS, M2TS, PMP, DPG" TextWrapping="Wrap" />
             </Grid>

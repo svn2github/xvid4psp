@@ -403,7 +403,7 @@ namespace XviD4PSP
            switch (format)
            {
                case ExportFormats.Audio:
-                   return new string[] { "PCM", "AC3", "MP3", "MP2", "AAC" };
+                   return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC" };
 
                case ExportFormats.PmpAvc:
                case ExportFormats.Mp4Archos5G:
@@ -445,7 +445,7 @@ namespace XviD4PSP
                    return new string[] { "MP3", "MP2", "AAC", "Disabled", "Copy" };
 
                case ExportFormats.Mkv:
-                   return new string[] { "PCM", "AC3", "MP3", "MP2", "AAC", "Disabled", "Copy" };
+                   return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC", "Disabled", "Copy" };
 
                case ExportFormats.DpgNintendoDS:
                case ExportFormats.Mpeg1PS:
@@ -785,8 +785,7 @@ namespace XviD4PSP
 
        public static Massive GetValidBits(Massive m)
        {
-           if (m.inaudiostreams.Count > 0 &&
-    m.inaudiostreams.Count > 0)
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
            {
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                outstream.bits = 16;
@@ -2144,8 +2143,7 @@ namespace XviD4PSP
                        m.outvcodec == "MPEG2" ||
                        m.outvcodec == "MPEG1")
                    {
-                       if (outstream.codec == "PCM" ||
-                           outstream.codec == "LPCM")
+                       if (outstream.codec == "PCM" || outstream.codec == "LPCM")
                            return Muxers.Disabled;
                        else
                        {

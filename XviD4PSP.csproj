@@ -107,6 +107,7 @@
     <Compile Include="classes\ac3_arguments.cs" />
     <Compile Include="classes\FormatReader.cs" />
     <Compile Include="classes\HotKeys.cs" />
+    <Compile Include="classes\flac_arguments.cs" />
     <Compile Include="classes\wmv_arguments.cs" />
     <Compile Include="classes\FFInfo.cs" />
     <Compile Include="classes\ffmpeg_arguments.cs" />
@@ -138,6 +139,9 @@
     <Compile Include="classes\x264_arguments.cs" />
     <Compile Include="codec_controls\AftenAC3.xaml.cs">
       <DependentUpon>AftenAC3.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\FFFLAC.xaml.cs">
+      <DependentUpon>FFFLAC.xaml</DependentUpon>
     </Compile>
     <Compile Include="codec_controls\FMPEG1.xaml.cs">
       <DependentUpon>FMPEG1.xaml</DependentUpon>
@@ -309,6 +313,9 @@
       <DependentUpon>VisualCrop.xaml</DependentUpon>
     </Compile>
     <Page Include="codec_controls\AftenAC3.xaml" />
+    <Page Include="codec_controls\FFFLAC.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="codec_controls\FMPEG1.xaml" />
     <Page Include="codec_controls\FLV1.xaml" />
     <Page Include="codec_controls\FMJPEG.xaml" />
@@ -456,6 +463,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="main.ico" />
+    <Resource Include="pictures\logo_FF_FLAC.png" />
     <Resource Include="pictures\vc_background.PNG" />
     <Resource Include="pictures\Bottom.ico" />
     <Resource Include="pictures\Left.ico" />

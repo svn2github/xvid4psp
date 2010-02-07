@@ -18,6 +18,7 @@ namespace XviD4PSP
             this.aac_options = new aac_arguments();
             this.mp3_options = new mp3_arguments();
             this.ac3_options = new ac3_arguments();
+            this.flac_options = new flac_arguments();
 
             this.vpasses = new ArrayList();
             this.inaudiostreams = new ArrayList();
@@ -34,6 +35,7 @@ namespace XviD4PSP
             temp.aac_options = this.aac_options.Clone();
             temp.mp3_options = this.mp3_options.Clone();
             temp.ac3_options = this.ac3_options.Clone();
+            temp.flac_options = this.flac_options.Clone();
             temp.vpasses = (ArrayList)this.vpasses.Clone();
             temp.inaudiostreams = (ArrayList)this.inaudiostreams.Clone();
             temp.outaudiostreams = (ArrayList)this.outaudiostreams.Clone();
@@ -1091,6 +1093,19 @@ namespace XviD4PSP
             set
             {
                 _ac3_options = value;
+            }
+        }
+
+        private flac_arguments _flac_options;
+        public flac_arguments flac_options
+        {
+            get
+            {
+                return _flac_options;
+            }
+            set
+            {
+                _flac_options = value;
             }
         }
 

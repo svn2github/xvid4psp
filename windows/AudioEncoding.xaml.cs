@@ -21,6 +21,7 @@ namespace XviD4PSP
         FMP2 fmp2;
         FPCM fpcm;
         FLPCM flpcm;
+        FFLAC fflac;
         CopyOrDisabled copyordisabled;
 
         public AudioEncoding(Massive mass)
@@ -74,38 +75,37 @@ namespace XviD4PSP
                 aac = new NeroAAC(m, this);
                 grid_codec.Children.Add(aac);
             }
-
-            if (outstream.codec == "MP3")
+            else if (outstream.codec == "MP3")
             {
                 mp3 = new LameMP3(m, this);
                 grid_codec.Children.Add(mp3);
             }
-
-            if (outstream.codec == "AC3")
+            else if (outstream.codec == "AC3")
             {
                 ac3 = new AftenAC3(m, this);
                 grid_codec.Children.Add(ac3);
             }
-
-            if (outstream.codec == "MP2")
+            else if (outstream.codec == "MP2")
             {
                 fmp2 = new FMP2(m, this);
                 grid_codec.Children.Add(fmp2);
             }
-
-            if (outstream.codec == "PCM")
+            else if (outstream.codec == "PCM")
             {
                 fpcm = new FPCM(m, this);
                 grid_codec.Children.Add(fpcm);
             }
-
-            if (outstream.codec == "LPCM")
+            else if (outstream.codec == "LPCM")
             {
                 flpcm = new FLPCM(m, this);
                 grid_codec.Children.Add(flpcm);
             }
-
-            if (outstream.codec == "Copy" ||
+            else if (outstream.codec == "FLAC")
+            {
+                fflac = new FFLAC(m, this);
+                grid_codec.Children.Add(fflac);
+            }
+            else if (outstream.codec == "Copy" ||
                 outstream.codec == "Disabled")
             {
                 copyordisabled = new CopyOrDisabled();
@@ -131,38 +131,37 @@ namespace XviD4PSP
                 grid_codec.Children.Remove(aac);
                 aac = null;
             }
-
-            if (mp3 != null)
+            else if (mp3 != null)
             {
                 grid_codec.Children.Remove(mp3);
                 mp3 = null;
             }
-
-            if (ac3 != null)
+            else if (ac3 != null)
             {
                 grid_codec.Children.Remove(ac3);
                 ac3 = null;
             }
-
-            if (fmp2 != null)
+            else if (fmp2 != null)
             {
                 grid_codec.Children.Remove(fmp2);
                 fmp2 = null;
             }
-
-            if (fpcm != null)
+            else if (fpcm != null)
             {
                 grid_codec.Children.Remove(fpcm);
                 fpcm = null;
             }
-
-            if (flpcm != null)
+            else if (flpcm != null)
             {
                 grid_codec.Children.Remove(flpcm);
                 flpcm = null;
             }
-
-            if (copyordisabled != null)
+            else if (fflac != null)
+            {
+                grid_codec.Children.Remove(fflac);
+                fflac = null;
+            }
+            else if (copyordisabled != null)
             {
                 grid_codec.Children.Remove(copyordisabled);
                 copyordisabled = null;
@@ -227,6 +226,7 @@ namespace XviD4PSP
                 m.mp3_options = new mp3_arguments();
                 m.aac_options = new aac_arguments();
                 m.ac3_options = new ac3_arguments();
+                m.flac_options = new flac_arguments();
 
                 LoadCodecWindow();
                 if (outstream.codec == "Copy" ||
@@ -313,57 +313,47 @@ namespace XviD4PSP
                 m = aac.m.Clone();
                 m = NeroAAC.EncodeLine(m);
             }
-
-            if (mp3 != null)
+            else if (mp3 != null)
             {
                 m = mp3.m.Clone();
                 m = LameMP3.EncodeLine(m);
             }
-
-            if (ac3 != null)
+            else if (ac3 != null)
             {
                 m = ac3.m.Clone();
                 m = AftenAC3.EncodeLine(m);
             }
-
-            if (fmp2 != null)
+            else if (fmp2 != null)
             {
                 m = fmp2.m.Clone();
                 m = FMP2.EncodeLine(m);
             }
-
-            if (fpcm != null)
+            else if (fpcm != null)
             {
                 m = fpcm.m.Clone();
                 m = FPCM.EncodeLine(m);
             }
-
-            if (flpcm != null)
+            else if (flpcm != null)
             {
                 m = flpcm.m.Clone();
                 m = FLPCM.EncodeLine(m);
+            }
+            else if (fflac != null)
+            {
+                m = fflac.m.Clone();
+                m = FFLAC.EncodeLine(m);
             }
         }
 
         private void UpdateCodecMassive()
         {
-            if (aac != null)
-                aac.m = m.Clone();
-
-            if (mp3 != null)
-                mp3.m = m.Clone();
-
-            if (ac3 != null)
-                ac3.m = m.Clone();
-
-            if (fmp2 != null)
-                fmp2.m = m.Clone();
-
-            if (fpcm != null)
-                fpcm.m = m.Clone();
-
-            if (flpcm != null)
-                flpcm.m = m.Clone();
+            if (aac != null) aac.m = m.Clone();
+            else if (mp3 != null) mp3.m = m.Clone();
+            else if (ac3 != null) ac3.m = m.Clone();
+            else if (fmp2 != null) fmp2.m = m.Clone();
+            else if (fpcm != null) fpcm.m = m.Clone();
+            else if (flpcm != null) flpcm.m = m.Clone();
+            else if (fflac != null) fflac.m = m.Clone();
         }
 
         private void LoadProfiles()
@@ -405,8 +395,7 @@ namespace XviD4PSP
                 aac.m = PresetLoader.DecodePresets(aac.m);
                 aac.LoadFromProfile();
             }
-
-            if (mp3 != null)
+            else if (mp3 != null)
             {
                 AudioStream outstream = (AudioStream)mp3.m.outaudiostreams[mp3.m.outaudiostream];
                 //забиваем настройки из профиля
@@ -416,8 +405,7 @@ namespace XviD4PSP
                 mp3.m = PresetLoader.DecodePresets(mp3.m);
                 mp3.LoadFromProfile();
             }
-
-            if (ac3 != null)
+            else if (ac3 != null)
             {
                 AudioStream outstream = (AudioStream)ac3.m.outaudiostreams[ac3.m.outaudiostream];
                 //забиваем настройки из профиля
@@ -427,8 +415,7 @@ namespace XviD4PSP
                 ac3.m = PresetLoader.DecodePresets(ac3.m);
                 ac3.LoadFromProfile();
             }
-
-            if (fmp2 != null)
+            else if (fmp2 != null)
             {
                 AudioStream outstream = (AudioStream)fmp2.m.outaudiostreams[fmp2.m.outaudiostream];
                 //забиваем настройки из профиля
@@ -438,8 +425,7 @@ namespace XviD4PSP
                 fmp2.m = PresetLoader.DecodePresets(fmp2.m);
                 fmp2.LoadFromProfile();
             }
-
-            if (fpcm != null)
+            else if (fpcm != null)
             {
                 AudioStream outstream = (AudioStream)fpcm.m.outaudiostreams[fpcm.m.outaudiostream];
                 //забиваем настройки из профиля
@@ -449,8 +435,7 @@ namespace XviD4PSP
                 fpcm.m = PresetLoader.DecodePresets(fpcm.m);
                 fpcm.LoadFromProfile();
             }
-
-            if (flpcm != null)
+            else if (flpcm != null)
             {
                 AudioStream outstream = (AudioStream)flpcm.m.outaudiostreams[flpcm.m.outaudiostream];
                 //забиваем настройки из профиля
@@ -459,6 +444,16 @@ namespace XviD4PSP
                 outstream.passes = PresetLoader.GetACodecPasses(flpcm.m);
                 flpcm.m = PresetLoader.DecodePresets(flpcm.m);
                 flpcm.LoadFromProfile();
+            }
+            else if (fmp2 != null)
+            {
+                AudioStream outstream = (AudioStream)fflac.m.outaudiostreams[fflac.m.outaudiostream];
+                //забиваем настройки из профиля
+                outstream.encoding = combo_profile.SelectedItem.ToString();
+                outstream.codec = PresetLoader.GetACodec(fflac.m.format, outstream.encoding);
+                outstream.passes = PresetLoader.GetACodecPasses(fflac.m);
+                fmp2.m = PresetLoader.DecodePresets(fflac.m);
+                fmp2.LoadFromProfile();
             }
         }
 
@@ -626,6 +621,5 @@ namespace XviD4PSP
                 mes.ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
-
 	}
 }

@@ -38,6 +38,7 @@ namespace XviD4PSP
             combo_VCodec.Items.Add("DV");
             combo_VCodec.SelectedItem = FormatReader.GetFormatInfo(format, "GetVCodec");
 
+            combo_ACodec.Items.Add("FLAC");
             combo_ACodec.Items.Add("PCM");
             combo_ACodec.Items.Add("AAC");
             combo_ACodec.Items.Add("AC3");
@@ -231,7 +232,7 @@ namespace XviD4PSP
             samplerateslist.Content = Languages.Translate("Valid samplerates:");
             validresolution.Content = Languages.Translate("Resolution:");
             check_fixed_ar.Content = "fix AR:"; //Languages.Translate("Use only AR`s, specified below:");
-            validmuxer.Content = Languages.Translate("Muxer fot this format:");
+            validmuxer.Content = Languages.Translate("Muxer for this format:");
             validextension.Content = Languages.Translate("File extension:");
             check_4gb_only.Content = Languages.Translate("Maximum filesize is 4Gb");
 
@@ -241,7 +242,7 @@ namespace XviD4PSP
             textbox_vcodec_list.ToolTip = Languages.Translate("Codecs that will be selectable in the video-codecs-setting window.") + Environment.NewLine + Languages.Translate("Valid values:")+" x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy";
             combo_VCodec.ToolTip = Languages.Translate("Codec, that usualy used in this format (or maybe i`m wrong)");
             textbox_framerates_list.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000, ..." + Environment.NewLine + Languages.Translate("Separate by comma.");
-            textbox_acodec_list.ToolTip = Languages.Translate("Codecs that will be selectable in the audio-codecs-setting window.") + Environment.NewLine + Languages.Translate("Valid values:")+ " PCM, AAC, MP2, MP3, AC3, Disabled, Copy";
+            textbox_acodec_list.ToolTip = Languages.Translate("Codecs that will be selectable in the audio-codecs-setting window.") + Environment.NewLine + Languages.Translate("Valid values:")+ " PCM, FLAC, AAC, MP2, MP3, AC3, Disabled, Copy";
             combo_ACodec.ToolTip = Languages.Translate("Codec, that usualy used in this format (or maybe i`m wrong)");
             textbox_samplerates_list.ToolTip = Languages.Translate("Samplerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 22050, 32000, 44100, 48000, 96000, 192000, ..." + Environment.NewLine + Languages.Translate("Separate by comma.");
             validresolution.ToolTip = Languages.Translate("Resolution:");

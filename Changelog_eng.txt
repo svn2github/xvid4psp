@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r111 07.02.10, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r112 07.02.10, main changes:
 
+>>> (r112) Added FLAC encoder (from FFmpeg), it available for Audio and MKV formats.
 >>> (r111) Added Estonian translation (Estonian.txt by tudiludi).
 >>> (r110) In the x264 settings window for CRF mode label "Quantizer: (Q)" replaced by "Quality: (CRF)".
 >>> (r110) In the AAC settings window added option -2passperiod (only for 2pass mode).

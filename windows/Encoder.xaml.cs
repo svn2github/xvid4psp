@@ -856,9 +856,10 @@ namespace XviD4PSP
                 if (m.outaudiostreams.Count > 0)
                 {
                     AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                    if (outstream.codec == "MP3" &&
-                        m.mp3_options.encodingmode == Settings.AudioEncodingModes.VBR)
-                        m.outainfo = outstream.codec + " Q" + m.mp3_options.quality + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz";
+                    if (outstream.codec == "MP3" && m.mp3_options.encodingmode == Settings.AudioEncodingModes.VBR)
+                        m.outainfo = outstream.codec + " Q" + m.mp3_options.quality + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz";                    
+                    else if (outstream.codec == "FLAC")
+                        m.outainfo = outstream.codec + " Q" + m.flac_options.level + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz";
                     else
                         m.outainfo = outstream.codec + " " + outstream.bitrate + "kbps " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz";
                     SetLog(m.outainfo);
@@ -1657,6 +1658,8 @@ namespace XviD4PSP
             SetLog("Encoding audio to: " + outstream.audiopath);
             if (outstream.codec == "MP3" && m.mp3_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 m.outainfo = outstream.codec + " Q" + m.mp3_options.quality + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz";
+            else if (outstream.codec == "FLAC")
+                m.outainfo = outstream.codec + " Q" + m.flac_options.level + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz";
             else if (outstream.codec == "AAC" && m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass)
             {
                 m.outainfo = outstream.codec + " " + outstream.bitrate + "kbps 2pass " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz";
@@ -1690,7 +1693,7 @@ namespace XviD4PSP
                         avs.encoderPath = Calculate.StartupPath + "\\apps\\neroAacEnc_pmp\\neroAacEnc.exe";
                     else avs.encoderPath = Calculate.StartupPath + "\\apps\\neroAacEnc\\neroAacEnc.exe";
                 }
-                else if (outstream.codec == "MP2" || outstream.codec == "PCM" || outstream.codec == "LPCM")
+                else if (outstream.codec == "MP2" || outstream.codec == "PCM" || outstream.codec == "LPCM" || outstream.codec == "FLAC")
                     avs.encoderPath = Calculate.StartupPath + "\\apps\\ffmpeg\\ffmpeg.exe";
                 else if (outstream.codec == "AC3")
                     avs.encoderPath = Calculate.StartupPath + "\\apps\\aften\\aften.exe";

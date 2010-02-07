@@ -101,7 +101,5 @@ namespace XviD4PSP
                 root_window.UpdateOutSize();
             }
         }
-
-
 	}
 }

@@ -212,81 +212,33 @@ namespace XviD4PSP
 
         public static Massive DecodePresets(Massive m)
         {
-
-           //расшифровываем видео параметры
-            if (m.outvcodec == "x264")
-                m = x264.DecodeLine(m);
-
             //расшифровываем видео параметры
-            if (m.outvcodec == "XviD")
-                m = XviD.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "MPEG2")
-                m = FMPEG2.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "MPEG1")
-                m = FMPEG1.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "MPEG4")
-                m = FMPEG4.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "DV")
-                m = FDV.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "HUFF")
-                m = FFHUFF.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "MJPEG")
-                m = FMJPEG.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "FFV1")
-                m = FFV1.DecodeLine(m);
-
-            //расшифровываем видео параметры
-            if (m.outvcodec == "FLV1")
-                m = FLV1.DecodeLine(m);
+            if (m.outvcodec == "x264") m = x264.DecodeLine(m);
+            else if (m.outvcodec == "XviD") m = XviD.DecodeLine(m);
+            else if (m.outvcodec == "MPEG2") m = FMPEG2.DecodeLine(m);
+            else if (m.outvcodec == "MPEG1") m = FMPEG1.DecodeLine(m);
+            else if (m.outvcodec == "MPEG4") m = FMPEG4.DecodeLine(m);
+            else if (m.outvcodec == "DV") m = FDV.DecodeLine(m);
+            else if (m.outvcodec == "HUFF") m = FFHUFF.DecodeLine(m);
+            else if (m.outvcodec == "MJPEG") m = FMJPEG.DecodeLine(m);
+            else if (m.outvcodec == "FFV1") m = FFV1.DecodeLine(m);
+            else if (m.outvcodec == "FLV1") m = FLV1.DecodeLine(m);
 
             if (m.outaudiostreams.Count > 0)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
                 //расшифровываем audio параметры
-                if (outstream.codec == "AAC")
-                    m = NeroAAC.DecodeLine(m);
-
-                //расшифровываем audio параметры
-                if (outstream.codec == "MP3")
-                    m = LameMP3.DecodeLine(m);
-
-                //расшифровываем audio параметры
-                if (outstream.codec == "AC3")
-                    m = AftenAC3.DecodeLine(m);
-
-                //расшифровываем audio параметры
-                if (outstream.codec == "MP2")
-                    m = FMP2.DecodeLine(m);
-
-                //расшифровываем audio параметры
-                if (outstream.codec == "PCM")
-                    m = FPCM.DecodeLine(m);
-
-                //расшифровываем audio параметры
-                if (outstream.codec == "LPCM")
-                    m = FLPCM.DecodeLine(m);
+                if (outstream.codec == "AAC") m = NeroAAC.DecodeLine(m);
+                else if (outstream.codec == "MP3") m = LameMP3.DecodeLine(m);
+                else if (outstream.codec == "AC3") m = AftenAC3.DecodeLine(m);
+                else if (outstream.codec == "MP2") m = FMP2.DecodeLine(m);
+                else if (outstream.codec == "PCM") m = FPCM.DecodeLine(m);
+                else if (outstream.codec == "LPCM") m = FLPCM.DecodeLine(m);
+                else if (outstream.codec == "FLAC") m = FFLAC.DecodeLine(m);
             }
 
             return m;
         }
-
- 
-
-
     }
 }
