@@ -199,7 +199,12 @@ namespace XviD4PSP
             }
             else
             {
-                text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
+                if (m.encodingmode == Settings.EncodingModes.Quality ||
+                    m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                    m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                    text_bitrate.Content = Languages.Translate("Quality") + ": (CRF)";
+                else
+                    text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
                 num_bitrate.Value = (decimal)m.outvbitrate;
             }
 
@@ -452,8 +457,10 @@ namespace XviD4PSP
             else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                       m.encodingmode == Settings.EncodingModes.ThreePassSize)
                 num_bitrate.ToolTip = "Set file size (Default: InFileSize)";
+            else if (m.encodingmode == Settings.EncodingModes.Quantizer)
+                num_bitrate.ToolTip = "Set target quantizer. Lower - better quality but bigger filesize.\r\n(Default: 23)";
             else
-                num_bitrate.ToolTip = "Set target quality (Default: 21)";
+                num_bitrate.ToolTip = "Set target quality. Lower - better quality but bigger filesize.\r\n(Default: 23)";
 
             check_lossless.ToolTip = "LossLess encoding mode. High AVC profile only";
             combo_level.ToolTip = "Specify level (--level)";
@@ -927,75 +934,41 @@ namespace XviD4PSP
                     oldmode = m.encodingmode;
 
                     string x264mode = combo_mode.SelectedItem.ToString();
-                    if (x264mode == "1-Pass Bitrate")
-                        m.encodingmode = Settings.EncodingModes.OnePass;
-
-                    else if (x264mode == "2-Pass Bitrate")
-                        m.encodingmode = Settings.EncodingModes.TwoPass;
-
-                    else if (x264mode == "2-Pass Size")
-                        m.encodingmode = Settings.EncodingModes.TwoPassSize;
-
-                    else if (x264mode == "3-Pass Bitrate")
-                        m.encodingmode = Settings.EncodingModes.ThreePass;
-
-                    else if (x264mode == "3-Pass Size")
-                        m.encodingmode = Settings.EncodingModes.ThreePassSize;
-
-                    else if (x264mode == "Constant Quality")
-                        m.encodingmode = Settings.EncodingModes.Quality;
-
-                    else if (x264mode == "Constant Quantizer")
-                        m.encodingmode = Settings.EncodingModes.Quantizer;
-
-                    else if (x264mode == "2-Pass Quality")
-                        m.encodingmode = Settings.EncodingModes.TwoPassQuality;
-
-                    else if (x264mode == "3-Pass Quality")
-                        m.encodingmode = Settings.EncodingModes.ThreePassQuality;
+                    if (x264mode == "1-Pass Bitrate") m.encodingmode = Settings.EncodingModes.OnePass;
+                    else if (x264mode == "2-Pass Bitrate") m.encodingmode = Settings.EncodingModes.TwoPass;
+                    else if (x264mode == "2-Pass Size") m.encodingmode = Settings.EncodingModes.TwoPassSize;
+                    else if (x264mode == "3-Pass Bitrate") m.encodingmode = Settings.EncodingModes.ThreePass;
+                    else if (x264mode == "3-Pass Size") m.encodingmode = Settings.EncodingModes.ThreePassSize;
+                    else if (x264mode == "Constant Quality") m.encodingmode = Settings.EncodingModes.Quality;
+                    else if (x264mode == "Constant Quantizer") m.encodingmode = Settings.EncodingModes.Quantizer;
+                    else if (x264mode == "2-Pass Quality") m.encodingmode = Settings.EncodingModes.TwoPassQuality;
+                    else if (x264mode == "3-Pass Quality") m.encodingmode = Settings.EncodingModes.ThreePassQuality;
 
                     check_lossless.IsChecked = false;
 
                     SetMinMaxBitrate();
 
-                    //сброс на квантайзер
+                    //Устанавливаем дефолтный битрейт (при необходимости)
                     if (oldmode == Settings.EncodingModes.OnePass ||
                         oldmode == Settings.EncodingModes.TwoPass ||
-                        oldmode == Settings.EncodingModes.ThreePass ||
-                        oldmode == Settings.EncodingModes.TwoPassSize ||
-                        oldmode == Settings.EncodingModes.ThreePassSize)
+                        oldmode == Settings.EncodingModes.ThreePass)
                     {
-                        if (m.encodingmode == Settings.EncodingModes.Quality ||
-                            m.encodingmode == Settings.EncodingModes.Quantizer ||
-                            m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
-                            m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-                        {
+                        if (m.encodingmode != Settings.EncodingModes.OnePass &&
+                            m.encodingmode != Settings.EncodingModes.TwoPass &&
+                            m.encodingmode != Settings.EncodingModes.ThreePass)
                             SetDefaultBitrates();
-                        }
                     }
-
-                    //сброс на битрейт
-                    if (oldmode != Settings.EncodingModes.OnePass &&
-                        oldmode != Settings.EncodingModes.TwoPass &&
-                        oldmode != Settings.EncodingModes.ThreePass)
+                    else if (oldmode.ToString().Contains("Size") && !m.encodingmode.ToString().Contains("Size"))
                     {
-                        if (m.encodingmode == Settings.EncodingModes.OnePass ||
-                            m.encodingmode == Settings.EncodingModes.TwoPass ||
-                            m.encodingmode == Settings.EncodingModes.ThreePass)
-                        {
-                            SetDefaultBitrates();
-                        }
+                        SetDefaultBitrates();
                     }
-
-                    //сброс на размер
-                    if (oldmode != Settings.EncodingModes.TwoPassSize &&
-                        oldmode != Settings.EncodingModes.ThreePassSize)
+                    else if (oldmode.ToString().Contains("Quality") && !m.encodingmode.ToString().Contains("Quality"))
                     {
-                        if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
-                            m.encodingmode == Settings.EncodingModes.ThreePassSize)
-                        {
-                            SetDefaultBitrates();
-                        }
+                        SetDefaultBitrates();
+                    }
+                    else if (oldmode == Settings.EncodingModes.Quantizer)
+                    {
+                        SetDefaultBitrates();
                     }
 
                     if (m.encodingmode == Settings.EncodingModes.OnePass ||
@@ -1043,9 +1016,14 @@ namespace XviD4PSP
         private void SetDefaultBitrates()
         {
             if (m.encodingmode == Settings.EncodingModes.Quality ||
-                m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+            {
+                m.outvbitrate = 23;
+                num_bitrate.Value = (decimal)m.outvbitrate;
+                text_bitrate.Content = Languages.Translate("Quality") + ": (CRF)";
+            }
+            else if (m.encodingmode == Settings.EncodingModes.Quantizer)
             {
                 m.outvbitrate = 23;
                 num_bitrate.Value = (decimal)m.outvbitrate;

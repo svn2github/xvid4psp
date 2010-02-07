@@ -54,5 +54,18 @@ namespace XviD4PSP
                 _quality = value;
             }
         }
+
+        private int _period = 0;
+        public int period
+        {
+            get
+            {
+                return _period;
+            }
+            set
+            {
+                _period = value;
+            }
+        }
     }
 }

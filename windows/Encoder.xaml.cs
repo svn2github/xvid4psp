@@ -227,14 +227,6 @@ namespace XviD4PSP
             button_cancel.ToolTip = Languages.Translate("Cancel encoding");
         }
 
-        private void Window_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
-        {
-            if (e.NewSize.Width < 400)
-                this.Width = 400;
-            if (e.NewSize.Height < 200)
-                this.Height = 200;
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             try
@@ -1801,7 +1793,6 @@ namespace XviD4PSP
                     mat = r.Match(line);
                     if (mat.Success == true)
                     {
-                        worker.ReportProgress((int)(Convert.ToInt32(mat.Groups[2].Value) * fps));
                         if (oldpass == 0 && mat.Groups[1].Value == "First")
                         {
                             SetLog("...first pass...");
@@ -1810,9 +1801,11 @@ namespace XviD4PSP
                         else if (oldpass == 1 && mat.Groups[1].Value == "Second")
                         {
                             SetLog("...last pass...");
+                            of = cf = 0;
                             oldpass = 2;
                             step++;
                         }
+                        worker.ReportProgress((int)(Convert.ToInt32(mat.Groups[2].Value) * fps));
                     }
                     else
                     {
@@ -4772,19 +4765,14 @@ namespace XviD4PSP
                     try
                     {   
                         //Сохранение лога при ошибке
-                        string logfilename = Settings.TempPath + "\\" + Path.GetFileName(m.outfilepath) + ".error.log";
-                        FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                        StreamWriter writer = new StreamWriter(strm);
-                        writer.WriteLine(tbxLog.Text);
-                        writer.Flush();
-                        writer.Dispose();
-                        strm.Dispose();
+                        string logfilename = m.outfilepath + ".error.log";
+                        File.WriteAllText(logfilename, tbxLog.Text + Environment.NewLine, System.Text.Encoding.Default);
 
                         SetLog(Environment.NewLine + "This log was saved here: " + logfilename);
                     }
                     catch (Exception ex)
                     {
-                        ErrorExeption(ex.Message);
+                        ShowMessage(ex.Message);
                     }
                 }
                 SafeDelete(m.scriptpath);
@@ -4967,34 +4955,22 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LogDelegate(SetLog), data);
             else
             {
-                if(data != "xvid_encraw - raw mpeg4 bitstream encoder written by Christoph Lampert 2002-2003" &&
-                    !data.StartsWith("avis [info]: " + m.outresw))
+                tbxLog.AppendText(data + Environment.NewLine);
+                tbxLog.ScrollToEnd();
+
+                //Лог в файл
+                if (Settings.WriteLog)
                 {
-                    tbxLog.AppendText(data + Environment.NewLine);
-                    tbxLog.ScrollToEnd();
-                    
-                    //Лог в файл
-                    if (Settings.WriteLog)
+                    try
                     {
-                        try
-                        {
-                            string logfilename = m.outfilepath + ".encoding.log";
-                            if (Settings.LogInTemp) //Лог-файл во временную папку
-                                logfilename = Settings.TempPath + "\\" + Path.GetFileName(m.outfilepath) + ".encoding.log";
-                            FileStream strm = new FileStream(logfilename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-                            StreamWriter writer = new StreamWriter(strm);
-
-                            writer.WriteLine(data);
-
-                            writer.Flush();
-                            writer.Close();
-                            strm.Close();
-                        }
-                        catch (Exception ex)
-                        {
-                           ErrorExeption(ex.Message);
-                        }
-                    }        
+                        string logfilename = ((Settings.LogInTemp) ? Settings.TempPath + "\\" + Path.GetFileName(m.outfilepath) : m.outfilepath) + ".encoding.log";
+                        File.AppendAllText(logfilename, data + Environment.NewLine, System.Text.Encoding.Default);
+                    }
+                    catch (Exception ex)
+                    {
+                        tbxLog.AppendText(ex.Message + Environment.NewLine);
+                        tbxLog.ScrollToEnd();
+                    }
                 }
             }
         }
@@ -5026,26 +5002,14 @@ namespace XviD4PSP
             try
             {
                 string logfilename = m.outfilepath + ".encoding.log";
-                FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                StreamWriter writer = new StreamWriter(strm);
-
-                writer.WriteLine(tbxLog.Text);
-               
-                writer.Flush();
-                //writer.Close();
-                //strm.Close();
-                writer.Dispose();
-                strm.Dispose();
+                File.WriteAllText(logfilename, tbxLog.Text + Environment.NewLine, System.Text.Encoding.Default);
                 
                 SetLog(Environment.NewLine + "This log was saved here: " + logfilename + Environment.NewLine);
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
-            }
-           
-          
+                ShowMessage(ex.Message);
+            }          
         }
-
 	}
 }

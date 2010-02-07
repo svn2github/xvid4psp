@@ -14,16 +14,16 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<Image Margin="0,0,0,0" Source="..\pictures\logo_lame.png" Stretch="None" VerticalAlignment="Top" Height="95" d:LayoutOverrides="Width"/>
-		<Grid VerticalAlignment="Bottom" Height="197.48" Background="{DynamicResource black_gradient_2}" Margin="0,95,0,0" Width="312">
-			<ComboBox Margin="0,23.66,6.733,0" x:Name="combo_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mode_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_mode" Content="Encoding mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9.267,19,0,0" VerticalAlignment="Top"/>
-			<ComboBox HorizontalAlignment="Right" Margin="0,80.9,6.733,0" x:Name="combo_bitrate" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bitrate_SelectionChanged" VerticalAlignment="Top"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9.267,76.24,0,0" VerticalAlignment="Top"/>
-			<ComboBox x:Name="combo_channels_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,52.28,6.733,0" SelectionChanged="combo_channels_mode_SelectionChanged" VerticalAlignment="Top"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_channels_mode" Content="Channels mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="10.534,47.62,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-			<ComboBox x:Name="combo_quality" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,109.52,6.733,0" SelectionChanged="combo_quality_SelectionChanged" VerticalAlignment="Top"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="Quality:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9.267,104.86,0,0" VerticalAlignment="Top"/>
-			<CheckBox x:Name="check_force_samplearte" Width="Auto" Height="Auto" Content="Don`t change samplerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="14,0,0,12" Checked="check_force_samplearte_Checked" Unchecked="check_force_samplearte_Unchecked" d:LayoutOverrides="Width, Height" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+		<Grid VerticalAlignment="Bottom" Height="186" Background="{DynamicResource black_gradient_2}" Margin="0,95,0,0" Width="312">
+			<ComboBox Margin="0,23.66,8,0" x:Name="combo_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mode_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_mode" Content="Encoding mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,19,0,0" VerticalAlignment="Top"/>
+			<ComboBox HorizontalAlignment="Right" Margin="0,80.9,8,0" x:Name="combo_bitrate" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bitrate_SelectionChanged" VerticalAlignment="Top"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,76.24,0,0" VerticalAlignment="Top"/>
+			<ComboBox x:Name="combo_channels_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,52.28,8,0" SelectionChanged="combo_channels_mode_SelectionChanged" VerticalAlignment="Top"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_channels_mode" Content="Channels mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,47.62,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+			<ComboBox x:Name="combo_quality" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,109.52,8,0" SelectionChanged="combo_quality_SelectionChanged" VerticalAlignment="Top"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="Quality:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,104.86,0,0" VerticalAlignment="Top"/>
+			<CheckBox x:Name="check_force_samplearte" Width="Auto" Height="Auto" Content="Don`t change samplerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="13,0,0,12" Checked="check_force_samplearte_Checked" Unchecked="check_force_samplearte_Unchecked" d:LayoutOverrides="Width, Height" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
 		</Grid>
 	</Grid>
 </UserControl>

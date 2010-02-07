@@ -33,6 +33,10 @@ namespace XviD4PSP
             combo_aac_profile.Items.Add("AAC-HE");
             combo_aac_profile.Items.Add("AAC-HEv2");
 
+            this.num_period.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_period_ValueChanged);
+            num_period.ToolTip = "2-Pass encoding bitrate averaging period, milliseconds. \r\nDefault and recommended: 0 (Auto).\r\n" +
+            "\r\nWARNING! Low values may produce crash of neroAacEnc.exe!";
+
             LoadFromProfile();
 		}
 
@@ -59,10 +63,13 @@ namespace XviD4PSP
             else combo_bitrate.SelectedItem = outstream.bitrate;
 
             combo_aac_profile.SelectedItem = m.aac_options.aacprofile;
+
+            num_period.Value = m.aac_options.period;
         }
 
         private void LoadBitrates()
         {
+            num_period.IsEnabled = (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass);
             try
             {
                 combo_bitrate.Items.Clear();
@@ -108,29 +115,28 @@ namespace XviD4PSP
             foreach (string value in cli)
             {
                 if (value == "-2pass") m.aac_options.encodingmode = Settings.AudioEncodingModes.TwoPass;
-                if (value == "-q")
+                else if (value == "-q")
                 {
                     m.aac_options.encodingmode = Settings.AudioEncodingModes.VBR;
                     m.aac_options.quality = Calculate.ConvertStringToDouble(cli[n + 1]);
                 }
-
-                if (value == "-br" || value == "-cbr")
+                else if (value == "-br" || value == "-cbr")
                 {
                     if (m.aac_options.encodingmode != Settings.AudioEncodingModes.TwoPass)
                         if (value == "-br") m.aac_options.encodingmode = Settings.AudioEncodingModes.ABR;
                         else m.aac_options.encodingmode = Settings.AudioEncodingModes.CBR;
                     outstream.bitrate = Convert.ToInt32(cli[n + 1].Replace("000", ""));
                 }
-
-                if (value == "-lc" || value == "-he" || value == "-hev2")
+                else if (value == "-lc" || value == "-he" || value == "-hev2")
                 {
                     auto = false;
                     if (value == "-lc") m.aac_options.aacprofile = "AAC-LC";
                     else if (value == "-he") m.aac_options.aacprofile = "AAC-HE";
                     else m.aac_options.aacprofile = "AAC-HEv2";
                 }
-                if (auto) m.aac_options.aacprofile = "Auto";
+                else if (value == "-2passperiod") m.aac_options.period = Convert.ToInt32(cli[n + 1]);
 
+                if (auto) m.aac_options.aacprofile = "Auto";
                 n++;
             }
 
@@ -143,17 +149,17 @@ namespace XviD4PSP
 
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-            if (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass)
-                line += "-2pass -br " + outstream.bitrate + "000";
-
             if (m.aac_options.encodingmode == Settings.AudioEncodingModes.ABR)
                 line += "-br " + outstream.bitrate + "000";
-
-            if (m.aac_options.encodingmode == Settings.AudioEncodingModes.CBR)
+            else if (m.aac_options.encodingmode == Settings.AudioEncodingModes.CBR)
                 line += "-cbr " + outstream.bitrate + "000";
-
-            if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
+            else if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 line += "-q " + m.aac_options.quality.ToString("0.00").Replace(",", ".");
+            else //TwoPass
+            {
+                line += "-2pass -br " + outstream.bitrate + "000";
+                if (m.aac_options.period > 0) line += " -2passperiod " + m.aac_options.period;
+            }
 
             if (m.aac_options.aacprofile == "AAC-LC") line += " -lc";
             if (m.aac_options.aacprofile == "AAC-HE") line += " -he";
@@ -209,6 +215,17 @@ namespace XviD4PSP
             {
                 //TODO: прописать тут ограничение и смену битрейтов для HEv2
                 m.aac_options.aacprofile = combo_aac_profile.SelectedItem.ToString();
+
+                root_window.UpdateOutSize();
+                root_window.UpdateManualProfile();
+            }
+        }
+
+        private void num_period_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_period.IsAction)
+            {
+                m.aac_options.period = (int)num_period.Value;
 
                 root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();

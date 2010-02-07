@@ -434,9 +434,9 @@
                 <Button x:Name="button_edit_vencoding" Margin="0,178.36,3,0" Click="VideoEncodingSettings_Click" d:LayoutOverrides="VerticalAlignment" HorizontalAlignment="Right" VerticalAlignment="Top" Width="26" Foreground="#FFFFFFFF" Height="26" Template="{DynamicResource GlassButtonRounded}">
                 <Image  Stretch="None" x:Name="image_settings3" Source="..\pictures\settings.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="RightToLeft" />
                 </Button>
-                <Label x:Name="text_aencoding" Height="Auto" Content="Audio encoding:" Foreground="#FFFFFFFF" FontSize="14" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Left" Margin="0,0,0,136.06" VerticalAlignment="Bottom"/>
-                <ComboBox x:Name="combo_aencoding" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="Auto" d:LayoutOverrides="Height" Margin="4,0,30.55,114.1" SelectionChanged="combo_aencoding_SelectionChanged" VerticalAlignment="Bottom"/>
-                <Button x:Name="button_edit_aencoding" Margin="0,0,3,112.06" Click="AudioEncodingSettings_Click" HorizontalAlignment="Right" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" VerticalAlignment="Bottom" Height="26">
+                <Label x:Name="text_aencoding" Height="Auto" Content="Audio encoding:" Foreground="#FFFFFFFF" FontSize="14" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Left" Margin="0,203.32,0,0" VerticalAlignment="Top" />
+                <ComboBox x:Name="combo_aencoding" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" Margin="4,230.94,30.55,0" SelectionChanged="combo_aencoding_SelectionChanged" VerticalAlignment="Top"/>
+                <Button x:Name="button_edit_aencoding" Margin="0,228.94,3,0" Click="AudioEncodingSettings_Click" HorizontalAlignment="Right" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" VerticalAlignment="Top" Height="26">
                 <Image  Stretch="None" x:Name="image_settings4" Source="..\pictures\settings.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="RightToLeft" />
                 </Button>
                 <ComboBox Margin="4,129.82,30.55,0" x:Name="combo_sbc" VerticalAlignment="Top" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_sbc_SelectionChanged"/>

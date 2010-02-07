@@ -14,9 +14,9 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<Image Margin="0,0,0,0" Source="..\pictures\logo_FF_LPCM.png" Stretch="None" d:LayoutOverrides="Width" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-		<Grid VerticalAlignment="Stretch" Height="62" Background="{DynamicResource black_gradient_2}" Margin="0,95,0,0" Width="312">
-			<ComboBox x:Name="combo_bits" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,19.929,8,0" Width="128" SelectionChanged="combo_bits_SelectionChanged" VerticalAlignment="Top"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_bits" Content="Bits:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,15.269,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
+		<Grid VerticalAlignment="Stretch" Height="59" Background="{DynamicResource black_gradient_2}" Margin="0,95,0,0" Width="312">
+			<ComboBox x:Name="combo_bits" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,19,8,0" Width="128" SelectionChanged="combo_bits_SelectionChanged" VerticalAlignment="Top"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_bits" Content="Bits:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,15,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
 		</Grid>
 	</Grid>
 </UserControl>

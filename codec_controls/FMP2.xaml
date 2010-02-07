@@ -13,9 +13,9 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-		<Image Margin="0,0,0,49.48" Source="..\pictures\logo_FF_MP2.png" Stretch="None" d:LayoutOverrides="Width" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-		<Grid VerticalAlignment="Stretch" Height="59.48" Background="{DynamicResource black_gradient_2}" Margin="0,95,0,0" Width="312">
-			<ComboBox HorizontalAlignment="Right" Margin="0,19.169,8,0" x:Name="combo_bitrate" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bitrate_SelectionChanged" VerticalAlignment="Top"/>
+		<Image Margin="0,0,0,0" Source="..\pictures\logo_FF_MP2.png" Stretch="None" d:LayoutOverrides="Width" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+		<Grid VerticalAlignment="Stretch" Height="59" Background="{DynamicResource black_gradient_2}" Margin="0,95,0,0" Width="312">
+			<ComboBox HorizontalAlignment="Right" Margin="0,19,8,0" x:Name="combo_bitrate" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bitrate_SelectionChanged" VerticalAlignment="Top"/>
 			<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,15,0,0" VerticalAlignment="Top"/>
 		</Grid>
 	</Grid>

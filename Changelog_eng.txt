@@ -1,5 +1,10 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r107 18.01.10, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r110 07.02.10, main changes:
 
+>>> (r110) In the x264 settings window for CRF mode label "Quantizer: (Q)" replaced by "Quality: (CRF)".
+>>> (r110) In the AAC settings window added option -2passperiod (only for 2pass mode).
+>>> (r108) Various changes in the Decoder, Demuxer, Encoder and AviSynthEncoder (error handling based on ExitCode and other).
+>>> (r108) Added 2-pass ABR mode for AAC encoding. It require a temporal WAV-file, that will be created when encoding
+           starts.
 >>> (r107) For the AVI, MKV, MP4, MOV and Custom formats added ability to specify a valid divider for the picture sides
            (mod16, mod8, etc). Video->Resolution/Aspect->Settings.
 ---

@@ -13,7 +13,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-		<Image Margin="0,0,0,0" Source="..\pictures\logo_aften.png" Stretch="None" VerticalAlignment="Top" Height="95" d:LayoutOverrides="Width" HorizontalAlignment="Center"/>
+		<Image Margin="0,0,0,0" Source="..\pictures\logo_aften.png" Stretch="None" VerticalAlignment="Top" d:LayoutOverrides="Width" HorizontalAlignment="Center"/>
 		<Grid Margin="0,95,0,0" VerticalAlignment="Stretch" Height="59" Background="{DynamicResource black_gradient_2}" Width="312">
 			<ComboBox HorizontalAlignment="Right" Margin="0,19,8,0" x:Name="combo_bitrate" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bitrate_SelectionChanged" VerticalAlignment="Top"/>
 			<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,15,0,0" VerticalAlignment="Top"/>
