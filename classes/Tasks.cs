@@ -111,7 +111,7 @@ namespace XviD4PSP
                 {
                     _info += "  " + outstream.samplerate + "Hz";
                     _info += "  " + Calculate.ExplainChannels(outstream.channels);
-                    _info += "  " + outstream.bitrate + "kbps";
+                    _info += "  " + ((outstream.bitrate > 0) ? outstream.bitrate + "kbps" : "VBR");
 
                     if (mass.volume != "Disabled")
                         _info += "  " + mass.volume;
@@ -128,8 +128,7 @@ namespace XviD4PSP
                 }
             }
 
-            if (mass.outfilesize != Languages.Translate("Unknown"))
-                _info += "  " + mass.outfilesize.Replace(" ", "");
+            _info += "  " + ((mass.outfilesize != Languages.Translate("Unknown")) ? mass.outfilesize.Replace(" ", "") : "?mb");
 
             _mass = mass.Clone();
             _id = mass.key;

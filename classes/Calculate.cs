@@ -253,6 +253,9 @@ namespace XviD4PSP
        public static string GetQualityOut(Massive m, bool FromSize)
        {
            string quality = Languages.Translate("Unknown");
+           if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).bitrate == 0)
+               return quality; //ћы не можем посчитать качество, т.к. не знаем финальный размер, потому-что звук = VBR
+           
            int pixels = m.outresw * m.outresh;
 
            //добавл€ем чЄрные пол€
@@ -526,20 +529,18 @@ namespace XviD4PSP
        public static string GetEncodingSize(Massive m)
        {
            string ssize = Languages.Translate("Unknown");
+           if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).bitrate == 0)
+               return ssize; //ћы не можем знать размер, если звук = VBR
            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                m.encodingmode == Settings.EncodingModes.ThreePassSize ||
                m.encodingmode == Settings.EncodingModes.OnePassSize)
            {
                ssize = m.outvbitrate + " mb";
            }
-           else if (m.format == Format.ExportFormats.Audio)
+           else if (m.format == Format.ExportFormats.Audio && m.outaudiostreams.Count > 0)
            {
-               double outsize = 0;
-               if (m.outaudiostreams.Count > 0)
-               {
-                   AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                   outsize += (0.125261 * (double)outstream.bitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
-               }
+               AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+               double outsize = (0.125261 * (double)outstream.bitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
                ssize = Calculate.ConvertDoubleToPointString(outsize, 1) + " mb";
            }
            else
@@ -548,8 +549,7 @@ namespace XviD4PSP
                    m.encodingmode == Settings.EncodingModes.TwoPass ||
                    m.encodingmode == Settings.EncodingModes.ThreePass)
                {
-                   double outsize;
-                   outsize = (0.1258 * (double)m.outvbitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
+                   double outsize = (0.1258 * (double)m.outvbitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
                    if (m.outaudiostreams.Count > 0)
                    {
                        AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];

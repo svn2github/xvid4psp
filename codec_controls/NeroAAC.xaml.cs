@@ -54,10 +54,6 @@ namespace XviD4PSP
 
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-            //значение по умолчанию
-            if (!combo_bitrate.Items.Contains(outstream.bitrate) || outstream.bitrate == 0)
-                outstream.bitrate = 128;
-
             if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 combo_bitrate.SelectedItem = m.aac_options.quality.ToString("0.00").Replace(",", ".");
             else combo_bitrate.SelectedItem = outstream.bitrate;
@@ -73,6 +69,7 @@ namespace XviD4PSP
             try
             {
                 combo_bitrate.Items.Clear();
+                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 {
                     double n = 0;
@@ -81,6 +78,8 @@ namespace XviD4PSP
                         combo_bitrate.Items.Add(n.ToString("0.00").Replace(",", "."));
                         n += 0.01;
                     }
+                    //Битрейт для VBR
+                    outstream.bitrate = 0;
                 }
                 else
                 {
@@ -90,6 +89,9 @@ namespace XviD4PSP
                         combo_bitrate.Items.Add(n);
                         n += 4;
                     }
+                    //Битрейт по умолчанию
+                    if (!combo_bitrate.Items.Contains(outstream.bitrate) || outstream.bitrate == 0)
+                        outstream.bitrate = 128;
                 }
             }
             catch (Exception ex)

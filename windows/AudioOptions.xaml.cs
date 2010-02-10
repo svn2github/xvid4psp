@@ -260,7 +260,7 @@ namespace XviD4PSP
                 texbox_info.AppendText("Output:" + Environment.NewLine);
                 texbox_info.AppendText("------------------" + Environment.NewLine);
                 texbox_info.AppendText("Codec: " + outstream.codec + Environment.NewLine);
-                texbox_info.AppendText("Bitrate: " + outstream.bitrate + " kbps" + Environment.NewLine);
+                texbox_info.AppendText("Bitrate: " + ((outstream.bitrate > 0) ? outstream.bitrate + " kbps" : "VBR") + Environment.NewLine);
                 texbox_info.AppendText("Channels: " + outstream.channels + " ch" + Environment.NewLine);
                 texbox_info.AppendText("Samplerate: " + outstream.samplerate + " Hz" + Environment.NewLine);
                 texbox_info.AppendText("Delay: " + outstream.delay + " ms" + Environment.NewLine);

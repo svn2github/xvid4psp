@@ -28,7 +28,8 @@ namespace XviD4PSP
             for (int n = 0; n < 16; n++) combo_precision.Items.Add(n);
 
             combo_level.ToolTip = "Set compression level:\r\n0 - fast, but bigger filesize\r\n5 - default\r\n12 - slow, but smaller filesize";
-            combo_use_lpc.ToolTip = "LPC method for determining coefficients:\r\n0 - LPC with fixed pre-defined coeffs (fast)\r\n" +                 "1 - LPC with coeffs determined by Levinson-Durbin recursion (default)\r\n2+ - LPC with coeffs determined by Cholesky factorization using (Use LPC - 1) passes (10 - veeery slow)";
+            combo_use_lpc.ToolTip = "LPC method for determining coefficients:\r\n0 - LPC with fixed pre-defined coeffs (fast)\r\n" + 
+                "1 - LPC with coeffs determined by Levinson-Durbin recursion (default)\r\n2+ - LPC with coeffs determined by Cholesky factorization using (Use LPC - 1) passes (10 - veeery slow)";
             combo_precision.ToolTip = "LPC coefficient precision (15 - default)";
 
             LoadFromProfile();
@@ -39,6 +40,10 @@ namespace XviD4PSP
             combo_level.SelectedItem = m.flac_options.level;
             combo_use_lpc.SelectedItem = m.flac_options.use_lpc;
             combo_precision.SelectedItem = m.flac_options.lpc_precision;
+
+            //Битрейт для VBR
+            AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+            outstream.bitrate = 0; 
         }
 
         public static Massive DecodeLine(Massive m)
@@ -87,7 +92,7 @@ namespace XviD4PSP
         {
             if (combo_level.IsDropDownOpen || combo_level.IsSelectionBoxHighlighted)
             {
-                m.flac_options.level = Convert.ToInt32(combo_level.SelectedItem);
+                m.flac_options.level = combo_level.SelectedIndex;
                 root_window.UpdateManualProfile();
             }
         }
@@ -96,7 +101,7 @@ namespace XviD4PSP
         {
             if (combo_use_lpc.IsDropDownOpen || combo_use_lpc.IsSelectionBoxHighlighted)
             {
-                m.flac_options.use_lpc = Convert.ToInt32(combo_use_lpc.SelectedItem);
+                m.flac_options.use_lpc = combo_use_lpc.SelectedIndex;
                 root_window.UpdateManualProfile();
             }
         }
@@ -105,7 +110,7 @@ namespace XviD4PSP
         {
             if (combo_precision.IsDropDownOpen || combo_precision.IsSelectionBoxHighlighted)
             {
-                m.flac_options.lpc_precision = Convert.ToInt32(combo_precision.SelectedItem);
+                m.flac_options.lpc_precision = combo_precision.SelectedIndex;
                 root_window.UpdateManualProfile();
             }
         }
