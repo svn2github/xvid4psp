@@ -1962,45 +1962,32 @@ namespace XviD4PSP
            string ext = m.invcodecshort.ToLower();
            string fext = Path.GetExtension(m.infilepath).ToLower();
 
-           if (m.invcodecshort == "DivX" ||
-               m.invcodecshort == "XviD")
-               ext = "avi";
-           if (m.invcodecshort == "MPEG1")
-               ext = "m1v";
-           if (m.invcodecshort == "MPEG2")
-               ext = "m2v";
-           if (m.invcodecshort == "h264")
-               ext = "h264";
-           if (m.invcodecshort == "MPEG4")
-               ext = "avi";
-           if (m.invcodecshort == "VC1")
-               ext = "vc1";
-           if (ext.Contains("vp5") || ext.Contains("vp6"))
-               ext = "flv";
-           
+           if (m.invcodecshort == "DivX" || m.invcodecshort == "XviD") ext = "avi";
+           else if (ext.Contains("vp5") || ext.Contains("vp6")) ext = "flv";
+           else if (m.invcodecshort == "MPEG1") ext = "m1v";
+           else if (m.invcodecshort == "MPEG2") ext = "m2v";
+           else if (m.invcodecshort == "h264") ext = "h264";
+           else if (m.invcodecshort == "MPEG4") ext = "avi";
+           else if (ext.Contains("vc1")) ext = "avi";
+           else if (ext.Contains("dv")) ext = "avi";
+           else if (ext.Contains("m") && ext.Contains("jp")) ext = "avi"; //M-JPEG
+           else if (ext == "huffman" || ext == "hfyu" || ext == "ffvh") ext = "avi";
+           else if (ext == "ffv1") ext = "avi";
+           else if (fext == "avi") ext = "avi";
+
            Demuxers dem = GetDemuxer(m);
            Muxers mux = GetMuxer(m);
-           if (dem == Demuxers.mp4box &&
-               ext == "avi")
-               ext = "m4v";
-           if (mux == Muxers.ffmpeg &&
-               ext == "h263")
-               ext = "flv";
+           if (dem == Demuxers.mp4box && ext == "avi") ext = "m4v";
+           if (mux == Muxers.ffmpeg && ext == "h263") ext = "flv";
 
            return ext;
        }
 
        public static string GetValidRAWAudioEXT(string codec)
        {
-           if (codec == "PCM" ||
-               codec == "LPCM")
-               return ".wav";
-           else if (codec == "AAC")
-               return ".aac";//.m4a
-           else if (codec == "TrueHD")
-               return ".ac3";
-           else
-               return "." + codec.ToLower();
+           if (codec == "PCM" || codec == "LPCM") return ".wav";
+           else if (codec == "TrueHD") return ".ac3";
+           else return "." + codec.ToLower();
        }
 
        public static string GetValidVPreset(ExportFormats format)
