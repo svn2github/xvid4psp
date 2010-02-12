@@ -1715,6 +1715,66 @@ namespace XviD4PSP
             }
         }
 
+        public static bool BatchCloneDeint
+        {
+            get
+            {
+                object value = GetValue("BatchCloneDeint");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("BatchCloneDeint", value);
+            }
+        }
+        
+        public static bool BatchCloneFPS
+        {
+            get
+            {
+                object value = GetValue("BatchCloneFPS");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("BatchCloneFPS", value);
+            }
+        }
+        
+        public static bool BatchCloneAudio
+        {
+            get
+            {
+                object value = GetValue("BatchCloneAudio");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("BatchCloneAudio", value);
+            }
+        }
+
         public static bool BatchPause
         {
             get

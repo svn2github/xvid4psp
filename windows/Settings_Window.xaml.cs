@@ -54,9 +54,18 @@ namespace XviD4PSP
             label_clone.Content = Languages.Translate("Clone from the already opened file to each other:");
             check_clone_ar.Content = Languages.Translate("Aspect/Resolution info (crop, aspect, etc)");
             check_clone_trim.Content = Languages.Translate("Trim");
+            check_clone_deint.Content = Languages.Translate("Deinterlace");
+            check_clone_fps.Content = Languages.Translate("Framerate");
+            check_clone_audio.Content = Languages.Translate("Audio options");
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
             check_use_64bit.Content = Languages.Translate("Use 64 bit x264");
             check_demux_audio.ToolTip = Languages.Translate("Leave it unchecked to avoid some problems with sound");
+            check_clone_ar.ToolTip = "Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method." +
+                "\r\nNote: Autocrop analysis will not be performed!";
+            check_clone_trim.ToolTip = "Clone: trim start and trim end";
+            check_clone_deint.ToolTip = "Clone: field order, deinterlace method.\r\nNote: Autodeinterlace analysis will not be performed!";
+            check_clone_fps.ToolTip = "Clone: output framerate";
+            check_clone_audio.ToolTip = "Clone: output samplerate, samplerate converter, channels, channels converter";
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -94,6 +103,9 @@ namespace XviD4PSP
             check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp; //помещать DGIndex-кэш в Темп-папку            
             check_clone_ar.IsChecked = Settings.BatchCloneAR; //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
             check_clone_trim.IsChecked = Settings.BatchCloneTrim; //То-же что и выше, но для обрезки
+            check_clone_deint.IsChecked = Settings.BatchCloneDeint; //А это для деинтерлейса
+            check_clone_fps.IsChecked = Settings.BatchCloneFPS; //Это для fps
+            check_clone_audio.IsChecked = Settings.BatchCloneAudio; //Ну а это для звуковых параметров
             check_batch_pause.IsChecked = Settings.BatchPause; //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
             check_use_64bit.IsChecked = Settings.Use64x264; //Использовать 64-битную версию x264.exe
 
@@ -112,11 +124,8 @@ namespace XviD4PSP
             combo_action.SelectedIndex = listview_hotkeys.SelectedIndex = 0;
             textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
             list_loaded = true;
-            
-            if (Settings.WriteLog)
-                check_logfile_tempfolder.IsEnabled = true;
-            else
-                check_logfile_tempfolder.IsEnabled = false;
+
+            check_logfile_tempfolder.IsEnabled = (Settings.WriteLog);
 
             cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;
 
@@ -422,6 +431,21 @@ namespace XviD4PSP
         private void check_clone_trim_Click(object sender, RoutedEventArgs e)
         {
             Settings.BatchCloneTrim = check_clone_trim.IsChecked.Value;
+        }
+
+        private void check_clone_deint_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.BatchCloneDeint = check_clone_deint.IsChecked.Value;
+        }
+        
+        private void check_clone_fps_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.BatchCloneFPS = check_clone_fps.IsChecked.Value;
+        }
+
+        private void check_clone_audio_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.BatchCloneAudio = check_clone_audio.IsChecked.Value;
         }
         
         private void check_batch_pause_Click(object sender, RoutedEventArgs e)

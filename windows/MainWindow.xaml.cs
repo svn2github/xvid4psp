@@ -76,15 +76,15 @@ namespace XviD4PSP
 
         private BackgroundWorker worker = null;
 
-        private string path_to_save; //Путь для конечных файлов при перекодировании папки
-        private int opened_files = 0; //Кол-во открытых файлов при открытии папки
-        private double fps = 0; //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
-        private bool OldSeeking = false; //Способ позиционирования, old - непрерывное, new - только при отпускании кнопки мыши
-        private double dpi = 1.0; //Для масштабирования окна ДиректШоу-превью
-        
-        private bool IsBatchOpening = false; //true при пакетном открытии
+        private string path_to_save;          //Путь для конечных файлов при перекодировании папки
+        private int opened_files = 0;         //Кол-во открытых файлов при открытии папки
+        private double fps = 0;               //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
+        private bool OldSeeking = false;      //Способ позиционирования, old - непрерывное, new - только при отпускании кнопки мыши
+        private double dpi = 1.0;             //Для масштабирования окна ДиректШоу-превью
+        private bool IsBatchOpening = false;  //true при пакетном открытии
         private bool PauseAfterFirst = false; //Пакетное открытие с паузой после 1-го файла
-        private string[] batch_files; //Сохраненный список файлов для пакетного открытия с паузой
+        private string[] batch_files;         //Сохраненный список файлов для пакетного открытия с паузой
+        private bool CloneIsEnabled = false;  //true, если есть открытый файл от которого можно брать параметры при пакетном открытии
 
 #if DEBUG
         private DsROTEntry rot = null;
@@ -1299,31 +1299,39 @@ namespace XviD4PSP
                     //автоматический деинтерлейс
                     if (x.format != Format.ExportFormats.Audio)
                     {
-                        if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.AllFiles &&
-                            x.outvcodec != "Copy" ||
-                            Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
-                            Calculate.IsMPEG(x.infilepath) &&
-                            x.outvcodec != "Copy" ||
-                            Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
-                            ext == ".evo" &&
-                            x.outvcodec != "Copy")
+                        //Клонируем деинтерлейс от предыдущего файла
+                        if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneDeint)
                         {
-                            if (x.inframerate == "23.976")
-                            {
-                                x.interlace = SourceType.PROGRESSIVE;
-                                x = Format.GetOutInterlace(x);
-                            }
-                            else
-                            {
-                                //перепроверяем входной интерлейс
-                                SourceDetector sd = new SourceDetector(x);
-                                if (sd.m != null)
-                                    x = sd.m.Clone();
-                            }
+                            x.fieldOrder = m.fieldOrder;
+                            x.deinterlace = m.deinterlace;
                         }
                         else
                         {
-                            x = Format.GetOutInterlace(x);
+                            if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.AllFiles &&
+                                x.outvcodec != "Copy" ||
+                                Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
+                                Calculate.IsMPEG(x.infilepath) &&
+                                x.outvcodec != "Copy" ||
+                                Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
+                                ext == ".evo" &&
+                                x.outvcodec != "Copy")
+                            {
+                                if (x.inframerate == "23.976")
+                                {
+                                    x.interlace = SourceType.PROGRESSIVE;
+                                    x = Format.GetOutInterlace(x);
+                                }
+                                else
+                                {
+                                    //перепроверяем входной интерлейс
+                                    SourceDetector sd = new SourceDetector(x);
+                                    if (sd.m != null) x = sd.m.Clone();
+                                }
+                            }
+                            else
+                            {
+                                x = Format.GetOutInterlace(x);
+                            }
                         }
                     }
 
@@ -1351,7 +1359,7 @@ namespace XviD4PSP
                     if (x.format != Format.ExportFormats.Audio)
                     {
                         //Клонируем АР от предыдущего файла
-                        if (IsBatchOpening && Settings.BatchCloneAR && m != null)
+                        if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneAR)
                         {
                             x.outresw = m.outresw;
                             x.outresh = m.outresh;
@@ -1389,12 +1397,19 @@ namespace XviD4PSP
                             x = Format.GetValidOutAspect(x);
                             x = AspectResolution.FixAspectDifference(x);
                         }
-                        x = Format.GetValidFramerate(x);
-                        x = Calculate.UpdateOutFrames(x);
-
+                        
+                        //Клонируем частоту кадров от предыдущего файла
+                        if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneFPS)
+                        {
+                            x.outframerate = m.outframerate;
+                        }
+                        else
+                        {
+                            x = Format.GetValidFramerate(x);
+                        }
+                        
                         //обновление выходных битрейтов
-                        if (x.outvcodec == "Disabled")
-                            x.outvbitrate = 0;
+                        if (x.outvcodec == "Disabled") x.outvbitrate = 0;
                     }
                     else
                     {
@@ -1421,17 +1436,15 @@ namespace XviD4PSP
                     //переполучаем параметры из профилей
                     x = PresetLoader.DecodePresets(x);
 
-                    //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
-                    x = Calculate.UpdateOutFrames(x);
-
-                    //Клонируем Трим от предыдущего файла и пересчитываем кол-во кадров и продолжительность 
-                    if (IsBatchOpening && Settings.BatchCloneTrim && m != null)
+                    //Клонируем Трим от предыдущего файла
+                    if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneTrim)
                     {                       
                         x.trim_start = m.trim_start;
                         x.trim_end = m.trim_end;
-                        x.outframes = ((x.trim_end == 0) ? x.outframes : x.trim_end) - x.trim_start;
-                        x.outduration = TimeSpan.FromSeconds((double)x.outframes / Calculate.ConvertStringToDouble(x.outframerate));
                     }
+
+                    //Пересчитываем кол-во кадров и продолжительность
+                    x = Calculate.UpdateOutFrames(x);
 
                     //создаём AviSynth скрипт
                     x = AviSynthScripting.CreateAutoAviSynthScript(x);
@@ -1689,8 +1702,17 @@ namespace XviD4PSP
             SafeDelete(Settings.TempPath + "\\AutoCrop.log");
 
             m = null;
-            ResetTrim(); //обнуляем всё что связано с тримом
+            ResetTrim();      //Обнуляем всё что связано с тримом
             MenuHider(false); //Делаем пункты меню неактивными
+
+            //Если пользователь передумал пакетно открывать файлы
+            if (PauseAfterFirst && button_encode.Content.ToString() == Languages.Translate("Resume"))
+            {
+                PauseAfterFirst = IsBatchOpening = false;
+                button_save.Content = Languages.Translate("Enqueue");
+                button_encode.Content = Languages.Translate("Encode");
+                batch_files = null;
+            }
         }
         
         private void clear_audio_and_video_caches()
@@ -4751,22 +4773,37 @@ namespace XviD4PSP
 
                 AudioStream outstream = (AudioStream)mass.outaudiostreams[mass.outaudiostream];
 
-                //забиваем аудио настройки
-                outstream.encoding = Settings.GetAEncodingPreset(Settings.FormatOut);
-                outstream.codec = PresetLoader.GetACodec(mass.format, outstream.encoding);
-                outstream.passes = PresetLoader.GetACodecPasses(mass);
+                //Клонируем звуковые параметры от предыдущего файла
+                if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneAudio && m.outaudiostreams.Count > 0)
+                {
+                    AudioStream old_outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                    outstream.encoding = old_outstream.encoding;
+                    outstream.codec = old_outstream.codec;
+                    outstream.passes = old_outstream.passes;
+                    outstream.samplerate = old_outstream.samplerate;
+                    mass.sampleratemodifer = m.sampleratemodifer;
+                    outstream.channels = old_outstream.channels;
+                    instream.channelconverter = ((AudioStream)m.inaudiostreams[m.inaudiostream]).channelconverter;
+                    outstream.bits = old_outstream.bits;
+                }
+                else
+                {
+                    //забиваем аудио настройки
+                    outstream.encoding = Settings.GetAEncodingPreset(Settings.FormatOut);
+                    outstream.codec = PresetLoader.GetACodec(mass.format, outstream.encoding);
+                    outstream.passes = PresetLoader.GetACodecPasses(mass);
+                    
+                    mass = Format.GetValidSamplerate(mass);
 
-                mass = Format.GetValidSamplerate(mass);
+                    //определяем битность
+                    mass = Format.GetValidBits(mass);
 
-                //определяем битность
-                mass = Format.GetValidBits(mass);
+                    //определяем колличество каналов
+                    mass = Format.GetValidChannelsConverter(mass);
+                    mass = Format.GetValidChannels(mass);
+                }
 
-                //определяем колличество каналов
-                mass = Format.GetValidChannelsConverter(mass);
-                mass = Format.GetValidChannels(mass);
-
-                if (outstream.codec == "Disabled")
-                    outstream.bitrate = 0;
+                if (outstream.codec == "Disabled") outstream.bitrate = 0;
 
                 //проверяем можно ли копировать данный формат
                 if (outstream.codec == "Copy")
@@ -5380,6 +5417,7 @@ namespace XviD4PSP
             {
                 opened_files = 0; //Обнуляем счетчик успешно открытых файлов
                 int count = files_to_open.Length; //Кол-во файлов для открытия
+                CloneIsEnabled = (m != null && (this.videoWindow != null || this.VideoElement.Source != null));
 
                 //Вывод первичной инфы об открытии
                 textbox_name.Text = count + " - " + Languages.Translate("total files, ") + opened_files + " - " + Languages.Translate("opened files, ") + outfiles.Count + " - " + Languages.Translate("in queue");

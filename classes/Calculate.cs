@@ -168,29 +168,39 @@ namespace XviD4PSP
 
        public static Massive UpdateOutFrames(Massive m)
        {
-           //AviSynthReader reader = new AviSynthReader();
-           //reader.ParseScript(m.script);
-
-           //if (reader.Framerate != Double.PositiveInfinity)
-           //{
-           //    m.outframes = reader.FrameCount;
-           //    m.outframerate = Calculate.ConvertDoubleToPointString(reader.Framerate);
-           //}
-
-           //reader.Close();
-
-           if (m.frameratemodifer != AviSynthScripting.FramerateModifers.AssumeFPS)
+           if (m.frameratemodifer == AviSynthScripting.FramerateModifers.AssumeFPS)
            {
-               m.outframes = (int)(Calculate.ConvertStringToDouble(m.outframerate) * (double)m.induration.TotalSeconds);
-               //подправляем duration
-               m.outduration = TimeSpan.FromSeconds((double)m.outframes / Calculate.ConvertStringToDouble(m.outframerate));
+               //AssumeFPS не меняет число кадров, но его меняют деинтерлейсеры
+               if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TDecimate)
+               {
+                   //Для деинтерлейсеров, возвращающих 23.976fps
+                   m.outframes = (int)(23.976 * (double)m.induration.TotalSeconds);
+               }
+               else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace ||
+                   m.deinterlace == DeinterlaceType.MCBob || m.deinterlace == DeinterlaceType.NNEDI)
+               {
+                   //Для деинтерлейсеров, удваивающих fps
+                   m.outframes = (int)(Calculate.ConvertStringToDouble(m.inframerate) * 2.0 * (double)m.induration.TotalSeconds);
+               }
+               else
+               {
+                   //Во всех остальных случаях
+                   m.outframes = m.inframes;
+               }
            }
            else
            {
-               m.outframes = m.inframes;
-               //подправляем duration
-               m.outduration = TimeSpan.FromSeconds((double)m.inframes / Calculate.ConvertStringToDouble(m.outframerate));
+               m.outframes = (int)(Calculate.ConvertStringToDouble(m.outframerate) * (double)m.induration.TotalSeconds);
            }
+
+           //Учитываем обрезку     
+           m.outframes = ((m.trim_end == 0 || m.trim_end > m.outframes) ? m.outframes : m.trim_end) - m.trim_start;
+
+           //С тест-скриптом тоже что-то надо делать..
+           if (m.testscript && m.outframes > 2555) m.outframes = 2555;
+
+           //Пересчитываем duration
+           m.outduration = TimeSpan.FromSeconds((double)m.outframes / Calculate.ConvertStringToDouble(m.outframerate));
 
            return m;
        }

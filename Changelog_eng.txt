@@ -1,5 +1,11 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r112 07.02.10, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r116 12.02.10, main changes:
 
+>>> (r116) Fixed UpdateOutFrames issues: trim and test-script wasn`t take into account; for deinterlacers that 
+           change the number of frames, not occurred recount number of frames if AssumeFPS - is selected in settings
+           "Framerate modifier".           
+>>> (r116) For Batch-opening added new options: clone deinterlace, clone output framerate, clone audio options.
+>>> (r115) Extension for demuxed vc1 streams was changed from VC1 to AVI (rep. by hikaru1022).
+>>> (r114) If Audio encoding mode is VBR, then output file size must be "Unknown".
 >>> (r112) Added FLAC encoder (from FFmpeg), it available for Audio and MKV formats.
 >>> (r111) Added Estonian translation (Estonian.txt by tudiludi).
 >>> (r110) In the x264 settings window for CRF mode label "Quantizer: (Q)" replaced by "Quality: (CRF)".
