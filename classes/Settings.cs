@@ -706,7 +706,7 @@ namespace XviD4PSP
             {
                 object value = GetValue("Deinterlace");
                 if (value == null)
-                    return DeinterlaceType.TomsMoComp;
+                    return DeinterlaceType.Yadif;
                 else
                     return (DeinterlaceType)Enum.Parse(typeof(DeinterlaceType), value.ToString());
             }

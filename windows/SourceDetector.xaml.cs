@@ -170,17 +170,12 @@ namespace XviD4PSP
 
                     if (stdout != "")
                     {
-                        int unknown = GetIntInfo(stdout, @"`unknown':\D(\d+)");
-                        int progressive = GetIntInfo(stdout, @"`progressive':\D(\d+)");
-                        int interlaced = GetIntInfo(stdout, @"`interlaced':\D(\d+)");
-                        int film = GetIntInfo(stdout, @"`film':\D(\d+)");
-
-                        int m0 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D0\Dframes\Dmoving");
-                        int m1 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D1\Dframes\Dmoving");
-                        int m2 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D2\Dframes\Dmoving");
-                        int m3 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D3\Dframes\Dmoving");
-                        int m4 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D4\Dframes\Dmoving");
-                        int m5 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D5\Dframes\Dmoving");
+                        //int m0 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D0\Dframes\Dmoving");
+                        //int m1 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D1\Dframes\Dmoving");
+                        //int m2 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D2\Dframes\Dmoving");
+                        //int m3 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D3\Dframes\Dmoving");
+                        //int m4 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D4\Dframes\Dmoving");
+                        //int m5 = GetIntInfo(stdout, @"(\d+)\Dsections\Dwith\D5\Dframes\Dmoving");
 
                         string type = GetStringInfo(stdout, @"determined\Dto\Dbe\D(\D+).");
                         if (type == "decimating")
@@ -195,6 +190,11 @@ namespace XviD4PSP
                             m.interlace = SourceType.HYBRID_PROGRESSIVE_INTERLACED;
                         else
                         {
+                            //int unknown = GetIntInfo(stdout, @"`unknown':\D(\d+)");
+                            int progressive = GetIntInfo(stdout, @"`progressive':\D(\d+)");
+                            int interlaced = GetIntInfo(stdout, @"`interlaced':\D(\d+)");
+                            int film = GetIntInfo(stdout, @"`film':\D(\d+)");
+                            
                             //гадание
                             if (progressive > interlaced &&
                                 progressive > film)
@@ -207,19 +207,16 @@ namespace XviD4PSP
                                 m.interlace = SourceType.FILM;
                         }
 
-                        int bff = GetIntInfo(stdout, @"`bff':\D(\d+)");
-                        int tff = GetIntInfo(stdout, @"`tff':\D(\d+)");
-                        int funknown = 0;
-                        if (stdout.Length > 56)
-                            funknown = GetIntInfo(stdout.Substring(56, stdout.Length - 56), @"`unknown':\D(\d+)");
+                        //int bff = GetIntInfo(stdout, @"`bff':\D(\d+)");
+                        //int tff = GetIntInfo(stdout, @"`tff':\D(\d+)");
+                        //int funknown = 0;
+                        //if (stdout.Length > 56)
+                        //    funknown = GetIntInfo(stdout.Substring(56, stdout.Length - 56), @"`unknown':\D(\d+)");
 
                         string field = GetStringInfo(stdout, @"Field\Dorder\Dis\D(\D+).");
-                        if (field == "variable")
-                            m.fieldOrder = FieldOrder.VARIABLE;
-                        else if (field == "tff")
-                            m.fieldOrder = FieldOrder.TFF;
-                        else if (field == "bff")
-                            m.fieldOrder = FieldOrder.BFF;
+                        if (field == "variable") m.fieldOrder = FieldOrder.VARIABLE;
+                        else if (field == "tff") m.fieldOrder = FieldOrder.TFF;
+                        else if (field == "bff") m.fieldOrder = FieldOrder.BFF;
 
                         //MessageBox.Show(stdout + Environment.NewLine + Environment.NewLine +
                         //    m.interlace.ToString() + Environment.NewLine +
@@ -343,7 +340,5 @@ namespace XviD4PSP
                 mes.ShowMessage(data, Languages.Translate("Error"));
             }
         }
-
-
 	}
 }

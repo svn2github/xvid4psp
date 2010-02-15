@@ -95,8 +95,8 @@ namespace XviD4PSP
            if (m.deinterlace == DeinterlaceType.TomsMoComp)
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TomsMoComp.dll\")" + Environment.NewLine;
 
-           if (m.deinterlace == DeinterlaceType.TIVTC ||
-               m.deinterlace == DeinterlaceType.TDecimate)
+           if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TDecimate ||
+               m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED)
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
 
            if (m.deinterlace == DeinterlaceType.TDeint)
@@ -130,11 +130,11 @@ namespace XviD4PSP
            {
                m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\mt_masktools.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\Repair.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;//
+               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
            }
 
            if (m.deinterlace == DeinterlaceType.FieldDeinterlace)
@@ -374,7 +374,8 @@ namespace XviD4PSP
            ///////////////////////
 
            //прописываем цветовое пространство
-           m.script += "AutoYV12()" + Environment.NewLine;
+           m.script += "ConvertToYV12(" + ((m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE &&
+               m.interlace != SourceType.DECIMATING) ? "interlaced = true" : "") + ")" + Environment.NewLine;
 
            //Mod protection
            string mod2 = null;
@@ -437,12 +438,7 @@ namespace XviD4PSP
                m.script += "Tweak(hue=" + m.hue + ")" + Environment.NewLine;         
                       
            //разделяем при необходимости на поля
-           if (m.interlace == SourceType.DECIMATING ||
-               m.interlace == SourceType.FILM ||
-               m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
-               m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
-               m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
-               m.interlace == SourceType.INTERLACED)
+           if (m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE && m.interlace != SourceType.DECIMATING)
            {
                if (m.deinterlace == DeinterlaceType.Disabled)
                {
@@ -451,143 +447,53 @@ namespace XviD4PSP
                }
            }
 
-           //деинтерлейсинг
+           //Деинтерлейсинг
+           int order = (m.fieldOrder == FieldOrder.TFF) ? 1 : (m.fieldOrder == FieldOrder.BFF) ? 0 : -1;
            if (m.deinterlace == DeinterlaceType.TomsMoComp)
            {
-               if (m.fieldOrder == FieldOrder.TFF ||
-                   m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "TomsMoComp(1,5,1)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "TomsMoComp(0,5,1)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.VARIABLE)
-                   m.script += "TomsMoComp(-1,5,1)" + Environment.NewLine;
+               string deinterlacer = "TomsMoComp(" + order + ", 5, 1)";
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
-
-           if (m.deinterlace == DeinterlaceType.TIVTC)
+           else if (m.deinterlace == DeinterlaceType.Yadif)
            {
-               if (m.fieldOrder == FieldOrder.TFF ||
-                   m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "TFM(order=1).TDecimate(hybrid=1)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "TFM(order=0).TDecimate(hybrid=1)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.VARIABLE)
-                   m.script += "TFM(order=-1).TDecimate(hybrid=1)" + Environment.NewLine;
+               string deinterlacer = "Yadif(order= " + order + ")";
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
-
-           if (m.deinterlace == DeinterlaceType.FieldDeinterlace)
+           else if (m.deinterlace == DeinterlaceType.YadifModEDI)
            {
-               if (m.fieldOrder == FieldOrder.TFF)
-                   m.script += "AssumeTFF().FieldDeinterlace()" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "AssumeBFF().FieldDeinterlace()" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.VARIABLE ||
-                   m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "FieldDeinterlace()" + Environment.NewLine;
+               string deinterlacer = "yadifmod(order=" + order + ", field=-1, mode=0, edeint=nnedi2())";
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
-
-           if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
+           else if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
            {
-               if (m.fieldOrder == FieldOrder.TFF ||
-                   m.fieldOrder == FieldOrder.VARIABLE ||
-                   m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "LeakKernelDeint(order=1,sharp=true)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "LeakKernelDeint(order=0,sharp=true)" + Environment.NewLine;
+               string deinterlacer = "LeakKernelDeint(order=" + Math.Abs(order) + ", sharp=true)";
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + Environment.NewLine +
+               "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
-
-           if (m.deinterlace == DeinterlaceType.TDeint)
+           else if (m.deinterlace == DeinterlaceType.FieldDeinterlace)
            {
-               if (m.fieldOrder == FieldOrder.TFF)
-                   m.script += "TDeint(order=1)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "TDeint(order=0)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.VARIABLE ||
-                   m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "TDeint()" + Environment.NewLine;
+               m.script += ((order == 1) ? "AssumeTFF()." : (order == 0) ? "AssumeBFF()." : "") + "FieldDeinterlace(" + ((m.interlace ==
+                   SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "full=false, threshold=20" : "") + ")" + Environment.NewLine;
            }
-
-           if (m.deinterlace == DeinterlaceType.TDeintEDI)
+           else if (m.deinterlace == DeinterlaceType.TDeint)
+           {
+               m.script += "TDeint(order=" + order + ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ?
+                   ", full=false, cthresh=7, MI=40" : "") + ")" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.TDeintEDI)
            {
                m.script += "edeintted = last.AssumeTFF().SeparateFields().SelectEven().EEDI2(field=-1)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.TFF)
-                   m.script += "TDeint(order=1, edeint=edeintted)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "TDeint(order=0, edeint=edeintted)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.VARIABLE ||
-                   m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "TDeint(edeint=edeintted)" + Environment.NewLine;
+               m.script += "TDeint(order=" + order + ", edeint=edeintted" + ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ?
+                   ", full=false, cthresh=7, MI=40" : "") + ")" + Environment.NewLine;
            }
-
-           if (m.deinterlace == DeinterlaceType.Yadif)
+           else if (m.deinterlace == DeinterlaceType.TIVTC)
            {
-               if (m.fieldOrder == FieldOrder.TFF ||
-                   m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "Yadif(order=1)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "Yadif(order=0)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.VARIABLE)
-                   m.script += "Yadif(order=-1)" + Environment.NewLine;
+               m.script += "TFM(order=" + order + ").TDecimate(hybrid=1)" + Environment.NewLine;
            }
-
-           if (m.deinterlace == DeinterlaceType.SmoothDeinterlace)
-           {
-               if (m.fieldOrder == FieldOrder.TFF ||
-                   m.fieldOrder == FieldOrder.VARIABLE)
-                   m.script += "SmoothDeinterlace(tff=true, doublerate=true)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "SmoothDeinterlace(tff=false, doublerate=true)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.UNKNOWN)
-                   m.script += "SmoothDeinterlace(doublerate=true)" + Environment.NewLine;
-           }
-
-           if (m.deinterlace == DeinterlaceType.MCBob)
-           {
-               m.script += "MCBobmod()" + Environment.NewLine;
-           }
-
-           if (m.deinterlace == DeinterlaceType.NNEDI)
-           {       
-               if (m.fieldOrder == FieldOrder.UNKNOWN ||
-                   m.fieldOrder == FieldOrder.VARIABLE)
-                   m.script += "nnedi2(field=-2)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "nnedi2(field=2)" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.TFF)
-                   m.script += "nnedi2(field=3)" + Environment.NewLine;
-           }
-
-           if (m.deinterlace == DeinterlaceType.YadifModEDI)
-           {
-               if (m.fieldOrder == FieldOrder.UNKNOWN ||
-                   m.fieldOrder == FieldOrder.VARIABLE)
-                   m.script += "yadifmod(order=-1, field=-1, mode=0, edeint=nnedi2())" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.BFF)
-                   m.script += "yadifmod(order=0, field=-1, mode=0, edeint=nnedi2())" + Environment.NewLine;
-
-               if (m.fieldOrder == FieldOrder.TFF)
-                   m.script += "yadifmod(order=1, field=-1, mode=0, edeint=nnedi2())" + Environment.NewLine;
-           }
-
-           if (m.deinterlace == DeinterlaceType.TDecimate)
+           else if (m.deinterlace == DeinterlaceType.TDecimate)
            {
                //SelectEven().Tdecimate()
                //TDecimate(Mode=7,Rate=23.976)
@@ -601,6 +507,18 @@ namespace XviD4PSP
                }
                else
                    m.script += "TDecimate(cycleR=1)" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace)
+           {
+               m.script += "SmoothDeinterlace(" + ((order == 1) ? "tff=true, " : (order == 0) ? "tff=false, " : "") + "doublerate=true)" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.MCBob)
+           {
+               m.script += "MCBobmod()" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.NNEDI)
+           {
+               m.script += "nnedi2(field=" + ((order == 1) ? "3" : (order == 0) ? "2" : "-2") + ")" + Environment.NewLine;
            }
 
            //фильтры из пресетов, если в настройках не выбрано "сначала ресайз, потом фильтрация"
@@ -687,18 +605,12 @@ namespace XviD4PSP
                    m.script += Environment.NewLine + LoadScript(Calculate.StartupPath + "\\presets\\filtering\\" + m.filtering + ".avs") + Environment.NewLine;
            }
            
-           
            //объединяем поля при необходимости
-                if (m.interlace == SourceType.DECIMATING ||
-                    m.interlace == SourceType.FILM ||
-                    m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
-                    m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
-                    m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
-                    m.interlace == SourceType.INTERLACED)
-                {
-                    if (m.deinterlace == DeinterlaceType.Disabled)
-                        m.script += "Weave()" + Environment.NewLine;
-                }
+           if (m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE && m.interlace != SourceType.DECIMATING)
+           {
+               if (m.deinterlace == DeinterlaceType.Disabled)
+                   m.script += "Weave()" + Environment.NewLine;
+           }
 
            //вписываем параметры для гистограммы
              if (m.levels != "Disabled")
