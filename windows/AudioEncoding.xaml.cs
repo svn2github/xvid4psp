@@ -229,18 +229,31 @@ namespace XviD4PSP
                 m.flac_options = new flac_arguments();
 
                 LoadCodecWindow();
-                if (outstream.codec == "Copy" ||
-                    outstream.codec == "Disabled")
+                if (outstream.codec == "Disabled")
                 {
                     combo_profile.SelectedItem = outstream.codec;
                     outstream.encoding = outstream.codec;
                 }
+                else if (outstream.codec == "Copy")
+                {
+                    combo_profile.SelectedItem = outstream.codec;
+                    outstream.encoding = outstream.codec;
+                    outstream.bitrate = instream.bitrate;
+                    m = Format.GetValidSamplerate(m);
+                    m = Format.GetValidBits(m);
+                    m = Format.GetValidChannelsConverter(m);
+                    m = Format.GetValidChannels(m);
+                }
                 else
+                {
+                    m = Format.GetValidSamplerate(m);
+                    m = Format.GetValidBits(m);
+                    m = Format.GetValidChannelsConverter(m);
+                    m = Format.GetValidChannels(m);
                     UpdateManualProfile();
+                }
 
                 //правим выходной битрейт
-                if (outstream.codec == "Copy")
-                    outstream.bitrate = instream.bitrate;
                 if (outstream.codec == "Disabled")
                     outstream.bitrate = 0;
 

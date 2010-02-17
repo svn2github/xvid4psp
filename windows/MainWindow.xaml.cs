@@ -1471,7 +1471,7 @@ namespace XviD4PSP
                     x.thmframe = x.outframes / 2;
 
                     //запрежаем профиль кодирования если нет звука
-                    if (x.inaudiostreams.Count == 0)
+                    if (x.inaudiostreams.Count == 0 || x.outaudiostreams.Count == 0)
                     {
                         combo_aencoding.SelectedItem = "Disabled";
                     }
@@ -2794,13 +2794,13 @@ namespace XviD4PSP
         private void SetAudioPresetFromSettings()
         {
             Format.ExportFormats format;
-            if (m == null)
-                format = Settings.FormatOut;
-            else
-                format = m.format;
+            if (m == null) format = Settings.FormatOut;
+            else format = m.format;
 
             //прописываем текущий пресет кодирования
-            if (combo_aencoding.Items.Contains(Settings.GetAEncodingPreset(format)))
+            if (m != null && m.outaudiostreams.Count == 0)
+                combo_aencoding.SelectedItem = "Disabled";
+            else if (combo_aencoding.Items.Contains(Settings.GetAEncodingPreset(format)))
                 combo_aencoding.SelectedItem = Settings.GetAEncodingPreset(format);
             else
             {
@@ -3000,15 +3000,13 @@ namespace XviD4PSP
                 if (combo_aencoding.SelectedItem != null)
                 {
                     Format.ExportFormats format;
-                    if (m == null)
-                        format = Settings.FormatOut;
-                    else
-                        format = m.format;
+                    if (m == null) format = Settings.FormatOut;
+                    else format = m.format;
 
                     if (format == Format.ExportFormats.Audio &&
                         combo_aencoding.SelectedItem.ToString() == "Disabled")
                     {
-                        combo_aencoding.SelectedItem = "MP3 CBR 128k";
+                        if (m!= null && m.inaudiostreams.Count > 0) combo_aencoding.SelectedItem = "MP3 CBR 128k";
                         return;
                     }
 
@@ -3017,11 +3015,10 @@ namespace XviD4PSP
 
                     if (m != null)
                     {
-                        if (m.outaudiostreams.Count == 0 &&
+                        if (m.inaudiostreams.Count == 0 &&
                             combo_aencoding.SelectedItem.ToString() != "Disabled")
                         {
                             combo_aencoding.SelectedItem = "Disabled";
-                            LoadVideo(MediaLoad.update);
                             return;
                         }
 
@@ -3040,10 +3037,9 @@ namespace XviD4PSP
                         //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). combo aencoding selection
                         if (Settings.RenewScript == true)
                         {
-                            // string script = m.script;
+                            string script = m.script;
                             m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                            // if (script != m.script)
-                            //     LoadVideo(MediaLoad.update);
+                            if (script != m.script) LoadVideo(MediaLoad.update);
                         }
 
                         m = PresetLoader.DecodePresets(m);
@@ -3211,7 +3207,7 @@ namespace XviD4PSP
         private void AudioEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m == null) return;
-            if (m.inaudiostreams.Count == 0 || combo_aencoding.SelectedItem.ToString() == "Disabled")
+            if (m.inaudiostreams.Count == 0 || m.outaudiostreams.Count == 0)
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
@@ -3221,9 +3217,6 @@ namespace XviD4PSP
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-
-                string oldacodec = outstream.codec;
-                string oldsrate = outstream.samplerate;
 
                 AudioEncoding enc = new AudioEncoding(m);
                 m = enc.m.Clone();
@@ -3235,38 +3228,24 @@ namespace XviD4PSP
 
                 combo_aencoding.SelectedItem = outstream.encoding;
 
-                Format.ExportFormats format;
-                if (m == null)
-                    format = Settings.FormatOut;
-                else
-                    format = m.format;
-
                 if (combo_aencoding.SelectedItem.ToString() != "Disabled")
-                    Settings.SetAEncodingPreset(format, outstream.encoding);
+                    Settings.SetAEncodingPreset(m.format, outstream.encoding);
+                else 
+                    m.outaudiostreams.Clear();
 
-                //прописываем правильную частоту
-                if (outstream.codec != "Disabled" &&
-                    outstream.codec != "Copy" &&
-                    outstream.codec != oldacodec)
-                    m = Format.GetValidSamplerate(m);
-
-                //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). audio encoding settings
-                if (Settings.RenewScript == true)
+                //Создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). audio encoding settings
+                if (Settings.RenewScript)
                 {
-                    // string old_script2 = m.script; //сохраняем 
+                    string old_script = m.script;
                     m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                    // m.script = old_script2; //восстанавливаем
+                    if (old_script != m.script) LoadVideo(MediaLoad.update);
                 }
 
                 //проверка на размер
                 //m.outfilesize = Calculate.GetEncodingSize(m);
 
-                //загружаем обновлённый скрипт
-                if (outstream.codec == "Disabled" ||
-                    oldacodec == "Disabled" ||
-                    oldsrate != outstream.samplerate)
-                    LoadVideo(MediaLoad.update);
                 UpdateTaskMassive(m);
+                ValidateTrim(m);
             }
         }
 
@@ -4774,17 +4753,26 @@ namespace XviD4PSP
                 AudioStream outstream = (AudioStream)mass.outaudiostreams[mass.outaudiostream];
 
                 //Клонируем звуковые параметры от предыдущего файла
-                if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneAudio && m.outaudiostreams.Count > 0)
+                if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneAudio)
                 {
-                    AudioStream old_outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                    outstream.encoding = old_outstream.encoding;
-                    outstream.codec = old_outstream.codec;
-                    outstream.passes = old_outstream.passes;
-                    outstream.samplerate = old_outstream.samplerate;
-                    mass.sampleratemodifer = m.sampleratemodifer;
-                    outstream.channels = old_outstream.channels;
-                    instream.channelconverter = ((AudioStream)m.inaudiostreams[m.inaudiostream]).channelconverter;
-                    outstream.bits = old_outstream.bits;
+                    if (m.outaudiostreams.Count > 0)
+                    {
+                        AudioStream old_outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                        outstream.encoding = old_outstream.encoding;
+                        outstream.codec = old_outstream.codec;
+                        outstream.passes = old_outstream.passes;
+                        outstream.samplerate = old_outstream.samplerate;
+                        mass.sampleratemodifer = m.sampleratemodifer;
+                        outstream.channels = old_outstream.channels;
+                        instream.channelconverter = ((AudioStream)m.inaudiostreams[m.inaudiostream]).channelconverter;
+                        outstream.bits = old_outstream.bits;
+                    }
+                    else
+                    {
+                        //Клонируем Audio = Disabled
+                        mass.outaudiostreams.Clear();
+                        return mass;
+                    }
                 }
                 else
                 {

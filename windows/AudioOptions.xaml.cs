@@ -200,15 +200,11 @@ namespace XviD4PSP
                 this.Height = 234;
             }
 
-            if (m.inaudiostreams.Count > 0 &&
-                m.outaudiostreams.Count > 0)
-            {
-                //прописываем в форму текущие настройки
-                SetAudioOptions();
-
-                //прописываем входную информацию
-                SetInfo();
-            }
+            //прописываем в форму текущие настройки
+            if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0) SetAudioOptions();
+            
+            //прописываем информацию
+            SetInfo();
 
             //прописываем тултипы
             SetTooltips();
@@ -233,12 +229,10 @@ namespace XviD4PSP
 
         private void SetInfo()
         {
-            if (m.inaudiostreams.Count > 0 &&
-                m.outaudiostreams.Count > 0)
+            if (m.inaudiostreams.Count > 0)
             {
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
                 //таблички
                 label_delayin.Content = Languages.Translate("Input") + ": " + instream.delay + " ms";
@@ -246,7 +240,7 @@ namespace XviD4PSP
                 label_volume.Content = Languages.Translate("Amplifying") + ": " + instream.gain + "dB";
                 label_inchannels.Content = Languages.Translate("Source") + ": " + Calculate.ExplainChannels(instream.channels);
 
-                //панель информации
+                //Параметры на вход
                 texbox_info.Clear();
                 texbox_info.AppendText("Input:" + Environment.NewLine);
                 texbox_info.AppendText("------------------" + Environment.NewLine);
@@ -257,6 +251,11 @@ namespace XviD4PSP
                 texbox_info.AppendText("Samplerate: " + instream.samplerate + " Hz" + Environment.NewLine);
                 texbox_info.AppendText("Delay: " + instream.delay + " ms" + Environment.NewLine);
                 texbox_info.AppendText(Environment.NewLine);
+
+                if (m.outaudiostreams.Count == 0) return;
+                
+                //Параметры на выход
+                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 texbox_info.AppendText("Output:" + Environment.NewLine);
                 texbox_info.AppendText("------------------" + Environment.NewLine);
                 texbox_info.AppendText("Codec: " + outstream.codec + Environment.NewLine);
