@@ -1204,29 +1204,6 @@ namespace XviD4PSP
             }
         }
 
-        //Разрешает или запрещает обновлять скрипт при изменении настроек аудио/видео кодека
-        public static bool RenewScript
-        {
-            get
-            {
-                object value = GetValue("RenewScript");
-                if (value == null)
-                {
-                    SetBool("RenewScript", false);
-                    return false;
-                }
-                else
-                {
-                    return Convert.ToBoolean(value);
-                }
-            }
-            set
-            {
-                SetBool("RenewScript", value);
-            }
-        }
-
-
         //Разрешает или запрещает удалять из текста скрипта комментарии (#)
         public static bool HideComments
         {
@@ -1249,7 +1226,6 @@ namespace XviD4PSP
             }
         }
 
-
         public static string Test
         {
             get
@@ -1269,7 +1245,6 @@ namespace XviD4PSP
                 SetString("Test", value);
             }
         }
-
 
         //Кроп/ресайз до или после фильтрации
         public static bool ResizeFirst
@@ -1292,7 +1267,6 @@ namespace XviD4PSP
                 SetBool("ResizeFirst", value);
             }
         }
-
 
         //Кол-во кадров для анализа автокропа
         public static int AutocropFrames
@@ -1359,7 +1333,6 @@ namespace XviD4PSP
                 SetBool("FFmpegSource2", value);
             }
         }
-
 
         //Перечитывать или нет параметры видео из скрипта, при сохранении задания
         public static bool ReadScript

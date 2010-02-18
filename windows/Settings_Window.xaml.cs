@@ -41,7 +41,6 @@ namespace XviD4PSP
             check_auto_colormatrix.Content = Languages.Translate("Auto apply ColorMatrix for MPEG2 files");
             label_temppath.Content = Languages.Translate("Temp folder path:");
             check_window_dim.Content = Languages.Translate("Remember last window location");
-            check_renew_script.Content = Languages.Translate("Renew script when audio/video encoding settings is changed");
             check_hide_comments.Content = Languages.Translate("Remove comments (#text) from the AviSynth script");
             check_resize_first.Content = Languages.Translate("Make crop/resize before filtering (otherwise - after filtering)");
             check_read_prmtrs.Content = Languages.Translate("Read parameters from the script when saving a new task");
@@ -96,7 +95,6 @@ namespace XviD4PSP
             check_alwaysprogressive.IsChecked = Settings.AlwaysProgressive;
             check_auto_colormatrix.IsChecked = Settings.AutoColorMatrix;
             check_window_dim.IsChecked = Settings.WindowResize;                                   //запоминать параметры окна
-            check_renew_script.IsChecked = Settings.RenewScript;                                  //обновлять скрипт
             check_hide_comments.IsChecked = Settings.HideComments;                                //удалять комментарии из скрипта
             check_resize_first.IsChecked = Settings.ResizeFirst;                                  //ресайз перед фильтрацией
             check_read_prmtrs.IsChecked = Settings.ReadScript;                                    //считывать параметры скрипта
@@ -266,12 +264,6 @@ namespace XviD4PSP
         private void check_window_pos_Click(object sender, RoutedEventArgs e)
         {
             Settings.WindowResize = check_window_dim.IsChecked.Value;
-        }
-
-        //Обработка чекбокса "обновлять скрипт"
-        private void check_renew_script_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.RenewScript = check_renew_script.IsChecked.Value;
         }
 
         //Обработка чекбокса "удалять комментарии"

@@ -3020,11 +3020,16 @@ namespace XviD4PSP
                             return;
                         }
 
+                        //Запоминаем старый кодер
+                        string old_codec = (m.outaudiostreams.Count > 0) ? 
+                            ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec : "";
+
                         //запрещаем или разрешаем звук
                         if (m.outaudiostreams.Count > 0 &&
                             combo_aencoding.SelectedItem.ToString() == "Disabled")
                         {
                             m.outaudiostreams.Clear();
+                            old_codec = ".";
                         }
                         else
                         {
@@ -3032,12 +3037,13 @@ namespace XviD4PSP
                             m = FillAudio(m);
                         }
 
-                        //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). combo aencoding selection
-                        if (Settings.RenewScript == true)
+                        //Пересоздаем скрипт при изменении кодера. combo aencoding selection
+                        if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
+                            old_codec == ".")
                         {
-                            string script = m.script;
+                            string old_script = m.script;
                             m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                            if (script != m.script) LoadVideo(MediaLoad.update);
+                            if (old_script != m.script) LoadVideo(MediaLoad.update);
                         }
 
                         m = PresetLoader.DecodePresets(m);
@@ -3072,15 +3078,12 @@ namespace XviD4PSP
                         combo_sbc.IsEnabled = false;
                         button_edit_sbc.IsEnabled = false;
 
-                        if (m != null)
-                            m.format = Format.ExportFormats.Audio;
+                        if (m != null) m.format = Format.ExportFormats.Audio;
                     }
 
                     Format.ExportFormats format;
-                    if (m == null)
-                        format = Settings.FormatOut;
-                    else
-                        format = m.format;
+                    if (m == null) format = Settings.FormatOut;
+                    else format = m.format;
 
                     Settings.SetVEncodingPreset(format, combo_vencoding.SelectedItem.ToString());
 
@@ -3088,7 +3091,6 @@ namespace XviD4PSP
                     {
                         //забиваем настройки из профиля
                         m.vencoding = combo_vencoding.SelectedItem.ToString();
-                        //m.vencoding = Settings.GetVEncodingPreset(Format.EnumToString(m.format));
 
                         if (m.vencoding != "Disabled")
                         {
@@ -3102,20 +3104,11 @@ namespace XviD4PSP
                         }
                         m = PresetLoader.DecodePresets(m);
 
-                        //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). combo vencoding selection
-                        if (Settings.RenewScript == true)
-                        {
-                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        }
-
-                        if (m.outvcodec == "Disabled")
-                            m.outvbitrate = 0;
+                        if (m.outvcodec == "Disabled") m.outvbitrate = 0;
 
                         //проверка на размер
                         m.outfilesize = Calculate.GetEncodingSize(m);
 
-                        //загружаем обновлённый скрипт
-                        //LoadVideo(MediaLoad.update);
                         UpdateTaskMassive(m);
 
                         //проверяем можно ли копировать данный формат
@@ -3131,21 +3124,6 @@ namespace XviD4PSP
                             else ValidateTrim(m);
                         }
                     }
-
-                    /*Ну тогда уж надо и скрипт обновлять, иначе толку ноль..
-                    if (combo_vencoding.SelectedItem.ToString() == "Copy")
-                    {
-                        combo_filtering.SelectedItem = "Disabled";
-                        combo_sbc.SelectedItem = "Disabled";
-
-                        if (m != null)
-                        {
-                            m.sbc = "Disabled";
-                            m.filtering = "Disabled";
-                            Settings.SBC = "Disabled";
-                            Settings.Filtering = "Disabled";
-                        }
-                    }*/
                     
                     //обновляем дочерние окна
                     ReloadChildWindows();
@@ -3175,30 +3153,10 @@ namespace XviD4PSP
 
                 Settings.SetVEncodingPreset(m.format, m.vencoding);
 
-                //создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). video encoding settings
-                if (Settings.RenewScript == true)
-                {
-                    //string old_script = m.script; //сохраняем 
-                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                    //m.script = old_script; //восстанавливаем
-                }
-
                 //проверка на размер
                 //m.outfilesize = Calculate.GetEncodingSize(m);
 
                 UpdateTaskMassive(m);
-
-                if (combo_vencoding.SelectedItem.ToString() == "Copy")
-                {
-                    combo_filtering.SelectedItem = "Disabled";
-                    combo_sbc.SelectedItem = "Disabled";
-
-                    m.sbc = "Disabled";
-                    m.filtering = "Disabled";
-
-                    Settings.SBC = "Disabled";
-                    Settings.Filtering = "Disabled";
-                }
             }
         }
 
@@ -3216,6 +3174,9 @@ namespace XviD4PSP
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
+                //Запоминаем старый кодер
+                string old_codec = outstream.codec;
+
                 AudioEncoding enc = new AudioEncoding(m);
                 m = enc.m.Clone();
                 LoadAudioPresets();
@@ -3227,12 +3188,18 @@ namespace XviD4PSP
                 combo_aencoding.SelectedItem = outstream.encoding;
 
                 if (combo_aencoding.SelectedItem.ToString() != "Disabled")
+                {
                     Settings.SetAEncodingPreset(m.format, outstream.encoding);
-                else 
+                }
+                else
+                {
                     m.outaudiostreams.Clear();
+                    old_codec = ".";
+                }
 
-                //Создаём новый AviSynth скрипт (если в настройках разрешено обновлять скрипт). audio encoding settings
-                if (Settings.RenewScript)
+                //Пересоздаем скрипт при изменении кодера. audio encoding settings
+                if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
+                    old_codec == ".")
                 {
                     string old_script = m.script;
                     m = AviSynthScripting.CreateAutoAviSynthScript(m);
