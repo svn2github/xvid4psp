@@ -59,6 +59,8 @@ namespace XviD4PSP
             check_clone_audio.Content = Languages.Translate("Audio options");
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
             check_use_64bit.Content = Languages.Translate("Use 64 bit x264");
+            check_dont_delete_caches.Content = Languages.Translate("Don`t delete any caches and temporal files");
+            
             check_demux_audio.ToolTip = Languages.Translate("Leave it unchecked to avoid some problems with sound");
             check_clone_ar.ToolTip = "Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method." +
                 "\r\nNote: Autocrop analysis will not be performed!";
@@ -66,6 +68,8 @@ namespace XviD4PSP
             check_clone_deint.ToolTip = "Clone: field order, deinterlace method.\r\nNote: Autodeinterlace analysis will not be performed!";
             check_clone_fps.ToolTip = "Clone: output framerate";
             check_clone_audio.ToolTip = "Clone: output samplerate, samplerate converter, channels, channels converter";
+            check_dont_delete_caches.ToolTip = "Enable this option ONLY if you use XviD4PSP as script creator, and then encoding it in another" + 
+                "\r\napplication. Or for experiments. In any other cases it MUST be disabled (unchecked)!";
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -91,23 +95,26 @@ namespace XviD4PSP
             check_save_anamorph.IsChecked = Settings.SaveAnamorph;
             check_alwaysprogressive.IsChecked = Settings.AlwaysProgressive;
             check_auto_colormatrix.IsChecked = Settings.AutoColorMatrix;
-            check_window_dim.IsChecked = Settings.WindowResize; //запоминать параметры окна
-            check_renew_script.IsChecked = Settings.RenewScript; //обновлять скрипт
-            check_hide_comments.IsChecked = Settings.HideComments; //удалять комментарии из скрипта
-            check_resize_first.IsChecked = Settings.ResizeFirst; //ресайз перед фильтрацией
-            check_read_prmtrs.IsChecked = Settings.ReadScript; //считывать параметры скрипта
-            check_log_to_file.IsChecked = Settings.WriteLog; //записывать лог кодирования в файл..
-            check_logfile_tempfolder.IsChecked = Settings.LogInTemp; //.. а файл поместить во временную папку
-            textbox_extensions.Text = Settings.GoodFilesExtensions; //окно со списком допустимых расширений файлов (при пакетной обработке)
-            check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding; //автозапуск кодирования (при пакетной обработке)
-            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp; //помещать DGIndex-кэш в Темп-папку            
-            check_clone_ar.IsChecked = Settings.BatchCloneAR; //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
-            check_clone_trim.IsChecked = Settings.BatchCloneTrim; //То-же что и выше, но для обрезки
-            check_clone_deint.IsChecked = Settings.BatchCloneDeint; //А это для деинтерлейса
-            check_clone_fps.IsChecked = Settings.BatchCloneFPS; //Это для fps
-            check_clone_audio.IsChecked = Settings.BatchCloneAudio; //Ну а это для звуковых параметров
-            check_batch_pause.IsChecked = Settings.BatchPause; //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
-            check_use_64bit.IsChecked = Settings.Use64x264; //Использовать 64-битную версию x264.exe
+            check_window_dim.IsChecked = Settings.WindowResize;                                   //запоминать параметры окна
+            check_renew_script.IsChecked = Settings.RenewScript;                                  //обновлять скрипт
+            check_hide_comments.IsChecked = Settings.HideComments;                                //удалять комментарии из скрипта
+            check_resize_first.IsChecked = Settings.ResizeFirst;                                  //ресайз перед фильтрацией
+            check_read_prmtrs.IsChecked = Settings.ReadScript;                                    //считывать параметры скрипта
+            check_log_to_file.IsChecked = check_logfile_tempfolder.IsEnabled = Settings.WriteLog; //записывать лог кодирования в файл..
+            check_logfile_tempfolder.IsChecked = Settings.LogInTemp;                              //.. а файл поместить во временную папку
+            textbox_extensions.Text = Settings.GoodFilesExtensions;                               //окно со списком допустимых расширений файлов (при пакетной обработке)
+            check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding;                      //автозапуск кодирования (при пакетной обработке)
+            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp;                       //помещать DGIndex-кэш в Темп-папку            
+            check_clone_ar.IsChecked = Settings.BatchCloneAR;                                     //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
+            check_clone_trim.IsChecked = Settings.BatchCloneTrim;                                 //То-же что и выше, но для обрезки
+            check_clone_deint.IsChecked = Settings.BatchCloneDeint;                               //А это для деинтерлейса
+            check_clone_fps.IsChecked = Settings.BatchCloneFPS;                                   //Это для fps
+            check_clone_audio.IsChecked = Settings.BatchCloneAudio;                               //Ну а это для звуковых параметров
+            check_batch_pause.IsChecked = Settings.BatchPause;                                    //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
+            check_use_64bit.IsChecked = Settings.Use64x264;                                       //Использовать 64-битную версию x264.exe
+            cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
+            check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled
+                 = check_delete_dgindex_cache.IsEnabled = Settings.DeleteTempFiles);              //Удалять кэши и временные файлы
 
             //Загружаем HotKeys (плюс перевод к действиям)
             foreach (string line in HotKeys.Data)
@@ -124,13 +131,7 @@ namespace XviD4PSP
             combo_action.SelectedIndex = listview_hotkeys.SelectedIndex = 0;
             textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
             list_loaded = true;
-
-            check_logfile_tempfolder.IsEnabled = (Settings.WriteLog);
-
-            cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;
-
-            SetTooltips();
-
+            
             //Чтоб открыть окно на нужной вкладке
             if (set_focus_to == 2) tab_temp.Focus();
             else if (set_focus_to == 3) tab_encoding.Focus();
@@ -180,141 +181,55 @@ namespace XviD4PSP
             Close();
         }
 
-        private void SetTooltips()
-        {
-      
-        }
-
         private void ErrorExeption(string message)
         {
             new Message(this).ShowMessage(message, Languages.Translate("Error"));
         }
 
-        private void check_demux_audio_Unchecked(object sender, RoutedEventArgs e)
+        private void check_demux_audio_Click(object sender, RoutedEventArgs e)
         {
-            if (check_demux_audio.IsFocused)
-            {
-                Settings.DontDemuxAudio = check_demux_audio.IsChecked.Value;
-            }
+            Settings.DontDemuxAudio = check_demux_audio.IsChecked.Value;
         }
 
-        private void check_demux_audio_Checked(object sender, RoutedEventArgs e)
+        private void check_show_psnr_Click(object sender, RoutedEventArgs e)
         {
-            if (check_demux_audio.IsFocused)
-            {
-                Settings.DontDemuxAudio = check_demux_audio.IsChecked.Value;
-            }
+            Settings.x264_PSNR = check_show_psnr.IsChecked.Value;
         }
 
-        private void check_show_psnr_Checked(object sender, RoutedEventArgs e)
+        private void check_show_ssim_Click(object sender, RoutedEventArgs e)
         {
-            if (check_show_psnr.IsFocused)
-            {
-                Settings.x264_PSNR = check_show_psnr.IsChecked.Value;
-            }
+            Settings.x264_SSIM = check_show_ssim.IsChecked.Value;
         }
 
-        private void check_show_psnr_Unchecked(object sender, RoutedEventArgs e)
+        private void check_show_arguments_Click(object sender, RoutedEventArgs e)
         {
-            if (check_show_psnr.IsFocused)
-            {
-                Settings.x264_PSNR = check_show_psnr.IsChecked.Value;
-            }
+            Settings.ArgumentsToLog = check_show_arguments.IsChecked.Value;
         }
 
-        private void check_show_ssim_Checked(object sender, RoutedEventArgs e)
+        private void check_show_script_Click(object sender, RoutedEventArgs e)
         {
-            if (check_show_ssim.IsFocused)
-            {
-                Settings.x264_SSIM = check_show_ssim.IsChecked.Value;
-            }
+            Settings.PrintAviSynth = check_show_script.IsChecked.Value;
         }
 
-        private void check_show_ssim_Unchecked(object sender, RoutedEventArgs e)
+        private void check_dont_delete_caches_Click(object sender, RoutedEventArgs e)
         {
-            if (check_show_ssim.IsFocused)
-            {
-                Settings.x264_SSIM = check_show_ssim.IsChecked.Value;
-            }
+            check_delete_ff_cache.IsEnabled = check_delete_dgindex_cache.IsEnabled =
+                Settings.DeleteTempFiles = !check_dont_delete_caches.IsChecked.Value;
+        }
+        
+        private void check_delete_ff_cache_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DeleteFFCache = check_delete_ff_cache.IsChecked.Value;
         }
 
-        private void check_show_arguments_Checked(object sender, RoutedEventArgs e)
+        private void check_delete_dgindex_cache_Click(object sender, RoutedEventArgs e)
         {
-            if (check_show_arguments.IsFocused)
-            {
-                Settings.ArgumentsToLog = check_show_arguments.IsChecked.Value;
-            }
+            Settings.DeleteDGIndexCache = check_delete_dgindex_cache.IsChecked.Value;
         }
 
-        private void check_show_arguments_Unchecked(object sender, RoutedEventArgs e)
+        private void check_search_temp_Click(object sender, RoutedEventArgs e)
         {
-            if (check_show_arguments.IsFocused)
-            {
-                Settings.ArgumentsToLog = check_show_arguments.IsChecked.Value;
-            }
-        }
-
-        private void check_show_script_Checked(object sender, RoutedEventArgs e)
-        {
-            if (check_show_script.IsFocused)
-            {
-                Settings.PrintAviSynth = check_show_script.IsChecked.Value;
-            }
-        }
-
-        private void check_show_script_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (check_show_script.IsFocused)
-            {
-                Settings.PrintAviSynth = check_show_script.IsChecked.Value;
-            }
-        }
-
-        private void check_delete_ff_cache_Checked(object sender, RoutedEventArgs e)
-        {
-            if (check_delete_ff_cache.IsFocused)
-            {
-                Settings.DeleteFFCache = check_delete_ff_cache.IsChecked.Value;
-            }       
-        }
-
-        private void check_delete_ff_cache_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (check_delete_ff_cache.IsFocused)
-            {
-                Settings.DeleteFFCache = check_delete_ff_cache.IsChecked.Value;
-            }    
-        }
-
-        private void check_delete_dgindex_cache_Checked(object sender, RoutedEventArgs e)
-        {
-            if (check_delete_dgindex_cache.IsFocused)
-            {
-                Settings.DeleteDGIndexCache = check_delete_dgindex_cache.IsChecked.Value;
-            }
-        }
-
-        private void check_delete_dgindex_cache_Unchecked(object sender, RoutedEventArgs e)
-        {
-            {
-                Settings.DeleteDGIndexCache = check_delete_dgindex_cache.IsChecked.Value;
-            }
-        }
-
-        private void check_search_temp_Checked(object sender, RoutedEventArgs e)
-        {
-            if (check_search_temp.IsFocused)
-            {
-                Settings.SearchTempPath = check_search_temp.IsChecked.Value;
-            }
-        }
-
-        private void check_search_temp_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (check_search_temp.IsFocused)
-            {
-                Settings.SearchTempPath = check_search_temp.IsChecked.Value;
-            }
+            Settings.SearchTempPath = check_search_temp.IsChecked.Value;
         }
 
         private void button_temppath_Click(object sender, RoutedEventArgs e)
@@ -371,7 +286,6 @@ namespace XviD4PSP
             Settings.ResizeFirst = check_resize_first.IsChecked.Value;
         }
 
-
         //Обработка чекбокса "считывать параметры при добавлении задания"
         private void check_read_prmtrs_Click(object sender, RoutedEventArgs e)
         {
@@ -381,12 +295,7 @@ namespace XviD4PSP
         //Лог кодирования в файл
         private void check_log_to_file_Click(object sender, RoutedEventArgs e)
         {
-            Settings.WriteLog = check_log_to_file.IsChecked.Value;
-
-            if (Settings.WriteLog)
-                check_logfile_tempfolder.IsEnabled = true;
-            else
-                check_logfile_tempfolder.IsEnabled = false;
+            check_logfile_tempfolder.IsEnabled = Settings.WriteLog = check_log_to_file.IsChecked.Value;
         }
 
         //Файл с логом кодирования во временную папку

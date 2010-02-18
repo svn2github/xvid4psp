@@ -1934,5 +1934,25 @@ namespace XviD4PSP
                 SetInt("LimitModH", value);
             }
         }
+
+        public static bool DeleteTempFiles
+        {
+            get
+            {
+                object value = GetValue("DeleteTempFiles");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("DeleteTempFiles", value);
+            }
+        }
     }
 }

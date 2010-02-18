@@ -494,38 +494,32 @@ namespace XviD4PSP
                 CloseFile();
             }
 
-            //удаляем мусор
-            foreach (string dfile in deletefiles)
+            if (Settings.DeleteTempFiles)
             {
-                if (!dfile.Contains("cache"))
-                    SafeDelete(dfile);
-            }
-
-            //подчищаем мусор за FFmpegSource
-            if (Settings.DeleteFFCache)
-            {
-                foreach (string dfile in ffcache)
-                    SafeDelete(dfile);
-
-                //Кэш от FFmpegSource2
-                foreach (string f in Directory.GetFiles(Settings.TempPath, "*.ffindex"))
-                    SafeDelete(f);
-            }
-
-            //Удаление DGIndex-кеша
-            if (Settings.DeleteDGIndexCache)
-            {
-                foreach (string cache_path in dgcache)
+                //удаляем мусор
+                foreach (string dfile in deletefiles)
                 {
-                    SafeDirDelete(Path.GetDirectoryName(cache_path));
+                    if (!dfile.Contains("cache")) SafeDelete(dfile);
+                }
+
+                //подчищаем мусор за FFmpegSource
+                if (Settings.DeleteFFCache)
+                {
+                    foreach (string dfile in ffcache) SafeDelete(dfile);
+
+                    //Кэш от FFmpegSource2
+                    foreach (string f in Directory.GetFiles(Settings.TempPath, "*.ffindex")) SafeDelete(f);
+                }
+
+                //Удаление DGIndex-кеша
+                if (Settings.DeleteDGIndexCache)
+                {
+                    foreach (string cache_path in dgcache)
+                    {
+                        SafeDirDelete(Path.GetDirectoryName(cache_path));
+                    }
                 }
             }
-
-            //сообщения о пожертвоаниях
-            //if (Convert.ToInt32(Settings.Key) > 10 && !Settings.WasDonate)
-            //{
-            //   Donate don = new Donate(null);
-            //}
 
             //Определяем и сохраняем размер и положение окна при выходе
             if (this.WindowState != System.Windows.WindowState.Maximized && this.WindowState != System.Windows.WindowState.Minimized) //но только если окно не развернуто на весь экран и не свернуто
@@ -556,7 +550,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (Settings.DeleteFFCache)
+                if (Settings.DeleteFFCache && Settings.DeleteTempFiles)
                 {
                     ArrayList filesinwork = new ArrayList();
 
@@ -1693,9 +1687,13 @@ namespace XviD4PSP
             CloseChildWindows();
 
             CloseClip();
-            clear_ff_cache();                // - Кэш от FFmpegSource1            
-            clear_dgindex_cache();           // - Кэш от DGIndex
-            clear_audio_and_video_caches();  // - Извлеченные или декодированные аудио и видео файлы
+
+            if (Settings.DeleteTempFiles)
+            {
+                clear_ff_cache();                // - Кэш от FFmpegSource1            
+                clear_dgindex_cache();           // - Кэш от DGIndex
+                clear_audio_and_video_caches();  // - Извлеченные или декодированные аудио и видео файлы
+            }
 
             SafeDelete(Settings.TempPath + "\\preview.avs");
             SafeDelete(Settings.TempPath + "\\AvsP.avs");
