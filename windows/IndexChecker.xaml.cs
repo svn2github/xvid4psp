@@ -86,6 +86,10 @@ namespace XviD4PSP
                     reader.ParseScript(script);
                     m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
 
+                    //Закрываем ридер
+                    reader.Close();
+                    reader = null;
+
                     //проверка на устаревшую индекс папку
                     string ifopath = Calculate.GetIFO(m.infilepath);
                     if (File.Exists(ifopath))
@@ -95,8 +99,8 @@ namespace XviD4PSP
                         TimeSpan duration = vs.Duration();
                         vs.Close();
 
-                        //папка устарела
-                        if ((long)m.induration.Duration().TotalSeconds != (long)duration.TotalSeconds)
+                        //папка устарела (если разница между тем что есть, и тем что должно быть, больше 5-ти секунд)                       
+                        if (Math.Abs(m.induration.Duration().TotalSeconds - duration.TotalSeconds) > 5)
                         {
                             try
                             {
@@ -114,6 +118,11 @@ namespace XviD4PSP
                 {
                     try
                     {
+                        if (reader != null)
+                        {
+                            reader.Close();
+                            reader = null;
+                        }
                         Directory.Delete(Path.GetDirectoryName(m.indexfile), true);
                     }
                     catch { }
@@ -163,6 +172,5 @@ namespace XviD4PSP
                 mes.ShowMessage(data, title, style);
             }
         }
-
 	}
 }
