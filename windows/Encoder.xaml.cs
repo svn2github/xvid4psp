@@ -4214,7 +4214,7 @@ namespace XviD4PSP
                             e_s += elapsed.Seconds + "sec";
 
                         //fps = 123.1234;
-                        string pr_text = (cframe) + "frame " + new_fps + "fps " + e_s; //("####0.0")   PadLeft(12, ' ');
+                        string pr_text = (cframe) + "frames " + new_fps + "fps " + e_s; //("####0.0")   PadLeft(12, ' ');
                         string title = pr.ToString("##0.00") + "% encoding to: " + busyfile;
                         SetStatus(title, pr_text, cframe, pr_t);
                     }

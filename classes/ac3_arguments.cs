@@ -4,56 +4,42 @@ using System.Text;
 
 namespace XviD4PSP
 {
-   public class ac3_arguments
+    public class ac3_arguments
     {
 
-       public ac3_arguments()
+        public ac3_arguments()
         {
         }
 
-       public ac3_arguments Clone()
+        public ac3_arguments Clone()
         {
             return (ac3_arguments)this.MemberwiseClone();
         }
 
-        private Settings.AudioEncodingModes _encodingmode = Settings.AudioEncodingModes.ABR;
-        public Settings.AudioEncodingModes encodingmode
+        private int _dnorm = 31;
+        public int dnorm
         {
             get
             {
-                return _encodingmode;
+                return _dnorm;
             }
             set
             {
-                _encodingmode = value;
+                _dnorm = value;
             }
         }
 
-        private string _aacprofile = "AAC-LC";
-        public string aacprofile
+        private int _bandwidth = -1;
+        public int bandwidth
         {
             get
             {
-                return _aacprofile;
+                return _bandwidth;
             }
             set
             {
-                _aacprofile = value;
+                _bandwidth = value;
             }
         }
-
-        private double _quality = 0.5;
-        public double quality
-        {
-            get
-            {
-                return _quality;
-            }
-            set
-            {
-                _quality = value;
-            }
-        }
-
     }
 }

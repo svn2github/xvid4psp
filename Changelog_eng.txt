@@ -1,5 +1,19 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r116 12.02.10, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r122 24.02.10, main changes:
 
+>>> (r122) In the AC3-encoder settings window added two new options: "Bandwidth" and "Dialog normalization level".
+>>> (r121) Fixed issue with re-opening some DVDs (bug since r89).
+>>> (r120) Removed option "Renew script when audio/video encoding settings is changed". For audio-settings the script will be auto 
+           re-created if audio encoder was changed (but not their settings), for video-settings.. there is no any reasons to re-create
+           script.
+>>> (r119) Added new option "Don`t delete any caches and temp files" - for those who use XviD4PSP as script creator and then encoding
+           it in another apps.
+>>> (r118) Fixed some problems with audio-presets switcher (Disable mode on\off, switching between formats when source have no
+           audio). Audio=Disabled now also can be used for Batch-opening (if "Clone audio options"- is on).
+>>> (r117) Yadif is now default deinterlacer.
+>>> (r117) "Smart" deinterlace for HYBRID_PROGRESSIVE_INTERLACED sources. If source type is HYBRID_PROGRESSIVE_INTERLACED, then 
+           only frames with visible interlace will be deinterlaced. All other frames will be untouched. It works only for deinterlacers,
+           that didn`t change framerate. On some specific videos (noisy etc) may produce bad results. Not intended for sources that
+           must be IVTC`ed.
 >>> (r116) Fixed UpdateOutFrames issues: trim and test-script wasn`t take into account; for deinterlacers that 
            change the number of frames, not occurred recount number of frames if AssumeFPS - is selected in settings
            "Framerate modifier".           
