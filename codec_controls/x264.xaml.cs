@@ -18,7 +18,7 @@ namespace XviD4PSP
         private Settings.EncodingModes oldmode;
         private VideoEncoding root_window;
         private MainWindow p;
-        public enum CodecPresets { Default = 1, Fast, Slow, Slower, Placebo, Custom }
+        public enum CodecPresets { Custom, Ultrafast, Veryfast, Faster, Fast, Medium, Slow, Slower, Veryslow, Placebo }
         private ArrayList good_cli = null;
 
         public x264(Massive mass, VideoEncoding VideoEncWindow, MainWindow parent)
@@ -484,7 +484,7 @@ namespace XviD4PSP
             check_chroma.ToolTip = "Chroma motion estimation (--no-chroma-me if not checked)";
             combo_bframes.ToolTip = "Number of B-frames between I and P (--bframes, default: 3)";
             combo_bframe_mode.ToolTip = "B-frame mode (--direct, default: Spatial)";
-            combo_bpyramid_mode.ToolTip = "Keep some B-frames as references. \r\n -none: disabled \r\n -strict: strictly hierarchical pyramid (Blu-ray compatible)\r\n -normal: non-strict (not Blu-ray compatible) \r\n(--b-pyramid value, default: --b-pyramid none)";
+            combo_bpyramid_mode.ToolTip = "Keep some B-frames as references. \r\nNone: disabled \r\nStrict: strictly hierarchical pyramid (Blu-ray compatible)\r\nNormal: non-strict (not Blu-ray compatible) \r\n(--b-pyramid value, default: --b-pyramid normal)";
             check_weightedb.ToolTip = "Weighted prediction for B-frames (--no-weightb if not checked)";
             combo_weightp_mode.ToolTip = "Weighted prediction for P-frames (--weightp value, default: Smart)";
             combo_trellis.ToolTip = "Trellis RD quantization. Requires CABAC." + Environment.NewLine +
@@ -503,20 +503,20 @@ namespace XviD4PSP
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
-                combo_codec_preset.ToolTip = "Default - restore default settings" + Environment.NewLine +
-                    "Fast - fast encoding, big output file size" + Environment.NewLine +
-                    "Slow - good quality encoding, medium file size" + Environment.NewLine +
-                    "Slower - high quality encoding, small file size" + Environment.NewLine +
+                combo_codec_preset.ToolTip = "Set encoding preset:" + Environment.NewLine +
+                    "Ultrafast - fastest encoding, but biggest output file size" + Environment.NewLine +
+                    "Medium - default, good speed and medium file size" + Environment.NewLine +
+                    "Veryslow - high quality encoding, small file size" + Environment.NewLine +
                     "Placebo - super high quality encoding, smallest file size" + Environment.NewLine +
                     "Custom - custom codec settings";
             }
             else
             {
-                combo_codec_preset.ToolTip = "Default - restore default settings" + Environment.NewLine +
-                    "Fast - fast encoding, bad quality" + Environment.NewLine +
-                    "Slow - good quality encoding, optimal speed-quality solution" + Environment.NewLine +
-                    "Slower - high quality encoding" + Environment.NewLine +
-                    "Placebo - high quality encoding, very slow" + Environment.NewLine +
+                combo_codec_preset.ToolTip = "Set encoding preset:" + Environment.NewLine +
+                    "Ultrafast - fastest encoding, bad quality" + Environment.NewLine +
+                    "Medium - default, optimal speed-quality solution" + Environment.NewLine +
+                    "Veryslow - high quality encoding" + Environment.NewLine +
+                    "Placebo - super high quality encoding" + Environment.NewLine +
                     "Custom - custom codec settings";
             }
             combo_badapt_mode.ToolTip = "Adaptive B-frame decision method (--b-adapt, default: Fast)";
@@ -663,10 +663,10 @@ namespace XviD4PSP
 
                 else if (value == "--b-pyramid")
                 {
-                    if ((cli[n + 1]) == "strict")
+                    if ((cli[n + 1]) == "none" || (cli[n + 1]) == "0")
+                        m.x264options.bpyramid = 0;
+                    else if ((cli[n + 1]) == "strict" || (cli[n + 1]) == "1")
                         m.x264options.bpyramid = 1;
-                    else if ((cli[n + 1]) == "normal")
-                        m.x264options.bpyramid = 2;
                 }
 
                 else if (value == "--no-weightb")
@@ -808,12 +808,12 @@ namespace XviD4PSP
             if (m.x264options.b_adapt != 1)
                 line += " --b-adapt " + m.x264options.b_adapt;
 
-            if (m.x264options.bpyramid != 0)
+            if (m.x264options.bpyramid != 2)
             {
                 if (m.x264options.bpyramid == 1)
                     line += " --b-pyramid strict";
                 else
-                    line += " --b-pyramid normal";
+                    line += " --b-pyramid none";
             }
 
             if (m.x264options.weightb == false)
@@ -1416,12 +1416,10 @@ namespace XviD4PSP
                     combo_bframes.SelectedItem = 0;
                     m.x264options.trellis = 0;
                     combo_trellis.SelectedItem = "Disabled";
-                    //check_adaptb.IsChecked = false;
-                    //m.x264options.badapt = false;
                     combo_badapt_mode.SelectedValue = "Disabled";
                     m.x264options.b_adapt = 0;
-                    combo_bpyramid_mode.SelectedIndex = 0;
-                    m.x264options.bpyramid = 0;
+                    combo_bpyramid_mode.SelectedIndex = 2;
+                    m.x264options.bpyramid = 2;
                     check_weightedb.IsChecked = false;
                     m.x264options.weightb = false;
                     combo_weightp_mode.SelectedIndex = 0;
@@ -1434,7 +1432,6 @@ namespace XviD4PSP
                     check_i4x4.IsChecked = false;
                     m.x264options.analyse = GetMackroblocks();
                 }
-
                 else if (avcprofile == "Main Profile")
                 {
                     m.x264options.cabac = true;
@@ -1473,7 +1470,6 @@ namespace XviD4PSP
                     check_i4x4.IsChecked = false;
                     m.x264options.analyse = GetMackroblocks();
                 }
-
                 else if (avcprofile == "High Profile")
                 {
                     m.x264options.cabac = true;
@@ -1524,42 +1520,94 @@ namespace XviD4PSP
         {
             CodecPresets preset = CodecPresets.Custom;
 
-            //Default
+#region "Detecting"
+            //Medium 
             if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
+                    m.x264options.aqmode == "1" &&
                     m.x264options.b_adapt == 1 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == 0 &&
+                    m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
-                    m.x264options.custommatrix == null &&
                     m.x264options.dctdecimate == true &&
                     m.x264options.deblocking == true &&
-                    m.x264options.deblocks == 0 &&
-                    m.x264options.deblockt == 0 &&
                     m.x264options.direct == "spatial" &&
                     m.x264options.fastpskip == true &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.lookahead == 40 &&
                     m.x264options.me == "hex" &&
                     m.x264options.merange == 16 &&
-                    m.x264options.minquant == 10 &&
                     m.x264options.mixedrefs == true &&
+                    m.x264options.no_mbtree == false &&
                     m.x264options.reference == 3 &&
                     m.x264options.subme == 7 &&
                     m.x264options.trellis == 1 &&
                     m.x264options.weightb == true &&
                     m.x264options.weightp == 2 &&
                     m.x264options.slow_frstpass == false)
-                preset = CodecPresets.Default;
+                preset = CodecPresets.Medium;
+            
+            //Ultrafast
+            else if (m.x264options.adaptivedct == false &&
+                    m.x264options.analyse == "none" &&
+                    m.x264options.aqmode == "Disabled" &&
+                    m.x264options.b_adapt == 0 &&
+                    m.x264options.bframes == 0 &&
+                    m.x264options.cabac == false &&
+                    m.x264options.chroma == true &&
+                    m.x264options.dctdecimate == true && //
+                    m.x264options.deblocking == false &&
+                    m.x264options.direct == "none" &&
+                    m.x264options.fastpskip == true &&
+                    m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.me == "dia" &&
+                    m.x264options.merange == 16 &&
+                    m.x264options.mixedrefs == false &&
+                    m.x264options.no_mbtree == true &&
+                    m.x264options.reference == 1 &&
+                    m.x264options.subme == 1 &&
+                    m.x264options.trellis == 0 &&
+                    m.x264options.weightb == false &&
+                    m.x264options.weightp == 0 &&
+                    m.x264options.slow_frstpass == false)
+                preset = CodecPresets.Ultrafast;
 
-            //Fast
+            //Veryfast
             else if (m.x264options.adaptivedct == true &&
-                    m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
+                    m.x264options.analyse == "i8x8,i4x4" &&
+                    m.x264options.aqmode == "1" &&
                     m.x264options.b_adapt == 1 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == 0 &&
+                    m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.custommatrix == null &&
+                    m.x264options.chroma == true &&
+                    m.x264options.dctdecimate == true &&
+                    m.x264options.deblocking == true &&
+                    m.x264options.direct == "spatial" &&
+                    m.x264options.fastpskip == true &&
+                    m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.me == "dia" &&
+                    m.x264options.merange == 16 &&
+                    m.x264options.mixedrefs == false &&
+                    m.x264options.no_mbtree == true &&
+                    m.x264options.reference == 1 &&
+                    m.x264options.subme == 1 &&
+                    m.x264options.trellis == 0 &&
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 0 &&
+                    m.x264options.slow_frstpass == false)
+                preset = CodecPresets.Veryfast;
+
+            //Faster
+            else if (m.x264options.adaptivedct == true &&
+                    m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
+                    m.x264options.aqmode == "1" &&
+                    m.x264options.b_adapt == 1 &&
+                    m.x264options.bframes == 3 &&
+                    m.x264options.bpyramid == 2 &&
+                    m.x264options.cabac == true &&
+                    m.x264options.chroma == true &&
                     m.x264options.dctdecimate == true &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "spatial" &&
@@ -1568,84 +1616,150 @@ namespace XviD4PSP
                     m.x264options.me == "hex" &&
                     m.x264options.merange == 16 &&
                     m.x264options.mixedrefs == false &&
+                    m.x264options.no_mbtree == true &&
                     m.x264options.reference == 2 &&
-                    m.x264options.subme == 5 &&
+                    m.x264options.subme == 4 &&
                     m.x264options.trellis == 1 &&
                     m.x264options.weightb == true &&
-                    m.x264options.weightp == 2)
+                    m.x264options.weightp == 1 &&
+                    m.x264options.slow_frstpass == false)
+                preset = CodecPresets.Faster;
+
+            //Fast
+            else if (m.x264options.adaptivedct == true &&
+                    m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
+                    m.x264options.aqmode == "1" &&
+                    m.x264options.b_adapt == 1 &&
+                    m.x264options.bframes == 3 &&
+                    m.x264options.bpyramid == 2 &&
+                    m.x264options.cabac == true &&
+                    m.x264options.chroma == true &&
+                    m.x264options.dctdecimate == true &&
+                    m.x264options.deblocking == true &&
+                    m.x264options.direct == "spatial" &&
+                    m.x264options.fastpskip == true &&
+                    m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.lookahead == 30 &&
+                    m.x264options.me == "hex" &&
+                    m.x264options.merange == 16 &&
+                    m.x264options.mixedrefs == true &&
+                    m.x264options.no_mbtree == false &&
+                    m.x264options.reference == 2 &&
+                    m.x264options.subme == 6 &&
+                    m.x264options.trellis == 1 &&
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 2 &&
+                    m.x264options.slow_frstpass == false)
                 preset = CodecPresets.Fast;
 
             //Slow
             else if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
+                    m.x264options.aqmode == "1" &&
                     m.x264options.b_adapt == 2 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == 0 &&
+                    m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
-                    m.x264options.custommatrix == null &&
                     m.x264options.dctdecimate == true &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "auto" &&
                     m.x264options.fastpskip == true &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.lookahead == 50 &&
                     m.x264options.me == "umh" &&
                     m.x264options.merange == 16 &&
                     m.x264options.mixedrefs == true &&
+                    m.x264options.no_mbtree == false &&
                     m.x264options.reference == 5 &&
                     m.x264options.subme == 8 &&
                     m.x264options.trellis == 1 &&
                     m.x264options.weightb == true &&
-                    m.x264options.weightp == 2)
+                    m.x264options.weightp == 2 &&
+                    m.x264options.slow_frstpass == false)
                 preset = CodecPresets.Slow;
 
             //Slower
             else if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "all" &&
+                    m.x264options.aqmode == "1" &&
                     m.x264options.b_adapt == 2 &&
                     m.x264options.bframes == 3 &&
-                    m.x264options.bpyramid == 0 &&
+                    m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
-                    m.x264options.custommatrix == null &&
                     m.x264options.dctdecimate == true &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "auto" &&
                     m.x264options.fastpskip == true &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.lookahead == 60 &&
                     m.x264options.me == "umh" &&
                     m.x264options.merange == 16 &&
                     m.x264options.mixedrefs == true &&
+                    m.x264options.no_mbtree == false &&
                     m.x264options.reference == 8 &&
                     m.x264options.subme == 9 &&
                     m.x264options.trellis == 2 &&
                     m.x264options.weightb == true &&
-                    m.x264options.weightp == 2)
+                    m.x264options.weightp == 2 &&
+                    m.x264options.slow_frstpass == false)
                 preset = CodecPresets.Slower;
+
+            //Veryslow
+            else if (m.x264options.adaptivedct == true &&
+                    m.x264options.analyse == "all" &&
+                    m.x264options.aqmode == "1" &&
+                    m.x264options.b_adapt == 2 &&
+                    m.x264options.bframes == 8 &&
+                    m.x264options.bpyramid == 2 &&
+                    m.x264options.cabac == true &&
+                    m.x264options.chroma == true &&
+                    m.x264options.dctdecimate == true &&
+                    m.x264options.deblocking == true &&
+                    m.x264options.direct == "auto" &&
+                    m.x264options.fastpskip == true &&
+                    m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.lookahead == 60 &&
+                    m.x264options.me == "umh" &&
+                    m.x264options.merange == 24 &&
+                    m.x264options.mixedrefs == true &&
+                    m.x264options.no_mbtree == false &&
+                    m.x264options.reference == 16 &&
+                    m.x264options.subme == 10 &&
+                    m.x264options.trellis == 2 &&
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 2 &&
+                    m.x264options.slow_frstpass == false)
+                preset = CodecPresets.Veryslow;
 
             //Placebo
             else if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "all" &&
+                    m.x264options.aqmode == "1" &&
                     m.x264options.b_adapt == 2 &&
                     m.x264options.bframes == 16 &&
-                    m.x264options.bpyramid == 0 &&
+                    m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
                     m.x264options.chroma == true &&
-                    m.x264options.custommatrix == null &&
                     m.x264options.dctdecimate == true &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "auto" &&
                     m.x264options.fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.lookahead == 60 &&
                     m.x264options.me == "tesa" &&
                     m.x264options.merange == 24 &&
                     m.x264options.mixedrefs == true &&
+                    m.x264options.no_mbtree == false &&
                     m.x264options.reference == 16 &&
-                    m.x264options.subme == 9 &&
+                    m.x264options.subme == 10 &&
                     m.x264options.trellis == 2 &&
                     m.x264options.weightb == true &&
-                    m.x264options.weightp == 2)
+                    m.x264options.weightp == 2 &&
+                    m.x264options.slow_frstpass == true)
                 preset = CodecPresets.Placebo;
+#endregion
 
             combo_codec_preset.SelectedItem = preset.ToString();
             UpdateCLI();
@@ -1665,145 +1779,106 @@ namespace XviD4PSP
             {
                 CodecPresets preset = (CodecPresets)Enum.Parse(typeof(CodecPresets), combo_codec_preset.SelectedItem.ToString());
 
-                //ultrafast, veryfast, faster, fast, medium, slow, slower, veryslow, placebo
-                if (preset == CodecPresets.Default) //туууут
+                //Сбрасываем на дефолтные параметры
+                if (preset != CodecPresets.Custom)
                 {
-                    m.x264options.adaptivedct = true;
-                    m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
-                    m.x264options.b_adapt = 1;
-                    m.x264options.bframes = 3;
-                    m.x264options.bpyramid = 0;
-                    m.x264options.cabac = true;
-                    m.x264options.chroma = true;
-                    m.x264options.custommatrix = null;
-                    m.x264options.dctdecimate = true;
-                    m.x264options.deblocking = true;
-                    m.x264options.deblocks = 0;
-                    m.x264options.deblockt = 0;
-                    m.x264options.direct = "spatial";
-                    m.x264options.fastpskip = true;
+                    m.x264options = new x264_arguments().Clone();
                     m.x264options.level = Format.GetValidAVCLevel(m);
-                    m.x264options.me = "hex";
-                    m.x264options.merange = 16;
-                    m.x264options.minquant = 10;
-                    m.x264options.mixedrefs = true;
-                    m.x264options.reference = 3;
-                    m.x264options.subme = 7;
-                    m.x264options.trellis = 1;
-                    m.x264options.weightb = true;
-                    m.x264options.weightp = 2;
-                    m.x264options.aqmode = "1";
-                    m.x264options.aqstrength = "1.0";
-                    m.x264options.psytrellis = 0;
-                    m.x264options.psyrdo = 1;
-                    m.x264options.vbv_bufsize = 0;
-                    m.x264options.vbv_maxrate = 0;
-                    m.x264options.qcomp = 0.6m;
-                    m.x264options.qp_offset = "0";
-                    m.x264options.threads = "auto";
-                    m.x264options.slow_frstpass = false;
-
-                    SetDefaultBitrates();
                 }
-
-                else if (preset == CodecPresets.Fast)
+                
+                if (preset == CodecPresets.Ultrafast)
                 {
-                    m.x264options.adaptivedct = true;
-                    m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
-                    m.x264options.b_adapt = 1;
-                    m.x264options.bframes = 3;
+                    m.x264options.adaptivedct = false;
+                    m.x264options.analyse = "none";
+                    m.x264options.b_adapt = 0;
+                    m.x264options.bframes = 0;
                     m.x264options.bpyramid = 0;
-                    m.x264options.cabac = true;
-                    m.x264options.chroma = true;
-                    m.x264options.custommatrix = null;
-                    m.x264options.dctdecimate = true;
-                    m.x264options.deblocking = true;
-                    m.x264options.direct = "spatial";
-                    m.x264options.fastpskip = true;
-                    m.x264options.level = Format.GetValidAVCLevel(m);
-                    m.x264options.me = "hex";
-                    m.x264options.merange = 16;
+                    m.x264options.cabac = false;
+                    m.x264options.deblocking = false;
+                    m.x264options.direct = "none";
+                    m.x264options.me = "dia";
+                    m.x264options.mixedrefs = false;
+                    m.x264options.reference = 1;
+                    m.x264options.subme = 1;
+                    m.x264options.trellis = 0;
+                    m.x264options.weightb = false;
+                    m.x264options.weightp = 0;
+                    m.x264options.aqmode = "Disabled";
+                    m.x264options.psyrdo = 0;
+                    m.x264options.no_mbtree = true;
+                }
+                else if (preset == CodecPresets.Veryfast)
+                {
+                    m.x264options.analyse = "i8x8,i4x4";
+                    m.x264options.me = "dia";
+                    m.x264options.mixedrefs = false;
+                    m.x264options.reference = 1;
+                    m.x264options.subme = 1;
+                    m.x264options.trellis = 0;
+                    m.x264options.weightp = 0;
+                    m.x264options.no_mbtree = true;
+                }
+                else if (preset == CodecPresets.Faster)
+                {
                     m.x264options.mixedrefs = false;
                     m.x264options.reference = 2;
-                    m.x264options.subme = 5;
-                    m.x264options.trellis = 1;
-                    m.x264options.weightb = true;
-                    m.x264options.weightp = 2;
+                    m.x264options.subme = 4;
+                    m.x264options.weightp = 1;
+                    m.x264options.no_mbtree = true;
                 }
-
+                else if (preset == CodecPresets.Fast)
+                {
+                    m.x264options.reference = 2;
+                    m.x264options.subme = 6;
+                    m.x264options.lookahead = 30;
+                }
                 else if (preset == CodecPresets.Slow)
                 {
-                    m.x264options.adaptivedct = true;
-                    m.x264options.analyse = "p8x8,b8x8,i8x8,i4x4";
                     m.x264options.b_adapt = 2;
-                    m.x264options.bframes = 3;
-                    m.x264options.bpyramid = 0;
-                    m.x264options.cabac = true;
-                    m.x264options.chroma = true;
-                    m.x264options.custommatrix = null;
-                    m.x264options.dctdecimate = true;
-                    m.x264options.deblocking = true;
                     m.x264options.direct = "auto";
-                    m.x264options.fastpskip = true;
-                    m.x264options.level = Format.GetValidAVCLevel(m);
                     m.x264options.me = "umh";
-                    m.x264options.merange = 16;
-                    m.x264options.mixedrefs = true;
+                    m.x264options.lookahead = 50;
                     m.x264options.reference = 5;
                     m.x264options.subme = 8;
-                    m.x264options.trellis = 1;
-                    m.x264options.weightb = true;
-                    m.x264options.weightp = 2;
                 }
-
                 else if (preset == CodecPresets.Slower)
                 {
-                    m.x264options.adaptivedct = true;
-                    m.x264options.analyse = "all";
                     m.x264options.b_adapt = 2;
-                    m.x264options.bframes = 3;
-                    m.x264options.bpyramid = 0;
-                    m.x264options.cabac = true;
-                    m.x264options.chroma = true;
-                    m.x264options.custommatrix = null;
-                    m.x264options.dctdecimate = true;
-                    m.x264options.deblocking = true;
                     m.x264options.direct = "auto";
-                    m.x264options.fastpskip = true;
-                    m.x264options.level = Format.GetValidAVCLevel(m);
                     m.x264options.me = "umh";
-                    m.x264options.merange = 16;
-                    m.x264options.mixedrefs = true;
+                    m.x264options.analyse = "all";
+                    m.x264options.lookahead = 60;
                     m.x264options.reference = 8;
                     m.x264options.subme = 9;
                     m.x264options.trellis = 2;
-                    m.x264options.weightb = true;
-                    m.x264options.weightp = 2;
                 }
-
+                else if (preset == CodecPresets.Veryslow)
+                {
+                    m.x264options.b_adapt = 2;
+                    m.x264options.bframes = 8;
+                    m.x264options.direct = "auto";
+                    m.x264options.me = "umh";
+                    m.x264options.merange = 24;
+                    m.x264options.analyse = "all";
+                    m.x264options.reference = 16;
+                    m.x264options.lookahead = 60;
+                    m.x264options.subme = 10;
+                    m.x264options.trellis = 2;
+                }
                 else if (preset == CodecPresets.Placebo)
                 {
-                    m.x264options.adaptivedct = true;
-                    m.x264options.analyse = "all";
                     m.x264options.b_adapt = 2;
                     m.x264options.bframes = 16;
-                    m.x264options.bpyramid = 0;
-                    m.x264options.cabac = true;
-                    m.x264options.chroma = true;
-                    m.x264options.custommatrix = null;
-                    m.x264options.dctdecimate = true;
-                    m.x264options.deblocking = true;
                     m.x264options.direct = "auto";
                     m.x264options.fastpskip = false;
-                    m.x264options.level = Format.GetValidAVCLevel(m);
                     m.x264options.me = "tesa";
                     m.x264options.merange = 24;
-                    m.x264options.mixedrefs = true;
+                    m.x264options.analyse = "all";
                     m.x264options.reference = 16;
-                    m.x264options.subme = 9;
+                    m.x264options.lookahead = 60;
+                    m.x264options.subme = 10;
                     m.x264options.trellis = 2;
-                    m.x264options.weightb = true;
-                    m.x264options.weightp = 2;
+                    m.x264options.slow_frstpass = true;
                 }
 
                 if (preset != CodecPresets.Custom)

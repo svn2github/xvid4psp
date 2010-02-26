@@ -172,7 +172,7 @@ namespace XviD4PSP
             }
         }
 
-        private int _bpyramid = 0;
+        private int _bpyramid = 2;
         public int bpyramid
         {
             get
