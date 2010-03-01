@@ -1769,7 +1769,7 @@ namespace XviD4PSP
             info.CreateNoWindow = true;
             encodertext = null;
 
-            info.Arguments = PresetLoader.GetACodecPasses(m) + " -if \"" + outstream.nerotemp + "\" -of \"" + outstream.audiopath + "\"";
+            info.Arguments = outstream.passes + " -if \"" + outstream.nerotemp + "\" -of \"" + outstream.audiopath + "\"";
 
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
@@ -2865,7 +2865,7 @@ namespace XviD4PSP
             info.CreateNoWindow = true;
             encodertext = null;
 
-            info.Arguments = "-i \"" + m.scriptpath + "\" " + PresetLoader.GetACodecPasses(m) + " -vn \"" + outstream.audiopath + "\"";
+            info.Arguments = "-i \"" + m.scriptpath + "\" " + outstream.passes + " -vn \"" + outstream.audiopath + "\"";
 
             //прописываем аргументы команндной строки
             SetLog(" ");

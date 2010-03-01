@@ -1418,8 +1418,8 @@ namespace XviD4PSP
                     combo_trellis.SelectedItem = "Disabled";
                     combo_badapt_mode.SelectedValue = "Disabled";
                     m.x264options.b_adapt = 0;
-                    combo_bpyramid_mode.SelectedIndex = 2;
-                    m.x264options.bpyramid = 2;
+                    combo_bpyramid_mode.SelectedIndex = 0;
+                    m.x264options.bpyramid = 0;
                     check_weightedb.IsChecked = false;
                     m.x264options.weightb = false;
                     combo_weightp_mode.SelectedIndex = 0;

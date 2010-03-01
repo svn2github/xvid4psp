@@ -406,7 +406,7 @@ namespace XviD4PSP
                     if (dem.m != null) m = dem.m.Clone();
                 }
 
-                if (m.volume != "Disabled" &&
+                if ((m.volume != "Disabled" && Settings.AutoVolumeMode != Settings.AutoVolumeModes.Disabled) &&
                     !instream.gaindetected)
                 {
                     AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
@@ -459,9 +459,8 @@ namespace XviD4PSP
                     m = dem.m.Clone();
                 }
 
-                if (m.volume != "Disabled" &&
-                    !instream.gaindetected &&
-                    outacodec != "Copy")
+                if ((m.volume != "Disabled" && Settings.AutoVolumeMode != Settings.AutoVolumeModes.Disabled) &&
+                    !instream.gaindetected && outacodec != "Copy")
                     AnalyseVolume();
             }
 
@@ -572,7 +571,6 @@ namespace XviD4PSP
                     mi.Close();
                 }
 
-                
                 AudioStream newstream = new AudioStream();
                 m.outaudiostreams.Clear();
                 m.outaudiostreams.Add(newstream);

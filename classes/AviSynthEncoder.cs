@@ -199,21 +199,21 @@ namespace XviD4PSP
 
                 if (encoderPath.Contains("neroAacEnc.exe"))
                 {
-                    info.Arguments = "-ignorelength " + PresetLoader.GetACodecPasses(m) + " -if - -of \"" + outfilepath + "\"";
+                    info.Arguments = "-ignorelength " + stream.passes + " -if - -of \"" + outfilepath + "\"";
                 }
                 else if (encoderPath.Contains("lame.exe"))
                 {
                     string resample = "";
                     if (m.mp3_options.forcesamplerate)
                         resample = Calculate.ConvertDoubleToPointString(Convert.ToDouble(stream.samplerate) / 1000.0, 1);
-                    info.Arguments = PresetLoader.GetACodecPasses(m) + resample + " - \"" + outfilepath + "\"";
+                    info.Arguments = stream.passes + resample + " - \"" + outfilepath + "\"";
                     if (stream.channels == 1)
                         info.Arguments = info.Arguments.Replace(" -m s", " -m m").Replace(" -m j", " -m m").Replace(" -m f", " -m m");
                 }
                 else if (encoderPath.Contains("ffmpeg.exe"))
-                    info.Arguments = "-i - " + PresetLoader.GetACodecPasses(m) + " -vn \"" + outfilepath + "\"";
+                    info.Arguments = "-i - " + stream.passes + " -vn \"" + outfilepath + "\"";
                 else if (encoderPath.Contains("aften.exe"))
-                    info.Arguments = PresetLoader.GetACodecPasses(m) + " - \"" + outfilepath + "\"";
+                    info.Arguments = stream.passes + " - \"" + outfilepath + "\"";
 
                 //запоминаем аргументы для лога
                 args = info.Arguments;

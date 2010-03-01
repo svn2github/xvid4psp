@@ -1585,8 +1585,19 @@ namespace XviD4PSP
                         //убираем выделение из списка заданий
                         list_tasks.SelectedIndex = -1;
 
-                        //добавляем задание в список
+                        //Клонируем исходную outaudiostream чтоб потом восстановить её в массиве m, т.к. Mass.Clone() не клонирует,
+                        //а создает связанную копию - баг, но я пока-что не знаю как его убрать, зато его можно частично обойти :)
+                        AudioStream oldstream = new AudioStream();
+                        if (m.outaudiostreams.Count > 0)
+                            oldstream = ((AudioStream)m.outaudiostreams[m.outaudiostream]).Clone();
+
                         mass = UpdateOutAudioPath(mass);
+
+                        //Восстанавливаем исходную outaudiostream в массиве m
+                        if (m.outaudiostreams.Count > 0)
+                            m.outaudiostreams[m.outaudiostream] = oldstream.Clone();
+
+                        //добавляем задание в список
                         AddTask(mass, "Waiting");
                     }
                     if (PauseAfterFirst)
