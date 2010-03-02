@@ -28,10 +28,10 @@ namespace XviD4PSP
             //прогружаем colorspace
             combo_color.Items.Add("YV12");
             combo_color.Items.Add("YUY2");
-            combo_color.Items.Add("YUY444P");
-            combo_color.Items.Add("YUY411P");
-            combo_color.Items.Add("YUY410P");
             combo_color.Items.Add("RGB32");
+            combo_color.Items.Add("YUV410P");
+            combo_color.Items.Add("YUV411P");
+            combo_color.Items.Add("YUV444P");
 
             //codertype
             combo_codertype.Items.Add("VLC");
@@ -55,7 +55,9 @@ namespace XviD4PSP
         public void LoadFromProfile()
         {
             //битрейт
-            m.outvbitrate = (int)((4.19 * (double)m.outresw * (double)m.outresh * Calculate.ConvertStringToDouble(m.outframerate)) / 1000.0);
+            m.outvbitrate = 1; //(int)((4.19 * (double)m.outresw * (double)m.outresh * Calculate.ConvertStringToDouble(m.outframerate)) / 1000.0);
+            //А поскольку битрейт все-равно нельзя расчитать, то вот
+            m.encodingmode = Settings.EncodingModes.Quantizer;
 
             combo_contextmodel.SelectedItem = m.ffmpeg_options.contextmodel;
             combo_color.SelectedItem = m.ffmpeg_options.colorspace;
@@ -87,12 +89,9 @@ namespace XviD4PSP
                     //YUV420P - YV12 & I420
 
                     string color = cli[n + 1];
-                    if (color == "yuv420p")
-                        m.ffmpeg_options.colorspace = "YV12";
-                    else if (color == "yuv422p")
-                        m.ffmpeg_options.colorspace = "YUY2";
-                    else
-                        m.ffmpeg_options.colorspace = color.ToUpper();
+                    if (color == "yuv420p") m.ffmpeg_options.colorspace = "YV12";
+                    else if (color == "yuv422p") m.ffmpeg_options.colorspace = "YUY2";
+                    else m.ffmpeg_options.colorspace = color.ToUpper();
                 }
 
                 if (value == "-coder")
@@ -100,30 +99,16 @@ namespace XviD4PSP
 
                 if (value == "-context")
                 {
-                    int context = Convert.ToInt32(cli[n + 1]);
-                    if (context == 0)
+                    if (Convert.ToInt32(cli[n + 1]) == 0) 
                         m.ffmpeg_options.contextmodel = "Small";
-                    if (context != 0)
-                        m.ffmpeg_options.contextmodel = "Large";
-                }
-
-                //дешифруем флаги
-                if (value == "-flags")
-                {
-                    string flags_string = cli[n + 1];
-                    string[] separator2 = new string[] { "+" };
-                    string[] flags = flags_string.Split(separator2, StringSplitOptions.RemoveEmptyEntries);
-
-                    foreach (string flag in flags)
-                    {
-
-                    }
+                    else m.ffmpeg_options.contextmodel = "Large";
                 }
 
                 n++;
             }
 
-            m.outvbitrate = (int)((4.19 * (double)m.outresw * (double)m.outresh * Calculate.ConvertStringToDouble(m.outframerate)) / 1000.0);
+            m.outvbitrate = 1; //(int)((4.19 * (double)m.outresw * (double)m.outresh * Calculate.ConvertStringToDouble(m.outframerate)) / 1000.0);
+            m.encodingmode = Settings.EncodingModes.Quantizer;
 
             return m;
         }
@@ -135,12 +120,9 @@ namespace XviD4PSP
 
             string line = "-vcodec ffv1 -an";
 
-            if (m.ffmpeg_options.colorspace == "YV12")
-                line += " -pix_fmt yuv420p";
-            else if (m.ffmpeg_options.colorspace == "YUY2")
-                line += " -pix_fmt yuv422p";
-            else
-                line += " -pix_fmt " + m.ffmpeg_options.colorspace.ToLower();
+            if (m.ffmpeg_options.colorspace == "YV12") line += " -pix_fmt yuv420p";
+            else if (m.ffmpeg_options.colorspace == "YUY2") line += " -pix_fmt yuv422p";
+            else line += " -pix_fmt " + m.ffmpeg_options.colorspace.ToLower();
 
             if (m.ffmpeg_options.codertype != "VLC")
                 line += " -coder " + m.ffmpeg_options.codertype.ToLower();
@@ -148,15 +130,7 @@ namespace XviD4PSP
             if (m.ffmpeg_options.contextmodel == "Large")
                 line += " -context 1";
 
-            //создаём пустой массив -flags
-            string flags = " -flags ";
-
-            //передаём массив флагов
-            if (flags != " -flags ")
-                line += flags;
-
             m.vpasses.Add(line);
-
 
             return m;
         }
@@ -175,6 +149,11 @@ namespace XviD4PSP
             if (combo_color.IsDropDownOpen || combo_color.IsSelectionBoxHighlighted)
             {
                 m.ffmpeg_options.colorspace = combo_color.SelectedItem.ToString();
+
+                m.outvbitrate = 1; //(int)((4.19 * (double)m.outresw * (double)m.outresh * Calculate.ConvertStringToDouble(m.outframerate)) / 1000.0);
+                m.encodingmode = Settings.EncodingModes.Quantizer;
+
+                root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();
             }
         }
@@ -187,12 +166,5 @@ namespace XviD4PSP
                 root_window.UpdateManualProfile();
             }
         }
-
-
-
- 
-
-
-
 	}
 }

@@ -3700,6 +3700,7 @@ namespace XviD4PSP
                     SetLog("Audio file: " + outstream.audiopath);
             }
             SetLog("Muxing to: " + m.outfilepath);
+            SetLog("Please wait...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -4380,7 +4381,7 @@ namespace XviD4PSP
                             SetLog("AudioCodec: " + instream.codecshort);
 
                         if (instream.bitrate != outstream.bitrate)
-                            SetLog("AudioBitrate: " + instream.bitrate + " > " + outstream.bitrate);
+                            SetLog("AudioBitrate: " + instream.bitrate + " > " + ((outstream.bitrate == 0) ? "VBR" : outstream.bitrate.ToString()));
                         else
                             SetLog("AudioBitrate: " + instream.bitrate);
 
@@ -4446,7 +4447,7 @@ namespace XviD4PSP
                 else if (muxer == Format.Muxers.Disabled &&
                     m.format != Format.ExportFormats.Audio)
                 {
-                    SetLog((m.outvcodec == "x264") ? "VIDEO ENCODING" : "VIDEO & AUDIO ENCODING");
+                    SetLog((m.outaudiostreams.Count == 0) ? "VIDEO ENCODING" : "VIDEO & AUDIO ENCODING");
                     SetLog("------------------------------");
                 }
                 else if (m.outvcodec != "Disabled" &&

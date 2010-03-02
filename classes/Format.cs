@@ -1753,7 +1753,7 @@ namespace XviD4PSP
            AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           if (ext == ".avs") return "Source - AVS-script";
+           if (ext == ".avs" && instream.audiopath == null) return "Source - AVS-script";
            else if (m.format == ExportFormats.PmpAvc)
            {
                if (instream.codecshort != "AAC" && instream.codecshort != "MP3")
@@ -2117,7 +2117,17 @@ namespace XviD4PSP
                     m.format == ExportFormats.AviMeizuM6)
            {
                if (m.outaudiostreams.Count == 0)
-                   return Muxers.ffmpeg;
+               {
+                   if (m.outvcodec == "HUFF" ||
+                       m.outvcodec == "FFV1" ||
+                       m.outvcodec == "MJPEG" ||
+                       m.outvcodec == "MPEG4" ||
+                       m.outvcodec == "MPEG2" ||
+                       m.outvcodec == "MPEG1" ||
+                       m.outvcodec == "FLV1")
+                       return Muxers.Disabled;
+                   else return Muxers.ffmpeg;
+               }
                else
                {
                    AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
@@ -2128,7 +2138,8 @@ namespace XviD4PSP
                        m.outvcodec == "MJPEG" ||
                        m.outvcodec == "MPEG4" ||
                        m.outvcodec == "MPEG2" ||
-                       m.outvcodec == "MPEG1")
+                       m.outvcodec == "MPEG1" ||
+                       m.outvcodec == "FLV1")
                    {
                        if (outstream.codec == "PCM" || outstream.codec == "LPCM")
                            return Muxers.Disabled;
