@@ -120,7 +120,7 @@ namespace XviD4PSP
                 object value = GetValue("VolumeAccurate");
                 if (value == null)
                 {
-                    return "3%";
+                    return "10%";
                 }
                 else
                 {

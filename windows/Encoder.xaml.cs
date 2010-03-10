@@ -4750,7 +4750,6 @@ namespace XviD4PSP
                             Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
                             a.audiopath != m.infilepath) //Защита от удаления исходника
                             p.deletefiles.Add(a.audiopath);
-                        p.deletefiles.Add(a.gainfile);
                     }
 
                     foreach (object s in m.outaudiostreams)

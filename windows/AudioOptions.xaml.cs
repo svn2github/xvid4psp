@@ -89,7 +89,7 @@ namespace XviD4PSP
             label_delayout.Content = Languages.Translate("Output") + ":";
             label_outsamplerate.Content = Languages.Translate("Output") + ":";
             label_converter.Content = Languages.Translate("Converter") + ":";
-            label_accurate.Content = Languages.Translate("Accurate") + ":";
+            label_accurate.Content = Languages.Translate("Analyse") + ":";
             //label_mixing.Content = Languages.Translate("Mixing") + ":";
 
             //путь к звуковой дорожке
@@ -237,7 +237,7 @@ namespace XviD4PSP
                 //таблички
                 label_delayin.Content = Languages.Translate("Input") + ": " + instream.delay + " ms";
                 label_insamplerate.Content = Languages.Translate("Input") + ": " + instream.samplerate + " Hz";
-                label_volume.Content = Languages.Translate("Amplifying") + ": " + instream.gain + "dB";
+                label_volume.Content = Languages.Translate("Amplifying") + ": " + instream.gain + " dB";
                 label_inchannels.Content = Languages.Translate("Source") + ": " + Calculate.ExplainChannels(instream.channels);
 
                 //Параметры на вход
@@ -294,6 +294,7 @@ namespace XviD4PSP
             check_apply_delay.ToolTip = Languages.Translate("Auto apply to output");
             combo_volume.ToolTip = Languages.Translate("Normalize to this (peak) level:") + "\r\n30% = -10.5dB\r\n40% = -8dB\r\n50% = -6dB\r\n60% = -4.5dB\r\n70% = -3dB\r\n80% = -1.9dB\r\n" + 
                 "90% = -0.9dB\r\n100% = 0dB (Nominal level)\r\n150% = 3.5dB\r\n200% = 6dB\r\n250% = 8dB\r\n300% = 9.5dB\r\n350% = 11dB\r\n400% = 12dB";
+            combo_accurate.ToolTip = Languages.Translate("How many frames to analyze");
         }
 
         private void combo_atracks_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -319,7 +320,6 @@ namespace XviD4PSP
                 //перезабиваем поток на выход
                 AudioStream stream = new AudioStream();
                 m.outaudiostreams.Clear();
-                stream.gainfile = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + "_gain.wav";
                 if (Settings.ApplyDelay) stream.delay = instream.delay;
                 m.outaudiostreams.Add(stream);
 
@@ -555,7 +555,6 @@ namespace XviD4PSP
                     stream = Format.GetValidADecoder(stream);
                     //делаем трек активным
                     m.inaudiostream = m.inaudiostreams.Count;
-                    stream.gainfile = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + "_gain.wav";
                     m.inaudiostreams.Add(stream);
 
                     //прописываем в список внешний трек
@@ -639,7 +638,10 @@ namespace XviD4PSP
                 m.volume = combo_volume.SelectedItem.ToString();
                 Settings.Volume = m.volume;
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                instream.gain = "0.0";
                 instream.gaindetected = false;
+
+                SetInfo();
             }
         }
 
@@ -745,7 +747,6 @@ namespace XviD4PSP
                 Settings.VolumeAccurate = combo_accurate.SelectedItem.ToString();
                 m.volumeaccurate = combo_accurate.SelectedItem.ToString();
                 instream.gain = "0.0";
-                SafeDelete(instream.gainfile);
                 instream.gaindetected = false;
 
                 SetInfo();

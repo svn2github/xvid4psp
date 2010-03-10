@@ -121,7 +121,7 @@
 					<Label OpacityMask="{x:Null}" x:Name="label_volume" Content="Amplifying to: 0.000 dB" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,8,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Width, Height" VerticalAlignment="Top"/>
 					<ComboBox x:Name="combo_volume" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_volume_SelectionChanged" HorizontalAlignment="Right" Margin="0,11.66,34,0" VerticalAlignment="Top" d:LayoutOverrides="Height" Width="104"/>
 					<Button x:Name="button_analysevolume" Content="A" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="22" Margin="0,11.62,8,0" Click="button_analysevolume_Click" VerticalAlignment="Top" Height="22"/>
-					<Label OpacityMask="{x:Null}" x:Name="label_accurate" Content="Accurate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,36.62,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="label_accurate" Content="Analyse:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,36.62,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 					<ComboBox x:Name="combo_accurate" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,40.28,34,0" VerticalAlignment="Top" Width="104" SelectionChanged="combo_accurate_SelectionChanged"/>
 				</Grid>
 			</GroupBox>

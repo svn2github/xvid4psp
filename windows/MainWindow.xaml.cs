@@ -680,7 +680,6 @@ namespace XviD4PSP
                 MediaInfoWrapper med = new MediaInfoWrapper();
                 AudioStream s = med.GetAudioInfoFromAFile(apath);
                 s.decoder = AviSynthScripting.Decoders.WAVSource;
-                s.gainfile = Settings.TempPath + "\\" + x.key + "_" + 0 + "_gain.wav";
                 x.inaudiostreams.Add(s.Clone());
             }
 
@@ -960,7 +959,6 @@ namespace XviD4PSP
                                 MediaInfoWrapper med = new MediaInfoWrapper();
                                 AudioStream stream = med.GetAudioInfoFromAFile(apath);
                                 stream.delay = Calculate.GetDelay(apath);
-                                stream.gainfile = Settings.TempPath + "\\" + x.key + "_" + n + "_gain.wav";
                                 x.inaudiostreams.Add(stream.Clone());
                                 n++;
                             }
@@ -1748,7 +1746,6 @@ namespace XviD4PSP
                         Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
                         a.audiopath != m.infilepath) //Защита от удаления исходника
                         if (!busy) SafeDelete(a.audiopath); else deletefiles.Add(a.audiopath);
-                    if (!busy) SafeDelete(a.gainfile); else deletefiles.Add(a.gainfile);
                 }
                 if (Path.GetFileNameWithoutExtension(m.infilepath) != m.taskname && //Видео
                     Path.GetDirectoryName(m.infilepath) == Settings.TempPath)
@@ -2634,7 +2631,6 @@ namespace XviD4PSP
             foreach (object s in m.inaudiostreams)
             {
                 AudioStream stream = (AudioStream)s;
-                SafeDelete(stream.gainfile);
                 stream.gain = "0.0";
                 stream.gaindetected = false;
             }

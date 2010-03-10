@@ -191,19 +191,6 @@ namespace XviD4PSP
             }
         }
 
-        private string _gainfile;
-        public string gainfile
-        {
-            get
-            {
-                return _gainfile;
-            }
-            set
-            {
-                _gainfile = value;
-            }
-        }
-
         private string _language;
         public string language
         {

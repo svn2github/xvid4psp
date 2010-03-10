@@ -123,7 +123,6 @@ namespace XviD4PSP
                         stream.samplerate = "44100";
                         stream.bits = 16;
                         stream.channels = 2;
-                        stream.gainfile = Settings.TempPath + "\\" + m.key + "_0_gain.wav";
                         stream.language = "English";
                         m.inaudiostreams.Add(stream.Clone());
                         m.inaudiostream = 0;
@@ -143,7 +142,6 @@ namespace XviD4PSP
                             //забиваем в список все найденные треки
                             MediaInfoWrapper med = new MediaInfoWrapper();
                             stream = med.GetAudioInfoFromAFile(stream.audiopath);
-                            stream.gainfile = Settings.TempPath + "\\" + m.key + "_0_gain.wav";
                             stream.samplerate = header.samplerate.ToString();
                         }
                     }
@@ -157,7 +155,6 @@ namespace XviD4PSP
                         //stream.samplerate = media.Samplerate(snum);
                         //stream.bits = media.Bits(snum);
                         //stream.channels = media.Channels(snum);
-                        stream.gainfile = Settings.TempPath + "\\" + m.key + "_0_gain.wav";
                         stream.language = "English";
 
                         m.isvideo = false;
@@ -186,7 +183,6 @@ namespace XviD4PSP
                             stream = med.GetAudioInfoFromAFile(apath);
                             stream.audiopath = apath;
                             stream.delay = Calculate.GetDelay(apath);
-                            stream.gainfile = Settings.TempPath + "\\" + m.key + "_" + n + "_gain.wav";
                             stream = Format.GetValidADecoder(stream);
 
                             stream.mkvid = media.AudioID(n);
@@ -210,7 +206,6 @@ namespace XviD4PSP
                             stream.channels = media.Channels(snum);
                             if (m.indexfile == null)
                                 stream.delay = media.Delay(snum);
-                            stream.gainfile = Settings.TempPath + "\\" + m.key + "_" + snum + "_gain.wav";
                             stream.language = media.AudioLanguage(snum);
 
                             //вероятно звуковой файл
@@ -430,7 +425,6 @@ namespace XviD4PSP
                         stream.channels = ff.StreamChannels(snum);
                         //if (m.indexfile == null)
                         //    stream.delay = media.Delay(snum);
-                        stream.gainfile = Settings.TempPath + "\\" + m.key + "_" + snum + "_gain.wav";
                         stream.language = ff.StreamLanguage(snum);
                         stream.ffid = snum;
                         m.inaudiostreams.Add(stream.Clone());

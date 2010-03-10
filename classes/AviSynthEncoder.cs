@@ -16,7 +16,8 @@ namespace XviD4PSP
         public string encoderPath = null;
         public int frame;
         public string args = null, error_text = "";
-        public bool IsAborted = false, IsErrors = false;
+        public bool IsAborted = false, IsErrors = false, IsGainDetecting = false;
+        public double gain = 0;
 
         private Massive m;
         private string script;
@@ -43,6 +44,14 @@ namespace XviD4PSP
             this.script = m.script;
             AudioStream stream = (AudioStream)m.outaudiostreams[0];
             this.outfilepath = stream.audiopath;
+        }
+
+        //Только для определения громкости
+        public AviSynthEncoder(Massive mass, string script)
+        {
+            m = mass.Clone();
+            this.script = script;
+            IsGainDetecting = true;
         }
 
         private void readStdOut()
@@ -109,11 +118,53 @@ namespace XviD4PSP
 
                         if (encoderPath != null) createEncoderProcess();
 
-                        using (Stream target = getOutputStream())
+                        if (!IsGainDetecting)
                         {
-                            //let's write WAV Header
-                            writeHeader(target, a);
+                            //Обычное кодирование/извлечение звука
+                            using (Stream target = getOutputStream())
+                            {
+                                //let's write WAV Header
+                                writeHeader(target, a);
 
+                                GCHandle h = GCHandle.Alloc(frameBuffer, GCHandleType.Pinned);
+                                IntPtr address = h.AddrOfPinnedObject();
+                                try
+                                {
+                                    while (frameSample < a.SamplesCount)
+                                    {
+                                        locker.WaitOne();
+                                        int nHowMany = Math.Min((int)(a.SamplesCount - frameSample), MAX_SAMPLES_PER_ONCE);
+                                        a.ReadAudio(address, frameSample, nHowMany);
+
+                                        locker.WaitOne();
+                                        frame = (int)(((double)frameSample / (double)a.SamplesCount) * (double)a.num_frames);
+
+                                        target.Write(frameBuffer, 0, nHowMany * a.ChannelsCount * a.BytesPerSample);
+
+                                        target.Flush();
+                                        frameSample += nHowMany;
+                                        Thread.Sleep(0);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    if (encoderPath != null && _encoderProcess.HasExited)
+                                        throw new Exception("Abnormal encoder termination " + _encoderProcess.ExitCode.ToString());
+                                    else throw new Exception(ex.Message, ex);
+                                }
+                                finally
+                                {
+                                    h.Free();
+                                }
+
+                                if (a.BytesPerSample % 2 == 1)
+                                    target.WriteByte(0);
+                            }
+                        }
+                        else
+                        {
+                            //Определяем peak level
+                            int max = 0, e = 0, ch = a.ChannelsCount;
                             GCHandle h = GCHandle.Alloc(frameBuffer, GCHandleType.Pinned);
                             IntPtr address = h.AddrOfPinnedObject();
                             try
@@ -122,30 +173,36 @@ namespace XviD4PSP
                                 {
                                     locker.WaitOne();
                                     int nHowMany = Math.Min((int)(a.SamplesCount - frameSample), MAX_SAMPLES_PER_ONCE);
+                                    frame = (int)(((double)frameSample / (double)a.SamplesCount) * (double)a.num_frames);
                                     a.ReadAudio(address, frameSample, nHowMany);
 
                                     locker.WaitOne();
-                                    frame = (int)(((double)frameSample / (double)a.SamplesCount) * (double)a.num_frames);
+                                    int n = 0, pos = 0;
+                                    while (n < nHowMany)
+                                    {
+                                        //Ищем максимум для каждого канала
+                                        for (int i = 0; i < ch; i += 1)
+                                        {
+                                            //Это годится только для 16-ти битного звука!
+                                            e = BitConverter.ToInt16(frameBuffer, pos);
+                                            max = Math.Max(max, Math.Abs(e));
+                                            pos += 2;
+                                        }
 
-                                    target.Write(frameBuffer, 0, nHowMany * a.ChannelsCount * a.BytesPerSample);
-                                    target.Flush();
+                                        n += 1;
+                                    }
+
                                     frameSample += nHowMany;
                                     Thread.Sleep(0);
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                if (encoderPath != null && _encoderProcess.HasExited)
-                                    throw new Exception("Abnormal encoder termination " + _encoderProcess.ExitCode.ToString());
-                                else throw new Exception(ex.Message, ex);
+
+                                if (max != 0)
+                                    gain = 20.0 * Math.Log10((32767.0 * Convert.ToDouble(m.volume.Replace("%", ""))) / ((double)max * 100.0));
                             }
                             finally
                             {
                                 h.Free();
                             }
-
-                            if (a.BytesPerSample % 2 == 1)
-                                target.WriteByte(0);
                         }
                         if (encoderPath != null)
                         {
@@ -163,7 +220,8 @@ namespace XviD4PSP
                 if (!IsAborted)
                 {
                     IsErrors = true;
-                    error_text = "AviSynth Encoder Error: " + ex.Message.ToString() + ((_encoderProcess != null && _encoderProcess.HasExited &&
+                    string txt = (IsGainDetecting) ? "GainDetector Error: " : "AviSynth Encoder Error: ";
+                    error_text = txt + ex.Message.ToString() + ((_encoderProcess != null && _encoderProcess.HasExited &&
                         _encoderProcess.ExitCode != 0) ? "\r\n" + (!string.IsNullOrEmpty(_encoderStdErr) ? "\r\n" + _encoderStdErr : "") +
                         (!string.IsNullOrEmpty(_encoderStdOut) ? "\r\n" + _encoderStdOut : "") : "");
                 }

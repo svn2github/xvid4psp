@@ -146,7 +146,6 @@ namespace XviD4PSP
                             instream.bitrate = (reader.BitsPerSample * Convert.ToInt32(reader.Samplerate) * reader.Channels) / 1000; //kbps
                             instream.codec = "PCM";
                             instream.codecshort = "PCM";
-                            instream.gainfile = Settings.TempPath + "\\" + m.key + "_0_gain.wav";
                             instream.language = "English";
                             m.inaudiostreams.Add(instream.Clone());
                         }
