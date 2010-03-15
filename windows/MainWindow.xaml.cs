@@ -835,7 +835,7 @@ namespace XviD4PSP
                         //создаём новый AviSynth скрипт
                         x = AviSynthScripting.CreateAutoAviSynthScript(x);
 
-                        if (ext != ".d2v" && ext != ".dga")//AVC
+                        if (ext != ".d2v" && ext != ".dga" && ext != ".dgi")
                         {
                             //подсчитываем размер
                             long sizeb = 0;
@@ -945,8 +945,8 @@ namespace XviD4PSP
                     x.filtering = Settings.Filtering;
                     x.resizefilter = Settings.ResizeFilter;
 
-                    //Звук для d2v и dga файлов
-                    if (ext == ".d2v" || ext == ".dga")
+                    //Звук для d2v, dga и dgi файлов
+                    if (ext == ".d2v" || ext == ".dga" || ext == ".dgi")
                     {
                         x.indexfile = x.infilepath;
                         ArrayList atracks = Indexing.GetTracks(x.indexfile);
@@ -2555,8 +2555,14 @@ namespace XviD4PSP
                 string ext = Path.GetExtension(m.infilepath).ToLower();
                 if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264" && m.isvideo)
                 {
-                    m.oldindexfile = m.indexfile;
-                    m.indexfile = null;
+                    if (mpg_mpg.IsFocused)
+                        m.indexfile = m.oldindexfile;
+                    else if (m.indexfile != null)
+                    {
+                        m.oldindexfile = m.indexfile;
+                        m.indexfile = null;
+                    }
+                    
                     reopen_file();
                 }
             }

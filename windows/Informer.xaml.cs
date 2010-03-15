@@ -78,7 +78,7 @@ namespace XviD4PSP
             {
                 string ext = Path.GetExtension((m.infilepath_source != null) ? m.infilepath_source : m.infilepath).ToLower();
 
-                if (ext != ".d2v" && ext != ".avs" && ext!= ".dga")
+                if (ext != ".d2v" && ext != ".avs" && ext != ".dga" && ext != ".dgi")
                 {
                     //забиваем максимум параметров файла
                     MediaInfoWrapper media = new MediaInfoWrapper();
@@ -309,7 +309,7 @@ namespace XviD4PSP
                     Match mat1;
                     Match mat2;
                     Regex r1 = new Regex(@"Picture_Size=(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                    Regex r2 = new Regex(@"Aspect_Ratio=(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                    Regex r2 = new Regex(@"Aspect_Ratio=(\d+\.*\d*):(\d+\.*\d*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                     int result1 = 720; int result2 = 576; double result3 = 4; double result4 = 3; //Значения по-умолчанию
                     using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
                         while (!sr.EndOfStream && n < 15) //Ограничиваемся первыми 15-ю строчками
@@ -324,8 +324,8 @@ namespace XviD4PSP
                             }
                             if (mat2.Success)
                             {
-                                result3 = Convert.ToDouble(mat2.Groups[1].Value);
-                                result4 = Convert.ToDouble(mat2.Groups[2].Value);
+                                result3 = Calculate.ConvertStringToDouble(mat2.Groups[1].Value);
+                                result4 = Calculate.ConvertStringToDouble(mat2.Groups[2].Value);
                             }
                             n += 1;
                         }
@@ -338,49 +338,179 @@ namespace XviD4PSP
                 else if (ext == ".dga")
                 {
                     //Смотрим, на месте ли log-файл
-                    string path = Path.GetDirectoryName(m.infilepath).ToLower();
-                    string name = Path.GetFileNameWithoutExtension(m.infilepath).ToLower();
-                    if (!File.Exists(path + "\\" + name + ".log"))
-                    {
-                        ShowMessage(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + path + "\\" + name + ".log" + Environment.NewLine + Environment.NewLine +
-                        Languages.Translate("AR will be set as 16/9, you can change it manually later."), Languages.Translate("Error"), Message.MessageStyle.Ok);
-                        m.inaspect = 16.0 / 9.0;
-                    }
-                    else
+                    string log_file = Calculate.RemoveExtention(m.infilepath) + "log";
+                    if (File.Exists(log_file))
                     {
                         //Читаем log-файл
-                        string line = "";
-                        Match mat1;
-                        Match mat2;
+                        string text_log = "";
+                        Match mat;
                         Regex r1 = new Regex(@"Frame.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                         Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                         int result1 = 1280; int result2 = 720; double result3 = 1; double result4 = 1; //Значения по-умолчанию
-                        using (StreamReader sr = new StreamReader(path + "\\" + name + ".log", System.Text.Encoding.Default))
-                            while (!sr.EndOfStream)
-                            {
-                                line = sr.ReadLine();
-                                mat1 = r1.Match(line);
-                                mat2 = r2.Match(line);
-                                if (mat1.Success)
-                                {
-                                    result1 = Convert.ToInt32(mat1.Groups[1].Value);
-                                    result2 = Convert.ToInt32(mat1.Groups[2].Value);
-                                }
-                                if (mat2.Success)
-                                {
-                                    result3 = Convert.ToDouble(mat2.Groups[1].Value);
-                                    result4 = Convert.ToDouble(mat2.Groups[2].Value);
-                                }
-                            }
+                        using (StreamReader sr = new StreamReader(log_file, System.Text.Encoding.Default))
+                            text_log = sr.ReadToEnd();
+                        
+                        mat = r1.Match(text_log);
+                        if (mat.Success)
+                        {
+                            result1 = Convert.ToInt32(mat.Groups[1].Value);
+                            result2 = Convert.ToInt32(mat.Groups[2].Value);
+                        }
+                        mat = r2.Match(text_log);
+                        if (mat.Success)
+                        {
+                            result3 = Convert.ToDouble(mat.Groups[1].Value);
+                            result4 = Convert.ToDouble(mat.Groups[2].Value);
+                        }
+
                         m.inresw = result1;
                         m.inresh = result2;
                         m.inaspect = (result3 / result4) * ((double)m.inresw / (double)m.inresh);
                         m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
                         //можно еще определить тут фпс, но всё-равно это будет сделано позже через ависинт-скрипт (class Caching). 
+                        m.invcodecshort = "h264";
                     }
-                    m.invcodecshort = "h264";
+                    else
+                    {
+                        //Если нет log-файла, ищем исходный файл и берем инфу из него
+                        Match mat;
+                        string source_file = "";
+                        Regex r = new Regex(@"(\D:\\.*\..*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                            for (int i = 0; i < 3 && !sr.EndOfStream; i += 1)
+                            {
+                                source_file = sr.ReadLine();
+                            }
+                        mat = r.Match(source_file);
+                        if (mat.Success && File.Exists(source_file = mat.Groups[1].Value))
+                        {
+                            MediaInfoWrapper media = new MediaInfoWrapper();
+                            media.Open(source_file);
+                            m.invcodecshort = media.VCodecShort;
+                            m.inresw = media.Width;
+                            m.inresh = media.Height;
+                            m.inaspect = media.Aspect;
+                            m.pixelaspect = media.PixelAspect;
+                            media.Close();
+                        }
+                        else
+                        {
+                            ShowMessage(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + log_file + "\r\n" +
+                                Languages.Translate("And can`t determine the source-file."), Languages.Translate("Error"), Message.MessageStyle.Ok);
+                            m = null; return;
+                        }
+                    }
                 }
-                else if (m.isvideo && Settings.UseFFmpegAR) 
+                else if (ext == ".dgi")
+                {
+                    //Путь к декодеру 
+                    using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                        for (int i = 0; i < 2 && !sr.EndOfStream; i += 1)
+                        {
+                            m.dgdecnv_path = sr.ReadLine();
+                        }
+                    if (!File.Exists(m.dgdecnv_path + "DGMultiDecodeNV.dll"))
+                    {
+                        ShowMessage(Languages.Translate("Can`t find file") + ": " + m.dgdecnv_path + "DGMultiDecodeNV.dll", Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        m = null; return;
+                    }
+
+                    //Смотрим, на месте ли log-файл
+                    string log_file = Calculate.RemoveExtention(m.infilepath) + "log";
+                    if (File.Exists(log_file))
+                    {
+                        //Читаем log-файл
+                        Match mat;
+                        string text_log = "";
+                        Regex r1 = new Regex(@"Coded.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        Regex r3 = new Regex(@"Aspect.Ratio:.(\d+\.*\d*):(\d+\.*\d*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        Regex r4 = new Regex(@"Video.Type:.(.*).", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        double result1, result2;
+                        text_log = File.ReadAllText(log_file, System.Text.Encoding.Default);
+
+                        //Разрешение (Coded Size:)
+                        mat = r1.Match(text_log);
+                        if (mat.Success)
+                        {
+                            m.inresw = Convert.ToInt32(mat.Groups[1].Value);
+                            m.inresh = Convert.ToInt32(mat.Groups[2].Value);
+
+                            //Аспект (SAR:)
+                            mat = r2.Match(text_log);
+                            if (mat.Success)
+                            {
+                                result1 = Convert.ToDouble(mat.Groups[1].Value);
+                                result2 = Convert.ToDouble(mat.Groups[2].Value);
+
+                                m.inaspect = (result1 / result2) * ((double)m.inresw / (double)m.inresh);
+                                m.pixelaspect = result1 / result2;
+                            }
+                            else
+                            {
+                                //Аспект (Aspect Ratio:)
+                                mat = r3.Match(text_log);
+                                if (mat.Success)
+                                {
+                                    result1 = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
+                                    result2 = Calculate.ConvertStringToDouble(mat.Groups[2].Value);
+
+                                    m.inaspect = result1 / result2;
+                                    m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
+                                }
+                                else
+                                {
+                                    m.inaspect = (double)m.inresw / (double)m.inresh;
+                                    m.pixelaspect = 1.0;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            m.inaspect = 16.0 / 9.0;
+                            m.pixelaspect = 1.0;
+                        }
+
+                        //Кодек
+                        mat = r4.Match(text_log);
+                        if (mat.Success)
+                        {
+                            string codec = mat.Groups[1].Value;
+                            if (codec == "AVC") codec = "h264";
+                            m.invcodecshort = codec;
+                        }
+                    }
+                    else
+                    {
+                        //Если нет log-файла, ищем исходный файл и берем инфу из него
+                        string source_file = "";
+                        Regex r = new Regex(@"(\D:\\.*\..*)\s\d+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                            for (int i = 0; i < 4 && !sr.EndOfStream; i += 1)
+                            {
+                                source_file = sr.ReadLine();
+                            }
+                        Match mat = r.Match(source_file);
+                        if (mat.Success && File.Exists(source_file = mat.Groups[1].Value))
+                        {
+                            MediaInfoWrapper media = new MediaInfoWrapper();
+                            media.Open(source_file);
+                            m.invcodecshort = media.VCodecShort;
+                            m.inresw = media.Width;
+                            m.inresh = media.Height;
+                            m.inaspect = media.Aspect;
+                            m.pixelaspect = media.PixelAspect;
+                            media.Close();
+                        }
+                        else
+                        {
+                            ShowMessage(Languages.Translate("Can`t find DGIndexNV log-file:") + " " + log_file + "\r\n" +
+                                Languages.Translate("And can`t determine the source-file."), Languages.Translate("Error"), Message.MessageStyle.Ok);
+                            m = null; return;
+                        }
+                    }
+                }
+                else if (m.isvideo && Settings.UseFFmpegAR)
                 {
                     double par = ff.CalculatePAR(m.invideostream_ffid);
                     if (par != 0) m.pixelaspect = par;
@@ -508,6 +638,5 @@ namespace XviD4PSP
                 }
             }
         }
-
 	}
 }

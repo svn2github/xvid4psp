@@ -208,20 +208,6 @@ namespace XviD4PSP
             Close();
         }
 
-        public static string GetTrack(Massive mass)
-        {
-            foreach (string f in Directory.GetFiles(Path.GetDirectoryName(mass.indexfile), "*"))
-            {
-                string ext = Path.GetExtension(f);
-                if (f.Contains(Path.GetFileNameWithoutExtension(mass.indexfile)))
-                {
-                    if (ext != ".d2v" && ext != ".txt" && ext != ".bad")
-                        return f;
-                }
-            }
-            return null;
-        }
-
         public static ArrayList GetTracks(string indexfile) //звук, получение списка звуковых треков
         {
             ArrayList tracklist = new ArrayList();
@@ -242,10 +228,13 @@ namespace XviD4PSP
                         path = path.Replace(mat.Groups[1].Value, "");
                     }
                 }
-                    
+
                 if (f.Contains(path))
                 {
-                    if (ext != ".d2v" && ext != ".txt" && ext != ".bad" && ext != ".log" && ext != ".dga" && ext != ".d2a" && ext != ".m2ts" && ext != ".h264" && ext != ".264" && ext != ".avc")// AVC, .bad") добавил другие расширения
+                    if (ext == ".mpa" || ext == ".ac3" || ext == ".wav" || ext == ".mp2" || ext == ".mp3" || ext == ".dts" || ext == ".m4a" || ext == ".aac"
+                         || ext == ".flac" || ext == ".ape" || ext == ".aiff" || ext == ".aif" || ext == ".wv" || ext == ".ogg" || ext == ".wma")
+                    //if (ext != ".d2v" && ext != ".txt" && ext != ".bad" && ext != ".log" && ext != ".dga" && ext != ".d2a"  && ext != ".m2ts" && 
+                    //    ext != ".h264" && ext != ".264" && ext != ".avc" && ext != ".dgi" && ext != ".sfk")
                     {
                         tracklist.Add(f);
                     }

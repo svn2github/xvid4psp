@@ -168,6 +168,19 @@ namespace XviD4PSP
                 _oldindexfile = value;
             }
         }
+                
+        private string _dgdecnv_path;
+        public string dgdecnv_path
+        {
+            get
+            {
+                return _dgdecnv_path;
+            }
+            set
+            {
+                _dgdecnv_path = value;
+            }
+        }
 
         private string _outfilepath;
         public string outfilepath

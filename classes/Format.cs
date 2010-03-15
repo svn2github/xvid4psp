@@ -597,7 +597,8 @@ namespace XviD4PSP
                else if (ext == ".pmp") m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
                else if (ext == ".vdr") m.vdecoder = AviSynthScripting.Decoders.AVISource;
                else if (ext == ".avs") m.vdecoder = AviSynthScripting.Decoders.Import;
-               else if (ext == ".dga") m.vdecoder = AviSynthScripting.Decoders.AVCSource;           
+               else if (ext == ".dga") m.vdecoder = AviSynthScripting.Decoders.AVCSource;
+               else if (ext == ".dgi") m.vdecoder = AviSynthScripting.Decoders.DGMultiSource;
                else m.vdecoder = Settings.OtherDecoder;
            }
            return m;
@@ -1845,6 +1846,7 @@ namespace XviD4PSP
            if (ext == ".avs") return "Source - AVS-script";
            else if (ext == ".d2v") return "Source - DGIndex-project";
            else if (ext == ".dga") return "Source - DGAVCIndex-project";
+           else if (ext == ".dgi") return "Source - DGIndexNV-project";
            else if (m.format == ExportFormats.PmpAvc ||
                     m.format == ExportFormats.Mp4PSPAVC ||
                     m.format == ExportFormats.Mp4PSPASP)

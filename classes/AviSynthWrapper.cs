@@ -424,9 +424,11 @@ namespace XviD4PSP
             }
         }
 
-
         private void cleanup(bool disposing)
         {
+            //Позаимствовано из MeGUI (для уменьшения вылетов из-за DGMultiSource)
+            System.Threading.Thread.Sleep(100);
+            
             dimzon_avs_destroy(ref _avs);
             _avs = new IntPtr(0);
             if (disposing)
