@@ -1,5 +1,20 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r122 24.02.10, main changes:
+XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r129 20.03.10, main changes:
 
+>>> (r129) For the iPod 5.5G format with x264 encoding, a muxer was changed from the MP4Box(NicMP4Box) to ffmpeg (rep. by jhonny2).
+>>> (r128) Updated Spanish translation (by Ginger).
+>>> (r127) Added support for the DGMultiSource() decoder and dgi-files (DGIndexNV index files). The source file
+           must be indexed by the DGIndexNV and project must be saved into separate folder (w/o any files in it).
+           Then log-file must be placed in the same folder. If it wasn`t found, then all info will be recieved from
+           the source-file via MediaInfo (but log file is more recommended).
+           Some changes for the d2v and dga opening. For dga-files there is no need to put log-file in the same folder,
+           but it`s still recommended.
+>>> (r126) Audio gain detection is now fully internal, normalize.exe and temporal WAV-file is not needed anymore.
+>>> (r125) Some fixes for FFV1 and HUFF encoders.
+>>> (r124) Fixed problems with audio encoding for several tasks, when all this tasks is based on one source-file.
+           Fixed problems with common audio encoding settings for all the tasks, if audio preset is Custom.
+>>> (r123) In the x264 encoder window was updated internal presets, so now they fully equivalent to the same presets 
+           from the x264.exe (Ultrafast, Veryfast, Faster, Fast, Medium, Slow, Slower, Veryslow, Placebo). B-pyramid mode
+           is now Normal by default (x264 r1455+).
 >>> (r122) In the AC3-encoder settings window added two new options: "Bandwidth" and "Dialog normalization level".
 >>> (r121) Fixed issue with re-opening some DVDs (bug since r89).
 >>> (r120) Removed option "Renew script when audio/video encoding settings is changed". For audio-settings the script will be auto 

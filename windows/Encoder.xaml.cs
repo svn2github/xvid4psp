@@ -2456,7 +2456,7 @@ namespace XviD4PSP
             ProcessStartInfo info = new ProcessStartInfo();
 
             bool old_muxer = false; //Использование старого NicMP4Box в случае его наличия - необходим для воспроизведения на Иподе файлов с большим разрешением
-            if (m.format == Format.ExportFormats.Mp4iPod55G && (m.outvcodec == "x264" || m.outvcodec == "Copy") && File.Exists(Calculate.StartupPath + "\\apps\\MP4Box\\NicMP4Box.exe"))
+            if (m.format == Format.ExportFormats.Mp4iPod55G && (/*m.outvcodec == "x264" || */m.outvcodec == "Copy") && File.Exists(Calculate.StartupPath + "\\apps\\MP4Box\\NicMP4Box.exe"))
             {
                 old_muxer = true;
                 info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\NicMP4Box.exe";
@@ -2778,6 +2778,8 @@ namespace XviD4PSP
                 m.format == Format.ExportFormats.Mpeg2PAL ||
                 m.format == Format.ExportFormats.Mpeg2NTSC)
                 format = " -f vob";
+            else if (m.format == Format.ExportFormats.Mp4iPod55G)
+                format = " -f ipod"; //Добавляем ipod atom для 5.5G
 
             info.Arguments = "-i \"" + m.outvideofile + "\" -vcodec copy" + addaudio + format + rate + " \"" + m.outfilepath + "\"";
 

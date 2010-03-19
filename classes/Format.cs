@@ -2189,6 +2189,8 @@ namespace XviD4PSP
                if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
                else return Muxers.mp4box;
            }
+           else if (m.format == Format.ExportFormats.Mp4iPod55G && m.outvcodec == "x264")
+               return Muxers.ffmpeg; //ipod atom
            else return Muxers.mp4box;
        }
 
