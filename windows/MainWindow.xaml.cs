@@ -150,9 +150,8 @@ namespace XviD4PSP
                     this.TasksRow2.Height = (GridLength)conv.ConvertFromString(value[5]);
                 }
 
-                //Для правильного отображения таймера
-                this.textbox_time.Visibility = Visibility.Visible;//Показать прошедшее время воспроизведения..
-                this.textbox_duration.Visibility = Visibility.Collapsed;//.. а общее время скрыть.
+                //Список недавних файлов
+                UpdateRecentFiles();
 
                 textbox_name.Text = textbox_frame.Text = textbox_frame_goto.Text = "";
                 textbox_time.Text = textbox_duration.Text = "00:00:00";
@@ -1502,6 +1501,21 @@ namespace XviD4PSP
                     //загружаем скрипт в форму
                     if (!IsBatchOpening)
                     {
+                        if (!PauseAfterFirst)
+                        {
+                            //Обновляем список недавно открытых файлов
+                            string source = (string.IsNullOrEmpty(m.infilepath_source)) ? m.infilepath : m.infilepath_source;
+                            string[] rfiles = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
+                            string output = source + "; ";
+                            for (int i = 0; i < rfiles.Length && i < 5; i++)
+                            {
+                                string line = rfiles[i].Trim();
+                                if (line != source && line != "") output += (line + "; ");
+                            }
+                            Settings.RecentFiles = output;
+                            UpdateRecentFiles();
+                        }
+
                         LoadVideo(MediaLoad.load);
                         MenuHider(true); //Делаем пункты меню активными
                     }
@@ -1894,6 +1908,7 @@ namespace XviD4PSP
                 mnCloseFile.Header = Languages.Translate("Close file");
                 menu_save_frame.Header = Languages.Translate("Save frame") + "...";
                 menu_savethm.Header = Languages.Translate("Save") + " THM...";
+                mnRecentFiles.Header = Languages.Translate("Recent files");
 
                 mnVideo.Header = Languages.Translate("Video");
                 mnAudio.Header = Languages.Translate("Audio");
@@ -5620,6 +5635,37 @@ namespace XviD4PSP
         {
             m.testscript = !m.testscript;
             UpdateScriptAndDuration();
+        }
+
+        private void UpdateRecentFiles()
+        {
+            mnRecentFiles.Items.Clear();
+            string file = "";
+            string[] rfiles = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
+            for (int i = 0; i < rfiles.Length && i < 5; i++)
+            {
+                if (string.IsNullOrEmpty(file = rfiles[i].Trim())) break;
+                MenuItem mn = new MenuItem();
+                mn.Header = "_" + Calculate.GetShortPath(file);
+                mn.ToolTip = file;
+                mn.Icon = new TextBlock { Text = ((i + 1) + ".") };
+                mn.Click += new RoutedEventHandler(menu_rf_Click);
+                mnRecentFiles.Items.Add(mn);
+            }
+        }
+
+        private void menu_rf_Click(object sender, RoutedEventArgs e)
+        {
+            string file = ((MenuItem)sender).ToolTip.ToString();
+            if (File.Exists(file))
+            {
+                Massive x = new Massive();
+                x.infilepath = file;
+                x.infileslist = new string[] { x.infilepath };
+                action_open(x);
+            }
+            else 
+                new Message(this).ShowMessage(Languages.Translate("Can`t find file") + ": " + file, Languages.Translate("Error"), Message.MessageStyle.Ok);
         }
     }
 }

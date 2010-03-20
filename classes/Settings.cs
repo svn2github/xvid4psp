@@ -1927,5 +1927,25 @@ namespace XviD4PSP
                 SetBool("DeleteTempFiles", value);
             }
         }
+
+        public static string RecentFiles
+        {
+            get
+            {
+                object value = GetValue("RecentFiles");
+                if (value == null)
+                {
+                    return "";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("RecentFiles", value);
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@
             <RowDefinition x:Name="TasksRow2" Height="400*" MinHeight="38" />
         </Grid.RowDefinitions>
 		<Grid HorizontalAlignment="Stretch" x:Name="grid_menu" Width="Auto" d:LayoutOverrides="VerticalAlignment" VerticalAlignment="Top" Height="Auto" Grid.RowSpan="1" Margin="0,0,0,0">
-			<Menu x:Name="FileMenu" Height="Auto" d:LayoutOverrides="Height" Margin="0,0,0,0" Background="Snow">
+            <Menu x:Name="FileMenu" Height="Auto" d:LayoutOverrides="Height" Margin="0,0,0,0" Background="Snow">
                 <Menu.Resources>
                     <Style TargetType="{x:Type RadioButton}">
                         <Setter Property="HorizontalAlignment" Value="Center" />
@@ -42,7 +42,9 @@
 					<MenuItem Header="Save frame..." x:Name="menu_save_frame" Click="menu_save_frame_Click"/>
 					<MenuItem x:Name="menu_savethm" Header="Save THM..." Click="menu_savethm_Click" IsEnabled="True"/>
 					<Separator/>
-					<MenuItem x:Name="mnExit" Header="Exit" Click="mnExit_Click"/>
+                    <MenuItem x:Name="mnRecentFiles" Header="Recent files"/>
+                    <Separator/>
+                    <MenuItem x:Name="mnExit" Header="Exit" Click="mnExit_Click"/>
 				</MenuItem>
 				<MenuItem x:Name="mnVideo" Header="Video">
 					<MenuItem x:Name="mnUpdateVideo" Header="Refresh preview" Click="mnUpdateVideo_Click"/>
@@ -487,7 +489,7 @@
 					</Rectangle.OpacityMask>
 				</Rectangle>
 				<TextBlock Opacity="0.4" x:Name="textbox_time" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,-0.7,0,13.5"/>
-				<TextBlock Opacity="0.4" x:Name="textbox_duration" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,-0.7,0,13.5"/>
+				<TextBlock Opacity="0.4" x:Name="textbox_duration" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,-0.7,0,13.5" Visibility="Collapsed"/>
                 <TextBlock Opacity="1" FontFamily="Segoe" FontSize="24" FontWeight="Light" Foreground="#FFFFFFFF" Text="video_name" TextWrapping="Wrap" x:Name="textbox_name" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" Margin="0,0,2,15.2" Padding="0,0,97,0" TextTrimming="CharacterEllipsis" />
 			</Grid>
 			<MediaElement Margin="8,56,8,8" x:Name="VideoElement" Focusable="True" Volume="{Binding Path=Value, ElementName=slider_Volume}" />

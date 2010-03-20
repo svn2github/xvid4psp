@@ -988,5 +988,11 @@ namespace XviD4PSP
            return ext;
        }
 
+       public static string GetShortPath(string path)
+       {
+           if (Path.GetDirectoryName(path).Length > 10)
+               return Path.GetPathRoot(path) + "...\\" + Path.GetFileName(path);
+           return path;
+       }
     }
 }
