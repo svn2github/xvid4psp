@@ -133,16 +133,16 @@ namespace XviD4PSP
             }
         }
 
-        private bool _chroma = true;
-        public bool chroma
+        private bool _no_chroma = false;
+        public bool no_chroma
         {
             get
             {
-                return _chroma;
+                return _no_chroma;
             }
             set
             {
-                _chroma= value;
+                _no_chroma = value;
             }
         }
 
@@ -263,29 +263,29 @@ namespace XviD4PSP
             }
         }
 
-        private bool _fastpskip = true;
-        public bool fastpskip
+        private bool _no_fastpskip = false;
+        public bool no_fastpskip
         {
             get
             {
-                return _fastpskip;
+                return _no_fastpskip;
             }
             set
             {
-                _fastpskip = value;
+                _no_fastpskip = value;
             }
         }
 
-        private bool _dctdecimate = true;
-        public bool dctdecimate
+        private bool _no_dctdecimate = false;
+        public bool no_dctdecimate
         {
             get
             {
-                return _dctdecimate;
+                return _no_dctdecimate;
             }
             set
             {
-                _dctdecimate = value;
+                _no_dctdecimate = value;
             }
         }
 
@@ -302,16 +302,42 @@ namespace XviD4PSP
             }
         }
 
-        private int _minquant = 10;
-        public int minquant
+        private int _min_quant = 10;
+        public int min_quant
         {
             get
             {
-                return _minquant;
+                return _min_quant;
             }
             set
             {
-                _minquant = value;
+                _min_quant = value;
+            }
+        }
+
+        private int _max_quant = 51;
+        public int max_quant
+        {
+            get
+            {
+                return _max_quant;
+            }
+            set
+            {
+                _max_quant = value;
+            }
+        }
+
+        private int _step_quant = 4;
+        public int step_quant
+        {
+            get
+            {
+                return _step_quant;
+            }
+            set
+            {
+                _step_quant = value;
             }
         }
 
@@ -527,5 +553,43 @@ namespace XviD4PSP
            }
        }
 
+       private bool _nal_hrd = false;
+       public bool nal_hrd
+       {
+           get
+           {
+               return _nal_hrd;
+           }
+           set
+           {
+               _nal_hrd = value;
+           }
+       }
+
+       private int _gop_min = 25;
+       public int gop_min
+       {
+           get
+           {
+               return _gop_min;
+           }
+           set
+           {
+               _gop_min = value;
+           }
+       }
+
+       private int _gop_max = 250;
+       public int gop_max
+       {
+           get
+           {
+               return _gop_max;
+           }
+           set
+           {
+               _gop_max = value;
+           }
+       }
     }
 }

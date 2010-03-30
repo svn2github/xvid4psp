@@ -18,20 +18,12 @@ namespace XviD4PSP
         private Settings.EncodingModes oldmode;
         private VideoEncoding root_window;
         private MainWindow p;
-        public enum CodecPresets { Custom, Ultrafast, Veryfast, Faster, Fast, Medium, Slow, Slower, Veryslow, Placebo }
+        public enum CodecPresets { Custom, Ultrafast, Superfast, Veryfast, Faster, Fast, Medium, Slow, Slower, Veryslow, Placebo }
         private ArrayList good_cli = null;
 
         public x264(Massive mass, VideoEncoding VideoEncWindow, MainWindow parent)
         {
             this.InitializeComponent();
-
-            this.num_bitrate.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_bitrate_ValueChanged);
-            this.num_psyrdo.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_psyrdo_ValueChanged);
-            this.num_qcomp.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_qcomp_ValueChanged);
-            this.num_psytrellis.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_psytrellis_ValueChanged);
-            this.num_vbv_buf.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_vbv_buf_ValueChanged);
-            this.num_vbv_max.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_vbv_max_ValueChanged);
-            this.num_lookahead.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_lookahead_ValueChanged);
 
             this.m = mass.Clone();
             this.root_window = VideoEncWindow;
@@ -91,7 +83,7 @@ namespace XviD4PSP
             combo_subme.Items.Add("7 - RD on all frames");
             combo_subme.Items.Add("8 - RD refinement on I/P frames");
             combo_subme.Items.Add("9 - RD refinement on all frames");
-            combo_subme.Items.Add("10 - QP-RD reg. trellis=2,AQ-mode>0");
+            combo_subme.Items.Add("10 - QP-RD");
 
             //прописываем me алгоритм
             combo_me.Items.Add("Diamond");
@@ -128,17 +120,13 @@ namespace XviD4PSP
             combo_avc_profile.Items.Add("Main Profile");
             combo_avc_profile.Items.Add("High Profile");
 
-            //minimum quantizer
-            for (int n = 1; n <= 51; n++)
-                combo_min_quant.Items.Add(n);
-
             //пресеты настроек и качества
             foreach (string preset in Enum.GetNames(typeof(CodecPresets)))
                 combo_codec_preset.Items.Add(preset);
 
             //Кол-во потоков для x264-го
             combo_threads_count.Items.Add("Auto");
-            for (int n = 1; n <= 8; n++)
+            for (int n = 1; n <= 12; n++)
                 combo_threads_count.Items.Add(Convert.ToString(n));
 
             //-b-adapt
@@ -292,7 +280,7 @@ namespace XviD4PSP
             combo_merange.SelectedItem = m.x264options.merange;
 
             //прописываем chroma me
-            check_chroma.IsChecked = m.x264options.chroma;
+            check_chroma.IsChecked = m.x264options.no_chroma;
 
             //B фреймы
             combo_bframes.SelectedItem = m.x264options.bframes;
@@ -325,16 +313,21 @@ namespace XviD4PSP
             check_cabac.IsChecked = m.x264options.cabac;
 
             //fast p skip
-            check_fast_pskip.IsChecked = m.x264options.fastpskip;
+            check_fast_pskip.IsChecked = m.x264options.no_fastpskip;
 
             //dct decimate
-            check_dct_decimate.IsChecked = m.x264options.dctdecimate;
+            check_dct_decimate.IsChecked = m.x264options.no_dctdecimate;
 
             //Прогружаем список AVC profile
             SetAVCProfile();
 
-            //minimum quantizer
-            combo_min_quant.SelectedItem = m.x264options.minquant;
+            //min-max quantizer
+            num_min_quant.Value = m.x264options.min_quant;
+            num_max_quant.Value = m.x264options.max_quant;
+            num_step_quant.Value = m.x264options.step_quant;
+
+            num_min_gop.Value = m.x264options.gop_min;
+            num_max_gop.Value = m.x264options.gop_max;
 
             //Кол-во потоков для x264-го
             if (m.x264options.threads == "auto") combo_threads_count.SelectedItem = "Auto";
@@ -366,6 +359,10 @@ namespace XviD4PSP
                 num_psyrdo.IsEnabled = true;
                 num_psytrellis.IsEnabled = true;
             }
+
+            check_nal_hrd.IsChecked = m.x264options.nal_hrd;
+
+            check_aud.IsChecked = m.x264options.aud;
 
             SetToolTips();
             DetectCodecPreset();          
@@ -462,7 +459,7 @@ namespace XviD4PSP
             else
                 num_bitrate.ToolTip = "Set target quality. Lower - better quality but bigger filesize.\r\n(Default: 23)";
 
-            check_lossless.ToolTip = "LossLess encoding mode. High AVC profile only";
+            check_lossless.ToolTip = "Lossless encoding mode. High AVC profile only";
             combo_level.ToolTip = "Specify level (--level)";
             check_p8x8.ToolTip = "Partitions to consider";
             check_i8x8.ToolTip = "Partitions to consider";
@@ -473,31 +470,34 @@ namespace XviD4PSP
             combo_dstrength.ToolTip = "Deblocking filter strength (--deblock, default: 0:0)";
             combo_dthreshold.ToolTip = "Deblocking filter treshold (--deblock, default: 0:0)";
             check_deblocking.ToolTip = "Deblocking filter (Default: Enabled)";
-            combo_subme.ToolTip = "Subpixel motion estimation and partition decision quality: 1=fast, 10=best. (--subme, default: 7)";
-            combo_me.ToolTip = "Subpixel motion estimation and mode decision (Default: --hex)" + Environment.NewLine +
-                "Diamond Search (--dia)" + Environment.NewLine +
-                "Hexagonal Search (--hex)" + Environment.NewLine +
-                "Uneven Multi-Hexagon Search (--umh)" + Environment.NewLine +
-                "Exhaustive Search (--esa)" + Environment.NewLine +
-                "SATD Exhaustive Search (--tesa)";
+            combo_subme.ToolTip = "Subpixel motion estimation and mode decision (--subme, default: 7):" + Environment.NewLine + 
+                "1: fast\r\n7: default\r\n10: slow, requires trellis=2 and aq-mode>0";
+            combo_me.ToolTip = "Integer pixel motion estimation method (--me, default: --me hex)" + Environment.NewLine +
+                "Diamond Search, fast (--me dia)" + Environment.NewLine +
+                "Hexagonal Search (--me hex)" + Environment.NewLine +
+                "Uneven Multi-Hexagon Search (--me umh)" + Environment.NewLine +
+                "Exhaustive Search (--me esa)" + Environment.NewLine +
+                "SATD Exhaustive Search, slow (--me tesa)";
             combo_merange.ToolTip = "Maximum motion vector search range (--merange, default: 16)";
-            check_chroma.ToolTip = "Chroma motion estimation (--no-chroma-me if not checked)";
+            check_chroma.ToolTip = "Ignore chroma in motion estimation (--no-chroma-me, default: unchecked)";
             combo_bframes.ToolTip = "Number of B-frames between I and P (--bframes, default: 3)";
-            combo_bframe_mode.ToolTip = "B-frame mode (--direct, default: Spatial)";
-            combo_bpyramid_mode.ToolTip = "Keep some B-frames as references. \r\nNone: disabled \r\nStrict: strictly hierarchical pyramid (Blu-ray compatible)\r\nNormal: non-strict (not Blu-ray compatible) \r\n(--b-pyramid value, default: --b-pyramid normal)";
+            combo_bframe_mode.ToolTip = "Direct MV prediction mode (--direct, default: Spatial)";
+            combo_bpyramid_mode.ToolTip = "Keep some B-frames as references (--b-pyramid, default: Normal)\r\nNone: disabled \r\nStrict: strictly hierarchical pyramid (Blu-ray compatible)\r\nNormal: non-strict (not Blu-ray compatible)";
             check_weightedb.ToolTip = "Weighted prediction for B-frames (--no-weightb if not checked)";
-            combo_weightp_mode.ToolTip = "Weighted prediction for P-frames (--weightp value, default: Smart)";
-            combo_trellis.ToolTip = "Trellis RD quantization. Requires CABAC." + Environment.NewLine +
+            combo_weightp_mode.ToolTip = "Weighted prediction for P-frames (--weightp, default: Smart)";
+            combo_trellis.ToolTip = "Trellis RD quantization, requires CABAC (--trellis, default: 1)" + Environment.NewLine +
                 "0: disabled" + Environment.NewLine +
-                "1: enabled only on the final encode of a MB (Default)" + Environment.NewLine +
+                "1: enabled only on the final encode of a MB" + Environment.NewLine +
                 "2: enabled on all mode decisions";
             combo_ref.ToolTip = "Number of reference frames (--ref, default: 3)";
             check_mixed_ref.ToolTip = "Decide references on a per partition basis (--no-mixed-refs if not checked)";
             check_cabac.ToolTip = "Enable CABAC (--no-cabac if not checked)";
-            check_fast_pskip.ToolTip = "Enable early SKIP detection on P-frames (--no-fast-pskip if not checked)";
-            check_dct_decimate.ToolTip = "Enable coefficient thresholding on P-frames (--no-dct-decimate if not checked)";
+            check_fast_pskip.ToolTip = "Disables early SKIP detection on P-frames (--no-fast-pskip, default: unchecked)";
+            check_dct_decimate.ToolTip = "Disables coefficient thresholding on P-frames (--no-dct-decimate, default: unchecked)";
             combo_avc_profile.ToolTip = "AVC profile";
-            combo_min_quant.ToolTip = "Set min QP (Default: 10)";
+            num_min_quant.ToolTip = "Set min QP (--qpmin, default: 10)";
+            num_max_quant.ToolTip = "Set max QP (--qpmax, default: 51)";
+            num_step_quant.ToolTip = "Set max QP step (--qpstep, default: 4)";
             if (m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
@@ -520,17 +520,17 @@ namespace XviD4PSP
                     "Custom - custom codec settings";
             }
             combo_badapt_mode.ToolTip = "Adaptive B-frame decision method (--b-adapt, default: Fast)";
-            combo_adapt_quant_mode.ToolTip = "AQ method (--aq-mode, default: 1)" + Environment.NewLine +
+            combo_adapt_quant_mode.ToolTip = "AQ mode (--aq-mode, default: 1)" + Environment.NewLine +
                         "0: Disabled" + Environment.NewLine +
-                        "1: Variance AQ (Default)" + Environment.NewLine +
-                        "2: Variance-Hadamard AQ (AutoVAQ patch)";
+                        "1: Variance AQ (complexity mask)" + Environment.NewLine +
+                        "2: Auto-variance AQ (experimental)";
             combo_adapt_quant.ToolTip = "AQ Strength (--ag-strength, default: 1.0)" + Environment.NewLine +
                         "Reduces blocking and blurring in flat and textured areas" + Environment.NewLine +
                         "0.5: weak AQ, 1.5: strong AQ";
             num_psyrdo.ToolTip = "Strength of psychovisual RD optimization (--psy-rd, default: 1.0)";
             num_psytrellis.ToolTip = "Strength of psychovisual Trellis optimization (--psy-rd, default: 0.0)";
-            num_vbv_buf.ToolTip = "Enable CBR and set VBV buffer size (--vbv-bufsize, default: 0)";
-            num_vbv_max.ToolTip = "Set maximum local bitrate (--vbv-maxrate, default: 0)";
+            num_vbv_buf.ToolTip = "Set size of the VBV buffer, kbit (--vbv-bufsize, default: 0)";
+            num_vbv_max.ToolTip = "Max local bitrate, kbit/s (--vbv-maxrate, default: 0)";
             num_qcomp.ToolTip = "QP curve compression (--qcomp, default: 0.60)" + Environment.NewLine +
                         "0.00 => CBR, 1.00 => CQP";
             combo_chroma_qp.ToolTip = "QP difference between chroma and luma (--qp-chroma-offset Default: 0)";
@@ -539,6 +539,10 @@ namespace XviD4PSP
             check_nombtree.ToolTip = "Disable mb-tree ratecontrol (off by default, --no-mbtree if checked)";
             num_lookahead.ToolTip = "Number of frames for frametype lookahead (--rc-lookahead, default: 40)";
             check_enable_psy.ToolTip = "If unchecked disable all visual optimizations that worsen both PSNR and SSIM" + Environment.NewLine + "(--no-psy if not checked)";
+            num_min_gop.ToolTip = "Minimum GOP size (--min-keyint, default: 25)";
+            num_max_gop.ToolTip = "Maximum GOP size (--keyint, default: 250)";
+            check_nal_hrd.ToolTip = "Signal HRD information, requires VBV parameters (--nal-hrd vbr, default: unchecked)";
+            check_aud.ToolTip = "Use Access Unit Delimiters (--aud, default: unchecked)";
         }
 
         public static Massive DecodeLine(Massive m)
@@ -546,12 +550,7 @@ namespace XviD4PSP
             //создаём свежий массив параметров x264
             m.x264options = new x264_arguments();
 
-            //для начала определяем колличество проходов
-            Settings.EncodingModes mode = Settings.EncodingModes.OnePass;
-            if (m.vpasses.Count == 3)
-                mode = Settings.EncodingModes.ThreePass;
-            else if (m.vpasses.Count == 2)
-                mode = Settings.EncodingModes.TwoPass;
+            Settings.EncodingModes mode = new Settings.EncodingModes();
 
             //берём пока что за основу последнюю строку
             string line = m.vpasses[m.vpasses.Count - 1].ToString();
@@ -569,34 +568,55 @@ namespace XviD4PSP
                         mode = Settings.EncodingModes.Quality;
                         m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
                     }
-                    if (value == "--qp" || value == "-q")
+                    else if (value == "--bitrate" || value == "-B")
+                    {
+                        mode = Settings.EncodingModes.OnePass;
+                        m.outvbitrate = Convert.ToInt32(cli[n + 1]);
+                    }
+                    else if (value == "--qp" || value == "-q")
                     {
                         mode = Settings.EncodingModes.Quantizer;
                         m.outvbitrate = Convert.ToInt32(cli[n + 1]);
                     }
                 }
-                else if (m.vpasses.Count == 2 && value == "--crf")
+                else if (m.vpasses.Count == 2)
                 {
-                    mode = Settings.EncodingModes.TwoPassQuality;
-                    m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                    if (value == "--crf")
+                    {
+                        mode = Settings.EncodingModes.TwoPassQuality;
+                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                    }
+                    else if (value == "--bitrate" || value == "-B")
+                    {
+                        mode = Settings.EncodingModes.TwoPass;
+                        m.outvbitrate = Convert.ToInt32(cli[n + 1]);
+                    }
+                    else if (value == "--size")
+                    {
+                        mode = Settings.EncodingModes.TwoPassSize;
+                        m.outvbitrate = Convert.ToInt32(cli[n + 1]);
+                    }
                 }
-                else if (m.vpasses.Count == 3 && value == "--crf")
+                else if (m.vpasses.Count == 3)
                 {
-                    mode = Settings.EncodingModes.ThreePassQuality;
-                    m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                    if (value == "--crf")
+                    {
+                        mode = Settings.EncodingModes.ThreePassQuality;
+                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                    }
+                    else if (value == "--bitrate" || value == "-B")
+                    {
+                        mode = Settings.EncodingModes.ThreePass;
+                        m.outvbitrate = Convert.ToInt32(cli[n + 1]);
+                    }
+                    else if (value == "--size")
+                    {
+                        mode = Settings.EncodingModes.ThreePassSize;
+                        m.outvbitrate = Convert.ToInt32(cli[n + 1]);
+                    }
                 }
 
-                if (value == "--size")
-                {
-                    m.outvbitrate = Convert.ToInt32(cli[n + 1]);
-                    if (m.vpasses.Count == 3) mode = Settings.EncodingModes.ThreePassSize;
-                    else if (m.vpasses.Count == 2) mode = Settings.EncodingModes.TwoPassSize;
-                }
-                
-                else if (value == "--bitrate" || value == "-B")
-                    m.outvbitrate = Convert.ToInt32(cli[n + 1]);
-
-                else if (value == "--level")
+                if (value == "--level")
                     m.x264options.level = cli[n + 1];
 
                 else if (value == "--ref" || value == "-r")
@@ -650,7 +670,7 @@ namespace XviD4PSP
                     m.x264options.merange = Convert.ToInt32(cli[n + 1]);
 
                 else if (value == "--no-chroma-me")
-                    m.x264options.chroma = false;
+                    m.x264options.no_chroma = true;
 
                 else if (value == "--bframes" || value == "-b")
                     m.x264options.bframes = Convert.ToInt32(cli[n + 1]);
@@ -688,10 +708,10 @@ namespace XviD4PSP
                     m.x264options.cabac = false;
 
                 else if (value == "--no-fast-pskip")
-                    m.x264options.fastpskip = false;
+                    m.x264options.no_fastpskip = true;
 
                 else if (value == "--no-dct-decimate")
-                    m.x264options.dctdecimate = false;
+                    m.x264options.no_dctdecimate = true;
 
                 else if (value == "--cqm")
                     m.x264options.custommatrix = cli[n + 1];
@@ -700,7 +720,13 @@ namespace XviD4PSP
                     m.x264options.deblocking = false;
 
                 else if (value == "--qpmin")
-                    m.x264options.minquant = Convert.ToInt32(cli[n + 1]);
+                    m.x264options.min_quant = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "--qpmax")
+                    m.x264options.max_quant = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "--qpstep")
+                    m.x264options.step_quant = Convert.ToInt32(cli[n + 1]);
 
                 else if (value == "--aud")
                     m.x264options.aud = true;
@@ -732,11 +758,27 @@ namespace XviD4PSP
                 else if (value == "--rc-lookahead")
                     m.x264options.lookahead = Convert.ToInt32(cli[n + 1]);
 
+                else if (value == "--nal-hrd")
+                    m.x264options.nal_hrd = true;
+
+                else if (value == "--min-keyint")
+                    m.x264options.gop_min = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "--keyint")
+                    m.x264options.gop_max = Convert.ToInt32(cli[n + 1]);
+
                 n++;
             }
 
-            //прописываем вычисленное колличество проходов
-            m.encodingmode = mode;
+            //Сброс на дефолт, если в CLI нет параметров кодирования
+            if (mode == 0)
+            {
+                m.encodingmode = Settings.EncodingModes.Quality;
+                m.outvbitrate = 23;
+            }
+            else 
+                m.encodingmode = mode;
+            
             return m;
         }
 
@@ -796,7 +838,7 @@ namespace XviD4PSP
             if (m.x264options.merange != 16)
                 line += " --merange " + m.x264options.merange;
 
-            if (!m.x264options.chroma)
+            if (m.x264options.no_chroma)
                 line += " --no-chroma-me";
 
             if (m.x264options.bframes != 3)
@@ -825,20 +867,29 @@ namespace XviD4PSP
             if (m.x264options.trellis != 1)
                 line += " --trellis " + m.x264options.trellis;
 
-            if (!m.x264options.fastpskip)
+            if (m.x264options.no_fastpskip)
                 line += " --no-fast-pskip";
 
-            if (!m.x264options.dctdecimate)
+            if (m.x264options.no_dctdecimate)
                 line += " --no-dct-decimate";
 
             if (m.x264options.custommatrix != null)
                 line += " --cqm " + m.x264options.custommatrix;
 
-            if (m.x264options.minquant != 10)
-                line += " --qpmin " + m.x264options.minquant;
+            if (m.x264options.min_quant != 10)
+                line += " --qpmin " + m.x264options.min_quant;
+
+            if (m.x264options.max_quant != 51)
+                line += " --qpmax " + m.x264options.max_quant;
+
+            if (m.x264options.step_quant != 4)
+                line += " --qpstep " + m.x264options.step_quant;
 
             if (m.x264options.aud == true)
                 line += " --aud";
+
+            if (m.x264options.nal_hrd)
+                line += " --nal-hrd vbr";
 
             if (m.x264options.pictiming == true)
                 line += " --pictiming";
@@ -885,7 +936,13 @@ namespace XviD4PSP
                 line += " --no-mbtree";
 
             if (!m.x264options.no_mbtree && m.x264options.lookahead != 40)
-                line += " --rc-lookahead " + m.x264options.lookahead;
+                line += " --rc-lookahead " + m.x264options.lookahead;            
+
+            if (m.x264options.gop_min != 25)
+                line += " --min-keyint " + m.x264options.gop_min;
+
+            if (m.x264options.gop_max != 250)
+                line += " --keyint " + m.x264options.gop_max;
 
             //удаляем пустоту в начале
             if (line.StartsWith(" "))
@@ -1173,7 +1230,7 @@ namespace XviD4PSP
 
         private void check_chroma_Click(object sender, RoutedEventArgs e)
         {
-            m.x264options.chroma = check_chroma.IsChecked.Value;
+            m.x264options.no_chroma = check_chroma.IsChecked.Value;
             root_window.UpdateManualProfile();
             DetectCodecPreset();
         }
@@ -1364,11 +1421,31 @@ namespace XviD4PSP
             }
         }
 
-        private void combo_min_quant_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void num_min_quant_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
-            if (combo_min_quant.IsDropDownOpen || combo_min_quant.IsSelectionBoxHighlighted)
+            if (num_min_quant.IsAction)
             {
-                m.x264options.minquant = Convert.ToInt32(combo_min_quant.SelectedItem);
+                m.x264options.min_quant = Convert.ToInt32(num_min_quant.Value);
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_max_quant_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_max_quant.IsAction)
+            {
+                m.x264options.max_quant = Convert.ToInt32(num_max_quant.Value);
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_step_quant_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_step_quant.IsAction)
+            {
+                m.x264options.step_quant = Convert.ToInt32(num_step_quant.Value);
                 root_window.UpdateManualProfile();
                 DetectCodecPreset();
             }
@@ -1391,14 +1468,14 @@ namespace XviD4PSP
 
         private void check_fast_pskip_Click(object sender, RoutedEventArgs e)
         {
-            m.x264options.fastpskip = check_fast_pskip.IsChecked.Value;
+            m.x264options.no_fastpskip = check_fast_pskip.IsChecked.Value;
             root_window.UpdateManualProfile();
             DetectCodecPreset();
         }
 
         private void check_dct_decimate_Click(object sender, RoutedEventArgs e)
         {
-            m.x264options.dctdecimate = check_dct_decimate.IsChecked.Value;
+            m.x264options.no_dctdecimate = check_dct_decimate.IsChecked.Value;
             root_window.UpdateManualProfile();
             DetectCodecPreset();
         }
@@ -1520,7 +1597,7 @@ namespace XviD4PSP
         {
             CodecPresets preset = CodecPresets.Custom;
 
-#region "Detecting"
+#region "Detecting Codec Preset"
             //Medium 
             if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
@@ -1529,11 +1606,11 @@ namespace XviD4PSP
                     m.x264options.bframes == 3 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "spatial" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.lookahead == 40 &&
                     m.x264options.me == "hex" &&
@@ -1555,11 +1632,11 @@ namespace XviD4PSP
                     m.x264options.b_adapt == 0 &&
                     m.x264options.bframes == 0 &&
                     m.x264options.cabac == false &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true && //
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == false &&
                     m.x264options.direct == "none" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.me == "dia" &&
                     m.x264options.merange == 16 &&
@@ -1573,7 +1650,7 @@ namespace XviD4PSP
                     m.x264options.slow_frstpass == false)
                 preset = CodecPresets.Ultrafast;
 
-            //Veryfast
+            //Superfast
             else if (m.x264options.adaptivedct == true &&
                     m.x264options.analyse == "i8x8,i4x4" &&
                     m.x264options.aqmode == "1" &&
@@ -1581,11 +1658,11 @@ namespace XviD4PSP
                     m.x264options.bframes == 3 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "spatial" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.me == "dia" &&
                     m.x264options.merange == 16 &&
@@ -1593,6 +1670,32 @@ namespace XviD4PSP
                     m.x264options.no_mbtree == true &&
                     m.x264options.reference == 1 &&
                     m.x264options.subme == 1 &&
+                    m.x264options.trellis == 0 &&
+                    m.x264options.weightb == true &&
+                    m.x264options.weightp == 0 &&
+                    m.x264options.slow_frstpass == false)
+                preset = CodecPresets.Superfast;
+
+            //Veryfast
+            else if (m.x264options.adaptivedct == true &&
+                    m.x264options.analyse == "p8x8,b8x8,i8x8,i4x4" &&
+                    m.x264options.aqmode == "1" &&
+                    m.x264options.b_adapt == 1 &&
+                    m.x264options.bframes == 3 &&
+                    m.x264options.bpyramid == 2 &&
+                    m.x264options.cabac == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
+                    m.x264options.deblocking == true &&
+                    m.x264options.direct == "spatial" &&
+                    m.x264options.no_fastpskip == false &&
+                    m.x264options.level == Format.GetValidAVCLevel(m) &&
+                    m.x264options.me == "hex" &&
+                    m.x264options.merange == 16 &&
+                    m.x264options.mixedrefs == false &&
+                    m.x264options.no_mbtree == true &&
+                    m.x264options.reference == 1 &&
+                    m.x264options.subme == 2 &&
                     m.x264options.trellis == 0 &&
                     m.x264options.weightb == true &&
                     m.x264options.weightp == 0 &&
@@ -1607,16 +1710,16 @@ namespace XviD4PSP
                     m.x264options.bframes == 3 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "spatial" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.me == "hex" &&
                     m.x264options.merange == 16 &&
                     m.x264options.mixedrefs == false &&
-                    m.x264options.no_mbtree == true &&
+                    m.x264options.lookahead == 20 &&
                     m.x264options.reference == 2 &&
                     m.x264options.subme == 4 &&
                     m.x264options.trellis == 1 &&
@@ -1633,11 +1736,11 @@ namespace XviD4PSP
                     m.x264options.bframes == 3 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "spatial" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.lookahead == 30 &&
                     m.x264options.me == "hex" &&
@@ -1660,11 +1763,11 @@ namespace XviD4PSP
                     m.x264options.bframes == 3 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "auto" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.lookahead == 50 &&
                     m.x264options.me == "umh" &&
@@ -1687,11 +1790,11 @@ namespace XviD4PSP
                     m.x264options.bframes == 3 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "auto" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.lookahead == 60 &&
                     m.x264options.me == "umh" &&
@@ -1714,11 +1817,11 @@ namespace XviD4PSP
                     m.x264options.bframes == 8 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "auto" &&
-                    m.x264options.fastpskip == true &&
+                    m.x264options.no_fastpskip == false &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.lookahead == 60 &&
                     m.x264options.me == "umh" &&
@@ -1741,11 +1844,11 @@ namespace XviD4PSP
                     m.x264options.bframes == 16 &&
                     m.x264options.bpyramid == 2 &&
                     m.x264options.cabac == true &&
-                    m.x264options.chroma == true &&
-                    m.x264options.dctdecimate == true &&
+                    m.x264options.no_chroma == false &&
+                    m.x264options.no_dctdecimate == false &&
                     m.x264options.deblocking == true &&
                     m.x264options.direct == "auto" &&
-                    m.x264options.fastpskip == false &&
+                    m.x264options.no_fastpskip == true &&
                     m.x264options.level == Format.GetValidAVCLevel(m) &&
                     m.x264options.lookahead == 60 &&
                     m.x264options.me == "tesa" &&
@@ -1807,7 +1910,7 @@ namespace XviD4PSP
                     m.x264options.psyrdo = 0;
                     m.x264options.no_mbtree = true;
                 }
-                else if (preset == CodecPresets.Veryfast)
+                else if (preset == CodecPresets.Superfast)
                 {
                     m.x264options.analyse = "i8x8,i4x4";
                     m.x264options.me = "dia";
@@ -1818,13 +1921,22 @@ namespace XviD4PSP
                     m.x264options.weightp = 0;
                     m.x264options.no_mbtree = true;
                 }
+                else if (preset == CodecPresets.Veryfast)
+                {
+                    m.x264options.no_mbtree = true;
+                    m.x264options.mixedrefs = false;
+                    m.x264options.reference = 1;
+                    m.x264options.subme = 2;
+                    m.x264options.trellis = 0;
+                    m.x264options.weightp = 0;
+                }
                 else if (preset == CodecPresets.Faster)
                 {
                     m.x264options.mixedrefs = false;
                     m.x264options.reference = 2;
                     m.x264options.subme = 4;
                     m.x264options.weightp = 1;
-                    m.x264options.no_mbtree = true;
+                    m.x264options.lookahead = 20;
                 }
                 else if (preset == CodecPresets.Fast)
                 {
@@ -1870,7 +1982,7 @@ namespace XviD4PSP
                     m.x264options.b_adapt = 2;
                     m.x264options.bframes = 16;
                     m.x264options.direct = "auto";
-                    m.x264options.fastpskip = false;
+                    m.x264options.no_fastpskip = true;
                     m.x264options.me = "tesa";
                     m.x264options.merange = 24;
                     m.x264options.analyse = "all";
@@ -2074,28 +2186,19 @@ namespace XviD4PSP
 
         private void check_slow_first_Click(object sender, RoutedEventArgs e)
         {
-            if (check_slow_first.IsFocused)
-            {
-                m.x264options.slow_frstpass = check_slow_first.IsChecked.Value;
+            m.x264options.slow_frstpass = check_slow_first.IsChecked.Value;
 
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void check_nombtree_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_nombtree.IsFocused)
-            {
-                m.x264options.no_mbtree = check_nombtree.IsChecked.Value;
-                if (m.x264options.no_mbtree == true)
-                    num_lookahead.IsEnabled = false;
-                else
-                    num_lookahead.IsEnabled = true;
+            m.x264options.no_mbtree = check_nombtree.IsChecked.Value;
+            num_lookahead.IsEnabled = !m.x264options.no_mbtree;
 
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void num_lookahead_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
@@ -2144,6 +2247,8 @@ namespace XviD4PSP
                     if (line == null) break;
                     if (line != "") m.vpasses.Add(line);
                 }
+                if (m.vpasses.Count == 0) m.vpasses.Add(" ");
+
                 DecodeLine(m);                       //- Загружаем в массив m.x264 значения, на основе текущего содержимого m.vpasses[x]
                 LoadFromProfile();                   //- Загружаем в форму значения, на основе значений массива m.x264
                 m.vencoding = "Custom x264 CLI";     //- Изменяем название пресета           
@@ -2191,6 +2296,40 @@ namespace XviD4PSP
                 new ShowWindow(root_window, "x264 help", p.StandardOutput.ReadToEnd(), new FontFamily("Lucida Console"));
             }
             catch (Exception) { }
+        }
+
+        private void check_nal_hrd_Click(object sender, RoutedEventArgs e)
+        {
+            m.x264options.nal_hrd = check_nal_hrd.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
+        }
+
+        private void check_aud_Click(object sender, RoutedEventArgs e)
+        {
+            m.x264options.aud = check_aud.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
+        }
+
+        private void num_min_gop_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_min_gop.IsAction)
+            {
+                m.x264options.gop_min = Convert.ToInt32(num_min_gop.Value);
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_max_gop_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_max_gop.IsAction)
+            {
+                m.x264options.gop_max = Convert.ToInt32(num_max_gop.Value);
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
         }
     }
 }
