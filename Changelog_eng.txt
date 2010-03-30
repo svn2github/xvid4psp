@@ -1,5 +1,9 @@
-XviD4PSP 5.0.37.6 r65->r70->r80->r85->r95->r106->r129 20.03.10, main changes:
+XviD4PSP 5.0.37.6 r65 -> 5.0.37.8 r132 30.03.10, main changes:
 
+>>> (r132) Updated Spanish translation (by Tuko).
+>>> (r131) x264.exe settings window: added Superfast preset (x264 r1510+); added --qpmax, --qpstep, --min-keyint, --keyint, --nal-hrd,
+           --aud; some other changes.
+>>> (r130) Added list of "Recent files".
 >>> (r129) For the iPod 5.5G format with x264 encoding, a muxer was changed from the MP4Box(NicMP4Box) to ffmpeg (rep. by jhonny2).
 >>> (r128) Updated Spanish translation (by Ginger).
 >>> (r127) Added support for the DGMultiSource() decoder and dgi-files (DGIndexNV index files). The source file
