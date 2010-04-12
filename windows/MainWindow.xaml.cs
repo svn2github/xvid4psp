@@ -303,15 +303,11 @@ namespace XviD4PSP
                         this.LocationChanged += new EventHandler(MainWindow_LocationChanged);
                         this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
                         this.grid_tasks.SizeChanged += new SizeChangedEventHandler(grid_tasks_SizeChanged);
-                        this.grid_player_window.MouseDown += new MouseButtonEventHandler(Direct_Show_Mouse_Click); //мышь для Фуллскрина при ДиректШоу
-                        this.grid_player_buttons.MouseDown += new MouseButtonEventHandler(Direct_Show_Mouse_Click); //мышь для Фуллскрина при ДиректШоу
 
                         source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
                         source.AddHook(new HwndSourceHook(WndProc));
-
-                        VideoElement.Visibility = Visibility.Collapsed; //Visible;
                     }
-                    if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
+                    else
                     {
                         //set media element state for video loading
                         VideoElement.LoadedBehavior = MediaState.Manual;
@@ -321,8 +317,6 @@ namespace XviD4PSP
                         //events
                         VideoElement.MediaOpened += new RoutedEventHandler(VideoElement_MediaOpened);
                         VideoElement.MediaEnded += new RoutedEventHandler(VideoElement_MediaEnded);
-                        VideoElement.MouseDown += new MouseButtonEventHandler(VideoElement_MouseDown);
-                        //VisualTarget.Rendering += new EventHandler(VisualTarget_Rendering);
 
                         VideoElement.Visibility = Visibility.Visible;
                     }
@@ -362,7 +356,7 @@ namespace XviD4PSP
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (this.OwnedWindows.Count > 0 || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused) return;
+            if (this.OwnedWindows.Count > 0 || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused || script_box.IsFocused) return;
             string PressedKeys;
             string key = new System.Windows.Input.KeyConverter().ConvertToString(e.Key);
             string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
@@ -1776,7 +1770,10 @@ namespace XviD4PSP
 
         public void LoadVideo(MediaLoad mediaload)
         {
-            oldpos = Position;
+            //Чтоб позиция не сбрасывалась на ноль при включенном ScriptView
+            if (script_box.Visibility == Visibility.Collapsed)
+                oldpos = Position;
+
             this.mediaload = mediaload;
 
             // If we have ANY file open, close it and shut down DirectShow
@@ -1791,18 +1788,29 @@ namespace XviD4PSP
 
             try
             {
-                // Reset status variables
-                if (mediaload != MediaLoad.update)
-                    this.currentState = PlayState.Stopped;
-
                 // Start playing the media file
-                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
-                    PlayMovieInWindow(Settings.TempPath + "\\preview.avs");
-                if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
-                    PlayWithMediaBridge(Settings.TempPath + "\\preview.avs");
+                if (Settings.ScriptView)
+                {
+                    this.currentState = PlayState.Stopped;
+                    script_box.Visibility = Visibility.Visible;
+                    script_box.Text = m.script;
+                    fps = Calculate.ConvertStringToDouble(m.outframerate);
+                }
+                else
+                {
+                    // Reset status variables
+                    if (mediaload != MediaLoad.update)
+                        this.currentState = PlayState.Stopped;
+                    
+                    if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
+                        PlayMovieInWindow(Settings.TempPath + "\\preview.avs");
+                    else
+                        PlayWithMediaBridge(Settings.TempPath + "\\preview.avs");
+
+                    slider_pos.Focus(); //Переводит фокус на полосу прокрутки видео
+                }
                 
                 textbox_name.Text = m.taskname;
-                slider_pos.Focus(); //Переводит фокус на полосу прокрутки видео
             }
             catch (Exception ex)
             {
@@ -2004,6 +2012,10 @@ namespace XviD4PSP
                 button_play.ToolTip = Languages.Translate("Play-Pause");
                 button_frame_back.ToolTip = Languages.Translate("Frame back");
                 button_frame_forward.ToolTip = Languages.Translate("Frame forward");
+                button_save_script.Content = Languages.Translate("Apply");
+                button_play_script.Content = Languages.Translate("Play");
+                button_play_script.ToolTip = Languages.Translate("Play in") + " Media Player Classic";
+                button_fullscreen.ToolTip = Languages.Translate("Fullscreen");
 
                 cmenu_deselect.Header = Languages.Translate("Deselect");
                 cmenu_delete_all_tasks.Header = Languages.Translate("Delete all tasks");
@@ -2039,6 +2051,7 @@ namespace XviD4PSP
                 ff_ff.ToolTip = ff_ff2.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.");
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
+                check_scriptview_white.ToolTip = Languages.Translate("Enable white background for ScriptView");
             }
             catch { }
         }
@@ -2060,8 +2073,33 @@ namespace XviD4PSP
             else if (l == "Estonian") check_estonian.IsChecked = true;
             else mnEnglish.IsChecked = true;
 
-            if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge) check_engine_mediabridge.IsChecked = true;
-            else check_engine_directshow.IsChecked = true;
+            if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) check_engine_directshow.IsChecked = true;
+            else check_engine_mediabridge.IsChecked = true;
+
+            if (Settings.ScriptView)
+            {
+                mn_scriptview.IsChecked = cmn_scriptview.IsChecked = true;
+                button_save_script.Visibility = button_fullscreen.Visibility = button_avsp.Visibility = button_play_script.Visibility = Visibility.Visible;
+                button_play.Visibility = button_frame_back.Visibility = button_frame_forward.Visibility = slider_pos.Visibility = Visibility.Collapsed;
+            }
+            else mn_preview.IsChecked = cmn_preview.IsChecked = true;
+
+            if (Settings.ScriptView_Brushes == "#FFFFFFFF:#FF000000")
+            {
+                check_scriptview_white.IsChecked = true;
+                script_box.Background = Brushes.White;
+                script_box.Foreground = Brushes.Black;
+            }
+            else
+            {
+                string[] brushes = Settings.ScriptView_Brushes.Split(new string[] { ":" }, StringSplitOptions.None);
+                if (brushes.Length == 2 && brushes[0].Length == 9 && brushes[1].Length == 9)
+                {
+                    BrushConverter bc = new BrushConverter();
+                    script_box.Background = (Brush)bc.ConvertFromString(brushes[0]);
+                    script_box.Foreground = (Brush)bc.ConvertFromString(brushes[1]);
+                }
+            }
 
             if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly) check_auto_join_onlydvd.IsChecked = true;
             else if (Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled) check_auto_join_enabled.IsChecked = true;
@@ -2074,7 +2112,7 @@ namespace XviD4PSP
             else if (Settings.AVIDecoder == AviSynthScripting.Decoders.FFmpegSource)
                 mn_avi_dec_ff.IsChecked = true;
             else mn_avi_dec_avi.IsChecked = true;
-            
+
             if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DirectShowSource) mn_mpg_dec_ds.IsChecked = true;
             else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DSS2) mn_mpg_dec_ds2.IsChecked = true;
             else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.FFmpegSource) mn_mpg_dec_ff.IsChecked = true;
@@ -2111,7 +2149,7 @@ namespace XviD4PSP
             else menu_auto_volume_onexp.IsChecked = true;
 
             cmenu_is_always_delete_encoded.IsChecked = Settings.AutoDeleteTasks;
-            
+
             //Установка параметров регулятора громкости
             slider_Volume.Value = Settings.VolumeLevel; //Установка значения громкости из реестра..
             VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //.. и пересчет его для ДиректШоу
@@ -2123,12 +2161,7 @@ namespace XviD4PSP
 
             check_force_film.IsChecked = Settings.DGForceFilm;
             check_assume_fps.IsChecked = Settings.FFmpegAssumeFPS;
-
-            if (Settings.OldSeeking)
-            {
-                check_old_seeking.IsChecked = true;
-                OldSeeking = true;
-            }
+            check_old_seeking.IsChecked = OldSeeking = Settings.OldSeeking;
         }
 
         private void Languages_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -2322,25 +2355,44 @@ namespace XviD4PSP
             }
         }
 
-        private void check_engine_mediabridge_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void player_engine_Click(object sender, RoutedEventArgs e)
         {
-            check_engine_mediabridge.IsChecked = true;
+            if (Settings.PlayerEngine.ToString() == ((MenuItem)sender).Header.ToString()) return;
+            
+            PlayState cstate = currentState;
+            if (m != null) CloseClip();
+            
+            //Удаляем старое
             if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
             {
-                PlayState cstate = currentState;
-
-                if (m != null)
-                    CloseClip();
-
-                //remove events
                 this.LocationChanged -= new EventHandler(MainWindow_LocationChanged);
                 this.SizeChanged -= new SizeChangedEventHandler(MainWindow_SizeChanged);
                 this.grid_tasks.SizeChanged -= new SizeChangedEventHandler(grid_tasks_SizeChanged);
-                this.grid_player_window.MouseDown -= new MouseButtonEventHandler(Direct_Show_Mouse_Click); //мышь для Фуллскрина при ДиректШоу
-                this.grid_player_buttons.MouseDown -= new MouseButtonEventHandler(Direct_Show_Mouse_Click); //мышь для Фуллскрина при ДиректШоу
-
+                
                 source.RemoveHook(new HwndSourceHook(WndProc));
+            }
+            else
+            {
+                VideoElement.Visibility = Visibility.Collapsed;
+                VideoElement.MediaOpened -= new RoutedEventHandler(VideoElement_MediaOpened);
+                VideoElement.MediaEnded -= new RoutedEventHandler(VideoElement_MediaEnded);
+            }
 
+            //Добавляем новое
+            if (((MenuItem)sender).Header.ToString() == "DirectShow")
+            {
+                this.LocationChanged += new EventHandler(MainWindow_LocationChanged);
+                this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
+                this.grid_tasks.SizeChanged += new SizeChangedEventHandler(grid_tasks_SizeChanged);
+
+                source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+                source.AddHook(new HwndSourceHook(WndProc));
+
+                check_engine_directshow.IsChecked = true;
+                Settings.PlayerEngine = Settings.PlayerEngines.DirectShow;
+            }
+            else
+            {
                 //set media element state for video loading
                 VideoElement.LoadedBehavior = MediaState.Manual;
                 //VideoElement.UnloadedBehavior = MediaState.Stop;
@@ -2349,57 +2401,43 @@ namespace XviD4PSP
                 //add new events
                 VideoElement.MediaOpened += new RoutedEventHandler(VideoElement_MediaOpened);
                 VideoElement.MediaEnded += new RoutedEventHandler(VideoElement_MediaEnded);
-                VideoElement.MouseDown += new MouseButtonEventHandler(VideoElement_MouseDown);
-                //VisualTarget.Rendering += new EventHandler(VisualTarget_Rendering);
 
-                VideoElement.Visibility = Visibility.Visible;
-
-                currentState = cstate;
                 isAudioOnly = false;
-
+                check_engine_mediabridge.IsChecked = true;
                 Settings.PlayerEngine = Settings.PlayerEngines.MediaBridge;
-                if (m != null)
-                {
-                    LoadVideo(MediaLoad.update);
-                }
+            }
+
+            currentState = cstate;
+
+            //Обновляем превью
+            if (m != null)
+            {
+                LoadVideo(MediaLoad.update);
             }
         }
 
-        private void check_engine_directshow_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void scriptview_Click(object sender, RoutedEventArgs e)
         {
-            check_engine_directshow.IsChecked = true;
-            if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
+            if (((MenuItem)sender).Header.ToString() == "ScriptView")
             {
-                PlayState cstate = currentState;
+                Settings.ScriptView = true;
+                this.isAudioOnly = false;
+                mn_scriptview.IsChecked = cmn_scriptview.IsChecked = true;
+                button_save_script.Visibility = button_fullscreen.Visibility = button_avsp.Visibility = button_play_script.Visibility = Visibility.Visible;
+                button_play.Visibility = button_frame_back.Visibility = button_frame_forward.Visibility = slider_pos.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                Settings.ScriptView = false;
+                mn_preview.IsChecked = cmn_preview.IsChecked = true;
+                button_save_script.Visibility = button_fullscreen.Visibility = button_avsp.Visibility = button_play_script.Visibility = Visibility.Collapsed;
+                button_play.Visibility = button_frame_back.Visibility = button_frame_forward.Visibility = slider_pos.Visibility = Visibility.Visible;
+            }
 
-                if (m != null)
-                    CloseClip();
-
-                //remove events
-                VideoElement.MediaOpened -= new RoutedEventHandler(VideoElement_MediaOpened);
-                VideoElement.MediaEnded -= new RoutedEventHandler(VideoElement_MediaEnded);
-                VideoElement.MouseDown -= new MouseButtonEventHandler(VideoElement_MouseDown);
-                //VisualTarget.Rendering -= new EventHandler(VisualTarget_Rendering);
-
-                //add new events
-                this.LocationChanged += new EventHandler(MainWindow_LocationChanged);
-                this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
-                this.grid_tasks.SizeChanged += new SizeChangedEventHandler(grid_tasks_SizeChanged);
-                this.grid_player_window.MouseDown += new MouseButtonEventHandler(Direct_Show_Mouse_Click); //мышь для Фуллскрина при ДиректШоу
-                this.grid_player_buttons.MouseDown += new MouseButtonEventHandler(Direct_Show_Mouse_Click); //мышь для Фуллскрина при ДиректШоу
-
-                source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
-                source.AddHook(new HwndSourceHook(WndProc));
-
-                VideoElement.Visibility = Visibility.Collapsed;
-
-                currentState = cstate;
-
-                Settings.PlayerEngine = Settings.PlayerEngines.DirectShow;
-                if (m != null)
-                {
-                    LoadVideo(MediaLoad.update);
-                }
+            //Обновляем превью
+            if (m != null)
+            {
+                LoadVideo(MediaLoad.update);
             }
         }
 
@@ -3267,15 +3305,19 @@ namespace XviD4PSP
                 ErrorExeption(ex.Message);
             }
         }
- 
+
         private void grid_player_window_DragEnter(object sender, System.Windows.DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
                 e.Effects = DragDropEffects.All;
+                e.Handled = true;
+            }
         }
 
         private void grid_player_window_Drop(object sender, System.Windows.DragEventArgs e)
         {
+            e.Handled = true;
             if (((string[])e.Data.GetData(DataFormats.FileDrop)).Length > 1) //Мульти-открытие
             {
                 PauseAfterFirst = Settings.BatchPause;
@@ -3848,10 +3890,10 @@ namespace XviD4PSP
 
         public void SwitchToFullScreen()
         {
-            if (this.isAudioOnly || this.graphBuilder == null) return;
+            if (this.isAudioOnly || (this.graphBuilder == null && script_box.Visibility != Visibility.Visible)) return;
 
             //если не Фуллскрин, то делаем Фуллскрин
-            if (isFullScreen == false)
+            if (!isFullScreen)
             {
                 this.isFullScreen = true;
                 oldstate = this.WindowState;
@@ -3872,7 +3914,7 @@ namespace XviD4PSP
                 this.grid_player_window.Margin = new Thickness(0, 0, 0, 0);//
 
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) MoveVideoWindow();
-                else this.VideoElement.Margin = new Thickness(0, 0, 0, 0);
+                this.VideoElement.Margin = script_box.Margin = new Thickness(0, 0, 0, 38);
             }
             else
             {
@@ -3890,13 +3932,12 @@ namespace XviD4PSP
                 this.WindowState = oldstate; //размер окна (сохранённый)
                 this.WindowStyle = System.Windows.WindowStyle.SingleBorderWindow;
                 this.grid_top.Visibility = Visibility.Visible;
-                this.slider_pos.Visibility = Visibility.Visible;
                 this.LayoutRoot.Background = oldbrush;
                 this.grid_player_buttons.Margin = new Thickness(195.856, 0, 0, 0); //Установить дефолтные отступы для панели управления плейера              
                 this.isFullScreen = false;
 
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) MoveVideoWindow();
-                else this.VideoElement.Margin = new Thickness(8, 56, 8, 8);
+                this.VideoElement.Margin = script_box.Margin = new Thickness(8, 56, 8, 8);
             }
             slider_pos.Focus();
         }
@@ -3920,12 +3961,12 @@ namespace XviD4PSP
                 if (mediaload != MediaLoad.update)
                     this.currentState = PlayState.Init;
             }
-
-            if (this.VideoElement.Source != null)
+            else if (this.VideoElement.Source != null)
             {
                 VideoElement.Stop();
                 VideoElement.Close();
                 VideoElement.Source = null;
+                VideoElement.Visibility = Visibility.Collapsed;
                 if (mediaload != MediaLoad.update)
                     this.currentState = PlayState.Init;
                 if (this.graphBuilder != null)
@@ -3947,6 +3988,12 @@ namespace XviD4PSP
                 Thread.Sleep(100);
                 string url = "MediaBridge://MyDataString";
                 MediaBridge.MediaBridgeManager.UnregisterCallback(url);
+            }
+            else if (script_box.Visibility == Visibility.Visible)
+            {
+                script_box.Clear();
+                script_box.Visibility = Visibility.Collapsed;
+                this.currentState = PlayState.Init;
             }
 
             //update titles
@@ -4272,8 +4319,7 @@ namespace XviD4PSP
                 {
                     hr = this.mediaControl.Stop();
 
-                    if (mediaload != MediaLoad.update)
-                        this.currentState = PlayState.Stopped;
+                    this.currentState = PlayState.Stopped;
 
                     // Seek to the beginning
                     hr = this.mediaSeeking.SetPositions(pos, AMSeekingSeekingFlags.AbsolutePositioning, null, AMSeekingSeekingFlags.NoPositioning);
@@ -4289,8 +4335,7 @@ namespace XviD4PSP
             if (this.VideoElement.Source != null)
             {
                 VideoElement.Stop();
-                if (mediaload != MediaLoad.update)
-                    this.currentState = PlayState.Stopped;
+                this.currentState = PlayState.Stopped;
                 SetPlayIcon();
             }
         }
@@ -4487,45 +4532,13 @@ namespace XviD4PSP
             StopClip();
         }
 
-        private void VisualTarget_Rendering(object sender, EventArgs e)
-        {
-           /* if (VideoElement.NaturalDuration.HasTimeSpan && this.VideoElement.Source != null)
-            {
-                progress_top.Width = (VideoElement.Position.TotalSeconds / VideoElement.NaturalDuration.TimeSpan.TotalSeconds) * progress_back.ActualWidth;
-                TimeSpan tCode = TimeSpan.Parse(VideoElement.Position.ToString().Split('.')[0]);
-                textbox_time.Text = tCode.ToString();
-
-                Visual visual = Mouse.Captured as Visual;
-                if (visual == null)
-                {
-                    slider_pos.Value = VideoElement.Position.TotalSeconds;
-                }
-            } */
-        }
-
-        private void VideoElement_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ClickCount == 1 &&
-                e.ChangedButton == MouseButton.Left &&
-                VideoElement.Source != null)
-            {
-                PauseClip();
-            }
-            else if (e.ClickCount == 2 &&
-                e.ChangedButton == MouseButton.Left &&
-                VideoElement.Source != null)
-            {
-                PauseClip();
-                SwitchToFullScreen();
-            }
-        }
-
         private void PlayWithMediaBridge(string filepath)
         {
             this.filepath = filepath;
             string url = "MediaBridge://MyDataString";
             MediaBridge.MediaBridgeManager.RegisterCallback(url, BridgeCallback);
 
+            VideoElement.Visibility = Visibility.Visible;
             VideoElement.Source = new Uri(url);
             
             if (currentState != PlayState.Running) //Открытие по-дефолту, сразу на паузе
@@ -5222,8 +5235,8 @@ namespace XviD4PSP
                 VolumeMinus();
         }
 
-        //Обработка двойного щелчка мыши для ДиректШоу
-        private void Direct_Show_Mouse_Click(object sender, MouseButtonEventArgs e)
+        //Обработка двойного щелчка мыши для плейера
+        private void Player_Mouse_Click(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2 && e.ChangedButton == MouseButton.Left)
                 SwitchToFullScreen();
@@ -5666,6 +5679,67 @@ namespace XviD4PSP
             }
             else 
                 new Message(this).ShowMessage(Languages.Translate("Can`t find file") + ": " + file, Languages.Translate("Error"), Message.MessageStyle.Ok);
+        }
+
+        private void button_apply_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null) return;
+            m.script = script_box.Text;
+            string preview_script = AviSynthScripting.GetPreviewScript(m);
+            AviSynthScripting.WriteScriptToFile(preview_script, "preview");
+            AviSynthScripting.WriteScriptToFile(m.script, "AvsP");
+            UpdateTaskMassive(m);
+        }
+
+        private void button_avsp_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null) return;
+            Process pr = new Process();
+            ProcessStartInfo info = new ProcessStartInfo();
+            try
+            {
+                info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
+                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+                info.Arguments = Settings.TempPath + "\\AvsP.avs";
+                pr.StartInfo = info;
+                pr.Start();
+                pr.WaitForExit(); //Ждать завершения
+
+                //После завершения работы AvsP перечитываем измененный им файл AvsP.avs и вводим его содержимое в окно Фильтрация
+                using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AvsP.avs", System.Text.Encoding.Default))
+                    script_box.Text = m.script = sr.ReadToEnd();
+                UpdateTaskMassive(m);
+            }
+            catch (Exception ex)
+            {
+                new Message(this).ShowMessage(ex.Message, "Error");
+            }
+        }
+
+        private void button_fullscreen_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchToFullScreen();
+        }
+
+        private void button_play_script_Click(object sender, RoutedEventArgs e)
+        {
+            menu_play_in_Click(menu_playinmpc, null);
+        }
+
+        private void check_scriptview_white_Click(object sender, RoutedEventArgs e)
+        {
+            if (check_scriptview_white.IsChecked)
+            {
+                script_box.Background = Brushes.White;
+                script_box.Foreground = Brushes.Black;
+                Settings.ScriptView_Brushes = "#FFFFFFFF:#FF000000";
+            }
+            else
+            {
+                script_box.Background = Brushes.Transparent;
+                script_box.Foreground = Brushes.White;
+                Settings.ScriptView_Brushes = "#00000000:#FFFFFFFF";
+            }
         }
     }
 }

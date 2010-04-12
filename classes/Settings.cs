@@ -1947,5 +1947,47 @@ namespace XviD4PSP
                 SetString("RecentFiles", value);
             }
         }
+
+        public static bool ScriptView
+        {
+            get
+            {
+                object value = GetValue("ScriptView");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("ScriptView", value);
+            }
+        }
+
+        //Цвет фона:текста для окна ScriptView
+        public static string ScriptView_Brushes
+        {           
+            get
+            {
+                object value = GetValue("ScriptView_Brushes");
+                if (value == null)
+                {
+                    SetString("ScriptView_Brushes", "#FFFFFFFF:#FF000000");
+                    return "#FFFFFFFF:#FF000000";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("ScriptView_Brushes", value);
+            }
+        }
     }
 }
