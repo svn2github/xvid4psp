@@ -1,5 +1,27 @@
+XviD4PSP 5.0.37.8 r132->r134 15.04.10, основные изменения:
+
+>>> (r134) Окно Разрешение/Аспект: добавлена вкладка Manual, для ручного ввода всех параметров.
+>>> (r133) Добавлен режим превью ScriptView. В этом режиме AviSynth не загружается, а вместо изображения выводится текст скрипта.
+           Как результат, быстрое переключение между форматами, пресетами фильтрации, и во всех других случаях, когда требуется
+           загрузка/обновление превью; лучшая совместимость с CUDA-декодерами. Переключатель режима находится в меню
+           Настройки->Джвижок плейера, а так-же в контекстном меню плейера (правый клик по области превью). (Idea by Procrustean).
+
+
+-----------------------------------
+
 XviD4PSP 5.0.37.6 r65 -> 5.0.37.8 r132 30.03.10, основные изменения:
 
+---
+Обновлен:  FFmpegSource2 (2.14 r309, http://code.google.com/p/ffmpegsource)
+Обновлен:  MediaInfo (0.7.30, http://mediainfo.sourceforge.net)
+Обновлен:  FFmpeg (unofficial build r22716, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
+Обновлен:  MKVtoolnix (3.3.0, http://www.bunkus.org/videotools/mkvtoolnix)
+Обновлен:  DGIndex (1.5.8, http://neuron2.net)
+Обновлен:  BASS (2.4.5.0, http://www.un4seen.com/bass.html)
+Обновлен:  Aften (aften-git-20091226-icl11_1_054-win32-bin SSE3, http://aften.sourceforge.net, http://code.google.com/p/wavtoac3encoder)
+Обновлен:  x264.exe, x264_64.exe (r1510,  http://x264.nl)
+Обновлен:  Набор плагинов и пресетов фильтрации by Tempter57.
+---
 >>> (r132) Обновлен Испанский перевод (by Tuko).
 >>> (r131) Окно настроек x264.exe: добавлен пресет Superfast (x264 r1510+); добавлены --qpmax, --qpstep, --min-keyint, --keyint,
            --nal-hrd, --aud; некоторые другие изменения.

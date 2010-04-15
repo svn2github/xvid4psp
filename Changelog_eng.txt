@@ -1,5 +1,27 @@
+XviD4PSP 5.0.37.8 r132->r134 15.04.10, main changes:
+
+>>> (r134) Resolution/Aspect window: added a new tab "Manual" (it allows user to specify all values manually).
+>>> (r133) Added switcher to select preview mode (Preview/ScriptView). In the ScriptView-mode AviSynth is not loaded, as result
+           very fast switching between filtering presets, formats, and in all other cases where preview must be loaded/updated;
+           more capability with CUDA-decoders. This switcher available in the "Settings->Player engine" menu, and also in the
+           player context menu (right-clik on the player area). (Idea by Procrustean).
+
+
+-----------------------------------
+
 XviD4PSP 5.0.37.6 r65 -> 5.0.37.8 r132 30.03.10, main changes:
 
+---
+Updated:   FFmpegSource2 (2.14 r309, http://code.google.com/p/ffmpegsource)
+Updated:   MediaInfo (0.7.30, http://mediainfo.sourceforge.net)
+Updated:   FFmpeg (unofficial build r22716, http://ffmpeg.org, http://ffmpeg.arrozcru.org/autobuilds)
+Updated:   MKVtoolnix (3.3.0, http://www.bunkus.org/videotools/mkvtoolnix)
+Updated:   DGIndex (1.5.8, http://neuron2.net)
+Updated:   BASS (2.4.5.0, http://www.un4seen.com/bass.html)
+Updated:   Aften (aften-git-20091226-icl11_1_054-win32-bin SSE3, http://aften.sourceforge.net, http://code.google.com/p/wavtoac3encoder)
+Updated:   x264.exe, x264_64.exe (r1510,  http://x264.nl)
+Updated:   Package of plugins and filtering presets by Tempter57.
+---
 >>> (r132) Updated Spanish translation (by Tuko).
 >>> (r131) x264.exe settings window: added Superfast preset (x264 r1510+); added --qpmax, --qpstep, --min-keyint, --keyint, --nal-hrd,
            --aud; some other changes.

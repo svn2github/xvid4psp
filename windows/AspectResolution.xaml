@@ -124,12 +124,57 @@
                                     <ComboBox x:Name="combo_modh" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_modh_SelectionChanged" Width="46" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" IsEnabled="False"/>
                                     <ComboBox x:Name="combo_modw" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_modw_SelectionChanged" Width="46" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right" IsEnabled="False"/>
                                 </DockPanel>
-
                             </StackPanel>
                       </GroupBox>    
                </Grid> 
             </TabItem>
-        </TabControl>
+                <TabItem Header="Manual" x:Name="tab_manual">
+                    <Grid Width="380" Height="Auto">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel>
+                            <DockPanel Margin="16,8,16,0" Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" Content="{Binding Path=Content, ElementName=text_source_res}" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto"/>
+                                <Label OpacityMask="{x:Null}" Content="{Binding Path=Content, ElementName=text_resolution}" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="text_manual_res" Content="Output resolution:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                <TextBox x:Name="manual_h" Width="62" Height="Auto" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,0,0" Opacity="0.95" />
+                                <TextBox x:Name="manual_w" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,8,0" Opacity="0.95" />
+                            </DockPanel>
+                            <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="text_manual_outasp" Content="Output aspect: | " Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                <Button x:Name="button_calc_sar" Width="36" Height="22" FontSize="12" Content="SAR:" Click="button_calc_sar_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" HorizontalAlignment="Left" DockPanel.Dock="Left" Template="{DynamicResource GlassButton}" Margin="-4,0,0,-1"/>
+                                <TextBox x:Name="manual_outsar" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,0,0" Opacity="0.95" />
+                                <TextBox x:Name="manual_outaspect" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,8,0" Opacity="0.95" />
+                            </DockPanel>
+                            <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="text_manual_crop_tb" Content="Crop top, bottom:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                <TextBox x:Name="manual_crop_b" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,0,0" Opacity="0.95" />
+                                <TextBox x:Name="manual_crop_t" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,8,0" Opacity="0.95" />
+                            </DockPanel>
+                            <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="text_manual_crop_lr" Content="Crop left, right:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                <TextBox x:Name="manual_crop_r" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,0,0" Opacity="0.95" />
+                                <TextBox x:Name="manual_crop_l" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,8,0" Opacity="0.95" />
+                            </DockPanel>
+                            <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="text_manual_black" Content="Black width, height:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                <TextBox x:Name="manual_black_h" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,0,0" Opacity="0.95" />
+                                <TextBox x:Name="manual_black_w" Width="62" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,8,0" Opacity="0.95" />
+                            </DockPanel>
+                            <DockPanel Margin="16,0,16,6" Width="Auto" Height="Auto">
+                                <Label OpacityMask="{x:Null}" x:Name="text_manual_apply" Content="Apply:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                <Button x:Name="button_manual_apply" Width="132" Height="22" FontSize="12" Content="Apply" Click="button_manual_apply_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" HorizontalAlignment="Right" Template="{DynamicResource GlassButton}" Margin="0,3,0,0"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
         </Grid>
         <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
 			    <Button x:Name="button_cancel" Height="25" Content="Cancel" Click="button_cancel_Click" d:LayoutOverrides="Height" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="120,0,4,0"/>

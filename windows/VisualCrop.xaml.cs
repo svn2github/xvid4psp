@@ -57,7 +57,7 @@ namespace XviD4PSP
             PicBack.Opacity = Settings.VCropOpacity / 10.0;
             brightness = Settings.VCropBrightness * 10;
 
-            Title = m.inresw + "x" + m.inresh + " -> " + (m.inresw - left - right) + "x" + (m.inresh - top - bottom) + " (cropped size)";
+            ShowTitle();
             button_autocrop.Content = Languages.Translate("Analyse");
             button_cancel.Content = Languages.Translate("Cancel");
 
@@ -121,7 +121,7 @@ namespace XviD4PSP
                    System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
 
                 Pic.Source = picture;
-                Title = m.inresw + "x" + m.inresh + " -> " + (m.inresw - left - right) + "x" + (m.inresh - top - bottom) + " (cropped size)";
+                ShowTitle();
             }
             catch (Exception ex)
             {
@@ -337,8 +337,7 @@ namespace XviD4PSP
         
         private void WheelMouse(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
-            int d = 2;
-            if (e.Delta < 0) d = -2;
+            int d = (e.Delta < 0) ? -2 : 2;
             if (e.GetPosition(Pic).Y < Pic.ActualHeight / 3) numt.Value = numt.Value + d;         //Сверху
             else if (e.GetPosition(Pic).Y > Pic.ActualHeight / 1.5) numb.Value = numb.Value + d;  //Снизу
             else if (e.GetPosition(Pic).X < Pic.ActualWidth / 3) numl.Value = numl.Value + d;     //Слева
@@ -376,6 +375,26 @@ namespace XviD4PSP
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
             GreenLight = false; //Чтоб кроп не срабатывал при включении Фуллскрина
+        }
+
+        private void ShowTitle()
+        {
+            string modw, modh;
+            int cw = m.inresw - left - right, ch = m.inresh - top - bottom;
+            
+            if (cw % 16 == 0) modw = "16";
+            else if (cw % 8 == 0) modw = "8";
+            else if (cw % 4 == 0) modw = "4";
+            else if (cw % 2 == 0) modw = "2";
+            else modw = "1";
+
+            if (ch % 16 == 0) modh = "16";
+            else if (ch % 8 == 0) modh = "8";
+            else if (ch % 4 == 0) modh = "4";
+            else if (ch % 2 == 0) modh = "2";
+            else modh = "1";
+
+            Title = m.inresw + "x" + m.inresh + " -> " + cw + "x" + ch + " (" + modw + "x" + modh + ", cropped size)";
         }
     }
 }

@@ -1298,8 +1298,8 @@ namespace XviD4PSP
                 object value = GetValue("RecalculateAspect");
                 if (value == null)
                 {
-                    SetBool("RecalculateAspect", false);
-                    return false;
+                    SetBool("RecalculateAspect", true);
+                    return true;
                 }
                 else
                 {

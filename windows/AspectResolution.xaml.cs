@@ -32,25 +32,26 @@ namespace XviD4PSP
             //переводим
             button_cancel.Content = Languages.Translate("Cancel");
             button_ok.Content = Languages.Translate("OK");
-            button_refresh.Content = Languages.Translate("Apply");
+            button_refresh.Content = button_manual_apply.Content = text_manual_apply.Content = Languages.Translate("Apply");
             button_refresh.ToolTip = Languages.Translate("Refresh preview");
 
             text_resolution.Content = m.inresw + "x" + m.inresh;
             text_source_res.Content = Languages.Translate("Input resolution:");
-            text_final_res.Content = Languages.Translate("Output resolution:");
+            text_final_res.Content = text_manual_res.Content = Languages.Translate("Output resolution:");
             text_resizer.Content = Languages.Translate("Resize filter:");
             text_aspectfix.Content = Languages.Translate("Aspect adjusting method:");
             text_inaspect.Content = Languages.Translate("Input aspect:");
-            text_outaspect.Content = Languages.Translate("Output aspect:");
-            text_crop_tb.Content = Languages.Translate("Crop top, bottom:");
-            text_crop_lr.Content = Languages.Translate("Crop left, right:");
-            combo_crop_b.ToolTip = Languages.Translate("Bottom");
-            combo_crop_t.ToolTip = Languages.Translate("Top");
-            combo_crop_l.ToolTip = Languages.Translate("Left");
-            combo_crop_r.ToolTip = Languages.Translate("Right");
-            text_black.Content = Languages.Translate("Black width, height:");
-            combo_black_h.ToolTip = Languages.Translate("Height");
-            combo_black_w.ToolTip = Languages.Translate("Width");
+            //text_outaspect.Content = Languages.Translate("Output aspect:");
+            text_manual_outasp.Content = (text_outaspect.Content = Languages.Translate("Output aspect:")) + " | ";
+            text_crop_tb.Content = text_manual_crop_tb.Content = Languages.Translate("Crop top, bottom:");
+            text_crop_lr.Content = text_manual_crop_lr.Content = Languages.Translate("Crop left, right:");
+            text_black.Content = text_manual_black.Content = Languages.Translate("Black width, height:");
+            combo_crop_b.ToolTip = manual_crop_b.ToolTip = Languages.Translate("Bottom");
+            combo_crop_t.ToolTip = manual_crop_t.ToolTip = Languages.Translate("Top");
+            combo_crop_l.ToolTip = manual_crop_l.ToolTip = Languages.Translate("Left");
+            combo_crop_r.ToolTip = manual_crop_r.ToolTip = Languages.Translate("Right");
+            combo_black_h.ToolTip = manual_black_h.ToolTip = Languages.Translate("Height");
+            combo_black_w.ToolTip = manual_black_w.ToolTip = Languages.Translate("Width");
             text_autocropsens.Content = Languages.Translate("Autocrop sensivity:");
             text_autocropframes.Content = Languages.Translate("Frames to analyze:");
             text_aspecterror.Content = Languages.Translate("Aspect error:");
@@ -71,7 +72,13 @@ namespace XviD4PSP
             text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
             text_mod.Content = Languages.Translate("Allow resolutions divisible by:");
-
+            manual_outaspect.ToolTip = Languages.Translate("In case of non-anamorphic encoding: Aspect = Width/Height.") +
+                "\r\n" + Languages.Translate("In case of anamorphic encoding: Aspect = (Width/Height)*SAR.");
+            manual_outsar.ToolTip = Languages.Translate("Leave it empty for non-anamorphic encoding.") +
+                "\r\n" + Languages.Translate("For anamorphic encoding you must specify SAR.");
+            button_calc_sar.ToolTip = Languages.Translate("Calculate SAR for specified output resolution and aspect.") +
+                "\r\n" + Languages.Translate("It must be used for anamorphic encoding only!"); ;
+            
             //ресайзеры
             foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
                 combo_resizer.Items.Add(resizer);
@@ -135,6 +142,8 @@ namespace XviD4PSP
             LoadOutAspect();
 
             CalculateMod();
+
+            FillManualBox();
 
             ShowDialog();
 		}
@@ -382,6 +391,7 @@ namespace XviD4PSP
             ArrayList reswlist = Format.GetResWList(m);
             foreach (int r in reswlist)
                 combo_width.Items.Add(r);
+            if (!combo_width.Items.Contains(m.outresw)) combo_width.Items.Add(m.outresw);
             combo_width.SelectedItem = m.outresw;
 
             //высота
@@ -389,6 +399,7 @@ namespace XviD4PSP
             ArrayList reshlist = Format.GetResHList(m);
             foreach (int r in reshlist)
                 combo_height.Items.Add(r);
+            if (!combo_height.Items.Contains(m.outresh)) combo_height.Items.Add(m.outresh);
             combo_height.SelectedItem = m.outresh;
         }
 
@@ -521,6 +532,7 @@ namespace XviD4PSP
             p.Refresh(m.script);
 
             CalculateMod();
+            FillManualBox();
         }
 
         public static Massive FixAspectDifference(Massive mass)
@@ -554,23 +566,21 @@ namespace XviD4PSP
             {
                 //mass.sar = null;
                 
-                //Считаем чистый исходный аспект (без учета откропленного)
-                double inputasp = ((double)mass.inresw / (double)mass.inresh) * mass.pixelaspect; 
+                //Считаем чистый исходный аспект (без учета откропленного) ..или все-же с учетом..
+                double inputasp = ((double)(mass.inresw - mass.cropl - mass.cropr) / (double)(mass.inresh - mass.cropt - mass.cropb)) * mass.pixelaspect;
+                //((double)mass.inresw / (double)mass.inresh) * mass.pixelaspect; 
+                
                 if (mass.inaspect < mass.outaspect)
                 {
-                    //double diff = mass.inresh - (mass.inresw / mass.outaspect);
-                    
-                    //Считаем сколько нужно откропить, с учетом аспекта
-                    double diff = mass.inresh - (int)(((double)mass.inresh * inputasp) / mass.outaspect);
+                    //Считаем сколько нужно откропить, с учетом аспекта и уже откропленного
+                    double diff = (mass.inresh - mass.cropt - mass.cropb) - (int)(((double)(mass.inresh - mass.cropt - mass.cropb) * inputasp) / mass.outaspect);
                     mass.cropt = Calculate.GetValid((int)(diff / 2) + mass.cropt_copy, 2);
                     mass.cropb = Calculate.GetValid((int)(diff / 2) + mass.cropb_copy, 2);
                 }
                 else if (mass.inaspect > mass.outaspect)
                 {
-                    //double diff = mass.inresw - (mass.inresh * mass.outaspect);
-                    
-                    //Считаем сколько нужно откропить, с учетом аспекта
-                    double diff = mass.inresw - (int)((double)mass.inresw / inputasp) * mass.outaspect;                    
+                    //Считаем сколько нужно откропить, с учетом аспекта и уже откропленного
+                    double diff = (mass.inresw - mass.cropl - mass.cropr) - (int)((double)(mass.inresw - mass.cropl - mass.cropr) / inputasp) * mass.outaspect;
                     mass.cropl = Calculate.GetValid((int)(diff / 2) + mass.cropl_copy, 2);
                     mass.cropr = Calculate.GetValid((int)(diff / 2) + mass.cropr_copy, 2);
                 }
@@ -593,33 +603,51 @@ namespace XviD4PSP
 
         private void LoadCrop()
         {
+            combo_crop_l.Items.Clear();
+            combo_crop_r.Items.Clear();
+            combo_crop_t.Items.Clear();
+            combo_crop_b.Items.Clear();
+            
             for (int n = 0; n < (m.inresw / 2); n += 2)
             {
                 combo_crop_l.Items.Add(n);
                 combo_crop_r.Items.Add(n);
             }
-            combo_crop_l.SelectedItem = m.cropl;
-            combo_crop_r.SelectedItem = m.cropr;
             for (int n = 0; n < (m.inresh / 2); n += 2)
             {
                 combo_crop_t.Items.Add(n);
                 combo_crop_b.Items.Add(n);
             }
-            combo_crop_b.SelectedItem = m.cropb;
+
+            if (!combo_crop_l.Items.Contains(m.cropl)) combo_crop_l.Items.Add(m.cropl);
+            if (!combo_crop_r.Items.Contains(m.cropr)) combo_crop_r.Items.Add(m.cropr);
+            if (!combo_crop_t.Items.Contains(m.cropt)) combo_crop_t.Items.Add(m.cropt);
+            if (!combo_crop_b.Items.Contains(m.cropb)) combo_crop_b.Items.Add(m.cropb);
+
+            combo_crop_l.SelectedItem = m.cropl;
+            combo_crop_r.SelectedItem = m.cropr;
             combo_crop_t.SelectedItem = m.cropt;
+            combo_crop_b.SelectedItem = m.cropb;
         }
 
         private void LoadBlack()
         {
+            combo_black_w.Items.Clear();
+            combo_black_h.Items.Clear();
+            
             for (int n = 0; n < (m.outresw / 2); n += 2)
             {
                 combo_black_w.Items.Add(n);
             }
-            combo_black_w.SelectedItem = m.blackw;
             for (int n = 0; n < (m.outresh / 2); n += 2)
             {
                 combo_black_h.Items.Add(n);
             }
+
+            if (!combo_black_w.Items.Contains(m.blackw)) combo_black_w.Items.Add(m.blackw);
+            if (!combo_black_h.Items.Contains(m.blackh)) combo_black_h.Items.Add(m.blackh);
+
+            combo_black_w.SelectedItem = m.blackw;
             combo_black_h.SelectedItem = m.blackh;
         }
 
@@ -638,7 +666,6 @@ namespace XviD4PSP
                 Settings.AutocropFrames = (int)combo_autocropframes.SelectedItem;
             }
         }
-
 
         private void check_recalculate_aspect_Click(object sender, RoutedEventArgs e)
         {
@@ -735,14 +762,106 @@ namespace XviD4PSP
         {
             if (m.outresw % 16 == 0) combo_width.ToolTip = ":16 ";
             else if (m.outresw % 8 == 0) combo_width.ToolTip = ":8 ";
-            else combo_width.ToolTip = ":4 ";
+            else if (m.outresw % 4 == 0) combo_width.ToolTip = ":4 ";
+            else if (m.outresw % 2 == 0) combo_width.ToolTip = ":2 ";
+            else combo_width.ToolTip = ":1 ";
             combo_width.ToolTip += Languages.Translate("Width");
+            manual_w.ToolTip = combo_width.ToolTip;
 
             if (m.outresh % 16 == 0) combo_height.ToolTip = ":16 ";
             else if (m.outresh % 8 == 0) combo_height.ToolTip = ":8 ";
             else if (m.outresh % 4 == 0) combo_height.ToolTip = ":4 ";
-            else combo_height.ToolTip = ":2 ";
+            else if (m.outresh % 2 == 0) combo_height.ToolTip = ":2 ";
+            else combo_height.ToolTip = ":1 ";
             combo_height.ToolTip += Languages.Translate("Height");
+            manual_h.ToolTip = combo_height.ToolTip;
+        }
+
+        private void FillManualBox()
+        {
+            manual_w.Text = m.outresw.ToString();
+            manual_h.Text = m.outresh.ToString();
+            manual_crop_l.Text = m.cropl.ToString();
+            manual_crop_r.Text = m.cropr.ToString();
+            manual_crop_t.Text = m.cropt.ToString();
+            manual_crop_b.Text = m.cropb.ToString();
+            manual_black_w.Text = m.blackw.ToString();
+            manual_black_h.Text = m.blackh.ToString();
+            manual_outsar.Text = m.sar;
+            manual_outaspect.Text = Calculate.ConvertDoubleToPointString(m.outaspect, 4);
+        }
+
+        private void button_manual_apply_Click(object sender, RoutedEventArgs e)
+        {
+            int var;
+            if (int.TryParse(manual_w.Text, out var)) m.outresw = var;
+            if (int.TryParse(manual_h.Text, out var)) m.outresh = var;
+            if (int.TryParse(manual_crop_l.Text, out var)) m.cropl = m.cropl_copy = var;
+            if (int.TryParse(manual_crop_r.Text, out var)) m.cropr = m.cropr_copy = var;
+            if (int.TryParse(manual_crop_t.Text, out var)) m.cropt = m.cropt_copy = var;
+            if (int.TryParse(manual_crop_b.Text, out var)) m.cropb = m.cropb_copy = var;
+            if (int.TryParse(manual_black_w.Text, out var)) m.blackw = var;
+            if (int.TryParse(manual_black_h.Text, out var)) m.blackh = var;
+
+            //Все-же немного автоматики.. смотрим, что вписано в SAR, и пересчитываем аспект под этот SAR.
+            //Если в SAR пусто или недопустимое значение, то аспект = ширина/высота.
+            if (manual_outsar.Text.Length > 2 && manual_outsar.Text.Contains(":"))
+            {
+                int n, d;
+                string[] sar = manual_outsar.Text.Split(new string[] { ":" }, StringSplitOptions.None);
+                if (sar.Length == 2 && int.TryParse(sar[0], out n) && int.TryParse(sar[1], out d))
+                {
+                    m.sar = n.ToString() + ":" + d.ToString();
+                    manual_outaspect.Text = Calculate.ConvertDoubleToPointString((m.outaspect = ((double)m.outresw / (double)m.outresh) * ((double)n / (double)d)), 4);
+                }
+                else
+                {
+                    m.sar = "";
+                    manual_outaspect.Text = Calculate.ConvertDoubleToPointString((m.outaspect = (double)m.outresw / (double)m.outresh), 4);
+                }
+            }
+            else
+            {
+                m.sar = "";
+                manual_outaspect.Text = Calculate.ConvertDoubleToPointString((m.outaspect = (double)m.outresw / (double)m.outresh), 4);
+            }
+
+            if (m.sar != "" && m.sar != "1:1") m.aspectfix = AspectFixes.SAR;
+            else if (m.aspectfix == AspectFixes.SAR) m.aspectfix = AspectFixes.Disabled;
+            combo_aspectfix.SelectedItem = m.aspectfix.ToString();
+
+            if (Settings.RecalculateAspect)
+                m.inaspect = ((double)(m.inresw - m.cropl - m.cropr) / (double)(m.inresh - m.cropt - m.cropb)) * m.pixelaspect;
+
+            LoadResolutions();
+            LoadInAspect();
+            LoadOutAspect();
+            LoadCrop();
+            LoadBlack();
+
+            Refresh();
+        }
+
+        private void button_calc_sar_Click(object sender, RoutedEventArgs e)
+        {
+            int w, h;
+            double asp = 0;
+
+            //Определяем требуемый аспект
+            if (manual_outaspect.Text.Length > 2 && manual_outaspect.Text.Contains("/"))
+            {
+                int n, d;
+                string[] a = manual_outaspect.Text.Split(new string[] { "/" }, StringSplitOptions.None);
+                if (a.Length == 2 && int.TryParse(a[0], out n) && int.TryParse(a[1], out d))
+                    asp = (double)n / (double)d;
+                else asp = Calculate.ConvertStringToDouble(manual_outaspect.Text);
+            }
+            else asp = Calculate.ConvertStringToDouble(manual_outaspect.Text);
+
+            if (int.TryParse(manual_w.Text, out w) && int.TryParse(manual_h.Text, out h) && asp > 0)
+            {
+                manual_outsar.Text = Calculate.CalculateSAR(w, h, asp);
+            }
         }
 	}
 }
