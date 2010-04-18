@@ -202,6 +202,9 @@ namespace XviD4PSP
            //Пересчитываем duration
            m.outduration = TimeSpan.FromSeconds((double)m.outframes / Calculate.ConvertStringToDouble(m.outframerate));
 
+           //Пересчитываем кадр для THM
+           m.thmframe = m.outframes / 2;
+
            return m;
        }
 

@@ -1452,9 +1452,6 @@ namespace XviD4PSP
                     //проверка на размер
                     x.outfilesize = Calculate.GetEncodingSize(x);
 
-                    //по умолчанию середина для картинки
-                    x.thmframe = x.outframes / 2;
-
                     //запрежаем профиль кодирования если нет звука
                     if (x.inaudiostreams.Count == 0 || x.outaudiostreams.Count == 0)
                     {
@@ -4892,7 +4889,14 @@ namespace XviD4PSP
 
                         System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
                         if (ext == ".png") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                        if (ext == ".jpg") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        if (ext == ".jpg")
+                        {
+                            System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
+                            System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
+                            encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
+
+                            bmp.Save(s.FileName, info[1], encoderParameters);
+                        }
                         if (ext == ".bmp") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
 
                         //завершение
@@ -4955,7 +4959,7 @@ namespace XviD4PSP
                             {
                                 System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(144, 80);
                                 System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp);
-                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                                 g.DrawImage(reader.ReadFrameBitmap(frame), 0, 0, 144, 80);
                                 bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
 
@@ -4974,21 +4978,46 @@ namespace XviD4PSP
                                 reader.Close();
                             }
                         }
-
+                        
                         if (ext == ".jpg")
                         {
                             AviSynthReader reader = new AviSynthReader();
                             reader.ParseScript(m.script);
 
                             if (m.format == Format.ExportFormats.Mp4PSPAVC ||
-                                m.format == Format.ExportFormats.Mp4PSPAVC ||
-                                m.format == Format.ExportFormats.Mp4PSPASP)
+                               m.format == Format.ExportFormats.Mp4PSPAVC ||
+                               m.format == Format.ExportFormats.Mp4PSPASP)
                             {
+                                //масштабируем изображение
+                                int sideHeight, sideWidth;
+                                //выбираем большую сторону, по которой изменяем изображение
+                                if (reader.Height < reader.Width)
+                                {
+                                    //если ширина больше высоты                                    
+                                    sideHeight = 121;
+                                    sideWidth = (int)((float)reader.Width * ((float)sideHeight / (float)reader.Height));
+                                }
+                                else
+                                {
+                                    //если высота больше ширины
+                                    sideWidth = 161;
+                                    sideHeight = (int)((float)reader.Height * ((float)sideWidth / (float)reader.Width));
+                                }
+
                                 System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(160, 120);
                                 System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp);
-                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
-                                g.DrawImage(reader.ReadFrameBitmap(frame), 0, 0, 160, 120);
-                                bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+                                //метод интерполяции при ресайзе
+                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+
+                                //процент cжатия jpg
+                                System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
+                                System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
+                                encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 92L);
+
+                                //вывод и запись изображения в файл
+                                g.DrawImage(reader.ReadFrameBitmap(frame), (int)(0.5 * (160 - (float)sideWidth)), (int)(0.5 * (120 - (float)sideHeight)), sideWidth, sideHeight);
+                                bmp.Save(s.FileName, info[1], encoderParameters);
 
                                 //завершение
                                 g.Dispose();
@@ -4998,7 +5027,12 @@ namespace XviD4PSP
                             else
                             {
                                 System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
-                                bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                                //сжатие jpg
+                                System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
+                                System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
+                                encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
+
+                                bmp.Save(s.FileName, info[1], encoderParameters);
 
                                 //завершение
                                 bmp.Dispose();
@@ -5359,6 +5393,7 @@ namespace XviD4PSP
             reader = null;
             m.outduration = TimeSpan.FromSeconds((double)m.outframes / fps);
             m.outfilesize = Calculate.GetEncodingSize(m);
+            m.thmframe = m.outframes / 2;
 
             UpdateTaskMassive(m);
         }

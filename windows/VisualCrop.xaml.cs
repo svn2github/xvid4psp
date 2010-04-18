@@ -61,7 +61,7 @@ namespace XviD4PSP
             button_autocrop.Content = Languages.Translate("Analyse");
             button_cancel.Content = Languages.Translate("Cancel");
 
-            slider_pos.Maximum = m.outframes;
+            slider_pos.Maximum = m.inframes;
             slider_pos.Value = (Settings.VCropFrame == "THM-frame") ? m.thmframe : 0;
 
             ShowFrame((int)slider_pos.Value);
