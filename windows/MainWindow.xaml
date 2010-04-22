@@ -415,7 +415,12 @@
 					</ListView.View>
 					<ListView.ContextMenu>
 						<ContextMenu x:Name = "cmenu_tasks" ClipToBounds="False">
-							<MenuItem x:Name = "cmenu_deselect" Click="cmenu_deselect_Click" Header="Deselect"/>
+							<MenuItem x:Name = "cmenu_up" Click="cmenu_move_task_Click" Header="Move up" StaysOpenOnClick="True"/>
+                            <MenuItem x:Name = "cmenu_down" Click="cmenu_move_task_Click" Header="Move down" StaysOpenOnClick="True"/>
+                            <MenuItem x:Name = "cmenu_first" Click="cmenu_move_task_Click" Header="Move to the first" StaysOpenOnClick="True"/>
+                            <MenuItem x:Name = "cmenu_last" Click="cmenu_move_task_Click" Header="Move to the last" StaysOpenOnClick="True"/>
+                            <Separator/>
+                            <MenuItem x:Name = "cmenu_deselect" Click="cmenu_deselect_Click" Header="Deselect"/>
 							<Separator/>
 							<MenuItem x:Name = "cmenu_reset_status" Click="cmenu_reset_status_Click" Header="Reset task status"/>
 							<Separator/>
@@ -423,7 +428,7 @@
 							<MenuItem x:Name = "cmenu_delete_encoded_tasks" Click="cmenu_delete_encoded_tasks_Click" Header="Delete encoded tasks"/>
 							<MenuItem x:Name = "cmenu_delete_all_tasks" Click="cmenu_delete_all_tasks_Click" Header="Delete all tasks"/>
 							<Separator/>
-							<CheckBox x:Name = "cmenu_is_always_delete_encoded" Checked="cmenu_is_always_delete_encoded_Checked" Unchecked="cmenu_is_always_delete_encoded_Unchecked" Content="Always delete from list encoded tasks" IsChecked="True"/>					
+							<MenuItem x:Name = "cmenu_is_always_delete_encoded" IsCheckable="True" Click="cmenu_is_always_delete_encoded_Click" Header="Always delete from list encoded tasks" StaysOpenOnClick="True"/>					
 						</ContextMenu>
 					</ListView.ContextMenu>
 				</ListView>

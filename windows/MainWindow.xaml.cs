@@ -1508,7 +1508,6 @@ namespace XviD4PSP
                         }
 
                         LoadVideo(MediaLoad.load);
-                        MenuHider(true); //Делаем пункты меню активными
                     }
 
                     //удаляем старый кеш
@@ -1807,12 +1806,15 @@ namespace XviD4PSP
                     slider_pos.Focus(); //Переводит фокус на полосу прокрутки видео
                 }
                 
+                if (mediaload == MediaLoad.load) 
+                    MenuHider(true); //Делаем пункты меню активными
+
                 textbox_name.Text = m.taskname;
             }
             catch (Exception ex)
             {
-                if (this.currentState != PlayState.Init)
-                    CloseClip();
+                CloseClip();
+                MenuHider(false); //Делаем пункты меню неактивными
 
                 m = null;
 
@@ -2014,11 +2016,15 @@ namespace XviD4PSP
                 button_play_script.ToolTip = Languages.Translate("Play in") + " Media Player Classic";
                 button_fullscreen.ToolTip = Languages.Translate("Fullscreen");
 
+                cmenu_up.Header = Languages.Translate("Move up");
+                cmenu_down.Header = Languages.Translate("Move down");
+                cmenu_first.Header = Languages.Translate("Move to the first");
+                cmenu_last.Header = Languages.Translate("Move to the last");
                 cmenu_deselect.Header = Languages.Translate("Deselect");
                 cmenu_delete_all_tasks.Header = Languages.Translate("Delete all tasks");
                 cmenu_delete_encoded_tasks.Header = Languages.Translate("Delete encoded tasks");
                 cmenu_delete_task.Header = Languages.Translate("Delete selected task");
-                cmenu_is_always_delete_encoded.Content = Languages.Translate("Always delete encoded tasks from list");
+                cmenu_is_always_delete_encoded.Header = Languages.Translate("Always delete encoded tasks from list");
                 cmenu_reset_status.Header = Languages.Translate("Reset task status");
 
                 menu_directx_update.Header = Languages.Translate("Update DirectX");
@@ -3355,9 +3361,7 @@ namespace XviD4PSP
             {
                 Task task = (Task)list_tasks.Items[list_tasks.SelectedIndex];
 
-                string script = null;
-                if (m != null)
-                    script = m.script;
+                string script = (m != null) ? m.script : "";
                 m = task.Mass.Clone();
 
                 LoadVideoPresets();
@@ -3394,8 +3398,27 @@ namespace XviD4PSP
                 if (m != null)
                     m.key = Settings.Key;
             }
+        }
 
-            MenuHider(true); //Делаем пункты меню активными
+        private void cmenu_move_task_Click(object sender, RoutedEventArgs e)
+        {
+            if (list_tasks.SelectedIndex != -1 && list_tasks.SelectedItem != null && list_tasks.Items.Count > 1)
+            {
+                int index = 0;
+                if (((MenuItem)sender).Name == "cmenu_up") index = list_tasks.SelectedIndex - 1;
+                else if (((MenuItem)sender).Name == "cmenu_down") index = list_tasks.SelectedIndex + 1;
+                else if (((MenuItem)sender).Name == "cmenu_last") index = list_tasks.Items.Count - 1;
+
+                if (index >= 0 && index < list_tasks.Items.Count && list_tasks.SelectedIndex != index)
+                {
+                    IsInsertAction = true;
+                    Task task = (Task)list_tasks.SelectedItem;
+                    list_tasks.Items.Remove(task);
+                    list_tasks.Items.Insert(index, task);
+                    list_tasks.SelectedIndex = index;
+                    IsInsertAction = false;
+                }
+            }
         }
 
         private void RemoveSelectedTask()
@@ -3642,16 +3665,9 @@ namespace XviD4PSP
             }
         }
 
-        private void cmenu_is_always_delete_encoded_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void cmenu_is_always_delete_encoded_Click(object sender, RoutedEventArgs e)
         {
-            if (cmenu_is_always_delete_encoded.IsFocused)
-                Settings.AutoDeleteTasks = cmenu_is_always_delete_encoded.IsChecked.Value;
-        }
-
-        private void cmenu_is_always_delete_encoded_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (cmenu_is_always_delete_encoded.IsFocused)
-                Settings.AutoDeleteTasks = cmenu_is_always_delete_encoded.IsChecked.Value;
+            Settings.AutoDeleteTasks = cmenu_is_always_delete_encoded.IsChecked;
         }
 
         private void ColorCorrection_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -5491,7 +5507,6 @@ namespace XviD4PSP
                 if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
                 {
                     LoadVideo(MediaLoad.load);
-                    MenuHider(true);
                 }
 
                 if (Settings.AutoBatchEncoding) EncodeNextTask(); //Запускаем кодирование

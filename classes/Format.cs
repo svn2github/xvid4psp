@@ -2234,11 +2234,12 @@ namespace XviD4PSP
                string[] outaspects = Format.GetValidOutAspects(m);
                m.outaspect = Calculate.GetCloseDouble(m.inaspect, outaspects);
 
-               m.sar = Calculate.ConvertDoubleToPointString(m.outaspect);
+               //m.sar = Calculate.ConvertDoubleToPointString(m.outaspect);
                if (m.format == ExportFormats.Mp4PSPAVCTV ||
                    m.format == ExportFormats.BluRay ||
                    m.format == ExportFormats.Custom) //тут
                    m.sar = null;
+               else m = Calculate.CalculateSAR(m);
 
                m.aspectfix = AspectResolution.AspectFixes.Black;
            }
@@ -2249,7 +2250,7 @@ namespace XviD4PSP
                    m.aspectfix == AspectResolution.AspectFixes.SAR)
                {
                    m.outaspect = m.inaspect;
-                   m = Calculate.CalculateSAR(m);//тут
+                   m = Calculate.CalculateSAR(m);
                }
                else
                {

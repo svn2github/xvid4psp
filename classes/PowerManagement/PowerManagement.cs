@@ -2,9 +2,7 @@
 using System.Drawing;
 using System.Collections.Generic;
 using System.Collections;
-using System.Text;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
@@ -179,6 +177,11 @@ namespace XviD4PSP
         /// at which a warning battery alert should occur.
         /// </summary>
         private UInt32 defaultAlert2;
+
+        public SystemBatteryState(byte[] spare) : this()
+        {
+            this.spare = spare;
+        }
 
         #endregion
 
