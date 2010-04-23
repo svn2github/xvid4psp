@@ -85,6 +85,8 @@ namespace XviD4PSP
         private bool PauseAfterFirst = false; //Пакетное открытие с паузой после 1-го файла
         private string[] batch_files;         //Сохраненный список файлов для пакетного открытия с паузой
         private bool CloneIsEnabled = false;  //true, если есть открытый файл от которого можно брать параметры при пакетном открытии
+        private string[] drop_data;           //Список забрасываемых файлов (drag-and-drop)
+        private bool IsDragOpening = false;   //true всё время, пока идет открытие drag-and-drop
 
 #if DEBUG
         private DsROTEntry rot = null;
@@ -3321,35 +3323,53 @@ namespace XviD4PSP
         private void grid_player_window_Drop(object sender, System.Windows.DragEventArgs e)
         {
             e.Handled = true;
-            if (((string[])e.Data.GetData(DataFormats.FileDrop)).Length > 1) //Мульти-открытие
+
+            if (!IsDragOpening)
             {
-                PauseAfterFirst = Settings.BatchPause;
-                if (!PauseAfterFirst)
-                {
-                    OpenDialogs.owner = this;
-                    path_to_save = OpenDialogs.SaveFolder();
-                    if (path_to_save == null) return;
-                }
-                MultiOpen((string[])e.Data.GetData(DataFormats.FileDrop));
+                IsDragOpening = true;
+                drop_data = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (drop_data != null) new Thread(new ThreadStart(this.DragOpen)).Start();
+                else IsDragOpening = false;
             }
-            else //Обычное открытие
+        }
+
+        internal delegate void DragOpenDelegate();
+        private void DragOpen()
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new DragOpenDelegate(DragOpen));
+            else
             {
-                foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
+                if (drop_data.Length == 1) //Обычное открытие
                 {
-                    if (Path.GetFileName(dropfile).ToLower() == "x264.exe")
+                    if (Path.GetFileName(drop_data[0]).ToLower() == "x264.exe")
                     {
-                        File.Copy(dropfile, Calculate.StartupPath + "\\apps\\x264\\x264.exe", true);
-                        return;
+                        File.Copy(drop_data[0], Calculate.StartupPath + "\\apps\\x264\\x264.exe", true);
                     }
-                    else 
+                    else if (Path.GetFileName(drop_data[0]).ToLower() == "x264_64.exe")
+                    {
+                        File.Copy(drop_data[0], Calculate.StartupPath + "\\apps\\x264\\x264_64.exe", true);
+                    }
+                    else
                     {
                         Massive x = new Massive();
-                        x.infilepath = dropfile;
-                        x.infileslist = new string[] { dropfile };
+                        x.infilepath = drop_data[0];
+                        x.infileslist = new string[] { drop_data[0] };
                         action_open(x);
-                        return;
                     }
                 }
+                else if (drop_data.Length > 1) //Мульти-открытие
+                {
+                    PauseAfterFirst = Settings.BatchPause;
+                    if (!PauseAfterFirst)
+                    {
+                        OpenDialogs.owner = this;
+                        path_to_save = OpenDialogs.SaveFolder();
+                        if (path_to_save == null) return;
+                    }
+                    MultiOpen(drop_data);
+                }
+                IsDragOpening = false;
             }
         }
              
@@ -3418,7 +3438,9 @@ namespace XviD4PSP
                     list_tasks.SelectedIndex = index;
                     IsInsertAction = false;
                 }
+                else cmenu_tasks.IsOpen = false;
             }
+            else cmenu_tasks.IsOpen = false;
         }
 
         private void RemoveSelectedTask()
