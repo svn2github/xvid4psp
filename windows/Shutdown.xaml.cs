@@ -59,7 +59,6 @@ namespace XviD4PSP
         {
             while (!IsCanceled && seconds != 0)
             {
-              
                 SetMessage();
                 Thread.Sleep(1000);
                 seconds--;
@@ -72,9 +71,9 @@ namespace XviD4PSP
             {
                 if (mode == ShutdownMode.Shutdown)
                 {
+                    ((MainWindow)Owner.Owner).IsExiting = true;
                     PowerManager powerManager = new PowerManager();
                     powerManager.PowerOffComputer(false);
-
                 }
                 else if (mode == ShutdownMode.Hibernate)
                 {
@@ -107,7 +106,5 @@ namespace XviD4PSP
         {
             IsCanceled = true;
         }
-
-
 	}
 }

@@ -331,7 +331,7 @@ namespace XviD4PSP
                 s = "MP2";
             else if (s == "Vorbis")
                 s = "OGG";
-            else if (s == "AAC LC" || s == "AAC LC-SBR" || s == "AAC LC-SBR-PS" || s == "A_AAC")
+            else if (s.Contains("AAC"))
                 s = "AAC";
             else if (s == "WMA2" ||
                 s == "WMA3")
@@ -341,8 +341,6 @@ namespace XviD4PSP
             else if (s == "A_DTS" ||
                 s == "DTS-HD")
                 s = "DTS";
-            else if (s == "A_AAC")
-                s = "AAC";
             else if (s == "A_LPCM")
                 s = "LPCM";
             return s;

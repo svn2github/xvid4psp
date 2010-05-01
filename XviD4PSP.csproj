@@ -462,7 +462,7 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="main.ico" />
+    <Resource Include="main.ico" />
     <Resource Include="pictures\logo_FF_FLAC.png" />
     <Resource Include="pictures\vc_background.PNG" />
     <Resource Include="pictures\Bottom.ico" />

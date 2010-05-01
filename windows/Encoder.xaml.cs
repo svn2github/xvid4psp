@@ -41,7 +41,6 @@ namespace XviD4PSP
         private int step = 0;
         private int steps = 0;
         private double fps = 0.0;
-        private double ofps = 0.0;
         private double encoder_fps = 0.0;
         //private string enc_fps = "";
         private string busyfile;
@@ -4200,17 +4199,17 @@ namespace XviD4PSP
                     //вычисляем fps
                     if (of != cframe)
                     {
-                        double tinterval = TimeSpan.FromTicks(ct.Ticks - ot.Ticks).TotalSeconds;
-                        fps = (double)(cframe - of) / tinterval; //фэпээс
-   
+                        //берем значение fps от энкодеров, если они не равны нулю
+                        if (encoder_fps != 0.0) fps = encoder_fps;
+                        else
+                        {
+                            double tinterval = TimeSpan.FromTicks(ct.Ticks - ot.Ticks).TotalSeconds;
+                            fps = (double)(cframe - of) / tinterval; //фэпээс
+                        }
+
                         //запоминаем сравнительные значения
                         of = cframe;
                         ot = ct;
-                        ofps = fps;
-
-                        //берем значение fps от энкодеров, если они не равны нулю
-                        if (encoder_fps != 0.0)
-                            fps = encoder_fps;
                        
                         //вычисляем сколько времени осталось кодировать
                         if (cframe < m.outframes)
@@ -4230,25 +4229,22 @@ namespace XviD4PSP
                     if (fps > 0.0000001)
                     {
                         TimeSpan elapsed = TimeSpan.FromSeconds(et);
-                        if (elapsed.Days > 0)
-                            e_s += elapsed.Days + "day ";
-
-                        if (elapsed.Hours > 0)
-                            e_s += elapsed.Hours + "hour ";
-
-                        if (elapsed.Minutes > 0)
-                            e_s += elapsed.Minutes + "min ";
-
-                        if (elapsed.Seconds > 0)
-                            e_s += elapsed.Seconds + "sec";
+                        if (elapsed.Days > 0) e_s += elapsed.Days + "day ";
+                        if (elapsed.Hours > 0) e_s += elapsed.Hours + "hour ";
+                        if (elapsed.Minutes > 0) e_s += elapsed.Minutes + "min ";
+                        if (elapsed.Seconds > 0) e_s += elapsed.Seconds + "sec";
 
                         //fps = 123.1234;
-                        string pr_text = (cframe) + "frames " + new_fps + "fps " + e_s; //("####0.0")   PadLeft(12, ' ');
+                        string pr_text = cframe + "frames " + new_fps + "fps " + e_s;
                         string title = pr.ToString("##0.00") + "% encoding to: " + busyfile;
+                        //Текст не должен превышать 64-х символов, иначе будет вылет.
+                        //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + "\r\nDone: " + pr.ToString("##0.00") + "%\r\nTime left: " + e_s;
+                        //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + "\r\nEncoded: " + pr.ToString("##0.00") + "%\r\n" + e_s;
+                        //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + pr.ToString("##0.00") + "%)\r\nTime left: " + e_s;
+                        p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + pr.ToString("##0.00") + "%)\r\n" + e_s;
                         SetStatus(title, pr_text, cframe, pr_t);
                     }
                 }
-
             }
             catch (Exception)
             {
@@ -4754,11 +4750,19 @@ namespace XviD4PSP
             prTotal.Value = 0;
             button_cancel.ToolTip = Languages.Translate("Close");
             button_cancel.Content = Languages.Translate("Close");
+            p.TrayIcon.Text = "XviD4PSP";
 
             if (!IsErrors && !IsAborted)
             {
                 button_info.Visibility = Visibility.Visible;
                 button_play.Visibility = Visibility.Visible;
+                if (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized)
+                {
+                    p.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+                    p.TrayIcon.BalloonTipTitle = Languages.Translate("Complete") + "!";
+                    p.TrayIcon.BalloonTipText = Path.GetFileName(m.outfilepath);
+                    p.TrayIcon.ShowBalloonTip(5000);
+                }
             }
 
             try
@@ -4793,6 +4797,14 @@ namespace XviD4PSP
                 }
                 else
                 {
+                    if (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized)
+                    {
+                        p.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+                        p.TrayIcon.BalloonTipTitle = Languages.Translate("Error") + "!";
+                        p.TrayIcon.BalloonTipText = Path.GetFileName(m.outfilepath);
+                        p.TrayIcon.ShowBalloonTip(5000);
+                    }
+                    
                     try
                     {   
                         //Сохранение лога при ошибке
@@ -4858,7 +4870,10 @@ namespace XviD4PSP
                 if (p.outfiles.Count == 0 && !IsAborted)
                 {
                     if (ending == Shutdown.ShutdownMode.Exit)
+                    {
+                        p.IsExiting = true;
                         p.Close();
+                    }
                     else if (ending == Shutdown.ShutdownMode.Hibernate ||
                         ending == Shutdown.ShutdownMode.Shutdown ||
                         ending == Shutdown.ShutdownMode.Standby)

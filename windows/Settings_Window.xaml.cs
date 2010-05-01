@@ -64,7 +64,7 @@ namespace XviD4PSP
             check_clone_ar.ToolTip = "Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method." +
                 "\r\nNote: Autocrop analysis will not be performed!";
             check_clone_trim.ToolTip = "Clone: trim start and trim end";
-            check_clone_deint.ToolTip = "Clone: field order, deinterlace method.\r\nNote: Autodeinterlace analysis will not be performed!";
+            check_clone_deint.ToolTip = "Clone: source type, field order, deinterlace method.\r\nNote: Autodeinterlace analysis will not be performed!";
             check_clone_fps.ToolTip = "Clone: output framerate";
             check_clone_audio.ToolTip = "Clone: output samplerate, samplerate converter, channels, channels converter";
             check_dont_delete_caches.ToolTip = "Enable this option ONLY if you use XviD4PSP as script creator, and then encoding it in another" + 

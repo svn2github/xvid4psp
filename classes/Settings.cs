@@ -1752,7 +1752,7 @@ namespace XviD4PSP
         {
             get
             {
-                object value = GetValue("BatchClonePath");
+                object value = GetValue("BatchPause");
                 if (value == null)
                 {
                     return false;
@@ -1764,7 +1764,7 @@ namespace XviD4PSP
             }
             set
             {
-                SetBool("BatchClonePath", value);
+                SetBool("BatchPause", value);
             }
         }
 
@@ -1987,6 +1987,66 @@ namespace XviD4PSP
             set
             {
                 SetString("ScriptView_Brushes", value);
+            }
+        }
+
+        public static bool TrayClose
+        {
+            get
+            {
+                object value = GetValue("TrayClose");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("TrayClose", value);
+            }
+        }
+        
+        public static bool TrayMinimize
+        {
+            get
+            {
+                object value = GetValue("TrayMinimize");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("TrayMinimize", value);
+            }
+        }
+
+        public static bool TrayClickOnce
+        {
+            get
+            {
+                object value = GetValue("TrayClickOnce");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("TrayClickOnce", value);
             }
         }
     }

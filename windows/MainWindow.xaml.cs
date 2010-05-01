@@ -76,6 +76,13 @@ namespace XviD4PSP
 
         private BackgroundWorker worker = null;
 
+        //Tray
+        public System.Windows.Forms.NotifyIcon TrayIcon;                 //Иконка в трее
+        private System.Windows.Forms.ToolStripMenuItem tmnExit;          //Пункт меню "Exit"
+        private System.Windows.Forms.ToolStripMenuItem tmnTrayClose;     //Пункт меню "Close to tray"
+        private System.Windows.Forms.ToolStripMenuItem tmnTrayMinimize;  //Пункт меню "Minimize to tray"
+        private System.Windows.Forms.ToolStripMenuItem tmnTrayClickOnce; //Пункт меню "1-Click"
+
         private string path_to_save;          //Путь для конечных файлов при перекодировании папки
         private int opened_files = 0;         //Кол-во открытых файлов при открытии папки
         private double fps = 0;               //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
@@ -87,6 +94,7 @@ namespace XviD4PSP
         private bool CloneIsEnabled = false;  //true, если есть открытый файл от которого можно брать параметры при пакетном открытии
         private string[] drop_data;           //Список забрасываемых файлов (drag-and-drop)
         private bool IsDragOpening = false;   //true всё время, пока идет открытие drag-and-drop
+        public bool IsExiting = false;        //true, если надо выйти из программы, false - если свернуть в трей
 
 #if DEBUG
         private DsROTEntry rot = null;
@@ -122,9 +130,7 @@ namespace XviD4PSP
                 Process[] processes = Process.GetProcessesByName(process.ProcessName);
                 foreach (Process _process in processes)
                 {
-                    if (_process.Id != process.Id &&
-                        _process.MainModule.FileName == process.MainModule.FileName &&
-                        _process.MainWindowHandle != IntPtr.Zero)
+                    if (_process.Id != process.Id && _process.MainModule.FileName == process.MainModule.FileName)
                     {
                         process.Kill();
                     }
@@ -143,24 +149,66 @@ namespace XviD4PSP
                 if (Settings.WindowResize == true)
                 {
                     string[] value = (Settings.WindowLocation + "/" + Settings.TasksRows).Split('/');
-                    this.Width = Convert.ToDouble(value[0]);
-                    this.Height = Convert.ToDouble(value[1]);
-                    this.Left = Convert.ToDouble(value[2]);
-                    this.Top = Convert.ToDouble(value[3]);
-                    GridLengthConverter conv = new GridLengthConverter();
-                    this.TasksRow.Height = (GridLength)conv.ConvertFromString(value[4]);
-                    this.TasksRow2.Height = (GridLength)conv.ConvertFromString(value[5]);
+                    if (value.Length == 6)
+                    {
+                        this.Width = Convert.ToDouble(value[0]);
+                        this.Height = Convert.ToDouble(value[1]);
+                        this.Left = Convert.ToDouble(value[2]);
+                        this.Top = Convert.ToDouble(value[3]);
+                        GridLengthConverter conv = new GridLengthConverter();
+                        this.TasksRow.Height = (GridLength)conv.ConvertFromString(value[4]);
+                        this.TasksRow2.Height = (GridLength)conv.ConvertFromString(value[5]);
+                    }
                 }
 
-                //Список недавних файлов
-                UpdateRecentFiles();
+                //Трей
+                System.Windows.Forms.ContextMenuStrip TrayMenu = new System.Windows.Forms.ContextMenuStrip();
+                TrayIcon = new System.Windows.Forms.NotifyIcon();
+                //Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/pictures/Top.ico")).Stream;
+                Stream iconStream = Application.GetResourceStream(new Uri("main.ico", UriKind.RelativeOrAbsolute)).Stream;
+                TrayIcon.Icon = new System.Drawing.Icon(iconStream);
+
+                //Пункт меню "Close to tray"
+                tmnTrayClose = new System.Windows.Forms.ToolStripMenuItem();
+                tmnTrayClose.Text = "Close to tray";
+                tmnTrayClose.CheckOnClick = true;
+                tmnTrayClose.Checked = Settings.TrayClose;
+                tmnTrayClose.Click += new EventHandler(tmnTrayClose_Click);
+                TrayMenu.Items.Add(tmnTrayClose);
+
+                //Пункт меню "Minimize to tray"
+                tmnTrayMinimize = new System.Windows.Forms.ToolStripMenuItem();
+                tmnTrayMinimize.Text = "Minimize to tray";
+                tmnTrayMinimize.CheckOnClick = true;
+                tmnTrayMinimize.Checked = Settings.TrayMinimize;
+                tmnTrayMinimize.Click += new EventHandler(tmnTrayMinimize_Click);
+                TrayMenu.Items.Add(tmnTrayMinimize);
+
+                //Пункт меню "1-Click"
+                tmnTrayClickOnce = new System.Windows.Forms.ToolStripMenuItem();
+                tmnTrayClickOnce.Text = "Single click to open";
+                tmnTrayClickOnce.CheckOnClick = true;
+                tmnTrayClickOnce.Checked = Settings.TrayClickOnce;
+                tmnTrayClickOnce.Click += new EventHandler(tmnTrayClickOnce_Click);
+                TrayMenu.Items.Add(tmnTrayClickOnce);
+                TrayMenu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
+
+                //Пункт меню "Exit"
+                tmnExit = new System.Windows.Forms.ToolStripMenuItem();
+                tmnExit.Text = "Exit";
+                tmnExit.Click += new EventHandler(mnExit_Click);
+                TrayMenu.Items.Add(tmnExit);
+
+                TrayIcon.ContextMenuStrip = TrayMenu;
+                TrayIcon.Text = "XviD4PSP";
+
+                UpdateRecentFiles();  //Список недавних файлов
+                MenuHider(false);     //Делаем пункты меню неактивными
+                SetHotKeys();         //Загружаем HotKeys
+                SetLanguage();        //переводим лейблы
 
                 textbox_name.Text = textbox_frame.Text = textbox_frame_goto.Text = "";
                 textbox_time.Text = textbox_duration.Text = "00:00:00";
-             
-                MenuHider(false); //Делаем пункты меню неактивными
-                SetHotKeys();     //Загружаем HotKeys
-                SetLanguage();    //переводим лейблы
 
                 //Определяем коэффициент для масштабирования окна ДиректШоу-превью
                 IntPtr ScreenDC = GetDC(IntPtr.Zero); //88-w, 90-h
@@ -175,9 +223,12 @@ namespace XviD4PSP
 
             //events
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
-            this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown); 
-            this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter);//Мышь вошла в зону с названием файла
-            this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave);//Мышь вышла из зоны с названием файла 
+            this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown);
+            this.StateChanged += new EventHandler(MainWindow_StateChanged);
+            this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter); //Мышь вошла в зону с названием файла
+            this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave); //Мышь вышла из зоны с названием файла
+            if (Settings.TrayClickOnce) TrayIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+            else TrayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
         }
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -187,6 +238,7 @@ namespace XviD4PSP
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            TrayIcon.Visible = true;
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerAsync();
@@ -359,10 +411,9 @@ namespace XviD4PSP
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (this.OwnedWindows.Count > 0 || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused || script_box.IsFocused) return;
-            string PressedKeys;
             string key = new System.Windows.Input.KeyConverter().ConvertToString(e.Key);
             string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
-            PressedKeys = "=" + ((mod.Length > 0) ? mod + "+" : "") + key;
+            string PressedKeys = "=" + ((mod.Length > 0) ? mod + "+" : "") + key;
             //textbox_frame.Text = PressedKeys;
             
             string Action = HotKeys.GetAction(PressedKeys);
@@ -454,41 +505,95 @@ namespace XviD4PSP
             if (!isFullScreen) MoveVideoWindow();
         }
 
+        //Сворачиваемся в трей
+        private void MainWindow_StateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == System.Windows.WindowState.Minimized && Settings.TrayMinimize)
+                this.Hide();
+        }
+
+        //Разворачиваемся из трея
+        private void TrayIcon_Click(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                this.Show();
+                if (this.WindowState == System.Windows.WindowState.Minimized)
+                    this.WindowState = System.Windows.WindowState.Normal;
+                this.Activate();
+            }
+        }
+
+        private void tmnTrayClose_Click(object sender, EventArgs e)
+        {
+            Settings.TrayClose = tmnTrayClose.Checked;
+        }
+
+        private void tmnTrayMinimize_Click(object sender, EventArgs e)
+        {
+            Settings.TrayMinimize = tmnTrayMinimize.Checked;
+        }
+
+        private void tmnTrayClickOnce_Click(object sender, EventArgs e)
+        {
+            if (Settings.TrayClickOnce = tmnTrayClickOnce.Checked)
+            {
+                TrayIcon.MouseDoubleClick -= new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+                TrayIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+            }
+            else
+            {
+                TrayIcon.MouseClick -= new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+                TrayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+            }
+        }
+
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            //Сворачиваемся в трей
+            if (!IsExiting && Settings.TrayClose)
+            {
+                e.Cancel = true;
+                this.StateChanged -= new EventHandler(MainWindow_StateChanged);
+                this.WindowState = System.Windows.WindowState.Minimized;
+                this.Hide();
+                this.StateChanged += new EventHandler(MainWindow_StateChanged);
+                TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+                TrayIcon.BalloonTipTitle = "XviD4PSP";
+                TrayIcon.BalloonTipText = " ";
+                TrayIcon.ShowBalloonTip(5000);
+                return;
+            }
+
             //проверяем есть ли задания в работе
-            bool IsEncoding = false;
             foreach (object _task in list_tasks.Items)
             {
                 Task task = (Task)_task;
                 if (task.Status == "Encoding")
-                    IsEncoding = true;
-            }
-
-            if (IsEncoding)
-            {
-                Message mes = new Message(this);
-                mes.ShowMessage(Languages.Translate("Some jobs are still in progress!") + "\r\n" + Languages.Translate("Are you sure you want to quit?"), Languages.Translate("Warning"), Message.MessageStyle.YesNo);
-                if (mes.result == Message.Result.No)
                 {
-                    e.Cancel = true;
-                    return;
-                }
-
-                while (this.OwnedWindows.Count > 0)
-                {
-                    foreach (Window OwnedWindow in this.OwnedWindows)
+                    Message mes = new Message(this);
+                    mes.ShowMessage(Languages.Translate("Some jobs are still in progress!") + "\r\n" + Languages.Translate("Are you sure you want to quit?"), Languages.Translate("Warning"), Message.MessageStyle.YesNo);
+                    if (mes.result == Message.Result.No)
                     {
-                        OwnedWindow.Close();
+                        IsExiting = false;
+                        e.Cancel = true;
+                        return;
                     }
+
+                    while (this.OwnedWindows.Count > 0)
+                    {
+                        foreach (Window OwnedWindow in this.OwnedWindows)
+                        {
+                            OwnedWindow.Close();
+                        }
+                    }
+                    break;
                 }
             }
 
-            if (m != null)
-            {
-                CloseFile();
-            }
+            if (m != null) CloseFile();
 
+            //Временные файлы
             if (Settings.DeleteTempFiles)
             {
                 //удаляем мусор
@@ -523,6 +628,10 @@ namespace XviD4PSP
                 GridLengthConverter conv = new GridLengthConverter();
                 Settings.TasksRows = conv.ConvertToString(this.TasksRow.Height) + "/" + conv.ConvertToString(this.TasksRow2.Height);
             }
+
+            //Чистим трей
+            TrayIcon.Visible = false;
+            TrayIcon.Dispose();
         }
 
         private ArrayList add_ff_cache(string[] infileslist)
@@ -691,8 +800,9 @@ namespace XviD4PSP
             if (m != null) action_save(m.Clone());
         }
 
-        private void mnExit_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void mnExit_Click(object sender, EventArgs e)
         {
+            IsExiting = true;
             Close();
         }
 
@@ -1289,6 +1399,7 @@ namespace XviD4PSP
                         //Клонируем деинтерлейс от предыдущего файла
                         if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneDeint)
                         {
+                            x.interlace = m.interlace;
                             x.fieldOrder = m.fieldOrder;
                             x.deinterlace = m.deinterlace;
                         }
@@ -1913,7 +2024,7 @@ namespace XviD4PSP
                 mnSave.Header = Languages.Translate("Add task") + "...";
                 menu_dvd.Header = Languages.Translate("Open DVD folder") + "...";
                 button_dvd.ToolTip = Languages.Translate("Open DVD folder");
-                mnExit.Header = Languages.Translate("Exit");
+                mnExit.Header = tmnExit.Text = Languages.Translate("Exit");
                 mnCloseFile.Header = Languages.Translate("Close file");
                 menu_save_frame.Header = Languages.Translate("Save frame") + "...";
                 menu_savethm.Header = Languages.Translate("Save") + " THM...";
@@ -1983,6 +2094,10 @@ namespace XviD4PSP
                 mnTools.Header = Languages.Translate("Tools");
                 mnHelp.Header = Languages.Translate("Help");
                 mnAbout.Header = Languages.Translate("About");
+
+                tmnTrayClose.Text = Languages.Translate("Close to tray");
+                tmnTrayMinimize.Text = Languages.Translate("Minimize to tray");
+                tmnTrayClickOnce.Text = Languages.Translate("Single click to open");
 
                 text_vencoding.Content = Languages.Translate("Video encoding") + ":";
                 text_aencoding.Content = Languages.Translate("Audio encoding") + ":";
