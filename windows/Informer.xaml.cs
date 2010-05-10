@@ -143,6 +143,7 @@ namespace XviD4PSP
                             MediaInfoWrapper med = new MediaInfoWrapper();
                             stream = med.GetAudioInfoFromAFile(stream.audiopath);
                             stream.samplerate = header.samplerate.ToString();
+                            m.inaudiostreams[m.inaudiostream] = stream;
                         }
                     }
                     else if (ext == ".cda")

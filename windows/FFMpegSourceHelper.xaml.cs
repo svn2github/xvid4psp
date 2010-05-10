@@ -34,7 +34,7 @@ namespace XviD4PSP
 
             //забиваем
             prCurrent.Maximum = 100;
-            Title =  Languages.Translate("FFmpegSource");
+            Title = "FFmpegSource";
             text_info.Content = Languages.Translate("Please wait... Work in progress...");
 
             //фоновое кодирование
@@ -49,14 +49,8 @@ namespace XviD4PSP
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-            worker.ProgressChanged += new ProgressChangedEventHandler(worker_ProgressChanged);
             worker.WorkerSupportsCancellation = true;
             worker.WorkerReportsProgress = true;
-        }
-
-        private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
-        {
-
         }
 
         private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -70,21 +64,19 @@ namespace XviD4PSP
                 {
                     reader = new AviSynthReader();
                     reader.ParseScript(script);
-
-                    //if (m != null)
-                    //{
-                    //    if (reader.Framerate != Double.PositiveInfinity)
-                    //        m.inframerate = Calculate.ConvertDoubleToPointString(reader.Framerate);
-                    //}
-
-                    reader.Close();
-                    reader = null;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    NeedVExtract = true;
-                    reader.Close();
-                    reader = null;
+                    if (!ex.Message.StartsWith("FFAudioSource:") && !ex.Message.Contains(" audio track"))
+                        NeedVExtract = true;
+                }
+                finally
+                {
+                    if (reader != null)
+                    {
+                        reader.Close();
+                        reader = null;
+                    }
                 }
             }
             catch (Exception ex)
@@ -97,11 +89,15 @@ namespace XviD4PSP
         {
             if (worker.IsBusy)
             {
-
+                if (reader != null)
+                {
+                    reader.Close();
+                    reader = null;
+                }
             }
         }
 
-       private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             Close();
         }
@@ -138,6 +134,5 @@ namespace XviD4PSP
                 }
             }
         }
-
     }
 }

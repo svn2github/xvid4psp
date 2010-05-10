@@ -203,7 +203,6 @@ namespace XviD4PSP
 
         private void demux_mp4box()
         {
-
             //if (m.infileslist.Length > 1)
             //    ShowMessage(Languages.Translate("Sorry, but stream will be extracted only from first file! :("),
             //        Languages.Translate("Warning"));
@@ -302,6 +301,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
+                IsErrors = true;
                 ErrorExeption(ex.Message);
             }
 
@@ -547,15 +547,9 @@ namespace XviD4PSP
         }
 
        private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
-        {
-            //if (IsErrors)
-            //{
-            //    ShowMessage(error_message, Languages.Translate("Error"));
-            //}
-
-            Close();
-        }
-
+       {
+           Close();
+       }
 
        private void ErrorExeption(string message)
        {
@@ -569,7 +563,7 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), mtext, mtitle);
             else
             {
-                Message mes = new Message(this);
+                Message mes = new Message(Owner);
                 mes.ShowMessage(mtext, mtitle);
             }
         }

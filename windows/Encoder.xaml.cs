@@ -4331,11 +4331,15 @@ namespace XviD4PSP
                         else
                             SetLog("VideoDecoder: " + m.vdecoder);
 
-                        if (m.inresw != m.outresw ||
-                            m.inresh != m.outresh)
+                        if (m.inresw != m.outresw || m.inresh != m.outresh)
                             SetLog("Resolution: " + m.inresw + "x" + m.inresh + " > " + m.outresw + "x" + m.outresh);
                         else
                             SetLog("Resolution: " + m.inresw + "x" + m.inresh);
+
+                        if (Math.Abs(m.inaspect - m.outaspect) > 0.0001)
+                            SetLog("Aspect: " + Calculate.ConvertDoubleToPointString(m.inaspect, 4) + " > " + Calculate.ConvertDoubleToPointString(m.outaspect, 4));
+                        else
+                            SetLog("Aspect: " + Calculate.ConvertDoubleToPointString(m.outaspect, 4));
 
                         SetLog("VCodecPreset: " + m.vencoding);
                         SetLog("VEncodingMode: " + m.encodingmode);

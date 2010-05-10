@@ -1086,7 +1086,9 @@ namespace XviD4PSP
                if (Settings.FFmpegSource2)
                {
                    ffmpegsource2 = "2";
-                   cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.infilepath).ToLower() + ".ffindex\"";
+                   //Если DontDemuxAudio, то разрешаем звук, чтоб файл сразу проиндексировался вместе с ним (иначе позже произойдет переиндексация)
+                   string atrack = (m.inaudiostreams.Count > 0 && Settings.DontDemuxAudio) ? ", atrack = -1" : ", atrack = -2";
+                   cache_path = atrack + ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.infilepath).ToLower() + ".ffindex\"";
                }
                script += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
            }

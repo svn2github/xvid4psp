@@ -147,7 +147,6 @@ namespace XviD4PSP
             AudioStream stream = new AudioStream();
             Open(filepath);
            
-       //Settings.Test = ACodecString(0);
             stream.audiopath = filepath;
             stream.audiofiles = new string[] { stream.audiopath };
             stream.codec = ACodecString(0);
@@ -158,9 +157,6 @@ namespace XviD4PSP
             stream.samplerate = Samplerate(0);
             stream.channels = Channels(0);
             stream.bits = Bits(0);
-          //stream.channels = Channels(0);
-           
-       //Settings.Test = ACodecShort(0);
 
             //определяем битрейт
             if (stream.bitrate == 0)
@@ -173,28 +169,10 @@ namespace XviD4PSP
                     stream.bitrate = (int)(((info.Length / Duration.TotalSeconds) * stream.bits) / stream.channels) / 1000; //kbps
                 }
             }
-            //m.inframerate = Fr ; //FrameRate; 
+
             Close();
             return stream;
         }
-
-        //public Massive GetFrameRate(Massive m)
-        //{
-        //    Open(m.infilepath);
-
-         //   m.inframerate = FrameRate;
-
-        //    Close();
-        //    return m;
-        //}
-
-        //public Massive GetAudioStreams(Massive m)
-        //{
-        //    Open(m.infilepath);
-        //    m.inaudiostreams = CountAudioStreams;
-        //    Close();
-        //    return m;
-        //}
 
         public int AudioID(int track)
         {
@@ -761,6 +739,5 @@ namespace XviD4PSP
                 return Get(StreamKind.Video, 0, "ScanOrder");
             }
         }
-
     }
 }

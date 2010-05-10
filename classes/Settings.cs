@@ -1226,26 +1226,6 @@ namespace XviD4PSP
             }
         }
 
-        public static string Test
-        {
-            get
-            {
-                object value = GetValue("Test");
-                if (value == null)
-                {
-                    return "UDF 2.50 DVD/BD";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("Test", value);
-            }
-        }
-
         //Кроп/ресайз до или после фильтрации
         public static bool ResizeFirst
         {

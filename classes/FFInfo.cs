@@ -197,7 +197,7 @@ namespace XviD4PSP
             if (info != null)
             {
                 int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+\s(\w+),", out times);
+                string type = SearchRegEx(@"Stream..0." + stream + @".+Video:.\w+,.(\w+),", out times);
                 if (times != 0)
                     return type;
                 else
@@ -267,7 +267,7 @@ namespace XviD4PSP
             if (info != null)
             {
                 int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+,.(\d+.\d+).tb\(r\)", out times);
+                string type = SearchRegEx(@"Stream..0." + stream + @".+,.(\d+.*\d*).tbr", out times);
                 if (times != 0)
                 {
                     if (type == "23.98")

@@ -1,5 +1,13 @@
-XviD4PSP 5.0.37.8 r132->r134 15.04.10, main changes:
+XviD4PSP 5.0.37.8 r132->r139 10.05.10, main changes:
 
+>>> (r139) Some other fixes.
+>>> (r139) Fixed fps detection with FFmpeg.
+>>> (r139) Some caches remain in the Temp-folder if source file wasn`t opened successfully.
+>>> (r139) Throw an Error if video decoder returns zero-size image.
+>>> (r138) Added TrayIcon and added ability to minimize program to tray (req. by AkvenJan).
+>>> (r137) Fixed blocking of folder with source file(s) ("drag-and-drop" opening).
+>>> (r136) Added ability to reorder (move up/down) saved tasks (req. by mbamg).
+>>> (r135) Some improvements for THM-creation and JPG-screenshots (by Procrustean).
 >>> (r134) Resolution/Aspect window: added a new tab "Manual" (it allows user to specify all values manually).
 >>> (r133) Added switcher to select preview mode (Preview/ScriptView). In the ScriptView-mode AviSynth is not loaded, as result
            very fast switching between filtering presets, formats, and in all other cases where preview must be loaded/updated;

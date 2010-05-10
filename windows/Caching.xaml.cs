@@ -59,7 +59,6 @@ namespace XviD4PSP
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-            worker.ProgressChanged += new ProgressChangedEventHandler(worker_ProgressChanged);
             worker.WorkerSupportsCancellation = true;
             worker.WorkerReportsProgress = true;
         }
@@ -72,11 +71,6 @@ namespace XviD4PSP
                 SetStatus(tmp_title, "", progress);
                 progress++;
             }
-        }
-
-        private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
-        {
-
         }
 
         private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -115,8 +109,13 @@ namespace XviD4PSP
                             m.inframerate = Calculate.ConvertDoubleToPointString(reader.Framerate);
                     }
 
-                    m.inresw = reader.Width;
-                    m.inresh = reader.Height;
+                    if (m.isvideo && ext != ".avs" && (reader.Width == 0 || reader.Height == 0))
+                        throw new Exception(m.vdecoder.ToString() + ": Can`t decode video (zero-size image was returned)!");
+                    else
+                    {
+                        m.inresw = reader.Width;
+                        m.inresh = reader.Height;
+                    }
 
                     string samlerate = reader.Samplerate;
                     if (samlerate == "0" && m.inaudiostreams.Count > 0)
@@ -150,7 +149,6 @@ namespace XviD4PSP
                             m.inaudiostreams.Add(instream.Clone());
                         }
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -201,7 +199,7 @@ namespace XviD4PSP
             if (error == null) Close(); 
             
             else if (error == "Can`t decode audio with DirectShowSource" || error.StartsWith("DirectShowSource:") || error == "Script doesn't contain video" ||
-                error.Contains("FFmpegSource: Audio decoding error") || error.StartsWith("FFAudioSource:") || error.Contains("audio track"))
+                error.Contains("FFmpegSource: Audio decoding error") || error.StartsWith("FFAudioSource:") || error.Contains(" audio track"))
             {
                 //Переключение с DirectShowSource на FFmpegSource (если DirectShowSource не может декодировать видео)
                 if (error.StartsWith("DirectShowSource:") || error.Contains("contain video"))
@@ -244,6 +242,7 @@ namespace XviD4PSP
                             instream.audiopath = outpath;
                             instream.audiofiles = new string[] { outpath };
                             instream = Format.GetValidADecoder(instream);
+                            ((MainWindow)Owner).deletefiles.Add(outpath);
                         }
                         else
                         {
@@ -255,11 +254,6 @@ namespace XviD4PSP
                     error = null;
                     worker.RunWorkerAsync();
                     return;
-                //}
-                //else
-                //{
-                //    m.inaudiostreams = 0;
-                //}
             }
             //ситуация когда стоит попробовать декодировать аудио в wav
             else if (error == "FFmpegSource: Audio codec not found")
@@ -387,9 +381,5 @@ namespace XviD4PSP
                 ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
-
-
-
-
     }
 }

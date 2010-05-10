@@ -11,15 +11,15 @@ using System.Text.RegularExpressions;
 
 namespace XviD4PSP
 {
-	public partial class ColorCorrection
-	{
+    public partial class ColorCorrection
+    {
         public Massive m;
         private Massive oldm;
         private MainWindow p;
 
         public ColorCorrection(Massive mass, MainWindow parent)
-		{
-			this.InitializeComponent();
+        {
+            this.InitializeComponent();
 
             m = mass.Clone();
             oldm = mass.Clone();
@@ -43,7 +43,7 @@ namespace XviD4PSP
             text_histogram.Content = Languages.Translate("Histogram") + ":";
 
             combo_brightness.ToolTip = Languages.Translate("Is used to change the brightness of the image.") + Environment.NewLine +
-               Languages.Translate("Positive values increase the brightness.") + Environment.NewLine + 
+               Languages.Translate("Positive values increase the brightness.") + Environment.NewLine +
               Languages.Translate("Negative values decrease the brightness.");
 
             combo_hue.ToolTip = Languages.Translate("Is used to adjust the color hue of the image.") + Environment.NewLine +
@@ -72,14 +72,14 @@ namespace XviD4PSP
             slider_contrast.Maximum = 5.0; //10.0
             slider_contrast.SmallChange = 0.01; //0.1
 
-            
+
             for (int n = -180; n <= 180; n++) //Оттенок
                 combo_hue.Items.Add(n);
             slider_hue.Minimum = -180;
             slider_hue.Maximum = 180;
             slider_saturation.SmallChange = 1; //<-----
 
-  
+
             for (int n = -255; n <= 255; n++) //Яркость
                 combo_brightness.Items.Add(n);
             slider_brightness.Minimum = -255;
@@ -103,7 +103,7 @@ namespace XviD4PSP
             LoadFromProfile();//загружает эти параметры в форму (из массива m)
 
             ShowDialog();
-		}
+        }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -146,20 +146,19 @@ namespace XviD4PSP
         }
 
         public static Massive DecodeProfile(Massive mass)//читает и передает массиву mass значения параметров из файла профиля = m.sbc
-          {
+        {
             //обнуляем параметры на параметры по умолчанию
             mass.iscolormatrix = false;
             mass.saturation = 1.0;
             mass.brightness = 0;
             mass.contrast = 1.00; //1.0
             mass.hue = 0;
-            mass.levels = "Disabled";//режим гистограммы
 
             if (mass.sbc == "Disabled")
                 return mass;
 
             string line;
-            using (StreamReader sr = new StreamReader(Calculate.StartupPath + 
+            using (StreamReader sr = new StreamReader(Calculate.StartupPath +
                 "\\presets\\sbc\\" + mass.sbc + ".avs", System.Text.Encoding.Default)) //ищет и читает файл с пресетами цветокоррекции
             {
                 while (!sr.EndOfStream)
@@ -449,7 +448,7 @@ namespace XviD4PSP
 
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            p.SwitchToFullScreen();        
+            p.SwitchToFullScreen();
         }
 
         //Обработка выбора режима отображения гистограммы
@@ -459,10 +458,7 @@ namespace XviD4PSP
             {
                 m.levels = Convert.ToString(combo_histogram.SelectedItem);
                 Refresh();
-
             }
-
         }
-
-	}
+    }
 }
