@@ -27,6 +27,7 @@
                             <CheckBox x:Name="check_hide_comments" Width="Auto" Height="Auto" Content="Remove comments (#text) from the AviSynth script" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_hide_comments_Click"/>
                             <CheckBox x:Name="check_resize_first" Width="Auto" Height="Auto" Content="Make crop/resize before filtering (otherwise - after filtering)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_resize_first_Click"/>
                             <CheckBox x:Name="check_read_prmtrs" Width="Auto" Height="Auto" Content="Read parameters from the script when saving a new task" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_read_prmtrs_Click"/>
+                            <CheckBox x:Name="check_use_trayicon" Width="Auto" Height="Auto" Content="Enable system tray icon" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_trayicon_Click"/>
                         </StackPanel>
                     </Grid>
 				</TabItem>

@@ -1970,6 +1970,28 @@ namespace XviD4PSP
             }
         }
 
+        //Разрешаем иконку в трее
+        public static bool TrayIconEnabled
+        {
+            get
+            {
+                object value = GetValue("TrayIconEnabled");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("TrayIconEnabled", value);
+            }
+        }
+
+        //В трей при закрытии программы
         public static bool TrayClose
         {
             get
@@ -1990,6 +2012,7 @@ namespace XviD4PSP
             }
         }
         
+        //В трей при сворачивании окна
         public static bool TrayMinimize
         {
             get
@@ -2010,6 +2033,7 @@ namespace XviD4PSP
             }
         }
 
+        //Одинарный клик по иконке для восстановления окна
         public static bool TrayClickOnce
         {
             get

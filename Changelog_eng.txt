@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r139 10.05.10, main changes:
+XviD4PSP 5.0.37.8 r132->r140 10.05.10, main changes:
 
+>>> (r140) System tray icon now can be disabled (Settings->Global settings->Enable system tray icon).
 >>> (r139) Some other fixes.
 >>> (r139) Fixed fps detection with FFmpeg.
 >>> (r139) Some caches remain in the Temp-folder if source file wasn`t opened successfully.

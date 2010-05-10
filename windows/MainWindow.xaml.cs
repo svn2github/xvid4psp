@@ -238,7 +238,7 @@ namespace XviD4PSP
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            TrayIcon.Visible = true;
+            TrayIcon.Visible = Settings.TrayIconEnabled;
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerAsync();
@@ -508,7 +508,7 @@ namespace XviD4PSP
         //Сворачиваемся в трей
         private void MainWindow_StateChanged(object sender, EventArgs e)
         {
-            if (this.WindowState == System.Windows.WindowState.Minimized && Settings.TrayMinimize)
+            if (this.WindowState == System.Windows.WindowState.Minimized && Settings.TrayIconEnabled && Settings.TrayMinimize)
                 this.Hide();
         }
 
@@ -551,7 +551,7 @@ namespace XviD4PSP
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //Сворачиваемся в трей
-            if (!IsExiting && Settings.TrayClose)
+            if (!IsExiting && Settings.TrayIconEnabled && Settings.TrayClose)
             {
                 e.Cancel = true;
                 this.StateChanged -= new EventHandler(MainWindow_StateChanged);

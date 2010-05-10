@@ -59,7 +59,8 @@ namespace XviD4PSP
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
             check_use_64bit.Content = Languages.Translate("Use 64 bit x264");
             check_dont_delete_caches.Content = Languages.Translate("Don`t delete any caches and temporal files");
-            
+            check_use_trayicon.Content = Languages.Translate("Enable system tray icon");
+
             check_demux_audio.ToolTip = Languages.Translate("Leave it unchecked to avoid some problems with sound");
             check_clone_ar.ToolTip = "Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method." +
                 "\r\nNote: Autocrop analysis will not be performed!";
@@ -113,6 +114,7 @@ namespace XviD4PSP
             cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
             check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled
                  = check_delete_dgindex_cache.IsEnabled = Settings.DeleteTempFiles);              //Удалять кэши и временные файлы
+            check_use_trayicon.IsChecked = Settings.TrayIconEnabled;                              //Иконка в трее вкл\выкл
 
             //Загружаем HotKeys (плюс перевод к действиям)
             foreach (string line in HotKeys.Data)
@@ -476,6 +478,11 @@ namespace XviD4PSP
             edit = true;
             textbox_combination.Text = "";
             button_save_hotkeys_Click(null, null);
+        }
+
+        private void check_use_trayicon_Click(object sender, RoutedEventArgs e)
+        {
+            p.TrayIcon.Visible = Settings.TrayIconEnabled = check_use_trayicon.IsChecked.Value;
         }
 	}
 }

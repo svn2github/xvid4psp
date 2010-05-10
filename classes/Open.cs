@@ -227,7 +227,5 @@ namespace XviD4PSP
             else
                 return null;
         }
-
-
     }
 }
