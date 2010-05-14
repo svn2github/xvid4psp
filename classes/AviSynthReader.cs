@@ -5,9 +5,9 @@ using System.Drawing;
 
 namespace XviD4PSP
 {
-   public class AviSynthReader
+    public class AviSynthReader
     {
-       private AviSynthScriptEnvironment enviroment = null;
+        private AviSynthScriptEnvironment enviroment = null;
         private AviSynthClip clip = null;
         private int width, height;
         private double frameRate;
@@ -118,34 +118,39 @@ namespace XviD4PSP
             get { return clip.ChannelsCount; }
         }
 
-       public Bitmap ReadFrameBitmap(int position)
-       {
-           Bitmap bmp = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-           try
-           {
-               // Lock the bitmap's bits.  
-               Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-               System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
-               try
-               {
-                   // Get the address of the first line.
-                   IntPtr ptr = bmpData.Scan0;
-                   // Read data
-                   clip.ReadFrame(ptr, bmpData.Stride, position);
-               }
-               finally
-               {
-                   // Unlock the bits.
-                   bmp.UnlockBits(bmpData);
-               }
-               bmp.RotateFlip(RotateFlipType.Rotate180FlipX);
-               return bmp;
-           }
-           catch (Exception)
-           {
-               bmp.Dispose();
-               throw;
-           }
-       }
+        public int GetIntVariable(string variable_name, int default_value)
+        {
+            return clip.GetIntVariable(variable_name, default_value);
+        }
+
+        public Bitmap ReadFrameBitmap(int position)
+        {
+            Bitmap bmp = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            try
+            {
+                // Lock the bitmap's bits.  
+                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+                System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
+                try
+                {
+                    // Get the address of the first line.
+                    IntPtr ptr = bmpData.Scan0;
+                    // Read data
+                    clip.ReadFrame(ptr, bmpData.Stride, position);
+                }
+                finally
+                {
+                    // Unlock the bits.
+                    bmp.UnlockBits(bmpData);
+                }
+                bmp.RotateFlip(RotateFlipType.Rotate180FlipX);
+                return bmp;
+            }
+            catch (Exception)
+            {
+                bmp.Dispose();
+                throw;
+            }
+        }
     }
 }

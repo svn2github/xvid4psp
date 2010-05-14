@@ -117,6 +117,12 @@ namespace XviD4PSP
                         m.inresh = reader.Height;
                     }
 
+                    if (ext == ".avs")
+                    {
+                        //Считываем аспект из скрипта
+                        m.pixelaspect = (double)reader.GetIntVariable("OUT_SAR_X", 1) / (double)reader.GetIntVariable("OUT_SAR_Y", 1);
+                    }
+
                     string samlerate = reader.Samplerate;
                     if (samlerate == "0" && m.inaudiostreams.Count > 0)
                     {

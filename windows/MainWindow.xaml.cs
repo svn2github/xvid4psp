@@ -2074,6 +2074,7 @@ namespace XviD4PSP
                 cmenu_delete_task.Header = Languages.Translate("Delete selected task");
                 cmenu_is_always_delete_encoded.Header = Languages.Translate("Always delete encoded tasks from list");
                 cmenu_reset_status.Header = Languages.Translate("Reset task status");
+                cmenu_save_all_scripts.Header = Languages.Translate("Save all scripts");
 
                 menu_directx_update.Header = Languages.Translate("Update DirectX");
                 menu_autocrop.Header = Languages.Translate("Detect black borders");
@@ -2810,12 +2811,47 @@ namespace XviD4PSP
             s.Filter = "AviSynth " + Languages.Translate("files") + "|*.avs";
             if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                StreamWriter sw = new StreamWriter(s.FileName, false, System.Text.Encoding.Default);
-                string[] lines = m.script.Split( new string[] { Environment.NewLine }, StringSplitOptions.None);
-                foreach (string line in lines)
-                    sw.WriteLine(line);
-                sw.Close();
+                try
+                {
+                    WriteScriptToFile(m, s.FileName);
+                }
+                catch (Exception ex)
+                {
+                    new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
+                }
             }
+        }
+
+        private void cmenu_save_all_scripts_Click(object sender, RoutedEventArgs e)
+        {
+            if (list_tasks.Items.Count == 0) return;
+            try
+            {
+                foreach (object _task in list_tasks.Items)
+                {
+                    Task task = (Task)_task;
+                    string path = Path.GetDirectoryName(task.Mass.outfilepath) + "\\" + Path.GetFileNameWithoutExtension(task.Mass.outfilepath) + ".avs";
+                    WriteScriptToFile(task.Mass, path);
+                }
+                new Message(this).ShowMessage(Languages.Translate("Complete"), "OK");
+            }
+            catch (Exception ex)
+            {
+                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
+            }
+        }
+
+        private void WriteScriptToFile(Massive mass, string path)
+        {
+            StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.Default);
+            if (mass.isvideo && !string.IsNullOrEmpty(mass.sar) && mass.sar != "1:1")
+            {
+                //Сохраняем SAR в скрипте (для анаморфного кодирования)
+                string[] sar = mass.sar.Split(new string[] { ":" }, StringSplitOptions.None);
+                if (sar.Length == 2) sw.WriteLine("OUT_SAR_X = " + sar[0] + "\r\nOUT_SAR_Y = " + sar[1] + "\r\n");
+            }
+            sw.Write(mass.script);
+            sw.Close();
         }
 
         private void menu_auto_volume_disabled_Click(object sender, System.Windows.RoutedEventArgs e)
