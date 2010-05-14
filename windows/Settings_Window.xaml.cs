@@ -153,27 +153,28 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (textbox_temp.Text != null &&
-                textbox_temp.Text != "")
+            if (!string.IsNullOrEmpty(textbox_temp.Text) && textbox_temp.Text.Length > 3)
             {
                 try
                 {
                     if (textbox_temp.Text != Settings.TempPath)
                     {
-                        if (!Directory.Exists(textbox_temp.Text))
-                            Directory.CreateDirectory(textbox_temp.Text);
-                        Settings.TempPath = textbox_temp.Text;
-                        p.TempFolderFiles(); //Проверка на наличие в папке файлов
+                        string path = textbox_temp.Text;
+                        while (path.Length > 3 && path.EndsWith("\\")) path = path.Remove(path.Length - 1, 1);
+                        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                        Settings.TempPath = textbox_temp.Text = path;
+                        p.TempFolderFiles(); //Проверка папки на наличие в ней файлов
                     }
                 }
                 catch (Exception ex)
                 {
-                    ErrorExeption(ex.Message);
+                    ErrorExeption(Languages.Translate("Temp folder path:") + " " + ex.Message);
+                    return;
                 }
             }
 
             //Сохраняем список валидных расширений (для открытия папки)
-            if (textbox_extensions.Text != null)
+            if (!string.IsNullOrEmpty(textbox_extensions.Text))
             {
                 Settings.GoodFilesExtensions = textbox_extensions.Text.ToLower();
             }
@@ -235,14 +236,13 @@ namespace XviD4PSP
         private void button_temppath_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog folder = new System.Windows.Forms.FolderBrowserDialog();
-            folder.Description = Languages.Translate("Select folder for temp files:");
+            folder.Description = Languages.Translate("Place for temp files") + ":";
             folder.ShowNewFolderButton = true;
             folder.SelectedPath = Settings.TempPath;
 
             if (folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Settings.TempPath = folder.SelectedPath;
-                textbox_temp.Text = Settings.TempPath;
+                Settings.TempPath = textbox_temp.Text = folder.SelectedPath;
             }
             p.TempFolderFiles();
         }

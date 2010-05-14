@@ -326,11 +326,8 @@ namespace XviD4PSP
                         if (drivestring != Settings.TempPath.Substring(0, 3) || Settings.Key == "0000")
                         {
                             Message mess = new Message(this);
-                            mess.ShowMessage(Languages.Translate("Maximum free drive space detected on") + " " +
-                                drivestring.Substring(0, 2) + " (" + dlabel + ")." +
-                                Environment.NewLine +
-                                Languages.Translate("Do you want use this drive for temp files?"), Languages.Translate("Place for temp files"),
-                                 Message.MessageStyle.YesNo);
+                            mess.ShowMessage(Languages.Translate("Maximum free drive space detected on") + " " + drivestring.Substring(0, 2) + " (" + dlabel + ").\r\n" +
+                                Languages.Translate("Do you want use this drive for temp files?"), Languages.Translate("Place for temp files"), Message.MessageStyle.YesNo);
                             if (mess.result == Message.Result.Yes)
                             {
                                 Settings.TempPath = drivestring + "Temp";
@@ -338,12 +335,11 @@ namespace XviD4PSP
                             }
                             else if (Settings.Key == "0000") //Чтоб не доставать каждый раз окном выбора Темп-папки, а только при первом запуске
                             {
-                                Settings_Window sett = new Settings_Window(this, 2);
+                                new Settings_Window(this, 2);
                             }
                         }
-                        if (!Directory.Exists(Settings.TempPath))
-                            Directory.CreateDirectory(Settings.TempPath);
                     }
+                    if (!Directory.Exists(Settings.TempPath)) Directory.CreateDirectory(Settings.TempPath);
                                                          
                     //Запускаем таймер, по которому потом будем обновлять позицию слайдера, счетчик времени, и еще одну хреновину..
                     timer = new System.Timers.Timer();
@@ -5667,7 +5663,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (Directory.GetFiles(Settings.TempPath).Length != 0)
+                if (Directory.Exists(Settings.TempPath) && Directory.GetFiles(Settings.TempPath).Length != 0)
                 {
                     Message mess = new Message(this);
                     mess.ShowMessage(Languages.Translate("Selected temp folder is not empty") + " (" + Settings.TempPath.ToString() + ")." + Environment.NewLine + Languages.Translate("You must delete all unnecessary files before start encoding.")
