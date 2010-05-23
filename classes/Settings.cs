@@ -593,14 +593,40 @@ namespace XviD4PSP
             get
             {
                 object value = GetValue("AVIDecoder");
-                if (value == null)
-                    return AviSynthScripting.Decoders.DirectShowSource;
-                else
-                    return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
             }
             set
             {
                 SetString("AVIDecoder", value.ToString());
+            }
+        }
+
+        public static AviSynthScripting.Decoders MKVDecoder
+        {
+            get
+            {
+                object value = GetValue("MKVDecoder");
+                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+            }
+            set
+            {
+                SetString("MKVDecoder", value.ToString());
+            }
+        }
+
+        public static AviSynthScripting.Decoders MP4Decoder
+        {
+            get
+            {
+                object value = GetValue("MP4Decoder");
+                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+            }
+            set
+            {
+                SetString("MP4Decoder", value.ToString());
             }
         }
 
@@ -609,10 +635,8 @@ namespace XviD4PSP
             get
             {
                 object value = GetValue("MPEGDecoder");
-                if (value == null)
-                    return AviSynthScripting.Decoders.MPEG2Source;
-                else
-                    return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+                if (value == null) return AviSynthScripting.Decoders.MPEG2Source;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
             }
             set
             {
@@ -625,14 +649,82 @@ namespace XviD4PSP
             get
             {
                 object value = GetValue("OtherDecoder");
-                if (value == null)
-                    return AviSynthScripting.Decoders.DirectShowSource;
-                else
-                    return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
             }
             set
             {
                 SetString("OtherDecoder", value.ToString());
+            }
+        }
+
+        public static AviSynthScripting.Decoders AC3Decoder
+        {
+            get
+            {
+                object value = GetValue("AC3Decoder");
+                if (value == null) return AviSynthScripting.Decoders.NicAC3Source;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+            }
+            set
+            {
+                SetString("AC3Decoder", value.ToString());
+            }
+        }
+
+        public static AviSynthScripting.Decoders MPADecoder
+        {
+            get
+            {
+                object value = GetValue("MPADecoder");
+                if (value == null) return AviSynthScripting.Decoders.NicMPG123Source;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+            }
+            set
+            {
+                SetString("MPADecoder", value.ToString());
+            }
+        }
+
+        public static AviSynthScripting.Decoders MP3Decoder
+        {
+            get
+            {
+                object value = GetValue("MP3Decoder");
+                if (value == null) return AviSynthScripting.Decoders.bassAudioSource;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+            }
+            set
+            {
+                SetString("MP3Decoder", value.ToString());
+            }
+        }
+
+        public static AviSynthScripting.Decoders WAVDecoder
+        {
+            get
+            {
+                object value = GetValue("WAVDecoder");
+                if (value == null) return AviSynthScripting.Decoders.RaWavSource;
+                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+            }
+            set
+            {
+                SetString("WAVDecoder", value.ToString());
+            }
+        }
+
+        public static bool DSS_ConvertFPS
+        {
+            get
+            {
+                object value = GetValue("DSS_ConvertFPS");
+                if (value == null) return true;
+                else return Convert.ToBoolean(value);
+            }
+            set
+            {
+                SetBool("DSS_ConvertFPS", value);
             }
         }
 
@@ -1422,7 +1514,7 @@ namespace XviD4PSP
             }
         }
 
-        //Включить опцию ForcedFilm при индексации DGIndex`ом
+        //Авто ForceFilm при индексации DGIndex`ом
         public static bool DGForceFilm
         {
             get
@@ -1430,7 +1522,7 @@ namespace XviD4PSP
                 object value = GetValue("DGForceFilm");
                 if (value == null)
                 {
-                    return false;
+                    return true;
                 }
                 else
                 {
@@ -1440,6 +1532,21 @@ namespace XviD4PSP
             set
             {
                 SetBool("DGForceFilm", value);
+            }
+        }
+
+        //Процент Film для Auto ForceFilm
+        public static int DGFilmPercent
+        {
+            get
+            {
+                object value = GetValue("DGFilmPercent");
+                if (value == null) return 95;
+                else return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("DGFilmPercent", value);
             }
         }
 

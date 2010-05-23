@@ -207,6 +207,9 @@
     <Compile Include="windows\AudioEncoding.xaml.cs">
       <DependentUpon>AudioEncoding.xaml</DependentUpon>
     </Compile>
+    <Compile Include="windows\Decoders_Settings.xaml.cs">
+      <DependentUpon>Decoders_Settings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="windows\ShowWindow.xaml.cs">
       <DependentUpon>ShowWindow.xaml</DependentUpon>
     </Compile>
@@ -338,6 +341,10 @@
     <Page Include="windows\Autocrop.xaml" />
     <Page Include="windows\Caching.xaml" />
     <Page Include="windows\AudioEncoding.xaml" />
+    <Page Include="windows\Decoders_Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="windows\ShowWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

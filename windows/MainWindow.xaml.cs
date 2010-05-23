@@ -1169,7 +1169,7 @@ namespace XviD4PSP
                     //пытаемся точно узнать фреймрейт (если до этого не вышло)
                     if (x.format != Format.ExportFormats.Audio)
                     {
-                        if (x.inframerate == "")
+                        if (x.inframerate == "" && ext != ".y4m" && ext != ".yuv")
                         {
                             FramerateDetector frd = new FramerateDetector(x);
                             if (frd.m != null)
@@ -1966,7 +1966,6 @@ namespace XviD4PSP
                 menu_demux.Header = menu_demux_video.Header = Languages.Translate("Demux") + "...";
                 //menu_demux.Header = Languages.Translate("Save to");
                 //menu_demux_video.Header = Languages.Translate("Save to");
-                menu_demux_video.Header = Languages.Translate("Demux");
 
                 mnUpdateVideo.Header = Languages.Translate("Refresh preview");
                 menu_createautoscript.Header = Languages.Translate("Create auto script");
@@ -1974,7 +1973,7 @@ namespace XviD4PSP
                 menu_editscript.Header = Languages.Translate("Edit filtering script");
 
                 mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
-                menu_interlace.Header = Languages.Translate("Interlace/Framerate");
+                menu_interlace.Header = Languages.Translate("Interlace/Framerate") + "...";
 
                 mnAddSubtitles.Header = Languages.Translate("Add");
                 mnRemoveSubtitles.Header = Languages.Translate("Remove");
@@ -2009,10 +2008,7 @@ namespace XviD4PSP
                 auto_join_enabled.Header = Languages.Translate("Enabled");
                 auto_join_onlydvd.Header = Languages.Translate("DVD Only");
 
-                mnVideoDecoding.Header = Languages.Translate("Decoding");
-                mnAVIFiles.Header = "AVI " + Languages.Translate("files");
-                mnMPEGFiles.Header = "MPEG " + Languages.Translate("files");
-                mnOtherFiles.Header = Languages.Translate("Other files");
+                mnVideoDecoding.Header = mnAudioDecoding.Header = Languages.Translate("Decoding") + "...";
 
                 menu_fix_AVCHD.Header = Languages.Translate("Convert BluRay UDF to FAT32");
 
@@ -2030,7 +2026,7 @@ namespace XviD4PSP
                 text_aencoding.Content = Languages.Translate("Audio encoding") + ":";
                 text_filtering.Content = Languages.Translate("Filtering") + ":";
                 text_sbc.Content = Languages.Translate("Color correction") + ":";
-                menu_saturation_brightness.Header = Languages.Translate("Color correction");
+                menu_saturation_brightness.Header = Languages.Translate("Color correction") + "...";
                 text_format.Content = Languages.Translate("Format") + ":";
                 button_edit_filters.ToolTip = Languages.Translate("Edit filtering script");
                 button_edit_vencoding.ToolTip = Languages.Translate("Edit video encoding settings");
@@ -2089,14 +2085,6 @@ namespace XviD4PSP
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
                 target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.");
                 
-                //Тултипы для выбора видео-декодера
-                avi_ds.ToolTip = o_ds.ToolTip = mpg_ds.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding");
-                avi_ds2.ToolTip = o_ds2.ToolTip = mpg_ds2.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio");
-                avi_ff.ToolTip = o_ff.ToolTip = mpg_ff.ToolTip = Languages.Translate("This decoder (old or new) is fully independed from your system decoders and theirs settings, but needs some time for indexing video (especialy new FFmpegSource2)");
-                mpg_mpg.ToolTip = Languages.Translate("I think it`s better decoder for decoding MPEG-files. Fully independed and frame-accurate.");
-                check_force_film.ToolTip = Languages.Translate("If checked, DGIndex(MPEG2Source) will reduce fps to 23,976. Use only if video has PullDown flag and 23.976fps (29.970 after PullDown). Read DGIndex manual for more info!") + Environment.NewLine + Languages.Translate("NEVER USE IT IF YOU DON`T KNOW WHAT IT`S ALL ABOUT!");
-                check_assume_fps.ToolTip = Languages.Translate("Force FPS");
-                ff_ff.ToolTip = ff_ff2.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used, if FFmpegSource is specified as decoder for the current file-type.");
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
                 check_scriptview_white.ToolTip = Languages.Translate("Enable white background for ScriptView");
@@ -2153,47 +2141,20 @@ namespace XviD4PSP
             else if (Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled) check_auto_join_enabled.IsChecked = true;
             else check_auto_join_disabled.IsChecked = true;
 
-            if (Settings.AVIDecoder == AviSynthScripting.Decoders.DirectShowSource)
-                mn_avi_dec_ds.IsChecked = true;
-            else if (Settings.AVIDecoder == AviSynthScripting.Decoders.DSS2)
-                mn_avi_dec_ds2.IsChecked = true;
-            else if (Settings.AVIDecoder == AviSynthScripting.Decoders.FFmpegSource)
-                mn_avi_dec_ff.IsChecked = true;
-            else mn_avi_dec_avi.IsChecked = true;
-
-            if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DirectShowSource) mn_mpg_dec_ds.IsChecked = true;
-            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.DSS2) mn_mpg_dec_ds2.IsChecked = true;
-            else if (Settings.MPEGDecoder == AviSynthScripting.Decoders.FFmpegSource) mn_mpg_dec_ff.IsChecked = true;
-            else mn_mpg_dec_mpg.IsChecked = true;
-
-            if (Settings.OtherDecoder == AviSynthScripting.Decoders.DirectShowSource)
-                mn_oth_dec_ds.IsChecked = true;
-            else if (Settings.OtherDecoder == AviSynthScripting.Decoders.DSS2)
-                mn_oth_dec_ds2.IsChecked = true;
-            else mn_oth_dec_ff.IsChecked = true;
-
-            if (Settings.AfterImportAction == Settings.AfterImportActions.Middle)
-                menu_after_i_middle.IsChecked = true;
-            else if (Settings.AfterImportAction == Settings.AfterImportActions.Nothing)
-                menu_after_i_nothing.IsChecked = true;
+            if (Settings.AfterImportAction == Settings.AfterImportActions.Middle) menu_after_i_middle.IsChecked = true;
+            else if (Settings.AfterImportAction == Settings.AfterImportActions.Nothing) menu_after_i_nothing.IsChecked = true;
             else menu_after_i_play.IsChecked = true;
 
-            if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.AllFiles)
-                check_auto_deint_all.IsChecked = true;
-            else if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.Disabled)
-                check_auto_deint_disabled.IsChecked = true;
+            if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.AllFiles) check_auto_deint_all.IsChecked = true;
+            else if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.Disabled) check_auto_deint_disabled.IsChecked = true;
             else check_auto_deint_mpeg.IsChecked = true;
 
-            if (Settings.AutocropMode == Autocrop.AutocropMode.AllFiles)
-                menu_acrop_allfiles.IsChecked = true;
-            else if (Settings.AutocropMode == Autocrop.AutocropMode.Disabled)
-                menu_acrop_disabled.IsChecked = true;
+            if (Settings.AutocropMode == Autocrop.AutocropMode.AllFiles) menu_acrop_allfiles.IsChecked = true;
+            else if (Settings.AutocropMode == Autocrop.AutocropMode.Disabled) menu_acrop_disabled.IsChecked = true;
             else menu_acrop_mpeg.IsChecked = true;
 
-            if (Settings.AutoVolumeMode == Settings.AutoVolumeModes.Disabled)
-                menu_auto_volume_disabled.IsChecked = true;
-            else if (Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnImport)
-                menu_auto_volume_onimp.IsChecked = true;
+            if (Settings.AutoVolumeMode == Settings.AutoVolumeModes.Disabled) menu_auto_volume_disabled.IsChecked = true;
+            else if (Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnImport) menu_auto_volume_onimp.IsChecked = true;
             else menu_auto_volume_onexp.IsChecked = true;
 
             cmenu_is_always_delete_encoded.IsChecked = Settings.AutoDeleteTasks;
@@ -2201,14 +2162,8 @@ namespace XviD4PSP
             //Установка параметров регулятора громкости
             slider_Volume.Value = Settings.VolumeLevel; //Установка значения громкости из реестра..
             VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //.. и пересчет его для ДиректШоу
-            if (slider_Volume.Value == 0)
-                image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume2.png", UriKind.RelativeOrAbsolute));
+            if (slider_Volume.Value == 0) image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume2.png", UriKind.RelativeOrAbsolute));
 
-            if (Settings.FFmpegSource2) mn_ffmpeg_new.IsChecked = true;
-            else mn_ffmpeg_old.IsChecked = true;
-
-            check_force_film.IsChecked = Settings.DGForceFilm;
-            check_assume_fps.IsChecked = Settings.FFmpegAssumeFPS;
             check_old_seeking.IsChecked = OldSeeking = Settings.OldSeeking;
         }
 
@@ -2600,118 +2555,30 @@ namespace XviD4PSP
             }
         }
 
-        private void avi_dec_Click(object sender, RoutedEventArgs e)
+        private void mnDecoding_Click(object sender, RoutedEventArgs e)
         {
-            if (avi_ds.IsFocused)
-            {
-                mn_avi_dec_ds.IsChecked = true;
-                Settings.AVIDecoder = AviSynthScripting.Decoders.DirectShowSource;
-            }
-            else if (avi_ds2.IsFocused)
-            {
-                mn_avi_dec_ds2.IsChecked = true;
-                Settings.AVIDecoder = AviSynthScripting.Decoders.DSS2;
-            }
-            else if (avi_ff.IsFocused)
-            {
-                mn_avi_dec_ff.IsChecked = true;
-                Settings.AVIDecoder = AviSynthScripting.Decoders.FFmpegSource;
-            }
-            else if (avi_avi.IsFocused)
-            {
-                mn_avi_dec_avi.IsChecked = true;
-                Settings.AVIDecoder = AviSynthScripting.Decoders.AVISource;
-            }
-            if (m != null)
-            {
-                string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext == ".avi") reopen_file();
-            }
-        }
+            Decoders_Settings ds;
 
-        private void mpg_dec_Click(object sender, RoutedEventArgs e)
-        {
-            if (mpg_ds.IsFocused)
-            {
-                mn_mpg_dec_ds.IsChecked = true;
-                Settings.MPEGDecoder = AviSynthScripting.Decoders.DirectShowSource;
-            }
-            else if (mpg_ds2.IsFocused)
-            {
-                mn_mpg_dec_ds2.IsChecked = true;
-                Settings.MPEGDecoder = AviSynthScripting.Decoders.DSS2;
-            }
-            else if (mpg_ff.IsFocused)
-            {
-                mn_mpg_dec_ff.IsChecked = true;
-                Settings.MPEGDecoder = AviSynthScripting.Decoders.FFmpegSource;
-            }
-            else if (mpg_mpg.IsFocused)
-            {
-                mn_mpg_dec_mpg.IsChecked = true;
-                Settings.MPEGDecoder = AviSynthScripting.Decoders.MPEG2Source;
-            }
-            if (m != null)
-            {
-                string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264" && m.isvideo)
-                {
-                    if (mpg_mpg.IsFocused)
-                        m.indexfile = m.oldindexfile;
-                    else if (m.indexfile != null)
-                    {
-                        m.oldindexfile = m.indexfile;
-                        m.indexfile = null;
-                    }
-                    
-                    reopen_file();
-                }
-            }
-        }
+            if (((MenuItem)sender).Name == "mnAudioDecoding")
+                ds = new Decoders_Settings(m, this, 2);
+            else
+                ds = new Decoders_Settings(m, this, 1);
 
-        private void oth_dec_Click(object sender, RoutedEventArgs e)
-        {
-            if (o_ds.IsFocused)
+            if (m != null && ds.NeedUpdate)
             {
-                mn_oth_dec_ds.IsChecked = true;
-                Settings.OtherDecoder = AviSynthScripting.Decoders.DirectShowSource;
-            }
-            else if (o_ds2.IsFocused)
-            {
-                mn_oth_dec_ds2.IsChecked = true;
-                Settings.OtherDecoder = AviSynthScripting.Decoders.DSS2;
-            }
-            else if (o_ff.IsFocused)
-            {
-                mn_oth_dec_ff.IsChecked = true;
-                Settings.OtherDecoder = AviSynthScripting.Decoders.FFmpegSource;
-            }
-            if (m != null)
-            {
-                string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (ext != ".avi" && !Calculate.IsMPEG(m.infilepath) && m.isvideo)
-                    reopen_file();
+                //Дублируем текущий массив для возможности восстановления
+                Massive old_m = m.Clone();
+                
+                //Новый массив с измененными декодерами и скриптом
+                m = ds.m.Clone();
+                
+                reopen_file(old_m);
             }
         }
 
         //повторное открытие файла после смены декодера
-        private void reopen_file()
-        {
-            //Дублируем текущий массив для возможности восстановления
-            Massive old_m = new Massive();
-            old_m = m.Clone();
-            
-            m = Format.GetValidVDecoder(m);
-
-            //определяем аудио декодер
-            foreach (object o in m.inaudiostreams)
-            {
-                AudioStream s = (AudioStream)o;
-                s = Format.GetValidADecoder(s);
-            }
-
-            m = AviSynthScripting.CreateAutoAviSynthScript(m);
-
+        private void reopen_file(Massive old_m)
+        {           
             //Получаем информацию через AviSynth и ловим ошибки
             Caching cach = new Caching(m);
             if (cach.m == null)
@@ -2725,12 +2592,15 @@ namespace XviD4PSP
             old_m = null;
 
             //перезабиваем специфику формата
-            m = Format.GetOutInterlace(m);
-            m = Format.GetValidResolution(m);
-            m = Format.GetValidOutAspect(m);
-            m = AspectResolution.FixAspectDifference(m);
-            m = Format.GetValidFramerate(m);
-            m = Calculate.UpdateOutFrames(m);
+            if (m.format != Format.ExportFormats.Audio)
+            {
+                m = Format.GetOutInterlace(m);
+                m = Format.GetValidResolution(m);
+                m = Format.GetValidOutAspect(m);
+                m = AspectResolution.FixAspectDifference(m);
+                m = Format.GetValidFramerate(m);
+                m = Calculate.UpdateOutFrames(m);
+            }
 
             m = FillAudio(m);
 
@@ -5514,19 +5384,6 @@ namespace XviD4PSP
             UpdateTaskMassive(m);
         }
 
-        private void mn_ffmpeg_old_Click(object sender, RoutedEventArgs e)
-        {
-            mn_ffmpeg_old.IsChecked = true;
-            Settings.FFmpegSource2 = false;
-        }
-
-        private void mn_ffmpeg_new_Click(object sender, RoutedEventArgs e)
-        {
-
-            mn_ffmpeg_new.IsChecked = true;
-            Settings.FFmpegSource2 = true;
-        }
-
         //Открытие папки (пакетная обработка)
         private void menu_open_folder_Click(object sender, RoutedEventArgs e)
         {
@@ -5676,16 +5533,6 @@ namespace XviD4PSP
             {
                 ErrorExeption(ex.Message);
             }
-        }
-
-        private void check_Force_Film_Clicked(object sender, RoutedEventArgs e)
-        {
-            Settings.DGForceFilm = check_force_film.IsChecked;
-        }
-
-        private void check_Assume_FPS_Clicked(object sender, RoutedEventArgs e)
-        {
-            Settings.FFmpegAssumeFPS = check_assume_fps.IsChecked;
         }
 
         private void MenuHider(bool ShowItems)

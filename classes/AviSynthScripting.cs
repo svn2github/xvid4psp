@@ -10,19 +10,21 @@ namespace XviD4PSP
 
        public enum Decoders
        {
-           AVIFileSource = 1, //Avisynth
-           AVISource,         //Avisynth
-           OpenDMLSource,     //Avisynth
+           AVIFileSource = 1, //AviSynth
+           AVISource,         //AviSynth
+           OpenDMLSource,     //AviSynth
            MPEG2Source,       //DGDecode.dll
-           DirectShowSource,  //Avisynth
+           DirectShowSource,  //DirectShowSource.dll
            FFmpegSource,      //ffmpegsource.dll
            FFAudioSource,     //ffmpegsource.dll
-           QTInput,           //Quicktime player
-           NicAC3Source,      //NicSource.dll
-           NicDTSSource,      //NicSource.dll
-           NicMPG123Source,   //NicSource.dll (NicMPASource в старых версиях)
+           QTInput,           //QuickTime player
+           RawSource,         //RawSource.dll
+           NicAC3Source,      //NicAudio.dll
+           NicDTSSource,      //NicAudio.dll
+           NicMPG123Source,   //NicAudio.dll
+           RaWavSource,       //NicAudio.dll
            bassAudioSource,   //bassAudio.dll
-           WAVSource,         //Avisynth
+           WAVSource,         //AviSynth
            AVCSource,         //DGAVCDecode.dll
            DGMultiSource,     //DGMultiDecodeNV.dll
            DSS2,              //avss.dll
@@ -87,9 +89,11 @@ namespace XviD4PSP
                m.script += "loadplugin(\"" + m.dgdecnv_path + "DGMultiDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
+           else if (m.vdecoder == Decoders.RawSource)
+               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
 
            if (instream.decoder == Decoders.NicAC3Source || instream.decoder == Decoders.NicMPG123Source ||
-               instream.decoder == Decoders.NicDTSSource)
+               instream.decoder == Decoders.NicDTSSource || instream.decoder == Decoders.RaWavSource)
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
            else if (instream.decoder == Decoders.bassAudioSource)
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
@@ -180,9 +184,6 @@ namespace XviD4PSP
            if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")// && m.isforcefps
                fps = ", fps=" + m.inframerate;
 
-           //выбор видео трека
-           string vtrack = "";
-
            //выбор аудио трека
            string atrack = "";
            if (m.vdecoder == Decoders.FFmpegSource &&
@@ -193,7 +194,7 @@ namespace XviD4PSP
 
            //принудительная конвертация частоты
            string convertfps = "";
-           if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps)
+           if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
            //запрет обработки звука при видео импорте
@@ -261,7 +262,7 @@ namespace XviD4PSP
                            cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
                        }
                    }
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path + ")" + assume_fps;
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
                    n++;
                    if (n < m.infileslist.Length)
                        invideostring += " + ";
@@ -433,7 +434,7 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.Yadif)
            {
-               string deinterlacer = "Yadif(order= " + order + ")";
+               string deinterlacer = "Yadif(order=" + order + ")";
                m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
                    "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
@@ -827,9 +828,11 @@ namespace XviD4PSP
                script += "loadplugin(\"" + m.dgdecnv_path + "DGMultiDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
+           else if (m.vdecoder == Decoders.RawSource)
+               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
 
            if (instream.decoder == Decoders.NicAC3Source || instream.decoder == Decoders.NicMPG123Source ||
-               instream.decoder == Decoders.NicDTSSource)
+               instream.decoder == Decoders.NicDTSSource || instream.decoder == Decoders.RaWavSource)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
            else if (instream.decoder == Decoders.bassAudioSource)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
@@ -876,7 +879,7 @@ namespace XviD4PSP
 
            //принудительная конвертация частоты
            string convertfps = "";
-           if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps)
+           if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
            //запрет обработки звука при видео импорте
@@ -884,9 +887,6 @@ namespace XviD4PSP
            if (m.vdecoder == Decoders.DirectShowSource &&
                instream.audiopath != null)
                audio = ", audio=false";
-
-           //выбор видео трека
-           string vtrack = "";
 
            //выбор аудио трека
            string atrack = "";
@@ -946,7 +946,7 @@ namespace XviD4PSP
                            cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
                        }
                    }
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + vtrack + atrack + cache_path + ")" + assume_fps;
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
                    n += 1;
                    if (n < m.infileslist.Length)
                        invideostring += " + ";
@@ -1057,6 +1057,8 @@ namespace XviD4PSP
                script += "loadplugin(\"" + m.dgdecnv_path + "DGMultiDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
+           else if (m.vdecoder == Decoders.RawSource)
+               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.FFmpegSource)
            {
                if (Settings.FFmpegSource2)

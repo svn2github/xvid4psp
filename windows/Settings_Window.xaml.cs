@@ -28,7 +28,6 @@ namespace XviD4PSP
             //переводим
             button_ok.Content = Languages.Translate("OK");
             Title = Languages.Translate("Settings") + ":";
-            check_demux_audio.Content = Languages.Translate("Don`t demux audio for preview");
             check_show_psnr.ToolTip = Languages.Translate("Show x264 PSNR info");
             check_show_ssim.ToolTip = Languages.Translate("Show x264 SSIM info");
             check_show_arguments.Content = Languages.Translate("Show encoding arguments");
@@ -61,7 +60,6 @@ namespace XviD4PSP
             check_dont_delete_caches.Content = Languages.Translate("Don`t delete any caches and temporal files");
             check_use_trayicon.Content = Languages.Translate("Enable system tray icon");
 
-            check_demux_audio.ToolTip = Languages.Translate("Leave it unchecked to avoid some problems with sound");
             check_clone_ar.ToolTip = "Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method." +
                 "\r\nNote: Autocrop analysis will not be performed!";
             check_clone_trim.ToolTip = "Clone: trim start and trim end";
@@ -83,7 +81,6 @@ namespace XviD4PSP
             tab_open_folder.Header = Languages.Translate("Batch encoding");
             //tab_hotkeys.Header = Languages.Translate("HotKeys");
 
-            check_demux_audio.IsChecked = Settings.DontDemuxAudio;
             check_show_psnr.IsChecked = Settings.x264_PSNR;
             check_show_ssim.IsChecked = Settings.x264_SSIM;
             check_show_arguments.IsChecked = Settings.ArgumentsToLog;
@@ -185,11 +182,6 @@ namespace XviD4PSP
         private void ErrorExeption(string message)
         {
             new Message(this).ShowMessage(message, Languages.Translate("Error"));
-        }
-
-        private void check_demux_audio_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.DontDemuxAudio = check_demux_audio.IsChecked.Value;
         }
 
         private void check_show_psnr_Click(object sender, RoutedEventArgs e)

@@ -51,83 +51,7 @@
                     <Separator/>
 					<MenuItem x:Name="menu_demux_video" Header="Save to" Click="menu_demux_video_Click"/>
 					<Separator/>
-                    <MenuItem x:Name="mnVideoDecoding" Header="Decoding">
-                        <MenuItem x:Name="mnAVIFiles" Header="AVI files">
-                            <MenuItem x:Name="avi_ds" Header="DirectShowSource" Click="avi_dec_Click" StaysOpenOnClick="True">
-                                <MenuItem.Icon>
-                                    <RadioButton Name="mn_avi_dec_ds"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="avi_ds2" Header="DirectShowSource2" Click="avi_dec_Click" StaysOpenOnClick="True">
-                                <MenuItem.Icon>
-                                    <RadioButton Name="mn_avi_dec_ds2"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="avi_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="avi_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton Name="mn_avi_dec_ff"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="avi_avi" Header="AVISource" StaysOpenOnClick="True" Click="avi_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton Name="mn_avi_dec_avi"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                        <MenuItem x:Name="mnMPEGFiles" Header="MPEG files">
-                            <MenuItem x:Name="mpg_ds" Header="DirectShowSource" StaysOpenOnClick="True" Click="mpg_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_mpg_dec_ds"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="mpg_ds2" Header="DirectShowSource2" StaysOpenOnClick="True" Click="mpg_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_mpg_dec_ds2"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="mpg_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="mpg_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_mpg_dec_ff"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="mpg_mpg" Header="MPEG2Source" StaysOpenOnClick="True" Click="mpg_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_mpg_dec_mpg" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="check_force_film" Header="ForceFilm for MPEG2Source" Click="check_Force_Film_Clicked" IsCheckable="True" IsChecked="False" StaysOpenOnClick="True" />
-                        </MenuItem>
-                        <MenuItem x:Name="mnOtherFiles" Header="Other files">
-                            <MenuItem x:Name="o_ds" Header="DirectShowSource" StaysOpenOnClick="True" Click="oth_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_oth_dec_ds"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="o_ds2" Header="DirectShowSource2" StaysOpenOnClick="True" Click="oth_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_oth_dec_ds2"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="o_ff" Header="FFmpegSource" StaysOpenOnClick="True" Click="oth_dec_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_oth_dec_ff"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                        <MenuItem x:Name="mnFFmpegSource" Header="FFmpegSource">
-                            <MenuItem x:Name="ff_ff" Header="Use FFmpegSource (old)" StaysOpenOnClick="True" Click="mn_ffmpeg_old_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_ffmpeg_old"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="ff_ff2" Header="Use FFmpegSource2 (new)" StaysOpenOnClick="True" Click="mn_ffmpeg_new_Click">
-                                <MenuItem.Icon>
-                                    <RadioButton x:Name="mn_ffmpeg_new"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem x:Name="check_assume_fps" Header="Add AssumeFPS() to force FPS" Click="check_Assume_FPS_Clicked" IsCheckable="True" IsChecked="False" StaysOpenOnClick="True" />
-                        </MenuItem>
-                    </MenuItem>           
+                    <MenuItem x:Name="mnVideoDecoding" Header="Decoding" Click="mnDecoding_Click"/>
 					<Separator/>
 					<MenuItem x:Name="menu_autocrop" Header="Detect black borders" Click="menu_autocrop_Click" HorizontalAlignment="Stretch"/>
 					<MenuItem x:Name="menu_detect_interlace" Header="Detect interlace" Click="menu_detect_interlace_Click"/>
@@ -142,6 +66,8 @@
 					<MenuItem x:Name="menu_demux" Header="Demux" Click="menu_demux_Click"/>
 					<MenuItem x:Name="menu_save_wav" Header="Save to WAV" Click="menu_save_wav_Click"/>
 					<Separator/>
+                    <MenuItem x:Name="mnAudioDecoding" Header="Decoding" Click="mnDecoding_Click"/>
+                    <Separator/>
 					<MenuItem x:Name="menu_audiooptions" Header="Editing options" Click="AudioOptions_Click"/>
 					<MenuItem x:Name="menu_aenc_settings" Header="Encoding settings" Click="AudioEncodingSettings_Click"/>
 				</MenuItem>

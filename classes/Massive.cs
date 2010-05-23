@@ -637,16 +637,17 @@ namespace XviD4PSP
             }
         }
 
-        private bool _IsPullDown = false;
-        public bool IsPullDown
+        //ѕосле индексации DGIndex`ом был произведен Auto ForceFilm и FPS стал равен 23.976
+        private bool _IsForcedFilm = false;
+        public bool IsForcedFilm
         {
             get
             {
-                return _IsPullDown;
+                return _IsForcedFilm;
             }
             set
             {
-                _IsPullDown = value;
+                _IsForcedFilm = value;
             }
         }
 

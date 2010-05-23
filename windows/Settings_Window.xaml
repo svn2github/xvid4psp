@@ -19,7 +19,6 @@
 							<RowDefinition Height="*"/>
 						</Grid.RowDefinitions>
 						<StackPanel Margin="8,8,8,0" VerticalAlignment="Top" Height="Auto">
-							<CheckBox x:Name="check_demux_audio" Width="Auto" Height="Auto" Content="Don`t demux audio for preview" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" Click="check_demux_audio_Click"/>
 							<CheckBox x:Name="check_save_anamorph" Width="Auto" Height="Auto" Content="Maintain anamorph aspect" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_save_anamorph_Click"/>
 							<CheckBox x:Name="check_alwaysprogressive" Width="Auto" Height="Auto" Content="Always encode to progressive video" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_alwaysprogressive_Click"/>
 							<CheckBox x:Name="check_auto_colormatrix" Width="Auto" Height="Auto" Content="Auto apply ColorMatrix for MPEG2 files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_auto_colormatrix_Click"/>

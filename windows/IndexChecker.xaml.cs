@@ -62,7 +62,6 @@ namespace XviD4PSP
                 m.invcodecshort = media.VCodecShort;
                 //Добавляем инфу, по которой потом можно будет определить, применять ли ForceFilm
                 m.inframerate = media.FrameRate;
-                if (media.ScanOrder.Contains("Pulldown")) m.IsPullDown = true;
                 media.Close();
 
                 //проверка на невалидную индексацию

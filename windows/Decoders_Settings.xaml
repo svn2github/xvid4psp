@@ -1,0 +1,96 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.Decoders_Settings"
+	x:Name="Window"
+	Title="Decoding Settings"
+	Width="Auto" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
+
+    <Grid x:Name="LayoutRoot">
+        <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
+            <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
+                <TabItem Header="Video" x:Name="tab_video">
+                    <Grid Width="380" Height="280">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_vdecoders" Header="Video decoders" Margin="4,6,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_avi" Content="AVI:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_avi_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_avi_dec_SelectionChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="text_mp4" Content="MP4:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_mp4_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mp4_dec_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_mpg" Content="MPG:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_mpg_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mpg_dec_SelectionChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="text_mkv" Content="MKV:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_mkv_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mkv_dec_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,3" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_other" Content="Other files:" Width="222" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_oth_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_oth_dec_SelectionChanged"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_directshowsource" Header="DirectShowSource" Margin="4,114,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_dss_convert_fps" Width="Auto" Height="Auto" Content="ConvertFPS = true" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_convert_fps_Click"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="Mpeg2Source" Margin="4,170,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_force_film" Width="290" Height="Auto" Content="Auto force Film at (%):" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_force_film_Click"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_force_film" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="100" Minimum="0" Value="95" ValueChanged="num_force_film_ValueChanged"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource" Margin="4,226,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_ffms2" Width="220" Height="Auto" Content="Use new FFmpegSource2" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms2_Click"/>
+                                    <CheckBox x:Name="check_ffms2_force_fps" Width="Auto" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms2_force_fps_Click"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Audio" x:Name="tab_audio">
+                    <Grid Width="380" Height="200">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_adecoders" Header="Audio decoders" Margin="4,6,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_ac3" Content="AC3:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_ac3_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_ac3_dec_SelectionChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="text_mpa" Content="MPA:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_mpa_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mpa_dec_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,3" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_wav" Content="WAV:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_wav_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_wav_dec_SelectionChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="text_mp3" Content="MP3:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_mp3_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mp3_dec_SelectionChanged"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,88,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_dont_demux" Width="220" Height="Auto" Content="Don`t demux audio for preview" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dont_demux_Click"/>
+                                </DockPanel>
+                                <!--DockPanel Margin="0,1,0,3" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_copy_delay" Width="Auto" Height="Auto" Content="Apply Delay in Copy mode" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF"/>
+                                </DockPanel-->
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+        <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
+            <Button x:Name="button_ok" Width="80" Height="25" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="290,0,4,0"/>
+        </Grid>
+    </Grid>
+</Window>

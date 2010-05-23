@@ -574,7 +574,7 @@ namespace XviD4PSP
        {
            if (!m.isvideo)
            {
-               m.vdecoder = 0;
+               m.vdecoder = AviSynthScripting.Decoders.BlankClip;
                return m;
            }
            string ext = Path.GetExtension(m.infilepath).ToLower();
@@ -593,12 +593,15 @@ namespace XviD4PSP
            else
            {
                if (ext == ".avi") m.vdecoder = Settings.AVIDecoder;
+               else if (ext == ".mkv") m.vdecoder = Settings.MKVDecoder;
+               else if (ext == ".mp4" || ext == ".m4v") m.vdecoder = Settings.MP4Decoder;
                else if (ext == ".evo") m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
                else if (ext == ".pmp") m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
                else if (ext == ".vdr") m.vdecoder = AviSynthScripting.Decoders.AVISource;
                else if (ext == ".avs") m.vdecoder = AviSynthScripting.Decoders.Import;
                else if (ext == ".dga") m.vdecoder = AviSynthScripting.Decoders.AVCSource;
                else if (ext == ".dgi") m.vdecoder = AviSynthScripting.Decoders.DGMultiSource;
+               else if (ext == ".y4m" || ext == ".yuv") m.vdecoder = AviSynthScripting.Decoders.RawSource;
                else m.vdecoder = Settings.OtherDecoder;
            }
            return m;
@@ -609,10 +612,11 @@ namespace XviD4PSP
            if (instream.audiopath != null)
            {
                string aext = Path.GetExtension(instream.audiopath).ToLower();
-               if (aext == ".ac3") instream.decoder = AviSynthScripting.Decoders.NicAC3Source;
-               else if (aext == ".mpa") instream.decoder = AviSynthScripting.Decoders.NicMPG123Source;
+               if (aext == ".ac3") instream.decoder = Settings.AC3Decoder;
+               else if (aext == ".mp1" || aext == ".mp2" || aext == ".mpa") instream.decoder = Settings.MPADecoder;
+               else if (aext == ".mp3") instream.decoder = Settings.MP3Decoder;
+               else if (aext == ".wav" || aext == ".w64") instream.decoder = Settings.WAVDecoder;
                else if (aext == ".dts") instream.decoder = AviSynthScripting.Decoders.NicDTSSource;
-               else if (aext == ".wav") instream.decoder = AviSynthScripting.Decoders.WAVSource;
                else if (aext == ".wma") instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
                else instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
            }
