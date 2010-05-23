@@ -378,8 +378,7 @@ namespace XviD4PSP
                string colormatrix = "ColorMatrix(";
                if (m.vdecoder == Decoders.MPEG2Source)
                {
-                   if (m.interlace == SourceType.DECIMATING ||
-                       m.interlace == SourceType.FILM ||
+                   if (m.interlace == SourceType.FILM ||
                        m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
                        m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
                        m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
@@ -390,8 +389,7 @@ namespace XviD4PSP
                }
                else
                {
-                   if (m.interlace == SourceType.DECIMATING ||
-                       m.interlace == SourceType.FILM ||
+                   if (m.interlace == SourceType.FILM ||
                        m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
                        m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
                        m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
@@ -525,8 +523,7 @@ namespace XviD4PSP
                int outresh = m.outresh;
 
                //пересчитываем размеры для раздельных полей
-               if (m.interlace == SourceType.DECIMATING ||
-                   m.interlace == SourceType.FILM ||
+               if (m.interlace == SourceType.FILM ||
                    m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
                    m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
                    m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
