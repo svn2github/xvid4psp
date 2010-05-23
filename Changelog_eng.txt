@@ -1,5 +1,14 @@
-XviD4PSP 5.0.37.8 r132->r140 10.05.10, main changes:
+XviD4PSP 5.0.37.8 r132->r145 23.05.10, main changes:
 
+>>> (r144) Out aspect 16:9 is now allowed for "AVI DV NTSC" and "AVI DV PAL" formats.
+>>> (r144) Fixed a bug with incorrect resolution if SourceType = Decimating and Deinterlace = Disabled (bug since r117).
+>>> (r143) Option "Don`t demux audio for preview" has been moved to the Audio-decoders settings window.
+>>> (r143) Added: RawSource for y4m- and yuv-files; RaWavSource for wav-files, selected by default (req. by Procrustean).
+>>> (r143) Added Film-percents analyser for DGIndex-files (Auto ForceFilm), enabled by default.
+>>> (r143) Added settings window for audio- and video- decoders (Video->Decoding, Audio->Decoding).
+>>> (r142) Fixed incorrect Temp path (http://forum.winnydows.com/viewtopic.php?f=2&t=1433).
+>>> (r141) "Save all scripts" added to tasks area context menu (req. by newsky).
+>>> (r141) Save SAR to (and restore it from) the scripts - added (for anamorphic encoding).
 >>> (r140) System tray icon now can be disabled (Settings->Global settings->Enable system tray icon).
 >>> (r139) Some other fixes.
 >>> (r139) Fixed fps detection with FFmpeg.

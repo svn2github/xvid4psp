@@ -2285,7 +2285,7 @@ namespace XviD4PSP
        {
            if (m.format == ExportFormats.AviDVNTSC ||
                m.format == ExportFormats.AviDVPAL)
-               return new string[] { "1.3333 (4:3)" };
+               return new string[] { "1.3333 (4:3)", "1.7778 (16:9)" };
 
            else if (m.format == ExportFormats.Mpeg2NTSC ||
                m.format == ExportFormats.Mpeg2PAL)
