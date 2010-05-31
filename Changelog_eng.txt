@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r146 01.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r147 01.06.10, main changes:
 
+>>> (r147) Fixed wrong duration and frames count if source file is RAW-AAC (*.aac).
 >>> (r146) Added ability to preserve audio-delay in Copy mode (only for next muxers: MKVMerge, MP4Box, VirtualDubMod,
            FFmpeg, tsMuxeR). Due to some specific reasons this function may work improperly. Audio->Decoding->
            Apply Delay in Copy mode, disabled by default.

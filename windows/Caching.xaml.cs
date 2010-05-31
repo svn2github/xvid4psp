@@ -123,28 +123,35 @@ namespace XviD4PSP
                         m.pixelaspect = (double)reader.GetIntVariable("OUT_SAR_X", 1) / (double)reader.GetIntVariable("OUT_SAR_Y", 1);
                     }
 
-                    string samlerate = reader.Samplerate;
-                    if (samlerate == "0" && m.inaudiostreams.Count > 0)
+                    int samplerate = reader.Samplerate;
+                    if (samplerate == 0 && m.inaudiostreams.Count > 0)
                     {
                         //похоже что звук не декодируется этим декодером
                         throw new Exception("Can`t decode audio with DirectShowSource");
                     }
-                    
-                    if (samlerate != "0" && (m.inaudiostreams.Count > 0 || instream.samplerate == null))
+
+                    if (samplerate != 0 && (m.inaudiostreams.Count > 0 || instream.samplerate == null))
                     {                       
                         //вероятно аудио декодер меняет колличество каналов
                         if (instream.channels != reader.Channels) instream.badmixing = true;
 
-                        instream.samplerate = samlerate;
+                        instream.samplerate = samplerate.ToString();
                         instream.bits = reader.BitsPerSample;
 
+                        //Определение продолжительности и числа кадров только для звука (например если исходник - RAW ААС)
+                        if (!m.isvideo && m.inframes == 0 && m.induration == TimeSpan.Zero)
+                        {
+                            m.induration = m.outduration = TimeSpan.FromSeconds(reader.SamplesCount / (double)reader.Samplerate);
+                            m.inframes = (int)(m.induration.TotalSeconds * 25);
+                        }
+
                         if (m.inaudiostreams.Count > 0 && instream.bitrate == 0 && (instream.codecshort == "PCM" || instream.codecshort == "LPCM"))
-                            instream.bitrate = (reader.BitsPerSample * Convert.ToInt32(reader.Samplerate) * reader.Channels) / 1000; //kbps
+                            instream.bitrate = (reader.BitsPerSample * reader.Samplerate * reader.Channels) / 1000; //kbps
 
                         //если звук всё ещё не забит
-                        if (m.inaudiostreams.Count == 0 && ext == ".avs" && samlerate != "0")
+                        if (m.inaudiostreams.Count == 0 && ext == ".avs" && samplerate != 0)
                         {
-                            instream.bitrate = (reader.BitsPerSample * Convert.ToInt32(reader.Samplerate) * reader.Channels) / 1000; //kbps
+                            instream.bitrate = (reader.BitsPerSample * reader.Samplerate * reader.Channels) / 1000; //kbps
                             instream.codec = "PCM";
                             instream.codecshort = "PCM";
                             instream.language = "English";

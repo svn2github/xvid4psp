@@ -108,9 +108,14 @@ namespace XviD4PSP
             get { return clip.BitsPerSample; }
         }
 
-        public string Samplerate
+        public int Samplerate
         {
-            get { return clip.AudioSampleRate.ToString(); }
+            get { return clip.AudioSampleRate; }
+        }
+
+        public long SamplesCount
+        {
+            get { return clip.SamplesCount; }
         }
 
         public int Channels
