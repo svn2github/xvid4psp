@@ -31,6 +31,7 @@ namespace XviD4PSP
         private string encodertext;
         private bool IsAborted = false;
         private bool IsErrors = false;
+        private bool CopyDelay = false;
         private string estimated = Languages.Translate("estimated");
 
         private System.Timers.Timer timer;
@@ -42,7 +43,6 @@ namespace XviD4PSP
         private int steps = 0;
         private double fps = 0.0;
         private double encoder_fps = 0.0;
-        //private string enc_fps = "";
         private string busyfile;
         private DateTime start_time;
         private Shutdown.ShutdownMode ending = Settings.FinalAction;
@@ -79,11 +79,14 @@ namespace XviD4PSP
             //аудио кодирование
             if (m.inaudiostreams.Count > 0)
             {
-                if (muxer != Format.Muxers.Disabled)
-                    steps++;
-                if (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass && m.outaudiostreams.Count > 0
-                    && ((AudioStream)(m.outaudiostreams[m.outaudiostream])).codec == "AAC")
-                    steps++;
+                if (muxer != Format.Muxers.Disabled) steps++;
+
+                if (m.outaudiostreams.Count > 0)
+                {
+                    string codec = ((AudioStream)(m.outaudiostreams[m.outaudiostream])).codec;
+                    if (codec == "AAC" && m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass) steps++;
+                    else if (codec == "Copy" && Settings.CopyDelay) CopyDelay = true;
+                }
             }
 
             if (m.vencoding == "Disabled")
@@ -1888,7 +1891,12 @@ namespace XviD4PSP
             //Ловим ошибки, если они были
             if (avs.IsErrors)
             {
-                ErrorExeption(avs.error_text);                
+                ErrorExeption(avs.error_text);
+            }
+            else
+            {
+                //Задержка уже была в скрипте, и звук декодировался вместе с ней
+                CopyDelay = false;
             }
 
             //чистим ресурсы
@@ -2518,7 +2526,7 @@ namespace XviD4PSP
             if (m.outaudiostreams.Count > 0)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                addaudio = " -add \"" + outstream.audiopath + "\"";
+                addaudio = " -add \"" + outstream.audiopath + "\"" + (CopyDelay ? " -delay 2=" + outstream.delay : "");
             }
             
             info.Arguments = ipod + rate +
@@ -2763,7 +2771,12 @@ namespace XviD4PSP
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 if (outstream.audiopath != null)
-                    SetLog("Audio file: " + outstream.audiopath);
+                {
+                    if (!File.Exists(outstream.audiopath) && outstream.codec == "Copy")
+                        SetLog("Audio file: " + m.infilepath);
+                    else
+                        SetLog("Audio file: " + outstream.audiopath);
+                }
             }
             SetLog("Muxing to: " + m.outfilepath);
 
@@ -2792,10 +2805,13 @@ namespace XviD4PSP
             if (m.outaudiostreams.Count > 0)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                if (!File.Exists(outstream.audiopath))
-                    addaudio = " -acodec copy";
-                else
-                    addaudio = " -i \"" + outstream.audiopath + "\"" + aformat + " -acodec copy";
+                if (CopyDelay)
+                {
+                    addaudio = " -ss " + TimeSpan.FromMilliseconds(outstream.delay * -1.0).ToString();
+                    if (addaudio.Contains(".")) addaudio = addaudio.Remove(addaudio.Length - 4, 4);
+                }
+                if (!File.Exists(outstream.audiopath)) addaudio += " -i \"" + m.infilepath + "\"" + aformat + " -acodec copy";
+                else addaudio += " -i \"" + outstream.audiopath + "\"" + aformat + " -acodec copy";
             }
 
             string format = "";
@@ -3176,7 +3192,12 @@ namespace XviD4PSP
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 if (outstream.audiopath != null)
-                    SetLog("Audio file: " + outstream.audiopath);
+                {
+                    if (!File.Exists(outstream.audiopath) && outstream.codec == "Copy")
+                        SetLog("Audio file: " + m.infilepath);
+                    else
+                        SetLog("Audio file: " + outstream.audiopath);
+                }
             }
             SetLog("Muxing to: " + m.outfilepath);
 
@@ -3319,6 +3340,8 @@ namespace XviD4PSP
                         //    atrack = ", track=" + i.ffid;// +", lang=eng";
                     }
                 }
+
+                if (CopyDelay) atrack += ", timeshift=" + o.delay + "ms";
 
                 meta += atag + ", \"" + apath + "\"" + atrack;
             }
@@ -3748,7 +3771,7 @@ namespace XviD4PSP
             VirtualDubModWrapper.SetStartUpInfo();
 
             //создаём скрипт
-            VirtualDubModWrapper.CreateMuxingScript(m);
+            VirtualDubModWrapper.CreateMuxingScript(m, CopyDelay);
 
             
             encoderProcess.StartInfo = info;
@@ -3798,15 +3821,12 @@ namespace XviD4PSP
         {
             SafeDelete(m.outfilepath);
 
+            string sf_ext = Path.GetExtension(m.infilepath).ToLower();
             busyfile = Path.GetFileName(m.outfilepath);
             step++;
 
-            string outvideofile;
-            if (Format.IsDirectRemuxingPossible(m) &&
-                m.outvcodec == "Copy")
-                outvideofile = m.infilepath;
-            else
-                outvideofile = m.outvideofile;
+            //Видеофайл
+            string outvideofile = (Format.IsDirectRemuxingPossible(m) && m.outvcodec == "Copy") ? m.infilepath : m.outvideofile;
 
             //info строка
             SetLog("Video file: " + outvideofile);
@@ -3814,7 +3834,12 @@ namespace XviD4PSP
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 if (outstream.audiopath != null)
-                    SetLog("Audio file: " + outstream.audiopath);
+                {
+                    if (!File.Exists(outstream.audiopath) && outstream.codec == "Copy")
+                        SetLog("Audio file: " + m.infilepath);
+                    else
+                        SetLog("Audio file: " + outstream.audiopath);
+                }
             }
             SetLog("Muxing to: " + m.outfilepath);
 
@@ -3828,10 +3853,8 @@ namespace XviD4PSP
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
-            string ext = Path.GetExtension(outvideofile);
-            int vID = 0;
-            if (ext == ".mp4")
-                vID = 1;
+            string ext = Path.GetExtension(outvideofile).ToLower();
+            int vID = (ext == ".mp4") ? 1 : 0;
 
             string rate = "--default-duration " + vID + ":" + m.outframerate + "fps ";
             if (m.outvcodec == "Copy")
@@ -3844,25 +3867,21 @@ namespace XviD4PSP
 
             //split
             string split = "";
-            if (m.split != null &&
-                m.split != "Disabled")
+            if (m.split != null && m.split != "Disabled")
             {
                 int size = 0;
-
                 string svalue = Calculate.GetRegexValue(@"(\d+).mb", m.split);
-                if (svalue != null)
-                    Int32.TryParse(svalue, NumberStyles.Integer, null, out size);
-
-                if (size != 0)
-                    split = " --split size:" + size + "M ";
+                if (svalue != null) Int32.TryParse(svalue, NumberStyles.Integer, null, out size);
+                if (size != 0) split = " --split size:" + size + "M ";
             }
 
             //video
             string video = "";
-            if (Format.IsDirectRemuxingPossible(m) &&
-                m.outvcodec == "Copy")
-                video = "-d " + m.invideostream_mkvid + " -A -S \"" + m.infilepath + "\" ";
-                //video = "-d " + m.invideostream_mkvid + " -S \"" + m.infilepath + "\" ";
+            if (Format.IsDirectRemuxingPossible(m) && m.outvcodec == "Copy")
+            {
+                int remux_vID = (sf_ext == ".mpg" || sf_ext == ".vob") ? m.invideostream_ffid : m.invideostream_mkvid;
+                video = "-d " + remux_vID + " -A -S \"" + m.infilepath + "\" ";
+            }
             else
                 video = rate + "-d " + vID + " -A -S \"" + m.outvideofile + "\" ";
 
@@ -3870,16 +3889,13 @@ namespace XviD4PSP
             string audio = "";
             if (m.outaudiostreams.Count > 0)
             {
-                //video += "--sync 0:0 ";
-
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                string aext = Path.GetExtension(outstream.audiopath);
+                string aext = Path.GetExtension(outstream.audiopath).ToLower();
                 int aID = outstream.mkvid;
-                if (aext == ".m4a" || aext == ".avi") //||aext == ".aac"
-                    aID = 1;
-                if (aext == ".aac") //Для aac всегда ноль, т.к. это RAW
-                    aID = 0;
+                if (aext == ".m4a" || aext == ".avi") aID = 1;
+                else if (aext == ".aac") aID = 0; //Для aac всегда ноль, т.к. это RAW
+                    
                 string sbr = null;
                 if (outstream.codec == "Copy" && instream.codec.Contains("AAC")) //Для правильного муксинга he-aac, aac+, или aac-sbr
                     if (instream.codec.Contains("HE") || instream.codec.Contains("AAC+") || instream.codec.Contains("SBR"))
@@ -3887,18 +3903,35 @@ namespace XviD4PSP
                     else
                         sbr = " --aac-is-sbr 0:0";
 
-                if (!File.Exists(outstream.audiopath) &&
-                    Format.IsDirectRemuxingPossible(m) &&
-                    outstream.codec == "Copy")
+                if (!File.Exists(outstream.audiopath) && Format.IsDirectRemuxingPossible(m) && outstream.codec == "Copy")
                 {
-                    audio = "-a " + instream.mkvid + " -D -S --no-chapters \"" + m.infilepath + "\" "; //звук из исходника (режим Copy без демукса)
+                    //звук из исходника (режим Copy без демукса)
+                    string delay = "";
+                    int remux_aID = (sf_ext == ".mpg" || sf_ext == ".vob") ? instream.ffid : instream.mkvid;
+                    if (CopyDelay)
+                    {
+                        int new_delay;
+                        if (sf_ext == ".mp4" || sf_ext == ".mov" || sf_ext == ".m4v")
+                        {
+                            //Файлы, для которых mkvmerge не использует существующую задержку, и поправка не нужна
+                            new_delay = outstream.delay;
+                        }
+                        else
+                        {
+                            //Для остальных файлов нужно учесть уже имеющуюся в них задержку
+                            new_delay = outstream.delay - instream.delay;
+                        }
+                        delay = " --sync " + remux_aID + ":" + new_delay;
+                    }
+                    audio = "-a " + remux_aID + delay + " -D -S --no-chapters \"" + m.infilepath + "\" ";
                 }
                 else
-                    audio = "-a " + aID + sbr + " -D -S --no-chapters \"" + outstream.audiopath + "\" ";
+                {
+                    string delay = (CopyDelay) ? " --sync " + aID + ":" + outstream.delay : "";
+                    audio = "-a " + aID + sbr + delay + " -D -S --no-chapters \"" + outstream.audiopath + "\" ";
+                }                    
             }
- 
-            //"--aspect-ratio " + vID + ":" + Calculate.ConvertDoubleToPointString(m.outaspect) + " " +
-            
+             
             //Ввод полученых аргументов коммандной строки, + добавление строки введенной пользователем
             info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + split + m.mkvstring;
 
@@ -4439,8 +4472,7 @@ namespace XviD4PSP
                             SetLog("Accurate: " + m.volumeaccurate);
                             SetLog("Gain: " + instream.gain);
                         }
-                        if (instream.delay != 0 ||
-                            outstream.delay != 0)
+                        if (instream.delay != 0 || outstream.delay != 0)
                             SetLog("Delay: " + instream.delay + " > " + outstream.delay);
                     }
                     else
@@ -4449,6 +4481,8 @@ namespace XviD4PSP
                         SetLog("AudioBitrate: " + instream.bitrate);
                         SetLog("Samplerate: " + instream.samplerate);
                         SetLog("Channels: " + instream.channels);
+                        if (Settings.CopyDelay && (instream.delay != 0 || outstream.delay != 0))
+                            SetLog("Delay: " + instream.delay + " > " + outstream.delay);
                     }
                 }
 

@@ -109,8 +109,7 @@ namespace XviD4PSP
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
-                if (instream.audiopath == null &&
-                    instream.badmixing)
+                if (instream.audiopath == null && instream.badmixing)
                 {
                     string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
                     instream.audiopath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
@@ -154,28 +153,21 @@ namespace XviD4PSP
                 foreach (string channelschanger in Enum.GetNames(typeof(ChannelConverters)))
                     combo_mixing.Items.Add(EnumMixingToString((ChannelConverters)Enum.Parse(typeof(ChannelConverters), channelschanger)));
 
-                string outacodec = null;
                 if (m.outaudiostreams.Count > 0)
                 {
-                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                    outacodec = outstream.codec;
-                }
-
-                //запрещаем формы если файл без звука
-                if (m.outaudiostreams.Count == 0 ||
-                    m.outaudiostreams.Count  > 0 && outacodec == "Copy")
-                {
-                    group_channels.IsEnabled = false;
-                    group_delay.IsEnabled = false;
-                    group_samplerate.IsEnabled = false;
-                    group_volume.IsEnabled = false;
+                    if (((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "Copy")
+                    {
+                        group_delay.IsEnabled = Settings.CopyDelay;
+                        group_channels.IsEnabled = group_samplerate.IsEnabled = group_volume.IsEnabled = false;
+                    }
+                    else
+                    {
+                        group_delay.IsEnabled = group_channels.IsEnabled = group_samplerate.IsEnabled = group_volume.IsEnabled = true;
+                    }
                 }
                 else
                 {
-                    group_channels.IsEnabled = true;
-                    group_delay.IsEnabled = true;
-                    group_samplerate.IsEnabled = true;
-                    group_volume.IsEnabled = true;
+                    group_delay.IsEnabled = group_channels.IsEnabled = group_samplerate.IsEnabled = group_volume.IsEnabled = false;
                 }
             }
             //закончился режим all
@@ -197,7 +189,7 @@ namespace XviD4PSP
                 button_ok.Margin = new Thickness(0, 5, 8, 5);
 
                 this.Width = 500;
-                this.Height = 234;
+                this.Height = 240;
             }
 
             //прописываем в форму текущие настройки
@@ -306,8 +298,9 @@ namespace XviD4PSP
                 //передаём активный трек на выход
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
+                //Только FFmpegSource умеет переключать треки
                 if (instream.audiopath == null && instream.decoder == 0 && m.inaudiostream > 0 &&
-                    !(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Settings.DontDemuxAudio))
+                    !(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Settings.FFMS_Enable_Audio))
                 {
                     string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
                     instream.audiopath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
@@ -394,7 +387,7 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, RoutedEventArgs e)
         {
-           if (m.inaudiostreams.Count > 0 && !Settings.DontDemuxAudio)
+           if (m.inaudiostreams.Count > 0)
             {
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
@@ -854,13 +847,14 @@ namespace XviD4PSP
         private void check_apply_delay_Click(object sender, RoutedEventArgs e)
         {
             Settings.ApplyDelay = check_apply_delay.IsChecked.Value;
-            if (check_apply_delay.IsChecked.Value == true)
+            AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+            if (check_apply_delay.IsChecked.Value)
             {
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 num_delay.Value = outstream.delay = instream.delay;
-                SetInfo();
             }
+            else num_delay.Value = outstream.delay = 0;
+            SetInfo();
         }
 	}
 }

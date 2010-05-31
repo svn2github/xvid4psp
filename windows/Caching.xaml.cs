@@ -110,7 +110,7 @@ namespace XviD4PSP
                     }
 
                     if (m.isvideo && ext != ".avs" && (reader.Width == 0 || reader.Height == 0))
-                        throw new Exception(m.vdecoder.ToString() + ": Can`t decode video (zero-size image was returned)!");
+                        throw new Exception("Caching: " + m.vdecoder.ToString() + " can`t decode video (zero-size image was returned)!");
                     else
                     {
                         m.inresw = reader.Width;
@@ -127,22 +127,18 @@ namespace XviD4PSP
                     if (samlerate == "0" && m.inaudiostreams.Count > 0)
                     {
                         //похоже что звук не декодируется этим декодером
-                        error = "Can`t decode audio with DirectShowSource";
+                        throw new Exception("Can`t decode audio with DirectShowSource");
                     }
-                    if (samlerate != "0" && m.inaudiostreams.Count > 0 ||
-                        samlerate != "0" && instream.samplerate == null)
-                    {
+                    
+                    if (samlerate != "0" && (m.inaudiostreams.Count > 0 || instream.samplerate == null))
+                    {                       
                         //вероятно аудио декодер меняет колличество каналов
-                        if (instream.channels != reader.Channels)
-                            instream.badmixing = true;
-                        else
-                            instream.channels = reader.Channels;
+                        if (instream.channels != reader.Channels) instream.badmixing = true;
 
                         instream.samplerate = samlerate;
                         instream.bits = reader.BitsPerSample;
 
-                        if (m.inaudiostreams.Count > 0 && instream.bitrate == 0 && instream.codecshort == "PCM" ||
-                            m.inaudiostreams.Count > 0 && instream.bitrate == 0 && instream.codecshort == "LPCM")
+                        if (m.inaudiostreams.Count > 0 && instream.bitrate == 0 && (instream.codecshort == "PCM" || instream.codecshort == "LPCM"))
                             instream.bitrate = (reader.BitsPerSample * Convert.ToInt32(reader.Samplerate) * reader.Channels) / 1000; //kbps
 
                         //если звук всё ещё не забит
@@ -202,7 +198,7 @@ namespace XviD4PSP
             else
                 instream = new AudioStream();
 
-            if (error == null) Close(); 
+            if (error == null) Close();
             
             else if (error == "Can`t decode audio with DirectShowSource" || error.StartsWith("DirectShowSource:") || error == "Script doesn't contain video" ||
                 error.Contains("FFmpegSource: Audio decoding error") || error.StartsWith("FFAudioSource:") || error.Contains(" audio track"))
@@ -211,7 +207,7 @@ namespace XviD4PSP
                 if (error.StartsWith("DirectShowSource:") || error.Contains("contain video"))
                     m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
 
-                    if (m.inaudiostreams.Count > 0)
+                    if (m.inaudiostreams.Count > 0 && !File.Exists(instream.audiopath))
                     {
                         string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
                         string outpath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
@@ -256,6 +252,12 @@ namespace XviD4PSP
                             instream.decoder = 0;
                         }
                     }
+                    //else if (m.inaudiostreams.Count > 0 && File.Exists(instream.audiopath))
+                    //{
+                    //    ShowMessage("Caching: " + error, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    //    m = null;
+                    //    Close();
+                    //}
 
                     error = null;
                     worker.RunWorkerAsync();

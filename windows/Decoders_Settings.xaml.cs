@@ -36,13 +36,18 @@ namespace XviD4PSP
             Title = Languages.Translate("Decoding");
             button_ok.Content = Languages.Translate("OK");
             text_other.Content = Languages.Translate("Other files") + ":";
-            check_dont_demux.Content = Languages.Translate("Don`t demux audio for preview");
-            check_dont_demux.ToolTip = Languages.Translate("Leave it unchecked to avoid some problems with sound");
+            check_dss_audio.ToolTip = Languages.Translate("Allow DirectShowSource to decode audio directly from the source-file (without demuxing).");
             check_force_film.Content = Languages.Translate("Auto force Film at") + " (%):";
             check_force_film.ToolTip = Languages.Translate("Auto force Film if Film percentage is more than selected value (for NTSC sources only)");
             check_ffms2.Content = Languages.Translate("Use new FFmpegSource2");
             check_ffms2.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used for decoding associated file types");
-            check_ffms2_force_fps.ToolTip = Languages.Translate("Force FPS");
+            check_ffms_force_fps.ToolTip = Languages.Translate("Force FPS");
+            check_ffms_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "FFmpegSource") + "\r\n" +
+                Languages.Translate("Note: FFmpegSource1 will decode audio to RAW-data file, so it can take a lot of space on your HDD.");
+            check_new_delay.Content = Languages.Translate("Use new Delay calculation method");
+            check_new_delay.ToolTip = Languages.Translate("A new method uses the difference between video and audio delays, while old method uses audio delay only."); //+
+                //"\r\n" + Languages.Translate("This new method can be helpfull for the FFmpegSource decoders, but harmful for the DirectShowSource.");
+            check_copy_delay.Content = Languages.Translate("Apply Delay in Copy mode");
 
             text_avi.ToolTip = "avi";
             text_mkv.ToolTip = "mkv";
@@ -93,6 +98,7 @@ namespace XviD4PSP
 
             //DirectShowSource
             check_dss_convert_fps.IsChecked = Settings.DSS_ConvertFPS;
+            check_dss_audio.IsChecked = Settings.DSS_Enable_Audio;
             
             //Mpeg2Source
             check_force_film.IsChecked = Settings.DGForceFilm;
@@ -100,10 +106,12 @@ namespace XviD4PSP
 
             //FFmpegSource
             check_ffms2.IsChecked = Settings.FFmpegSource2;
-            check_ffms2_force_fps.IsChecked = Settings.FFmpegAssumeFPS;
+            check_ffms_force_fps.IsChecked = Settings.FFmpegAssumeFPS;
+            check_ffms_audio.IsChecked = Settings.FFMS_Enable_Audio;
 
             //Audio
-            check_dont_demux.IsChecked = Settings.DontDemuxAudio;
+            check_new_delay.IsChecked = Settings.NewDelayMethod;
+            check_copy_delay.IsChecked = Settings.CopyDelay;
 
             SetDecoders();
             
@@ -337,6 +345,11 @@ namespace XviD4PSP
             Settings.DSS_ConvertFPS = check_dss_convert_fps.IsChecked.Value;
         }
 
+        private void check_dss_audio_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DSS_Enable_Audio = check_dss_audio.IsChecked.Value;
+        }
+
         private void check_force_film_Click(object sender, RoutedEventArgs e)
         {
             Settings.DGForceFilm = check_force_film.IsChecked.Value;
@@ -347,14 +360,24 @@ namespace XviD4PSP
             Settings.FFmpegSource2 = check_ffms2.IsChecked.Value;
         }
 
-        private void check_ffms2_force_fps_Click(object sender, RoutedEventArgs e)
+        private void check_ffms_force_fps_Click(object sender, RoutedEventArgs e)
         {
-            Settings.FFmpegAssumeFPS = check_ffms2_force_fps.IsChecked.Value;
+            Settings.FFmpegAssumeFPS = check_ffms_force_fps.IsChecked.Value;
         }
 
-        private void check_dont_demux_Click(object sender, RoutedEventArgs e)
+        private void check_ffms_audio_Click(object sender, RoutedEventArgs e)
         {
-            Settings.DontDemuxAudio = check_dont_demux.IsChecked.Value;
+            Settings.FFMS_Enable_Audio = check_ffms_audio.IsChecked.Value;
+        }
+
+        private void check_new_delay_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.NewDelayMethod = check_new_delay.IsChecked.Value;
+        }
+        
+        private void check_copy_delay_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.CopyDelay = check_copy_delay.IsChecked.Value;
         }
 	}
 }

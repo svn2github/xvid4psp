@@ -1,5 +1,15 @@
-XviD4PSP 5.0.37.8 r132->r145 23.05.10, main changes:
+XviD4PSP 5.0.37.8 r132->r146 01.06.10, main changes:
 
+>>> (r146) Added ability to preserve audio-delay in Copy mode (only for next muxers: MKVMerge, MP4Box, VirtualDubMod,
+           FFmpeg, tsMuxeR). Due to some specific reasons this function may work improperly. Audio->Decoding->
+           Apply Delay in Copy mode, disabled by default.
+>>> (r146) Added a new method of audio-delay calculation. Most probably you need to use this method if video decoder is:
+           FFmpegSource (1 or 2), DirectShowSource2, or DirectShowSource with "Enable Audio" is disabled. Audio->Decoding->
+           Use new Delay calculation method, disabled by default.
+>>> (r146) For DirectShowSource and FFmpegSource added option "Enable Audio", that allows this decoders to decode audio
+           directly from the source file, w/o demuxing. If it`s disabled, audio will be extracted and decoded by regular
+           audio-decoder.
+>>> (r146) Option "Don`t demux audio for preview" has been removed.
 >>> (r144) Out aspect 16:9 is now allowed for "AVI DV NTSC" and "AVI DV PAL" formats.
 >>> (r144) Fixed a bug with incorrect resolution if SourceType = Decimating and Deinterlace = Disabled (bug since r117).
 >>> (r143) Option "Don`t demux audio for preview" has been moved to the Audio-decoders settings window.

@@ -24,7 +24,7 @@ namespace XviD4PSP
            myHive.Close();
        }
 
-       public static void CreateMuxingScript(Massive m)
+       public static void CreateMuxingScript(Massive m, bool CopyDelay)
        {
            StreamWriter sw = new StreamWriter(Settings.TempPath + "\\" + m.key + ".vcf", false, System.Text.Encoding.Default);
 
@@ -33,6 +33,7 @@ namespace XviD4PSP
 
            if (m.outaudiostreams.Count > 0)
            {
+               AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                if (outstream.audiopath != null)
                {
@@ -50,19 +51,22 @@ namespace XviD4PSP
                        key = "00000205";
 
                    //SRT 0x0301 
-                   //Для правильного муксинга вбр и абр мп3-звука (0 - переписывать заголовок, 1 - не переписывать заголовок мп3-файла)
-                   if (outstream.codec == "MP3" && m.mp3_options.encodingmode != Settings.AudioEncodingModes.CBR)//для VBR и ABR 1
+                   //Для правильного муксинга вбр и абр мп3-звука
+                   if (outstream.codec == "MP3" && m.mp3_options.encodingmode != Settings.AudioEncodingModes.CBR || instream.codecshort == "MP3" && outstream.codec == "Copy")
                    {
+                       //для VBR и ABR (1 - не переписывать заголовок файла)
                        sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 1);");
                    }
-                   else //для CBR 0
+                   else
                    {
+                       //для CBR (0 - переписывать заголовок)
                        sw.WriteLine("VirtualDub.stream[0].SetSource(\"" + Calculate.GetUTF8String(outstream.audiopath) + "\", 0x" + key + ", 0);");
                    }
+
                    sw.WriteLine("VirtualDub.stream[0].DeleteComments(1);");
                    sw.WriteLine("VirtualDub.stream[0].AdjustChapters(1);");
                    sw.WriteLine("VirtualDub.stream[0].SetMode(0);");
-                   sw.WriteLine("VirtualDub.stream[0].SetInterleave(1, 500, 1, 0, 0);");
+                   sw.WriteLine("VirtualDub.stream[0].SetInterleave(1, 500, 1, 0, " + (CopyDelay ? outstream.delay.ToString() : "0") + ");");
                    sw.WriteLine("VirtualDub.stream[0].SetClipMode(1, 1);");
                    sw.WriteLine("VirtualDub.stream[0].SetConversion(0, 0, 0, 0, 0);");
                    sw.WriteLine("VirtualDub.stream[0].SetVolume();");
@@ -88,7 +92,5 @@ namespace XviD4PSP
 
            sw.Close();
        }
-
-
     }
 }

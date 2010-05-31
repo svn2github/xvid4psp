@@ -1146,19 +1146,6 @@ namespace XviD4PSP
             }
         }
 
-        //private bool _isforcefps = true;
-        //public bool isforcefps
-        //{
-        //    get
-        //    {
-        //        return _isforcefps;
-        //    }
-        //    set
-        //    {
-        //        _isforcefps = value;
-        //    }
-        //}
-
         private string _outvinfo;
         public string outvinfo
         {

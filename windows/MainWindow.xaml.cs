@@ -1207,8 +1207,9 @@ namespace XviD4PSP
                         }
                     }
 
-                    //Извлечение звука для FFmpegSource (извлекается 1-й трек), для DSS2 звук будет извлечен в Caching
-                    if (x.inaudiostreams.Count > 0 && x.vdecoder == AviSynthScripting.Decoders.FFmpegSource && !Settings.DontDemuxAudio)
+                    //Извлечение звука (1-й трек) для FFmpegSource и DirectShowSource, для DSS2 звук будет извлечен в Caching
+                    if (x.inaudiostreams.Count > 0 && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource && !Settings.FFMS_Enable_Audio ||
+                        x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio))
                     {
                         AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
                         if (instream.audiopath == null)
@@ -1293,8 +1294,7 @@ namespace XviD4PSP
                             instream.audiofiles = new string[] { instream.audiopath };
                             instream = Format.GetValidADecoder(instream);
 
-                            if (!File.Exists(instream.audiopath) &&
-                                !Settings.DontDemuxAudio)
+                            if (!File.Exists(instream.audiopath))
                             {
                                 Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
                                 if (dem.m != null) x = dem.m.Clone();

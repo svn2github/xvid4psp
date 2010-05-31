@@ -11,7 +11,7 @@
         <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
             <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
                 <TabItem Header="Video" x:Name="tab_video">
-                    <Grid Width="380" Height="280">
+                    <Grid Width="380" Height="296">
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_vdecoders" Header="Video decoders" Margin="4,6,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
@@ -35,7 +35,8 @@
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_directshowsource" Header="DirectShowSource" Margin="4,114,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
-                                    <CheckBox x:Name="check_dss_convert_fps" Width="Auto" Height="Auto" Content="ConvertFPS = true" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_convert_fps_Click"/>
+                                    <CheckBox x:Name="check_dss_convert_fps" Width="226" Height="Auto" Content="ConvertFPS = true" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_convert_fps_Click"/>
+                                    <CheckBox x:Name="check_dss_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_audio_Click"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -49,16 +50,19 @@
                         </GroupBox>
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource" Margin="4,226,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
-                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
-                                    <CheckBox x:Name="check_ffms2" Width="220" Height="Auto" Content="Use new FFmpegSource2" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms2_Click"/>
-                                    <CheckBox x:Name="check_ffms2_force_fps" Width="Auto" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms2_force_fps_Click"/>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_ffms2" Width="226" Height="Auto" Content="Use new FFmpegSource2" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms2_Click"/>
+                                    <CheckBox x:Name="check_ffms_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_audio_Click"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_ffms_force_fps" Width="Auto" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_force_fps_Click"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Audio" x:Name="tab_audio">
-                    <Grid Width="380" Height="200">
+                    <Grid Width="380" Height="160">
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_adecoders" Header="Audio decoders" Margin="4,6,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
@@ -77,12 +81,12 @@
                         </GroupBox>
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,88,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
-                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
-                                    <CheckBox x:Name="check_dont_demux" Width="220" Height="Auto" Content="Don`t demux audio for preview" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dont_demux_Click"/>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_new_delay" Width="Auto" Height="Auto" Content="Use new Delay calculation method" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_new_delay_Click"/>
                                 </DockPanel>
-                                <!--DockPanel Margin="0,1,0,3" Width="Auto" Height="Auto">
-                                    <CheckBox x:Name="check_copy_delay" Width="Auto" Height="Auto" Content="Apply Delay in Copy mode" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF"/>
-                                </DockPanel-->
+                                <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_copy_delay" Width="Auto" Height="Auto" Content="Apply Delay in Copy mode" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_copy_delay_Click"/>
+                                </DockPanel>
                             </StackPanel>
                         </GroupBox>
                     </Grid>

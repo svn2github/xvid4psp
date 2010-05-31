@@ -168,28 +168,14 @@ namespace XviD4PSP
 
            //прописываем импорт видео
 
-           //прячем звук по опции don`t demux
-           string hidden_apath = null;
-           if (Settings.DontDemuxAudio &&
-               m.inaudiostreams.Count > 0 &&
-               instream.audiopath != null &&
-               !File.Exists(instream.audiopath))
-           {
-               hidden_apath = instream.audiopath;
-               instream.audiopath = null;
-           }
-
            //принудительная установка fps
            string fps = "";
-           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")// && m.isforcefps
+           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")
                fps = ", fps=" + m.inframerate;
 
            //выбор аудио трека
            string atrack = "";
-           if (m.vdecoder == Decoders.FFmpegSource &&
-               m.inaudiostreams.Count > 0 &&
-               m.outaudiostreams.Count > 0 &&
-               instream.audiopath == null)
+           if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio)
                atrack = ", atrack = " + (instream.ffid);
 
            //принудительная конвертация частоты
@@ -201,8 +187,7 @@ namespace XviD4PSP
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource)
            {
-               if (instream.audiopath != null ||
-                   m.outaudiostreams.Count == 0)
+               if (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio)
                    audio = ", audio=false";
            }
      
@@ -712,10 +697,6 @@ namespace XviD4PSP
            if (m.testscript)
                m.script += "SelectRangeEvery(FrameCount()/50,50) #2500 frames test-script\r\n\r\n";
            
-           //взвращаем спрятанный путь к звуку
-           if (hidden_apath != null)
-               instream.audiopath = hidden_apath;
-
            //убираем лишнюю mod2 защиту
            string[] separator = new string[] { Environment.NewLine };
            string[] lines = m.script.Split(separator, StringSplitOptions.None);
@@ -858,20 +839,9 @@ namespace XviD4PSP
 
            //прописываем импорт видео
 
-           //прячем звук по опции don`t demux
-           string hidden_apath = null;
-           if (Settings.DontDemuxAudio &&
-               m.inaudiostreams.Count > 0 &&
-               instream.audiopath != null &&
-               !File.Exists(instream.audiopath))
-           {
-               hidden_apath = instream.audiopath;
-               instream.audiopath = null;
-           }
-
            //принудительная установка fps
            string fps = "";
-           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")// && m.isforcefps
+           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")
                fps = ", fps=" + m.inframerate;
 
            //принудительная конвертация частоты
@@ -881,16 +851,13 @@ namespace XviD4PSP
 
            //запрет обработки звука при видео импорте
            string audio = "";
-           if (m.vdecoder == Decoders.DirectShowSource &&
-               instream.audiopath != null)
+           if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || !Settings.DSS_Enable_Audio))
                audio = ", audio=false";
 
            //выбор аудио трека
            string atrack = "";
-           if (m.vdecoder == Decoders.FFmpegSource &&
-               m.inaudiostreams.Count > 0 &&
-               instream.audiopath == null)
-               atrack = ", atrack = " +(instream.ffid);
+           if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio)
+               atrack = ", atrack = " + (instream.ffid);
            
            //ипортируем видео
            string invideostring = "";
@@ -1030,10 +997,6 @@ namespace XviD4PSP
                //script += "SelectRangeEvery(FrameCount()/30,40";
            }
 
-           //взвращаем спрятанный путь к звуку
-           if (hidden_apath != null)
-               instream.audiopath = hidden_apath;
-
            return script;
        }
 
@@ -1085,8 +1048,8 @@ namespace XviD4PSP
                if (Settings.FFmpegSource2)
                {
                    ffmpegsource2 = "2";
-                   //Если DontDemuxAudio, то разрешаем звук, чтоб файл сразу проиндексировался вместе с ним (иначе позже произойдет переиндексация)
-                   string atrack = (m.inaudiostreams.Count > 0 && Settings.DontDemuxAudio) ? ", atrack = -1" : ", atrack = -2";
+                   //Если FFMS_Enable_Audio, то разрешаем звук, чтоб файл сразу проиндексировался вместе с ним (иначе позже произойдет переиндексация)
+                   string atrack = (m.inaudiostreams.Count > 0 && Settings.FFMS_Enable_Audio) ? ", atrack = -1" : ", atrack = -2";
                    cache_path = atrack + ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.infilepath).ToLower() + ".ffindex\"";
                }
                script += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;

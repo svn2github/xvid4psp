@@ -462,9 +462,17 @@ namespace XviD4PSP
 
         public int Delay (int track)
         {
+            string vvdelay = Get(StreamKind.Audio, track, "Video_Delay");
             string sadelay = Get(StreamKind.Audio, track, "Delay");
             string svdelay = Get(StreamKind.Video, 0, "Delay");
 
+            //Используем параметр "Video delay", похоже МедиаИнфо уже всё посчитала
+            if (vvdelay != "" && Settings.NewDelayMethod)
+            {
+                int delay;
+                if (Int32.TryParse(vvdelay, NumberStyles.Integer, null, out delay)) return delay;
+            }
+            
             //подправляем
             if (sadelay.Contains("/"))
             {
@@ -472,11 +480,20 @@ namespace XviD4PSP
                 string[] a = sadelay.Split(separator, StringSplitOptions.RemoveEmptyEntries);
                 sadelay = a[0];
             }
+
+            //подправляем
             if (svdelay.Contains("/"))
             {
                 string[] separator = new string[] { " / " };
                 string[] a = svdelay.Split(separator, StringSplitOptions.RemoveEmptyEntries);
                 svdelay = a[0];
+            }
+
+            //Еще подправляем (mpeg, ts файлы)
+            if (Settings.NewDelayMethod)
+            {
+                while (sadelay.Length > 2 && sadelay.Contains(".")) sadelay = sadelay.Remove(sadelay.Length - 1, 1);
+                while (svdelay.Length > 2 && svdelay.Contains(".")) svdelay = svdelay.Remove(svdelay.Length - 1, 1);
             }
 
             //задержка звука
@@ -489,7 +506,11 @@ namespace XviD4PSP
 
             //сверяем задержку видео
             if (vdelay == adelay)
-                adelay = 0;
+                return 0;
+
+            //Если задержка сразу на обоих треках (mpeg, ts файлы)
+            if (vdelay != 0 && adelay != 0 && Settings.NewDelayMethod)
+                adelay = adelay - vdelay;
 
             //невероятно большая задержка
             if (adelay < -5000 || adelay > 5000)

@@ -1894,46 +1894,29 @@ namespace XviD4PSP
 
        public static bool IsDirectRemuxingPossible(Massive m)
        {
-           if (Settings.GetFormatPreset(m.format, "direct_remux") == "False")
-               return false;
+           if (Settings.GetFormatPreset(m.format, "direct_remux") == "False") return false;
 
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           if (m.format == ExportFormats.Mkv &&
-               m.outvcodec == "Copy")
+           if (m.format == ExportFormats.Mkv && m.outvcodec == "Copy")
            {
                if (m.outaudiostreams.Count > 0)
                {
                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                   if (outstream.codec == "Copy")
-                       return false;
+                   if (outstream.codec == "Copy") return false;
                }
            }
 
-           if (m.format == ExportFormats.TS ||
-               m.format == ExportFormats.M2TS ||
-               m.format == ExportFormats.BluRay)
-           {          
-               if (ext == ".mkv" ||
-                   ext == ".vob" ||
-                   ext == ".ts" ||
-                   ext == ".m2ts" ||
-                   ext == ".evo" ||
-                   ext == ".mts") //ext == ".mpg" не знаю как получить правильный ID
+           if (m.format == ExportFormats.TS || m.format == ExportFormats.M2TS || m.format == ExportFormats.BluRay)
+           {
+               if (ext == ".mkv" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".evo" || ext == ".mts" || ext == ".mpg")
                    return true;
                else
                    return false;
            }
            else if (m.format == ExportFormats.Mkv)
            {
-               if (ext == ".mkv" ||
-    ext == ".vob" ||
-    ext == ".mp4" ||
-    ext == ".mpg" ||
-    ext == ".rm" ||
-    ext == ".avi" ||
-    ext == ".ogm" ||
-                   ext == ".mov")
+               if (ext == ".mkv" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".rm" || ext == ".ogm")
                    return true;
                else
                    return false;

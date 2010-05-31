@@ -728,6 +728,36 @@ namespace XviD4PSP
             }
         }
 
+        //Разрешить декодирование звука через DirectShowSource
+        public static bool DSS_Enable_Audio
+        {
+            get
+            {
+                object value = GetValue("DSS_Enable_Audio");
+                if (value == null) return true;
+                else return Convert.ToBoolean(value);
+            }
+            set
+            {
+                SetBool("DSS_Enable_Audio", value);
+            }
+        }
+
+        //Разрешить декодирование звука через FFmpegSource
+        public static bool FFMS_Enable_Audio
+        {
+            get
+            {
+                object value = GetValue("FFMS_Enable_Audio");
+                if (value == null) return false;
+                else return Convert.ToBoolean(value);
+            }
+            set
+            {
+                SetBool("FFMS_Enable_Audio", value);
+            }
+        }
+
         public static Autocrop.AutocropMode AutocropMode
         {
             get
@@ -981,26 +1011,6 @@ namespace XviD4PSP
             set
             {
                 SetString("bluray_type", value);
-            }
-        }
-
-        public static bool DontDemuxAudio
-        {
-            get
-            {
-                object value = GetValue("DontDemuxAudio");
-                if (value == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return Convert.ToBoolean(value);
-                }
-            }
-            set
-            {
-                SetBool("DontDemuxAudio", value);
             }
         }
 
@@ -1872,6 +1882,47 @@ namespace XviD4PSP
             set
             {
                 SetBool("ApplyDelay", value);
+            }
+        }
+
+        //Новый способ определения задержки (относительно видео-трека, эквивалент "Video delay" в MediaInfo).
+        public static bool NewDelayMethod
+        {
+            get
+            {
+                object value = GetValue("NewDelayMethod");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("NewDelayMethod", value);
+            }
+        }
+
+        public static bool CopyDelay
+        {
+            get
+            {
+                object value = GetValue("CopyDelay");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("CopyDelay", value);
             }
         }
 
