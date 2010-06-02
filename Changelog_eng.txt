@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r147 01.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r148 03.06.10, main changes:
 
+>>> (r148) Fixed: bits/pixel calculation, prediction of output file size if Audio = Copy, audio-bitrate is unknown,
+           but audio-file is already demuxed (rep. by NasaCNN).
 >>> (r147) Fixed wrong duration and frames count if source file is RAW-AAC (*.aac).
 >>> (r146) Added ability to preserve audio-delay in Copy mode (only for next muxers: MKVMerge, MP4Box, VirtualDubMod,
            FFmpeg, tsMuxeR). Due to some specific reasons this function may work improperly. Audio->Decoding->

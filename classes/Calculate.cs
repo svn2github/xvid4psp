@@ -250,37 +250,18 @@ namespace XviD4PSP
 
        public static string GetQualityIn(Massive m)
        {
-           string quality = Languages.Translate("Unknown");
            int pixels = m.inresw * m.inresh;
-
-           //вычитаем чЄрные пол€
-           int black = m.cropl_copy * m.cropb_copy * m.cropr_copy * m.cropt_copy;
-           pixels = pixels - black;
-
            double framerate = ConvertStringToDouble(m.inframerate);
            int bitrate = m.invbitrate * 1000;
-           quality = ConvertDoubleToPointString((double)bitrate / (double)pixels / framerate);
-           return quality;
+           return ConvertDoubleToPointString((double)bitrate / (double)pixels / framerate);
        }
 
        public static string GetQualityOut(Massive m, bool FromSize)
        {
            string quality = Languages.Translate("Unknown");
-           if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).bitrate == 0)
-               return quality; //ћы не можем посчитать качество, т.к. не знаем финальный размер, потому-что звук = VBR
            
            int pixels = m.outresw * m.outresh;
-
-           //добавл€ем чЄрные пол€
-           int black = m.blackh * m.blackw;
-           pixels = pixels + black;
-
-           double framerate;
-           if (m.frameratemodifer == AviSynthScripting.FramerateModifers.AssumeFPS)
-               framerate = ConvertStringToDouble(m.inframerate);
-           else
-               framerate = Calculate.ConvertStringToDouble(m.outframerate);
-
+           double framerate = Calculate.ConvertStringToDouble(m.outframerate);
            int bitrate = (int)m.outvbitrate * 1000;
 
            if (m.encodingmode == Settings.EncodingModes.OnePass ||
@@ -294,14 +275,27 @@ namespace XviD4PSP
                m.encodingmode == Settings.EncodingModes.OnePassSize)
            {          
                int abitrate = 0;
+               string apath = "";
                if (m.outaudiostreams.Count > 0)
                {
+                   //ћы не можем посчитать качество, т.к. не можем посчитать видео-битрет, т.к. не знаем аудио-битрейта
+                   AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                   abitrate = outstream.bitrate;
+                   if (outstream.codec == "Copy" && File.Exists(instream.audiopath))
+                       apath = instream.audiopath;
+                   else if (outstream.bitrate == 0 && outstream.codec != "Disabled")
+                       return quality;
+                   else
+                       abitrate = outstream.bitrate;
                }
 
                if (FromSize)
-                   bitrate = Calculate.GetBitrateForSize((double)m.outvbitrate, abitrate, (int)m.outduration.TotalSeconds, m.outvcodec, m.format) * 1000;
+               {
+                   if (apath != "")
+                       bitrate = Calculate.GetBitrateForSize((double)m.outvbitrate, apath, (int)m.outduration.TotalSeconds, m.outvcodec, m.format) * 1000;
+                   else
+                       bitrate = Calculate.GetBitrateForSize((double)m.outvbitrate, abitrate, (int)m.outduration.TotalSeconds, m.outvcodec, m.format) * 1000;
+               }
                else
                    bitrate = (int)m.outvbitrate * 1000;
 
@@ -547,12 +541,19 @@ namespace XviD4PSP
        public static string GetEncodingSize(Massive m)
        {
            string ssize = Languages.Translate("Unknown");
-           if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).bitrate == 0)
-               return ssize; //ћы не можем знать размер, если звук = VBR
+
            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                m.encodingmode == Settings.EncodingModes.ThreePassSize ||
                m.encodingmode == Settings.EncodingModes.OnePassSize)
            {
+               if (m.outaudiostreams.Count > 0)
+               {
+                   //ћы не можем знать размер если звук = VBR или Copy, но файл еще не извлечен и битрейт неизвестен
+                   AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                   AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                   if (outstream.bitrate == 0 && outstream.codec != "Disabled" && !(outstream.codec == "Copy" && File.Exists(instream.audiopath)))
+                       return ssize;
+               }               
                ssize = m.outvbitrate + " mb";
            }
            else if (m.format == Format.ExportFormats.Audio && m.outaudiostreams.Count > 0)
@@ -570,8 +571,15 @@ namespace XviD4PSP
                    double outsize = (0.1258 * (double)m.outvbitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
                    if (m.outaudiostreams.Count > 0)
                    {
+                       //ћы не можем знать размер если звук = VBR или Copy, но файл еще не извлечен и битрейт неизвестен
+                       AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                        AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                       outsize += (0.125261 * (double)outstream.bitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
+                       if (outstream.codec == "Copy" && File.Exists(instream.audiopath))
+                           outsize += (new FileInfo(instream.audiopath).Length / 1000) / 1052.0 / 0.994;
+                       else if (outstream.bitrate == 0 && outstream.codec != "Disabled")
+                           return ssize;
+                       else
+                           outsize += (0.125261 * (double)outstream.bitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
                    }
 
                    //TS M2TS BluRay packet size

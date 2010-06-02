@@ -642,18 +642,8 @@ namespace XviD4PSP
             }
             else UpdateMassive();
 
-            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
-                m.encodingmode == Settings.EncodingModes.ThreePassSize)
-            {
-                //Мы не можем знать размер, если звук = VBR
-                if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).bitrate == 0)
-                    text_outsize_value.Content = Languages.Translate("Unknown");
-                else
-                    text_outsize_value.Content = m.outvbitrate + " mb";
-            }
-            else
-                text_outsize_value.Content = Calculate.GetEncodingSize(m);
-            m.outfilesize = text_outsize_value.Content.ToString();
+            //Финальный размер
+            text_outsize_value.Content = m.outfilesize = Calculate.GetEncodingSize(m);
 
             //bit-pixels calculation
             text_inquality_value.Content = Calculate.GetQualityIn(m);

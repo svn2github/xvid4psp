@@ -1785,21 +1785,31 @@ namespace XviD4PSP
                    return "Codec - " + instream.codecshort;
                else return null;
            }
+           else if (m.format == Format.ExportFormats.Avi ||
+               m.format == Format.ExportFormats.AviHardware ||
+               m.format == Format.ExportFormats.AviDVPAL ||
+               m.format == ExportFormats.AviDVNTSC ||
+               m.format == ExportFormats.AviHardwareHD)
+           {
+               if (instream.codecshort == "AAC")
+                   return "Codec - " + instream.codecshort;
+               else return null;
+           }
            else if (m.format == ExportFormats.Mp4 && instream.codecshort != "AC3" ||
-                    m.format == ExportFormats.Mp4AppleTV ||
-                    m.format == ExportFormats.Mp4BlackBerry8100 ||
-                    m.format == ExportFormats.Mp4BlackBerry8800 ||
-                    m.format == ExportFormats.Mp4BlackBerry8830 ||
-                    m.format == ExportFormats.Mp4SonyEricssonK800 ||
-                    m.format == ExportFormats.Mp4SonyEricssonK610 ||
-                    m.format == ExportFormats.Mp4Nokia5700 ||
-                    m.format == ExportFormats.Mp4MotorolaK1 ||
-                    m.format == ExportFormats.Mp4iPhone ||
-                    m.format == ExportFormats.Mp4iPod50G ||
-                    m.format == ExportFormats.Mp4iPod55G ||
-                    m.format == ExportFormats.Mp4Prada ||
-                    m.format == ExportFormats.Mp4PS3 ||
-                    m.format == ExportFormats.ThreeGP)
+                m.format == ExportFormats.Mp4AppleTV ||
+                m.format == ExportFormats.Mp4BlackBerry8100 ||
+                m.format == ExportFormats.Mp4BlackBerry8800 ||
+                m.format == ExportFormats.Mp4BlackBerry8830 ||
+                m.format == ExportFormats.Mp4SonyEricssonK800 ||
+                m.format == ExportFormats.Mp4SonyEricssonK610 ||
+                m.format == ExportFormats.Mp4Nokia5700 ||
+                m.format == ExportFormats.Mp4MotorolaK1 ||
+                m.format == ExportFormats.Mp4iPhone ||
+                m.format == ExportFormats.Mp4iPod50G ||
+                m.format == ExportFormats.Mp4iPod55G ||
+                m.format == ExportFormats.Mp4Prada ||
+                m.format == ExportFormats.Mp4PS3 ||
+                m.format == ExportFormats.ThreeGP)
            {
                if (instream.codecshort != "AAC" &&
                    instream.codecshort != "MP3" &&
