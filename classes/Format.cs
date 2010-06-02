@@ -1968,6 +1968,7 @@ namespace XviD4PSP
            else if (m.invcodecshort == "h264") ext = "h264";
            else if (m.invcodecshort == "MPEG4") ext = "avi";
            else if (ext.Contains("vc1")) ext = "avi";
+           else if (ext.Contains("wmv")) ext = "wmv";
            else if (ext.Contains("dv")) ext = "avi";
            else if (ext.Contains("m") && ext.Contains("jp")) ext = "avi"; //M-JPEG
            else if (ext == "huffman" || ext == "hfyu" || ext == "ffvh") ext = "avi";
@@ -2197,7 +2198,12 @@ namespace XviD4PSP
           string ext = Path.GetExtension(m.infilepath);
 
           if (ext == ".mkv")
-              return Demuxers.mkvextract;
+          {
+              if (m.invcodecshort == "VC1" || m.invcodecshort.Contains("WMV"))
+                  return Demuxers.ffmpeg;
+              else
+                  return Demuxers.mkvextract;
+          }
           else if (ext == ".dpg")
               return Demuxers.dpgmuxer;
           else if (ext == ".pmp")

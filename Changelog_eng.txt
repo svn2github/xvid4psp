@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r148 03.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r149 03.06.10, main changes:
 
+^^^ (r149) FFmpeg as demuxer for MKV, if it contains VC-1 or WMV video.
 >>> (r148) Fixed: bits/pixel calculation, prediction of output file size if Audio = Copy, audio-bitrate is unknown,
            but audio-file is already demuxed (rep. by NasaCNN).
 >>> (r147) Fixed wrong duration and frames count if source file is RAW-AAC (*.aac).
