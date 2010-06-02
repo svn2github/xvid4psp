@@ -1816,11 +1816,9 @@ namespace XviD4PSP
             if (this.currentState != PlayState.Init)
                 CloseClip();
 
-            //удаляем старый скрипт
-            File.Delete(Settings.TempPath + "\\preview.avs");
-            string preview_script = AviSynthScripting.GetPreviewScript(m);
-            AviSynthScripting.WriteScriptToFile(preview_script, "preview");
-            AviSynthScripting.WriteScriptToFile(m.script, "AvsP"); //пишет в файл AvsP.avs скрипт для Avsp
+            //Пишем скрипт в файл
+            AviSynthScripting.WriteScriptToFile(m.script, "preview");
+            AviSynthScripting.WriteScriptToFile(m.script, "AvsP"); //скрипт для Avsp
 
             try
             {
@@ -5682,8 +5680,7 @@ namespace XviD4PSP
         {
             if (m == null) return;
             m.script = script_box.Text;
-            string preview_script = AviSynthScripting.GetPreviewScript(m);
-            AviSynthScripting.WriteScriptToFile(preview_script, "preview");
+            AviSynthScripting.WriteScriptToFile(m.script, "preview");
             AviSynthScripting.WriteScriptToFile(m.script, "AvsP");
             UpdateTaskMassive(m);
         }
