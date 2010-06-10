@@ -113,7 +113,7 @@ namespace XviD4PSP
             combo_modh.SelectedItem = Settings.LimitModH;
 
             if (m.format == Format.ExportFormats.Avi || m.format == Format.ExportFormats.Mkv || m.format == Format.ExportFormats.Mov
-                || m.format == Format.ExportFormats.Mp4 || m.format == Format.ExportFormats.Custom)
+                || m.format == Format.ExportFormats.Mp4)
             {
                 combo_modw.IsEnabled = combo_modh.IsEnabled = true;
             }

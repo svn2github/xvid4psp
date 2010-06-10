@@ -1,5 +1,18 @@
-XviD4PSP 5.0.37.8 r132->r150 03.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r151 10.06.10, main changes:
 
+>>> (r151) Custom format and formats settings window was reworked. Some options has been added:
+           -mod for each side - as separate setting for this format.
+           -Can be anamorphic - if it enabled, video will have anamorphic aspect when source-file is anamorphic (in
+            global settings option "Maintain anamorphic aspect" must be enabled too). If it disabled, resolution
+            will be recalculated to non-anamorphic.
+           -Force format - muxers MP4Box and FFmpeg have special keys to override (force) output format. For FFmpeg
+            you can set any format as you want (by editing ini-file).
+           -Split output file - for muxers MKVMerge, MP4Box and tsMuxeR you can specify size of parts to split
+            final file (you can set any size as you want by editing ini-file).
+           -Don`t multiplex video and audio - do encode video and audio tracks, but don`t multiplex them in final file.
+           -Use direct remuxing if possible - don`t demux tracks for Copy, instead use source-file and specify track
+            that muxer must use from it, if possible.
+>>> (r151) File extension wasn`t updated when changing Format (editing tasks in queue).
 >>> (r150) Removed ConvertToYUY2() from the "preview"-script.
 >>> (r149) FFmpeg as demuxer for MKV, if it contains VC-1 or WMV video.
 >>> (r148) Fixed: bits/pixel calculation, prediction of output file size if Audio = Copy, audio-bitrate is unknown,

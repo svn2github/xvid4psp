@@ -37,8 +37,8 @@ namespace XviD4PSP
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
             //загружаем список кодеков соответвующий формату
-            foreach (string codec in Format.GetACodecsList(m.format))
-                combo_codec.Items.Add(codec);
+            foreach (string codec in Format.GetACodecsList(m.format)) combo_codec.Items.Add(codec);
+            if (!combo_codec.Items.Contains(outstream.codec)) combo_codec.Items.Add(outstream.codec);
             combo_codec.SelectedItem = outstream.codec;
             text_incodec_value.Content = instream.codecshort;
 

@@ -11,66 +11,82 @@ namespace XviD4PSP
 {
     static class FormatReader
     {
-       //Для одиночных значений
-       public static string GetFormatInfo(string format_name, string what_to_find)
-       {
-           try
-           {
-               using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\FormatSettings.ini", System.Text.Encoding.Default))
-               {
-                   string line;
-                   while (sr.EndOfStream == false)
-                   {
-                       line = sr.ReadLine();
-                       if (line.StartsWith("\\" + format_name + "\\" + what_to_find + "\\"))
-                       {
-                           line = line.Replace("\\" + format_name + "\\" + what_to_find + "\\", "").Trim(); //оставляем только нужную часть, и удаляем пробелы с обеих концов
-                           return line;
-                       }
-                   }
-                   return null;
-               }
-           }
-           catch (Exception)
-           {
-               return null;
-           }     
-       }
-       
-       //Для множественных значений
-       public static string[] GetFormatInfo2(string format_name, string what_to_find)
-       {
-           try
-           {
-               using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\FormatSettings.ini", System.Text.Encoding.Default))
-               {
-                   string line;
-                   ArrayList temp_lines = new ArrayList();
-                   string[] lines;
-                   string[] separator = new string[] { "," };
-                   while (sr.EndOfStream == false)
-                   {
-                       line = sr.ReadLine();
-                       if (line.StartsWith("\\" + format_name + "\\" + what_to_find + "\\"))
-                       {
-                           line = line.Replace("\\" + format_name + "\\" + what_to_find + "\\", "").Trim();//оставляем только нужную часть, и удаляем пробелы с обеих концов
-                           lines = line.Split(separator, StringSplitOptions.None); //Делим строку на подстроки
+        //Для одиночных значений
+        public static string GetFormatInfo(string format, string key)
+        {
+            try
+            {
+                using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\presets\\formats\\" + format + ".ini", System.Text.Encoding.Default))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        if (sr.ReadLine() == "[" + key + "]" && !sr.EndOfStream)
+                        {
+                            return sr.ReadLine().Trim();
+                        }
+                    }
+                    return "";
+                }
+            }
+            catch (Exception)
+            {
+                return "";
+            }
+        }
 
-                           for (int i = 0; i <= lines.Length - 1; i++)
-                               temp_lines.Add(lines[i].Trim()); //Избавляемся от пробелов в подстроках, и пересобираем строчку
+        //Для одиночных значений int (с дефолтом)
+        public static int GetFormatInfo(string format, string key, int default_value)
+        {
+            int result = default_value;
+            string value = GetFormatInfo(format, key);
+            if (!int.TryParse(value, out result)) return default_value;
+            else return result;
+        }
 
-                           lines = (String[])temp_lines.ToArray(typeof(string));
-                           return lines;
-                       }
-                   }
-                   return null;
-               }
-           }
-           catch (Exception)
-           {
-               return null;
-           }     
-       }      
+        //Для одиночных значений bool (с дефолтом)
+        public static bool GetFormatInfo(string format, string key, bool default_value)
+        {
+            string value = GetFormatInfo(format, key);
+            if (value != null && value.ToLower() == "true") return true;
+            else return default_value;
+        }
 
+        //Для одиночных значений string (с дефолтом)
+        public static string GetFormatInfo(string format, string key, string default_value)
+        {
+            string value = GetFormatInfo(format, key);
+            return (string.IsNullOrEmpty(value)) ? default_value : value;
+        }
+
+        //Для множественных значений string (с дефолтом)
+        public static string[] GetFormatInfo(string format, string key, string[] default_value)
+        {          
+            try
+            {
+                using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\presets\\formats\\" + format + ".ini", System.Text.Encoding.Default))
+                {
+                    string[] lines;
+                    ArrayList temp_lines = new ArrayList();
+                    while (!sr.EndOfStream)
+                    {
+                        if (sr.ReadLine() == "[" + key + "]" && !sr.EndOfStream)
+                        {
+                            //Делим строку на подстроки
+                            lines = sr.ReadLine().Trim().Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                            if (lines.Length == 0) return default_value;
+
+                            //Избавляемся от пробелов в подстроках, и пересобираем строчку
+                            foreach (string ss in lines) temp_lines.Add(ss.Trim());
+                            return (String[])temp_lines.ToArray(typeof(string));
+                        }
+                    }
+                    return default_value;
+                }
+            }
+            catch (Exception)
+            {
+                return default_value;
+            }
+        }
     }
 }

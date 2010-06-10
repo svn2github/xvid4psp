@@ -40,10 +40,8 @@ namespace XviD4PSP
             Owner = m.owner;
 
             //загружаем список кодеков соответвующий формату
-            foreach (string codec in Format.GetVCodecsList(m.format))
-            {
-                combo_codec.Items.Add(codec);
-            }
+            foreach (string codec in Format.GetVCodecsList(m.format)) combo_codec.Items.Add(codec);
+            if (!combo_codec.Items.Contains(m.outvcodec)) combo_codec.Items.Add(m.outvcodec);
             combo_codec.SelectedItem = m.outvcodec;
             text_incodec_value.Content = m.invcodecshort;
             text_insize_value.Content = m.infilesize;

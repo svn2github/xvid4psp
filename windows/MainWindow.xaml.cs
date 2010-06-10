@@ -255,8 +255,7 @@ namespace XviD4PSP
                 {
                     //загружаем список форматов
                     combo_format.Items.Clear();
-                    foreach (string f in Format.GetFormatList())
-                        combo_format.Items.Add(f);
+                    foreach (string f in Format.GetFormatList()) combo_format.Items.Add(f);
                     combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut);
 
                     //загружаем список фильтров
@@ -1516,10 +1515,8 @@ namespace XviD4PSP
                     }
 
                     //настройки форматов
-                    if (x.format == Format.ExportFormats.Mpeg2PAL ||
-                        x.format == Format.ExportFormats.Mpeg2NTSC)
-                        x.dontmuxstreams = Settings.Mpeg2MultiplexDisabled;
-                    x.split = Settings.GetFormatPreset(x.format, "split");
+                    x.dontmuxstreams = Format.GetMultiplexing(x.format);
+                    x.split = Format.GetSplitting(x.format);
                    
                     //передаём массив
                     m = x.Clone();
@@ -2610,15 +2607,6 @@ namespace XviD4PSP
                 stream.gaindetected = false;
             }
 
-            //определяем аудио потоки
-            if (m.outaudiostreams.Count > 0)
-            {
-                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                //передеаём задержку
-                instream.delay = 0;
-            }
-
             //обновляем скрипт с учётом полученных данных
             m = AviSynthScripting.CreateAutoAviSynthScript(m);
 
@@ -2888,10 +2876,11 @@ namespace XviD4PSP
                         }
                     }
 
-                    m.outfilesize = Calculate.GetEncodingSize(m);
-
                     //перезабиваем настройки форматов
-                    m.split = Settings.GetFormatPreset(m.format, "split");
+                    m.split = Format.GetSplitting(m.format);
+                    m.outfilesize = Calculate.GetEncodingSize(m);
+                    m.dontmuxstreams = Format.GetMultiplexing(m.format);
+                    if (m.outfilepath != null) m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
 
                     //создаём новый AviSynth скрипт
                     m = AviSynthScripting.CreateAutoAviSynthScript(m);
@@ -3058,6 +3047,10 @@ namespace XviD4PSP
                         if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
                             old_codec == ".")
                         {
+                            //Меняем расширение
+                            if (m.format == Format.ExportFormats.Audio && m.outfilepath != null)
+                                m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
+                            
                             string old_script = m.script;
                             m = AviSynthScripting.CreateAutoAviSynthScript(m);
                             if (old_script != m.script) LoadVideo(MediaLoad.update);
@@ -3218,6 +3211,10 @@ namespace XviD4PSP
                 if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
                     old_codec == ".")
                 {
+                    //Меняем расширение
+                    if (m.format == Format.ExportFormats.Audio && m.outfilepath != null)
+                        m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
+                    
                     string old_script = m.script;
                     m = AviSynthScripting.CreateAutoAviSynthScript(m);
                     if (old_script != m.script) LoadVideo(MediaLoad.update);
@@ -5129,72 +5126,51 @@ namespace XviD4PSP
                 }
                 else if (m.format == Format.ExportFormats.Custom)
                 {
-                    FormatSettings cust = new FormatSettings(m, this);
-                    if (cust.fstream != null)
+                    FormatSettings custom = new FormatSettings(m, this);
+                    if (custom.update_massive && !custom.update_audio && !custom.update_framerate && !custom.update_resolution)
                     {
-                        LoadVideoPresets();
-                        LoadAudioPresets();
-                        //забиваем-обновляем аудио массивы
-                        m = FillAudio(m);
-                        //забиваем настройки из профиля
-                        m.vencoding = Settings.GetVEncodingPreset(m.format);
-                        if (!combo_vencoding.Items.Contains(m.vencoding))
-                            m.vencoding = "Copy";
-                        m.outvcodec = PresetLoader.GetVCodec(m);
-                        m.vpasses = PresetLoader.GetVCodecPasses(m);
-                        m = PresetLoader.DecodePresets(m);
-                        //перезабиваем специфику формата
-                        m = Format.GetOutInterlace(m);
-                        m = Format.GetValidFramerate(m);
-                        m = Calculate.UpdateOutFrames(m);
-                        m = Format.GetValidResolution(m);
-                        m = Format.GetValidOutAspect(m);
-                        m = AspectResolution.FixAspectDifference(m);
-                        //принудительный фикс цвета для DVD
-                        if (Settings.AutoColorMatrix &&
-                            Calculate.IsMPEG(m.infilepath) &&
-                            m.iscolormatrix == false &&
-                            m.invcodecshort == "MPEG2")
-                        {
-                            m.iscolormatrix = true;
-                            if (combo_sbc.Items.Contains("MPEG2Fix") &&
-                                Settings.SBC == "Disabled")
-                                combo_sbc.SelectedItem = "MPEG2Fix";
-                        }
+                        m.split = Format.GetSplitting(m.format);
                         m.outfilesize = Calculate.GetEncodingSize(m);
+                        m.dontmuxstreams = Format.GetMultiplexing(m.format);
+                        if (m.outfilepath != null) m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
+                        
+                        UpdateTaskMassive(m);
+                    }
+                    else if (custom.update_audio || custom.update_framerate || custom.update_resolution)
+                    {
+                        string old_script = m.script;
+                        
+                        //забиваем-обновляем аудио массивы
+                        if (custom.update_audio) m = FillAudio(m);
+                                               
+                        //перезабиваем специфику формата
+                        if (custom.update_framerate)
+                        {
+                            m = Format.GetOutInterlace(m);
+                            m = Format.GetValidFramerate(m);
+                            m = Calculate.UpdateOutFrames(m);
+                        }
+                        if (custom.update_resolution)
+                        {
+                            m = Format.GetValidResolution(m);
+                            m = Format.GetValidOutAspect(m);
+                            m = AspectResolution.FixAspectDifference(m);
+                        }
+                       
                         //перезабиваем настройки форматов
-                        m.split = Settings.GetFormatPreset(m.format, "split");
+                        m.split = Format.GetSplitting(m.format);
+                        m.outfilesize = Calculate.GetEncodingSize(m);
+                        m.dontmuxstreams = Format.GetMultiplexing(m.format);
+                        if (m.outfilepath != null) m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
+                        
                         //создаём новый AviSynth скрипт
                         m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        //проверяем скрипт на ошибки и пытаемся их автоматически исправить
-                        string er = Calculate.CheckScriptErrors(m);
-                        if (er != null)
-                        {
-                            if (er == "SSRC: could not resample between the two samplerates.")
-                                m.sampleratemodifer = AviSynthScripting.SamplerateModifers.ResampleAudio;
 
-                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        }
                         //загружаем обновлённый скрипт
-                        LoadVideo(MediaLoad.update);
+                        if (old_script != m.script) LoadVideo(MediaLoad.update);
+                        
                         UpdateTaskMassive(m);
-
-                        //проверяем можно ли копировать данный формат
-                        //if (m.vencoding == "Copy")
-                        //{
-                        //    string CopyProblems = Format.ValidateCopyVideo(m);
-                        //    if (CopyProblems != null)
-                        //    {
-                        //        Message mess = new Message(this);
-                        //        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                        //            " " + Format.EnumToString(m.format) + " - " + CopyProblems + ".", Languages.Translate("Warning"));
-                        //    }
-                        //}
-                        SetVideoPresetFromSettings();
-                        SetAudioPresetFromSettings();
-                    }
-                    //m = cust.m.Clone();
-                    //UpdateTaskMassive(m);  
+                    }                    
                 }
                 else
                 {
@@ -5202,6 +5178,7 @@ namespace XviD4PSP
                     mess.ShowMessage(Languages.Translate("This format doesn`t have any settings."), Languages.Translate("Format"));
                 }
             }
+            else if (combo_format.SelectedItem.ToString() == "Custom") new FormatSettings(null, this);
         }
 
         private void menu_settings_Click(object sender, RoutedEventArgs e)

@@ -1146,32 +1146,6 @@ namespace XviD4PSP
             }
         }
 
-        private string _outvinfo;
-        public string outvinfo
-        {
-            get
-            {
-                return _outvinfo;
-            }
-            set
-            {
-                _outvinfo = value;
-            }
-        }
-
-        private string _outainfo;
-        public string outainfo
-        {
-            get
-            {
-                return _outainfo;
-            }
-            set
-            {
-                _outainfo = value;
-            }
-        }
-
         private int _thmframe = 0;
         public int thmframe
         {
@@ -1249,19 +1223,6 @@ namespace XviD4PSP
                 _dontmuxstreams = value;
             }
         }
-
-        //private bool _isanamorph = false;
-        //public bool isanamorph
-        //{
-        //    get
-        //    {
-        //        return _isanamorph;
-        //    }
-        //    set
-        //    {
-        //        _isanamorph = value;
-        //    }
-        //}
 
         private string _split;
         public string split

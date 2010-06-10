@@ -444,8 +444,7 @@ namespace XviD4PSP
         public static void SetFormatPreset(Format.ExportFormats format, string key, string value)
         {
             {
-                RegistryKey myHive =
-     Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5\\" + format);
+                RegistryKey myHive = Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5\\" + format);
                 myHive.SetValue(key, value, RegistryValueKind.String);
                 myHive.Close();
             }
@@ -454,8 +453,7 @@ namespace XviD4PSP
         public static string GetFormatPreset(Format.ExportFormats format, string key)
         {
             object value;
-            using (RegistryKey myHive =
-                Registry.CurrentUser.OpenSubKey("Software\\Winnydows\\XviD4PSP5\\" + format, true))
+            using (RegistryKey myHive = Registry.CurrentUser.OpenSubKey("Software\\Winnydows\\XviD4PSP5\\" + format, true))
             {
                 if (myHive != null)
                     value = myHive.GetValue(key);
@@ -471,8 +469,7 @@ namespace XviD4PSP
         public static void SetVEncodingPreset(Format.ExportFormats format, string value)
         {
             {
-                RegistryKey myHive =
-     Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5\\videopreset");
+                RegistryKey myHive = Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5\\videopreset");
                 myHive.SetValue(format.ToString(), value, RegistryValueKind.String);
                 myHive.Close();
             }
@@ -481,8 +478,7 @@ namespace XviD4PSP
         public static void SetAEncodingPreset(Format.ExportFormats format, string value)
         {
             {
-                RegistryKey myHive =
-     Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5\\audiopreset");
+                RegistryKey myHive = Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5\\audiopreset");
                 myHive.SetValue(format.ToString(), value, RegistryValueKind.String);
                 myHive.Close();
             }
