@@ -1,5 +1,8 @@
-XviD4PSP 5.0.37.8 r132->r151 10.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r152 13.06.10, main changes:
 
+>>> (r152) For DirectShow player engine added ability to select video renderer (Settings->Player engine->DirectShow output).
+>>> (r152) Fixed problem with preview (black borders and wrong AR) for anamorphic resolutions, if system video renderer uses
+           option "Maintain Aspect Ratio" by default (rep. by AkvenJan).
 >>> (r151) Custom format and formats settings window was reworked. Some options has been added:
            -mod for each side - as separate setting for this format.
            -Can be anamorphic - if it enabled, video will have anamorphic aspect when source-file is anamorphic (in

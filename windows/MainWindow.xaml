@@ -150,6 +150,28 @@
                     </MenuItem>
                     <Separator/>
                     <MenuItem x:Name="menu_player_engine" Header="Player engine" Width="Auto" Height="Auto">
+                        <MenuItem x:Name="menu_video_renderers" Header="DirectShow output">
+                            <MenuItem x:Name="vr_Default" Header="Default" StaysOpenOnClick="True" Click="Change_renderer_Click">
+                                <MenuItem.Icon>
+                                    <RadioButton GroupName="vr" x:Name="vr_default"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem x:Name="vr_Overlay" Header="Overlay" StaysOpenOnClick="True" Click="Change_renderer_Click">
+                                <MenuItem.Icon>
+                                    <RadioButton GroupName="vr" x:Name="vr_overlay"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem x:Name="vr_VMR7" Header="VMR-7" StaysOpenOnClick="True" Click="Change_renderer_Click">
+                                <MenuItem.Icon>
+                                    <RadioButton GroupName="vr" x:Name="vr_vmr7"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem x:Name="vr_VMR9" Header="VMR-9" StaysOpenOnClick="True" Click="Change_renderer_Click">
+                                <MenuItem.Icon>
+                                    <RadioButton GroupName="vr" x:Name="vr_vmr9"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
                         <MenuItem x:Name="engine_directshow" Header="DirectShow" StaysOpenOnClick="True" Click="player_engine_Click">
                             <MenuItem.Icon>
                                 <RadioButton x:Name="check_engine_directshow"/>

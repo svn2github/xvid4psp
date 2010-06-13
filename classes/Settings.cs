@@ -2207,5 +2207,25 @@ namespace XviD4PSP
                 SetBool("TrayClickOnce", value);
             }
         }
+
+        public static int VideoRenderer
+        {
+            get
+            {
+                object value = GetValue("VideoRenderer");
+                if (value == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("VideoRenderer", value);
+            }
+        }
     }
 }

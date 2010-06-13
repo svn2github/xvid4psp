@@ -2107,6 +2107,12 @@ namespace XviD4PSP
             if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) check_engine_directshow.IsChecked = true;
             else check_engine_mediabridge.IsChecked = true;
 
+            int vr = Settings.VideoRenderer;
+            if (vr == 0) vr_default.IsChecked = true;
+            else if (vr == 1) vr_overlay.IsChecked = true;
+            else if (vr == 2) vr_vmr7.IsChecked = true;
+            else if (vr == 3) vr_vmr9.IsChecked = true;
+            
             if (Settings.ScriptView)
             {
                 mn_scriptview.IsChecked = cmn_scriptview.IsChecked = true;
@@ -4049,21 +4055,56 @@ namespace XviD4PSP
             int hr = 0;
             this.graphBuilder = (IGraphBuilder)new FilterGraph();
 
-            /*
-            IBaseFilter vmr = (IBaseFilter)new VideoMixingRenderer9();
-            hr = graphBuilder.AddFilter(vmr, "VMR9");
-            DsError.ThrowExceptionForHR(hr);
-            IVMRFilterConfig9 vmrFilterConfig = (IVMRFilterConfig9)vmr;
-            hr = vmrFilterConfig.SetRenderingMode(VMR9Mode.Windowless);
-            DsError.ThrowExceptionForHR(hr);
-            IVMRWindowlessControl9 vmrWindowsless = (IVMRWindowlessControl9)vmr;
-            hr = vmrWindowsless.SetVideoClippingWindow(this.source.Handle);
-            DsError.ThrowExceptionForHR(hr);
-            */
+            //Добавляем в граф нужный рендерер (0 - graphBuilder сам выберет рендерер)
+            int renderer = Settings.VideoRenderer;
+            if (renderer == 1)
+            {
+                IBaseFilter add_vr = (IBaseFilter)new VideoRenderer();
+                hr = graphBuilder.AddFilter(add_vr, "Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
+            }
+            else if (renderer == 2)
+            {
+                IBaseFilter add_vmr = (IBaseFilter)new VideoMixingRenderer();
+                hr = graphBuilder.AddFilter(add_vmr, "Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
+            }
+            else if (renderer == 3)
+            {
+                IBaseFilter add_vmr9 = (IBaseFilter)new VideoMixingRenderer9();
+                hr = graphBuilder.AddFilter(add_vmr9, "Video Mixing Renderer 9");
+                DsError.ThrowExceptionForHR(hr);
+            }
+            else if (renderer == 4)
+            {
+                //EVR, но он почему-то не работает..
+                Type evr_type = Type.GetTypeFromCLSID(new Guid("FA10746C-9B63-4B6C-BC49-FC300EA5F256"));
+                object evr = Activator.CreateInstance(evr_type);
+                hr = graphBuilder.AddFilter((IBaseFilter)evr, "Enhanced Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
+            }
 
             // Have the graph builder construct its the appropriate graph automatically
             hr = this.graphBuilder.RenderFile(filename, null);
             DsError.ThrowExceptionForHR(hr);
+
+            //Ищем рендерер и отключаем соблюдение аспекта (аспект будет определяться размерами видео-окна)
+            IBaseFilter filter = null;
+            graphBuilder.FindFilterByName("Video Renderer", out filter);
+            if (filter != null)
+            {
+                IVMRAspectRatioControl vmr = filter as IVMRAspectRatioControl;
+                if (vmr != null) DsError.ThrowExceptionForHR(vmr.SetAspectRatioMode(VMRAspectRatioMode.None));
+            }
+            else
+            {
+                graphBuilder.FindFilterByName("Video Mixing Renderer 9", out filter);
+                if (filter != null)
+                {
+                    IVMRAspectRatioControl9 vmr9 = filter as IVMRAspectRatioControl9;
+                    if (vmr9 != null) DsError.ThrowExceptionForHR(vmr9.SetAspectRatioMode(VMRAspectRatioMode.None));
+                }
+            }
 
             // QueryInterface for DirectShow interfaces
             this.mediaControl = (IMediaControl)this.graphBuilder;
@@ -4542,13 +4583,13 @@ namespace XviD4PSP
                 //Convert pointer of filter graph to an object we can use
                 graph = (IFilterGraph)Marshal.GetObjectForIUnknown(GraphInfo.FilterGraph);
                 graphBuilder = (IGraphBuilder)graph;
-
-                IBaseFilter videoRenderer;
+               
+                //IBaseFilter videoRenderer;
                 ///Find WPF renderer.  It's always named the same thing
                 //hr = graphBuilder.FindFilterByName("Avalon EVR", out videoRenderer);//
                 //hr = graphBuilder.FindFilterByName("Video Renderer", out videoRenderer);//
-                hr = graphBuilder.FindFilterByName("Enhanced Video Renderer", out videoRenderer);                
-                DsError.ThrowExceptionForHR(hr);
+                //hr = graphBuilder.FindFilterByName("Enhanced Video Renderer", out videoRenderer);                
+                //DsError.ThrowExceptionForHR(hr);
 
                 //hr = this.graphBuilder.AddFilter(videoRenderer, "Enhanced Video Renderer");//
                 //DsError.ThrowExceptionForHR(hr);
@@ -5711,6 +5752,36 @@ namespace XviD4PSP
                 script_box.Foreground = Brushes.White;
                 Settings.ScriptView_Brushes = "#00000000:#FFFFFFFF";
             }
+        }
+
+        private void Change_renderer_Click(object sender, RoutedEventArgs e)
+        {
+            int new_value = 0;
+            int old_value = Settings.VideoRenderer;
+            
+            if (vr_Default.IsFocused)
+            {
+                vr_default.IsChecked = true;
+                Settings.VideoRenderer = new_value = 0;
+            }
+            else if (vr_Overlay.IsFocused)
+            {
+                vr_overlay.IsChecked = true;
+                Settings.VideoRenderer = new_value = 1;
+            }
+            else if (vr_VMR7.IsFocused)
+            {
+                vr_vmr7.IsChecked = true;
+                Settings.VideoRenderer = new_value = 2;
+            }
+            else if (vr_VMR9.IsFocused)
+            {
+                vr_vmr9.IsChecked = true;
+                Settings.VideoRenderer = new_value = 3;
+            }
+
+            if (old_value != new_value && m != null && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
+                LoadVideo(MediaLoad.update);
         }
     }
 }

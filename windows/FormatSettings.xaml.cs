@@ -12,7 +12,7 @@ namespace XviD4PSP
         public Massive m;
         private MainWindow p;
         public bool update_massive = false;
-        public bool update_audio= false;
+        public bool update_audio = false;
         public bool update_resolution = false;
         public bool update_framerate = false;
         private string format;
