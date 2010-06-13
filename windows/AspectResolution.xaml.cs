@@ -816,17 +816,17 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    m.sar = "";
+                    m.sar = null;
                     manual_outaspect.Text = Calculate.ConvertDoubleToPointString((m.outaspect = (double)m.outresw / (double)m.outresh), 4);
                 }
             }
             else
             {
-                m.sar = "";
+                m.sar = null;
                 manual_outaspect.Text = Calculate.ConvertDoubleToPointString((m.outaspect = (double)m.outresw / (double)m.outresh), 4);
             }
 
-            if (m.sar != "" && m.sar != "1:1") m.aspectfix = AspectFixes.SAR;
+            if (m.sar != null && m.sar != "1:1") m.aspectfix = AspectFixes.SAR;
             else if (m.aspectfix == AspectFixes.SAR) m.aspectfix = AspectFixes.Disabled;
             combo_aspectfix.SelectedItem = m.aspectfix.ToString();
 
@@ -848,17 +848,22 @@ namespace XviD4PSP
             double asp = 0;
 
             //Определяем требуемый аспект
-            if (manual_outaspect.Text.Length > 2 && manual_outaspect.Text.Contains("/"))
+            if (manual_outaspect.Text.Length > 2 && (manual_outaspect.Text.Contains(":") || manual_outaspect.Text.Contains("/")))
             {
                 int n, d;
-                string[] a = manual_outaspect.Text.Split(new string[] { "/" }, StringSplitOptions.None);
+                string out_ar = manual_outaspect.Text.Replace("/", ":");
+                string[] a = out_ar.Split(new string[] { ":" }, StringSplitOptions.None);
                 if (a.Length == 2 && int.TryParse(a[0], out n) && int.TryParse(a[1], out d))
                     asp = (double)n / (double)d;
-                else asp = Calculate.ConvertStringToDouble(manual_outaspect.Text);
             }
-            else asp = Calculate.ConvertStringToDouble(manual_outaspect.Text);
+            else
+                asp = Calculate.ConvertStringToDouble(manual_outaspect.Text);
 
-            if (int.TryParse(manual_w.Text, out w) && int.TryParse(manual_h.Text, out h) && asp > 0)
+            if (asp <= 0)
+            {
+                manual_outaspect.Text = Calculate.ConvertDoubleToPointString(m.outaspect, 4);
+            }
+            else if (int.TryParse(manual_w.Text, out w) && int.TryParse(manual_h.Text, out h))
             {
                 manual_outsar.Text = Calculate.CalculateSAR(w, h, asp);
             }
