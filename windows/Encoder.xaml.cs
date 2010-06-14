@@ -1265,29 +1265,29 @@ namespace XviD4PSP
             step++;
 
             if (m.outvideofile == null) m.outvideofile = Settings.TempPath + "\\" + m.key + ".avi";
-            if (m.dontmuxstreams) m.outvideofile = Calculate.RemoveExtention(m.outfilepath, true) + ".avi";
 
-            //подхватываем готовый файл
-            if (File.Exists(m.outvideofile))
+            //Если можно кодировать сразу в контейнер или не требуется муксить
+            if (Format.GetMuxer(m) == Format.Muxers.Disabled || m.dontmuxstreams)
             {
-                if (File.Exists(m.outvideofile) &&
-                    new FileInfo(m.outvideofile).Length != 0)
+                m.outvideofile = Calculate.RemoveExtention(m.outfilepath, true) + ".avi";
+                m.dontmuxstreams = true;
+            }
+            else if (File.Exists(m.outvideofile) && new FileInfo(m.outvideofile).Length != 0)
+            {
+                //подхватываем готовый файл
+                SetLog(Languages.Translate("Using already created file") + ": " + m.outvideofile + Environment.NewLine);
+                if (m.vpasses.Count == 2)
                 {
-                    SetLog(Languages.Translate("Using already created file") + ": " + m.outvideofile +
-                        Environment.NewLine);
-                    if (m.vpasses.Count == 2)
-                    {
-                        step++;
-                        step++;
-                    }
-                    if (m.vpasses.Count == 3)
-                    {
-                        step++;
-                        step++;
-                        step++;
-                    }
-                    return;
+                    step++;
+                    step++;
                 }
+                if (m.vpasses.Count == 3)
+                {
+                    step++;
+                    step++;
+                    step++;
+                }
+                return;
             }
 
             busyfile = Path.GetFileName(m.outvideofile);
@@ -4470,10 +4470,10 @@ namespace XviD4PSP
                             SetLog("Delay: " + instream.delay + " > " + outstream.delay);
                     }
                 }
-                //if (m.vencoding != "Disabled")
-                //{
-                //    SetLog("Muxer: " + ((m.dontmuxstreams) ? "Don`t Mux Streams" : muxer.ToString()));
-                //}
+                if (m.format == Format.ExportFormats.Custom && m.vencoding != "Disabled")
+                {
+                    SetLog("V+A Muxer: " + ((m.dontmuxstreams) ? "Don`t Mux Streams" : muxer.ToString()));
+                }
 
                 SetLog("");
 
