@@ -45,7 +45,7 @@ namespace XviD4PSP
             combo_codec.SelectedItem = m.outvcodec;
             text_incodec_value.Content = m.invcodecshort;
             text_insize_value.Content = m.infilesize;
-            text_outsize_value.Content = m.outfilesize;
+            text_outsize_value.Content = m.outfilesize = Calculate.GetEncodingSize(m);
 
             //загружаем правильную страницу
             LoadCodecWindow();

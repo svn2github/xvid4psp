@@ -2208,6 +2208,7 @@ namespace XviD4PSP
             }
         }
 
+        //Рендерер для DirectShow движка превью
         public static int VideoRenderer
         {
             get
@@ -2225,6 +2226,27 @@ namespace XviD4PSP
             set
             {
                 SetInt("VideoRenderer", value);
+            }
+        }
+
+        //Кодировать сначала звук, потом видео
+        public static bool EncodeAudioFirst
+        {
+            get
+            {
+                object value = GetValue("EncodeAudioFirst");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("EncodeAudioFirst", value);
             }
         }
     }

@@ -1,5 +1,9 @@
-XviD4PSP 5.0.37.8 r132->r156 14.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r157 14.06.10, main changes:
 
+>>> (r157) Added ability to encode audio before encoding video. "Settings->Global settings->Encoding->Encode audio first,
+           then video", disabled by default (video will be encoded first). This option may be very useful for "2-Pass size"
+           and "3-Pass size" encodings with VBR audio, because when video encoding starts, exact size of the audio-file will
+           be already known (by Procrustean).
 >>> (r156) In Custom-format option Muxer=Disabled not worked properly, if video coder is XviD.
 >>> (r153) Resolution/Aspect->Manual, after clearing SAR field, SAR receives wrong value ("" instead of null).
 >>> (r152) For DirectShow player engine added ability to select video renderer (Settings->Player engine->DirectShow output).

@@ -4486,6 +4486,35 @@ namespace XviD4PSP
                     SetLog("");
                 }
 
+                //кодирование звука (до кодирования видео)
+                if (Settings.EncodeAudioFirst)
+                {
+                    if (m.outaudiostreams.Count > 0)
+                    {
+                        AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                        AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                        if (outstream.codec == "Copy" && !File.Exists(instream.audiopath) &&
+                            (!Format.IsDirectRemuxingPossible(m) || m.dontmuxstreams))
+                        {
+                            SetLog("DEMUXING");
+                            SetLog("------------------------------");
+                        }
+                        else if (outstream.codec != "Disabled" && outstream.codec != "Copy")
+                        {
+                            if (muxer != Format.Muxers.Disabled || m.format == Format.ExportFormats.Audio)
+                            {
+                                SetLog("AUDIO ENCODING");
+                                SetLog("------------------------------");
+                            }
+                        }
+
+                        if (muxer != Format.Muxers.Disabled || muxer == Format.Muxers.Disabled && m.vencoding == "Disabled")
+                            make_sound();
+                    }
+
+                    if (IsAborted || IsErrors) return;
+                }
+
                 //кодирование видео
                 if (m.outvcodec == "Copy" && (!Format.IsDirectRemuxingPossible(m) || m.dontmuxstreams))
                 {
@@ -4538,31 +4567,34 @@ namespace XviD4PSP
 
                 if (IsAborted || IsErrors) return;
 
-                //кодирование звука
-                if (m.outaudiostreams.Count > 0)
+                //кодирование звука (после кодирования видео)
+                if (!Settings.EncodeAudioFirst)
                 {
-                    AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                    if (outstream.codec == "Copy" && !File.Exists(instream.audiopath) &&
-                        (!Format.IsDirectRemuxingPossible(m) || m.dontmuxstreams))
+                    if (m.outaudiostreams.Count > 0)
                     {
-                        SetLog("DEMUXING");
-                        SetLog("------------------------------");
-                    }
-                    else if (outstream.codec != "Disabled" && outstream.codec != "Copy")
-                    {
-                        if (muxer != Format.Muxers.Disabled || m.format == Format.ExportFormats.Audio)
+                        AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                        AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                        if (outstream.codec == "Copy" && !File.Exists(instream.audiopath) &&
+                            (!Format.IsDirectRemuxingPossible(m) || m.dontmuxstreams))
                         {
-                            SetLog("AUDIO ENCODING");
+                            SetLog("DEMUXING");
                             SetLog("------------------------------");
                         }
+                        else if (outstream.codec != "Disabled" && outstream.codec != "Copy")
+                        {
+                            if (muxer != Format.Muxers.Disabled || m.format == Format.ExportFormats.Audio)
+                            {
+                                SetLog("AUDIO ENCODING");
+                                SetLog("------------------------------");
+                            }
+                        }
+
+                        if (muxer != Format.Muxers.Disabled || muxer == Format.Muxers.Disabled && m.vencoding == "Disabled")
+                            make_sound();
                     }
 
-                    if (muxer != Format.Muxers.Disabled || muxer == Format.Muxers.Disabled && m.vencoding == "Disabled")
-                        make_sound();
+                    if (IsAborted || IsErrors) return;
                 }
-
-                if (IsAborted || IsErrors) return;
 
                 //pulldown
                 if (m.format == Format.ExportFormats.Mpeg2PAL && m.outframerate != "25.000" ||

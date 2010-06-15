@@ -551,10 +551,24 @@ namespace XviD4PSP
                    //ћы не можем знать размер если звук = VBR или Copy, но файл еще не извлечен и битрейт неизвестен
                    AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                   if (outstream.bitrate == 0 && outstream.codec != "Disabled" && !(outstream.codec == "Copy" && File.Exists(instream.audiopath)))
-                       return ssize;
-               }               
-               ssize = m.outvbitrate + " mb";
+                   if (outstream.bitrate == 0 && outstream.codec != "Disabled")
+                   {
+                       //≈сли звук будет кодироватьс€ первым, то размер звукового файла уже будет известен к моменту начала
+                       //кодировани€ видео (кроме случа€ DirectRemux дл€ Copy), и его можно будет учесть
+                       if (outstream.codec == "Copy" && !(Settings.EncodeAudioFirst && !Format.IsDirectRemuxingPossible(m))
+                           && !File.Exists(instream.audiopath))
+                       {
+                           //Copy
+                           return ssize;
+                       }
+                       else if (outstream.codec != "Copy" && !Settings.EncodeAudioFirst)
+                       {
+                           //VBR
+                           return ssize;
+                       }
+                   }
+               }
+               return m.outvbitrate + " mb";
            }
            else if (m.format == Format.ExportFormats.Audio && m.outaudiostreams.Count > 0)
            {
