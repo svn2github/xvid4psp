@@ -233,68 +233,84 @@ namespace XviD4PSP
             }
         }
 
-        private void make_thm()
+        private void make_thm(int width, int height, bool fix_ar, string format)
         {
-            string thmpath = Calculate.RemoveExtention(m.outfilepath) + "jpg";
+            Bitmap bmp = null;
+            Graphics g = null;
+            AviSynthReader reader = null;
+            string new_script = m.script;
+            string thmpath = Calculate.RemoveExtention(m.outfilepath) + format;
 
-            AviSynthReader reader = new AviSynthReader();
-            reader.ParseScript(m.script);
+            SetLog("CREATING THM");
+            SetLog("------------------------------");
+            SetLog("Saving picture to: " + thmpath);
+            SetLog(format.ToUpper() + " " + width + "x" + height + " \r\n");
 
-            //масштабируем изображение
-            int sideHeight, sideWidth;
-            //выбираем большую сторону, по которой изменяем изображение
-            if (reader.Height < reader.Width)
+            try
             {
-                //если ширина больше высоты
-                sideHeight = 121;
-                sideWidth = (int)((float)reader.Width * ((float)sideHeight / (float)reader.Height));
+                if (fix_ar)
+                {
+                    int crop_w = 0;
+                    int crop_h = 0;
+                    double old_asp = m.outaspect;
+                    double new_asp = (double)width / (double)height;
+
+                    if (old_asp < new_asp)
+                    {
+                        double diff = m.outresh - (int)(((double)m.outresh * old_asp) / new_asp);
+                        crop_h = Calculate.GetValid((int)(diff / 2), 2);
+                    }
+                    else if (old_asp > new_asp)
+                    {
+                        double diff = m.outresw - (int)((double)m.outresw / old_asp) * new_asp;
+                        crop_w = Calculate.GetValid((int)(diff / 2), 2);
+                    }
+
+                    new_script += ("Crop(" + crop_w + ", " + crop_h + ", -" + crop_w + ", -" + crop_h + ")\r\n");
+                    new_script += ("Lanczos4Resize(" + width + ", " + height + ")\r\n");
+                }
+
+                reader = new AviSynthReader();
+                reader.ParseScript(new_script);
+
+                //проверка на выходы за пределы общего количества кадров
+                int frame = (m.thmframe > reader.FrameCount) ? reader.FrameCount / 2 : m.thmframe;
+
+                bmp = new Bitmap(width, height);
+                g = Graphics.FromImage(bmp);
+
+                //метод интерполяции при ресайзе
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(reader.ReadFrameBitmap(frame), 0, 0, width, height);
+
+                if (format == "jpg")
+                {
+                    //процент cжатия jpg
+                    System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
+                    System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
+                    encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 92L);
+
+                    //jpg
+                    bmp.Save(thmpath, info[1], encoderParameters);
+                }
+                else
+                {
+                    //png
+                    bmp.Save(thmpath, System.Drawing.Imaging.ImageFormat.Png);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                //если высота больше ширины
-                sideWidth = 161;
-                sideHeight = (int)((float)reader.Height * ((float)sideWidth / (float)reader.Width));
+                SetLog("\r\nError creating THM: " + ex.Message.ToString() + Environment.NewLine);
             }
-
-            Bitmap bmp = new Bitmap(160, 120);
-            Graphics g = Graphics.FromImage(bmp);
-
-            //метод интерполяции при ресайзе
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-
-            //процент cжатия jpg
-            System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
-            System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
-            encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 92L);
-
-            //вывод и запись изображения в файл
-            int frame = (m.thmframe > m.outframes) ? m.outframes / 2 : m.thmframe;
-            g.DrawImage(reader.ReadFrameBitmap(frame), (int)(0.5 * (160 - (float)sideWidth)), (int)(0.5 * (120 - (float)sideHeight)), sideWidth, sideHeight);
-            bmp.Save(thmpath, info[1], encoderParameters);
-
-            //завершение
-            g.Dispose();
-            bmp.Dispose();
-            reader.Close();
-        }
-
-        private void make_png()
-        {
-            string thmpath = Calculate.RemoveExtention(m.outfilepath) + "png";
-
-            AviSynthReader reader = new AviSynthReader();
-            reader.ParseScript(m.script);
-
-            Bitmap bmp = new Bitmap(144, 80);
-            Graphics g = Graphics.FromImage(bmp);
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.DrawImage(reader.ReadFrameBitmap(m.thmframe), 0, 0, 144, 80);
-            bmp.Save(thmpath, System.Drawing.Imaging.ImageFormat.Png);
-
-            //завершение
-            g.Dispose();
-            bmp.Dispose();
-            reader.Close();
+            finally
+            {
+                //завершение
+                if (g != null) g.Dispose();
+                if (bmp != null) bmp.Dispose();
+                if (reader != null) reader.Close();
+                SetLog("");
+            }
         }
 
         private void make_x264()
@@ -4633,12 +4649,24 @@ namespace XviD4PSP
 
                 if (IsAborted || IsErrors) return;
 
-                //картинки для PSP
-                if (m.format == Format.ExportFormats.Mp4PSPAVC ||
-                    m.format == Format.ExportFormats.Mp4PSPAVCTV)
-                    make_thm();
-                if (m.format == Format.ExportFormats.PmpAvc)
-                    make_png();
+                //THM
+                if (m.format == Format.ExportFormats.Mp4PSPAVC || m.format == Format.ExportFormats.Mp4PSPAVCTV)
+                    make_thm(160, 120, true, "jpg");
+                else if (m.format == Format.ExportFormats.PmpAvc)
+                    make_thm(144, 80, true, "png");
+                else if (m.format == Format.ExportFormats.Custom)
+                {
+                    string thm_format = FormatReader.GetFormatInfo("Custom", "THMFormat", "None").ToLower();
+                    if (thm_format == "jpg" || thm_format == "png")
+                    {
+                        bool fix_ar = FormatReader.GetFormatInfo("Custom", "THMFixAR", true);
+                        int thm_w = FormatReader.GetFormatInfo("Custom", "THMWidth", 160);
+                        int thm_h = FormatReader.GetFormatInfo("Custom", "THMHeight", 120);
+                        if (thm_w == 0) thm_w = m.outresw;
+                        if (thm_h == 0) thm_h = m.outresh;
+                        make_thm(thm_w, thm_h, fix_ar, thm_format);
+                    }
+                }
 
                 //прописываем сколько это всё заняло у нас врмени
                 TimeSpan enc_time = (DateTime.Now - start_time);

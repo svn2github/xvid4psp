@@ -108,6 +108,24 @@ namespace XviD4PSP
             if (!combo_split.Items.Contains(split)) combo_split.Items.Add(split);
             combo_split.SelectedItem = split;
 
+            combo_thm_format.Items.Clear();
+            combo_thm_format.Items.Add("None");
+            combo_thm_format.Items.Add("JPG");
+            combo_thm_format.Items.Add("PNG");
+            string thm_format = FormatReader.GetFormatInfo(format, "THMFormat", "None");
+            if (!combo_thm_format.Items.Contains(thm_format)) combo_thm_format.SelectedItem = "None";
+            else combo_thm_format.SelectedItem = thm_format;
+
+            combo_thm_W.Items.Clear();
+            combo_thm_W.Items.Add(0);
+            for (int i = 120; i < 2000; i += 4) combo_thm_W.Items.Add(i);            
+            combo_thm_W.SelectedItem = FormatReader.GetFormatInfo(format, "THMWidth", 160);
+
+            combo_thm_H.Items.Clear();
+            combo_thm_H.Items.Add(0);
+            for (int i = 60; i < 2000; i += 2) combo_thm_H.Items.Add(i);
+            combo_thm_H.SelectedItem = FormatReader.GetFormatInfo(format, "THMHeight", 120);
+
             LoadResolutions();
             combo_ValidModW.Items.Clear();
             combo_ValidModH.Items.Clear();
@@ -119,6 +137,7 @@ namespace XviD4PSP
             check_fixed_ar.IsChecked = FormatReader.GetFormatInfo(format, "IsLockedOutAspect", false);
             check_anamorph.IsChecked = FormatReader.GetFormatInfo(format, "CanBeAnamorphic", false);
             check_stereo.IsChecked = FormatReader.GetFormatInfo(format, "IsLimitedToStereo", false);
+            //check_thm_fix_ar.IsChecked = FormatReader.GetFormatInfo(format, "THMFixAR", true);
             check_dont_mux.IsChecked = FormatReader.GetFormatInfo(format, "DontMuxStreams", false);
             check_direct_remux.IsChecked = FormatReader.GetFormatInfo(format, "UseDirectRemux", false);
             check_4gb_only.IsChecked = FormatReader.GetFormatInfo(format, "Is4GBlimitedFormat", false);
@@ -244,6 +263,8 @@ namespace XviD4PSP
             validmuxer.Content = Languages.Translate("Muxer for this format:");
             validextension.Content = Languages.Translate("File extension:");
             split.Content = Languages.Translate("Split output file:");
+            thm.Content = Languages.Translate("Create THM:");
+            thm_size.Content = Languages.Translate("Resolution:");
             check_dont_mux.Content = Languages.Translate("Don`t multiplex video and audio");
             check_direct_remux.Content = Languages.Translate("Use direct remuxing if possible");
             check_4gb_only.Content = Languages.Translate("Maximum filesize is 4Gb");
@@ -253,8 +274,8 @@ namespace XviD4PSP
         {
             textbox_vcodecs.ToolTip = Languages.Translate("Codecs, that will be selectable in the video-codecs settings window.") + Environment.NewLine + Languages.Translate("Valid values:") + " x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy\r\n" + Languages.Translate("Separate by comma.");
             textbox_framerates.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000, ...\r\n" + Languages.Translate("Separate by comma.");
-            combo_MinResolutionH.ToolTip = combo_MaxResolutionH.ToolTip = Languages.Translate("Height");
-            combo_MinResolutionW.ToolTip = combo_MaxResolutionW.ToolTip = Languages.Translate("Width");
+            combo_MinResolutionH.ToolTip = combo_MaxResolutionH.ToolTip = combo_thm_H.ToolTip = Languages.Translate("Height");
+            combo_MinResolutionW.ToolTip = combo_MaxResolutionW.ToolTip = combo_thm_W.ToolTip = Languages.Translate("Width");
             combo_ValidModW.ToolTip = Languages.Translate("Width") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "4, 8");
             combo_ValidModH.ToolTip = Languages.Translate("Height") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "2, 4");
             textbox_aspects.ToolTip = Languages.Translate("Aspect ratios.") + Environment.NewLine + Languages.Translate("Valid values:") + " 1.3333 (4:3), 1.5000, 1.6667, 1.7647 (16:9), 1.7778 (16:9), 1.8500, 2.3529, ...\r\n" + Languages.Translate("Separate by comma.");
@@ -266,6 +287,9 @@ namespace XviD4PSP
             combo_Extension.ToolTip = Languages.Translate("File extension:");
             combo_force_format.ToolTip = Languages.Translate("Only for this muxers:") + " mp4box, ffmpeg";
             combo_split.ToolTip = Languages.Translate("Only for this muxers:") + " mkvmerge, mp4box, tsmuxer";
+            combo_thm_format.ToolTip = "THM format";
+            combo_thm_W.ToolTip += "\r\n" + Languages.Translate("0 - encoding size");
+            combo_thm_H.ToolTip += "\r\n" + Languages.Translate("0 - encoding size");
             check_4gb_only.ToolTip = Languages.Translate("Maximum filesize is 4Gb");
         }
 
@@ -542,6 +566,35 @@ namespace XviD4PSP
                 StoreValue(format, "SplitOutputFile", combo_split.SelectedItem.ToString());
                 update_massive = true;
             }
+        }
+
+        private void combo_thm_format_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_thm_format.IsDropDownOpen || combo_thm_format.IsSelectionBoxHighlighted)
+            {
+                StoreValue(format, "THMFormat", combo_thm_format.SelectedItem.ToString());
+            }
+        }
+
+        private void combo_thm_W_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_thm_W.IsDropDownOpen || combo_thm_W.IsSelectionBoxHighlighted)
+            {
+                StoreValue(format, "THMWidth", combo_thm_W.SelectedItem.ToString());
+            }
+        }
+
+        private void combo_thm_H_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_thm_H.IsDropDownOpen || combo_thm_H.IsSelectionBoxHighlighted)
+            {
+                StoreValue(format, "THMHeight", combo_thm_H.SelectedItem.ToString());
+            }
+        }
+
+        private void check_thm_fix_ar_Clicked(object sender, RoutedEventArgs e)
+        {
+            //StoreValue(format, "THMFixAR", check_thm_fix_ar.IsChecked.Value.ToString());
         }
         
         private void check_direct_remux_Clicked(object sender, RoutedEventArgs e)

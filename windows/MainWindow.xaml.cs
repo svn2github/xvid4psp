@@ -4889,6 +4889,9 @@ namespace XviD4PSP
             }
             else
             {
+                AviSynthReader reader = null;
+                System.Drawing.Bitmap bmp = null;
+
                 try
                 {
                     System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
@@ -4906,11 +4909,10 @@ namespace XviD4PSP
                     {
                         string ext = Path.GetExtension(s.FileName).ToLower();
 
-                        AviSynthReader reader = new AviSynthReader();
+                        reader = new AviSynthReader();
                         reader.ParseScript(m.script);
 
-                        System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
-                        if (ext == ".png") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
                         if (ext == ".jpg")
                         {
                             System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
@@ -4919,16 +4921,19 @@ namespace XviD4PSP
 
                             bmp.Save(s.FileName, info[1], encoderParameters);
                         }
-                        if (ext == ".bmp") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
-
-                        //завершение
-                        bmp.Dispose();
-                        reader.Close();
+                        else if (ext == ".png") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        else if (ext == ".bmp") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
                     }
                 }
                 catch (Exception ex)
                 {
                     ErrorExeption(ex.Message);
+                }
+                finally
+                {
+                    //завершение
+                    if (bmp != null) bmp.Dispose();
+                    if (reader != null) reader.Close();
                 }
             }
         }
@@ -4943,6 +4948,10 @@ namespace XviD4PSP
             }
             else
             {
+                AviSynthReader reader = null;
+                System.Drawing.Bitmap bmp = null;
+                System.Drawing.Graphics g = null;
+
                 try
                 {
                     System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
@@ -4952,7 +4961,7 @@ namespace XviD4PSP
                     //s.DefaultExt = ".png";
 
                     if (m.format == Format.ExportFormats.Mp4PSPAVC ||
-                        m.format == Format.ExportFormats.Mp4PSPAVC ||
+                        m.format == Format.ExportFormats.Mp4PSPAVCTV ||
                         m.format == Format.ExportFormats.Mp4PSPASP)
                     {
                         s.Filter = "JPEG " + Languages.Translate("files") + "|*.jpg";
@@ -4972,42 +4981,30 @@ namespace XviD4PSP
                         string ext = Path.GetExtension(s.FileName).ToLower();
                         int frame = (int)Math.Round(Position.TotalSeconds * fps);
 
+                        reader = new AviSynthReader();
+                        reader.ParseScript(m.script);
+
                         if (ext == ".png")
                         {
-                            AviSynthReader reader = new AviSynthReader();
-                            reader.ParseScript(m.script);
-
                             if (m.format == Format.ExportFormats.PmpAvc)
                             {
-                                System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(144, 80);
-                                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp);
+                                bmp = new System.Drawing.Bitmap(144, 80);
+                                g = System.Drawing.Graphics.FromImage(bmp);
                                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                                 g.DrawImage(reader.ReadFrameBitmap(frame), 0, 0, 144, 80);
                                 bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-
-                                //завершение
-                                g.Dispose();
-                                bmp.Dispose();
-                                reader.Close();
                             }
                             else
                             {
-                                System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
+                                bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
                                 bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-
-                                //завершение
-                                bmp.Dispose();
-                                reader.Close();
                             }
                         }
-                        
-                        if (ext == ".jpg")
+                        else if (ext == ".jpg")
                         {
-                            AviSynthReader reader = new AviSynthReader();
-                            reader.ParseScript(m.script);
 
                             if (m.format == Format.ExportFormats.Mp4PSPAVC ||
-                               m.format == Format.ExportFormats.Mp4PSPAVC ||
+                               m.format == Format.ExportFormats.Mp4PSPAVCTV ||
                                m.format == Format.ExportFormats.Mp4PSPASP)
                             {
                                 //масштабируем изображение
@@ -5026,8 +5023,8 @@ namespace XviD4PSP
                                     sideHeight = (int)((float)reader.Height * ((float)sideWidth / (float)reader.Width));
                                 }
 
-                                System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(160, 120);
-                                System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp);
+                                bmp = new System.Drawing.Bitmap(160, 120);
+                                g = System.Drawing.Graphics.FromImage(bmp);
 
                                 //метод интерполяции при ресайзе
                                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
@@ -5040,25 +5037,16 @@ namespace XviD4PSP
                                 //вывод и запись изображения в файл
                                 g.DrawImage(reader.ReadFrameBitmap(frame), (int)(0.5 * (160 - (float)sideWidth)), (int)(0.5 * (120 - (float)sideHeight)), sideWidth, sideHeight);
                                 bmp.Save(s.FileName, info[1], encoderParameters);
-
-                                //завершение
-                                g.Dispose();
-                                bmp.Dispose();
-                                reader.Close();
                             }
                             else
                             {
-                                System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
+                                bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
                                 //сжатие jpg
                                 System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
                                 System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
                                 encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
 
                                 bmp.Save(s.FileName, info[1], encoderParameters);
-
-                                //завершение
-                                bmp.Dispose();
-                                reader.Close();
                             }
                         }
                     }
@@ -5066,6 +5054,13 @@ namespace XviD4PSP
                 catch (Exception ex)
                 {
                     ErrorExeption(ex.Message);
+                }
+                finally
+                {
+                    //завершение
+                    if (g != null) g.Dispose();
+                    if (bmp != null) bmp.Dispose();
+                    if (reader != null) reader.Close();
                 }
             }
         }

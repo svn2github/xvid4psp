@@ -39,15 +39,16 @@ namespace XviD4PSP
         {
             int result = default_value;
             string value = GetFormatInfo(format, key);
-            if (!int.TryParse(value, out result)) return default_value;
-            else return result;
+            if (int.TryParse(value, out result)) return result;
+            else return default_value;
         }
 
         //Для одиночных значений bool (с дефолтом)
         public static bool GetFormatInfo(string format, string key, bool default_value)
         {
+            bool result = default_value;
             string value = GetFormatInfo(format, key);
-            if (value != null && value.ToLower() == "true") return true;
+            if (bool.TryParse(value, out result)) return result;
             else return default_value;
         }
 

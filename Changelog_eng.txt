@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r157 14.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r158 17.06.10, main changes:
 
+>>> (r158) For Custom-format added ability to create THM-preview while encoding.
 >>> (r157) Added ability to encode audio before encoding video. "Settings->Global settings->Encoding->Encode audio first,
            then video", disabled by default (video will be encoded first). This option may be very useful for "2-Pass size"
            and "3-Pass size" encodings with VBR audio, because when video encoding starts, exact size of the audio-file will
