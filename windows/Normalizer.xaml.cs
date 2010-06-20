@@ -52,7 +52,27 @@ namespace XviD4PSP
             CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
+            //Сворачиваем окно, если программа минимизирована или свернута в трей
+            if (!Owner.IsVisible || Owner.WindowState == WindowState.Minimized)
+            {
+                this.WindowState = WindowState.Minimized;
+                this.StateChanged += new EventHandler(Window_StateChanged);
+                this.Name = "Hidden";
+            }
+
             ShowDialog();
+        }
+
+        //Разворачиваем главное окно при разворачивании этого окна
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState != System.Windows.WindowState.Minimized)
+            {
+                this.Name = "Window";
+                if (!Owner.IsVisible) Owner.Show();
+                if (Owner.WindowState == System.Windows.WindowState.Minimized)
+                    Owner.WindowState = System.Windows.WindowState.Normal;
+            }
         }
 
         private void CreateBackgroundWorker()

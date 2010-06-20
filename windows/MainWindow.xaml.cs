@@ -77,11 +77,12 @@ namespace XviD4PSP
         private BackgroundWorker worker = null;
 
         //Tray
-        public System.Windows.Forms.NotifyIcon TrayIcon;                 //Иконка в трее
-        private System.Windows.Forms.ToolStripMenuItem tmnExit;          //Пункт меню "Exit"
-        private System.Windows.Forms.ToolStripMenuItem tmnTrayClose;     //Пункт меню "Close to tray"
-        private System.Windows.Forms.ToolStripMenuItem tmnTrayMinimize;  //Пункт меню "Minimize to tray"
-        private System.Windows.Forms.ToolStripMenuItem tmnTrayClickOnce; //Пункт меню "1-Click"
+        public System.Windows.Forms.NotifyIcon TrayIcon;                   //Иконка в трее
+        private System.Windows.Forms.ToolStripMenuItem tmnExit;            //Пункт меню "Exit"
+        private System.Windows.Forms.ToolStripMenuItem tmnTrayClose;       //Пункт меню "Close to tray"
+        private System.Windows.Forms.ToolStripMenuItem tmnTrayMinimize;    //Пункт меню "Minimize to tray"
+        private System.Windows.Forms.ToolStripMenuItem tmnTrayClickOnce;   //Пункт меню "1-Click"
+        private System.Windows.Forms.ToolStripMenuItem tmnTrayNoBalloons;  //Пункт меню "Disable balloons"
 
         private string path_to_save;          //Путь для конечных файлов при перекодировании папки
         private int opened_files = 0;         //Кол-во открытых файлов при открытии папки
@@ -191,6 +192,14 @@ namespace XviD4PSP
                 tmnTrayClickOnce.Checked = Settings.TrayClickOnce;
                 tmnTrayClickOnce.Click += new EventHandler(tmnTrayClickOnce_Click);
                 TrayMenu.Items.Add(tmnTrayClickOnce);
+
+                //Пункт меню "Disable balloons"
+                tmnTrayNoBalloons = new System.Windows.Forms.ToolStripMenuItem();
+                tmnTrayNoBalloons.Text = "Disable balloons";
+                tmnTrayNoBalloons.CheckOnClick = true;
+                tmnTrayNoBalloons.Checked = Settings.TrayNoBalloons;
+                tmnTrayNoBalloons.Click += new EventHandler(tmnTrayNoBalloons_Click);
+                TrayMenu.Items.Add(tmnTrayNoBalloons);
                 TrayMenu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
 
                 //Пункт меню "Exit"
@@ -500,11 +509,25 @@ namespace XviD4PSP
             if (!isFullScreen) MoveVideoWindow();
         }
 
-        //Сворачиваемся в трей
+        //Сворачиваемся в трей; активируем окна при разворачивании
         private void MainWindow_StateChanged(object sender, EventArgs e)
         {
-            if (this.WindowState == System.Windows.WindowState.Minimized && Settings.TrayIconEnabled && Settings.TrayMinimize)
-                this.Hide();
+            if (this.WindowState == System.Windows.WindowState.Minimized)
+            {
+                if (Settings.TrayIconEnabled && Settings.TrayMinimize) this.Hide();
+            }
+            else
+            {
+                //Hidden - окна, спрятанные "вручную" (через код) - сами они не разворачиваются..
+                foreach (Window wnd in this.OwnedWindows)
+                    if (wnd.Name == "Hidden")
+                    {
+                        if (!wnd.IsVisible) wnd.Show();
+                        if (wnd.WindowState == System.Windows.WindowState.Minimized)
+                            wnd.WindowState = System.Windows.WindowState.Normal;
+                        wnd.Name = "Window";
+                    }
+            }
         }
 
         //Разворачиваемся из трея
@@ -543,6 +566,11 @@ namespace XviD4PSP
             }
         }
 
+        private void tmnTrayNoBalloons_Click(object sender, EventArgs e)
+        {
+            Settings.TrayNoBalloons = tmnTrayNoBalloons.Checked;
+        }
+
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //Сворачиваемся в трей
@@ -553,10 +581,7 @@ namespace XviD4PSP
                 this.WindowState = System.Windows.WindowState.Minimized;
                 this.Hide();
                 this.StateChanged += new EventHandler(MainWindow_StateChanged);
-                TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
-                TrayIcon.BalloonTipTitle = "XviD4PSP";
-                TrayIcon.BalloonTipText = " ";
-                TrayIcon.ShowBalloonTip(5000);
+                if (!Settings.TrayNoBalloons) TrayIcon.ShowBalloonTip(5000, "XviD4PSP", " ", System.Windows.Forms.ToolTipIcon.Info);
                 return;
             }
 
@@ -2016,6 +2041,7 @@ namespace XviD4PSP
                 tmnTrayClose.Text = Languages.Translate("Close to tray");
                 tmnTrayMinimize.Text = Languages.Translate("Minimize to tray");
                 tmnTrayClickOnce.Text = Languages.Translate("Single click to open");
+                tmnTrayNoBalloons.Text = Languages.Translate("Disable balloons");
 
                 text_vencoding.Content = Languages.Translate("Video encoding") + ":";
                 text_aencoding.Content = Languages.Translate("Audio encoding") + ":";

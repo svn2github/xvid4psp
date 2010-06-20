@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r158 17.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r159 20.06.10, main changes:
 
+>>> (r159) When XviD4PSP minimized or hidden, every new encoder window appears not in hidden-mode (rep. by brunorex).
+>>> (r159) A new item "Disable balloons" added to TrayIcon menu (req. by brunorex).
 >>> (r158) For Custom-format added ability to create THM-preview while encoding.
 >>> (r157) Added ability to encode audio before encoding video. "Settings->Global settings->Encoding->Encode audio first,
            then video", disabled by default (video will be encoded first). This option may be very useful for "2-Pass size"

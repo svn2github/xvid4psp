@@ -58,13 +58,33 @@ namespace XviD4PSP
             source_file = (m.infilepath_source != null) ? m.infilepath_source : m.infilepath;
 
             //фоновое кодирование
-            CreateBackgoundWorker();
+            CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
+            //Сворачиваем окно, если программа минимизирована или свернута в трей
+            if (!Owner.IsVisible || Owner.WindowState == WindowState.Minimized)
+            {
+                this.WindowState = WindowState.Minimized;
+                this.StateChanged += new EventHandler(Window_StateChanged);
+                this.Name = "Hidden";
+            }
+            
             ShowDialog();
         }
 
-        private void CreateBackgoundWorker()
+        //Разворачиваем главное окно при разворачивании этого окна
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState != System.Windows.WindowState.Minimized)
+            {
+                this.Name = "Window";
+                if (!Owner.IsVisible) Owner.Show();
+                if (Owner.WindowState == System.Windows.WindowState.Minimized)
+                    Owner.WindowState = System.Windows.WindowState.Normal;
+            }
+        }
+
+        private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);

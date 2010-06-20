@@ -67,10 +67,19 @@ namespace XviD4PSP
             button_play.Content = Languages.Translate("Play");
             button_info.Content = Languages.Translate("Info");
 
-            Show();
-
             m = mass.Clone();
             p = parent;
+            
+            //Show();
+
+            //Прячем окно, если программа минимизирована или свернута в трей
+            if (!p.IsVisible || p.WindowState == WindowState.Minimized)
+            {
+                this.Hide();
+                this.Name = "Hidden";
+            }
+            else
+                this.Show();
 
             Format.Muxers muxer = Format.GetMuxer(m);
 
@@ -4796,7 +4805,7 @@ namespace XviD4PSP
             {
                 button_info.Visibility = Visibility.Visible;
                 button_play.Visibility = Visibility.Visible;
-                if (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized)
+                if (!Settings.TrayNoBalloons && (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized))
                 {
                     p.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
                     p.TrayIcon.BalloonTipTitle = Languages.Translate("Complete") + "!";
@@ -4836,7 +4845,7 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    if (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized)
+                    if (!Settings.TrayNoBalloons && (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized))
                     {
                         p.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         p.TrayIcon.BalloonTipTitle = Languages.Translate("Error") + "!";

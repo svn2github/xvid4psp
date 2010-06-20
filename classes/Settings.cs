@@ -2208,6 +2208,27 @@ namespace XviD4PSP
             }
         }
 
+        //Запретить всплывающие сообщения в трее
+        public static bool TrayNoBalloons
+        {
+            get
+            {
+                object value = GetValue("TrayNoBalloons");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("TrayNoBalloons", value);
+            }
+        }
+
         //Рендерер для DirectShow движка превью
         public static int VideoRenderer
         {
