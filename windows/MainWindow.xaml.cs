@@ -1682,20 +1682,16 @@ namespace XviD4PSP
             //закрываем все дочерние окна
             CloseChildWindows();
 
-            if (mass.inaudiostreams.Count > 0 &&
-                mass.outaudiostreams.Count > 0)
+            if (mass.inaudiostreams.Count > 0 && mass.outaudiostreams.Count > 0)
             {
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)mass.inaudiostreams[mass.inaudiostream];
                 AudioStream outstream = (AudioStream)mass.outaudiostreams[mass.outaudiostream];
 
-                if (instream.audiopath != null &&
-                   !File.Exists(instream.audiopath))
+                if (instream.audiopath != null && !File.Exists(instream.audiopath))
                 {
-                    if (!Format.IsDirectRemuxingPossible(mass) &&
-                    outstream.codec == "Copy" ||
-                        Format.IsDirectRemuxingPossible(mass) &&
-                        outstream.codec != "Copy")
+                    if (!Format.IsDirectRemuxingPossible(mass) && outstream.codec == "Copy" ||
+                        Format.IsDirectRemuxingPossible(mass) && outstream.codec != "Copy")
                     {
                         Demuxer dem = new Demuxer(mass, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
                         if (dem.m != null) mass = dem.m.Clone();
@@ -1709,18 +1705,19 @@ namespace XviD4PSP
 
                 //определяем громкоcть (перед кодированием)
                 if (Settings.Volume != "Disabled" && Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnExport &&
-                    !instream.gaindetected &&
-                    outstream.codec != "Copy" &&
-                    outstream.codec != "Disabled")
+                    outstream.codec != "Copy" && outstream.codec != "Disabled")
                 {
-                    mass.volume = Settings.Volume;
-                    Normalize norm = new Normalize(mass);
-                    mass = norm.m.Clone();
-                    //mass = AviSynthScripting.CreateAutoAviSynthScript(mass);
-                    mass = AviSynthScripting.SetGain(mass);
+                    if (!instream.gaindetected)
+                    {
+                        mass.volume = Settings.Volume;
+                        Normalize norm = new Normalize(mass);
+                        mass = norm.m.Clone();
+                    }
 
+                    mass = AviSynthScripting.SetGain(mass);
                     UpdateTaskMassive(mass);
                 }
+
                 //Временный WAV-файл для 2pass AAC
                 if (outstream.codec == "AAC" && mass.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass)
                 {

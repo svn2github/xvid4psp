@@ -729,35 +729,27 @@ namespace XviD4PSP
        {
            //определяем аудио потоки
            AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-           AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-           //блок обработки звука
-           if (m.inaudiostreams.Count > 0 &&
-               m.outaudiostreams.Count > 0)
+           bool ok = false;
+           string new_script = "";
+           string[] lines = m.script.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+           //замена
+           foreach (string line in lines)
            {
-               string[] separator = new string[] { Environment.NewLine };
-               string[] lines = m.script.Split(separator, StringSplitOptions.None);
-               string newscript = "";
-
-               //замена
-               foreach (string line in lines)
+               if (line.ToLower().StartsWith("amplifydb("))
                {
-                   if (line.ToLower().StartsWith("AmplifydB("))
-                   {
-                       if (instream.gain != "0.0")
-                           newscript += "AmplifydB(" + instream.gain + ")" + Environment.NewLine;
-                   }
-                   else
-                       newscript += line + Environment.NewLine;
+                   if (instream.gain != "0.0") new_script += "AmplifydB(" + instream.gain + ")\r\n";
+                   ok = true;
                }
-
-               //добавление
-               if (instream.gain != "0.0" && !newscript.Contains("AmplifydB"))
-                   newscript += "AmplifydB(" + instream.gain + ")" + Environment.NewLine;
-
-               m.script = newscript;
+               else
+                   new_script += line + Environment.NewLine;
            }
 
+           //добавление
+           if (!ok && instream.gain != "0.0") new_script += "AmplifydB(" + instream.gain + ")\r\n";
+
+           m.script = new_script;
            return m;
        }
 
