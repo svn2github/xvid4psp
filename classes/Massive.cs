@@ -677,6 +677,19 @@ namespace XviD4PSP
             }
         }
 
+        private bool _filtering_changed = false;
+        public bool filtering_changed
+        {
+            get
+            {
+                return _filtering_changed;
+            }
+            set
+            {
+                _filtering_changed = value;
+            }
+        }
+
         private string _sbc;
         public string sbc
         {

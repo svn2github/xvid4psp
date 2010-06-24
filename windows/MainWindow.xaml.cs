@@ -1844,6 +1844,7 @@ namespace XviD4PSP
                 // Start playing the media file
                 if (Settings.ScriptView)
                 {
+                    this.isAudioOnly = false;
                     this.currentState = PlayState.Stopped;
                     script_box.Visibility = Visibility.Visible;
                     script_box.Text = m.script;
@@ -2991,7 +2992,9 @@ namespace XviD4PSP
                         m.filtering = combo_filtering.SelectedItem.ToString();
 
                         //создаём новый AviSynth скрипт
+                        m.filtering_changed = true;
                         m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        m.filtering_changed = false;
 
                         //загружаем обновлённый скрипт
                         LoadVideo(MediaLoad.update);

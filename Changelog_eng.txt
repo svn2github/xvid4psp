@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r160 20.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r161 24.06.10, main changes:
 
+>>> (r161) From now, filtering part of the script (i.e. all text that placed between ###[FILTERING]### tags) will be untouched
+           when script is re-created.
 >>> (r160) If setting "Auto volume" = "Before encoding" and in queue few tasks based on one source-file, gain will
            be altered only for the first task - fixed.
 >>> (r159) When XviD4PSP minimized or hidden, every new encoder window appears not in hidden-mode (rep. by brunorex).

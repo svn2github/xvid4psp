@@ -61,6 +61,30 @@ namespace XviD4PSP
 
        public static Massive CreateAutoAviSynthScript(Massive m)
        {
+           string old_filtering = null;
+
+           //Ищем и сохраняем старую фильтрацию
+           if (m.script != null && !m.filtering_changed)
+           {
+               bool ok = false;
+               string temp_filtering = null;
+               string[] strings = m.script.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+               foreach (string line in strings)
+               {
+                   if (!ok && line.StartsWith("###[FILTERING]###"))
+                   {
+                       ok = true;
+                       continue;
+                   }
+                   else if (ok && line.StartsWith("###[FILTERING]###"))
+                   {
+                       old_filtering = temp_filtering;
+                       break;
+                   }
+
+                   if (ok) temp_filtering += line + Environment.NewLine;
+               }
+           }
 
            //определяем расширения
            string ext = Path.GetExtension(m.infilepath).ToLower();
@@ -76,10 +100,10 @@ namespace XviD4PSP
            //начинаем писать скрипт
            m.script = "";
 
-           // загружаем доп функции
+           //загружаем доп функции
            m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
            m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
-           
+
            //загружаем необходимые плагины импорта
            if (m.vdecoder == Decoders.MPEG2Source)
                m.script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
@@ -244,7 +268,7 @@ namespace XviD4PSP
                        if (Settings.FFmpegSource2)
                        {
                            ffmpegsource2 = "2";
-                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
                    invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
@@ -481,11 +505,13 @@ namespace XviD4PSP
                m.script += "nnedi2(field=" + ((order == 1) ? "3" : (order == 0) ? "2" : "-2") + ")" + Environment.NewLine;
            }
 
-           //фильтры из пресетов, если в настройках не выбрано "сначала ресайз, потом фильтрация"
-           if (Settings.ResizeFirst == false)
+           //Фильтрация до ресайза
+           if (!Settings.ResizeFirst)
            {
-               if (m.filtering != "Disabled")
-                   m.script += Environment.NewLine + LoadScript(Calculate.StartupPath + "\\presets\\filtering\\" + m.filtering + ".avs") + Environment.NewLine;
+               m.script += "\r\n###[FILTERING]###\r\n";
+               if (old_filtering != null) m.script += old_filtering;
+               else if (m.filtering != "Disabled") m.script += LoadScript(Calculate.StartupPath + "\\presets\\filtering\\" + m.filtering + ".avs");
+               m.script += "###[FILTERING]###\r\n\r\n";
            }
 
            //блок применяется только если разрешение поменялось
@@ -557,13 +583,15 @@ namespace XviD4PSP
                    m.script += "AddBorders(" + blackw + ", " + blackh + ", " + blackw + ", " + blackh + ")" + Environment.NewLine;
            }
 
-           //фильтры из пресетов, если в настройках выбрано "сначала ресайз, потом фильтрация"
-           if (Settings.ResizeFirst == true)
+           //Фильтрация после ресайза
+           if (Settings.ResizeFirst)
            {
-               if (m.filtering != "Disabled") //перенос фильтрации после ресайза
-                   m.script += Environment.NewLine + LoadScript(Calculate.StartupPath + "\\presets\\filtering\\" + m.filtering + ".avs") + Environment.NewLine;
+               m.script += "\r\n###[FILTERING]###\r\n";
+               if (old_filtering != null) m.script += old_filtering;
+               else if (m.filtering != "Disabled") m.script += LoadScript(Calculate.StartupPath + "\\presets\\filtering\\" + m.filtering + ".avs");
+               m.script += "###[FILTERING]###\r\n\r\n";
            }
-           
+
            //объединяем поля при необходимости
            if (m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE && m.interlace != SourceType.DECIMATING)
            {
@@ -899,7 +927,7 @@ namespace XviD4PSP
                        if (Settings.FFmpegSource2)
                        {
                            ffmpegsource2 = "2";
-                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(file).ToLower() + ".ffindex\"";
+                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
                    invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
@@ -1042,7 +1070,7 @@ namespace XviD4PSP
                    ffmpegsource2 = "2";
                    //Если FFMS_Enable_Audio, то разрешаем звук, чтоб файл сразу проиндексировался вместе с ним (иначе позже произойдет переиндексация)
                    string atrack = (m.inaudiostreams.Count > 0 && Settings.FFMS_Enable_Audio) ? ", atrack = -1" : ", atrack = -2";
-                   cache_path = atrack + ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileNameWithoutExtension(m.infilepath).ToLower() + ".ffindex\"";
+                   cache_path = atrack + ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(m.infilepath).ToLower() + ".ffindex\"";
                }
                script += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
            }
@@ -1057,39 +1085,26 @@ namespace XviD4PSP
        {
            string line;
            string x = "";
+           string startup_path = Calculate.StartupPath;
            using (StreamReader sr = new StreamReader(scriptpath, System.Text.Encoding.Default))
            {
-               while (sr.EndOfStream == false)
+               while (!sr.EndOfStream)
                {
                    line = sr.ReadLine();
-                   if (line.StartsWith("#") && line.EndsWith(".dll"))
-                       x += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\" +
-                           line.Replace("#", "") + "\")" +
-                           Environment.NewLine;
-
-                   else if (line.StartsWith("#") && line.EndsWith(".avs"))
-                       x += "Import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\" +
-                           line.Replace("#", "") + "\")" +
-                           Environment.NewLine;
-
-                   else if (line.StartsWith("#") && line.EndsWith(".vdf"))
-                       x += "LoadVirtualDubPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\" +
-                           line.Replace("#", "") + "\", ";
-
-                   else if (line.StartsWith("#vdf_arguments:"))
+                   if (line.StartsWith("#"))
                    {
-                       string[] separator = new string[] { ":" };
-                       string[] v = line.Split(separator, StringSplitOptions.None);
-                       x += "\"" + v[1] + "\", " + v[2] + ")" +
-                           Environment.NewLine;
+                       if (line.EndsWith(".dll")) x += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\")\r\n";
+                       else if (line.EndsWith(".avs")) x += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\")\r\n";
+                       else if (line.EndsWith(".avsi")) x += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\")\r\n";
+                       else if (line.EndsWith(".vdf")) x += "LoadVirtualDubPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\", ";
+                       else if (line.StartsWith("#vdf_arguments:"))
+                       {
+                           string[] v = line.Split(new string[] { ":" }, StringSplitOptions.None);
+                           x += "\"" + v[1] + "\", " + v[2] + ")" + Environment.NewLine;
+                       }
+                       else if (!Settings.HideComments) x += line + Environment.NewLine;
                    }
-                   else if (line.StartsWith("#")) //вывод строк, начинающихся с #, но не те которые для загрузки длл-ок (т.к. они все уже были выше)
-                   {
-                    if (Settings.HideComments != true)
-                       x += line + Environment.NewLine;
-                   }
-
-                   if (!line.StartsWith("#"))// && line != ""
+                   else
                        x += line + Environment.NewLine;
                }
            }
