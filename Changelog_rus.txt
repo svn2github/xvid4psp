@@ -1,5 +1,9 @@
-XviD4PSP 5.0.37.8 r132->r161 24.06.10, основные изменения:
+XviD4PSP 5.0.37.8 r132->r162 11.07.10, основные изменения:
 
+>>> (r162) Улучшен отлов ошибок для xvid_encraw.exe; добавлен вывод в лог статистики XviD.
+>>> (r162) В окно настроек кодера XviD добавлены опции: full1pass, threads, max_key_interval, bquant_ratio, bquant_offset, reaction,
+           averaging, smoother, kboost, ostrength, oimprove, odegrade, chigh, clow, imin, imax, pmin, pmax, bmin, bmax, vbvmax, vbvsize,
+           vbvpeak.
 >>> (r161) Теперь при пересоставлении скрипта, его часть с фильтрацией (т.е. всё что находится между метками ###[FILTERING]###)
            будет сохраняться без изменений.
 >>> (r160) Если в настройках "Авто громкость" = "Перед кодированием" и в очереди несколько заданий на основе одного исходника,

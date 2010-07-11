@@ -2270,5 +2270,25 @@ namespace XviD4PSP
                 SetBool("EncodeAudioFirst", value);
             }
         }
+
+        public static int XviD_Threads
+        {
+            get
+            {
+                object value = GetValue("XviD_Threads");
+                if (value == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("XviD_Threads", value);
+            }
+        }
     }
 }

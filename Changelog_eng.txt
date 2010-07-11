@@ -1,5 +1,9 @@
-XviD4PSP 5.0.37.8 r132->r161 24.06.10, main changes:
+XviD4PSP 5.0.37.8 r132->r162 11.07.10, main changes:
 
+>>> (r162) Better error handling for xvid_encraw.exe; encoding statistics from XviD now available in the encoding log.
+>>> (r162) Next options has been added into XviD settings window: full1pass, threads, max_key_interval, bquant_ratio, bquant_offset,
+           reaction, averaging, smoother, kboost, ostrength, oimprove, odegrade, chigh, clow, imin, imax, pmin, pmax, bmin, bmax,
+           vbvmax, vbvsize, vbvpeak.
 >>> (r161) From now, filtering part of the script (i.e. all text that placed between ###[FILTERING]### tags) will be untouched
            when script is re-created.
 >>> (r160) If setting "Auto volume" = "Before encoding" and in queue few tasks based on one source-file, gain will

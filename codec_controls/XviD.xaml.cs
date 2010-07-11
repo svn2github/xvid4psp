@@ -61,6 +61,16 @@ namespace XviD4PSP
             foreach (string matrix in PresetLoader.CustomMatrixes(MatrixTypes.CQM))
                 combo_qmatrix.Items.Add(matrix);
 
+            for (int i = 1; i < 32; i++)
+            {
+                combo_imin.Items.Add(i);
+                combo_imax.Items.Add(i);
+                combo_pmin.Items.Add(i);
+                combo_pmax.Items.Add(i);
+                combo_bmin.Items.Add(i);
+                combo_bmax.Items.Add(i);
+            }
+
             //прогружаем fourcc
             combo_fourcc.Items.Add("XVID");
             combo_fourcc.Items.Add("FFDS");
@@ -70,8 +80,10 @@ namespace XviD4PSP
             combo_fourcc.Items.Add("MP4V");
 
             //B фреймы
-            for (int n = 0; n <= 4; n++)
-                combo_bframes.Items.Add(n);
+            for (int n = 0; n <= 4; n++) combo_bframes.Items.Add(n);
+
+            combo_threads.Items.Add("Auto");
+            for (int i = 1; i < 13; i++) combo_threads.Items.Add(i);
 
             //пресеты настроек и качества
             foreach (string preset in Enum.GetNames(typeof(CodecPresets)))
@@ -131,7 +143,11 @@ namespace XviD4PSP
             }
             else
             {
-                text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
+                if (m.encodingmode == Settings.EncodingModes.Quantizer)
+                    text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
+                else
+                    text_bitrate.Content = Languages.Translate("Quality") + ": (Q)";
+
                 num_bitrate.Value = (decimal)m.outvbitrate;
             }
 
@@ -149,6 +165,7 @@ namespace XviD4PSP
             check_chroma.IsChecked = m.XviD_options.chromame;
             combo_qmatrix.SelectedItem = m.XviD_options.qmatrix;
             check_trellis.IsChecked = m.XviD_options.trellis;
+            check_fullpass.IsChecked = m.XviD_options.full_first_pass;
             check_grayscale.IsChecked = m.XviD_options.grey;
             check_cartoon.IsChecked = m.XviD_options.cartoon;
             check_packedmode.IsChecked = m.XviD_options.packedmode;
@@ -157,8 +174,30 @@ namespace XviD4PSP
             check_bvhq.IsChecked = m.XviD_options.bvhq;
             check_closedgop.IsChecked = m.XviD_options.closedgop;
             combo_bframes.SelectedItem = m.XviD_options.bframes;
+            num_bquant_ratio.Value = m.XviD_options.b_ratio;
+            num_bquant_offset.Value = m.XviD_options.b_offset;
+            num_keyint.Value = m.XviD_options.keyint;
             check_lumimasking.IsChecked = m.XviD_options.limimasking;
             combo_fourcc.SelectedItem = m.XviD_options.fourcc;
+            combo_imin.SelectedItem = m.XviD_options.imin;
+            combo_imax.SelectedItem = m.XviD_options.imax;
+            combo_pmin.SelectedItem = m.XviD_options.pmin;
+            combo_pmax.SelectedItem = m.XviD_options.pmax;
+            combo_bmin.SelectedItem = m.XviD_options.bmin;
+            combo_bmax.SelectedItem = m.XviD_options.bmax;
+            combo_threads.SelectedIndex = Settings.XviD_Threads;
+            num_kboost.Value = m.XviD_options.kboost;
+            num_chigh.Value = m.XviD_options.chigh;
+            num_clow.Value = m.XviD_options.clow;
+            num_ostrength.Value = m.XviD_options.ostrength;
+            num_oimprove.Value = m.XviD_options.oimprove;
+            num_odegrade.Value = m.XviD_options.odegrade;
+            num_reaction.Value = m.XviD_options.reaction;
+            num_averaging.Value = m.XviD_options.averaging;
+            num_smoother.Value = m.XviD_options.smoother;
+            num_vbvmax.Value = m.XviD_options.vbvmax;
+            num_vbvsize.Value = m.XviD_options.vbvsize;
+            num_vbvpeak.Value = m.XviD_options.vbvpeak;
 
             SetToolTips();
             DetectCodecPreset();
@@ -174,30 +213,33 @@ namespace XviD4PSP
                 num_bitrate.ToolTip = "Set bitrate (Default: Auto)";
             else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                      m.encodingmode == Settings.EncodingModes.ThreePassSize)
-                num_bitrate.ToolTip = "Set file size (Default: InFileSize)";
+                num_bitrate.ToolTip = "Set file size (Default: InputFileSize)";
             else
                 num_bitrate.ToolTip = "Set target quality (Default: 3)";
 
-            combo_quality.ToolTip = "Quality (Default: 6)";
-            combo_vhqmode.ToolTip = "Level of R-D optimizations (Default: 1)";
-            check_chroma.ToolTip = "Chroma motion estimation (Default: Enabled)";
-            combo_qmatrix.ToolTip = "Use custom MPEG4 quantization matrix (Default: H263)";
-            check_trellis.ToolTip = "Trellis quantization (Default: Enabled)";
+            combo_quality.ToolTip = "Motion search quality (-quality, default: 6)";
+            combo_vhqmode.ToolTip = "Level of R-D optimizations (-vhqmode, default: 1)";
+            check_chroma.ToolTip = "Chroma motion estimation (-nochromame if unchecked, default: checked)";
+            combo_qmatrix.ToolTip = "Use custom MPEG4 quantization matrix (-qmatrix, default: H263)";
+            check_trellis.ToolTip = "Trellis quantization (-notrellis if unchecked, default: checked)";
             check_grayscale.ToolTip = "Greyscale mode (Default: Disabled)";
             check_cartoon.ToolTip = "Cartoon mode (Default: Disabled)";
-            check_packedmode.ToolTip = "Packed mode (Default: Enabled). Don`t work in multi-pass modes.";
-            check_gmc.ToolTip = "Use global motion compensation (Default: Disabled)";
-            check_qpel.ToolTip = "Use quarter pixel ME (Default: Disabled)";
-            check_bvhq.ToolTip = "Use R-D optimizations for B-frames (Default: Disabled)";
-            check_closedgop.ToolTip = "Closed GOP mode (Default: Enabled)";
-            combo_bframes.ToolTip = "Max bframes (Default: 2)";
-            check_lumimasking.ToolTip = "Use lumimasking algorithm (Default: Disabled)";
+            check_packedmode.ToolTip = "Packed mode (-nopacked if unchecked, default: checked).\r\nNot compatible with multi-passes encoding!";
+            check_gmc.ToolTip = "Use global motion compensation (-gmc if checked, default: unchecked)";
+            check_qpel.ToolTip = "Use quarter pixel ME (-qpel if checked, default: unchecked)";
+            check_bvhq.ToolTip = "Use R-D optimizations for B-frames (-bvhq if checked, default: unchecked)";
+            check_closedgop.ToolTip = "Closed GOP mode (-noclosed_gop if unchecked, default: checked)";
+            combo_bframes.ToolTip = "Max bframes (-max_bframes, default: 2)";
+            num_bquant_ratio.ToolTip = "B-frames quantizer ratio (-bquant_ratio, default: 150)";
+            num_bquant_offset.ToolTip = "B-frames quantizer offset (-bquant_offset, default: 100)";
+            num_keyint.ToolTip = "Maximum keyframe interval (-max_key_interval, default: 300)";
+            check_lumimasking.ToolTip = "Use lumimasking algorithm (-lumimasking if checked, default: unchecked).\r\nLumimasking = VAQ in patched builds of XviD.";
             if (m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
-                combo_codec_preset.ToolTip = "Default - default codec settings to default" + Environment.NewLine +
+                combo_codec_preset.ToolTip = "Default - set codec settings to defaults" + Environment.NewLine +
                     "Turbo - fast encoding, big output file size" + Environment.NewLine +
                     "Ultra - high quality encoding, medium file size" + Environment.NewLine +
                     "Extreme - super high quality encoding, smallest file size" + Environment.NewLine +
@@ -205,13 +247,33 @@ namespace XviD4PSP
             }
             else
             {
-                combo_codec_preset.ToolTip = "Default - default codec settings to default" + Environment.NewLine +
+                combo_codec_preset.ToolTip = "Default - set codec settings to defaults" + Environment.NewLine +
                     "Turbo - fast encoding, bad quality" + Environment.NewLine +
                     "Ultra - high quality encoding, optimal speed-quality solution" + Environment.NewLine +
                     "Extreme - super high quality encoding, very slow" + Environment.NewLine +
                     "Custom - custom codec settings";
             }
             combo_fourcc.ToolTip = "Force video tag/fourcc (Default: XVID)";
+            combo_imin.ToolTip = "Minimum quantizer for I-frames (-imin, default: 2)";
+            combo_imax.ToolTip = "Maximum quantizer for I-frames (-imax, default: 31)";
+            combo_pmin.ToolTip = "Minimum quantizer for P-frames (-pmin, default: 2)";
+            combo_pmax.ToolTip = "Maximum quantizer for P-frames (-pmax, default: 31)";
+            combo_bmin.ToolTip = "Minimum quantizer for B-frames (-bmin, default: 2)";
+            combo_bmax.ToolTip = "Maximum quantizer for B-frames (-bmax, default: 31)";
+            combo_threads.ToolTip = "Set number of threads for encoding (-threads, Auto (default) = CPU count + 2)";
+            check_fullpass.ToolTip = "Perform full first pass (-full1pass if checked, default: unchecked)";
+            num_kboost.ToolTip = "I frame boost (-kboost, default: 10)";
+            num_chigh.ToolTip = "High bitrate scenes degradation (-chigh, default: 0)";
+            num_clow.ToolTip = "Low bitrate scenes improvement (-clow, default: 0)";
+            num_ostrength.ToolTip = "Overflow control strength (-ostrength, default: 5)";
+            num_oimprove.ToolTip = "Max overflow improvement (-oimprove, default: 5)";
+            num_odegrade.ToolTip = "Max overflow degradation (-odegrade, default: 5)";
+            num_reaction.ToolTip = "Reaction delay factor (-reaction, default: 16)";
+            num_averaging.ToolTip = "Averaging period (-averaging, default: 100)";
+            num_smoother.ToolTip = "Smoothing buffer (-smoother, default: 100)";
+            num_vbvsize.ToolTip = "Use VBV buffer size (-vbvsize, default: 0)";
+            num_vbvmax.ToolTip = "VBV max bitrate (-vbvmax, default: 0)";
+            num_vbvpeak.ToolTip = "VBV peak bitrate over 1 second (-vbvpeak, default: 0)";
         }
 
         public static Massive DecodeLine(Massive m)
@@ -331,7 +393,6 @@ namespace XviD4PSP
                 else if (value == "-noclosed_gop")
                     m.XviD_options.closedgop = false;
 
-                //-max_bframes
                 else if (value == "-max_bframes")
                     m.XviD_options.bframes = Convert.ToInt32(cli[n + 1]);
 
@@ -340,6 +401,75 @@ namespace XviD4PSP
 
                 else if (value == "-fourcc")
                     m.XviD_options.fourcc = cli[n + 1];
+
+                else if (value == "-max_key_interval")
+                    m.XviD_options.keyint = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-bquant_ratio")
+                    m.XviD_options.b_ratio = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-bquant_offset")
+                    m.XviD_options.b_offset = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-reaction")
+                    m.XviD_options.reaction = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-averaging")
+                    m.XviD_options.averaging = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-smoother")
+                    m.XviD_options.smoother = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-kboost")
+                    m.XviD_options.kboost = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-ostrength")
+                    m.XviD_options.ostrength = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-oimprove")
+                    m.XviD_options.oimprove = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-odegrade")
+                    m.XviD_options.odegrade = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-chigh")
+                    m.XviD_options.chigh = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-clow")
+                    m.XviD_options.clow = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-overhead")
+                    m.XviD_options.overhead = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-vbvmax")
+                    m.XviD_options.vbvmax = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-vbvsize")
+                    m.XviD_options.vbvsize = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-vbvpeak")
+                    m.XviD_options.vbvpeak = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-imin")
+                    m.XviD_options.imin = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-imax")
+                    m.XviD_options.imax = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-pmin")
+                    m.XviD_options.pmin = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-pmax")
+                    m.XviD_options.pmax = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-bmin")
+                    m.XviD_options.bmin = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-bmax")
+                    m.XviD_options.bmax = Convert.ToInt32(cli[n + 1]);
+
+                else if (value == "-full1pass")
+                    m.XviD_options.full_first_pass = true;
 
                 n++;
             }
@@ -357,9 +487,6 @@ namespace XviD4PSP
 
             string line_turbo = "";
             string line = "";
-
-            //if (m.XviD_options.cartoon)
-            //    line += " -cartoon";
 
             if (m.XviD_options.quality != 6)
                 line += " -quality " + m.XviD_options.quality;
@@ -410,14 +537,35 @@ namespace XviD4PSP
             if (m.XviD_options.bframes != 2)
                 line += " -max_bframes " + m.XviD_options.bframes;
 
+            if (m.XviD_options.b_ratio != 150)
+                line += " -bquant_ratio " + m.XviD_options.b_ratio;
+
+            if (m.XviD_options.b_offset != 100)
+                line += " -bquant_offset " + m.XviD_options.b_offset;
+
             if (m.XviD_options.limimasking)
                 line += " -lumimasking";
 
             if (m.XviD_options.fourcc != "XVID")
                 line += " -fourcc " + m.XviD_options.fourcc;
 
+            if (m.XviD_options.keyint != 300)
+                line += " -max_key_interval " + m.XviD_options.keyint;
+
+            if (m.XviD_options.reaction != 16)
+                line += " -reaction " + m.XviD_options.reaction;
+
+            if (m.XviD_options.averaging != 100)
+                line += " -averaging " + m.XviD_options.averaging;
+
+            if (m.XviD_options.smoother != 100)
+                line += " -smoother " + m.XviD_options.smoother;
+
+            if (m.XviD_options.full_first_pass)
+                line += " -full1pass";
+
             //передаём параметры в турбо строку
-            line_turbo = line;// +" -turbo";
+            line_turbo = line;
 
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.TwoPass ||
@@ -425,9 +573,69 @@ namespace XviD4PSP
                 line = "-bitrate " + m.outvbitrate + line;
             else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
-                line = "-size " + m.outvbitrate * 1000 + line;
+                line = "-size " + (int)m.outvbitrate * 1000 + line;
             else
                 line = "-cq " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) + line;
+
+            //Опции многопроходного кодирования
+            if (m.encodingmode == Settings.EncodingModes.ThreePass ||
+                m.encodingmode == Settings.EncodingModes.ThreePassQuality ||
+                m.encodingmode == Settings.EncodingModes.ThreePassSize ||
+                m.encodingmode == Settings.EncodingModes.TwoPass ||
+                m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                m.encodingmode == Settings.EncodingModes.TwoPassSize)
+            {
+                if (m.XviD_options.kboost != 10)
+                    line += " -kboost " + m.XviD_options.kboost;
+
+                if (m.XviD_options.ostrength != 5)
+                    line += " -ostrength " + m.XviD_options.ostrength;
+
+                if (m.XviD_options.oimprove != 5)
+                    line += " -oimprove " + m.XviD_options.oimprove;
+
+                if (m.XviD_options.odegrade != 5)
+                    line += " -odegrade " + m.XviD_options.odegrade;
+
+                if (m.XviD_options.chigh != 0)
+                    line += " -chigh " + m.XviD_options.chigh;
+
+                if (m.XviD_options.clow != 0)
+                    line += " -clow " + m.XviD_options.clow;
+
+                if (m.XviD_options.overhead != 24)
+                    line += " -overhead " + m.XviD_options.overhead;
+
+                if (m.XviD_options.vbvmax != 0)
+                    line += " -vbvmax " + m.XviD_options.vbvmax;
+
+                if (m.XviD_options.vbvsize != 0)
+                    line += " -vbvsize " + m.XviD_options.vbvsize;
+
+                if (m.XviD_options.vbvpeak != 0)
+                    line += " -vbvpeak " + m.XviD_options.vbvpeak;
+            }
+
+            //Ограничения q
+            string q_limits = "";
+
+            if (m.XviD_options.imin != 2)
+                q_limits += " -imin " + m.XviD_options.imin;
+
+            if (m.XviD_options.imax != 31)
+                q_limits += " -imax " + m.XviD_options.imax;
+
+            if (m.XviD_options.pmin != 2)
+                q_limits += " -pmin " + m.XviD_options.pmin;
+
+            if (m.XviD_options.pmax != 31)
+                q_limits += " -pmax " + m.XviD_options.pmax;
+
+            if (m.XviD_options.bmin != 2)
+                q_limits += " -bmin " + m.XviD_options.bmin;
+
+            if (m.XviD_options.bmax != 31)
+                q_limits += " -bmax " + m.XviD_options.bmax;
 
             //удаляем пустоту в начале
             if (line.StartsWith(" "))
@@ -439,34 +647,49 @@ namespace XviD4PSP
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.Quantizer)
-                m.vpasses.Add(line);
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPass ||
+            {
+                m.vpasses.Add(line + q_limits);
+            }
+            else if (m.encodingmode == Settings.EncodingModes.TwoPass ||
                 m.encodingmode == Settings.EncodingModes.TwoPassSize)
             {
                 m.vpasses.Add(line_turbo);
-                m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
+                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                    m.vpasses.Add(line + q_limits);
+                else
+                    m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
             }
-
-            if (m.encodingmode == Settings.EncodingModes.ThreePass ||
+            else if (m.encodingmode == Settings.EncodingModes.ThreePass ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
                 m.vpasses.Add(line_turbo);
-                m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
-                m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
+                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                {
+                    m.vpasses.Add(line + q_limits);
+                    m.vpasses.Add(line + q_limits);
+                }
+                else
+                {
+                    m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
+                    m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
+                }
             }
-
-            if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
             {
                 m.vpasses.Add(line);
-                m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
+                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                    m.vpasses.Add(line + q_limits);
+                else
+                    m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
             }
-
-            if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+            else if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
                 m.vpasses.Add(line);
                 m.vpasses.Add(line);
-                m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
+                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                    m.vpasses.Add(line + q_limits);
+                else
+                    m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
             }
 
             return m;
@@ -506,41 +729,27 @@ namespace XviD4PSP
 
                 SetMinMaxBitrate();
 
-                //сброс на квантайзер
-                if (oldmode != Settings.EncodingModes.Quality &&
-                    oldmode != Settings.EncodingModes.Quantizer &&
-                    oldmode != Settings.EncodingModes.TwoPassQuality &&
-                    oldmode != Settings.EncodingModes.ThreePassQuality)
+                //Устанавливаем дефолтный битрейт (при необходимости)
+                if (oldmode == Settings.EncodingModes.OnePass ||
+                    oldmode == Settings.EncodingModes.TwoPass ||
+                    oldmode == Settings.EncodingModes.ThreePass)
                 {
-                    if (m.encodingmode == Settings.EncodingModes.Quality ||
-                        m.encodingmode == Settings.EncodingModes.Quantizer ||
-                        m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
-                        m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-                    {
+                    if (m.encodingmode != Settings.EncodingModes.OnePass &&
+                        m.encodingmode != Settings.EncodingModes.TwoPass &&
+                        m.encodingmode != Settings.EncodingModes.ThreePass)
                         SetDefaultBitrates();
-                    }
                 }
-                //сброс на битрейт
-                else if (oldmode != Settings.EncodingModes.OnePass &&
-                         oldmode != Settings.EncodingModes.TwoPass &&
-                         oldmode != Settings.EncodingModes.ThreePass)
+                else if (oldmode.ToString().Contains("Size") && !m.encodingmode.ToString().Contains("Size"))
                 {
-                    if (m.encodingmode == Settings.EncodingModes.OnePass ||
-                        m.encodingmode == Settings.EncodingModes.TwoPass ||
-                        m.encodingmode == Settings.EncodingModes.ThreePass)
-                    {
-                        SetDefaultBitrates();
-                    }
+                    SetDefaultBitrates();
                 }
-                //сброс на размер
-                else if (oldmode != Settings.EncodingModes.TwoPassSize &&
-                         oldmode != Settings.EncodingModes.ThreePassSize)
+                else if (oldmode.ToString().Contains("Quality") && !m.encodingmode.ToString().Contains("Quality"))
                 {
-                    if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
-                        m.encodingmode == Settings.EncodingModes.ThreePassSize)
-                    {
-                        SetDefaultBitrates();
-                    }
+                    SetDefaultBitrates();
+                }
+                else if (oldmode == Settings.EncodingModes.Quantizer)
+                {
+                    SetDefaultBitrates();
                 }
 
                 if (m.encodingmode == Settings.EncodingModes.TwoPass ||
@@ -552,8 +761,7 @@ namespace XviD4PSP
                 {
                     //отключаем пакет бит стрим так как он не работает в многопроходном режиме
                     m.XviD_options.packedmode = false;
-                    if (check_packedmode.IsChecked.Value)
-                        check_packedmode.IsChecked = false;
+                    check_packedmode.IsChecked = false;
                 }
 
                 root_window.UpdateOutSize();
@@ -564,14 +772,19 @@ namespace XviD4PSP
 
         private void SetDefaultBitrates()
         {
-            if (m.encodingmode == Settings.EncodingModes.Quality ||
-                m.encodingmode == Settings.EncodingModes.Quantizer ||
+            if (m.encodingmode == Settings.EncodingModes.Quantizer)
+            {
+                m.outvbitrate = 3.0m;
+                num_bitrate.Value = (decimal)m.outvbitrate;
+                text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
+            }
+            else if (m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
                 m.outvbitrate = 3.0m;
                 num_bitrate.Value = (decimal)m.outvbitrate;
-                text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
+                text_bitrate.Content = Languages.Translate("Quality") + ": (Q)";
             }
             else if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.TwoPass ||
@@ -602,25 +815,11 @@ namespace XviD4PSP
             }
         }
 
-
-        private void check_chroma_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_chroma_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_chroma.IsFocused)
-            {
-                m.XviD_options.chromame = check_chroma.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_chroma_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_chroma.IsFocused)
-            {
-                m.XviD_options.chromame = check_chroma.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.XviD_options.chromame = check_chroma.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_qmatrix_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -633,24 +832,11 @@ namespace XviD4PSP
             }
         }
 
-        private void check_trellis_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_trellis_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_trellis.IsFocused)
-            {
-                m.XviD_options.trellis = check_trellis.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_trellis_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_trellis.IsFocused)
-            {
-                m.XviD_options.trellis = check_trellis.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.XviD_options.trellis = check_trellis.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_vhqmode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -663,159 +849,68 @@ namespace XviD4PSP
             }
         }
 
-        private void check_grayscale_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_grayscale_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_grayscale.IsFocused)
-            {
-                m.XviD_options.grey = check_grayscale.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.XviD_options.grey = check_grayscale.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_grayscale_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_cartoon_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_grayscale.IsFocused)
-            {
-                m.XviD_options.grey = check_grayscale.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.XviD_options.cartoon = check_cartoon.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_cartoon_Checked(object sender, RoutedEventArgs e)
+        private void check_packedmode_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_cartoon.IsFocused)
+            m.XviD_options.packedmode = check_packedmode.IsChecked.Value;
+            if (m.XviD_options.packedmode && m.XviD_options.bframes == 0)
             {
-                m.XviD_options.cartoon = check_cartoon.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
+                m.XviD_options.bframes = 1;
+                combo_bframes.SelectedItem = 1;
             }
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_cartoon_Unchecked(object sender, RoutedEventArgs e)
+        private void check_gmc_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_cartoon.IsFocused)
-            {
-                m.XviD_options.cartoon = check_cartoon.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.XviD_options.gmc = check_gmc.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_packedmode_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_qpel_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_packedmode.IsFocused)
-            {
-                m.XviD_options.packedmode = check_packedmode.IsChecked.Value;
-                if (m.XviD_options.bframes == 0)
-                {
-                    m.XviD_options.bframes = 1;
-                    combo_bframes.SelectedItem = 1;
-                }
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.XviD_options.qpel = check_qpel.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_packedmode_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_bvhq_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_packedmode.IsFocused)
+            m.XviD_options.bvhq = check_bvhq.IsChecked.Value;
+            if (m.XviD_options.bvhq && m.XviD_options.bframes == 0)
             {
-                m.XviD_options.packedmode = check_packedmode.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
+                m.XviD_options.bframes = 1;
+                combo_bframes.SelectedItem = 1;
             }
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
-        private void check_gmc_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_closedgop_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_gmc.IsFocused)
+            m.XviD_options.closedgop = check_closedgop.IsChecked.Value;
+            if (m.XviD_options.closedgop && m.XviD_options.bframes == 0)
             {
-                m.XviD_options.gmc = check_gmc.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
+                m.XviD_options.bframes = 1;
+                combo_bframes.SelectedItem = 1;
             }
-        }
-
-        private void check_gmc_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_gmc.IsFocused)
-            {
-                m.XviD_options.gmc = check_gmc.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_qpel_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_qpel.IsFocused)
-            {
-                m.XviD_options.qpel = check_qpel.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_qpel_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_qpel.IsFocused)
-            {
-                m.XviD_options.qpel = check_qpel.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_bvhq_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_bvhq.IsFocused)
-            {
-                m.XviD_options.bvhq = check_bvhq.IsChecked.Value;
-                if (m.XviD_options.bframes == 0)
-                {
-                    m.XviD_options.bframes = 1;
-                    combo_bframes.SelectedItem = 1;
-                }
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_bvhq_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_bvhq.IsFocused)
-            {
-                m.XviD_options.bvhq = check_bvhq.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_closedgop_Checked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_closedgop.IsFocused)
-            {
-                m.XviD_options.closedgop = check_closedgop.IsChecked.Value;
-                if (m.XviD_options.bframes == 0)
-                {
-                    m.XviD_options.bframes = 1;
-                    combo_bframes.SelectedItem = 1;
-                }
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_closedgop_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_closedgop.IsFocused)
-            {
-                m.XviD_options.closedgop = check_closedgop.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_bframes_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -841,24 +936,11 @@ namespace XviD4PSP
             }
         }
 
-        private void check_lumimasking_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_lumimasking_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_lumimasking.IsFocused)
-            {
-                m.XviD_options.limimasking = check_lumimasking.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
-        }
-
-        private void check_lumimasking_Unchecked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (check_lumimasking.IsFocused)
-            {
-                m.XviD_options.limimasking = check_lumimasking.IsChecked.Value;
-                root_window.UpdateManualProfile();
-                DetectCodecPreset();
-            }
+            m.XviD_options.limimasking = check_lumimasking.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
         }
 
         private void combo_codec_preset_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -882,6 +964,29 @@ namespace XviD4PSP
                     m.XviD_options.trellis = true;
                     m.XviD_options.vhqmode = 1;
                     m.XviD_options.fourcc = "XVID";
+                    m.XviD_options.keyint = 300;
+                    m.XviD_options.imin = 2;
+                    m.XviD_options.imax = 31;
+                    m.XviD_options.pmin = 2;
+                    m.XviD_options.pmax = 31;
+                    m.XviD_options.bmin = 2;
+                    m.XviD_options.bmax = 31;
+                    m.XviD_options.full_first_pass = false;
+                    m.XviD_options.b_ratio = 150;
+                    m.XviD_options.b_offset = 100;
+                    m.XviD_options.kboost = 10;
+                    m.XviD_options.ostrength = 5;
+                    m.XviD_options.oimprove = 5;
+                    m.XviD_options.odegrade = 5;
+                    m.XviD_options.chigh = 0;
+                    m.XviD_options.clow = 0;
+                    m.XviD_options.reaction = 16;
+                    m.XviD_options.averaging = 100;
+                    m.XviD_options.smoother = 100;
+                    m.XviD_options.vbvmax = 0;
+                    m.XviD_options.vbvsize = 0;
+                    m.XviD_options.vbvpeak = 0;
+
                     SetDefaultBitrates();
                 }
                 else if (preset == CodecPresets.Turbo)
@@ -965,7 +1070,29 @@ namespace XviD4PSP
                 m.XviD_options.quality == 6 &&
                 m.XviD_options.trellis == true &&
                 m.XviD_options.vhqmode == 1 &&
-                m.XviD_options.fourcc == "XVID")
+                m.XviD_options.fourcc == "XVID" &&
+                m.XviD_options.keyint == 300 &&
+                m.XviD_options.imin == 2 &&
+                m.XviD_options.imax == 31 &&
+                m.XviD_options.pmin == 2 &&
+                m.XviD_options.pmax == 31 &&
+                m.XviD_options.bmin == 2 &&
+                m.XviD_options.bmax == 31 &&
+                m.XviD_options.full_first_pass == false &&
+                m.XviD_options.b_ratio == 150 &&
+                m.XviD_options.b_offset == 100 &&
+                m.XviD_options.kboost == 10 &&
+                m.XviD_options.ostrength == 5 &&
+                m.XviD_options.oimprove == 5 &&
+                m.XviD_options.odegrade == 5 &&
+                m.XviD_options.chigh == 0 &&
+                m.XviD_options.clow == 0 &&
+                m.XviD_options.reaction == 16 &&
+                m.XviD_options.averaging == 100 &&
+                m.XviD_options.smoother == 100 &&
+                m.XviD_options.vbvmax == 0 &&
+                m.XviD_options.vbvsize == 0 &&
+                m.XviD_options.vbvpeak == 0)
                 preset = CodecPresets.Default;
 
             //Turbo
@@ -1031,7 +1158,6 @@ namespace XviD4PSP
 
         private void SetMinMaxBitrate()
         {
-
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.TwoPass ||
                 m.encodingmode == Settings.EncodingModes.ThreePass)
@@ -1133,6 +1259,256 @@ namespace XviD4PSP
                 new ShowWindow(root_window, "XviD help", p.StandardError.ReadToEnd(), new FontFamily("Lucida Console"));
             }
             catch (Exception) { }
+        }
+
+        private void combo_imin_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_imin.IsDropDownOpen || combo_imin.IsSelectionBoxHighlighted)
+            {
+                m.XviD_options.imin = Convert.ToInt32(combo_imin.SelectedItem);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void combo_imax_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_imax.IsDropDownOpen || combo_imax.IsSelectionBoxHighlighted)
+            {
+                m.XviD_options.imax = Convert.ToInt32(combo_imax.SelectedItem);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void combo_pmin_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_pmin.IsDropDownOpen || combo_pmin.IsSelectionBoxHighlighted)
+            {
+                m.XviD_options.pmin = Convert.ToInt32(combo_pmin.SelectedItem);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void combo_pmax_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_pmax.IsDropDownOpen || combo_pmax.IsSelectionBoxHighlighted)
+            {
+                m.XviD_options.pmax = Convert.ToInt32(combo_pmax.SelectedItem);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void combo_bmin_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_bmin.IsDropDownOpen || combo_bmin.IsSelectionBoxHighlighted)
+            {
+                m.XviD_options.bmin = Convert.ToInt32(combo_bmin.SelectedItem);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void combo_bmax_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_bmax.IsDropDownOpen || combo_bmax.IsSelectionBoxHighlighted)
+            {
+                m.XviD_options.bmax = Convert.ToInt32(combo_bmax.SelectedItem);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_keyint_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_keyint.IsAction)
+            {
+                m.XviD_options.keyint = Convert.ToInt32(num_keyint.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void combo_threads_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_threads.IsDropDownOpen || combo_threads.IsSelectionBoxHighlighted)
+            {
+                Settings.XviD_Threads = combo_threads.SelectedIndex;
+
+                root_window.UpdateManualProfile();
+                //DetectCodecPreset();
+            }
+        }
+
+        private void check_fullpass_Clicked(object sender, RoutedEventArgs e)
+        {
+            m.XviD_options.full_first_pass = check_fullpass.IsChecked.Value;
+                
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
+        }
+
+        private void num_bquant_ratio_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_bquant_ratio.IsAction)
+            {
+                m.XviD_options.b_ratio = Convert.ToInt32(num_bquant_ratio.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_bquant_offset_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_bquant_offset.IsAction)
+            {
+                m.XviD_options.b_offset = Convert.ToInt32(num_bquant_offset.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_kboost_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_kboost.IsAction)
+            {
+                m.XviD_options.kboost = Convert.ToInt32(num_kboost.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_chigh_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_chigh.IsAction)
+            {
+                m.XviD_options.chigh = Convert.ToInt32(num_chigh.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_clow_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_clow.IsAction)
+            {
+                m.XviD_options.clow = Convert.ToInt32(num_clow.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_ostrength_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_ostrength.IsAction)
+            {
+                m.XviD_options.ostrength = Convert.ToInt32(num_ostrength.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_oimprove_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_oimprove.IsAction)
+            {
+                m.XviD_options.oimprove = Convert.ToInt32(num_oimprove.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_odegrade_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_odegrade.IsAction)
+            {
+                m.XviD_options.odegrade = Convert.ToInt32(num_odegrade.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_reaction_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_reaction.IsAction)
+            {
+                m.XviD_options.reaction = Convert.ToInt32(num_reaction.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_averaging_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_averaging.IsAction)
+            {
+                m.XviD_options.averaging = Convert.ToInt32(num_averaging.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_smoother_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_smoother.IsAction)
+            {
+                m.XviD_options.smoother = Convert.ToInt32(num_smoother.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_vbvmax_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_vbvmax.IsAction)
+            {
+                m.XviD_options.vbvmax = Convert.ToInt32(num_vbvmax.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_vbvsize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_vbvsize.IsAction)
+            {
+                m.XviD_options.vbvsize = Convert.ToInt32(num_vbvsize.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
+        private void num_vbvpeak_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_vbvpeak.IsAction)
+            {
+                m.XviD_options.vbvpeak = Convert.ToInt32(num_vbvpeak.Value);
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
         }
 	}
 }

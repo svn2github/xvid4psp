@@ -148,12 +148,6 @@ namespace XviD4PSP
             worker.WorkerReportsProgress = true;
         }
 
-        //private void ResetCounter()
-        //{
-        //    of = 0;
-        //    cf = 0;
-        //}
-
         private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
@@ -163,10 +157,9 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
-
 
         private void AbortAction()
         {
@@ -238,7 +231,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
 
@@ -460,7 +453,7 @@ namespace XviD4PSP
 
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
-            info.RedirectStandardOutput = true;
+            info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
@@ -493,11 +486,11 @@ namespace XviD4PSP
             }
 
             //Вывод аргументов коммандной строки в лог, если эта опция включена
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -549,7 +542,7 @@ namespace XviD4PSP
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
             }
 
             encodertext = null;
@@ -603,11 +596,11 @@ namespace XviD4PSP
                 }
 
                 //прописываем аргументы команндной строки
-                SetLog(" ");
+                SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
-                    SetLog(" ");
+                    SetLog("");
                 }
 
                 encoderProcess.StartInfo = info;
@@ -652,7 +645,7 @@ namespace XviD4PSP
                 if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
                 {
                     IsErrors = true;
-                    ErrorExeption(encodertext);
+                    ErrorException(encodertext);
                 }
 
                 encodertext = null;
@@ -672,11 +665,11 @@ namespace XviD4PSP
                 info.Arguments = arguments + " --output \"" + m.outvideofile + "\" \"" + m.scriptpath + "\"";
 
                 //прописываем аргументы команндной строки
-                SetLog(" ");
+                SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
-                    SetLog(" ");
+                    SetLog("");
                 }
 
                 encoderProcess.StartInfo = info;
@@ -721,7 +714,7 @@ namespace XviD4PSP
                 if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
                 {
                     IsErrors = true;
-                    ErrorExeption(encodertext);
+                    ErrorException(encodertext);
                 }
 
                 encodertext = null;
@@ -738,7 +731,7 @@ namespace XviD4PSP
             if (!File.Exists(m.outvideofile) || new FileInfo(m.outvideofile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(Languages.Translate("Can`t find output video file!"));
+                ErrorException(Languages.Translate("Can`t find output video file!"));
             }
 
             SetLog("");
@@ -963,11 +956,11 @@ namespace XviD4PSP
                 info.Arguments = " -y -i \"" + m.scriptpath + "\" -pass 1 -passlogfile \"" + passlog1 + "\" " + arguments + " \"" + m.outvideofile + "\"";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("ffmpeg.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -1009,7 +1002,7 @@ namespace XviD4PSP
             if (encoderProcess.HasExited &&  encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext += encoderProcess.StandardError.ReadToEnd());
+                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
             }
 
             encodertext = null;
@@ -1064,11 +1057,11 @@ namespace XviD4PSP
                 }
 
                 //прописываем аргументы команндной строки
-                SetLog(" ");
+                SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog("ffmpeg.exe:" + " " + info.Arguments);
-                    SetLog(" ");
+                    SetLog("");
                 }
 
                 encoderProcess.StartInfo = info;
@@ -1102,7 +1095,7 @@ namespace XviD4PSP
                 if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
                 {
                     IsErrors = true;
-                    ErrorExeption(encodertext += encoderProcess.StandardError.ReadToEnd());
+                    ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
                 }
 
                 encodertext = null;
@@ -1123,11 +1116,11 @@ namespace XviD4PSP
                 info.Arguments = " -y -i \"" + m.scriptpath + "\" -pass 2 -passlogfile \"" + passlog1 + "\" " + arguments + " \"" + m.outvideofile + "\"";
 
                 //прописываем аргументы команндной строки
-                SetLog(" ");
+                SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog("ffmpeg.exe:" + " " + info.Arguments);
-                    SetLog(" ");
+                    SetLog("");
                 }
 
                 encoderProcess.StartInfo = info;
@@ -1161,7 +1154,7 @@ namespace XviD4PSP
                 if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
                 {
                     IsErrors = true;
-                    ErrorExeption(encodertext += encoderProcess.StandardError.ReadToEnd());
+                    ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
                 }
 
                 encodertext = null;
@@ -1178,7 +1171,7 @@ namespace XviD4PSP
             if (!File.Exists(m.outvideofile) || new FileInfo(m.outvideofile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(Languages.Translate("Can`t find output video file!"));
+                ErrorException(Languages.Translate("Can`t find output video file!"));
             }
 
             //возвращаем путь
@@ -1187,7 +1180,73 @@ namespace XviD4PSP
             SafeDelete(passlog1 + "-0.log");
             SafeDelete(passlog2 + "-0.log");
 
-            SetLog(" ");
+            SetLog("");
+        }
+
+        private Thread readFromStdErrThread = null;
+        private void readErrStream()
+        {
+            if (IsAborted || encoderProcess == null || encoderProcess.HasExited) return;
+            using (StreamReader r = encoderProcess.StandardError)
+            {
+                encodertext = r.ReadToEnd();
+            }
+        }
+
+        private void Do_XviD_Encoding_Cycle()
+        {
+            string line = "";
+            string pat = @"(\d+):\Dkey=";
+            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match mat;
+
+            while (!encoderProcess.HasExited)
+            {
+                locker.WaitOne();
+                line = encoderProcess.StandardOutput.ReadLine();
+                if (line != null)
+                {
+                    mat = r.Match(line);
+                    if (mat.Success)
+                        worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
+                    else
+                    {
+                        if (line != "" && !line.StartsWith("xvid_encraw"))
+                            SetLog(line);
+                    }
+                }
+            }
+
+            //Дочитываем остатки лога, если что-то не успело считаться
+            line = encoderProcess.StandardOutput.ReadToEnd();
+            if (!string.IsNullOrEmpty(line)) SetFilteredLog(r, line);
+            SetLog("");
+
+            of = cf = 0;
+
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
+            {
+                if (encodertext != null && encodertext.Contains("Usage : xvid_encraw"))
+                {
+                    ErrorException("\r\nYou have specified an invalid command line key(s)/value(s).\r\n" +
+                        "Check valid command line arguments in xvid_encraw.exe Help.");
+                }
+                else
+                    ErrorException(encodertext);
+            }
+
+            //проверка на завершение
+            if (!encoderProcess.HasExited)
+            {
+                encoderProcess.Kill();
+                encoderProcess.WaitForExit();
+            }
+
+            //StdErr
+            if (readFromStdErrThread != null)
+                readFromStdErrThread.Abort();
+            readFromStdErrThread = null;
         }
 
         private void make_XviD()
@@ -1249,14 +1308,6 @@ namespace XviD4PSP
                 foreach (string cli in m.vpasses)
                     newclis.Add(cli.Replace("-size " + targetsize + "000", "-bitrate " + bitrate + "000"));
                 m.vpasses = (ArrayList)newclis.Clone();
-
-                //SetLog("TargetSize: " + Calculate.ConvertDoubleToPointString(targetsize, 1) + " mb");
-                //SetLog("VBitrate: " + bitrate + " kbps");
-                //if (m.outaudiostreams.Count > 0)
-                //{
-                //    AudioStream s = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                //    SetLog("ABitrate: " + s.bitrate + " kbps"); 
-                //}
             }
 
             //FOURCC
@@ -1320,8 +1371,9 @@ namespace XviD4PSP
             string passlog1 = Calculate.RemoveExtention(m.outvideofile, true) + "_1.log";
             string passlog2 = Calculate.RemoveExtention(m.outvideofile, true) + "_2.log";
 
-            //узнаём колличество процессоров
-            int cpucount = Environment.ProcessorCount + 2; //для максимальной производительности запускаем на два потока больше
+            //Threads
+            int cpucount = (m.vpasses[m.vpasses.Count - 1].ToString().Contains("-threads ")) ? 0 :
+                (Settings.XviD_Threads == 0 ? Environment.ProcessorCount + 2 : Settings.XviD_Threads);
 
             //info строка
             SetLog("Encoding video to: " + m.outvideofile);
@@ -1351,26 +1403,19 @@ namespace XviD4PSP
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
-            arguments = m.vpasses[0] + " -threads " + cpucount.ToString();//
-
             //прописываем sar
-            if (m.sar != null || m.IsAnamorphic)
-                arguments += " -par " + m.sar;
+            string sar = "";
+            if (!m.vpasses[m.vpasses.Count - 1].ToString().Contains("-par ") && (m.sar != null || m.IsAnamorphic))
+                sar = " -par " + m.sar;
             //else
-            //    arguments += " -par 1:1";
+            //    sar = " -par 1:1";
+
+            arguments = m.vpasses[0].ToString() + sar + ((cpucount == 0) ? "" : " -threads " + cpucount);
 
             if (m.vpasses.Count == 1)
                 info.Arguments = arguments + " -avi \"" + m.outvideofile + "\" -i \"" + m.scriptpath + "\"";
-            //-vbvsize 6291456 -vbvmax 9708.400 -vbvpeak 16000000 HDTV профиль, похожe что не влияет на quality mode
-            //else if (m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
-            //         m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-            //{
-            //    arguments = "-pass1 \"" + passlog1 + "\" " + arguments;
-            //    info.Arguments = arguments + " -i \"" + m.scriptpath + "\" -o \"" + m.outvideofile + "\"";
-            //}
             else if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
-                //arguments = "-pass1 \"" + passlog1 + "\" " + arguments;
                 info.Arguments = arguments + " -i \"" + m.scriptpath + "\" -avi \"" + m.outvideofile + "\"";
             }
             else
@@ -1380,58 +1425,22 @@ namespace XviD4PSP
             }
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("xvid_encraw.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
+
             encoderProcess.StartInfo = info;
+            readFromStdErrThread = new Thread(new ThreadStart(readErrStream));
             encoderProcess.Start();
+            readFromStdErrThread.Start();
             SetPriority(Settings.ProcessPriority);
 
-            //-progress 10
-            //961 frames( 96%) encoded,  39.45 fps, Average Bitrate =   516kbps
-            //string pat = @"(\d+)\Dframes";
-
-            string line;
-            string pat = @"(\d+):\Dkey=";
-            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match mat;
-
             //первый проход
-            while (!encoderProcess.HasExited)
-            {
-                locker.WaitOne();
-                line = encoderProcess.StandardOutput.ReadLine();
-                if (line != null)
-                {
-                    mat = r.Match(line);
-                    if (mat.Success == true)
-                        worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                    //SetLog(line);
-                    //else
-                    //{
-                    //    if (encodertext != null)
-                    //        encodertext += Environment.NewLine;
-                    //    encodertext += line;
-                    //    SetLog(line);
-                    //}
-                }
-            }
+            Do_XviD_Encoding_Cycle();
 
-            //обнуляем прогресс
-            of = 0;
-            cf = 0;
-
-            //проверка на завершение
-            if (!encoderProcess.HasExited)
-            {
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
-            }
-
-            //ResetCounter();
             if (IsAborted || IsErrors) return;
 
             //второй проход
@@ -1446,25 +1455,20 @@ namespace XviD4PSP
                     fsize = fsize / 1024.0 / 1024.0;
                     vbitrate = Calculate.GetBitrateForSize(fsize, 0, (int)m.outduration.TotalSeconds, m.outvcodec, m.format);
                     int maxbitrate = Format.GetMaxVBitrate(m);
-                    SetLog(Languages.Translate("Best bitrate for") + " Q" + Calculate.ConvertDoubleToPointString((double)m.outvbitrate , 1) + ": " + vbitrate + "kbps");
+                    SetLog(Languages.Translate("Best bitrate for") + " Q" + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) + ": " + vbitrate + "kbps");
                     if (vbitrate > maxbitrate)
                     {
                         vbitrate = maxbitrate;
                         SetLog(Languages.Translate("But it`s more than maximum bitrate") + ": " + vbitrate + "kbps");
                     }
+                    SetLog("");
                 }
 
                 if (m.vpasses.Count == 2) SetLog("...last pass...");
                 else if (m.vpasses.Count == 3) SetLog("...second pass...");
 
                 step++;
-                arguments = m.vpasses[1] + " -threads " + cpucount.ToString();//
-
-                //прописываем sar
-                if (m.sar != null || m.IsAnamorphic)
-                    arguments += " -par " + m.sar;
-                //else
-                //    arguments += " -par 1:1";
+                arguments = m.vpasses[1].ToString() + sar + ((cpucount == 0) ? "" : " -threads " + cpucount);
 
                 if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
                     info.Arguments = "-pass1 \"" + passlog1 + "\" " + arguments + " -i \"" + m.scriptpath + "\" -o NUL";
@@ -1488,50 +1492,24 @@ namespace XviD4PSP
                 }
 
                 //прописываем аргументы команндной строки
-                SetLog(" ");
+                SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog("xvid_encraw.exe:" + " " + info.Arguments);
-                    SetLog(" ");
+                    SetLog("");
                 }
 
+                encodertext = null;
                 encoderProcess.StartInfo = info;
+                readFromStdErrThread = new Thread(new ThreadStart(readErrStream));
                 encoderProcess.Start();
+                readFromStdErrThread.Start();
                 SetPriority(Settings.ProcessPriority);
 
-                while (!encoderProcess.HasExited)
-                {
-                    locker.WaitOne();
-                    line = encoderProcess.StandardOutput.ReadLine();
-                    if (line != null)
-                    {
-
-                        mat = r.Match(line);
-                        if (mat.Success == true)
-                            worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                        //else
-                        //{
-                        //    if (encodertext != null)
-                        //        encodertext += Environment.NewLine;
-                        //    encodertext += line;
-                        //    SetLog(line);
-                        //}
-                    }
-                }
+                //второй проход
+                Do_XviD_Encoding_Cycle();
             }
 
-            //обнуляем прогресс
-            of = 0;
-            cf = 0;
-
-            //проверка на завершение
-            if (!encoderProcess.HasExited)
-            {
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
-            }
-
-            //ResetCounter();
             if (IsAborted || IsErrors) return;
 
             //третий проход
@@ -1540,13 +1518,7 @@ namespace XviD4PSP
                 SetLog("...last pass...");
 
                 step++;
-                arguments = m.vpasses[2] + " -threads " + cpucount.ToString();//
-
-                //прописываем sar
-                if (m.sar != null || m.IsAnamorphic)
-                    arguments += " -par " + m.sar;
-                //else
-                //    arguments += " -par 1:1";
+                arguments = m.vpasses[2].ToString() + sar + ((cpucount == 0) ? "" : " -threads " + cpucount);
 
                 if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
                     info.Arguments = "-pass2 \"" + passlog1 + "\" " + arguments + " -i \"" + m.scriptpath + "\" -avi \"" + m.outvideofile + "\"";
@@ -1554,46 +1526,22 @@ namespace XviD4PSP
                     info.Arguments = "-pass2 \"" + passlog2 + "\" " + arguments + " -i \"" + m.scriptpath + "\" -avi \"" + m.outvideofile + "\"";
 
                 //прописываем аргументы команндной строки
-                SetLog(" ");
+                SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog("xvid_encraw.exe:" + " " + info.Arguments);
-                    SetLog(" ");
+                    SetLog("");
                 }
 
+                encodertext = null;
                 encoderProcess.StartInfo = info;
+                readFromStdErrThread = new Thread(new ThreadStart(readErrStream));
                 encoderProcess.Start();
+                readFromStdErrThread.Start();
                 SetPriority(Settings.ProcessPriority);
 
-                while (!encoderProcess.HasExited)
-                {
-                    locker.WaitOne();
-                    line = encoderProcess.StandardOutput.ReadLine();
-                    if (line != null)
-                    {
-                        mat = r.Match(line);
-                        if (mat.Success == true)
-                            worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                        //else
-                        //{
-                        //    if (encodertext != null)
-                        //        encodertext += Environment.NewLine;
-                        //    encodertext += line;
-                        //    SetLog(line);
-                        //}
-                    }
-                }
-            }
-
-            //обнуляем прогресс
-            of = 0;
-            cf = 0;
-
-            //проверка на завершение
-            if (!encoderProcess.HasExited)
-            {
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
+                //третий проход
+                Do_XviD_Encoding_Cycle();
             }
 
             //чистим ресурсы
@@ -1604,20 +1552,17 @@ namespace XviD4PSP
             if (IsAborted || IsErrors) return;
 
             //проверка на удачное завершение
-            if (!File.Exists(m.outvideofile) ||
-                new FileInfo(m.outvideofile).Length == 0)
+            if (!File.Exists(m.outvideofile) || new FileInfo(m.outvideofile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
-                //throw new Exception(Languages.Translate("Can`t find output video file!"));
+                ErrorException(encodertext);
             }
 
             encodertext = null;
-
-            SetLog("");
-
             SafeDelete(passlog1);
             SafeDelete(passlog2);
+
+            SetLog("");
 
             //FOURCC
             if (m.XviD_options.fourcc != "XVID")
@@ -1628,7 +1573,6 @@ namespace XviD4PSP
                 make_fourcc(m.XviD_options.fourcc);
             }
         }
-
 
         private void make_sound()
         {
@@ -1756,12 +1700,12 @@ namespace XviD4PSP
 
                 //прописываем аргументы командной строки
                 while (avs.args == null && !avs.IsErrors) Thread.Sleep(50);
-                SetLog(" ");
+                SetLog("");
 
                 if (Settings.ArgumentsToLog)
                 {
                     SetLog(Path.GetFileName(avs.encoderPath) + ": " + avs.args);
-                    SetLog(" ");
+                    SetLog("");
                 }
 
                 //Вывод прогресса кодирования
@@ -1828,7 +1772,7 @@ namespace XviD4PSP
             encoderProcess.Start();
             SetPriority(Settings.ProcessPriority);
 
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("neroAacEnc.exe: " + info.Arguments + "\r\n");
@@ -1881,7 +1825,7 @@ namespace XviD4PSP
             //Отлавливаем ошибку по ErrorLevel
             if (encoderProcess.ExitCode != 0 && !IsAborted)
             {
-                ErrorExeption(encodertext + "\r\n" + encoderProcess.StandardError.ReadToEnd() + "\r\n" + encoderProcess.StandardOutput.ReadToEnd());
+                ErrorException(encodertext + "\r\n" + encoderProcess.StandardError.ReadToEnd() + "\r\n" + encoderProcess.StandardOutput.ReadToEnd());
             }
 
             //чистим ресурсы
@@ -1916,7 +1860,7 @@ namespace XviD4PSP
             //Ловим ошибки, если они были
             if (avs.IsErrors)
             {
-                ErrorExeption(avs.error_text);
+                ErrorException(avs.error_text);
             }
             else
             {
@@ -2067,7 +2011,7 @@ namespace XviD4PSP
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext += encoderProcess.StandardError.ReadToEnd());
+                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
             }
 
             //чистим ресурсы
@@ -2081,7 +2025,7 @@ namespace XviD4PSP
             if (!File.Exists(outfile) || new FileInfo(outfile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
             }
 
             encodertext = null;
@@ -2213,7 +2157,7 @@ namespace XviD4PSP
                 new FileInfo(outfile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
             }
 
             encodertext = null;
@@ -2314,7 +2258,7 @@ namespace XviD4PSP
                 new FileInfo(m.outvideofile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
             }
 
             if (dmode == Demuxer.DemuxerMode.ExtractVideo)
@@ -2324,7 +2268,7 @@ namespace XviD4PSP
                     if (new FileInfo(outstream.audiopath).Length == 0)
                     {
                         IsErrors = true;
-                        ErrorExeption(encodertext);
+                        ErrorException(encodertext);
                     }
                 }
                 else
@@ -2471,7 +2415,7 @@ namespace XviD4PSP
                 new FileInfo(outfile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
             }
 
             encodertext = null;
@@ -2572,11 +2516,11 @@ namespace XviD4PSP
                 " -add \"" + m.outvideofile + "\"" + addaudio + " -new \"" + m.outfilepath + "\" -tmp \"" + Settings.TempPath + "\"";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog((old_muxer ? "NicMP4Box.exe: " : "MP4Box.exe: ") + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
             
             encoderProcess.StartInfo = info;
@@ -2618,7 +2562,7 @@ namespace XviD4PSP
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
             }
             
             //чистим ресурсы
@@ -2635,7 +2579,7 @@ namespace XviD4PSP
             if (!File.Exists(m.outfilepath) || new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -2684,11 +2628,11 @@ namespace XviD4PSP
             info.Arguments = "-raw 1 \"" + outstream.audiopath + "\" -out \"" + aacfile + "\" -tmp \"" + Settings.TempPath + "\"";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("mp4box.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -2740,7 +2684,7 @@ namespace XviD4PSP
                 new FileInfo(aacfile).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
             else
@@ -2786,7 +2730,7 @@ namespace XviD4PSP
                 new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -2871,11 +2815,11 @@ namespace XviD4PSP
             info.Arguments = "-i \"" + m.outvideofile + "\" -vcodec copy" + addaudio + format + rate + " \"" + m.outfilepath + "\"";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("ffmpeg.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -2916,7 +2860,7 @@ namespace XviD4PSP
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext += encoderProcess.StandardError.ReadToEnd());
+                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
             }
             
             //чистим ресурсы
@@ -2930,7 +2874,7 @@ namespace XviD4PSP
             if (!File.Exists(m.outfilepath) || new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -2957,11 +2901,11 @@ namespace XviD4PSP
             info.Arguments = "-i \"" + m.scriptpath + "\" " + outstream.passes + " -vn \"" + outstream.audiopath + "\"";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("ffmpeg.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
@@ -3000,7 +2944,7 @@ namespace XviD4PSP
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext += encoderProcess.StandardError.ReadToEnd());
+                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
             }
 
             //чистим ресурсы
@@ -3062,11 +3006,11 @@ namespace XviD4PSP
             info.Arguments = "-o \"" + m.outfilepath + "\" \"" + m.outvideofile + "\" " + addaudio + format;
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("mplex.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -3124,7 +3068,7 @@ namespace XviD4PSP
                 new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -3399,12 +3343,12 @@ namespace XviD4PSP
             info.Arguments = "\"" + metapath + "\" \"" + m.outfilepath + "\"";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("tsmuxer.exe:" + " " + info.Arguments);
                 SetLog(meta);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -3463,7 +3407,7 @@ namespace XviD4PSP
                     Calculate.GetFolderSize(m.outfilepath) == 0)
                 {
                     IsErrors = true;
-                    ErrorExeption(encodertext);
+                    ErrorException(encodertext);
                 }
             }
             else
@@ -3472,7 +3416,7 @@ namespace XviD4PSP
                     new FileInfo(m.outfilepath).Length == 0)
                 {
                     IsErrors = true;
-                    ErrorExeption(encodertext);
+                    ErrorException(encodertext);
                     //throw new Exception(Languages.Translate("Can`t find output video file!"));
                 }
             }
@@ -3532,11 +3476,11 @@ namespace XviD4PSP
             info.Arguments = "-i \"" + m.outvideofile + "\" -o \"" + aviout + "\"" + rate;
             
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("avc2avi.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -3556,7 +3500,7 @@ namespace XviD4PSP
                 new FileInfo(aviout).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -3595,11 +3539,11 @@ namespace XviD4PSP
                 info.Arguments = "\"" + m.outvideofile + "\" -inplace -srcfps " + m.outframerate + " -destfps 29.970";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("dgpulldown.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -3642,11 +3586,11 @@ namespace XviD4PSP
             info.Arguments = "\"" + m.outvideofile + "\" -u " + fourcc + " -d " + fourcc;
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("cfourcc.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -3748,7 +3692,7 @@ namespace XviD4PSP
                 new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -3831,7 +3775,7 @@ namespace XviD4PSP
                 new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -3959,11 +3903,11 @@ namespace XviD4PSP
             info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + split + m.mkvstring;
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("mkvmerge.exe:" + " " + info.Arguments); //Вывод в лог коммандной строки для mkvmerge
-                SetLog(" ");
+                SetLog("");
             }
 
             encoderProcess.StartInfo = info;
@@ -3994,7 +3938,7 @@ namespace XviD4PSP
                         if (line.StartsWith("Error"))
                         {
                             IsErrors = true;
-                            ErrorExeption(line.Replace("Error:","").Trim());
+                            ErrorException(line.Replace("Error:","").Trim());
                         }
                         if (line.StartsWith("Warning"))
                         {
@@ -4025,7 +3969,7 @@ namespace XviD4PSP
             if (!File.Exists(m.outfilepath) || new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
 
@@ -4100,11 +4044,11 @@ namespace XviD4PSP
                 + " -o \"" + m.outfilepath + "\"";
 
             //прописываем аргументы команндной строки
-            SetLog(" ");
+            SetLog("");
             if (Settings.ArgumentsToLog)
             {
                 SetLog("pmp_muxer_avc.exe:" + " " + info.Arguments);
-                SetLog(" ");
+                SetLog("");
             }
 
             SetLog("...import video...");
@@ -4212,7 +4156,7 @@ namespace XviD4PSP
                 new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
-                ErrorExeption(encodertext);
+                ErrorException(encodertext);
             }
 
             encodertext = null;
@@ -4229,7 +4173,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
 
@@ -4764,7 +4708,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
 
@@ -4777,7 +4721,7 @@ namespace XviD4PSP
             } 
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
 
@@ -4940,7 +4884,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
 
@@ -4996,7 +4940,7 @@ namespace XviD4PSP
             }
         }
 
-        private void ErrorExeption(string message)
+        private void ErrorException(string message)
         {
             SetLog("");
             SetLog(Languages.Translate("Error") + ": " + Environment.NewLine + message);
@@ -5066,6 +5010,16 @@ namespace XviD4PSP
                         tbxLog.ScrollToEnd();
                     }
                 }
+            }
+        }
+
+        private void SetFilteredLog(Regex reg, string text)
+        {
+            string[] lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            foreach (string line in lines)
+            {
+                if (!string.IsNullOrEmpty(line) && !reg.IsMatch(line))
+                    SetLog(line);
             }
         }
 

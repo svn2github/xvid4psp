@@ -187,12 +187,11 @@ namespace XviD4PSP
             }
             else
             {
-                if (m.encodingmode == Settings.EncodingModes.Quality ||
-                    m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
-                    m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-                    text_bitrate.Content = Languages.Translate("Quality") + ": (CRF)";
-                else
+                if (m.encodingmode == Settings.EncodingModes.Quantizer)
                     text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
+                else
+                    text_bitrate.Content = Languages.Translate("Quality") + ": (CRF)";
+
                 num_bitrate.Value = (decimal)m.outvbitrate;
             }
 
