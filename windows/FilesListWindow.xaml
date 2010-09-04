@@ -15,7 +15,7 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<Grid Margin="0,0,0,38.072" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<ListBox x:Name="list_files" FontSize="14" SelectionMode="Extended" IsSynchronizedWithCurrentItem="True" Margin="16,16,16,16"/>
+			<ListBox x:Name="list_files" FontSize="14" SelectionMode="Extended" KeyDown="list_files_KeyDown" IsSynchronizedWithCurrentItem="True" Margin="16,16,16,16"/>
 		</Grid>
 		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.072" Background="{DynamicResource black_gradient}">
 			<Grid.ColumnDefinitions>

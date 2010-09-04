@@ -4,6 +4,7 @@ using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
@@ -48,6 +49,12 @@ namespace XviD4PSP
 
             //выдаём диалог
             ShowDialog();
+        }
+
+        private void list_files_KeyDown(object sender, KeyEventArgs e)
+        {
+            if ((e.Key == Key.Delete || e.Key == Key.OemMinus || e.Key == Key.Subtract) && list_files.SelectedItem != null) btRemove_Click(null, null);
+            else if (e.Key == Key.Insert || e.Key == Key.OemPlus || e.Key == Key.Add) btAdd_Click(null, null);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -177,7 +184,5 @@ namespace XviD4PSP
                 }
             }
         }
-
-
 	}
 }

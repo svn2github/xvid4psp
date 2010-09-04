@@ -47,7 +47,7 @@ namespace XviD4PSP
             
             if (files.Count == 1) //Обычное открытие
                 infilepath = files[0].ToString();
-            
+
             if (infilepath != null)
             {
                 //создаём массив и забиваем в него данные
@@ -55,18 +55,12 @@ namespace XviD4PSP
                 m.infilepath = infilepath;
                 m.infileslist = new string[] { infilepath };
                 m.owner = owner;
-                
-                //исключаем DVD меню
-                //if (Path.GetFileName(m.infilepath) == "VIDEO_TS.VOB")
-                //    m.infilepath = Path.GetDirectoryName(m.infilepath) + "\\VTS_01_1.VOB";
 
                 //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
-                if (Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled ||
-                    Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly &&
-                    Calculate.IsValidVOBName(m.infilepath))
+                if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(m.infilepath) ||
+                    Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
                     m = GetFriendFilesList(m);
-                if (m != null)
-                    return m;
+                if (m != null) return m;
             }
 
             return null;
@@ -138,27 +132,27 @@ namespace XviD4PSP
 
         public static Massive GetFriendFilesList(Massive m)
         {
+            string friendfile;
             ArrayList fileslist = new ArrayList();
-            fileslist.Add(m.infilepath);
 
             if (Path.GetExtension(m.infilepath).ToLower() == ".vob" && Calculate.IsValidVOBName(m.infilepath))
             {
-                if (Path.GetFileName(m.infilepath) != "VIDEO_TS.VOB")
+                if (Path.GetFileName(m.infilepath).ToUpper() != "VIDEO_TS.VOB")
                 {
                     string title = Calculate.GetTitleNum(m.infilepath);
-                    string friendfile;
-                    for (int i = 2; i <= 9; i++)
+                    string dir = Path.GetDirectoryName(m.infilepath);
+                    for (int i = 1; i <= 20; i++)
                     {
-                        friendfile = Path.GetDirectoryName(m.infilepath) + "\\VTS_" + title + "_" + i.ToString() + ".VOB";
-                        if (File.Exists(friendfile))
-                        {
-                            fileslist.Add(friendfile);
-                        }
+                        friendfile = dir + "\\VTS_" + title + "_" + i.ToString() + ".VOB";
+                        if (File.Exists(friendfile)) fileslist.Add(friendfile);
                     }
                 }
+                else
+                    fileslist.Add(m.infilepath);
             }
             else
             {
+                fileslist.Add(m.infilepath);
                 char[] chars = Path.GetFileNameWithoutExtension(m.infilepath).ToCharArray();
                 int pos = 0;
                 foreach (char c in chars)
@@ -167,7 +161,6 @@ namespace XviD4PSP
                     string cstring = c.ToString();
                     if (cstring == "1")
                     {
-                        string friendfile;
                         for (int i = 2; i <= 9; i++)
                         {
                             friendfile = Path.GetDirectoryName(m.infilepath) + "\\" +
@@ -189,12 +182,10 @@ namespace XviD4PSP
             if (fileslist.Count > 1)
             {
                 FilesListWindow f = new FilesListWindow(m);
-                if (f.m == null)
-                    m = null;
-                else
-                    m = f.m.Clone();
+                if (f.m != null) m = f.m.Clone();
+                else m = null;
             }
-            
+
             return m;
         }
 

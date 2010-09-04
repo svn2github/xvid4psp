@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r163 04.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r164 04.09.10, main changes:
 
+>>> (r164) Better friends-files searching ("Auto join" option) for vobs from one DVD (rep. by mihanja80).
 >>> (r163) Fixed crash in AviSynthEncoder if creating encoder process (run a binary file) fails (rep. by Zag30).
 >>> (r162) Better error handling for xvid_encraw.exe; encoding statistics from XviD now available in the encoding log.
 >>> (r162) Next options has been added into XviD settings window: full1pass, threads, max_key_interval, bquant_ratio, bquant_offset,

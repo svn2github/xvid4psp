@@ -391,17 +391,11 @@ namespace XviD4PSP
                             x.infileslist = new string[] { args[1] };
                             x.owner = this;
 
-                            //исключаем DVD меню
-                            //if (Path.GetFileName(m.infilepath) == "VIDEO_TS.VOB")
-                            //    m.infilepath = Path.GetDirectoryName(m.infilepath) + "\\VTS_01_1.VOB";
-
                             //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
-                            if (Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled ||
-                                Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly &&
-                                Calculate.IsValidVOBName(x.infilepath))
+                            if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(x.infilepath) ||
+                                Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
                                 x = OpenDialogs.GetFriendFilesList(x);
-                            if (x != null)
-                                action_open(x);
+                            if (x != null) action_open(x);
                         }
                     }
                 }
@@ -3317,20 +3311,41 @@ namespace XviD4PSP
             {
                 if (drop_data.Length == 1) //Обычное открытие
                 {
-                    if (Path.GetFileName(drop_data[0]).ToLower() == "x264.exe")
+                    //Копирование exe-файлов
+                    if (Path.GetFileName(drop_data[0]).ToLower().EndsWith(".exe"))
                     {
-                        File.Copy(drop_data[0], Calculate.StartupPath + "\\apps\\x264\\x264.exe", true);
-                    }
-                    else if (Path.GetFileName(drop_data[0]).ToLower() == "x264_64.exe")
-                    {
-                        File.Copy(drop_data[0], Calculate.StartupPath + "\\apps\\x264\\x264_64.exe", true);
+                        string file_c = "", path_c = "", file_d = Path.GetFileName(drop_data[0]).ToLower();
+                        if (file_d == "x264.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264.exe"; }
+                        else if (file_d == "x264_64.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264_64.exe"; }
+                        else if (file_d == "ffmpeg.exe") { path_c = Calculate.StartupPath + "\\apps\\ffmpeg\\"; file_c = "ffmpeg.exe"; }
+
+                        if (!string.IsNullOrEmpty(file_c))
+                        {
+                            try
+                            {
+                                File.Copy(drop_data[0], path_c + file_c, true);
+                                new Message(this).ShowMessage("The file \"" + file_c + "\" was successfully copied to \r\n\"" + path_c + "\"", Languages.Translate("Complete"));
+                            }
+                            catch (Exception ex)
+                            {
+                                new Message(this).ShowMessage("Copying file \"" + file_c + "\" to \"" + path_c + "\" thrown an Error:\r\n" + ex.Message, Languages.Translate("Error"));
+                            }
+                        }
+                        else
+                            new Message(this).ShowMessage("I don`t know what to do with \"" + Path.GetFileName(drop_data[0]) + "\"!", Languages.Translate("Error"));
                     }
                     else
                     {
                         Massive x = new Massive();
                         x.infilepath = drop_data[0];
                         x.infileslist = new string[] { drop_data[0] };
-                        action_open(x);
+                        x.owner = this;
+
+                        //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
+                        if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(x.infilepath) ||
+                            Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
+                            x = OpenDialogs.GetFriendFilesList(x);
+                        if (x != null) action_open(x);
                     }
                 }
                 else if (drop_data.Length > 1) //Мульти-открытие
@@ -3340,14 +3355,14 @@ namespace XviD4PSP
                     {
                         OpenDialogs.owner = this;
                         path_to_save = OpenDialogs.SaveFolder();
-                        if (path_to_save == null) return;
+                        if (path_to_save == null) { IsDragOpening = false; return; }
                     }
                     MultiOpen(drop_data);
                 }
                 IsDragOpening = false;
             }
         }
-             
+
         private void list_tasks_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (IsInsertAction) return;
