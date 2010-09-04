@@ -71,25 +71,26 @@ namespace XviD4PSP
 
         private void readStdStream(bool bStdOut)
         {
-            using (StreamReader r = bStdOut ? _encoderProcess.StandardOutput : _encoderProcess.StandardError)
+            try
             {
-                while (!_encoderProcess.HasExited)
+                using (StreamReader r = bStdOut ? _encoderProcess.StandardOutput : _encoderProcess.StandardError)
                 {
-                    Thread.Sleep(0);
-                    string text1 = r.ReadToEnd();
-                    if (text1 != null)
+                    while (!_encoderProcess.HasExited)
                     {
-                        if (text1.Length > 0)
+                        Thread.Sleep(0);
+                        string text = r.ReadToEnd();
+                        if (text != null && text.Length > 0)
                         {
                             if (bStdOut)
-                                _encoderStdOut = cleanUpString(text1);
+                                _encoderStdOut = cleanUpString(text);
                             else
-                                _encoderStdErr = cleanUpString(text1);
+                                _encoderStdErr = cleanUpString(text);
                         }
+                        Thread.Sleep(0);
                     }
-                    Thread.Sleep(0);
                 }
             }
+            catch { }
         }
 
         private Stream getOutputStream()
@@ -106,7 +107,7 @@ namespace XviD4PSP
                     using (AviSynthClip a = env.ParseScript(script, AviSynthColorspace.RGB24))
                     //using (AviSynthClip a = env.OpenScriptFile(inFilePath, AviSynthColorspace.RGB24))
                     {
-                        if (0 == a.ChannelsCount) throw new Exception("Can't find audio stream");
+                        if (a.ChannelsCount == 0) throw new Exception("Can't find audio stream");
 
                         const int MAX_SAMPLES_PER_ONCE = 4096;
                         int frameSample = 0;
@@ -148,8 +149,8 @@ namespace XviD4PSP
                                 }
                                 catch (Exception ex)
                                 {
-                                    if (encoderPath != null && _encoderProcess.HasExited)
-                                        throw new Exception("Abnormal encoder termination " + _encoderProcess.ExitCode.ToString());
+                                    if (_encoderProcess != null && _encoderProcess.HasExited)
+                                        throw new Exception("Abnormal encoder termination (exit code = " + _encoderProcess.ExitCode.ToString() + ")");
                                     else throw new Exception(ex.Message, ex);
                                 }
                                 finally
@@ -204,13 +205,13 @@ namespace XviD4PSP
                                 h.Free();
                             }
                         }
-                        if (encoderPath != null)
+                        if (_encoderProcess != null)
                         {
                             _encoderProcess.WaitForExit();
                             _readFromStdErrThread.Join();
                             _readFromStdOutThread.Join();
                             if (_encoderProcess.ExitCode != 0)
-                                throw new Exception("Abnormal encoder termination " + _encoderProcess.ExitCode.ToString());
+                                throw new Exception("Abnormal encoder termination (exit code = " + _encoderProcess.ExitCode.ToString() + ")");
                         }
                     }
                 }
@@ -220,28 +221,35 @@ namespace XviD4PSP
                 if (!IsAborted)
                 {
                     IsErrors = true;
-                    string txt = (IsGainDetecting) ? "GainDetector Error: " : "AviSynth Encoder Error: ";
-                    error_text = txt + ex.Message.ToString() + ((_encoderProcess != null && _encoderProcess.HasExited &&
-                        _encoderProcess.ExitCode != 0) ? "\r\n" + (!string.IsNullOrEmpty(_encoderStdErr) ? "\r\n" + _encoderStdErr : "") +
-                        (!string.IsNullOrEmpty(_encoderStdOut) ? "\r\n" + _encoderStdOut : "") : "");
+                    error_text = ((IsGainDetecting) ? "Gain Detector Error: " : "AviSynth Encoder Error: ") + ex.Message;
+                    try
+                    {
+                        if (_encoderProcess != null && _encoderProcess.HasExited && _encoderProcess.ExitCode != 0)
+                            error_text += ("\r\n" + (!string.IsNullOrEmpty(_encoderStdErr) ? "\r\n" + _encoderStdErr : "") +
+                                (!string.IsNullOrEmpty(_encoderStdOut) ? "\r\n" + _encoderStdOut : ""));
+                    }
+                    catch (Exception exc)
+                    {
+                        error_text += "\r\n\r\nThere was Exception while trying to get error info:\r\n" + exc.Message;
+                    }
                 }
             }
             finally
             {
-                if (_encoderProcess != null && !_encoderProcess.HasExited)
+                try
                 {
-                    try
+                    if (_encoderProcess != null && !_encoderProcess.HasExited)
                     {
                         _encoderProcess.Kill();
                         _encoderProcess.WaitForExit();
                         _readFromStdErrThread.Join();
                         _readFromStdOutThread.Join();
                     }
-                    catch { }
                 }
+                catch { }
+                _encoderProcess = null;
                 _readFromStdErrThread = null;
                 _readFromStdOutThread = null;
-
                 _encoderThread = null;
             }
         }
@@ -295,6 +303,19 @@ namespace XviD4PSP
             }
             catch (Exception e)
             {
+                if (_encoderProcess != null)
+                {
+                    try
+                    {
+                        _encoderProcess.Kill();
+                        _encoderProcess.WaitForExit();
+                        _readFromStdErrThread.Join();
+                        _readFromStdOutThread.Join();
+                    }
+                    catch { }
+                    finally { _encoderProcess = null; }
+                }
+
                 throw new Exception("Can't start encoder: " + e.Message, e);
             }
         }
