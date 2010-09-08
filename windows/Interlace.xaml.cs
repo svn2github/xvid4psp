@@ -64,6 +64,8 @@ namespace XviD4PSP
             //забиваем
             foreach (string f in Format.GetValidFrameratesList(m))
                 combo_framerate.Items.Add(f + " fps");
+            if (!combo_framerate.Items.Contains(m.outframerate + " fps"))
+                combo_framerate.Items.Add(m.outframerate + " fps");
             combo_framerate.SelectedItem = m.outframerate + " fps";
 
             foreach (string ratechangers in Enum.GetNames(typeof(AviSynthScripting.FramerateModifers)))
@@ -467,6 +469,5 @@ namespace XviD4PSP
         {
             p.SwitchToFullScreen();
         }
-
 	}
 }

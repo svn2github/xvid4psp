@@ -56,19 +56,24 @@ namespace XviD4PSP
             check_clone_fps.Content = Languages.Translate("Framerate");
             check_clone_audio.Content = Languages.Translate("Audio options");
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
-            check_use_64bit.Content = Languages.Translate("Use 64 bit x264");
+            check_use_64bit.Content = Languages.Translate("Use 64-bit x264");
             check_dont_delete_caches.Content = Languages.Translate("Don`t delete any caches and temporal files");
             check_use_trayicon.Content = Languages.Translate("Enable system tray icon");
             cmenu_audio_first.Content = Languages.Translate("Encode audio first, then video");
 
-            check_clone_ar.ToolTip = "Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method." +
-                "\r\nNote: Autocrop analysis will not be performed!";
-            check_clone_trim.ToolTip = "Clone: trim start and trim end";
-            check_clone_deint.ToolTip = "Clone: source type, field order, deinterlace method.\r\nNote: Autodeinterlace analysis will not be performed!";
-            check_clone_fps.ToolTip = "Clone: output framerate";
-            check_clone_audio.ToolTip = "Clone: output samplerate, samplerate converter, channels, channels converter";
-            check_dont_delete_caches.ToolTip = "Enable this option ONLY if you use XviD4PSP as script creator, and then encoding it in another" + 
-                "\r\napplication. Or for experiments. In any other cases it MUST be disabled (unchecked)!";
+            check_use_64bit.ToolTip = Languages.Translate("Your OS must be 64-bit also!");
+            check_batch_pause.ToolTip = Languages.Translate("So you can tune all encoding settings as needed, and then continue opening");
+            check_clone_ar.ToolTip = Languages.Translate("Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method.") +
+                "\r\n" + Languages.Translate("Note: Autocrop analysis will not be performed!");
+            check_clone_trim.ToolTip = Languages.Translate("Clone: trim start and trim end");
+            check_clone_deint.ToolTip = Languages.Translate("Clone: source type, field order, deinterlace method.") +
+                "\r\n" + Languages.Translate("Note: Autodeinterlace analysis will not be performed!");
+            check_clone_fps.ToolTip = Languages.Translate("Clone: output framerate");
+            check_clone_audio.ToolTip = Languages.Translate("Clone: output samplerate, samplerate converter, channels, channels converter");
+            check_dont_delete_caches.ToolTip = Languages.Translate("Enable this option only if you use XviD4PSP as script creator, and then encoding it in another application.") +
+                "\r\n" + Languages.Translate("Or for experiments. In any other cases this option must be disabled (unchecked)!");
+            check_read_prmtrs.ToolTip = Languages.Translate("Read from the script: width, height, fps, duration and frames count.") + "\r\n" +
+                Languages.Translate("Use it only if these parameters was changed manually in the script!");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");

@@ -63,20 +63,30 @@ namespace XviD4PSP
                 mass.outvcodec != "Disabled")
             {
                 //Переопределение некоторых параметров видео на основе текущего скрипта (т.к. он мог быть изменен вручную)
-                if (Settings.ReadScript == true) //если в настройках это разрешено
+                if (Settings.ReadScript) //если в настройках это разрешено
                 {
-                    AviSynthReader reader = new AviSynthReader();
-                    reader.ParseScript(mass.script);
-                    mass.outresw = reader.Width;
-                    mass.outresh = reader.Height;
-                    mass.outframes = reader.FrameCount;
-                    reader.Close();
-                    reader = null;
-                    mass.outduration = TimeSpan.FromSeconds((double)mass.outframes / Calculate.ConvertStringToDouble(mass.outframerate));
-                    mass.outfilesize = Calculate.GetEncodingSize(mass);
-                    
-                    //Переопределяем SAR в случае анаморфного кодирования
-                    if (mass.sar != null && mass.sar != "1:1")
+                    bool recalc_sar = false;
+                    AviSynthReader reader = null;
+                    try
+                    {
+                        reader = new AviSynthReader();
+                        reader.ParseScript(mass.script);
+                        if (mass.outresw != reader.Width) { mass.outresw = reader.Width; recalc_sar = true; }
+                        if (mass.outresh != reader.Height) { mass.outresh = reader.Height; recalc_sar = true; }
+                        mass.outframes = reader.FrameCount;
+                        mass.outframerate = Calculate.ConvertDoubleToPointString(reader.Framerate);
+                        mass.outduration = TimeSpan.FromSeconds((double)mass.outframes / reader.Framerate);
+                        mass.outfilesize = Calculate.GetEncodingSize(mass);
+                    }
+                    catch { }
+                    finally
+                    {
+                        reader.Close();
+                        reader = null;
+                    }
+
+                    //Переопределяем SAR в случае анаморфного кодирования (если разрешение поменялось)
+                    if (recalc_sar && mass.sar != null && mass.sar != "1:1")
                     {
                         mass = Calculate.CalculateSAR(mass);
                     }
@@ -134,8 +144,6 @@ namespace XviD4PSP
             _id = mass.key;
         }
     }
-
-
 
     public class myTask :
         ObservableCollection<Task>

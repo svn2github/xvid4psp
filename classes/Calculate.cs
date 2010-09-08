@@ -573,6 +573,7 @@ namespace XviD4PSP
            else if (m.format == Format.ExportFormats.Audio && m.outaudiostreams.Count > 0)
            {
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+               if (outstream.bitrate == 0) return ssize; //"Unknown" для VBR
                double outsize = (0.125261 * (double)outstream.bitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
                ssize = Calculate.ConvertDoubleToPointString(outsize, 1) + " mb";
            }
