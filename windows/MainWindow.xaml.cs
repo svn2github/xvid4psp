@@ -2093,10 +2093,15 @@ namespace XviD4PSP
                 button_set_start.Content = Languages.Translate("Set Start");
                 button_set_end.Content = Languages.Translate("Set End");
                 button_apply_trim.Content = Languages.Translate("Apply Trim");
+                textbox_start.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", button_set_start.Content.ToString()) +
+                    "\r\n" + Languages.Translate("If you leave this field empty, then current frame number will be entered automatically.");
+                textbox_end.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", button_set_end.Content.ToString()) +
+                    "\r\n" + Languages.Translate("If you leave this field empty, then current frame number will be entered automatically.");
                 menu_open_folder.Header = Languages.Translate("Open folder") + "...";
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
-                target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.");
+                target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.") +
+                    "\r\n" + Languages.Translate("Enter - apply, Esc - cancel.");
                 
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
@@ -5344,12 +5349,23 @@ namespace XviD4PSP
             {
                 if (Convert.ToString(button_set_start.Content) != Languages.Translate("Clear"))
                 {
-                    if (textbox_start.Text == "")
+                    if (textbox_start.Text == "") //Ничего не вписано - определяем текущий кадр
                     {
-                        trim_start = (int)Math.Round(Position.TotalSeconds * fps);
+                        trim_start = Convert.ToInt32(Position.TotalSeconds * fps);
                         textbox_start.Text = Convert.ToString(trim_start);
                     }
-                    else if (!int.TryParse(textbox_start.Text, out trim_start)) //Допустимы только числовые значения
+                    else if (textbox_start.Text.Contains(":")) //Вписано время - пересчитываем в кадр
+                    {
+                        TimeSpan result = TimeSpan.Zero;
+                        if (TimeSpan.TryParse(textbox_start.Text, out result))
+                        {
+                            trim_start = Convert.ToInt32(result.TotalSeconds * fps);
+                            textbox_start.Text = Convert.ToString(trim_start);
+                        }
+                        else
+                            return;
+                    }
+                    else if (!int.TryParse(textbox_start.Text, out trim_start)) //Вписан номер кадра
                         return;
 
                     textbox_start.IsReadOnly = true;
@@ -5371,12 +5387,23 @@ namespace XviD4PSP
             {
                 if (Convert.ToString(button_set_end.Content) != Languages.Translate("Clear"))
                 {
-                    if (textbox_end.Text == "")
+                    if (textbox_end.Text == "") //Ничего не вписано - определяем текущий кадр
                     {
-                        trim_end = (int)Math.Round(Position.TotalSeconds * fps);
+                        trim_end = Convert.ToInt32(Position.TotalSeconds * fps);
                         textbox_end.Text = Convert.ToString(trim_end);
                     }
-                    else if (!int.TryParse(textbox_end.Text, out trim_end)) //Допустимы только числовые значения
+                    else if (textbox_end.Text.Contains(":")) //Вписано время - пересчитываем в кадр
+                    {
+                        TimeSpan result = TimeSpan.Zero;
+                        if (TimeSpan.TryParse(textbox_end.Text, out result))
+                        {
+                            trim_end = Convert.ToInt32(result.TotalSeconds * fps);
+                            textbox_end.Text = Convert.ToString(trim_end);
+                        }
+                        else
+                            return;
+                    }
+                    else if (!int.TryParse(textbox_end.Text, out trim_end)) //Вписан номер кадра
                         return;
 
                     textbox_end.IsReadOnly = true;
@@ -5423,16 +5450,39 @@ namespace XviD4PSP
             m = AviSynthScripting.CreateAutoAviSynthScript(m);
             LoadVideo(MediaLoad.update);
 
-            //пересчет кол-ва кадров в видео, его продолжительности и размера получаемого файла
-            AviSynthReader reader = new AviSynthReader();
-            reader.ParseScript(m.script);
-            m.outframes = reader.FrameCount;
-            reader.Close();
-            reader = null;
-            m.outduration = TimeSpan.FromSeconds((double)m.outframes / fps);
-            m.outfilesize = Calculate.GetEncodingSize(m);
-            m.thmframe = m.outframes / 2;
+            //Пересчет кол-ва кадров в видео, его продолжительности и размера получаемого файла
+            int outframes = 0;
+            TimeSpan outduration = TimeSpan.Zero;
+            AviSynthReader reader = null;
+            bool is_errors = false;
 
+            try
+            {
+                reader = new AviSynthReader();
+                reader.ParseScript(m.script);
+                outframes = reader.FrameCount;
+                outduration = TimeSpan.FromSeconds((double)outframes / reader.Framerate); // / fps)
+            }
+            catch 
+            {
+                is_errors = true;
+            }
+            finally
+            {
+                reader.Close();
+                reader = null;
+            }
+
+            if (!is_errors)
+            {
+                m.outframes = outframes;
+                m.outduration = outduration; //TimeSpan.FromSeconds((double)m.outframes / fps);
+                m.thmframe = m.outframes / 2;
+            }
+            else
+                m = Calculate.UpdateOutFrames(m);
+
+            m.outfilesize = Calculate.GetEncodingSize(m);
             UpdateTaskMassive(m);
         }
 

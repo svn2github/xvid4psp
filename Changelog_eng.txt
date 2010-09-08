@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r165 08.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r166 08.09.10, main changes:
 
+>>> (r166) It is now possible to enter time position into "Set Start" & "Set End" fields (format is HH:MM:SS.ms), fixed possible crash.
 >>> (r165) For option "Read parameters from the script when saving a new task" added fps detection, fixed possible crash.
 >>> (r165) Output file size 0Mb instead of "Unknown", if format is Audio and encoding with VBR - fixed.
 >>> (r164) Better friends-files searching ("Auto join" option) for vobs from one DVD (rep. by mihanja80).
