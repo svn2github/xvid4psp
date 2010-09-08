@@ -2448,7 +2448,6 @@ namespace XviD4PSP
             if (((MenuItem)sender).Header.ToString() == "ScriptView")
             {
                 Settings.ScriptView = true;
-                this.isAudioOnly = false;
                 mn_scriptview.IsChecked = cmn_scriptview.IsChecked = true;
                 button_save_script.Visibility = button_fullscreen.Visibility = button_avsp.Visibility = button_play_script.Visibility = Visibility.Visible;
                 button_play.Visibility = button_frame_back.Visibility = button_frame_forward.Visibility = slider_pos.Visibility = Visibility.Collapsed;
@@ -4297,12 +4296,19 @@ namespace XviD4PSP
                 // Also, if this video is encoded with an unsupported codec,
                 // we won't see any video, although the audio will work if it is
                 // of a supported format.
-                if (hr == unchecked((int)0x80004002)) //E_NOINTERFACE
+                if (hr == unchecked((int)0x80004002))      //E_NOINTERFACE
+                {
+                    this.isAudioOnly = true;
+                }
+                else if (hr == unchecked((int)0x80040209)) //VFW_E_NOT_CONNECTED 
                 {
                     this.isAudioOnly = true;
                 }
                 else
+                {
+                    this.isAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
                     DsError.ThrowExceptionForHR(hr);
+                }
             }
         }
 
@@ -4470,10 +4476,15 @@ namespace XviD4PSP
                     }
 
                     //Считаем fps
-                    double AvgTimePerFrame;
-                    hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
-                    DsError.ThrowExceptionForHR(hr);
-                    fps = (double)(1 / AvgTimePerFrame);
+                    if (!isAudioOnly)
+                    {
+                        double AvgTimePerFrame;
+                        hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
+                        DsError.ThrowExceptionForHR(hr);
+                        fps = (1.0 / AvgTimePerFrame);
+                    }
+                    else
+                        fps = Calculate.ConvertStringToDouble(m.outframerate);
 
                     //Обновляем счетчик кадров
                     total_frames = Convert.ToString(Math.Round(NaturalDuration.TotalSeconds * fps));

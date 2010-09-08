@@ -810,12 +810,19 @@ namespace XviD4PSP
                 // Also, if this video is encoded with an unsupported codec,
                 // we won't see any video, although the audio will work if it is
                 // of a supported format.
-                if (hr == unchecked((int)0x80004002)) //E_NOINTERFACE
+                if (hr == unchecked((int)0x80004002))      //E_NOINTERFACE
+                {
+                    this.isAudioOnly = true;
+                }
+                else if (hr == unchecked((int)0x80040209)) //VFW_E_NOT_CONNECTED 
                 {
                     this.isAudioOnly = true;
                 }
                 else
+                {
+                    this.isAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
                     DsError.ThrowExceptionForHR(hr);
+                }
             }
         }
 
@@ -979,12 +986,12 @@ namespace XviD4PSP
                 graph = (IFilterGraph)Marshal.GetObjectForIUnknown(GraphInfo.FilterGraph);
                 graphBuilder = (IGraphBuilder)graph;
 
-                IBaseFilter videoRenderer;
+                //IBaseFilter videoRenderer;
                 ////Find WPF renderer.  It's always named the same thing
                 ////hr = graphBuilder.FindFilterByName("Avalon EVR", out videoRenderer);
                 ////hr = graphBuilder.FindFilterByName("Video Renderer", out videoRenderer);
-                hr = graphBuilder.FindFilterByName("Enhanced Video Renderer", out videoRenderer);
-                DsError.ThrowExceptionForHR(hr);
+                //hr = graphBuilder.FindFilterByName("Enhanced Video Renderer", out videoRenderer);
+                //DsError.ThrowExceptionForHR(hr);
 
                 //hr = this.graphBuilder.AddFilter(videoRenderer, "Enhanced Video Renderer");
                 //DsError.ThrowExceptionForHR(hr);
@@ -1119,6 +1126,5 @@ namespace XviD4PSP
             bi.EndInit();
             image_play.Source = bi;
         }
-
     }
 }
