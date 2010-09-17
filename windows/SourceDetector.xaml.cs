@@ -20,7 +20,7 @@ namespace XviD4PSP
     {
         UNKNOWN, NOT_ENOUGH_SECTIONS,
         PROGRESSIVE, INTERLACED, FILM, DECIMATING,
-        HYBRID_FILM_INTERLACED, HYBRID_PROGRESSIVE_INTERLACED, HYBRID_PROGRESSIVE_FILM
+        HYBRID_FILM_INTERLACED, HYBRID_PROGRESSIVE_FILM, HYBRID_PROGRESSIVE_INTERLACED
     };
 
     public enum FieldOrder
@@ -30,7 +30,8 @@ namespace XviD4PSP
 
     public enum DeinterlaceType
     {
-        Disabled, Yadif, YadifModEDI, TDeint, TDeintEDI, LeakKernelDeint, TomsMoComp, FieldDeinterlace, SmoothDeinterlace, NNEDI, MCBob, TIVTC, TDecimate
+        Disabled, TFM, Yadif, YadifModEDI, TDeint, TDeintEDI, TomsMoComp, LeakKernelDeint, FieldDeinterlace, QTGMC, MCBob, NNEDI, YadifModEDI2,
+        SmoothDeinterlace, TIVTC, TIVTC_TDeintEDI, TIVTC_YadifModEDI, TDecimate, TDecimate_23, TDecimate_24, TDecimate_25
     };
 
 	public partial class SourceDetector

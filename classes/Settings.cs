@@ -802,11 +802,11 @@ namespace XviD4PSP
             }
         }
 
-        public static DeinterlaceType TIVTC
+        public static DeinterlaceType Deint_Film
         {
             get
             {
-                object value = GetValue("TIVTC");
+                object value = GetValue("Deint_Film");
                 if (value == null)
                     return DeinterlaceType.TIVTC;
                 else
@@ -814,15 +814,15 @@ namespace XviD4PSP
             }
             set
             {
-                SetString("TIVTC", value.ToString());
+                SetString("Deint_Film", value.ToString());
             }
         }
 
-        public static DeinterlaceType Deinterlace
+        public static DeinterlaceType Deint_Interlaced
         {
             get
             {
-                object value = GetValue("Deinterlace");
+                object value = GetValue("Deint_Interlaced");
                 if (value == null)
                     return DeinterlaceType.Yadif;
                 else
@@ -830,7 +830,7 @@ namespace XviD4PSP
             }
             set
             {
-                SetString("Deinterlace", value.ToString());
+                SetString("Deint_Interlaced", value.ToString());
             }
         }
 

@@ -569,26 +569,21 @@ namespace XviD4PSP
                    m.outvcodec == "x264" && m.format == ExportFormats.M2TS ||
                    m.outvcodec == "x264" && m.format == ExportFormats.Mkv ||
                    m.outvcodec == "x264" && m.format == ExportFormats.TS ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.Custom) 
+                   m.outvcodec == "x264" && m.format == ExportFormats.Custom)
                {
                    if (Settings.AlwaysProgressive)
-                       m.deinterlace = Settings.Deinterlace;
+                       m.deinterlace = Settings.Deint_Interlaced;
                    else
                        m.deinterlace = DeinterlaceType.Disabled;
                }
                else
-               {
-                   if (m.interlace == SourceType.INTERLACED ||
-                            m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED)
-                       m.deinterlace = Settings.Deinterlace;
-                   else
-                       m.deinterlace = DeinterlaceType.Disabled;
-               }
+                   m.deinterlace = Settings.Deint_Interlaced;
            }
-           else if (m.interlace == SourceType.FILM ||
-                    m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
+           else if (m.interlace == SourceType.FILM || m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
                     m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM)
-               m.deinterlace = Settings.TIVTC;
+           {
+               m.deinterlace = Settings.Deint_Film;
+           }
            else if (m.interlace == SourceType.DECIMATING)
            {
                m.deinterlace = DeinterlaceType.TDecimate;
@@ -728,8 +723,7 @@ namespace XviD4PSP
 
        public static Massive GetValidSamplerate(Massive m)
        {
-           if (m.inaudiostreams.Count > 0 &&
-               m.inaudiostreams.Count > 0)
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
            {
                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
@@ -754,10 +748,10 @@ namespace XviD4PSP
            return m;
        }
 
+       //Хоть это и из инструкции, но некоторые недопустимые частоты не отлавливаются (42240->32000)
        public static Massive GetValidSamplerateModifer(Massive m)
        {
-           if (m.inaudiostreams.Count > 0 &&
-               m.inaudiostreams.Count > 0 &&
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 &&
                m.sampleratemodifer == AviSynthScripting.SamplerateModifers.SSRC)
            {
                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
@@ -768,10 +762,10 @@ namespace XviD4PSP
                int frqgcd = Calculate.GetGCD(sfrq, dfrq);
                int fs1 = dfrq * sfrq / frqgcd;
 
-               if (fs1 / dfrq != 1 && 
-                   fs1 / dfrq % 2 != 0 && 
+               if (fs1 / dfrq != 1 &&
+                   fs1 / dfrq % 2 != 0 &&
                    fs1 / dfrq % 3 != 0)
-                   m.sampleratemodifer = AviSynthScripting.SamplerateModifers.ResampleAudio;          
+                   m.sampleratemodifer = AviSynthScripting.SamplerateModifers.ResampleAudio;
            }
 
            return m;
@@ -821,28 +815,18 @@ namespace XviD4PSP
 
        public static Massive GetValidFramerate(Massive m)
        {
-           string[] rates = GetValidFrameratesList(m);
-
            if (m.format == ExportFormats.DpgNintendoDS)
            {
-               if ((double)m.outresw / (double)m.outresh  < 1.5)
+               if ((double)m.outresw / (double)m.outresh < 1.5)
                    m.outframerate = "20.000";
                else
                    m.outframerate = "22.000";
            }
-           else if (m.deinterlace == DeinterlaceType.TIVTC ||
-               m.deinterlace == DeinterlaceType.TDecimate)
-               m.outframerate = Calculate.GetClosePointDouble("23.976", rates);
-           else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace ||
-                        m.deinterlace == DeinterlaceType.NNEDI ||
-                        m.deinterlace == DeinterlaceType.MCBob)
-           {
-               double inframerate = Calculate.ConvertStringToDouble(m.inframerate);
-               string rate = Calculate.ConvertDoubleToPointString(inframerate * 2.0);
-               m.outframerate = Calculate.GetClosePointDouble(rate, rates);
-           }
            else
-               m.outframerate = Calculate.GetClosePointDouble(m.inframerate, rates);
+           {
+               //Пересчет fps с учетом деинтерлейсера и ограничений форматов
+               m = Calculate.UpdateOutFramerate(m);
+           }
 
            return m;
        }

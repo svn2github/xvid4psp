@@ -2913,14 +2913,18 @@ namespace XviD4PSP
                     //создаём новый AviSynth скрипт
                     m = AviSynthScripting.CreateAutoAviSynthScript(m);
 
-                    //проверяем скрипт на ошибки и пытаемся их автоматически исправить
-                    string er = Calculate.CheckScriptErrors(m);
-                    if (er != null)
+                    //механизм обхода ошибок SSRC
+                    if (m.sampleratemodifer == AviSynthScripting.SamplerateModifers.SSRC &&
+                        m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
                     {
-                        if (er == "SSRC: could not resample between the two samplerates.")
+                        AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                        AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                        if (instream.samplerate != outstream.samplerate && outstream.samplerate != null &&
+                            Calculate.CheckScriptErrors(m) == "SSRC: could not resample between the two samplerates.")
+                        {
                             m.sampleratemodifer = AviSynthScripting.SamplerateModifers.ResampleAudio;
-
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        }
                     }
 
                     //загружаем обновлённый скрипт

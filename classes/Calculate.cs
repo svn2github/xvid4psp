@@ -171,16 +171,29 @@ namespace XviD4PSP
            if (m.frameratemodifer == AviSynthScripting.FramerateModifers.AssumeFPS)
            {
                //AssumeFPS не меняет число кадров, но его меняют деинтерлейсеры
-               if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TDecimate)
+               if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
+                   m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI || m.deinterlace == DeinterlaceType.TDecimate ||
+                   m.deinterlace == DeinterlaceType.TDecimate_23)
                {
                    //Для деинтерлейсеров, возвращающих 23.976fps
-                   m.outframes = (int)(23.976 * (double)m.induration.TotalSeconds);
+                   m.outframes = Convert.ToInt32(23.976 * m.induration.TotalSeconds);
                }
-               else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace ||
-                   m.deinterlace == DeinterlaceType.MCBob || m.deinterlace == DeinterlaceType.NNEDI)
+               else if (m.deinterlace == DeinterlaceType.TDecimate_24)
+               {
+                   //TDecimate_24 возвращает 24.000fps
+                   m.outframes = Convert.ToInt32(24.000 * m.induration.TotalSeconds);
+               }
+               else if (m.deinterlace == DeinterlaceType.TDecimate_25)
+               {
+                   //TDecimate_25 возвращает 25.000fps
+                   m.outframes = Convert.ToInt32(25.000 * m.induration.TotalSeconds);
+               }
+               else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace || m.deinterlace == DeinterlaceType.MCBob ||
+                   m.deinterlace == DeinterlaceType.NNEDI || m.deinterlace == DeinterlaceType.YadifModEDI2 ||
+                   m.deinterlace == DeinterlaceType.QTGMC)
                {
                    //Для деинтерлейсеров, удваивающих fps
-                   m.outframes = (int)(Calculate.ConvertStringToDouble(m.inframerate) * 2.0 * (double)m.induration.TotalSeconds);
+                   m.outframes = Convert.ToInt32(Calculate.ConvertStringToDouble(m.inframerate) * 2.0 * m.induration.TotalSeconds);
                }
                else
                {
@@ -190,7 +203,7 @@ namespace XviD4PSP
            }
            else
            {
-               m.outframes = (int)(Calculate.ConvertStringToDouble(m.outframerate) * (double)m.induration.TotalSeconds);
+               m.outframes = Convert.ToInt32(Calculate.ConvertStringToDouble(m.outframerate) * m.induration.TotalSeconds);
            }
 
            //Учитываем обрезку     
@@ -204,6 +217,46 @@ namespace XviD4PSP
 
            //Пересчитываем кадр для THM
            m.thmframe = m.outframes / 2;
+
+           return m;
+       }
+
+       //Выходная частота кадров с учетом деинтерлейсера и ограничений форматов
+       public static Massive UpdateOutFramerate(Massive m)
+       {
+           string[] rates = Format.GetValidFrameratesList(m);
+
+           if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
+               m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI || m.deinterlace == DeinterlaceType.TDecimate ||
+               m.deinterlace == DeinterlaceType.TDecimate_23)
+           {
+               //Для деинтерлейсеров, возвращающих 23.976fps
+               m.outframerate = Calculate.GetClosePointDouble("23.976", rates);
+           }
+           else if (m.deinterlace == DeinterlaceType.TDecimate_24)
+           {
+               //TDecimate_24 возвращает 24.000fps
+               m.outframerate = Calculate.GetClosePointDouble("24.000", rates);
+           }
+           else if (m.deinterlace == DeinterlaceType.TDecimate_25)
+           {
+               //TDecimate_25 возвращает 25.000fps
+               m.outframerate = Calculate.GetClosePointDouble("25.000", rates);
+           }
+           else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace || m.deinterlace == DeinterlaceType.NNEDI ||
+               m.deinterlace == DeinterlaceType.YadifModEDI2 || m.deinterlace == DeinterlaceType.MCBob ||
+               m.deinterlace == DeinterlaceType.QTGMC)
+           {
+               //Для деинтерлейсеров, удваивающих fps
+               double inframerate = Calculate.ConvertStringToDouble(m.inframerate);
+               string rate = Calculate.ConvertDoubleToPointString(inframerate * 2.0);
+               m.outframerate = Calculate.GetClosePointDouble(rate, rates);
+           }
+           else
+           {
+               //Во всех остальных случаях
+               m.outframerate = Calculate.GetClosePointDouble(m.inframerate, rates);
+           }
 
            return m;
        }

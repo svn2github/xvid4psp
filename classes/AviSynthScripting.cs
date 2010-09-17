@@ -7,7 +7,6 @@ namespace XviD4PSP
 {
    public static class AviSynthScripting
     {
-
        public enum Decoders
        {
            AVIFileSource = 1, //AviSynth
@@ -39,6 +38,7 @@ namespace XviD4PSP
            BilinearResize,
            LanczosResize,
            Lanczos4Resize,
+           BlackmanResize,
            Spline16Resize,
            Spline36Resize,
            Spline64Resize,
@@ -62,6 +62,7 @@ namespace XviD4PSP
        public static Massive CreateAutoAviSynthScript(Massive m)
        {
            string old_filtering = null;
+           string startup_path = Calculate.StartupPath;
 
            //Ищем и сохраняем старую фильтрацию
            if (m.script != null && !m.filtering_changed)
@@ -88,7 +89,6 @@ namespace XviD4PSP
 
            //определяем расширения
            string ext = Path.GetExtension(m.infilepath).ToLower();
-           //string aext = Path.GetExtension(m.audiopath).ToLower();
 
            //определяем аудио потоки
            AudioStream instream;
@@ -101,92 +101,117 @@ namespace XviD4PSP
            m.script = "";
 
            //загружаем доп функции
-           m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
-           m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
+           m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
+           m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
 
            //загружаем необходимые плагины импорта
            if (m.vdecoder == Decoders.MPEG2Source)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.AVCSource)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DGMultiSource)
                m.script += "loadplugin(\"" + m.dgdecnv_path + "DGMultiDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.RawSource)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
 
            if (instream.decoder == Decoders.NicAC3Source || instream.decoder == Decoders.NicMPG123Source ||
                instream.decoder == Decoders.NicDTSSource || instream.decoder == Decoders.RaWavSource)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
            else if (instream.decoder == Decoders.bassAudioSource)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
 
-           if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TDecimate ||
+           if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
+               m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI || m.deinterlace == DeinterlaceType.TDecimate ||
+               m.deinterlace == DeinterlaceType.TDecimate_23 || m.deinterlace == DeinterlaceType.TDecimate_24 ||
+               m.deinterlace == DeinterlaceType.TDecimate_25 || m.deinterlace == DeinterlaceType.TFM ||
                m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
            if (m.deinterlace == DeinterlaceType.TomsMoComp)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TomsMoComp.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TomsMoComp.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.TDeint)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.TDeintEDI)
            {
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
            }
-           else if (m.deinterlace == DeinterlaceType.YadifModEDI)
+           else if (m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI)
            {
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\yadifmod.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TMM.dll\")" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.YadifModEDI || m.deinterlace == DeinterlaceType.YadifModEDI2 ||
+               m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI)
+           {
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadifmod.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\LeakKernelDeint.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\LeakKernelDeint.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.Yadif)
-               m.script += "loadcplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
+               m.script += "loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\SmoothDeinterlacer.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SmoothDeinterlacer.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.NNEDI)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.MCBob)
            {
-               m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\Repair.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Repair.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.QTGMC)
+           {
+               m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\QTGMC.avs\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrainSSE2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RepairSSE2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\fft3dfilter.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI3.dll\")" + Environment.NewLine;
+               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
+               m.script += "#loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
+               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
+               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\AddGrainC.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.FieldDeinterlace)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\Decomb.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Decomb.dll\")" + Environment.NewLine;
 
            if (m.subtitlepath != null)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\VSFilter.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VSFilter.dll\")" + Environment.NewLine;
 
-           if (m.vdecoder == Decoders.FFmpegSource ||
-               instream.decoder == Decoders.FFmpegSource ||
-               instream.decoder == Decoders.FFAudioSource)
+           if (m.vdecoder == Decoders.FFmpegSource || instream.decoder == Decoders.FFmpegSource || instream.decoder == Decoders.FFAudioSource)
            {
                if (Settings.FFmpegSource2)
                {
-                   m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
-                   m.script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
+                   m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
+                   m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
                }
                else
-                   m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMpegSource.dll\")" + Environment.NewLine;
+                   m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMpegSource.dll\")" + Environment.NewLine;
            }
 
            if (m.vdecoder == Decoders.QTInput || instream.decoder == Decoders.QTInput)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\QTSource.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\QTSource.dll\")" + Environment.NewLine;
 
            if (m.iscolormatrix)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\ColorMatrix.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\ColorMatrix.dll\")" + Environment.NewLine;
 
            if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\soxfilter.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\soxfilter.dll\")" + Environment.NewLine;
 
            if (m.frameratemodifer == FramerateModifers.MSUFrameRate)
-               m.script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\MSU_FRC.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MSU_FRC.dll\")" + Environment.NewLine;
 
            m.script += Environment.NewLine;
 
@@ -227,10 +252,9 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\",cpu=0,info=3)";
                    n++;
-                   if (n < m.infileslist.Length)
-                       invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\",cpu=0,info=3)";
+                   if (n < m.infileslist.Length) invideostring += " + ";
                }
            }
            else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source) //мпег2 и MPEG2Source
@@ -242,10 +266,9 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
                    n++;
-                   if (n < m.infileslist.Length)
-                       invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
+                   if (n < m.infileslist.Length) invideostring += " + ";
                }
            }
            else //другое
@@ -271,72 +294,93 @@ namespace XviD4PSP
                            cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
                    n++;
-                   if (n < m.infileslist.Length)
-                       invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
+                   if (n < m.infileslist.Length) invideostring += " + ";
                }
            }
 
            //добавка для объединения звука и видео
-           if (m.inaudiostreams.Count > 0 &&
-               m.outaudiostreams.Count > 0 &&
-               instream.audiopath != null)
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath != null)
                invideostring = "video = " + invideostring;
 
-           //прописываем импорт видео иди всего клипа
-           m.script += invideostring + Environment.NewLine; //video = (tralalalalalala)
+           //прописываем импорт видео или всего клипа
+           m.script += invideostring + Environment.NewLine;
 
            //теперь звук!
-           if (m.inaudiostreams.Count > 0 &&
-               m.outaudiostreams.Count > 0 &&
-               instream.audiopath != null)
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath != null)
            {
                //пришиваем звук
                string inaudiostring = "";
-               if (instream.audiofiles != null &&
-                   instream.audiofiles.Length > 0)
+               if (instream.audiofiles != null && instream.audiofiles.Length > 0)
                {
                    int n = 0;
                    foreach (string file in instream.audiofiles)
                    {
-                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\")";
                        n++;
-                       if (n < instream.audiofiles.Length)
-                           inaudiostring += " + ";
+                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\")";
+                       if (n < instream.audiofiles.Length) inaudiostring += " + ";
                    }
                }
                else
                {
                    inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\")";
                }
-               m.script += "audio = " + inaudiostring + Environment.NewLine; //audio = (tralalalalalala)
+               m.script += "audio = " + inaudiostring + Environment.NewLine;
 
                //объединение
-               m.script += "AudioDub(video, audio)"
-                   + Environment.NewLine;
+               m.script += "AudioDub(video, audio)" + Environment.NewLine;
            }
 
            m.script += Environment.NewLine;
 
-           bool IsAssumeRateConvertion = false;
-           if (m.inframerate != m.outframerate)
+           //Определяем необходимость смены частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, MSU_FRC)
+           bool ApplyFramerateModifier = false, IsAssumeFramerateConvertion = false;
+           if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
+               m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI || m.deinterlace == DeinterlaceType.TDecimate ||
+               m.deinterlace == DeinterlaceType.TDecimate_23)
            {
-               if (m.deinterlace == DeinterlaceType.TIVTC ||
-                   m.deinterlace == DeinterlaceType.TDecimate)
+               if (m.outframerate != "23.976")
                {
-                   if (m.outframerate != "23.976")
-                       if (m.frameratemodifer == FramerateModifers.AssumeFPS)
-                           IsAssumeRateConvertion = true;
+                   ApplyFramerateModifier = true;
+                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
                }
-               else
-                   if (m.frameratemodifer == FramerateModifers.AssumeFPS)
-                       IsAssumeRateConvertion = true;
+           }
+           else if (m.deinterlace == DeinterlaceType.TDecimate_24)
+           {
+               if (m.outframerate != "24.000")
+               {
+                   ApplyFramerateModifier = true;
+                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
+               }
+           }
+           else if (m.deinterlace == DeinterlaceType.TDecimate_25)
+           {
+               if (m.outframerate != "25.000")
+               {
+                   ApplyFramerateModifier = true;
+                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
+               }
+           }
+           else if (m.deinterlace == DeinterlaceType.MCBob || m.deinterlace == DeinterlaceType.NNEDI ||
+           m.deinterlace == DeinterlaceType.YadifModEDI2 || m.deinterlace == DeinterlaceType.QTGMC ||
+           m.deinterlace == DeinterlaceType.SmoothDeinterlace)
+           {
+               double outframerate = Calculate.ConvertStringToDouble(m.outframerate);
+               if (outframerate != Calculate.ConvertStringToDouble(m.inframerate) * 2.0)
+               {
+                   ApplyFramerateModifier = true;
+                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
+               }
+           }
+           else if (m.inframerate != m.outframerate)
+           {
+               ApplyFramerateModifier = true;
+               IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
            }
 
            //блок обработки звука
-           if (m.inaudiostreams.Count > 0 &&
-               m.outaudiostreams.Count > 0)
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
            {
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
@@ -352,7 +396,7 @@ namespace XviD4PSP
                    m.script += "DelayAudio(" + Calculate.ConvertDoubleToPointString(Convert.ToDouble(outstream.delay) / 1000) + ")" + Environment.NewLine;
 
                //прописываем смену частоты
-               if (instream.samplerate != outstream.samplerate && !IsAssumeRateConvertion && outstream.samplerate != null)
+               if (instream.samplerate != outstream.samplerate && !IsAssumeFramerateConvertion && outstream.samplerate != null)
                    m.script += m.sampleratemodifer + "(" + outstream.samplerate + ")" + Environment.NewLine;
 
                //нормализация звука
@@ -437,25 +481,29 @@ namespace XviD4PSP
            {
                string deinterlacer = "TomsMoComp(" + order + ", 5, 1)";
                m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.Yadif)
            {
                string deinterlacer = "Yadif(order=" + order + ")";
                m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.YadifModEDI)
            {
-               string deinterlacer = "yadifmod(order=" + order + ", field=-1, mode=0, edeint=nnedi2())";
+               string deinterlacer = "YadifMod(order=" + order + ", edeint=nnedi2(field=" + order + "))";
                m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
            {
-               string deinterlacer = "LeakKernelDeint(order=" + Math.Abs(order) + ", sharp=true)";
+               string deinterlacer = "LeakKernelDeint(order=" + ((order < 0) ? "((GetParity) ? 1 : 0)" : order.ToString()) + ", sharp=true)";
                m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-               "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40)==true ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.TFM)
+           {
+               m.script += "TFM(order=" + order + ", mode=1, pp=6, slow=1, cthresh=6, MI=35)" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.FieldDeinterlace)
            {
@@ -469,7 +517,8 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.TDeintEDI)
            {
-               m.script += "edeintted = last.AssumeTFF().SeparateFields().SelectEven().EEDI2(field=-1)" + Environment.NewLine;
+               string assume = ((order == 1) ? "AssumeTFF()." : (order == 0) ? "AssumeBFF()." : "");
+               m.script += "edeintted = last." + assume + "SeparateFields().SelectEven().EEDI2(field=-1)" + Environment.NewLine;
                m.script += "TDeint(order=" + order + ", edeint=edeintted" + ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ?
                    ", full=false, cthresh=7, MI=40" : "") + ")" + Environment.NewLine;
            }
@@ -477,20 +526,40 @@ namespace XviD4PSP
            {
                m.script += "TFM(order=" + order + ").TDecimate(hybrid=1)" + Environment.NewLine;
            }
+           else if (m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI)
+           {
+               m.script += "interp = nnedi2(field=" + order + ", qual=2)" + Environment.NewLine;
+               m.script += "tmmask = TMM(order=" + order + ", field=" + order + ")" + Environment.NewLine;
+               m.script += "deint = TDeint(order=" + order + ", field=" + order + ", edeint=interp, slow=2, emask=tmmask)" + Environment.NewLine;
+               m.script += "TFM(order=" + order + ", mode=3, clip2=deint, slow=2).TDecimate(hybrid=1)" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI)
+           {
+               m.script += "interp = nnedi2(field=" + order + ", qual=2)" + Environment.NewLine;
+               m.script += "deint = YadifMod(order=" + order + ", edeint=interp)" + Environment.NewLine;
+               m.script += "TFM(order=" + order + ", mode=3, clip2=deint, slow=2).TDecimate(hybrid=1)" + Environment.NewLine;
+           }
            else if (m.deinterlace == DeinterlaceType.TDecimate)
            {
-               //SelectEven().Tdecimate()
-               //TDecimate(Mode=7,Rate=23.976)
-               //TDecimate(mode=0,cycleR=9,cycle=15)
-               //SelectEven().Decimate(5) 
+               //TDecimate(Mode=7,Rate=23.976) dupthresh vidthresh
+               //TDecimate(Mode=2, Rate=24)    maxndl m2PA
+               //TDecimate(mode=0,cycleR=9,cycle=15) 59.940->23.976
+               //TDecimate(Mode=1,CycleR=166,Cycle=1001) 29.970->25
 
-               if (m.inframerate != "29.970")
-               {
-                   m.script += "ChangeFPS(29.97)" + Environment.NewLine;
-                   m.script += "TDecimate()" + Environment.NewLine;
-               }
-               else
-                   m.script += "TDecimate(cycleR=1)" + Environment.NewLine;
+               if (m.inframerate != "29.970") m.script += "ChangeFPS(29.97)" + Environment.NewLine;
+               m.script += "TDecimate(cycleR=1, cycle=5) #remove 1 frame from every 5 frames" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.TDecimate_23)
+           {
+               m.script += "TDecimate(mode=7, rate=23.976) #or try \"mode=2\"" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.TDecimate_24)
+           {
+               m.script += "TDecimate(mode=7, rate=24.000) #or try \"mode=2\"" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.TDecimate_25)
+           {
+               m.script += "TDecimate(mode=7, rate=25.000) #or try \"mode=2\"" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace)
            {
@@ -498,11 +567,21 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.MCBob)
            {
+               m.script += ((order == 1) ? "AssumeTFF()\r\n" : (order == 0) ? "AssumeBFF()\r\n" : "");
                m.script += "MCBobmod()" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.NNEDI)
            {
                m.script += "nnedi2(field=" + ((order == 1) ? "3" : (order == 0) ? "2" : "-2") + ")" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.YadifModEDI2)
+           {
+               int field = ((order == 1) ? 3 : (order == 0) ? 2 : -2);
+               m.script += "YadifMod(order=" + order + ", mode=1, edeint=nnedi2(field=" + field + "))" + Environment.NewLine;
+           }
+           else if (m.deinterlace == DeinterlaceType.QTGMC)
+           {
+               m.script += "QTGMC(2, 1, 1, 4, 0, 4, \"NNEDI3\") #or try \"NNEDI2\" for speed up" + Environment.NewLine; ;
            }
 
            //Фильтрация до ресайза
@@ -510,7 +589,7 @@ namespace XviD4PSP
            {
                m.script += "\r\n###[FILTERING]###\r\n";
                if (old_filtering != null) m.script += old_filtering;
-               else if (m.filtering != "Disabled") m.script += LoadScript(Calculate.StartupPath + "\\presets\\filtering\\" + m.filtering + ".avs");
+               else if (m.filtering != "Disabled") m.script += LoadScript(startup_path + "\\presets\\filtering\\" + m.filtering + ".avs");
                m.script += "###[FILTERING]###\r\n\r\n";
            }
 
@@ -588,7 +667,7 @@ namespace XviD4PSP
            {
                m.script += "\r\n###[FILTERING]###\r\n";
                if (old_filtering != null) m.script += old_filtering;
-               else if (m.filtering != "Disabled") m.script += LoadScript(Calculate.StartupPath + "\\presets\\filtering\\" + m.filtering + ".avs");
+               else if (m.filtering != "Disabled") m.script += LoadScript(startup_path + "\\presets\\filtering\\" + m.filtering + ".avs");
                m.script += "###[FILTERING]###\r\n\r\n";
            }
 
@@ -613,110 +692,47 @@ namespace XviD4PSP
                     m.script += "TextSub(\"" + m.subtitlepath + "\")";
            }
 
-           //прописываем смену фреймрейта
-           if (m.deinterlace == DeinterlaceType.TIVTC ||
-               m.deinterlace == DeinterlaceType.TDecimate)
-           {
-               if (m.outframerate != "23.976")
-               {
-                   if (IsAssumeRateConvertion)
-                   {
-                       //восстанавливаем смещение звука
-                       if (m.inaudiostreams.Count > 0 &&
-                           m.outaudiostreams.Count > 0)
-                       {
-                           AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                           m.script += m.frameratemodifer + "(" + m.outframerate + ", true)" + Environment.NewLine;
-                           if (outstream.samplerate != null)
-                               m.script += "ResampleAudio(" + outstream.samplerate + ")" + Environment.NewLine;
-                       }
-                       else
-                           m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
-                   }
-                   else
-                   {
-                       m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
-                   }
-               }
-           }
-           else if (m.deinterlace == DeinterlaceType.MCBob ||
-               m.deinterlace == DeinterlaceType.NNEDI ||
-               m.deinterlace == DeinterlaceType.SmoothDeinterlace)
-           {
-               double outframerate = Calculate.ConvertStringToDouble(m.outframerate);
-               double outfr = Calculate.ConvertStringToDouble(m.inframerate) * 2.0;
-               if (outframerate != outfr)
-               {
-                   if (IsAssumeRateConvertion)
-                   {
-                       //восстанавливаем смещение звука
-                       if (m.inaudiostreams.Count > 0 &&
-                           m.outaudiostreams.Count > 0)
-                       {
-                           AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                           m.script += m.frameratemodifer + "(" + m.outframerate + ", true)" + Environment.NewLine;
-                           if (outstream.samplerate != null)
-                               m.script += "ResampleAudio(" + outstream.samplerate + ")" + Environment.NewLine;
-                       }
-                       else
-                           m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
-                   }
-                   else
-                   {
-                       m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
-                   }
-               }
-           }
-           else if (m.frameratemodifer == FramerateModifers.MSUFrameRate)
+           //Смена частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, MSU_FRC)
+           if (ApplyFramerateModifier && m.frameratemodifer == FramerateModifers.MSUFrameRate)
            {
                double outfr = Calculate.ConvertStringToDouble(m.outframerate);
                double infr = Calculate.ConvertStringToDouble(m.inframerate);
                int closevalue = Convert.ToInt32(outfr / infr);
                if (closevalue > 1)
                {
-                   //защита mod16
-                   if (Calculate.GetValid(m.outresw, 16) != m.outresw ||
-                       Calculate.GetValid(m.outresh, 16) != m.outresh)
+                   int new_w = Calculate.GetValid(m.outresw, 16);
+                   int new_h = Calculate.GetValid(m.outresh, 16);
+
+                   if (new_w != m.outresw || new_h != m.outresh)
                    {
-                       m.script += Resizers.Lanczos4Resize + "(" + Calculate.GetValid(m.outresw, 16) + ", " +
-                                   Calculate.GetValid(m.outresh, 16) + ")" + Environment.NewLine;
+                       //защита mod16 вкл.
+                       m.script += Resizers.Spline36Resize + "(" + new_w + ", " + new_h + ")" + Environment.NewLine;
                    }
                    m.script += "MSU_FRC(" + closevalue + ", \"slow\")" + Environment.NewLine;
-                   //защита mod16
-                   if (Calculate.GetValid(m.outresw, 16) != m.outresw ||
-                       Calculate.GetValid(m.outresh, 16) != m.outresh)
+                   if (new_w != m.outresw || new_h != m.outresh)
                    {
-                       m.script += Resizers.Lanczos4Resize + "(" + m.outresw + ", " + m.outresh + ")" + Environment.NewLine;
+                       //защита mod16 выкл.
+                       m.script += Resizers.Spline36Resize + "(" + m.outresw + ", " + m.outresh + ")" + Environment.NewLine;
                    }
                }
                if (closevalue * infr != outfr)
                    m.script += FramerateModifers.ChangeFPS + "(" + m.outframerate + ")" + Environment.NewLine;
            }
-           else
+           else if (ApplyFramerateModifier)
            {
-               if (m.inframerate != m.outframerate)
+               //Подгонка звука для AssumeFPS
+               if (IsAssumeFramerateConvertion && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
                {
-                   if (IsAssumeRateConvertion)
-                   {
-                       //восстанавливаем смещение звука
-                       if (m.inaudiostreams.Count > 0 &&
-                           m.outaudiostreams.Count > 0)
-                       {
-                           AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                           m.script += m.frameratemodifer + "(" + m.outframerate + ", true)" + Environment.NewLine;
-                           if (outstream.samplerate != null)
-                               m.script += "ResampleAudio(" + outstream.samplerate + ")" + Environment.NewLine;
-                       }
-                       else
-                           m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
-                   }
-                   else
-                   {
-                       m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
-                   }
+                   AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                   m.script += m.frameratemodifer + "(" + m.outframerate + ", true)" + Environment.NewLine;
+                   //Должен вписываться ресемплер из настроек (sampleratemodifer) но тогда надо отлавливать ошибки SSRC
+                   //из-за несовместимых частот (могут получиться после AssumeFPS).
+                   if (outstream.samplerate != null) m.script += "ResampleAudio(" + outstream.samplerate + ")" + Environment.NewLine;
                }
+               else
+                   m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
            }
-           
+
            //Трим
            if (m.trim_start != 0 || m.trim_end != 0)
                m.script += "Trim(" + m.trim_start + "," + m.trim_end + ")" + Environment.NewLine;
@@ -799,10 +815,8 @@ namespace XviD4PSP
 
        public static string GetInfoScript(Massive m, ScriptMode mode)
        {
-
            //определяем расширения
            string ext = Path.GetExtension(m.infilepath).ToLower();
-           //string aext = Path.GetExtension(m.audiopath).ToLower();
 
            AudioStream instream;
            if (m.inaudiostreams.Count > 0)
@@ -840,8 +854,7 @@ namespace XviD4PSP
            if (mode == ScriptMode.Interlace)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
 
-           if (m.vdecoder == Decoders.FFmpegSource || instream.decoder == Decoders.FFmpegSource ||
-               instream.decoder == Decoders.FFAudioSource)
+           if (m.vdecoder == Decoders.FFmpegSource || instream.decoder == Decoders.FFmpegSource || instream.decoder == Decoders.FFAudioSource)
            {
                if (Settings.FFmpegSource2)
                {
@@ -890,10 +903,9 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\",cpu=0,info=3)";
                    n++;
-                   if (n < m.infileslist.Length)
-                       invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\",cpu=0,info=3)";
+                   if (n < m.infileslist.Length) invideostring += " + ";
                }
            }
            else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source)
@@ -905,10 +917,9 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
                    n++;
-                   if (n < m.infileslist.Length)
-                       invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
+                   if (n < m.infileslist.Length) invideostring += " + ";
                }
            }
            else
@@ -930,37 +941,32 @@ namespace XviD4PSP
                            cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
                    n += 1;
-                   if (n < m.infileslist.Length)
-                       invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
+                   if (n < m.infileslist.Length) invideostring += " + ";
                }
            }
 
            //добавка для объединения звука и видео
-           if (m.inaudiostreams.Count > 0 &&
-               instream.audiopath != null)
+           if (m.inaudiostreams.Count > 0 && instream.audiopath != null)
                invideostring = "video = " + invideostring;
 
-           //прописываем импорт видео иди всего клипа
+           //прописываем импорт видео или всего клипа
            script += invideostring + Environment.NewLine;
 
            //импорт звука и объединение
-           if (m.inaudiostreams.Count > 0 &&
-               instream.audiopath != null)
+           if (m.inaudiostreams.Count > 0 && instream.audiopath != null)
            {
                //пришиваем звук
                string inaudiostring = "";
-               if (instream.audiofiles != null &&
-                   instream.audiofiles.Length > 0)
+               if (instream.audiofiles != null && instream.audiofiles.Length > 0)
                {
                    int n = 0;
                    foreach (string file in instream.audiofiles)
                    {
-                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\")";
                        n++;
-                       if (n < instream.audiofiles.Length)
-                           inaudiostring += " + ";
+                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\")";
+                       if (n < instream.audiofiles.Length) inaudiostring += " + ";
                    }
                }
                else
@@ -970,8 +976,7 @@ namespace XviD4PSP
                script += "audio = " + inaudiostring + Environment.NewLine;
 
                //объединение
-               script += "AudioDub(video, audio)"
-                   + Environment.NewLine;
+               script += "AudioDub(video, audio)" + Environment.NewLine;
            }
 
            if (mode == ScriptMode.FastPreview || mode == ScriptMode.Normalize)

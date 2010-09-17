@@ -1,5 +1,8 @@
-XviD4PSP 5.0.37.8 r132->r167 09.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r168 17.09.10, main changes:
 
+>>> (r168) Added BlackmanResize.
+>>> (r168) Some new deinterlacers has been added: QTGMC (Bob), YadifModEDI2 (Bob), TIVTC+TDeintEDI, TIVTC+YadifModEDI,
+           TFM (field-matcher for videos with phase-shifted fields) and TDecimate 23-25 (for auto deleting duplicate frames).
 >>> (r167) Fixed possible crash of DirectShow preview (if the script contains no video, or in some other cases).
 >>> (r166) It is now possible to enter time position into "Set Start" & "Set End" fields (format is HH:MM:SS.ms), fixed possible crash.
 >>> (r165) For option "Read parameters from the script when saving a new task" added fps detection, fixed possible crash.
