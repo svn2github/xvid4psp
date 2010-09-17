@@ -2976,7 +2976,7 @@ namespace XviD4PSP
                 {
                     //обновляем дочерние окна
                     ReloadChildWindows();
-                    ValidateTrim(m);
+                    ValidateTrimAndCopy(m);
                 }
             }
         }
@@ -3100,7 +3100,7 @@ namespace XviD4PSP
 
                         //обновляем дочерние окна
                         ReloadChildWindows();
-                        ValidateTrim(m);
+                        ValidateTrimAndCopy(m);
                     }
                 }
             }
@@ -3165,7 +3165,7 @@ namespace XviD4PSP
                                 mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
                                     " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                             }
-                            else ValidateTrim(m);
+                            ValidateTrimAndCopy(m);
                         }
                     }
                     
@@ -3201,6 +3201,7 @@ namespace XviD4PSP
                 //m.outfilesize = Calculate.GetEncodingSize(m);
 
                 UpdateTaskMassive(m);
+                ValidateTrimAndCopy(m);
             }
         }
 
@@ -3258,7 +3259,7 @@ namespace XviD4PSP
                 //m.outfilesize = Calculate.GetEncodingSize(m);
 
                 UpdateTaskMassive(m);
-                ValidateTrim(m);
+                ValidateTrimAndCopy(m);
             }
         }
 
@@ -5446,7 +5447,7 @@ namespace XviD4PSP
                 button_apply_trim.Content = Languages.Translate("Remove Trim");
                 textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = true;
                 UpdateScriptAndDuration();
-                ValidateTrim(m);
+                ValidateTrimAndCopy(m);
             }
             else if (trim_is_on)
             {
@@ -5743,13 +5744,15 @@ namespace XviD4PSP
              textbox_frame_goto.Text = Math.Round(Position.TotalSeconds * fps).ToString();            
         }
 
-        private void ValidateTrim(Massive mass)
+        private void ValidateTrimAndCopy(Massive mass)
         {
-            if (mass.trim_start == 0 && mass.trim_end == 0) return;
             if (combo_aencoding.SelectedItem.ToString() == "Copy" || combo_vencoding.SelectedItem.ToString() == "Copy")
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Trimming feature doesn't affect the track(s) in Copy mode!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
+                if (mass.trim_start != 0 || mass.trim_end != 0)
+                    new Message(this).ShowMessage(Languages.Translate("Trimming feature doesn't affect the track(s) in Copy mode!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
+
+                if (mass.testscript)
+                    new Message(this).ShowMessage(Languages.Translate("Test script and Copy mode are not compatible!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
             }
         }
 
@@ -5762,6 +5765,7 @@ namespace XviD4PSP
         {
             m.testscript = !m.testscript;
             UpdateScriptAndDuration();
+            ValidateTrimAndCopy(m);
         }
 
         private void UpdateRecentFiles()
