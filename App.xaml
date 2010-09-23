@@ -9,7 +9,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="ResourceDictionary1.xaml"/>
 			</ResourceDictionary.MergedDictionaries>
-			<Style TargetType="{x:Type ComboBox}">
+            <Style TargetType="{x:Type ComboBox}">
 				<Setter Property="FocusVisualStyle" Value="{StaticResource ComboBoxFocusVisual}"/>
 				<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>
 				<Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
@@ -136,8 +136,19 @@
 					</Setter.Value>
 				</Setter>
 			</Style>
-			<Style BasedOn="{x:Null}" TargetType="{x:Type TextBox}">
-				<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+			<ContextMenu x:Key="TextBoxContextMenu">
+                <MenuItem Command="ApplicationCommands.Cut" PreviewMouseUp="Cut_PreviewMouseUp"/>
+                <MenuItem Command="ApplicationCommands.Copy" PreviewMouseUp="Copy_PreviewMouseUp"/>
+                <MenuItem Command="ApplicationCommands.Paste"/>
+                <Separator/>
+                <MenuItem Command="ApplicationCommands.Undo"/>
+                <MenuItem Command="ApplicationCommands.Redo"/>
+                <MenuItem Command="ApplicationCommands.SelectAll"/>
+            </ContextMenu>
+            <Style BasedOn="{x:Null}" TargetType="{x:Type TextBox}">
+                <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
+                <Setter Property="ContextMenu" Value="{StaticResource TextBoxContextMenu}"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 				<Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
 				<Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
 				<Setter Property="BorderThickness" Value="1"/>

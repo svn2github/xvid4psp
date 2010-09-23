@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r169 18.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r170 23.09.10, main changes:
 
+>>> (r170) Fixed problems with copying text to clipboard.
 >>> (r169) Added warning message, if Test script is used when audio/video track is in Copy mode.
 >>> (r168) Added BlackmanResize.
 >>> (r168) Some new deinterlacers has been added: QTGMC (Bob), YadifModEDI2 (Bob), TIVTC+TDeintEDI, TIVTC+YadifModEDI,
