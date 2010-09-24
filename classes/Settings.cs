@@ -12,7 +12,7 @@ namespace XviD4PSP
         public enum AutoVolumeModes { Disabled = 1, OnImport, OnExport }
         public enum AutoJoinModes { Disabled = 1, Enabled, DVDonly }
         public enum EncodingModes { OnePass = 1, TwoPass, ThreePass, Quality, Quantizer, OnePassSize, TwoPassSize, ThreePassSize, TwoPassQuality, ThreePassQuality }
-        public enum PlayerEngines { DirectShow = 1, MediaBridge }
+        public enum PlayerEngines { DirectShow = 1, MediaBridge, PictureView }
         public enum AfterImportActions { Nothing = 1, Middle, Play }
         public enum AudioEncodingModes { CBR = 1, VBR, ABR, TwoPass }
         public enum AutoDeinterlaceModes { AllFiles = 1, MPEGs, Disabled }

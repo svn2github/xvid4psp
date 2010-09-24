@@ -53,11 +53,11 @@ namespace XviD4PSP
         private IMediaPosition mediaPosition = null;
         private IVideoFrameStep frameStep = null;
 
+        private double dpi = 1.0;
+        private double in_ar = 0;
         private string filepath = string.Empty;
         private bool isAudioOnly = false;
         private PlayState currentState = PlayState.Stopped;
-
-        private IntPtr hDrain = IntPtr.Zero;
 
         private HwndSource source;
         private System.Timers.Timer timer;
@@ -65,24 +65,22 @@ namespace XviD4PSP
         public Massive m;
         private ArrayList dvd;
         private bool isInfoLoading = true;
-
         private IFilterGraph graph;
 
-#if DEBUG
-        private DsROTEntry rot = null;
-#endif
-
-        public DVDImport(Massive mass, string dvdpath)
+        public DVDImport(Massive mass, string dvdpath, double dpi)
         {
             this.InitializeComponent();
 
             this.Owner = mass.owner;
             m = mass.Clone();
+            this.dpi = dpi;
 
             //tooltips
             label_title.Content = Languages.Translate("Select title:");
             button_cancel.Content = Languages.Translate("Cancel");
-            button_ok.Content = Languages.Translate("OK");       
+            button_ok.Content = Languages.Translate("OK");
+            button_play.ToolTip = Languages.Translate("Play-Pause");
+            button_stop.ToolTip = Languages.Translate("Stop");
 
             //events
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
@@ -144,166 +142,171 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MainFormLoaderDelegate(MainFormLoader));
             else
             {
-                        try
+                try
+                {
+                    // If we have ANY file open, close it and shut down DirectShow
+                    if (this.currentState != PlayState.Init)
+                        CloseClip();
+
+                    //список плохих титлов
+                    ArrayList badlist = new ArrayList();
+
+                    if (isInfoLoading)
+                    {
+                        double maximum = 0;
+                        int index_of_maximum = 0;
+                        int num = 0;
+
+                        //забиваем длительность
+                        foreach (object obj in dvd)
                         {
-                            // If we have ANY file open, close it and shut down DirectShow
-                            if (this.currentState != PlayState.Init)
-                                CloseClip();
+                            string[] titles = (string[])obj;
+                            string ifopath = Calculate.GetIFO(titles[0]);
 
-                            //список плохих титлов
-                            ArrayList badlist = new ArrayList();
-
-                            if (isInfoLoading)
+                            if (File.Exists(ifopath))
                             {
-                                double maximum = 0;
-                                int index_of_maximum = 0;
-                                int num = 0;
-                                
-                                //забиваем длительность
-                                foreach (object obj in dvd)
+                                MediaInfoWrapper media = new MediaInfoWrapper();
+                                media.Open(ifopath);
+                                string info = media.Width + "x" + media.Height + " " + media.AspectString + " " + media.Standart;
+                                media.Close();
+
+                                //получаем информацию из ифо
+                                VStripWrapper vs = new VStripWrapper();
+                                vs.Open(ifopath);
+                                double titleduration = vs.Duration().TotalSeconds;
+                                //string   info = vs.Width() + "x" + vs.Height() + " " + vs.System(); //При обращении к ifoGetVideoDesc на некоторых системах происходит вылет VStrip.dll..
+                                //Теперь нужная инфа будет браться из МедиаИнфо..
+                                vs.Close();
+
+                                string titlenum = Calculate.GetTitleNum(titles[0]);
+                                combo_titles.Items.Add("T" + titlenum + " " + info + " " + Calculate.GetTimeline(titleduration) + " - " + titles.Length + " file(s)");
+
+                                //Ищем самый продолжительный титл
+                                if (titleduration > maximum)
                                 {
-                                    string[] titles = (string[])obj;
-                                    string ifopath = Calculate.GetIFO(titles[0]);
-
-                                    if (File.Exists(ifopath))
-                                    {
-                                        MediaInfoWrapper media = new MediaInfoWrapper();
-                                        media.Open(ifopath);
-                                        string info = media.Width + "x" + media.Height + " " + media.AspectString + " " + media.Standart;
-                                        media.Close();
-
-                                        //получаем информацию из ифо
-                                        VStripWrapper vs = new VStripWrapper();
-                                        vs.Open(ifopath);
-                                        double titleduration = vs.Duration().TotalSeconds;
-                                        //string   info = vs.Width() + "x" + vs.Height() + " " + vs.System(); //При обращении к ifoGetVideoDesc на некоторых системах происходит вылет VStrip.dll.. Теперь нужная инфа будет браться из МедиаИнфо..
-                                        vs.Close();
-
-                                        string titlenum = Calculate.GetTitleNum(titles[0]);
-                                        combo_titles.Items.Add("T" + titlenum + " " + info + " " + Calculate.GetTimeline(titleduration) + " - " + titles.Length + " file(s)");
-
-                                        //Ищем самый продолжительный титл
-                                        if (titleduration > maximum)
-                                        {
-                                            maximum = titleduration;
-                                            index_of_maximum = num;
-                                        }
-                                        num += 1;
-                                    }
-                                    //метод если нет IFO
-                                    else
-                                    {
-                                        try
-                                        {
-                                            int n = 0;
-                                            double titleduration = 0.0;
-                                            string info = "";
-                                            foreach (string tilte in titles)
-                                            {
-                                                int hr = 0;
-
-                                                this.graphBuilder = (IGraphBuilder)new FilterGraph();
-
-                                                // Have the graph builder construct its the appropriate graph automatically
-                                                hr = this.graphBuilder.RenderFile(tilte, null);
-                                                DsError.ThrowExceptionForHR(hr);
-
-                                                // QueryInterface for DirectShow interfaces
-                                                this.mediaControl = (IMediaControl)this.graphBuilder;
-                                                this.mediaPosition = (IMediaPosition)this.graphBuilder;
-
-                                                //определяем длительность
-                                                double cduration = 0.0;
-                                                hr = mediaPosition.get_Duration(out cduration);
-                                                DsError.ThrowExceptionForHR(hr);
-
-                                                //определяем различные параметры
-                                                if (n == 0)
-                                                {
-                                                    this.basicVideo = this.graphBuilder as IBasicVideo;
-                                                    //this.basicAudio = this.graphBuilder as IBasicAudio;
-                                                    int resw;
-                                                    int resh;
-                                                    double AvgTimePerFrame;
-                                                    hr = basicVideo.get_SourceWidth(out resw);
-                                                    DsError.ThrowExceptionForHR(hr);
-                                                    hr = basicVideo.get_SourceHeight(out resh);
-                                                    DsError.ThrowExceptionForHR(hr);
-                                                    hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
-                                                    double framerate = 1 / AvgTimePerFrame;
-                                                    string system = "NTSC";
-                                                    if (framerate == 25.0)
-                                                        system = "PAL";
-
-                                                    info += resw + "x" + resh + " " + system + " ";
-                                                }
-
-                                                //освобождаем ресурсы
-                                                CloseInterfaces();
-
-                                                titleduration += cduration;
-
-                                                n++;
-                                            }
-
-                                            string titlenum = Calculate.GetTitleNum(titles[0]);
-                                            combo_titles.Items.Add("T" + titlenum + " " + info + Calculate.GetTimeline(titleduration));
-                                        }
-                                        catch
-                                        {
-                                            badlist.Add(obj);
-                                            CloseInterfaces();
-                                        }
-                                    }
+                                    maximum = titleduration;
+                                    index_of_maximum = num;
                                 }
-
-                                combo_titles.Items.RemoveAt(0);
-                                combo_titles.SelectedIndex = index_of_maximum;
-                                this.isInfoLoading = false;
+                                num += 1;
                             }
+                            //метод если нет IFO
+                            else
+                            {
+                                try
+                                {
+                                    int n = 0;
+                                    double titleduration = 0.0;
+                                    string info = "";
+                                    foreach (string tilte in titles)
+                                    {
+                                        int hr = 0;
 
-                            //удаляем плохие титлы
-                            foreach (object obj in badlist)
-                                dvd.Remove(obj);
+                                        this.graphBuilder = (IGraphBuilder)new FilterGraph();
 
-                            //загружаем титл
-                            string[] deftitles = (string[])dvd[combo_titles.SelectedIndex];
-                            this.filepath = deftitles[0];
-                            string title_s = Calculate.GetTitleNum(this.filepath);
-                            textbox_name.Text = Calculate.GetDVDName(this.filepath) + " T" + title_s;
-                            m.infilepath = this.filepath;
-                            m.infileslist = deftitles;
+                                        // Have the graph builder construct its the appropriate graph automatically
+                                        hr = this.graphBuilder.RenderFile(tilte, null);
+                                        DsError.ThrowExceptionForHR(hr);
 
-                            // Reset status variables
-                            this.currentState = PlayState.Stopped;
-                            //this.currentVolume = VolumeFull;
+                                        // QueryInterface for DirectShow interfaces
+                                        this.mediaControl = (IMediaControl)this.graphBuilder;
+                                        this.mediaPosition = (IMediaPosition)this.graphBuilder;
 
-                            // Start playing the media file
-                            if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
-                                PlayMovieInWindow(this.filepath);
-                            if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
-                                PlayWithMediaBridge(this.filepath);
+                                        //определяем длительность
+                                        double cduration = 0.0;
+                                        hr = mediaPosition.get_Duration(out cduration);
+                                        DsError.ThrowExceptionForHR(hr);
+
+                                        //определяем различные параметры
+                                        if (n == 0)
+                                        {
+                                            this.basicVideo = this.graphBuilder as IBasicVideo;
+                                            //this.basicAudio = this.graphBuilder as IBasicAudio;
+                                            int resw;
+                                            int resh;
+                                            double AvgTimePerFrame;
+                                            hr = basicVideo.get_SourceWidth(out resw);
+                                            DsError.ThrowExceptionForHR(hr);
+                                            hr = basicVideo.get_SourceHeight(out resh);
+                                            DsError.ThrowExceptionForHR(hr);
+                                            hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
+                                            double framerate = 1 / AvgTimePerFrame;
+                                            string system = "NTSC";
+                                            if (framerate == 25.0)
+                                                system = "PAL";
+
+                                            info += resw + "x" + resh + " " + system + " ";
+                                        }
+
+                                        //освобождаем ресурсы
+                                        CloseInterfaces();
+
+                                        titleduration += cduration;
+
+                                        n++;
+                                    }
+
+                                    string titlenum = Calculate.GetTitleNum(titles[0]);
+                                    combo_titles.Items.Add("T" + titlenum + " " + info + Calculate.GetTimeline(titleduration));
+                                }
+                                catch
+                                {
+                                    badlist.Add(obj);
+                                    CloseInterfaces();
+                                }
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            textbox_name.Text = "";
-                            CloseClip();
-                            this.filepath = String.Empty;
-                            MessageBox.Show(ex.Message);
-                        }
+
+                        combo_titles.Items.RemoveAt(0);
+                        combo_titles.SelectedIndex = index_of_maximum;
+                        this.isInfoLoading = false;
+                    }
+
+                    //удаляем плохие титлы
+                    foreach (object obj in badlist)
+                        dvd.Remove(obj);
+
+                    //загружаем титл
+                    string[] deftitles = (string[])dvd[combo_titles.SelectedIndex];
+                    this.filepath = deftitles[0];
+                    string title_s = Calculate.GetTitleNum(this.filepath);
+                    textbox_name.Text = Calculate.GetDVDName(this.filepath) + " T" + title_s;
+                    m.infilepath = this.filepath;
+                    m.infileslist = deftitles;
+
+                    //Определяем аспект для DirectShow плейера (чтоб не вызывать еще раз MediaInfo)
+                    string aspect = Calculate.GetRegexValue(@"\s\d+x\d+\s(\d+:\d+)\s", combo_titles.SelectedItem.ToString());
+                    if (!string.IsNullOrEmpty(aspect))
+                    {
+                        if (aspect == "4:3") in_ar = 4.0 / 3.0;
+                        else if (aspect == "16:9") in_ar = 16.0 / 9.0;
+                        else if (aspect == "2.2:1") in_ar = 2.21;
+                    }
+
+                    // Reset status variables
+                    this.currentState = PlayState.Stopped;
+
+                    // Start playing the media file
+                    if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
+                        PlayMovieInWindow(this.filepath);
+                    else
+                        PlayWithMediaBridge(this.filepath);
+                }
+                catch (Exception ex)
+                {
+                    textbox_name.Text = "";
+                    CloseClip();
+                    this.filepath = String.Empty;
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //string[] args = Environment.GetCommandLineArgs();
-            //if (args.Length > 1 && File.Exists(args[1]))
-                textbox_name.Text = Languages.Translate("loading") + "...";
-            //else
-            //    textbox_name.Text = "";
+            textbox_name.Text = Languages.Translate("loading") + "...";
             textbox_time.Text = "00:00:00";
 
-            if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
+            if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
             {
                 this.LocationChanged += new EventHandler(MainWindow_LocationChanged);
                 this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
@@ -320,7 +323,7 @@ namespace XviD4PSP
 
                 VideoElement.Visibility = Visibility.Collapsed;
             }
-            if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
+            else
             {
                 //set media element state for video loading
                 VideoElement.LoadedBehavior = MediaState.Manual;
@@ -377,9 +380,9 @@ namespace XviD4PSP
                     //this.currentVolume = VolumeFull;
 
                     // Start playing the media file
-                    if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
+                    if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
                         PlayMovieInWindow(this.filepath);
-                    if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
+                    else
                         PlayWithMediaBridge(this.filepath);
                 }
                 catch (Exception ex)
@@ -422,14 +425,6 @@ namespace XviD4PSP
             }
         }
 
-        //private void grid_player_MouseDown(object sender, MouseButtonEventArgs e)
-        //{
-        //    if (e.Clicks == 2 && e.Button == System.Windows.Forms.MouseButtons.Left && graphBuilder != null)
-        //    {
-        //        SwitchToFullScreen();
-        //    }
-        //}
-
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             StopClip();
@@ -446,67 +441,6 @@ namespace XviD4PSP
         {
             if (!this.isAudioOnly)
                 MoveVideoWindow();
-        }
-
-        private void button_open_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            try
-            {
-                string files = Languages.Translate("files");
-
-                System.Windows.Forms.OpenFileDialog o = new System.Windows.Forms.OpenFileDialog();
-                o.Filter = Languages.Translate("All media files") + "|*.avi;*.divx;*.wmv;*.mpg;*.mpe;*.mpeg;*.mod;*.asf;*.mkv;*.mov;*.qt;*.3gp;*.hdmov;*.mp4;*.ogm;*.avs;*.vob;*.dvr-ms;*.ts;*.m2p;*.m2t;*.m2v;*.d2v;*.m2ts;*.rm;*.ram;*.rmvb;*.rpx;*.smi;*.smil;*.flv;*.pmp;*.mp3;*.wma;*.ogg;*.aac;*.m4a;*.dts;*.ac3;*.wav|" +
-                    "AVI " + files + " (AVI DIVX ASF)|*.avi;*.divx;*.asf|" +
-                    "MPEG " + files + " (MPG MPE MPEG VOB MOD TS M2P M2T M2TS)|*.mpg;*.mpe;*.mpeg;*.vob;*.ts;*.m2p;*.m2t;*.mod;*.m2ts|" +
-                    "DGIndex " + files + " (D2V)|*.d2v|" +
-                    "QuickTime " + files + " (MOV QT 3GP HDMOV)|*.mov;*.qt;*.3gp;*.hdmov|" +
-                    "RealVideo " + files + " (RM RAM RMVB RPX SMI SMIL)|*.rm;*.ram;*.rmvb;*.rpx;*.smi;*.smil|" +
-                    "Matroska " + files + " (MKV)|*.mkv|" +
-                    "OGG Media (Vorbis) " + files + " (OGM)|*.ogm|" +
-                    "Windows Media " + files + " (WMV)|*.wmv|" +
-                    "Media Center " + files + " (DVR-MS)|*.dvr-ms|" +
-                    "PMP " + files + " (PMP)|*.pmp|" +
-                    "Flash Video " + files + " (FLV)|*.flv|" +
-                    "MP3 " + files + " (MP3)|*.mp3|" +
-                    "OGG Vorbis " + files + " (OGG)|*.ogg|" +
-                    "Windows media audio " + files + " (WMA)|*.wma|" +
-                    "DTS " + files + " (DTS)|*.dts|" +
-                    "AC3 " + files + " (AC3)|*.ac3|" +
-                    "AAC " + files + " (AAC)|*.aac;*.m4a|" +
-                    "Windows PCM " + files + " (WAV)|*.wav|" +
-                    Languages.Translate("All files") + " (*.*)|*.*";
-                o.Multiselect = false;
-                o.Title = Languages.Translate("Select media file") + ":";
-
-                if (o.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    textbox_name.Text = Languages.Translate("loading") + "...";
-
-                    // If we have ANY file open, close it and shut down DirectShow
-                    if (this.currentState != PlayState.Init)
-                        CloseClip();
-
-                    this.filepath = o.FileName;
-                    textbox_name.Text = Path.GetFileName(filepath);
-
-                    // Reset status variables
-                    this.currentState = PlayState.Stopped;
-                    //this.currentVolume = VolumeFull;
-
-                    // Start playing the media file
-                    if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
-                        PlayMovieInWindow(this.filepath);
-                    if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
-                        PlayWithMediaBridge(this.filepath);
-                }
-            }
-            catch (Exception ex)
-            {
-                this.textbox_name.Text = "";
-                CloseClip();
-                this.filepath = String.Empty;
-                MessageBox.Show(ex.Message);
-            }
         }
 
         private void button_close_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -559,37 +493,20 @@ namespace XviD4PSP
 
                 // Clear global flags
                 this.currentState = PlayState.Stopped;
-                //this.isAudioOnly = true;
 
                 // Free DirectShow interfaces
                 CloseInterfaces();
 
                 this.isAudioOnly = true; //Перенесено сюда
 
-                // Clear file name to allow selection of new file with open dialog
-                //this.filepath = string.Empty;
-
                 // No current media state
                 this.currentState = PlayState.Init;
-
-                //update titles
-                //textbox_name.Text = "";
-                textbox_time.Text = "00:00:00";
-                progress_top.Width = 0.0;
-                slider_pos.Value = 0.0;
             }
-
-            if (this.VideoElement.Source != null)
+            else if (this.VideoElement.Source != null)
             {
                 VideoElement.Stop();
                 VideoElement.Source = null;
                 this.currentState = PlayState.Init;
-
-                //update titles
-                //textbox_name.Text = "";
-                textbox_time.Text = "00:00:00";
-                progress_top.Width = 0.0;
-                slider_pos.Value = 0.0;
 
                 if (this.graphBuilder != null)
                 {
@@ -612,6 +529,12 @@ namespace XviD4PSP
                 string url = "MediaBridge://MyDataString";
                 MediaBridge.MediaBridgeManager.UnregisterCallback(url);
             }
+
+            //update titles
+            textbox_time.Text = "00:00:00";
+            progress_top.Width = 0.0;
+            slider_pos.Value = 0.0;
+            in_ar = 0;
         }
 
         private void CloseInterfaces()
@@ -623,7 +546,7 @@ namespace XviD4PSP
                 lock (this)
                 {
                     // Relinquish ownership (IMPORTANT!) after hiding video window
-                    if (!this.isAudioOnly && this.videoWindow != null)//////////////////////////////////////
+                    if (!this.isAudioOnly && this.videoWindow != null)
                     {
                         hr = this.videoWindow.put_Visible(OABool.False);
                         DsError.ThrowExceptionForHR(hr);
@@ -637,13 +560,6 @@ namespace XviD4PSP
                         DsError.ThrowExceptionForHR(hr);
                     }
 
-#if DEBUG
-                    if (rot != null)
-                    {
-                        rot.Dispose();
-                        rot = null;
-                    }
-#endif
                     // Release and zero DirectShow interfaces
                     if (this.mediaEventEx != null)
                         this.mediaEventEx = null;
@@ -681,18 +597,51 @@ namespace XviD4PSP
 
         private void PlayMovieInWindow(string filename)
         {
+            if (filename == string.Empty) return;
+
             int hr = 0;
-
-            //grid_player.Visibility = Visibility.Visible;
-
-            if (filename == string.Empty)
-                return;
-
             this.graphBuilder = (IGraphBuilder)new FilterGraph();
+
+            //Добавляем в граф нужный рендерер (0 - graphBuilder сам выберет рендерер)
+            int renderer = Settings.VideoRenderer;
+            if (renderer == 1)
+            {
+                IBaseFilter add_vr = (IBaseFilter)new VideoRenderer();
+                hr = graphBuilder.AddFilter(add_vr, "Video Renderer");
+            }
+            else if (renderer == 2)
+            {
+                IBaseFilter add_vmr = (IBaseFilter)new VideoMixingRenderer();
+                hr = graphBuilder.AddFilter(add_vmr, "Video Renderer");
+            }
+            else if (renderer == 3)
+            {
+                IBaseFilter add_vmr9 = (IBaseFilter)new VideoMixingRenderer9();
+                hr = graphBuilder.AddFilter(add_vmr9, "Video Mixing Renderer 9");
+            }
+            DsError.ThrowExceptionForHR(hr);
 
             // Have the graph builder construct its the appropriate graph automatically
             hr = this.graphBuilder.RenderFile(filename, null);
             DsError.ThrowExceptionForHR(hr);
+
+            //Ищем рендерер и отключаем соблюдение аспекта (аспект будет определяться размерами видео-окна)
+            IBaseFilter filter = null;
+            graphBuilder.FindFilterByName("Video Renderer", out filter);
+            if (filter != null)
+            {
+                IVMRAspectRatioControl vmr = filter as IVMRAspectRatioControl;
+                if (vmr != null) DsError.ThrowExceptionForHR(vmr.SetAspectRatioMode(VMRAspectRatioMode.None));
+            }
+            else
+            {
+                graphBuilder.FindFilterByName("Video Mixing Renderer 9", out filter);
+                if (filter != null)
+                {
+                    IVMRAspectRatioControl9 vmr9 = filter as IVMRAspectRatioControl9;
+                    if (vmr9 != null) DsError.ThrowExceptionForHR(vmr9.SetAspectRatioMode(VMRAspectRatioMode.None));
+                }
+            }
 
             // QueryInterface for DirectShow interfaces
             this.mediaControl = (IMediaControl)this.graphBuilder;
@@ -717,12 +666,20 @@ namespace XviD4PSP
 
             if (!this.isAudioOnly)
             {
+                //Определяем аспект, если он нам не известен
+                if (in_ar == 0)
+                {
+                    MediaInfoWrapper media = new MediaInfoWrapper();
+                    media.Open(filepath);
+                    in_ar = media.Aspect;
+                    media.Close();
+                }
+
                 // Setup the video window
                 hr = this.videoWindow.put_Owner(this.source.Handle);
                 DsError.ThrowExceptionForHR(hr);
 
-                hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child |
-                    DirectShowLib.WindowStyle.ClipSiblings |
+                hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings |
                     DirectShowLib.WindowStyle.ClipChildren);
                 DsError.ThrowExceptionForHR(hr);
 
@@ -730,10 +687,6 @@ namespace XviD4PSP
 
                 GetFrameStepInterface();
             }
-
-#if DEBUG
-            rot = new DsROTEntry(this.graphBuilder);
-#endif
 
             this.Focus();
 
@@ -752,34 +705,31 @@ namespace XviD4PSP
 
         private void MoveVideoWindow()
         {
-            int hr = 0;
-
             // Track the movement of the container window and resize as needed
             if (this.videoWindow != null)
             {
-                int w;
-                int h;
-                hr = basicVideo.get_SourceWidth(out w);
-                DsError.ThrowExceptionForHR(hr);
-                hr = basicVideo.get_VideoHeight(out h);
-                DsError.ThrowExceptionForHR(hr);
+                double top, left;
+                int hr = 0, w = 0, h = 0;
+                DsError.ThrowExceptionForHR(basicVideo.get_SourceWidth(out w));
+                DsError.ThrowExceptionForHR(basicVideo.get_VideoHeight(out h)); //get_SourceHeight ?
+                double aspect = (in_ar > 0) ? in_ar : ((double)w / (double)h);
 
-                double aspect = (double)w / (double)h;
-
-                int top = (int)(grid_top.ActualHeight + grid_player_info.ActualHeight + 12);
-                h = (int)(this.LayoutRoot.ActualHeight - top - grid_buttons.ActualHeight - slider_pos.ActualHeight - 6);
+                top = grid_top.ActualHeight + grid_player_info.ActualHeight + 4;
+                h = (int)(LayoutRoot.ActualHeight - top - grid_buttons.ActualHeight - slider_pos.ActualHeight - 4);
                 w = (int)(aspect * h);
-                int left = (int)((this.LayoutRoot.ActualWidth - w - 16) / 2);
-
+                left = (LayoutRoot.ActualWidth - w) / 2;
                 if (w > (int)progress_back.ActualWidth)
                 {
                     w = (int)progress_back.ActualWidth;
                     h = (int)((double)w / aspect);
-                    left = (int)((this.LayoutRoot.ActualWidth - w) / 2);
-                    top = (int)((this.LayoutRoot.ActualHeight - h) / 2.0) + 14;
+                    left = (LayoutRoot.ActualWidth - w) / 2;
+                    top = ((LayoutRoot.ActualHeight - h) / 2.0) + 16;
                 }
 
-                hr = this.videoWindow.SetWindowPosition(left, top, w, h);
+                //Масштабируем и вводим
+                hr = this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(w * dpi), (int)(h * dpi));
+                DsError.ThrowExceptionForHR(hr);
+                hr = this.videoWindow.put_BorderColor(1);
                 DsError.ThrowExceptionForHR(hr);
             }
         }
@@ -1041,9 +991,8 @@ namespace XviD4PSP
             {
                 if (this.graphBuilder != null && this.VideoElement.Source == null)
                 {
-                    int hr = 0;
                     double duration;
-                    hr = mediaPosition.get_Duration(out duration);
+                    int hr = mediaPosition.get_Duration(out duration);
                     DsError.ThrowExceptionForHR(hr);
                     return TimeSpan.FromSeconds(duration);
                 }
@@ -1062,9 +1011,8 @@ namespace XviD4PSP
             {
                 if (this.graphBuilder != null && this.VideoElement.Source == null)
                 {
-                    int hr = 0;
                     double position;
-                    hr = mediaPosition.get_CurrentPosition(out position);
+                    int hr = mediaPosition.get_CurrentPosition(out position);
                     DsError.ThrowExceptionForHR(hr);
                     return TimeSpan.FromSeconds(position);
                 }

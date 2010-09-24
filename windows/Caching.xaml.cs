@@ -340,7 +340,7 @@ namespace XviD4PSP
             }
             else
             {
-                ShowMessage(error, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                ShowMessage("Caching: " + error, Languages.Translate("Error"), Message.MessageStyle.Ok);
                 error = null;
                 m = null;
             }

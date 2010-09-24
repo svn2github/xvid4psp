@@ -1,5 +1,9 @@
-XviD4PSP 5.0.37.8 r132->r170 23.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r171 24.09.10, main changes:
 
+>>> (r171) Added another player engine: PictureView. In this mode preview shows a static picture of current frame; AviSynth
+           is only loaded when preview is updating; better accuracy of frame counter.
+>>> (r171) DVDImport window: fixed incorrect positioning of DirectShow preview, if system DPI not equal to 96; selected
+           video renderer in Settings->Player engine->DirectShow output - now also used for DirectShow preview in this window.
 >>> (r170) Fixed problems with copying text to clipboard.
 >>> (r169) Added warning message, if Test script is used when audio/video track is in Copy mode.
 >>> (r168) Added BlackmanResize.
