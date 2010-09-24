@@ -1,0 +1,646 @@
+<Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+	x:Class="WPF_VideoPlayer.App" StartupUri="MainWindow.xaml">
+    <Application.Resources>       
+        <ControlTemplate x:Key="GlassButton" TargetType="{x:Type Button}">
+            <ControlTemplate.Resources>
+                <Storyboard x:Key="Timeline1">
+                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="glow" Storyboard.TargetProperty="(UIElement.Opacity)">
+                        <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="1"/>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+                <Storyboard x:Key="Timeline2">
+                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="glow" Storyboard.TargetProperty="(UIElement.Opacity)">
+                        <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0"/>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+            </ControlTemplate.Resources>
+            <Grid>
+                <Border x:Name="border" Background="#7F000000" BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="4,4,4,4" Margin="0,0,0,0" Width="Auto" Height="Auto">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="0.507*"/>
+                            <RowDefinition Height="0.493*"/>
+                        </Grid.RowDefinitions>
+                        <Border Opacity="0" HorizontalAlignment="Stretch" x:Name="glow" Width="Auto" Grid.RowSpan="2" CornerRadius="4,4,4,4">
+                            <Border.Background>
+                                <RadialGradientBrush>
+                                    <RadialGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="1.702" ScaleY="2.243"/>
+                                            <SkewTransform AngleX="0" AngleY="0"/>
+                                            <RotateTransform Angle="0"/>
+                                            <TranslateTransform X="-0.368" Y="-0.152"/>
+                                        </TransformGroup>
+                                    </RadialGradientBrush.RelativeTransform>
+                                    <GradientStop Color="#B2A266EC" Offset="0"/>
+                                    <GradientStop Color="#008DBDFF" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Grid.RowSpan="2"/>
+                        <Border HorizontalAlignment="Stretch" Margin="0,0,0,0" x:Name="shine" Width="Auto" CornerRadius="4,4,0,0">
+                            <Border.Background>
+                                <LinearGradientBrush EndPoint="0.494,0.889" StartPoint="0.494,0.028">
+                                    <GradientStop Color="#99FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#33FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" TargetName="shine" Value="0.4"/>
+                    <Setter Property="Background" TargetName="border" Value="#CC000000"/>
+                    <Setter Property="Visibility" TargetName="glow" Value="Hidden"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard Storyboard="{StaticResource Timeline1}"/>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard x:Name="Timeline2_BeginStoryboard" Storyboard="{StaticResource Timeline2}"/>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <SolidColorBrush x:Key="HorizontalSliderTrackNormalBackground" Color="#FFE7EAEA" />
+        <LinearGradientBrush x:Key="HorizontalSliderTrackNormalBorder" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="#FFAEB1AF" Offset="0.1" />
+            <GradientStop Color="White" Offset=".9" />
+        </LinearGradientBrush>
+        <Style x:Key="SliderRepeatButtonStyle" TargetType="{x:Type RepeatButton}">
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Rectangle Fill="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="HorizontalSliderThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Width" Value="11" />
+            <Setter Property="Foreground" Value="Gray" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Canvas SnapsToDevicePixels="true">
+                            <Canvas.RenderTransform>
+                                <TranslateTransform X="5.5" Y="11"/>
+                            </Canvas.RenderTransform>
+                            <Border Name="border" Background="#B2000000" BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="8,8,8,8" Width="12.375" Height="18.875" Canvas.Left="-6.125" Canvas.Top="-9.375">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="0.507*" />
+                                        <RowDefinition Height="0.493*" />
+                                    </Grid.RowDefinitions>
+                                    <Border Name="glow" Opacity="0" HorizontalAlignment="Stretch" Width="Auto" Grid.RowSpan="2" CornerRadius="8,8,8,8" Visibility="Visible">
+                                        <Border.Background>
+                                            <RadialGradientBrush>
+                                                <RadialGradientBrush.RelativeTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform ScaleX="1.702" ScaleY="2.243" />
+                                                        <SkewTransform AngleX="0" AngleY="0" />
+                                                        <RotateTransform Angle="0" />
+                                                        <TranslateTransform X="-0.368" Y="-0.152" />
+                                                    </TransformGroup>
+                                                </RadialGradientBrush.RelativeTransform>
+                                                <GradientStop Color="#B2D663EE" Offset="0" />
+                                                <GradientStop Color="#008DBDFF" Offset="1" />
+                                            </RadialGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <Border Name="shine" HorizontalAlignment="Stretch" Margin="0,0,0,0" Width="Auto" CornerRadius="8,8,0,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush EndPoint="0.494,0.889" StartPoint="0.494,0.028">
+                                                <GradientStop Color="#99FFFFFF" Offset="0" />
+                                                <GradientStop Color="#33FFFFFF" Offset="1" />
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </Canvas>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="#B2A266EC"/>
+                            </Trigger>
+                            <Trigger Property="Foreground" Value="Blue" />
+                            <Trigger Property="IsDragging" Value="true" />
+                            <Trigger Property="IsEnabled" Value="false" />
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <LinearGradientBrush x:Key="HorizontalSliderThumbNormalBackgroundInverted" EndPoint="0,0" StartPoint="0,1">
+            <GradientStop Color="White" Offset="0" />
+            <GradientStop Color="#F0EFEF" Offset="0.4" />
+            <GradientStop Color="#D6D5D5" Offset=".8" />
+        </LinearGradientBrush>
+        <Geometry x:Key="SliderPointedThumbOuterBorderGeometry">M 4.5,-7.5 A 1 1 0 0 0 3.5,-8.5 L -3.5,-8.5 A 1 1 0 0 0 -4.5,-7.5 L -4.5,4.5 L -0.5,8.5 L 0.5,8.5 L 4.5,4.5 Z</Geometry>
+        <Geometry x:Key="SliderPointedThumbMiddleBorderGeometry">M 3.5,-7.5 L -3.5,-7.5 L -3.5,4.5 L 0,8 L 3.5,4.5 Z</Geometry>
+        <LinearGradientBrush x:Key="HorizontalSliderThumbHoverBackgroundInverted" EndPoint="0,0" StartPoint="0,1">
+            <GradientStop Color="white" Offset="0" />
+            <GradientStop Color="#B8E2F9" Offset="0.5" />
+            <GradientStop Color="#B0DFF8" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="HorizontalSliderThumbHoverBorder" Color="#3C7FB1" />
+        <LinearGradientBrush x:Key="HorizontalSliderThumbPressedBackgroundInverted" EndPoint="0,0" StartPoint="0,1">
+            <GradientStop Color="#B8E4FA" Offset="0.25" />
+            <GradientStop Color="#5EB4E3" Offset="0.5" />
+            <GradientStop Color="#4C8BB4" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="HorizontalSliderThumbPressedBorder" Color="#2C628B" />
+        <Geometry x:Key="SliderThumbDisabledGeometry">M -5,-10.5 L 5,-10.5 L 5,10.5 L -5,10.5 Z</Geometry>
+        <Geometry x:Key="SliderPointedThumbDisabledGeometry">M 4.5,-8.5 L -4.5,-8.5 L -4.5,4.5 L -0.5,8.5 L 0.5,8.5 L 4.5,4.5 Z</Geometry>
+        <Style x:Key="HorizontalSliderUpThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Canvas SnapsToDevicePixels="true">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TransformGroup.Children>
+                                        <TransformCollection>
+                                            <RotateTransform Angle="180"/>
+                                            <TranslateTransform X="5" Y="9"/>
+                                        </TransformCollection>
+                                    </TransformGroup.Children>
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Path Fill="{StaticResource HorizontalSliderThumbNormalBackgroundInverted}" x:Name="Background" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                            <Path Stroke="White" StrokeThickness="1" x:Name="InnerBorder" Data="{StaticResource SliderPointedThumbMiddleBorderGeometry}"/>
+                            <Path Stroke="#FF929292" StrokeThickness="1" x:Name="OuterBorder" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                        </Canvas>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource HorizontalSliderThumbHoverBackgroundInverted}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="Foreground" Value="Blue">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource HorizontalSliderThumbHoverBackgroundInverted}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource HorizontalSliderThumbPressedBackgroundInverted}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbPressedBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Fill" TargetName="Background" Value="#FFF4F4F4"/>
+                                <Setter Property="Stroke" TargetName="InnerBorder" Value="{x:Null}"/>
+                                <Setter Property="Data" TargetName="OuterBorder" Value="{StaticResource SliderThumbDisabledGeometry}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="#FFAEB1AF"/>
+                                <Setter Property="Data" TargetName="OuterBorder" Value="{StaticResource SliderPointedThumbDisabledGeometry}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <LinearGradientBrush x:Key="HorizontalSliderThumbNormalBackground" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="White" Offset="0" />
+            <GradientStop Color="#F0EFEF" Offset="0.4" />
+            <GradientStop Color="#D6D5D5" Offset=".8" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="HorizontalSliderThumbHoverBackground" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="white" Offset="0" />
+            <GradientStop Color="#B8E2F9" Offset="0.5" />
+            <GradientStop Color="#B0DFF8" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="HorizontalSliderThumbPressedBackground" EndPoint="0,1" StartPoint="0,0">
+            <GradientStop Color="#B8E4FA" Offset="0.25" />
+            <GradientStop Color="#5EB4E3" Offset="0.5" />
+            <GradientStop Color="#4C8BB4" Offset="1" />
+        </LinearGradientBrush>
+        <Style x:Key="HorizontalSliderDownThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Canvas SnapsToDevicePixels="true">
+                            <Canvas.RenderTransform>
+                                <TranslateTransform X="5" Y="9"/>
+                            </Canvas.RenderTransform>
+                            <Path Fill="{StaticResource HorizontalSliderThumbNormalBackground}" x:Name="Background" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                            <Path Stroke="White" StrokeThickness="1" x:Name="InnerBorder" Data="{StaticResource SliderPointedThumbMiddleBorderGeometry}"/>
+                            <Path Stroke="#FF929292" StrokeThickness="1" x:Name="OuterBorder" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                        </Canvas>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource HorizontalSliderThumbHoverBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="Foreground" Value="Blue">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource HorizontalSliderThumbHoverBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource HorizontalSliderThumbPressedBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbPressedBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Fill" TargetName="Background" Value="#FFF4F4F4"/>
+                                <Setter Property="Stroke" TargetName="InnerBorder" Value="{x:Null}"/>
+                                <Setter Property="Data" TargetName="OuterBorder" Value="{StaticResource SliderThumbDisabledGeometry}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="#FFAEB1AF"/>
+                                <Setter Property="Data" TargetName="OuterBorder" Value="{StaticResource SliderPointedThumbDisabledGeometry}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <LinearGradientBrush x:Key="VerticalSliderTrackNormalBorder" EndPoint="1,0" StartPoint="0,0">
+            <GradientStop Color="#FFAEB1AF" Offset="0.1" />
+            <GradientStop Color="White" Offset=".9" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="VerticalSliderThumbNormalBackground" EndPoint="1,0" StartPoint="0,0">
+            <GradientStop Color="White" Offset="0" />
+            <GradientStop Color="#F0EFEF" Offset="0.4" />
+            <GradientStop Color="#D6D5D5" Offset=".8" />
+        </LinearGradientBrush>
+        <Geometry x:Key="SliderThumbOuterBorderGeometry">M -5,-9.5 A 1 1 0 0 1 -4,-10.5 L 4,-10.5 A 1 1 0 0 1 5,-9.5 L 5,9.5 A 1 1 0 0 1 4,10.5 L -4,10.5 A 1 1 0 0 1 -5,9.5 Z</Geometry>
+        <Geometry x:Key="SliderThumbMiddleBorderGeometry">M -4,-9.5 L 4,-9.5 L 4,9.5 L -4,9.5 Z</Geometry>
+        <LinearGradientBrush x:Key="VerticalSliderThumbHoverBackground" EndPoint="1,0" StartPoint="0,0">
+            <GradientStop Color="white" Offset="0" />
+            <GradientStop Color="#B8E2F9" Offset="0.5" />
+            <GradientStop Color="#B0DFF8" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="VerticalSliderThumbPressedBackground" EndPoint="1,0" StartPoint="0,0">
+            <GradientStop Color="#B8E4FA" Offset="0.25" />
+            <GradientStop Color="#5EB4E3" Offset="0.5" />
+            <GradientStop Color="#4C8BB4" Offset="1" />
+        </LinearGradientBrush>
+        <Style x:Key="VerticalSliderThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Height" Value="11"/>
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Canvas SnapsToDevicePixels="true">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TransformGroup.Children>
+                                        <TransformCollection>
+                                            <RotateTransform Angle="90"/>
+                                            <TranslateTransform X="11" Y="5.5"/>
+                                        </TransformCollection>
+                                    </TransformGroup.Children>
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Path Fill="{StaticResource VerticalSliderThumbNormalBackground}" x:Name="Background" Data="{StaticResource SliderThumbOuterBorderGeometry}"/>
+                            <Path Stroke="White" StrokeThickness="1" x:Name="InnerBorder" Data="{StaticResource SliderThumbMiddleBorderGeometry}"/>
+                            <Path Stroke="#FF929292" StrokeThickness="1" x:Name="OuterBorder" Data="{StaticResource SliderThumbOuterBorderGeometry}"/>
+                        </Canvas>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbHoverBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="Foreground" Value="Blue">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbHoverBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbPressedBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbPressedBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Fill" TargetName="Background" Value="#FFF4F4F4"/>
+                                <Setter Property="Stroke" TargetName="InnerBorder" Value="{x:Null}"/>
+                                <Setter Property="Data" TargetName="OuterBorder" Value="{StaticResource SliderThumbDisabledGeometry}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="#FFAEB1AF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="VerticalSliderLeftThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Canvas SnapsToDevicePixels="true">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TransformGroup.Children>
+                                        <TransformCollection>
+                                            <RotateTransform Angle="90"/>
+                                            <TranslateTransform X="9" Y="5"/>
+                                        </TransformCollection>
+                                    </TransformGroup.Children>
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Path Fill="{StaticResource VerticalSliderThumbNormalBackground}" x:Name="Background" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                            <Path Stroke="White" StrokeThickness="1" x:Name="InnerBorder" Data="{StaticResource SliderPointedThumbMiddleBorderGeometry}"/>
+                            <Path Stroke="#FF929292" StrokeThickness="1" x:Name="OuterBorder" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                        </Canvas>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbHoverBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="Foreground" Value="Blue">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbHoverBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbPressedBackground}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbPressedBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Fill" TargetName="Background" Value="#FFF4F4F4"/>
+                                <Setter Property="Stroke" TargetName="InnerBorder" Value="{x:Null}"/>
+                                <Setter Property="Data" TargetName="OuterBorder" Value="{StaticResource SliderPointedThumbDisabledGeometry}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="#FFAEB1AF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <LinearGradientBrush x:Key="VerticalSliderThumbNormalBackgroundInverted" EndPoint="0,0" StartPoint="1,0">
+            <GradientStop Color="White" Offset="0" />
+            <GradientStop Color="#F0EFEF" Offset="0.4" />
+            <GradientStop Color="#D6D5D5" Offset=".8" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="VerticalSliderThumbHoverBackgroundInverted" EndPoint="0,0" StartPoint="1,0">
+            <GradientStop Color="white" Offset="0" />
+            <GradientStop Color="#B8E2F9" Offset="0.5" />
+            <GradientStop Color="#B0DFF8" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="VerticalSliderThumbPressedBackgroundInverted" EndPoint="0,0" StartPoint="1,0">
+            <GradientStop Color="#B8E4FA" Offset="0.25" />
+            <GradientStop Color="#5EB4E3" Offset="0.5" />
+            <GradientStop Color="#4C8BB4" Offset="1" />
+        </LinearGradientBrush>
+        <Style x:Key="VerticalSliderRightThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Canvas SnapsToDevicePixels="true">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TransformGroup.Children>
+                                        <TransformCollection>
+                                            <RotateTransform Angle="-90"/>
+                                            <TranslateTransform X="9" Y="5"/>
+                                        </TransformCollection>
+                                    </TransformGroup.Children>
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Path Fill="{StaticResource VerticalSliderThumbNormalBackgroundInverted}" x:Name="Background" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                            <Path Stroke="White" StrokeThickness="1" x:Name="InnerBorder" Data="{StaticResource SliderPointedThumbMiddleBorderGeometry}"/>
+                            <Path Stroke="#FF929292" StrokeThickness="1" x:Name="OuterBorder" Data="{StaticResource SliderPointedThumbOuterBorderGeometry}"/>
+                        </Canvas>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbHoverBackgroundInverted}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="Foreground" Value="Blue">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbHoverBackgroundInverted}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbHoverBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="true">
+                                <Setter Property="Fill" TargetName="Background" Value="{StaticResource VerticalSliderThumbPressedBackgroundInverted}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="{StaticResource HorizontalSliderThumbPressedBorder}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Fill" TargetName="Background" Value="#FFF4F4F4"/>
+                                <Setter Property="Stroke" TargetName="InnerBorder" Value="{x:Null}"/>
+                                <Setter Property="Data" TargetName="OuterBorder" Value="{StaticResource SliderPointedThumbDisabledGeometry}"/>
+                                <Setter Property="Stroke" TargetName="OuterBorder" Value="#FFAEB1AF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="GlassSlider" TargetType="{x:Type Slider}">
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFC4C4C4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Slider}">
+                        <Border SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TickBar Visibility="Collapsed" x:Name="TopTick" Height="4" Grid.Row="0" Fill="{TemplateBinding Foreground}" Placement="Top"/>
+                                <TickBar Visibility="Collapsed" x:Name="BottomTick" Height="4" Grid.Row="2" Fill="{TemplateBinding Foreground}" Placement="Bottom"/>
+                                <Border Margin="5,0" x:Name="TrackBackground" VerticalAlignment="center" Height="4.0" Grid.Row="1" Background="{StaticResource HorizontalSliderTrackNormalBackground}" BorderBrush="{StaticResource HorizontalSliderTrackNormalBorder}" BorderThickness="1" CornerRadius="1">
+                                    <Canvas Margin="-6,-1">
+                                        <Rectangle Visibility="Hidden" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Stroke="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" StrokeThickness="1.0" x:Name="PART_SelectionRange" Height="4.0"/>
+                                    </Canvas>
+                                </Border>
+                                <Track x:Name="PART_Track" Grid.Row="1">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource SliderRepeatButtonStyle}" Command="{x:Static Slider.DecreaseLarge}"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Style="{StaticResource SliderRepeatButtonStyle}" Command="{x:Static Slider.IncreaseLarge}"/>
+                                    </Track.IncreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb x:Name="Thumb" Style="{StaticResource HorizontalSliderThumbStyle}"/>
+                                    </Track.Thumb>
+                                </Track>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="TickPlacement" Value="TopLeft">
+                                <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
+                                <Setter Property="Style" TargetName="Thumb" Value="{StaticResource HorizontalSliderUpThumbStyle}"/>
+                                <Setter Property="Margin" TargetName="TrackBackground" Value="5,2,5,0"/>
+                            </Trigger>
+                            <Trigger Property="TickPlacement" Value="BottomRight">
+                                <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
+                                <Setter Property="Style" TargetName="Thumb" Value="{StaticResource HorizontalSliderDownThumbStyle}"/>
+                                <Setter Property="Margin" TargetName="TrackBackground" Value="5,0,5,2"/>
+                            </Trigger>
+                            <Trigger Property="TickPlacement" Value="Both">
+                                <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
+                                <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsSelectionRangeEnabled" Value="true">
+                                <Setter Property="Visibility" TargetName="PART_SelectionRange" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="true">
+                                <Setter Property="Foreground" TargetName="Thumb" Value="Blue"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Slider}">
+                                <Border SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition MinWidth="{TemplateBinding MinWidth}" Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TickBar Visibility="Collapsed" x:Name="TopTick" Width="4" Grid.Column="0" Fill="{TemplateBinding Foreground}" Placement="Left"/>
+                                        <TickBar Visibility="Collapsed" x:Name="BottomTick" Width="4" Grid.Column="2" Fill="{TemplateBinding Foreground}" Placement="Right"/>
+                                        <Border HorizontalAlignment="center" Margin="0,5" x:Name="TrackBackground" Width="4.0" Grid.Column="1" Background="{StaticResource HorizontalSliderTrackNormalBackground}" BorderBrush="{StaticResource VerticalSliderTrackNormalBorder}" BorderThickness="1" CornerRadius="1">
+                                            <Canvas Margin="-1,-6">
+                                                <Rectangle Visibility="Hidden" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Stroke="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" StrokeThickness="1.0" x:Name="PART_SelectionRange" Width="4.0"/>
+                                            </Canvas>
+                                        </Border>
+                                        <Track x:Name="PART_Track" Grid.Column="1">
+                                            <Track.DecreaseRepeatButton>
+                                                <RepeatButton Style="{StaticResource SliderRepeatButtonStyle}" Command="{x:Static Slider.DecreaseLarge}"/>
+                                            </Track.DecreaseRepeatButton>
+                                            <Track.IncreaseRepeatButton>
+                                                <RepeatButton Style="{StaticResource SliderRepeatButtonStyle}" Command="{x:Static Slider.IncreaseLarge}"/>
+                                            </Track.IncreaseRepeatButton>
+                                            <Track.Thumb>
+                                                <Thumb x:Name="Thumb" Style="{StaticResource VerticalSliderThumbStyle}"/>
+                                            </Track.Thumb>
+                                        </Track>
+                                    </Grid>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="TickPlacement" Value="TopLeft">
+                                        <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
+                                        <Setter Property="Style" TargetName="Thumb" Value="{StaticResource VerticalSliderLeftThumbStyle}"/>
+                                        <Setter Property="Margin" TargetName="TrackBackground" Value="2,5,0,5"/>
+                                    </Trigger>
+                                    <Trigger Property="TickPlacement" Value="BottomRight">
+                                        <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
+                                        <Setter Property="Style" TargetName="Thumb" Value="{StaticResource VerticalSliderRightThumbStyle}"/>
+                                        <Setter Property="Margin" TargetName="TrackBackground" Value="0,5,2,5"/>
+                                    </Trigger>
+                                    <Trigger Property="TickPlacement" Value="Both">
+                                        <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
+                                        <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelectionRangeEnabled" Value="true">
+                                        <Setter Property="Visibility" TargetName="PART_SelectionRange" Value="Visible"/>
+                                    </Trigger>
+                                    <Trigger Property="IsKeyboardFocused" Value="true">
+                                        <Setter Property="Foreground" TargetName="Thumb" Value="Blue"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <SolidColorBrush x:Key="StrawBerryBrush" Color="#FFA266EC" />
+        <LinearGradientBrush x:Key="opasity_1" EndPoint="0.744,1.208" StartPoint="0.742,-0.014">
+            <GradientStop Color="#FF000000" Offset="0" />
+            <GradientStop Color="#01FFFFFF" Offset="1" />
+        </LinearGradientBrush>        
+        <LinearGradientBrush x:Key="black_gradient_2" EndPoint="0.5,0" StartPoint="0.5,1">
+            <GradientStop Color="#FF545454" Offset="0" />
+            <GradientStop Color="#FF545454" Offset="1" />
+            <GradientStop Color="#FF232323" Offset="0.155" />
+            <GradientStop Color="#FF232323" Offset="0.845" />
+        </LinearGradientBrush>
+        <ControlTemplate x:Key="GlassButtonRounded" TargetType="{x:Type Button}">
+            <ControlTemplate.Resources>
+                <Storyboard x:Key="Timeline1">
+                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="glow" Storyboard.TargetProperty="(UIElement.Opacity)">
+                        <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="1"/>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+                <Storyboard x:Key="Timeline2">
+                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" Storyboard.TargetName="glow" Storyboard.TargetProperty="(UIElement.Opacity)">
+                        <SplineDoubleKeyFrame KeyTime="00:00:00.3000000" Value="0"/>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+            </ControlTemplate.Resources>
+            <Grid>
+                <Border x:Name="border" Background="#7F000000" BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="16,16,16,16" Margin="0,0,0,0" Width="Auto" Height="Auto">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="0.507*"/>
+                            <RowDefinition Height="0.493*"/>
+                        </Grid.RowDefinitions>
+                        <Border Opacity="0" HorizontalAlignment="Stretch" x:Name="glow" Width="Auto" Grid.RowSpan="2" CornerRadius="16,16,16,16">
+                            <Border.Background>
+                                <RadialGradientBrush>
+                                    <RadialGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="1.702" ScaleY="2.243"/>
+                                            <SkewTransform AngleX="0" AngleY="0"/>
+                                            <RotateTransform Angle="0"/>
+                                            <TranslateTransform X="-0.368" Y="-0.152"/>
+                                        </TransformGroup>
+                                    </RadialGradientBrush.RelativeTransform>
+                                    <GradientStop Color="#B2A266EC" Offset="0"/>
+                                    <GradientStop Color="#008DBDFF" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Width="Auto" Grid.RowSpan="2"/>
+                        <Border HorizontalAlignment="Stretch" Margin="0,0,0,0" x:Name="shine" Width="Auto" CornerRadius="16,16,0,0">
+                            <Border.Background>
+                                <LinearGradientBrush EndPoint="0.494,0.889" StartPoint="0.494,0.028">
+                                    <GradientStop Color="#99FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#33FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" TargetName="shine" Value="0.4"/>
+                    <Setter Property="Background" TargetName="border" Value="#CC000000"/>
+                    <Setter Property="Visibility" TargetName="glow" Value="Hidden"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard Storyboard="{StaticResource Timeline1}"/>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard x:Name="Timeline2_BeginStoryboard" Storyboard="{StaticResource Timeline2}"/>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </Application.Resources>
+</Application>

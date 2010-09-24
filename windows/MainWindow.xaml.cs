@@ -4132,8 +4132,7 @@ namespace XviD4PSP
             Pic.Source = new BitmapImage(new Uri(@"../pictures/vc_background.png", UriKind.RelativeOrAbsolute));
 
             bool has_video = true;
-            bool avs_error = false;
-            string avs_text = null;
+            string avs_error = null;
             string exception = null;
             ImageSource picture = null;
             System.Drawing.Bitmap bmp = null;
@@ -4165,8 +4164,7 @@ namespace XviD4PSP
                 }
                 catch (AviSynthException ex)
                 {
-                    avs_error = true;
-                    avs_text = ex.Message;
+                    avs_error = ex.Message;
                 }
 
                 bmp = new System.Drawing.Bitmap(new_w, new_h);
@@ -4176,7 +4174,7 @@ namespace XviD4PSP
                 g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
                 g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 
-                if (avs_error)
+                if (avs_error != null)
                 {
                     //Выводим текст ошибки Ависинта
                     System.Drawing.SizeF text_size;
@@ -4186,7 +4184,7 @@ namespace XviD4PSP
                     {
                         //Уменьшаем размер шрифта, пока текст не впишется в кадр
                         font = new System.Drawing.Font("Arial", font_size, System.Drawing.FontStyle.Bold);
-                        text_size = g.MeasureString(avs_text, font);
+                        text_size = g.MeasureString(avs_error, font);
 
                         left = (new_w - text_size.Width + font_size) / 2;
                         top = (new_h - text_size.Height) / 2;
@@ -4195,7 +4193,7 @@ namespace XviD4PSP
                         else break;
                     }
 
-                    g.DrawString(avs_text, font, System.Drawing.Brushes.Red, left, top, System.Drawing.StringFormat.GenericTypographic);
+                    g.DrawString(avs_error, font, System.Drawing.Brushes.Red, left, top, System.Drawing.StringFormat.GenericTypographic);
                     font.Dispose();
                     
                     total_frames = "0";

@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r171 24.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r172 24.09.10, main changes:
 
+>>> (r172) Various changes in WPF Video Player (WPF_VideoPlayer.exe), also source code added to SVN.
 >>> (r171) Added another player engine: PictureView. In this mode preview shows a static picture of current frame; AviSynth
            is only loaded when preview is updating; better accuracy of frame counter.
 >>> (r171) DVDImport window: fixed incorrect positioning of DirectShow preview, if system DPI not equal to 96; selected
