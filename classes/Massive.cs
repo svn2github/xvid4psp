@@ -23,6 +23,7 @@ namespace XviD4PSP
             this.vpasses = new ArrayList();
             this.inaudiostreams = new ArrayList();
             this.outaudiostreams = new ArrayList();
+            this.bookmarks = new ArrayList();
         }
 
         public Massive Clone()
@@ -48,6 +49,7 @@ namespace XviD4PSP
             //{
             //    temp.outaudiostreams[i] = ((AudioStream)this.outaudiostreams[i]).Clone();
             //}
+            temp.bookmarks = (ArrayList)this.bookmarks.Clone();
 
             return temp;
         }
@@ -1331,6 +1333,19 @@ namespace XviD4PSP
             set
             {
                 _testscript = value;
+            }
+        }
+
+        private ArrayList _bookmarks;
+        public ArrayList bookmarks
+        {
+            get
+            {
+                return _bookmarks;
+            }
+            set
+            {
+                _bookmarks = value;
             }
         }
     }

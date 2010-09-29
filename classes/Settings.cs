@@ -1952,8 +1952,8 @@ namespace XviD4PSP
                     return "Open file(s)=Ctrl+O; Open folder=Ctrl+Alt+O; Open DVD folder=Ctrl+D; Decode file=Ctrl+Alt+D; Join file=Ctrl+J; Close file=Ctrl+C; Save task=Ctrl+S; Save frame=Ctrl+F; Save THM frame=Ctrl+Alt+F; Refresh preview=Shift+R; VDemux=Shift+V;" +
                         "Detect black borders=Shift+B; Detect interlace=Shift+I; Color correction=C; Resolution/Aspect=R; Interlace/Framerate=I; VEncoding settings=V; ADemux=Shift+A; Save to WAV=W; Editing options=Ctrl+A; AEncoding settings=A; Add subtitles=Insert;" +
                         "Remove subtitles=Delete; Edit filtering script=S; Test script=Ctrl+T; Save script=Shift+S; Windows Media Player=Shift+M; Media Player Classic=M; WPF Video Player=Ctrl+M; Media Info=F1; FFRebuilder=F2; MKVRebuilder=F3; DGIndex=F4; DGPulldown=F5;" + 
-                        "DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; Play-Pause=Space; Fullscreen=Esc; Volume+=Up;" + 
-                        "Volume-=Down; Set Start=Home; Set End=End; Apply Trim=T;";
+                        "DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; Play-Pause=Space; Fullscreen=Esc; Volume+=Up;" +
+                        "Volume-=Down; Set Start=Home; Set End=End; Apply Trim=T; Add/Remove bookmark=Ctrl+B";
                 }
                 else
                 {

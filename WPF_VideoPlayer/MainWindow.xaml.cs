@@ -943,9 +943,16 @@ namespace WPF_VideoPlayer
                     {
                         HandleGraphEvent(); break;
                     }
-                case 0x0203: //0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP, 0x0203 WM_LBUTTONDBLCLK, 0x0206 WM_RBUTTONDBLCLK
+                case 0x0203: //0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP, 0x0203 WM_LBUTTONDBLCLK
                     {
                         SwitchToFullScreen(); break;
+                    }
+                case 0x0205: //0x0204 WM_RBUTTONDOWN, 0x0205 WM_RBUTTONUP, 0x0206 WM_RBUTTONDBLCLK
+                    {
+                        //Мышь должна быть над окном рендерера, иначе правый клик будет срабатывать повсюду!
+                        //Для 0x0203 и 0x0206 это условие каким-то образом выполняется само по себе :)
+                        if (Mouse.DirectlyOver == null) button_settings.ContextMenu.IsOpen = true;
+                        break;
                     }
                 case 0x020A: //0x020A WM_MOUSEWHEEL
                     {

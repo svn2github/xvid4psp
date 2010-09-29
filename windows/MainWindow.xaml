@@ -468,7 +468,7 @@
             <TextBox x:Name="script_box" Visibility="Collapsed" Text="" TextWrapping="Wrap" Margin="8,56,8,8" Background="#00FFFFFF" Foreground="#FFFFFFFF" BorderThickness="2" BorderBrush="Black" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" AllowDrop="True" PreviewDragOver="grid_player_window_DragEnter" Drop="grid_player_window_Drop"/>
             <Image x:Name="Pic" RenderOptions.BitmapScalingMode="HighQuality" Margin="8,56,8,8" Width="Auto" Height="Auto" Stretch="Uniform" Source="..\pictures\vc_background.png" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
             <Grid.ContextMenu>
-                <ContextMenu>
+                <ContextMenu Name="player_area_cmn">
                     <ContextMenu.Resources>
                             <Style TargetType="{x:Type RadioButton}">
                                 <Setter Property="HorizontalAlignment" Value="Center" />
@@ -484,7 +484,13 @@
                         <MenuItem.Icon>
                             <RadioButton GroupName="cmn" Name="cmn_scriptview"/>
                         </MenuItem.Icon>
-                    </MenuItem>                    
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Add/Remove bookmark" Name="cmn_addtobookmarks" Click="AddToBookmarks_Click"/>
+                    <MenuItem Header="Delete all bookmarks" Name="cmn_deletebookmarks" Click="DeleteBookmarks_Click"/>
+                    <MenuItem Header="Bookmarks" Name="cmn_bookmarks" IsEnabled="False"/>
+                    <Separator/>
+                    <MenuItem Header="Refresh preview" Name="cmn_refresh" Click="mnUpdateVideo_Click"/>
                 </ContextMenu>
             </Grid.ContextMenu>
         </Grid>

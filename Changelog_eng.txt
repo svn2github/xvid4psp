@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r172 24.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r173 29.09.10, main changes:
 
+>>> (r173) Fixed reset position to beginning after AviSynth/script errors (DirectShow and MediaBridge player engines).
+>>> (r173) Added ability to create Bookmarks for preview, right click on preview -> Add/Remove bookmark (req. by DAlek01).
 >>> (r172) Various changes in WPF Video Player (WPF_VideoPlayer.exe), also source code added to SVN.
 >>> (r171) Added another player engine: PictureView. In this mode preview shows a static picture of current frame; AviSynth
            is only loaded when preview is updating; better accuracy of frame counter.

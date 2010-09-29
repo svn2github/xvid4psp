@@ -26,7 +26,7 @@ using System.Windows.Media.Imaging;
 namespace XviD4PSP
 {
     public partial class MainWindow
-    {      
+    {
         public Massive m;
         public ArrayList outfiles = new ArrayList();
         public ArrayList deletefiles = new ArrayList();
@@ -67,7 +67,7 @@ namespace XviD4PSP
 
         private bool isAudioOnly = false;
         private bool isFullScreen = false;
-        public bool isDelayUpdate = false;
+        private bool isAviSynthError = false;
         public PlayState currentState = PlayState.Init;
 
         private IntPtr Handle = IntPtr.Zero;
@@ -489,6 +489,7 @@ namespace XviD4PSP
                 case ("Set Start"): button_set_start_Click(null, null); break;
                 case ("Set End"): button_set_end_Click(null, null); break;
                 case ("Apply Trim"): button_apply_trim_Click(null, null); break;
+                case ("Add/Remove bookmark"): AddToBookmarks_Click(null, null); break;
             }
         }
 
@@ -1829,22 +1830,26 @@ namespace XviD4PSP
 
         public void LoadVideo(MediaLoad mediaload)
         {
-            //Чтоб позиция не сбрасывалась на ноль при включенном ScriptView
-            if (script_box.Visibility == Visibility.Collapsed)
-                oldpos = Position;
-
             this.mediaload = mediaload;
+
+            //Сбрасываем флаг ошибки Ависинта при новом открытии
+            if (mediaload == MediaLoad.load) isAviSynthError = false;
+
+            //Чтоб позиция не сбрасывалась на ноль при включенном ScriptView
+            //А так-же НЕ сохраняем позицию после ошибки Ависинта в предыдущее открытие
+            if (script_box.Visibility == Visibility.Collapsed && !isAviSynthError)
+                oldpos = Position;
 
             // If we have ANY file open, close it and shut down DirectShow
             if (this.currentState != PlayState.Init)
                 CloseClip();
 
-            //Пишем скрипт в файл
-            AviSynthScripting.WriteScriptToFile(m.script, "preview");
-            AviSynthScripting.WriteScriptToFile(m.script, "AvsP"); //скрипт для Avsp
-
             try
             {
+                //Пишем скрипт в файл
+                AviSynthScripting.WriteScriptToFile(m.script, "preview");
+                AviSynthScripting.WriteScriptToFile(m.script, "AvsP"); //скрипт для AvsP
+
                 // Start playing the media file
                 if (Settings.ScriptView)
                 {
@@ -1887,9 +1892,8 @@ namespace XviD4PSP
             catch (Exception ex)
             {
                 CloseClip();
-                MenuHider(false); //Делаем пункты меню неактивными
-
                 m = null;
+                MenuHider(false); //Делаем пункты меню неактивными
 
                 if (ex.Message.Contains("DirectX"))
                 {
@@ -1928,7 +1932,7 @@ namespace XviD4PSP
                 menu_savethm.InputGestureText = HotKeys.GetKeys("Save THM frame");
                 mnExit.InputGestureText = "Alt+F4";
                 //Video
-                mnUpdateVideo.InputGestureText = HotKeys.GetKeys("Refresh preview");
+                mnUpdateVideo.InputGestureText = cmn_refresh.InputGestureText = HotKeys.GetKeys("Refresh preview");
                 menu_demux_video.InputGestureText = HotKeys.GetKeys("VDemux");                //
                 menu_autocrop.InputGestureText = HotKeys.GetKeys("Detect black borders");
                 menu_detect_interlace.InputGestureText = HotKeys.GetKeys("Detect interlace");
@@ -1964,6 +1968,8 @@ namespace XviD4PSP
                 menu_mkvextract.InputGestureText = HotKeys.GetKeys("MKVExtract");
                 menu_mkvmerge.InputGestureText = HotKeys.GetKeys("MKVMerge");
                 menu_yamb.InputGestureText = HotKeys.GetKeys("Yamb");
+
+                cmn_addtobookmarks.InputGestureText = HotKeys.GetKeys("Add/Remove bookmark");
             }
             catch { }
         }
@@ -2000,7 +2006,7 @@ namespace XviD4PSP
                 //menu_demux.Header = Languages.Translate("Save to");
                 //menu_demux_video.Header = Languages.Translate("Save to");
 
-                mnUpdateVideo.Header = Languages.Translate("Refresh preview");
+                mnUpdateVideo.Header = cmn_refresh.Header = Languages.Translate("Refresh preview");
                 menu_createautoscript.Header = Languages.Translate("Create auto script");
                 menu_createtestscript.Header = Languages.Translate("Test script");
                 menu_editscript.Header = Languages.Translate("Edit filtering script");
@@ -2128,6 +2134,9 @@ namespace XviD4PSP
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
                 check_scriptview_white.ToolTip = Languages.Translate("Enable white background for ScriptView");
+                cmn_addtobookmarks.Header = Languages.Translate("Add/Remove bookmark");
+                cmn_deletebookmarks.Header = Languages.Translate("Delete all bookmarks");
+                cmn_bookmarks.Header = Languages.Translate("Bookmarks");
             }
             catch { }
         }
@@ -4330,32 +4339,32 @@ namespace XviD4PSP
 
             this.Focus();
 
-            if (mediaload == MediaLoad.update && !isDelayUpdate) //Перенесено из HandleGraphEvent, теперь позиция устанавливается до начала воспроизведения, т.е. за один заход, а не за два
+            if (mediaload == MediaLoad.update) //Перенесено из HandleGraphEvent, теперь позиция устанавливается до начала воспроизведения, т.е. за один заход, а не за два
+            {
                 if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
+                {
+                    isAviSynthError = false;
                     mediaPosition.put_CurrentPosition(oldpos.TotalSeconds);
-               // else
-               //     mediaPosition.put_CurrentPosition(NaturalDuration.TotalSeconds); //Ограничиваем позицию длиной клипа
+                }
+                else if (NaturalDuration.TotalMilliseconds == 10000.0) isAviSynthError = true;
+                else isAviSynthError = false;
+                //mediaPosition.put_CurrentPosition(NaturalDuration.TotalSeconds); //Ограничиваем позицию длиной клипа
+            }
 
             // Run the graph to play the media file
             if (currentState == PlayState.Running)
             {
-                hr = this.mediaControl.Run(); //Продолжение воспроизведения, если статус до обновления был Running
-                DsError.ThrowExceptionForHR(hr);
+                //Продолжение воспроизведения, если статус до обновления был Running
+                DsError.ThrowExceptionForHR(this.mediaControl.Run());
                 SetPauseIcon();
             }
             else
             {
-                hr = this.mediaControl.Pause(); //Запуск с паузы, если была пауза или это новое открытие файла
-                DsError.ThrowExceptionForHR(hr);
+                //Запуск с паузы, если была пауза или это новое открытие файла
+                DsError.ThrowExceptionForHR(this.mediaControl.Pause());
                 this.currentState = PlayState.Paused;
                 SetPlayIcon();
             }
-
-            /*  if (mediaload == MediaLoad.update && !isDelayUpdate) //Перенесено из HandleGraphEvent, теперь позиция устанавливается до начала воспроизведения, т.е. за один заход, а не за два
-                  if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
-                      mediaPosition.put_CurrentPosition(oldpos.TotalSeconds);
-                  else
-                      mediaPosition.put_CurrentPosition(NaturalDuration.TotalSeconds); //Ограничиваем позицию длиной клипа */
         }
 
         private void MoveVideoWindow()
@@ -4553,9 +4562,16 @@ namespace XviD4PSP
                     {
                         HandleGraphEvent(); break;
                     }
-                case 0x0203: //0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP, 0x0203 WM_LBUTTONDBLCLK, 0x0206 WM_RBUTTONDBLCLK
+                case 0x0203: //0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP, 0x0203 WM_LBUTTONDBLCLK
                     {
                         SwitchToFullScreen(); break;
+                    }
+                case 0x0205: //0x0204 WM_RBUTTONDOWN, 0x0205 WM_RBUTTONUP, 0x0206 WM_RBUTTONDBLCLK
+                    {
+                        //Мышь должна быть над окном рендерера, иначе правый клик будет срабатывать повсюду!
+                        //Для 0x0203 и 0x0206 это условие каким-то образом выполняется само по себе :)
+                        if (Mouse.DirectlyOver == null) player_area_cmn.IsOpen = true;
+                        break;
                     }
                 case 0x020A: //0x020A WM_MOUSEWHEEL
                     if (isFullScreen) 
@@ -4593,12 +4609,6 @@ namespace XviD4PSP
                 if (evCode == EventCode.ClockChanged)
                 {
                     slider_pos.Maximum = NaturalDuration.TotalSeconds;
-
-                    if (mediaload == MediaLoad.update)
-                    {
-                        if (isDelayUpdate)
-                            isDelayUpdate = false;
-                    }
 
                     if (mediaload == MediaLoad.load)
                     {
@@ -4736,13 +4746,15 @@ namespace XviD4PSP
 
                 if (mediaload == MediaLoad.update)
                 {
-                    if (isDelayUpdate)
-                        isDelayUpdate = false;
-                    else if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
+                    if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
+                    {
+                        isAviSynthError = false;
                         Position = oldpos;
+                    }
+                    else if (NaturalDuration.TotalMilliseconds == 10000.0) isAviSynthError = true;
+                    else isAviSynthError = false;
                 }
-
-                if (mediaload == MediaLoad.load)
+                else if (mediaload == MediaLoad.load)
                 {
                     if (Settings.AfterImportAction == Settings.AfterImportActions.Play)
                         PauseClip();
@@ -5805,6 +5817,7 @@ namespace XviD4PSP
             menu_save_frame.IsEnabled = ShowItems;
             menu_savethm.IsEnabled = ShowItems;
             mnUpdateVideo.IsEnabled = ShowItems;
+            cmn_refresh.IsEnabled = ShowItems;
             menu_demux_video.IsEnabled = ShowItems;
             menu_autocrop.IsEnabled = ShowItems;
             menu_detect_interlace.IsEnabled = ShowItems;
@@ -5826,7 +5839,9 @@ namespace XviD4PSP
             menu_playinwpf.IsEnabled = ShowItems;
             target_goto.IsEnabled = ShowItems;
             menu_createtestscript.IsEnabled = ShowItems;
+            cmn_addtobookmarks.IsEnabled = cmn_deletebookmarks.IsEnabled = ShowItems;
 
+            cmn_bookmarks.Items.Clear();
             AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
             if (m != null)
             {
@@ -5842,11 +5857,22 @@ namespace XviD4PSP
                 }
                 else
                     ResetTrim();
+
+                //Восстанавливаем закладки
+                if (m.bookmarks.Count > 0)
+                {
+                    foreach (TimeSpan bookmark in m.bookmarks)
+                        add_bookmark_to_cmn(bookmark.ToString());
+                    cmn_bookmarks.IsEnabled = true;
+                }
+                else
+                    cmn_bookmarks.IsEnabled = false;
             }
             else
             {
                 this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
                 this.menu_createtestscript.IsChecked = false;
+                this.cmn_bookmarks.IsEnabled = false;
             }
             asinfo = null;
         }
@@ -6043,6 +6069,68 @@ namespace XviD4PSP
 
             if (old_value != new_value && m != null && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                 LoadVideo(MediaLoad.update);
+        }
+
+        private void AddToBookmarks_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null || (graphBuilder == null && Pic.Visibility != Visibility.Visible))
+                return;
+
+            //Удаляем закладку, если этот кадр уже сохранен
+            int frame = Convert.ToInt32(Position.TotalSeconds * fps);
+            foreach (TimeSpan bookmark in m.bookmarks)
+            {
+                if (frame == Convert.ToInt32(bookmark.TotalSeconds * fps))
+                {
+                    m.bookmarks.Remove(bookmark);
+                    cmn_bookmarks.Items.Clear();
+
+                    if (m.bookmarks.Count == 0)
+                        cmn_bookmarks.IsEnabled = false;
+                    else foreach (TimeSpan new_bookmark in m.bookmarks)
+                            add_bookmark_to_cmn(new_bookmark.ToString());
+
+                    UpdateTaskMassive(m);
+                    return;
+                }
+            }
+
+            //Сохраняем в массиве
+            m.bookmarks.Add(Position);
+
+            //Сохраняем в контекстном меню
+            add_bookmark_to_cmn(Position.ToString());
+            cmn_bookmarks.IsEnabled = true;
+
+            UpdateTaskMassive(m);
+        }
+
+        private void add_bookmark_to_cmn(string time_pos)
+        {          
+            //Добавляем закладку в контекстное меню
+            MenuItem item = new MenuItem();
+            if (time_pos.Length < 12) item.Header = time_pos + ".000";
+            else item.Header = time_pos.Remove(12);
+            item.Click += new RoutedEventHandler(GoToBookmark_Click);
+            cmn_bookmarks.Items.Add(item);
+        }
+
+        private void DeleteBookmarks_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null || (graphBuilder == null && Pic.Visibility != Visibility.Visible))
+                return;
+
+            m.bookmarks = new ArrayList();
+            cmn_bookmarks.Items.Clear();
+            cmn_bookmarks.IsEnabled = false;
+            UpdateTaskMassive(m);
+        }
+
+        private void GoToBookmark_Click(object sender, RoutedEventArgs e)
+        {
+            TimeSpan position;
+            if (TimeSpan.TryParse(((MenuItem)sender).Header.ToString(), out position) && position <= NaturalDuration)
+                Position = position;
         }
     }
 }
