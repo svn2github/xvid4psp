@@ -1,5 +1,12 @@
-XviD4PSP 5.0.37.8 r132->r174 30.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r175 30.09.10, main changes:
 
+>>> (r175) MKVExtractGUI-2 now will be used instead of MKVExtractGUI (http://sourceforge.net/projects/mkvextractgui-2/).
+>>> (r175) MKVMerge: fixed muxing progress detection (it was broken for non-english languages). Header compression set to
+           "none", it can be changed by modifying registry key MKVMerge_Compression: empty value - do not add --compression
+           key to CLI, any other values - argument for --compression. MKVMerge_Charset - this key specify output charset for
+           MKVMerge/MKVExtract/MKVInfo (info, error messages etc): empty value - do not add --output-charset key to CLI,
+           Auto - specify system charset, any other values - argument for --output-charset (by default value=empty, but if
+           MKVMerge/MKVExtract/MKVInfo uses wrong charset for output, you can try to set MKVMerge_Charset to Auto).
 >>> (r174) Background for ListViewItem.
 >>> (r173) Fixed reset position to beginning after AviSynth/script errors (DirectShow and MediaBridge player engines).
 >>> (r173) Added ability to create Bookmarks for preview, right click on preview -> Add/Remove bookmark (req. by DAlek01).

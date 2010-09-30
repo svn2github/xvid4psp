@@ -468,26 +468,27 @@ namespace XviD4PSP
             info.CreateNoWindow = true;
             encodertext = null;
 
+            string charset = ((Settings.MKVMerge_Charset != "") ? (" --output-charset " + ((Settings.MKVMerge_Charset.ToLower() == "auto") ?
+                        System.Text.Encoding.Default.HeaderName : Settings.MKVMerge_Charset)) : "");
+
             if (mode == DemuxerMode.ExtractAudio)
             {
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                info.Arguments = "tracks " + flist + instream.mkvid + ":" + "\"" + outfile + "\"";
+                info.Arguments = "tracks " + flist + instream.mkvid + ":" + "\"" + outfile + "\"" + charset;
             }
-
-            if (mode == DemuxerMode.ExtractVideo)
-                info.Arguments = "tracks " + flist + m.invideostream_mkvid + ":" + "\"" + outfile + "\"";
-
-            if (mode == DemuxerMode.RepairMKV)
+            else if (mode == DemuxerMode.ExtractVideo)
+                info.Arguments = "tracks " + flist + m.invideostream_mkvid + ":" + "\"" + outfile + "\"" + charset;
+            else if (mode == DemuxerMode.RepairMKV)
             {
                 info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvmerge.exe";
-                info.Arguments = "-S \"" + source_file + "\" -o \"" + outfile + "\"";
+                info.Arguments = "-S \"" + source_file + "\" -o \"" + outfile + "\"" + charset;
             }
 
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
 
             string line;
-            string pat = @"progress:\D(\d+)%";
+            string pat = @"^[^\+].+:\s(\d+)%";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
             int procent = 0;

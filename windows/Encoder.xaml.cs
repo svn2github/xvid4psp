@@ -2371,7 +2371,7 @@ namespace XviD4PSP
             encoderProcess.Start();
 
             string line;
-            string pat = @"progress:\D(\d+)%";
+            string pat = @"^[^\+].+:\s(\d+)%";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
             int procent = 0;
@@ -3821,6 +3821,10 @@ namespace XviD4PSP
             info.CreateNoWindow = true;
 
             string ext = Path.GetExtension(outvideofile).ToLower();
+            string compression = ((Settings.MKVMerge_Compression != "") ? "--compression -1:" + Settings.MKVMerge_Compression.ToLower() + " " : "");
+            string charset = ((Settings.MKVMerge_Charset != "") ? (" --output-charset " + ((Settings.MKVMerge_Charset.ToLower() == "auto") ?
+                        System.Text.Encoding.Default.HeaderName : Settings.MKVMerge_Charset)) : "");
+
             int vID = (ext == ".mp4") ? 1 : 0;
 
             string rate = "--default-duration " + vID + ":" + m.outframerate + "fps ";
@@ -3847,10 +3851,10 @@ namespace XviD4PSP
             if (Format.IsDirectRemuxingPossible(m) && m.outvcodec == "Copy")
             {
                 int remux_vID = (sf_ext == ".mpg" || sf_ext == ".vob") ? m.invideostream_ffid : m.invideostream_mkvid;
-                video = "-d " + remux_vID + " -A -S \"" + m.infilepath + "\" ";
+                video = "-d " + remux_vID + " -A -S " + compression + "\"" + m.infilepath + "\" ";
             }
             else
-                video = rate + "-d " + vID + " -A -S \"" + m.outvideofile + "\" ";
+                video = rate + "-d " + vID + " -A -S " + compression + "\"" + m.outvideofile + "\" ";
 
             //audio
             string audio = "";
@@ -3862,7 +3866,7 @@ namespace XviD4PSP
                 int aID = outstream.mkvid;
                 if (aext == ".m4a" || aext == ".avi") aID = 1;
                 else if (aext == ".aac") aID = 0; //Для aac всегда ноль, т.к. это RAW
-                    
+
                 string sbr = null;
                 if (outstream.codec == "Copy" && instream.codec.Contains("AAC")) //Для правильного муксинга he-aac, aac+, или aac-sbr
                     if (instream.codec.Contains("HE") || instream.codec.Contains("AAC+") || instream.codec.Contains("SBR"))
@@ -3890,17 +3894,17 @@ namespace XviD4PSP
                         }
                         delay = " --sync " + remux_aID + ":" + new_delay;
                     }
-                    audio = "-a " + remux_aID + delay + " -D -S --no-chapters \"" + m.infilepath + "\" ";
+                    audio = "-a " + remux_aID + delay + " -D -S --no-chapters " + compression + "\"" + m.infilepath + "\" ";
                 }
                 else
                 {
                     string delay = (CopyDelay) ? " --sync " + aID + ":" + outstream.delay : "";
-                    audio = "-a " + aID + sbr + delay + " -D -S --no-chapters \"" + outstream.audiopath + "\" ";
-                }                    
+                    audio = "-a " + aID + sbr + delay + " -D -S --no-chapters " + compression + "\"" + outstream.audiopath + "\" ";
+                }
             }
-             
+
             //Ввод полученых аргументов коммандной строки, + добавление строки введенной пользователем
-            info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + split + m.mkvstring;
+            info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + split + charset + m.mkvstring;
 
             //прописываем аргументы команндной строки
             SetLog("");
@@ -3915,7 +3919,9 @@ namespace XviD4PSP
             SetPriority(Settings.ProcessPriority);
 
             string line;
-            string pat = @"progress:\D(\d+)%";
+            // +-> ЏаҐ¤ў аЁвҐ«м­л©  ­ «Ё§ FLAC д ©« : 100% - мусор
+            // Џа®жҐбб: 100% - прогресс
+            string pat = @"^[^\+].+:\s(\d+)%";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
             int procent = 0;

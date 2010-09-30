@@ -77,15 +77,18 @@ namespace XviD4PSP
                 info.RedirectStandardError = true;
                 info.CreateNoWindow = true;
 
-                info.Arguments = "-S \"" + infile + "\" -o \"" + outfile + "\"";
+                string compression = ((Settings.MKVMerge_Compression != "") ? "--compression -1:" + Settings.MKVMerge_Compression.ToLower() + " " : "");
+                string charset = ((Settings.MKVMerge_Charset != "") ? (" --output-charset " + ((Settings.MKVMerge_Charset.ToLower() == "auto") ?
+                        System.Text.Encoding.Default.HeaderName : Settings.MKVMerge_Charset)) : "");
+
+                info.Arguments = "-S " + compression + "\"" + infile + "\" -o \"" + outfile + "\"" + charset;
 
                 SetLog(info.Arguments);
-
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
 
                 string line;
-                string pat = @"progress:\D(\d+)%";
+                string pat = @"^[^\+].+:\s(\d+)%";
                 Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                 Match mat;
 
@@ -282,6 +285,5 @@ namespace XviD4PSP
                 }
             }
         }
-
 	}
 }

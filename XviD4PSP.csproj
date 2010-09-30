@@ -282,9 +282,6 @@
     <Compile Include="windows\NewProfile.xaml.cs">
       <DependentUpon>NewProfile.xaml</DependentUpon>
     </Compile>
-    <Compile Include="windows\UserControl1.xaml.cs">
-      <DependentUpon>UserControl1.xaml</DependentUpon>
-    </Compile>
     <Compile Include="windows\VideoEncoding.xaml.cs">
       <DependentUpon>VideoEncoding.xaml</DependentUpon>
     </Compile>
@@ -387,10 +384,6 @@
     <Page Include="windows\Shutdown.xaml" />
     <Page Include="windows\Encoder.xaml" />
     <Page Include="windows\NewProfile.xaml" />
-    <Page Include="windows\UserControl1.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="windows\VideoEncoding.xaml" />
     <Page Include="windows\FilesListWindow.xaml" />
     <Page Include="windows\Filtering.xaml" />

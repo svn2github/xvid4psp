@@ -128,7 +128,10 @@ namespace XviD4PSP
                     info.RedirectStandardError = true;
                     info.CreateNoWindow = true;
 
-                    info.Arguments = "\"" + infilepath + "\"";
+                    string charset = ((Settings.MKVMerge_Charset != "") ? (" --output-charset " + ((Settings.MKVMerge_Charset.ToLower() == "auto") ?
+                        System.Text.Encoding.Default.HeaderName : Settings.MKVMerge_Charset)) : "");
+
+                    info.Arguments = "\"" + infilepath + "\"" + charset;
 
                     encoderProcess.StartInfo = info;
                     encoderProcess.Start();

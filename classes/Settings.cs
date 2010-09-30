@@ -2290,5 +2290,49 @@ namespace XviD4PSP
                 SetInt("XviD_Threads", value);
             }
         }
+
+        //Header compression для mkvmerge
+        public static string MKVMerge_Compression
+        {
+            get
+            {
+                object value = GetValue("MKVMerge_Compression");
+                if (value == null)
+                {
+                    SetString("MKVMerge_Compression", "None");
+                    return "None";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("MKVMerge_Compression", value);
+            }
+        }
+
+        //Charset для сообщений mkvmerge, mkvextract, mkvinfo
+        public static string MKVMerge_Charset
+        {
+            get
+            {
+                object value = GetValue("MKVMerge_Charset");
+                if (value == null)
+                {
+                    SetString("MKVMerge_Charset", "");
+                    return "";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("MKVMerge_Charset", value);
+            }
+        }
     }
 }

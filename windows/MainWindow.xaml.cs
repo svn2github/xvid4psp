@@ -848,7 +848,7 @@ namespace XviD4PSP
             else if (sender == menu_virtualdubmod) path += "\\apps\\VirtualDubMod\\VirtualDubMod.exe";
             else if (sender == menu_avimux) path += "\\apps\\AVI-Mux\\AVIMux_GUI.exe";
             else if (sender == menu_tsmuxer) path += "\\apps\\tsMuxeR\\tsMuxerGUI.exe";
-            else if (sender == menu_mkvextract) path += "\\apps\\MKVtoolnix\\MKVextractGUI.exe";
+            else if (sender == menu_mkvextract) path += "\\apps\\MKVtoolnix\\MKVExtractGUI2.exe";
             else if (sender == menu_mkvmerge) path += "\\apps\\MKVtoolnix\\mmg.exe";
             else if (sender == menu_yamb) path += "\\apps\\MP4Box\\Yamb.exe";
             else if (sender == menu_directx_update) path += "\\apps\\DirectX_Update\\dxwebsetup.exe";
