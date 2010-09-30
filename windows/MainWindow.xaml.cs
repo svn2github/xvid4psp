@@ -3629,7 +3629,6 @@ namespace XviD4PSP
 
         private void list_tasks_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-
             if (list_tasks.SelectedItem != null)
             {
                 Task task = (Task)list_tasks.SelectedItem;
@@ -3641,17 +3640,6 @@ namespace XviD4PSP
                     UpdateTaskStatus(task.Id, "Waiting");
                 }
             }
-        }
-
-        private void list_tasks_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            //if (list_tasks.SelectedItems.Count != 0)
-            //{
-            //    list_tasks.SelectedIndex = -1;
-            //    m.key = Settings.Key;
-            //    OldSelectedIndex = -1;
-            //    IsTaskSelection = false;
-            //}
         }
 
         private void cmenu_deselect_Click(object sender, System.Windows.RoutedEventArgs e)

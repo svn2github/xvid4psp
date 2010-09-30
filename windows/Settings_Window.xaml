@@ -74,12 +74,17 @@
                     <Grid>
                         <Label OpacityMask="{x:Null}" x:Name="label_action" Content="Action:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,48,44,0" d:LayoutOverrides="Height" VerticalAlignment="Top" HorizontalAlignment="Right" Width="129" Height="26.9" />
                         <Label OpacityMask="{x:Null}" x:Name="label_combination" Content="Combination:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,94,46,0" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="129" Height="29.263" VerticalAlignment="Top" />
-                        <ListView Margin="6,6,176.5,6" x:Name="listview_hotkeys" Background="#FF2A2A2A" Foreground="#FFFFFFFF" SelectionMode="Single" FontSize="12" MouseDoubleClick="listview_hotkeys_DoubleClick" MouseRightButtonUp="listview_hotkeys_RightUp" SelectionChanged="listview_hotkeys_SelectionChanged" >
+                        <ListView Margin="6,6,176.5,6" x:Name="listview_hotkeys" Background="#FF2A2A2A" Foreground="#FFFFFFFF" SelectionMode="Single" FontSize="12" SelectionChanged="listview_hotkeys_SelectionChanged">
                             <ListView.Resources>
                                 <Style TargetType="{x:Type ListViewItem}">
+                                    <EventSetter Event="MouseDoubleClick" Handler="listview_hotkeys_DoubleClick"/>
+                                    <EventSetter Event="MouseRightButtonUp" Handler="listview_hotkeys_RightUp"/>
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="#CF4485CD"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#EE3095FF"/>
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
@@ -93,8 +98,8 @@
                                             <Setter Property="Opacity" Value="0"/>
                                         </Style>
                                     </GridView.ColumnHeaderContainerStyle>
-                                    <GridViewColumn Width="210" Header="Action" DisplayMemberBinding="{Binding Column1}" />
-                                    <GridViewColumn Width="86"  Header="Combination" DisplayMemberBinding="{Binding Column2}" />
+                                    <GridViewColumn Width="209" Header="Action" DisplayMemberBinding="{Binding Column1}" />
+                                    <GridViewColumn Width="85"  Header="Combination" DisplayMemberBinding="{Binding Column2}" />
                                 </GridView>
                             </ListView.View>
                         </ListView>
