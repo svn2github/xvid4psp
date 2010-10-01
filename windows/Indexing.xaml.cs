@@ -149,8 +149,11 @@ namespace XviD4PSP
                 foreach (string _line in m.infileslist) sw.WriteLine(_line);
                 sw.Close();
 
-                info.Arguments = "-SD=\" -IA=6 -FO=0 -OM=2 -BF=\"" + filelistpath + "\" -OF=\"" + Calculate.RemoveExtention(m.indexfile, true) + "\" -HIDE -EXIT";
-               
+                //Извлекаем звук, только если он нам нужен
+                string ademux = (Settings.EnableAudio) ? "-OM=2" : "-OM=0";
+
+                info.Arguments = "-SD=\" -IA=6 -FO=0 " + ademux + " -BF=\"" + filelistpath + "\" -OF=\"" + Calculate.RemoveExtention(m.indexfile, true) + "\" -HIDE -EXIT";
+
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
                 encoderProcess.PriorityClass = ProcessPriorityClass.Normal;

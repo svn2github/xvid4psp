@@ -44,6 +44,9 @@ namespace XviD4PSP
             check_ffms_force_fps.ToolTip = Languages.Translate("Force FPS");
             check_ffms_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "FFmpegSource") + "\r\n" +
                 Languages.Translate("Note: FFmpegSource1 will decode audio to RAW-data file, so it can take a lot of space on your HDD.");
+            check_enable_audio.Content = Languages.Translate("Enable audio in input files");
+            check_enable_audio.ToolTip = Languages.Translate("If checked, input files will be opened with audio, otherwise they will be opened WITHOUT audio!")
+                + "\r\n" + Languages.Translate("Audio files - exception, they always will be opened.");
             check_new_delay.Content = Languages.Translate("Use new Delay calculation method");
             check_new_delay.ToolTip = Languages.Translate("A new method uses the difference between video and audio delays, while old method uses audio delay only."); //+
                 //"\r\n" + Languages.Translate("This new method can be helpfull for the FFmpegSource decoders, but harmful for the DirectShowSource.");
@@ -110,6 +113,7 @@ namespace XviD4PSP
             check_ffms_audio.IsChecked = Settings.FFMS_Enable_Audio;
 
             //Audio
+            check_enable_audio.IsChecked = Settings.EnableAudio;
             check_new_delay.IsChecked = Settings.NewDelayMethod;
             check_copy_delay.IsChecked = Settings.CopyDelay;
 
@@ -378,6 +382,11 @@ namespace XviD4PSP
         private void check_copy_delay_Click(object sender, RoutedEventArgs e)
         {
             Settings.CopyDelay = check_copy_delay.IsChecked.Value;
+        }
+
+        private void check_enable_audio_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.EnableAudio = check_enable_audio.IsChecked.Value;
         }
 	}
 }

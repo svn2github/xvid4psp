@@ -118,7 +118,7 @@ namespace XviD4PSP
                     }
 
                     //забиваем аудио потоки
-                    if (ext == ".pmp")
+                    if (ext == ".pmp" && Settings.EnableAudio)
                     {
                         AudioStream stream = new AudioStream();
                         stream.codec = "AAC";
@@ -139,7 +139,7 @@ namespace XviD4PSP
                         m.induration = TimeSpan.FromSeconds((double)header.frames / (double)header.fps);
                         m.outduration = m.induration;
 
-                        if (m.inaudiostreams.Count > 0)
+                        if (m.inaudiostreams.Count > 0 && Settings.EnableAudio)
                         {
                             AudioStream stream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                             //забиваем в список все найденные треки
@@ -172,11 +172,10 @@ namespace XviD4PSP
 
                         m.inaudiostreams.Add(stream.Clone());
                     }
-                    else if (m.indexfile != null &&
-                             File.Exists(m.indexfile))
+                    else if (m.indexfile != null && File.Exists(m.indexfile) && Settings.EnableAudio)
                     {
-                        ArrayList atracks = Indexing.GetTracks(m.indexfile);
                         int n = 0;
+                        ArrayList atracks = Indexing.GetTracks(m.indexfile);
                         foreach (string apath in atracks)
                         {
                             //определяем аудио потоки
@@ -198,38 +197,41 @@ namespace XviD4PSP
                     }
                     else
                     {
-                        for (int snum = 0; snum < media.CountAudioStreams; snum++)
+                        if (Settings.EnableAudio || media.CountVideoStreams == 0)
                         {
-                            AudioStream stream = new AudioStream();
-                            stream.codec = media.ACodecString(snum);
-                            stream.codecshort = media.ACodecShort(snum);
-                            stream.bitrate = media.AudioBitrate(snum);
-                            stream.mkvid = media.AudioID(snum);
-                            stream.samplerate = media.Samplerate(snum);
-                            stream.bits = media.Bits(snum);
-                            stream.channels = media.Channels(snum);
-                            if (m.indexfile == null)
-                                stream.delay = media.Delay(snum);
-                            stream.language = media.AudioLanguage(snum);
-
-                            //вероятно звуковой файл
-                            if (media.CountVideoStreams == 0)
+                            for (int snum = 0; snum < media.CountAudioStreams; snum++)
                             {
-                                m.isvideo = false;
-                                m.inframerate = "25.000";
-                                m.outframerate = m.inframerate;
-                                m.inframes = (int)(m.induration.TotalSeconds * 25);
-                                m.outframes = m.inframes;
-                                m.vdecoder = AviSynthScripting.Decoders.BlankClip;
-                                stream.audiopath = m.infilepath;
-                                stream = Format.GetValidADecoder(stream);
-                            }
+                                AudioStream stream = new AudioStream();
+                                stream.codec = media.ACodecString(snum);
+                                stream.codecshort = media.ACodecShort(snum);
+                                stream.bitrate = media.AudioBitrate(snum);
+                                stream.mkvid = media.AudioID(snum);
+                                stream.samplerate = media.Samplerate(snum);
+                                stream.bits = media.Bits(snum);
+                                stream.channels = media.Channels(snum);
+                                if (m.indexfile == null)
+                                    stream.delay = media.Delay(snum);
+                                stream.language = media.AudioLanguage(snum);
 
-                            m.inaudiostreams.Add(stream.Clone());
+                                //вероятно звуковой файл
+                                if (media.CountVideoStreams == 0)
+                                {
+                                    m.isvideo = false;
+                                    m.inframerate = "25.000";
+                                    m.outframerate = m.inframerate;
+                                    m.inframes = (int)(m.induration.TotalSeconds * 25);
+                                    m.outframes = m.inframes;
+                                    m.vdecoder = AviSynthScripting.Decoders.BlankClip;
+                                    stream.audiopath = m.infilepath;
+                                    stream = Format.GetValidADecoder(stream);
+                                }
+
+                                m.inaudiostreams.Add(stream.Clone());
+                            }
+                            //делаем первый трек активным
+                            m.inaudiostream = 0;
                         }
-                        //делаем первый трек активным
-                        m.inaudiostream = 0;
-                     
+
                         //довбиваем duration и frames для join заданий
                         if (m.infileslist.Length > 1)
                         {
@@ -545,7 +547,7 @@ namespace XviD4PSP
                 }
 
                 //забиваем аудио, если они ещё не забиты
-                if (m.indexfile == null && m.inaudiostreams.Count < ff.AudioStreamCount() ||
+                if (m.indexfile == null && m.inaudiostreams.Count < ff.AudioStreamCount() && Settings.EnableAudio ||
                     ext == ".avs" && m.inaudiostreams.Count < ff.AudioStreamCount())
                 {
                     for (int snum = ff.AudioStream(); snum <= ff.AudioStreamCount(); snum++)

@@ -239,7 +239,11 @@ namespace XviD4PSP
                if (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio)
                    audio = ", audio=false";
            }
-     
+           else if (m.vdecoder == Decoders.AVISource && !Settings.EnableAudio)
+           {
+               audio = ", audio=false";
+           }
+
            //ипортируем видео
            string invideostring = "";
 
@@ -886,6 +890,8 @@ namespace XviD4PSP
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || !Settings.DSS_Enable_Audio))
                audio = ", audio=false";
+           else if (m.vdecoder == Decoders.AVISource && !Settings.EnableAudio)
+               audio = ", audio=false";
 
            //выбор аудио трека
            string atrack = "";
@@ -1061,7 +1067,7 @@ namespace XviD4PSP
                script += m.vdecoder.ToString() + "(\"" + m.indexfile + "\",cpu=0,info=3)" + Environment.NewLine;
            else if (m.vdecoder == Decoders.AVCSource || m.vdecoder == Decoders.DGMultiSource)
                script += m.vdecoder.ToString() + "(\"" + m.indexfile + "\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.DirectShowSource)
+           else if (m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.AVISource)
                script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\",audio=false)" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
                script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\")" + Environment.NewLine;

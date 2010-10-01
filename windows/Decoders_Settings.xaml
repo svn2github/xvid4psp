@@ -62,7 +62,7 @@
                     </Grid>
                 </TabItem>
                 <TabItem Header="Audio" x:Name="tab_audio">
-                    <Grid Width="380" Height="160">
+                    <Grid Width="380" Height="175">
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_adecoders" Header="Audio decoders" Margin="4,6,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
@@ -82,9 +82,12 @@
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,88,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_enable_audio" Width="Auto" Height="Auto" Content="Enable audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_enable_audio_Click"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_new_delay" Width="Auto" Height="Auto" Content="Use new Delay calculation method" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_new_delay_Click"/>
                                 </DockPanel>
-                                <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                <DockPanel Margin="0,0,0,5" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_copy_delay" Width="Auto" Height="Auto" Content="Apply Delay in Copy mode" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_copy_delay_Click"/>
                                 </DockPanel>
                             </StackPanel>

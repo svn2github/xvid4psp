@@ -2334,5 +2334,26 @@ namespace XviD4PSP
                 SetString("MKVMerge_Charset", value);
             }
         }
+
+        //Обрабатывать звук при открытии файлов
+        public static bool EnableAudio
+        {
+            get
+            {
+                object value = GetValue("EnableAudio");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("EnableAudio", value);
+            }
+        }
     }
 }

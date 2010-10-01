@@ -801,26 +801,31 @@ namespace XviD4PSP
                 x.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
                 deletefiles.Add(vpath);
 
-                string apath = Settings.TempPath + "\\" + x.key + ".audio.wav";
-                Decoder adec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, apath);
-                if (adec.IsErrors)
+                if (Settings.EnableAudio)
                 {
-                    new Message(this).ShowMessage("Decoder: " + adec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
-                    SafeDelete(vpath);
-                    return;
+                    string apath = Settings.TempPath + "\\" + x.key + ".audio.wav";
+                    Decoder adec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, apath);
+                    if (adec.IsErrors)
+                    {
+                        new Message(this).ShowMessage("Decoder: " + adec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        SafeDelete(vpath);
+                        return;
+                    }
+
+                    //проверка на удачное завершение
+                    if (File.Exists(apath) && new FileInfo(apath).Length != 0)
+                    {
+                        MediaInfoWrapper med = new MediaInfoWrapper();
+                        AudioStream s = med.GetAudioInfoFromAFile(apath);
+                        s.decoder = AviSynthScripting.Decoders.WAVSource;
+                        x.inaudiostreams.Add(s.Clone());
+                        deletefiles.Add(apath);
+
+                        action_open(x);
+                    }
                 }
-
-                //проверка на удачное завершение
-                if (File.Exists(apath) && new FileInfo(apath).Length != 0)
-                {
-                    MediaInfoWrapper med = new MediaInfoWrapper();
-                    AudioStream s = med.GetAudioInfoFromAFile(apath);
-                    s.decoder = AviSynthScripting.Decoders.WAVSource;
-                    x.inaudiostreams.Add(s.Clone());
-                    deletefiles.Add(apath);
-
+                else
                     action_open(x);
-                }
             }
         }
 
@@ -1062,7 +1067,7 @@ namespace XviD4PSP
                         x.indexfile = x.infilepath;
                         ArrayList atracks = Indexing.GetTracks(x.indexfile);
                         int n = 0;
-                        if (atracks.Count > 0)
+                        if (atracks.Count > 0 && Settings.EnableAudio)
                         {
                             foreach (string apath in atracks)
                             {
@@ -1091,7 +1096,7 @@ namespace XviD4PSP
 
                         //извлекаем новый файл
                         Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, vpath);
-                        if (!dem.IsErrors) dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, apath);
+                        if (!dem.IsErrors && Settings.EnableAudio) dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, apath);
 
                         //проверка на удачное завершение
                         if (File.Exists(vpath) && new FileInfo(vpath).Length != 0)
@@ -1172,8 +1177,7 @@ namespace XviD4PSP
                     }
  
                     //принудительный фикс цвета для DVD
-                    if (Settings.AutoColorMatrix &&
-                        x.format != Format.ExportFormats.Audio)
+                    if (Settings.AutoColorMatrix && x.format != Format.ExportFormats.Audio)
                     {
                         if (x.iscolormatrix == false &&
                             x.invcodecshort == "MPEG2")
@@ -1186,8 +1190,7 @@ namespace XviD4PSP
                     }
 
                     //похоже что к нам идёт звковой файл
-                    if (x.format != Format.ExportFormats.Audio &&
-                        !x.isvideo)
+                    if (x.format != Format.ExportFormats.Audio && !x.isvideo)
                     {
                         x.format = Format.ExportFormats.Audio;
                         Settings.FormatOut = Format.ExportFormats.Audio;
@@ -1238,8 +1241,8 @@ namespace XviD4PSP
                     }
 
                     //Извлечение звука (1-й трек) для FFmpegSource и DirectShowSource, для DSS2 звук будет извлечен в Caching
-                    if (x.inaudiostreams.Count > 0 && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource && !Settings.FFMS_Enable_Audio ||
-                        x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio))
+                    if (x.inaudiostreams.Count > 0 && Settings.EnableAudio && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource &&
+                        !Settings.FFMS_Enable_Audio || x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio))
                     {
                         AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
                         if (instream.audiopath == null)
@@ -1305,7 +1308,7 @@ namespace XviD4PSP
                     x = FillAudio(x);
                     
                     //выбираем трек
-                    if (x.inaudiostreams.Count > 1)
+                    if (x.inaudiostreams.Count > 1 && Settings.EnableAudio)
                     {
                         AudioOptions ao = new AudioOptions(x, this, AudioOptions.AudioOptionsModes.TracksOnly);
                         if (ao.m == null) return;
@@ -1313,7 +1316,7 @@ namespace XviD4PSP
                     }
                    
                     //извлечение трека при badmixing
-                    if (x.inaudiostreams.Count == 1)
+                    if (x.inaudiostreams.Count == 1 && Settings.EnableAudio)
                     {
                         AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
 
@@ -1394,20 +1397,13 @@ namespace XviD4PSP
                     if (x.format != Format.ExportFormats.Audio)
                     {
                         string subs = Calculate.RemoveExtention(x.infilepath, true);
-                        if (File.Exists(subs + ".srt"))
-                            x.subtitlepath = subs + ".srt";
-                        if (File.Exists(subs + ".sub"))
-                            x.subtitlepath = subs + ".sub";
-                        if (File.Exists(subs + ".idx"))
-                            x.subtitlepath = subs + ".idx";
-                        if (File.Exists(subs + ".ssa"))
-                            x.subtitlepath = subs + ".ssa";
-                        if (File.Exists(subs + ".ass"))
-                            x.subtitlepath = subs + ".ass";
-                        if (File.Exists(subs + ".psb"))
-                            x.subtitlepath = subs + ".psb";
-                        if (File.Exists(subs + ".smi"))
-                            x.subtitlepath = subs + ".smi";
+                        if (File.Exists(subs + ".srt")) x.subtitlepath = subs + ".srt";
+                        if (File.Exists(subs + ".sub")) x.subtitlepath = subs + ".sub";
+                        if (File.Exists(subs + ".idx")) x.subtitlepath = subs + ".idx";
+                        if (File.Exists(subs + ".ssa")) x.subtitlepath = subs + ".ssa";
+                        if (File.Exists(subs + ".ass")) x.subtitlepath = subs + ".ass";
+                        if (File.Exists(subs + ".psb")) x.subtitlepath = subs + ".psb";
+                        if (File.Exists(subs + ".smi")) x.subtitlepath = subs + ".smi";
                     }
 
                     //автокроп
@@ -1522,7 +1518,7 @@ namespace XviD4PSP
                     //проверка на размер
                     x.outfilesize = Calculate.GetEncodingSize(x);
 
-                    //запрежаем профиль кодирования если нет звука
+                    //запрещаем профиль кодирования если нет звука
                     if (x.inaudiostreams.Count == 0 || x.outaudiostreams.Count == 0)
                     {
                         combo_aencoding.SelectedItem = "Disabled";
