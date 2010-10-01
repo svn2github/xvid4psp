@@ -957,16 +957,17 @@ namespace XviD4PSP
 
                case ExportFormats.Custom:
                    return "." + FormatReader.GetFormatInfo("Custom", "GetValidExtension", "mkv");
-               
+
                case ExportFormats.Audio:
                    {
-                       AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                       if (outstream.codec == "AAC")
-                           return ".m4a";
-                       else if (outstream.codec == "PCM")
-                           return ".wav";
-                       else
-                           return "." + outstream.codec.ToLower();
+                       if (m.outaudiostreams.Count > 0)
+                       {
+                           AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                           if (outstream.codec == "AAC") return ".m4a";
+                           else if (outstream.codec == "PCM") return ".wav";
+                           else return "." + outstream.codec.ToLower();
+                       }
+                       return ".avs";
                    }
            }
        }

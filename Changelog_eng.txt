@@ -1,5 +1,8 @@
-XviD4PSP 5.0.37.8 r132->r175 30.09.10, main changes:
+XviD4PSP 5.0.37.8 r132->r176 01.10.10, main changes:
 
+>>> (r176) AvsP was added to AviSynth menu. If you already have opened file in XviD4PSP, AvsP will be started with current
+           script. In other case you will be asked to save a new script (Untitled.avs), it will be opened in AvsP and
+           after closing AvsP this script will be opened in XviD4PSP. If you press Cancel, AvsP will be started "as is".
 >>> (r175) MKVExtractGUI-2 now will be used instead of MKVExtractGUI (http://sourceforge.net/projects/mkvextractgui-2/).
 >>> (r175) MKVMerge: fixed muxing progress detection (it was broken for non-english languages). Header compression set to
            "none", it can be changed by modifying registry key MKVMerge_Compression: empty value - do not add --compression

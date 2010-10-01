@@ -458,6 +458,7 @@ namespace XviD4PSP
                 case ("Add subtitles"): mnAddSubtitles_Click(null, null); break;
                 case ("Remove subtitles"): mnRemoveSubtitles_Click(null, null); break;
                 //AviSynth
+                case ("AvsP editor"): button_avsp_Click(null, null); break;
                 case ("Edit filtering script"): EditScript(null, null); break;
                 case ("Test script"): if (m != null) { ApplyTestScript(null, null); menu_createtestscript.IsChecked = m.testscript; }; break;
                 case ("Save script"): SaveScript(null, null); break;
@@ -1949,6 +1950,7 @@ namespace XviD4PSP
                 mnAddSubtitles.InputGestureText = HotKeys.GetKeys("Add subtitles");           //
                 mnRemoveSubtitles.InputGestureText = HotKeys.GetKeys("Remove subtitles");     //
                 //AviSynth
+                menu_avsp.InputGestureText = HotKeys.GetKeys("AvsP editor");
                 menu_editscript.InputGestureText = HotKeys.GetKeys("Edit filtering script");
                 menu_createtestscript.InputGestureText = HotKeys.GetKeys("Test script");
                 menu_save_script.InputGestureText = HotKeys.GetKeys("Save script");
@@ -2010,6 +2012,7 @@ namespace XviD4PSP
                 menu_createautoscript.Header = Languages.Translate("Create auto script");
                 menu_createtestscript.Header = Languages.Translate("Test script");
                 menu_editscript.Header = Languages.Translate("Edit filtering script");
+                menu_avsp.Header = Languages.Translate("AvsP editor");
 
                 mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
                 menu_interlace.Header = Languages.Translate("Interlace/Framerate") + "...";
@@ -2561,11 +2564,12 @@ namespace XviD4PSP
             if (m == null) return;
             try
             {
-                Filtering f = new Filtering(m, this);
                 string oldscript = m.script;
+                Filtering f = new Filtering(m, this);
                 m = f.m.Clone();
+
                 //обновление при необходимости
-                if (m.script != oldscript)
+                if (m.script.Trim() != oldscript.Trim())
                 {
                     LoadVideo(MediaLoad.update);
                     UpdateTaskMassive(m);
@@ -5980,26 +5984,64 @@ namespace XviD4PSP
 
         private void button_avsp_Click(object sender, RoutedEventArgs e)
         {
-            if (m == null) return;
-            Process pr = new Process();
-            ProcessStartInfo info = new ProcessStartInfo();
             try
             {
+                Process pr = new Process();
+                ProcessStartInfo info = new ProcessStartInfo();
                 info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
                 info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                info.Arguments = Settings.TempPath + "\\AvsP.avs";
-                pr.StartInfo = info;
-                pr.Start();
-                pr.WaitForExit(); //Ждать завершения
 
-                //После завершения работы AvsP перечитываем измененный им файл AvsP.avs и вводим его содержимое в окно Фильтрация
-                using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AvsP.avs", System.Text.Encoding.Default))
-                    script_box.Text = m.script = sr.ReadToEnd();
-                UpdateTaskMassive(m);
+                if (m == null)
+                {
+                    Massive x = new Massive();
+                    x.owner = this;
+                    x.taskname = "Untitled";
+                    x.outfilepath = OpenDialogs.SaveDialog(x);
+                    if (x.outfilepath != null)
+                    {
+                        //Создаем и открываем скрипт
+                        File.WriteAllText(x.outfilepath, "#Write your script here, then Save it and Exit.\r\n#Note: this script will" +
+                            " be opened using Import(), so you can`t change it later!\r\n\r\n\r\n", Encoding.Default);
+                        info.Arguments = x.outfilepath;
+                    }
+                    pr.StartInfo = info;
+                    pr.Start();
+
+                    if (x.outfilepath == null) return;
+                    pr.WaitForExit(); //Ждать завершения
+
+                    if (File.Exists(x.outfilepath) && new FileInfo(x.outfilepath).Length > 0)
+                    {
+                        x.infilepath = x.outfilepath;
+                        x.infileslist = new string[] { x.outfilepath };
+                        x.outfilepath = x.taskname = null;
+                        action_open(x);
+                    }
+                }
+                else
+                {
+                    //Открываем текущий скрипт
+                    info.Arguments = Settings.TempPath + "\\AvsP.avs";
+                    pr.StartInfo = info;
+                    pr.Start();
+                    pr.WaitForExit(); //Ждать завершения
+                    string oldscript = m.script;
+
+                    //После завершения работы AvsP перечитываем измененный им файл AvsP.avs и вводим его содержимое в окно Фильтрация
+                    using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AvsP.avs", System.Text.Encoding.Default))
+                        script_box.Text = m.script = sr.ReadToEnd();
+
+                    //обновление при необходимости
+                    if (m.script.Trim() != oldscript.Trim())
+                    {
+                        LoadVideo(MediaLoad.update);
+                        UpdateTaskMassive(m);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage(ex.Message, "Error");
+                new Message(this).ShowMessage("AvsP editor: " + ex.Message, Languages.Translate("Error"));
             }
         }
 

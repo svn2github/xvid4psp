@@ -76,7 +76,8 @@
 					<MenuItem x:Name="mnRemoveSubtitles" Header="Remove" Click="mnRemoveSubtitles_Click"/>
 				</MenuItem>
 				<MenuItem x:Name="menu_script" Header="AviSynth">
-					<MenuItem x:Name="menu_editscript" Header="Edit filtering script" Width="Auto" Height="Auto" Click="EditScript"/>
+					<MenuItem x:Name="menu_avsp" Header="AvsP editor" Width="Auto" Height="Auto" Click="button_avsp_Click"/>
+                    <MenuItem x:Name="menu_editscript" Header="Edit filtering script" Width="Auto" Height="Auto" Click="EditScript"/>
 					<MenuItem x:Name="menu_createautoscript" Header="Create auto script" Width="Auto" Height="Auto" Click="CreateAutoScript"/>
 					<MenuItem x:Name="menu_createtestscript" Header="Test script" Width="Auto" Height="Auto" IsCheckable="True"  Click="ApplyTestScript"/>
                     <MenuItem x:Name="menu_save_script" Header="Save script" Click="SaveScript" Width="Auto" Height="Auto"/>

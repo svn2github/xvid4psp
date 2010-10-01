@@ -24,53 +24,38 @@ namespace XviD4PSP
             p = parent;
             Owner = p;
 
-           
             script_box.Text = m.script;
             script_box.AcceptsReturn = true; //Разрешаем Enter
-            script_box.AcceptsTab = true; //Разрешаем Tab
+            script_box.AcceptsTab = true;    //Разрешаем Tab
 
             //переводим
+            Title = Languages.Translate("Filtering") + " " + m.scriptpath;
             button_cancel.Content = Languages.Translate("Cancel");
             button_ok.Content = Languages.Translate("OK");
             button_refresh.Content = Languages.Translate("Apply");
             button_refresh.ToolTip = Languages.Translate("Refresh preview");
             //button_fullscreen.Content = Languages.Translate("Fullscreen");
-            //button_auto.Content = Languages.Translate("Auto");
-            //button_auto.ToolTip = Languages.Translate("Create auto script");
-            
-            Title = Languages.Translate("Filtering") + " " + m.scriptpath;
+
+            //Ограничиваем максимальную ширину окна до его открытия
+            this.MaxWidth = Math.Min(((MainWindow)parent).ActualWidth * 1.25, SystemParameters.WorkArea.Width);
+            this.SizeChanged += new SizeChangedEventHandler(Window_SizeChanged);
 
             ShowDialog();
-          		  
         }
 
- //       public Massive EditFilters(Massive m)////
- //       {
- //         char[] chars = m.script.ToCharArray();//
- //
- //         string[] separator = new string[] { Environment.NewLine }
- //         string[] lines = m.script.Split(separator, StringSplitOptions.None);
- //
- //         foreach (string line in lines)
- //         {
- //            if (line.StartsWith("#"))
- //            {
- //                lbxFilters.Items.Add(line);
- //            }
- //         }
- //
- //
- //         ShowDialog();
- //
- //          //возвращаем массив
- //          return m;
- //       }////////
-
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (IsLoaded)
+            {
+                //После открытия окна разрешаем установить бОльшую ширину
+                this.MaxWidth = SystemParameters.WorkArea.Width;
+                this.SizeChanged -= new SizeChangedEventHandler(Window_SizeChanged);
+            }
+        }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             m.script = script_box.Text;
-            //p.Refresh(script_box.Text);//ShowDialog
             Close();
         }
 
@@ -84,75 +69,33 @@ namespace XviD4PSP
             p.Refresh(script_box.Text);
         }
 
-        //Вместо кнопки Auto теперь кнопка Fullscreen
-      //  private void button_auto_Click(object sender, System.Windows.RoutedEventArgs e)
-      //  {
-      //      m = p.CreateAutoScript();
-      //      script_box.Text = m.script;
-      //  }
-        
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
            p.SwitchToFullScreen();
         }
-        
+
         //Обработка вызова редактора скрипта AvsP
         private void button_avsp_Click(object sender, RoutedEventArgs e)
         {
-           // if (!File.Exists(Settings.TempPath + "\\preview.avs")) //Если файла preview.avs нет..
-           //     AviSynthScripting.WriteScriptToFile(m.script, "preview"); //..то создаем его
+            try
+            {
+                Process pr = new Process();
+                ProcessStartInfo info = new ProcessStartInfo();
+                info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
+                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+                info.Arguments = Settings.TempPath + "\\AvsP.avs";
+                pr.StartInfo = info;
+                pr.Start();
+                pr.WaitForExit(); //Ждать завершения
 
-                 // AviSynthScripting.WriteScriptToFile(m.script, "AvsPscript");
-
-                    Process pr = new Process();
-                    ProcessStartInfo info = new ProcessStartInfo();
-
-                    if (File.Exists(Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe"))
-                    {
-                        try
-                        {
-                            info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
-                            info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                            info.Arguments = Settings.TempPath + "\\AvsP.avs";
-                            pr.StartInfo = info;
-                            pr.Start();
-                            pr.WaitForExit(); //Ждать завершения
-                            
-                            //После завершения работы AvsP перечитываем измененный им файл AvsP.avs и вводим его содержимое в окно Фильтрация
-                           // string pre_script;
-                            using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AvsP.avs", System.Text.Encoding.Default))
-                                script_box.Text = sr.ReadToEnd();
-                             
-                           // pre_script = sr.ReadToEnd();
-                           // string[] separator = new string[] { Environment.NewLine };
-                           // string[] lines = pre_script.Split(separator, StringSplitOptions.None);
-                           // string script = "";
-                           // foreach (string line in lines)
-                           //     script += line + Environment.NewLine;
-                           // script_box.Text = script;
-
-                        }
-
-                        catch (Exception ex)
-                        {
-                            Message mes = new Message(this);
-                            mes.ShowMessage(ex.Message, "Error");
-                        }   
-               
-                    }
-                   else
-                    {
-                        Message mes = new Message(this);
-                        mes.ShowMessage(Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe - Can`t find this file!", "Error");
-
-                    }
-        
+                //После завершения работы AvsP перечитываем измененный им файл AvsP.avs и вводим его содержимое в окно Фильтрация
+                using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AvsP.avs", System.Text.Encoding.Default))
+                    script_box.Text = sr.ReadToEnd();
+            }
+            catch (Exception ex)
+            {
+                new Message(this).ShowMessage("AvsP editor: " + ex.Message, Languages.Translate("Error"));
+            }
         }
-
-
-
-
-
-
 	}
 }

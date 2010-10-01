@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.Filtering"
 	x:Name="Window"
 	Title="Filtering"
-	Width="505" Height="279" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="CanResize" Topmost="False" ForceCursor="True" MinWidth="497" MaxHeight="600">
+	Width="505" Height="279" MinWidth="497" MinHeight="150" MaxHeight="600" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" ResizeMode="CanResize" Topmost="False" ForceCursor="True">
     <Window.ContextMenu>
         <ContextMenu IsTextSearchEnabled="True" IsTabStop="True" />
     </Window.ContextMenu>
@@ -18,7 +18,7 @@
 			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,8.04,102,8" Width="90" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			<Button x:Name="button_refresh" Width="90" Height="Auto" Content="Refresh" Click="button_refresh_Click" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,8.04,0,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			<Button x:Name="button_fullscreen" Width="90" Height="Auto" Content="Fullscreen" Click="button_fullscreen_Click" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="102,8.04,0,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-		<Button x:Name="button_Avsp" Width="90" Height="Auto" Content="AvsP - Editor" Click="button_avsp_Click" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="196,8.04,0,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+		    <Button x:Name="button_Avsp" Width="90" Height="Auto" Content="AvsP - Editor" Click="button_avsp_Click" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="196,8.04,0,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
         </Grid>
 	</Grid>
 </Window>
