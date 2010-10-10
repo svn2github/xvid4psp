@@ -888,15 +888,17 @@ namespace XviD4PSP
 
            //запрет обработки звука при видео импорте
            string audio = "";
-           if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || !Settings.DSS_Enable_Audio))
+           if (m.vdecoder == Decoders.DirectShowSource && (mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace || instream.audiopath != null ||
+               !Settings.DSS_Enable_Audio || !Settings.EnableAudio))
                audio = ", audio=false";
-           else if (m.vdecoder == Decoders.AVISource && !Settings.EnableAudio)
+           else if (m.vdecoder == Decoders.AVISource && (mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace || !Settings.EnableAudio))
                audio = ", audio=false";
 
            //выбор аудио трека
            string atrack = "";
            if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio)
-               atrack = ", atrack = " + (instream.ffid);
+               if (mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
+                   atrack = ", atrack = " + (instream.ffid);
            
            //ипортируем видео
            string invideostring = "";
@@ -1016,16 +1018,14 @@ namespace XviD4PSP
            //автокроп
            if (mode == ScriptMode.Autocrop)
            {
-               script += "AutoYV12()" + Environment.NewLine;
+               script += "ConvertToYV12()" + Environment.NewLine;
                script += "autocrop(mode=2,wmultof=4,hmultof=4,samples=" + Settings.AutocropFrames + ",Aspect=0,threshold=" + Settings.AutocropSensivity +
                    ",samplestartframe=0,leftadd=0,rightadd=0,topadd=0,bottomadd=0, file=\"" + Settings.TempPath + "\\AutoCrop.log\")" + Environment.NewLine;
            }
 
            if (mode == ScriptMode.Interlace)
            {
-               script += "AutoYV12()" + Environment.NewLine;
-               script += "Trim(0, 1200)" + Environment.NewLine;
-               //script += "SelectRangeEvery(FrameCount()/30,40";
+               script += "ConvertToYV12()" + Environment.NewLine;
            }
 
            return script;
@@ -1144,6 +1144,49 @@ namespace XviD4PSP
            foreach (string line in lines)
                sw.WriteLine(line);
            sw.Close();
+       }
+
+       private const string InterlaceScript =
+@"{0}
+{1}
+file=""{2}""
+global sep=""-""
+c = last
+global clip = c
+c = WriteFile(c, file, ""a"", ""sep"", ""b"")
+c = FrameEvaluate(c, ""global a = IsCombedTIVTC(clip, cthresh=9)"")
+c = FrameEvaluate(c, ""global b = ((0.50*YDifference{5}(clip) + 0.25*UDifference{5}(clip) + 0.25*VDifference{5}(clip)) < 1.0) ? false : true"")
+SelectRangeEvery(c,{3},{4},0)
+crop(0,0,16,16)";
+
+       private const string FieldOrderScript =
+@"{0}
+{1}
+file=""{2}""
+global sep=""-""
+d = last
+global abff = d.assumebff.separatefields
+global atff = d.assumetff.separatefields
+c = abff
+c = WriteFile(c, file, ""diffa"", ""sep"", ""diffb"")
+c = FrameEvaluate(c,""global diffa = 0.50*YDifference{5}(abff) + 0.25*UDifference{5}(abff) + 0.25*VDifference{5}(abff)"")
+c = FrameEvaluate(c,""global diffb = 0.50*YDifference{5}(atff) + 0.25*UDifference{5}(atff) + 0.25*VDifference{5}(atff)"")
+SelectRangeEvery(c,{3},{4},0)
+crop(0,0,16,16)";
+
+       public static string GetSourceDetectionScript(Detecting det, string originalScript, string trimLine, string logFileName, int selectEvery, int selectLength)
+       {
+           //—крипты дл€ анализа работают намного быстрее, если вместо DifferenceFromPrevious использовать DifferenceToNext.
+           //Ќе должно сильно сказатьс€ на погрешности, т.к. всЄ-равно дл€ достоверного определени€ движени€ в текущем кадре
+           //нужны оба, и предыдущий, и последующий. »спользу€ только два кадра нельз€ определить, какой из них с движением,
+           //а какой статичен. “ак-что с FromPrevious всегда будет сколько-то неверно определенных кадров, дл€ которых лучше
+           //было бы использовать ToNext. » наоборот. «ато прибавка в скорости существенна€! :)
+           if (det == Detecting.Interlace)   //detection
+               return string.Format(InterlaceScript, originalScript, trimLine, logFileName, selectEvery, selectLength, "ToNext");
+           else if (det == Detecting.Fields) //field order
+               return string.Format(FieldOrderScript, originalScript, trimLine, logFileName, selectEvery, selectLength, "ToNext");
+           else
+               return null;
        }
     }
 }

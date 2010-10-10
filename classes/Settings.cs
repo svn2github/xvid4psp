@@ -1232,7 +1232,7 @@ namespace XviD4PSP
                     SetDouble("VolumeLevel", 1.0);
                     return 1.0;
                 }
-                return Convert.ToDouble(value);
+                return Calculate.ConvertStringToDouble(value.ToString());
             }
             set
             {
@@ -2343,7 +2343,7 @@ namespace XviD4PSP
                 object value = GetValue("EnableAudio");
                 if (value == null)
                 {
-                    return false;
+                    return true;
                 }
                 else
                 {
@@ -2353,6 +2353,99 @@ namespace XviD4PSP
             set
             {
                 SetBool("EnableAudio", value);
+            }
+        }
+
+        //Анализировать % (SourceDetector)
+        public static double SD_Analyze
+        {
+            get
+            {
+                object value = GetValue("SD_Analyze");
+                if (value == null)
+                {
+                    return 1.0;
+                }
+                return Calculate.ConvertStringToDouble(value.ToString());
+            }
+            set
+            {
+                SetDouble("SD_Analyze", value);
+            }
+        }
+
+        //Минимум секций (блоков по 5 кадров) для анализа (SourceDetector)
+        public static int SD_Min_Sections
+        {
+            get
+            {
+                object value = GetValue("SD_Min_Sections");
+                if (value == null)
+                {
+                    return 150;
+                }
+                return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("SD_Min_Sections", value);
+            }
+        }
+
+        //Порог для Hybrid Interlace % (SourceDetector)
+        public static int SD_Hybrid_Int
+        {
+            get
+            {
+                object value = GetValue("SD_Hybrid_Int");
+                if (value == null)
+                {
+                    return 5;
+                }
+                return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("SD_Hybrid_Int", value);
+            }
+        }
+
+        //Порог для Hybrid FieldOrder % (SourceDetector)
+        public static int SD_Hybrid_FO
+        {
+            get
+            {
+                object value = GetValue("SD_Hybrid_FO");
+                if (value == null)
+                {
+                    return 10;
+                }
+                return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("SD_Hybrid_FO", value);
+            }
+        }
+
+        //Выборочный анализ полей (SourceDetector)
+        public static bool SD_Portions_FO
+        {
+            get
+            {
+                object value = GetValue("SD_Portions_FO");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("SD_Portions_FO", value);
             }
         }
     }

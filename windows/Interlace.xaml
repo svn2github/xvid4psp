@@ -5,34 +5,90 @@
 	x:Class="XviD4PSP.Interlace"
 	x:Name="Window"
 	Title="Interlace/Framerate"
-	Width="400" Height="385" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl">
+	Width="Auto" Height="Auto" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<GroupBox Foreground="#FFFFFFFF" x:Name="group_interlace" Header="Interlace" Margin="8,8,8,137.04" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
-				<Grid Width="Auto" Height="Auto">
-					<Label OpacityMask="{x:Null}" x:Name="label_source_info" Content="Detect source type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Top"/>
-					<Button x:Name="button_analyse" Content="Analyse" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_analyse_Click" HorizontalAlignment="Right" Margin="0,5.66,8,0" VerticalAlignment="Top" Width="149" Height="21.96"/>
-					<Label OpacityMask="{x:Null}" x:Name="label_deinterlace" Content="Deinterlace:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" d:LayoutOverrides="Height" Margin="8,85.86,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_deinterlace" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_deinterlace_SelectionChanged" HorizontalAlignment="Right" Margin="0,91.52,8,0" Width="149" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="label_field_order" Content="Field order:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,57.24,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_fieldorder" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_fieldorder_SelectionChanged" HorizontalAlignment="Right" Margin="0,62.9,8,0" VerticalAlignment="Top" Width="149"/>
-					<Label OpacityMask="{x:Null}" x:Name="label_source_type" Content="Source type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,28.62,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_sourcetype" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" SelectionChanged="combo_sourcetype_SelectionChanged" HorizontalAlignment="Right" Margin="0,34.28,8,0" VerticalAlignment="Top" Width="149"/>
-					<Label OpacityMask="{x:Null}" x:Name="label_outinterlace" Content="Target type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,114.48,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_outinterlace" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,120.14,8,0" Width="149" VerticalAlignment="Top" SelectionChanged="combo_outinterlace_SelectionChanged"/>
-				</Grid>
-			</GroupBox>
-			<GroupBox Margin="8,0,8,8" Header="Framerate" Foreground="#FFFFFFFF" x:Name="group_framerate" VerticalAlignment="Bottom" Height="125.04">
-				<Grid Width="Auto" Height="Auto">
-					<Label OpacityMask="{x:Null}" x:Name="text_in_framerate" Content="Input framerate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_in_framerate_value" Content="25.000 fps" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Right" Margin="0,8,8,0" VerticalAlignment="Top" Width="Auto"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_out_framerate" Content="Output framerate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,36.62,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_framerate" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_framerate_SelectionChanged" HorizontalAlignment="Right" Margin="0,41.28,8,0" VerticalAlignment="Top" Width="149"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_framerateconvertor" Content="Convertion method:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,65.24,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_framerateconvertor" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,69.9,8,0" VerticalAlignment="Top" Width="149" SelectionChanged="combo_framerateconvertor_SelectionChanged"/>
-				</Grid>
-			</GroupBox>
+		   <TabControl Width="Auto" Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
+                <TabItem Header="Main" x:Name="tab_main">
+                    <Grid Width="386" Height="Auto">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_interlace" Header="Interlace" Margin="4,2,4,0" Height="Auto" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_source_info" Content="Detect source type:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <Button x:Name="button_analyse" Content="Analyse" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_analyse_Click" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,5,0" VerticalAlignment="Center" Width="150" Height="22"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_source_type" Content="Source type:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_sourcetype" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_sourcetype_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_field_order" Content="Field order:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_fieldorder" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_fieldorder_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_deinterlace" Content="Deinterlace:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_deinterlace" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_deinterlace_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_outinterlace" Content="Target type:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_outinterlace" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_outinterlace_SelectionChanged"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Margin="4,166,4,6" Header="Framerate" Foreground="#FFFFFFFF" x:Name="group_framerate" VerticalAlignment="Top" Height="Auto" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_in_framerate" Content="Input framerate:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="text_in_framerate_value" Content="25.000 fps" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_out_framerate" Content="Output framerate:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_framerate" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_framerate_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_framerateconvertor" Content="Convertion method:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_framerateconvertor" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_framerateconvertor_SelectionChanged"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Settings" x:Name="tab_settings">
+                    <Grid Width="386" Height="Auto">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Source detector" Margin="4,2,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_analyze_percent" Content="Analyze (% of the source lenght):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_analyze_percent" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="0.1" DecimalPlaces="1" Minimum="0.1" Maximum="100" Value="1.0" ValueChanged="num_analyze_percent_ValueChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_min_sections" Content="But no less than (sections):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_min_sections" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Minimum="10" Maximum="9999" Value="150" ValueChanged="num_min_sections_ValueChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_hybrid_int" Content="Hybrid interlace threshold (%):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_hybrid_int" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Minimum="1" Maximum="100" Value="5" ValueChanged="num_hybrid_int_ValueChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_hybrid_fo" Content="Hybrid field order threshold (%):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_hybrid_fo" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Minimum="1" Maximum="100" Value="10" ValueChanged="num_hybrid_fo_ValueChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,3" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_fo_portions" Content="Enable selective field order analysis" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
+                                    <CheckBox x:Name="check_fo_portions" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" Click="check_fo_portions_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,7,0"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+            </TabControl>
 		</Grid>
 		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.96" Background="{DynamicResource black_gradient}">
 			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" BorderThickness="1,1,1,1" Click="button_cancel_Click" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>

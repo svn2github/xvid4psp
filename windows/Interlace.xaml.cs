@@ -42,6 +42,13 @@ namespace XviD4PSP
             text_framerateconvertor.Content = Languages.Translate("Framerate converter:");
             text_in_framerate_value.Content = m.inframerate + " fps";
             //button_fullscreen.Content = Languages.Translate("Fullscreen");
+            tab_main.Header = Languages.Translate("Main");
+            tab_settings.Header = Languages.Translate("Settings");
+            text_analyze_percent.Content = Languages.Translate("Analyze (% of the source lenght)") + ":";
+            text_min_sections.Content = Languages.Translate("But no less than (sections)") + ":";
+            text_hybrid_int.Content = Languages.Translate("Hybrid interlace threshold") + " (%):";
+            text_hybrid_fo.Content = Languages.Translate("Hybrid field order threshold") + " (%):";
+            text_fo_portions.Content = Languages.Translate("Enable selective field order analysis");
 
             SetTooltips();
 
@@ -122,6 +129,13 @@ namespace XviD4PSP
             foreach (string interlace in Enum.GetNames(typeof(Massive.InterlaceModes)))
                 combo_outinterlace.Items.Add(interlace);
             combo_outinterlace.SelectedItem = Format.GetCodecOutInterlace(m);
+
+            //Настройки
+            num_analyze_percent.Value = (decimal)Settings.SD_Analyze;
+            num_min_sections.Value = (decimal)Settings.SD_Min_Sections;
+            num_hybrid_int.Value = (decimal)Settings.SD_Hybrid_Int;
+            num_hybrid_fo.Value = (decimal)Settings.SD_Hybrid_FO;
+            check_fo_portions.IsChecked = Settings.SD_Portions_FO;
 
             ShowDialog();
 		}
@@ -226,25 +240,32 @@ namespace XviD4PSP
                 combo_framerateconvertor.ToolTip = "The AssumeFPS filter changes the frame rate without changing the frame count." +
                     Environment.NewLine + "(causing the video to play faster or slower)";
             }
-            if (m.frameratemodifer == AviSynthScripting.FramerateModifers.ChangeFPS)
+            else if (m.frameratemodifer == AviSynthScripting.FramerateModifers.ChangeFPS)
             {
                 combo_framerateconvertor.ToolTip = "ChangeFPS changes the frame rate by deleting or duplicating frames.";
             }
-            if (m.frameratemodifer == AviSynthScripting.FramerateModifers.ConvertFPS)
+            else if (m.frameratemodifer == AviSynthScripting.FramerateModifers.ConvertFPS)
             {
                 combo_framerateconvertor.ToolTip = "The filter attempts to convert the frame rate of clip to new_rate without" +
                              Environment.NewLine + "dropping or inserting frames, providing a smooth conversion with results similar" +
                              Environment.NewLine + "to those of standalone converter boxes. The output will have (almost) the same duration as clip," +
                              Environment.NewLine + "but the number of frames will change proportional to the ratio of target and source frame rates.";
             }
-            if (m.frameratemodifer == AviSynthScripting.FramerateModifers.MSUFrameRate)
+            else if (m.frameratemodifer == AviSynthScripting.FramerateModifers.MSUFrameRate)
             {
                 combo_framerateconvertor.ToolTip = "The filter is intended for video frame rate up-conversion. It increases the frame rate integer times.";
             }
+
+            num_analyze_percent.ToolTip = "Default: 1";
+            num_min_sections.ToolTip = "Default: 150 (1 section = 5 frames, 150 sections = 750 frames)";
+            num_hybrid_int.ToolTip = "Default: 5";
+            num_hybrid_fo.ToolTip = "Default: 10";
+            check_fo_portions.ToolTip = "Default: enabled";
         }
 
         private void button_analyse_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            button_analyse.ToolTip = null;
             SourceDetector sd = new SourceDetector(m);
 
             if (sd.m != null)
@@ -275,6 +296,13 @@ namespace XviD4PSP
                     //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
                     m = Calculate.UpdateOutFrames(m);
                     m.outfilesize = Calculate.GetEncodingSize(m);
+                }
+
+                //Выводим результаты
+                if (sd.results != null)
+                {
+                    button_analyse.ToolTip = sd.results;
+                    ToolTipService.SetShowDuration(button_analyse, 100000);
                 }
             }
         }
@@ -473,6 +501,35 @@ namespace XviD4PSP
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             p.SwitchToFullScreen();
+        }
+
+        private void num_analyzepercent_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_analyze_percent.IsAction)
+                Settings.SD_Analyze = (double)num_analyze_percent.Value;
+        }
+
+        private void num_min_sections_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_min_sections.IsAction)
+                Settings.SD_Min_Sections = (int)num_min_sections.Value;
+        }
+
+        private void num_hybrid_int_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_hybrid_int.IsAction)
+                Settings.SD_Hybrid_Int = (int)num_hybrid_int.Value;
+        }
+
+        private void num_hybrid_fo_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_hybrid_fo.IsAction)
+                Settings.SD_Hybrid_FO = (int)num_hybrid_fo.Value;
+        }
+
+        private void check_fo_portions_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.SD_Portions_FO = check_fo_portions.IsChecked.Value;
         }
 	}
 }

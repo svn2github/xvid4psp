@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r177 01.10.10, main changes:
+XviD4PSP 5.0.37.8 r132->r178 10.10.10, main changes:
 
+>>> (r178) Internal interlace analyzer instead of bautodeint.exe (based on http://forum.doom9.org/showthread.php?p=758642
+           and MeGUI; with speed improvements).
 >>> (r177) Added ability to disable audio in input files (Audio->Decoding->Enable audio in input files). If checkbox is
            unchecked, all video files will be opened without audio. This doesn`t affect audio files and AviSynth scripts.
 >>> (r176) AvsP was added to AviSynth menu. If you already have opened file in XviD4PSP, AvsP will be started with current
