@@ -160,8 +160,9 @@ namespace XviD4PSP
                         this.Left = Convert.ToDouble(value[2]);
                         this.Top = Convert.ToDouble(value[3]);
                         GridLengthConverter conv = new GridLengthConverter();
-                        this.TasksRow.Height = (GridLength)conv.ConvertFromString(value[4]);
-                        this.TasksRow2.Height = (GridLength)conv.ConvertFromString(value[5]);
+                        string sep = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                        this.TasksRow.Height = (GridLength)conv.ConvertFromString(value[4].Replace(".", sep).Replace(",", sep));
+                        this.TasksRow2.Height = (GridLength)conv.ConvertFromString(value[5].Replace(".", sep).Replace(",", sep));
                     }
                 }
 

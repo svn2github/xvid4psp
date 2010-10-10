@@ -503,7 +503,7 @@ namespace XviD4PSP
             p.SwitchToFullScreen();
         }
 
-        private void num_analyzepercent_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        private void num_analyze_percent_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
             if (num_analyze_percent.IsAction)
                 Settings.SD_Analyze = (double)num_analyze_percent.Value;

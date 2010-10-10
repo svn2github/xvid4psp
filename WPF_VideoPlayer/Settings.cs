@@ -52,6 +52,23 @@ namespace WPF_VideoPlayer
             key.Close();
         }
 
+        private static double GetDouble(string key, double _default)
+        {
+            object value = GetValue(key);
+            if (value == null)
+            {
+                return _default;
+            }
+            else
+            {
+                double dvalue;
+                string sep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                string dstring = value.ToString().Replace(".", sep).Replace(",", sep);
+                if (Double.TryParse(dstring, out dvalue)) return dvalue;
+                else return _default;
+            }
+        }
+
         public static string Language
         {
             get
@@ -139,12 +156,7 @@ namespace WPF_VideoPlayer
         {
             get
             {
-                object value = GetValue("WPFPlayer_VolumeLevel");
-                if (value == null)
-                {
-                    return 1.0;
-                }
-                return Convert.ToDouble(value);
+                return GetDouble("WPFPlayer_VolumeLevel", 1.0);
             }
             set
             {

@@ -412,32 +412,70 @@ namespace MyUserControl
                 IsAction = true;
             }
 
-            if (Value.ToString() != value)
+            try
             {
-                int intvalue;
-                bool IsInteger = Int32.TryParse(value, NumberStyles.Integer, null, out intvalue);
-
-                if (IsInteger)
+                if (Value.ToString(_numberFormatInfo) != value)
                 {
-                   decimal dvalue = Convert.ToDecimal(value);
-                   if (dvalue > Maximum)
-                   {
-                       dvalue = Maximum;
-                       text.Text = Maximum.ToString();
-                   }
-                   if (dvalue < Minimum)
-                   {
-                       dvalue = Minimum;
-                       text.Text = Minimum.ToString();
-                   }              
-                    Value = dvalue;
-                }
-                else
-                {              
-                    text.Text = Value.ToString();
-                }
+                    int intvalue;
 
-                text.CaretIndex = Value.ToString().Length;
+                    //Убираем всё лишнее
+                    if (this.DecimalPlaces == 0)
+                        value = value.Replace(".", "").Replace(",", "");
+                    else
+                        value = value.TrimEnd(new char[] { '.', ',' });
+
+                    if (Int32.TryParse(value, NumberStyles.Integer, null, out intvalue))
+                    {
+                        decimal dvalue = Convert.ToDecimal(value);
+                        if (dvalue > Maximum)
+                        {
+                            Value = Maximum;
+                            text.Text = Maximum.ToString(_numberFormatInfo);
+                        }
+                        else if (dvalue < Minimum)
+                        {
+                            Value = Minimum;
+                            text.Text = Minimum.ToString(_numberFormatInfo);
+                        }
+                        else
+                        {
+                            Value = dvalue;
+                            if (this.DecimalPlaces == 0)
+                                text.Text = Value.ToString(_numberFormatInfo);
+                        }
+                    }
+                    else
+                    {
+                        double double_value;
+                        string sep = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                        value = value.Replace(".", sep).Replace(",", sep);
+
+                        if (value.Contains(sep))
+                        {
+                            //Отрезаем лишнюю десятичную часть; Decimal.Round() - округляет последний символ, не годится
+                            value = value.Substring(0, Math.Min(value.Length, value.IndexOf(sep) + this.DecimalPlaces + 1));
+                        }
+
+                        if (Double.TryParse(value, out double_value))
+                        {
+                            decimal dvalue = Convert.ToDecimal(double_value);
+                            if (dvalue > Maximum) Value = Maximum;
+                            else if (dvalue < Minimum) Value = Minimum;
+                            else Value = dvalue;
+                            text.Text = Value.ToString(_numberFormatInfo);
+                        }
+                        else
+                        {
+                            text.Text = Value.ToString(_numberFormatInfo);
+                        }
+                    }
+                    text.CaretIndex = text.ToString().Length;
+                }
+            }
+            catch
+            {
+                text.Text = Value.ToString(_numberFormatInfo);
+                text.CaretIndex = text.ToString().Length;
             }
 
             IsAction = false;

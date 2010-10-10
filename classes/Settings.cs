@@ -19,48 +19,52 @@ namespace XviD4PSP
 
         private static void SetString(string Key, string Value)
         {
-            RegistryKey myHive =
-                Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
-
+            RegistryKey myHive = Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
             myHive.SetValue(Key, Value, RegistryValueKind.String);
             myHive.Close();
-
         }
 
         private static void SetBool(string Key, bool Value)
         {
-            RegistryKey myHive =
-                Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
-
+            RegistryKey myHive = Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
             myHive.SetValue(Key, Convert.ToString(Value), RegistryValueKind.String);
             myHive.Close();
-
         }
 
         private static void SetInt(string Key, int Value)
         {
-            RegistryKey myHive =
-                Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
-
+            RegistryKey myHive = Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
             myHive.SetValue(Key, Convert.ToString(Value), RegistryValueKind.String);
             myHive.Close();
-
         }
 
         private static void SetDouble(string Key, double Value)
         {
-            RegistryKey myHive =
-                Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
-
+            RegistryKey myHive = Registry.CurrentUser.CreateSubKey("Software\\Winnydows\\XviD4PSP5");
             myHive.SetValue(Key, Convert.ToString(Value), RegistryValueKind.String);
             myHive.Close();
+        }
 
+        private static double GetDouble(string key, double _default)
+        {
+            object value = GetValue(key);
+            if (value == null)
+            {
+                return _default;
+            }
+            else
+            {
+                double dvalue;
+                string sep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                string dstring = value.ToString().Replace(".", sep).Replace(",", sep);
+                if (Double.TryParse(dstring, out dvalue)) return dvalue;
+                else return _default;
+            }
         }
 
         private static object GetValue(string Key)
         {
-            using (RegistryKey
-         myHive = Registry.CurrentUser.OpenSubKey("Software\\Winnydows\\XviD4PSP5", true))
+            using (RegistryKey myHive = Registry.CurrentUser.OpenSubKey("Software\\Winnydows\\XviD4PSP5", true))
             {
                 if (myHive != null)
                 {
@@ -1226,13 +1230,7 @@ namespace XviD4PSP
         {
             get
             {
-                object value = GetValue("VolumeLevel");
-                if (value == null)
-                {
-                    SetDouble("VolumeLevel", 1.0);
-                    return 1.0;
-                }
-                return Calculate.ConvertStringToDouble(value.ToString());
+                return GetDouble("VolumeLevel", 1.0);
             }
             set
             {
@@ -2361,12 +2359,7 @@ namespace XviD4PSP
         {
             get
             {
-                object value = GetValue("SD_Analyze");
-                if (value == null)
-                {
-                    return 1.0;
-                }
-                return Calculate.ConvertStringToDouble(value.ToString());
+                return GetDouble("SD_Analyze", 1.0);
             }
             set
             {
