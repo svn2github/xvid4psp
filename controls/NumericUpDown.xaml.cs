@@ -43,9 +43,11 @@ namespace MyUserControl
             get { return (decimal)GetValue(ValueProperty); }
             set
             {
-                if (value > Maximum ||
-                    value < Minimum)
-                    IsAction = true;
+                //Это тут лишнее, т.к. IsAction должно быть равно true
+                //только тогда, когда значение меняется пользователем!
+                //if (value > Maximum ||
+                //    value < Minimum)
+                //    IsAction = true;
                 SetValue(ValueProperty, value); 
             }
         }

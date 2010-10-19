@@ -59,34 +59,35 @@ namespace XviD4PSP
                 Languages.Translate("Values below 1.0 reduce the saturation.");
 
             //забиваем параметры
-            for (double n = 0.0; n <= 10.0; n += 0.1) //цветность
+            //Цветность
+            for (double n = 0.0; n <= 10.0; n += 0.1)
                 combo_saturation.Items.Add(n.ToString("0.0").Replace(",", "."));
             slider_saturation.Minimum = 0.0;
             slider_saturation.Maximum = 10.0;
             slider_saturation.SmallChange = 0.1;
 
-
-            for (double n = 0.0; n <= 5.0; n += 0.01) //(double n = 0.0; n <= 10.0; n += 0.1)
-                combo_contrast.Items.Add(n.ToString("0.00").Replace(",", "."));//Контрастность //("0.0")
+            //Контрастность
+            for (double n = 0.0; n <= 5.0; n += 0.01)
+                combo_contrast.Items.Add(n.ToString("0.00").Replace(",", "."));
             slider_contrast.Minimum = 0.0;
-            slider_contrast.Maximum = 5.0; //10.0
-            slider_contrast.SmallChange = 0.01; //0.1
+            slider_contrast.Maximum = 5.0;
+            slider_contrast.SmallChange = 0.01;
 
-
-            for (int n = -180; n <= 180; n++) //Оттенок
+            //Оттенок
+            for (int n = -180; n <= 180; n++)
                 combo_hue.Items.Add(n);
             slider_hue.Minimum = -180;
             slider_hue.Maximum = 180;
-            slider_saturation.SmallChange = 1; //<-----
+            slider_saturation.SmallChange = 1;
 
-
-            for (int n = -255; n <= 255; n++) //Яркость
+            //Яркость
+            for (int n = -255; n <= 255; n++)
                 combo_brightness.Items.Add(n);
             slider_brightness.Minimum = -255;
             slider_brightness.Maximum = 255;
             slider_brightness.SmallChange = 1;
 
-            //возможные типы гистограммы
+            //Возможные типы гистограммы
             combo_histogram.Items.Add("Disabled");
             combo_histogram.Items.Add("Classic");
             combo_histogram.Items.Add("Levels");
@@ -98,9 +99,9 @@ namespace XviD4PSP
             combo_histogram.Items.Add("AudioLevels");
             combo_histogram.SelectedItem = oldm.levels;
 
-            LoadProfiles();//загружает список профилей в форму, название текущего профиля выбирается = m.sbc
-            DecodeProfile(m);//читает и передает массиву mass значения параметров из файла профиля = m.sbc
-            LoadFromProfile();//загружает эти параметры в форму (из массива m)
+            LoadProfiles();    //загружает список профилей в форму, название текущего профиля выбирается = m.sbc
+            DecodeProfile(m);  //читает и передает массиву mass значения параметров из файла профиля = m.sbc
+            LoadFromProfile(); //загружает эти параметры в форму (из массива m)
 
             ShowDialog();
         }
@@ -133,11 +134,16 @@ namespace XviD4PSP
             //загружаем списки профилей цвето коррекции
             combo_profile.Items.Clear();
             combo_profile.Items.Add("Disabled");
-            foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+            try
             {
-                string name = Path.GetFileNameWithoutExtension(file);
-                combo_profile.Items.Add(name);
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                {
+                    string name = Path.GetFileNameWithoutExtension(file);
+                    combo_profile.Items.Add(name);
+                }
             }
+            catch { }
+
             //прописываем текущий профиль
             if (combo_profile.Items.Contains(m.sbc))
                 combo_profile.SelectedItem = m.sbc;
@@ -157,68 +163,57 @@ namespace XviD4PSP
             if (mass.sbc == "Disabled")
                 return mass;
 
-            string line;
-            using (StreamReader sr = new StreamReader(Calculate.StartupPath +
-                "\\presets\\sbc\\" + mass.sbc + ".avs", System.Text.Encoding.Default)) //ищет и читает файл с пресетами цветокоррекции
+            try
             {
-                while (!sr.EndOfStream)
+                string line;
+                using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\presets\\sbc\\" + mass.sbc + ".avs", System.Text.Encoding.Default))
                 {
-                    line = sr.ReadLine();
-                    //дешифровка яркости контраста ...
-                    if (line.ToLower().StartsWith("tweak")) //начинает читать строчку со слова tweak
+                    while (!sr.EndOfStream)
                     {
-                        string pat;
-                        Regex r;
-                        Match mat;
+                        line = sr.ReadLine().ToLower();
+                        //дешифровка яркости контраста ...
+                        if (line.StartsWith("tweak")) //начинает читать строчку со слова tweak
+                        {
+                            string pat;
+                            Regex r;
+                            Match mat;
 
-                        //получаем hue - оттенок
-                        pat = @"hue=(\d+)";
-                        r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        mat = r.Match(line);
-                        if (mat.Success)
-                            mass.hue = Convert.ToInt32(mat.Groups[1].Value);
+                            //получаем hue - оттенок
+                            pat = @"hue=(-?\d+)";
+                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            mat = r.Match(line);
+                            if (mat.Success)
+                                mass.hue = Convert.ToInt32(mat.Groups[1].Value);
 
-                        //получаем hue-
-                        pat = @"hue=-(\d+)";
-                        r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        mat = r.Match(line);
-                        if (mat.Success)
-                            mass.hue = Convert.ToInt32("-" + mat.Groups[1].Value.ToString());
+                            //получаем насыщенность
+                            pat = @"sat=(\d+.\d+)";
+                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            mat = r.Match(line);
+                            if (mat.Success)
+                                mass.saturation = Convert.ToDouble(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
 
-                        //получаем насыщенность
-                        pat = @"sat=(\d+.\d+)";
-                        r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        mat = r.Match(line);
-                        if (mat.Success)
-                            mass.saturation = Convert.ToDouble(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
+                            //получаем яркость
+                            pat = @"bright=(-?\d+)";
+                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            mat = r.Match(line);
+                            if (mat.Success)
+                                mass.brightness = Convert.ToInt32(mat.Groups[1].Value);
 
-                        //получаем яркость
-                        pat = @"bright=(\d+)";
-                        r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        mat = r.Match(line);
-                        if (mat.Success)
-                            mass.brightness = Convert.ToInt32(mat.Groups[1].Value);
+                            //получаем контраст
+                            pat = @"cont=(\d+.\d+)";
+                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            mat = r.Match(line);
+                            if (mat.Success)
+                                mass.contrast = Convert.ToDouble(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
+                        }
 
-                        //получаем яркость
-                        pat = @"bright=-(\d+)";
-                        r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        mat = r.Match(line);
-                        if (mat.Success)
-                            mass.brightness = Convert.ToInt32("-" + mat.Groups[1].Value);
-
-                        //получаем контраст
-                        pat = @"cont=(\d+.\d+)";
-                        r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        mat = r.Match(line);
-                        if (mat.Success)
-                            mass.contrast = Convert.ToDouble(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
+                        //дешифровка ColorMatrix
+                        if (line == "colormatrix()")
+                            mass.iscolormatrix = true;
                     }
-
-                    //дешифровка ColorMatrix
-                    if (line.ToLower() == "colormatrix()")
-                        mass.iscolormatrix = true;
                 }
             }
+            catch { }
 
             return mass;
         }
@@ -240,16 +235,12 @@ namespace XviD4PSP
         private void button_add_Click(object sender, System.Windows.RoutedEventArgs e) //кнопка "добавить новый профиль"
         {
             string auto_name = "Custom";
-            if (m.iscolormatrix)
-                auto_name += " DVD";
-
+            if (m.iscolormatrix) auto_name += " DVD";
 
             NewProfile newp = new NewProfile(auto_name, Format.EnumToString(m.format), NewProfile.ProfileType.SBC, this); //создается новый профиль
-
             if (newp.profile != null)
             {
-                m.sbc = newp.profile;
-                CreateSBCProfile();//
+                CreateSBCProfile(newp.profile);
                 LoadProfiles();//загружает список профилей в форму, название текущего профиля выбирается = m.sbc
             }
         }
@@ -259,7 +250,7 @@ namespace XviD4PSP
             if (combo_profile.Items.Count > 1)
             {
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " " + m.sbc + "?",
+                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " \"" + m.sbc + "\"?",
                     Languages.Translate("Question"),
                     Message.MessageStyle.YesNo);
 
@@ -267,7 +258,16 @@ namespace XviD4PSP
                 {
                     int last_num = combo_profile.SelectedIndex;
                     string profile_path = Calculate.StartupPath + "\\presets\\sbc\\" + m.sbc + ".avs";
-                    File.Delete(profile_path);
+
+                    try
+                    {
+                        File.Delete(profile_path);
+                    }
+                    catch (Exception ex)
+                    {
+                        new Message(this).ShowMessage(Languages.Translate("Can`t delete profile") + ": " + ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        return;
+                    }
 
                     //загружаем список фильтров
                     combo_profile.Items.Clear();
@@ -283,7 +283,6 @@ namespace XviD4PSP
                     else
                         m.sbc = combo_profile.Items[last_num - 1].ToString();
                     combo_profile.SelectedItem = m.sbc;
-
                     combo_profile.UpdateLayout();
 
                     DecodeProfile(m);
@@ -300,34 +299,31 @@ namespace XviD4PSP
             }
         }
 
-        private void UpdateManualProfile() //изменяет название текущего профиля на Manual и сохраняет его в виде файла
+        private void UpdateManualProfile() //изменяет название текущего профиля на Custom и сохраняет его в виде файла
         {
-            m.sbc = "Manual";
-            CreateSBCProfile();
+            CreateSBCProfile("Custom");
             LoadProfiles();
         }
 
-        private void CreateSBCProfile() //создает новый пресет-файл
+        private void CreateSBCProfile(string profile) //создает новый пресет-файл
         {
-            StreamWriter sw = new StreamWriter(Calculate.StartupPath + "\\presets\\sbc\\" + m.sbc + ".avs", false, System.Text.Encoding.Default);
+            try
+            {
+                string text = "";
+                if (m.iscolormatrix) text += "ColorMatrix()" + Environment.NewLine;
+                if (m.hue != 0) text += "Tweak(hue=" + m.hue + ")" + Environment.NewLine;
+                if (m.saturation != 1.0) text += "Tweak(sat=" + m.saturation.ToString("0.0").Replace(",", ".") + ")" + Environment.NewLine;
+                if (m.brightness != 0) text += "Tweak(bright=" + m.brightness + ")" + Environment.NewLine;
+                if (m.contrast != 1.0) text += "Tweak(cont=" + m.contrast.ToString("0.00").Replace(",", ".") + ")" + Environment.NewLine;
 
-            //каждый параметр будет записываться на новой строчке, через одну
-            if (m.iscolormatrix)
-                sw.WriteLine("ColorMatrix()" + Environment.NewLine);
-
-            if (m.hue != 0)
-                sw.WriteLine("Tweak(hue=" + m.hue + ")" + Environment.NewLine);
-
-            if (m.saturation != 1.0)
-                sw.WriteLine("Tweak(sat=" + m.saturation.ToString("0.0").Replace(",", ".") + ")" + Environment.NewLine);
-
-            if (m.brightness != 0)
-                sw.WriteLine("Tweak(bright=" + m.brightness + ")" + Environment.NewLine);
-
-            if (m.contrast != 1.0)
-                sw.WriteLine("Tweak(cont=" + m.contrast.ToString("0.00").Replace(",", ".") + ")" + Environment.NewLine); //("0.0")
-
-            sw.Close();
+                string path = Calculate.StartupPath + "\\presets\\sbc\\" + profile + ".avs";
+                File.WriteAllText(path, text, System.Text.Encoding.Default);
+                m.sbc = profile;
+            }
+            catch (Exception ex)
+            {
+                new Message(this).ShowMessage(Languages.Translate("Can`t save profile") + ": " + ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+            }
         }
 
         private void slider_saturation_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)

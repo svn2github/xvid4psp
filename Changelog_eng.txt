@@ -1,5 +1,8 @@
-XviD4PSP 5.0.37.8 r132->r179 10.10.10, main changes:
+XviD4PSP 5.0.37.8 r132->r180 19.10.10, main changes:
 
+>>> (r180) Color correction window: changed default name for user`s presets from Manual to Custom.
+>>> (r180) Video and audio encoding settings windows: fixed loading of wrong codec window after changing encoder preset
+           from Copy to any other (using combobox Profile) and possible crash in video codec window.
 >>> (r179) Some improvements for the NumericUpDown user control.
 >>> (r178) Internal interlace analyzer instead of bautodeint.exe (based on http://forum.doom9.org/showthread.php?p=758642
            and MeGUI; with speed improvements).

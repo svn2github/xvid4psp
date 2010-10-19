@@ -226,9 +226,9 @@ namespace XviD4PSP
                     string CopyProblems = Format.ValidateCopyVideo(m);
                     if (CopyProblems != null)
                     {
-                        Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
+                        new Message(this).ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                            " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine +
+                            Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
             }
@@ -263,9 +263,9 @@ namespace XviD4PSP
                     string CopyProblems = Format.ValidateCopyVideo(m);
                     if (CopyProblems != null)
                     {
-                        Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
+                        new Message(this).ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                            " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine +
+                            Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
 
@@ -284,8 +284,7 @@ namespace XviD4PSP
             if (combo_profile.SelectedItem.ToString() == "Copy")
                 combo_codec.SelectedItem = combo_profile.SelectedItem.ToString();
 
-            if (m.outvcodec != "Copy" &&
-                combo_profile.SelectedItem.ToString() == "Copy")
+            if (m.outvcodec != "Copy" && combo_profile.SelectedItem.ToString() == "Copy")
             {
                 UnLoadCodecWindow();
                 m.outvcodec = combo_profile.SelectedItem.ToString();
@@ -295,24 +294,16 @@ namespace XviD4PSP
             }
             else
             {
-                if (m.outvcodec == "Copy")
+                string codec = m.outvcodec;
+                m.vencoding = combo_profile.SelectedItem.ToString();
+                string newcodec = PresetLoader.GetVCodec(m);
+                if (codec != newcodec)
                 {
                     UnLoadCodecWindow();
-                    m.outvcodec = Format.GetVCodec(m.format);
+                    m.outvcodec = newcodec;
                     LoadCodecWindow();
                 }
-                else
-                {
-                    string codec = m.outvcodec;
-                    m.vencoding = combo_profile.SelectedItem.ToString();
-                    string newcodec = PresetLoader.GetVCodec(m);
-                    if (codec != newcodec)
-                    {
-                        UnLoadCodecWindow();
-                        m.outvcodec = newcodec;
-                        LoadCodecWindow();
-                    }
-                }
+
                 LoadProfileToCodec();
                 combo_codec.SelectedItem = m.outvcodec;
             }
@@ -390,12 +381,17 @@ namespace XviD4PSP
         {
             //загружаем список фильтров
             combo_profile.Items.Clear();
-            foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video"))
+            try
             {
-                string name = Path.GetFileNameWithoutExtension(file);
-                combo_profile.Items.Add(name);
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video"))
+                {
+                    string name = Path.GetFileNameWithoutExtension(file);
+                    combo_profile.Items.Add(name);
+                }
             }
+            catch { }
             combo_profile.Items.Add("Copy");
+
             //прописываем текущий пресет кодирования
             combo_profile.SelectedItem = m.vencoding;
         }
@@ -504,17 +500,13 @@ namespace XviD4PSP
             if (x264c == null && xvid == null) UpdateMassive(); //CustomCLI
 
             string auto_name = m.outvcodec + " ";
-
-            if (m.outvcodec == "HUFF" ||
-                m.outvcodec == "DV" ||
-                m.outvcodec == "FFV1")
+            if (m.outvcodec == "HUFF" || m.outvcodec == "FFV1")
             {
-                if (m.outvcodec == "HUFF" ||
-                    m.outvcodec == "FFV1")
-                    auto_name += "LossLess";
-
-                if (m.outvcodec == "DV")
-                    auto_name += " Custom";
+                auto_name += "LossLess";
+            }
+            else if (m.outvcodec == "DV")
+            {
+                auto_name += "Custom";
             }
             else
             {
@@ -550,13 +542,22 @@ namespace XviD4PSP
             }
 
             NewProfile newp = new NewProfile(auto_name, Format.EnumToString(m.format), NewProfile.ProfileType.VEncoding, this);
-
             if (newp.profile != null)
             {
-                m.vencoding = newp.profile;     //Название для нового пресета
-                PresetLoader.CreateVProfile(m); //Пресет записывается в файл
-                LoadProfiles();                 //Обновляется содержимое комбобокса с пресетами, выбирается текущий пресет
+                string old_encoding = m.vencoding;
+                m.vencoding = newp.profile;         //Название для нового пресета
+                try
+                {
+                    PresetLoader.CreateVProfile(m); //Пресет записывается в файл
+                    LoadProfiles();                 //Обновляется содержимое комбобокса с пресетами, выбирается текущий пресет
+                }
+                catch (Exception ex)
+                {
+                    new Message(this).ShowMessage(Languages.Translate("Can`t save profile") + ": " + ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    m.vencoding = old_encoding;
+                }
             }
+
             //Не совсем понятно, зачем нужно перезагружаться с пресета, который мы только что сохранили..
             if (x264c == null && xvid == null) //CustomCLI
             {
@@ -575,7 +576,7 @@ namespace XviD4PSP
                 UpdateMassive();
 
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " " + m.vencoding + "?",
+                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " \"" + m.vencoding + "\"?",
                     Languages.Translate("Question"),
                     Message.MessageStyle.YesNo);
 
@@ -583,7 +584,16 @@ namespace XviD4PSP
                 {
                     int last_num = combo_profile.SelectedIndex;
                     string profile_path = Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video\\" + m.vencoding + ".txt";
-                    File.Delete(profile_path);
+
+                    try
+                    {
+                        File.Delete(profile_path);
+                    }
+                    catch (Exception ex)
+                    {
+                        new Message(this).ShowMessage(Languages.Translate("Can`t delete profile") + ": " + ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        return;
+                    }
 
                     //загружаем список фильтров
                     combo_profile.Items.Clear();
@@ -600,7 +610,6 @@ namespace XviD4PSP
                     else
                         m.vencoding = combo_profile.Items[last_num - 1].ToString();
                     combo_profile.SelectedItem = m.vencoding;
-
                     combo_profile.UpdateLayout();
 
                     RefreshCodecProfileWindow();
@@ -615,19 +624,16 @@ namespace XviD4PSP
                         string CopyProblems = Format.ValidateCopyVideo(m);
                         if (CopyProblems != null)
                         {
-                            Message messa = new Message(this);
-                            mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
+                            new Message(this).ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "."
+                                + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
                         }
                     }
                 }
             }
             else
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Not allowed removing the last profile!"),
-                    Languages.Translate("Warning"),
-                    Message.MessageStyle.Ok);
+                new Message(this).ShowMessage(Languages.Translate("Not allowed removing the last profile!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
             }
         }
 
@@ -653,7 +659,7 @@ namespace XviD4PSP
         public void UpdateManualProfile()
         {
             try
-            {                
+            {
                 UpdateMassive(); //Клонирует массивы и пересоздает vpasses[x]
 
                 m.vencoding = "Custom";
@@ -664,8 +670,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                Message mes = new Message(this);
-                mes.ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok); 
+                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
 	}

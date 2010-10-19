@@ -204,9 +204,9 @@ namespace XviD4PSP
                     string CopyProblems = Format.ValidateCopyAudio(m);
                     if (CopyProblems != null)
                     {
-                        Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
+                        new Message(this).ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                            " " + Format.EnumToString(m.format) + ": " + CopyProblems + "."
+                            + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
             }
@@ -263,9 +263,9 @@ namespace XviD4PSP
                     string CopyProblems = Format.ValidateCopyAudio(m);
                     if (CopyProblems != null)
                     {
-                        Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
+                        new Message(this).ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                            " " + Format.EnumToString(m.format) + ": " + CopyProblems + "."
+                            + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                     }
                 }
 
@@ -281,10 +281,8 @@ namespace XviD4PSP
                 combo_profile.SelectedItem.ToString() == "Disabled")
                 combo_codec.SelectedItem = combo_profile.SelectedItem.ToString();
 
-            if (outstream.codec != "Copy" &&
-                combo_profile.SelectedItem.ToString() == "Copy" ||
-                outstream.codec != "Disabled" &&
-                combo_profile.SelectedItem.ToString() == "Disabled")
+            if (outstream.codec != "Copy" && combo_profile.SelectedItem.ToString() == "Copy" ||
+                outstream.codec != "Disabled" && combo_profile.SelectedItem.ToString() == "Disabled")
             {
                 UnLoadCodecWindow();
                 outstream.codec = combo_profile.SelectedItem.ToString();
@@ -294,26 +292,16 @@ namespace XviD4PSP
             }
             else
             {
-
-                if (outstream.codec == "Copy" ||
-                    outstream.codec == "Disabled")
+                string codec = outstream.codec;
+                outstream.encoding = combo_profile.SelectedItem.ToString();
+                string newcodec = PresetLoader.GetACodec(m.format, outstream.encoding);
+                if (codec != newcodec)
                 {
                     UnLoadCodecWindow();
-                    outstream.codec = Format.GetACodec(m.format, m.outvcodec);
+                    outstream.codec = newcodec;
                     LoadCodecWindow();
                 }
-                else
-                {
-                    string codec = outstream.codec;
-                    outstream.encoding = combo_profile.SelectedItem.ToString();
-                    string newcodec = PresetLoader.GetACodec(m.format, outstream.encoding);
-                    if (codec != newcodec)
-                    {
-                        UnLoadCodecWindow();
-                        outstream.codec = newcodec;
-                        LoadCodecWindow();
-                    }
-                }
+
                 LoadProfileToCodec();
                 combo_codec.SelectedItem = outstream.codec;
             }
@@ -375,16 +363,20 @@ namespace XviD4PSP
 
             //загружаем список фильтров
             combo_profile.Items.Clear();
-            foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio"))
+            try
             {
-                string name = Path.GetFileNameWithoutExtension(file);
-                combo_profile.Items.Add(name);
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio"))
+                {
+                    string name = Path.GetFileNameWithoutExtension(file);
+                    combo_profile.Items.Add(name);
+                }
             }
+            catch { }
             combo_profile.Items.Add("Disabled");
             combo_profile.Items.Add("Copy");
+
             //прописываем текущий пресет кодирования
             combo_profile.SelectedItem = outstream.encoding;
-
             combo_profile.UpdateLayout();
         }
 
@@ -474,26 +466,20 @@ namespace XviD4PSP
         {
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-            if (outstream.codec == "Copy" ||
-                outstream.codec == "Disabled")
+            if (outstream.codec == "Copy" || outstream.codec == "Disabled")
                 return;
 
             UpdateMassive();
 
             string auto_name = outstream.codec;
-
             if (outstream.codec == "AAC")
             {
-                if (m.aac_options.aacprofile == "AAC-LC")
-                    auto_name += "-LC";
-                if (m.aac_options.aacprofile == "AAC-HE")
-                    auto_name += "-HE";
-                if (m.aac_options.aacprofile == "AAC-HEv2")
-                    auto_name += "-HEv2";
+                if (m.aac_options.aacprofile == "AAC-LC") auto_name += "-LC";
+                else if (m.aac_options.aacprofile == "AAC-HE") auto_name += "-HE";
+                else if (m.aac_options.aacprofile == "AAC-HEv2") auto_name += "-HEv2";
                 auto_name += " " + m.aac_options.encodingmode.ToString();
             }
-
-            if (outstream.codec == "MP3")
+            else if (outstream.codec == "MP3")
             {
                 auto_name += " " + m.mp3_options.encodingmode.ToString().ToUpper();
                 if (m.mp3_options.encodingmode == Settings.AudioEncodingModes.VBR)
@@ -501,34 +487,43 @@ namespace XviD4PSP
                 else
                     auto_name += " " + outstream.bitrate + "k";
             }
-
-            if (outstream.codec == "AAC")
+            else if (outstream.codec == "AAC")
             {
                 if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                     auto_name += " Q" + m.aac_options.quality;
                 else
                     auto_name += " " + outstream.bitrate + "k";
             }
-
-            if (outstream.codec == "PCM" ||
-                outstream.codec == "LPCM")
+            else if (outstream.codec == "PCM" || outstream.codec == "LPCM")
             {
                 auto_name += " " + outstream.bits + "bit";
             }
-
-            if (outstream.codec == "AC3" ||
-                outstream.codec == "MP2")
-                    auto_name += " " + outstream.bitrate + "k";
+            else if (outstream.codec == "AC3" || outstream.codec == "MP2")
+            {
+                auto_name += " " + outstream.bitrate + "k";
+            }
+            else if (outstream.codec == "FLAC")
+            {
+                auto_name += " Q" + m.flac_options.level;
+            }
 
             auto_name += " Custom";  
 
             NewProfile newp = new NewProfile(auto_name, Format.EnumToString(m.format), NewProfile.ProfileType.AEncoding, this);
-
             if (newp.profile != null)
             {
+                string old_encoding = outstream.encoding;
                 outstream.encoding = newp.profile;
-                PresetLoader.CreateAProfile(m);
-                LoadProfiles();
+                try
+                {
+                    PresetLoader.CreateAProfile(m);
+                    LoadProfiles();
+                }
+                catch (Exception ex)
+                {
+                    new Message(this).ShowMessage(Languages.Translate("Can`t save profile") + ": " + ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    outstream.encoding = old_encoding;
+                }
             }
 
             LoadProfileToCodec();
@@ -549,7 +544,7 @@ namespace XviD4PSP
                 UpdateMassive();
 
                 Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " " + outstream.encoding + "?",
+                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " \"" + outstream.encoding + "\"?",
                     Languages.Translate("Question"),
                     Message.MessageStyle.YesNo);
 
@@ -557,7 +552,16 @@ namespace XviD4PSP
                 {
                     int last_num = combo_profile.SelectedIndex;
                     string profile_path = Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio\\" + outstream.encoding + ".txt";
-                    File.Delete(profile_path);
+
+                    try
+                    {
+                        File.Delete(profile_path);
+                    }
+                    catch (Exception ex)
+                    {
+                        new Message(this).ShowMessage(Languages.Translate("Can`t delete profile") + ": " + ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        return;
+                    }
 
                     //загружаем список фильтров
                     combo_profile.Items.Clear();
@@ -575,7 +579,6 @@ namespace XviD4PSP
                     else
                         outstream.encoding = combo_profile.Items[last_num - 1].ToString();
                     combo_profile.SelectedItem = outstream.encoding;
-
                     combo_profile.UpdateLayout();
 
                     RefreshCodecProfileWindow();
@@ -590,19 +593,16 @@ namespace XviD4PSP
                         string CopyProblems = Format.ValidateCopyAudio(m);
                         if (CopyProblems != null)
                         {
-                            Message messa = new Message(this);
-                            mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
+                            new Message(this).ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "."
+                                + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                         }
                     }
                 }
             }
             else
             {
-                Message mess = new Message(this);
-                mess.ShowMessage(Languages.Translate("Not allowed removing the last profile!"),
-                    Languages.Translate("Warning"),
-                    Message.MessageStyle.Ok);
+                new Message(this).ShowMessage(Languages.Translate("Not allowed removing the last profile!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
             }
         }
 
@@ -630,8 +630,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                Message mes = new Message(this);
-                mes.ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
 	}
