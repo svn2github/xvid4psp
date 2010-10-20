@@ -25,7 +25,7 @@ namespace XviD4PSP
            bassAudioSource,   //bassAudio.dll
            WAVSource,         //AviSynth
            AVCSource,         //DGAVCDecode.dll
-           DGMultiSource,     //DGMultiDecodeNV.dll
+           DGMultiSource,     //DGDecodeNV.dll
            DSS2,              //avss.dll
            Import,
            BlankClip
@@ -110,7 +110,7 @@ namespace XviD4PSP
            else if (m.vdecoder == Decoders.AVCSource)
                m.script += "loadplugin(\"" + startup_path + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DGMultiSource)
-               m.script += "loadplugin(\"" + m.dgdecnv_path + "DGMultiDecodeNV.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.RawSource)
@@ -433,14 +433,14 @@ namespace XviD4PSP
            if (m.iscolormatrix)
            {
                string colormatrix = "ColorMatrix(";
-               if (m.vdecoder == Decoders.MPEG2Source)
+               if (m.vdecoder == Decoders.MPEG2Source || m.vdecoder == Decoders.DGMultiSource)
                {
                    if (m.interlace == SourceType.FILM ||
                        m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
                        m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
                        m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
                        m.interlace == SourceType.INTERLACED)
-                       colormatrix += "hints=true,interlaced=true)";
+                       colormatrix += "hints=true, interlaced=true)";
                    else
                        colormatrix += "hints=true)";
                }
@@ -841,7 +841,7 @@ namespace XviD4PSP
            else if (m.vdecoder == Decoders.MPEG2Source)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DGMultiSource)
-               script += "loadplugin(\"" + m.dgdecnv_path + "DGMultiDecodeNV.dll\")" + Environment.NewLine;
+               script += "loadplugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.RawSource)
@@ -1045,7 +1045,7 @@ namespace XviD4PSP
            else if (m.vdecoder == Decoders.MPEG2Source)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DGMultiSource)
-               script += "loadplugin(\"" + m.dgdecnv_path + "DGMultiDecodeNV.dll\")" + Environment.NewLine;
+               script += "loadplugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DSS2)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.RawSource)

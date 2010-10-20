@@ -415,9 +415,9 @@ namespace XviD4PSP
                         {
                             m.dgdecnv_path = sr.ReadLine();
                         }
-                    if (!File.Exists(m.dgdecnv_path + "DGMultiDecodeNV.dll"))
+                    if (!File.Exists(m.dgdecnv_path + "DGDecodeNV.dll"))
                     {
-                        ShowMessage(Languages.Translate("Can`t find file") + ": " + m.dgdecnv_path + "DGMultiDecodeNV.dll", Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        ShowMessage(Languages.Translate("Can`t find file") + ": " + m.dgdecnv_path + "DGDecodeNV.dll", Languages.Translate("Error"), Message.MessageStyle.Ok);
                         m = null; return;
                     }
 
