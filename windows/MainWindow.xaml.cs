@@ -1124,13 +1124,11 @@ namespace XviD4PSP
                     //если файл MPEG делаем запрос на индексацию
                     if (Calculate.IsMPEG(x.infilepath) && ext != ".d2v")
                     {
-                        if (Path.GetExtension(x.infilepath).ToLower() == ".vob" &&
-                            Calculate.IsValidVOBName(x.infilepath))
+                        if (Calculate.IsValidVOBName(x.infilepath))
                         {
                             x.dvdname = Calculate.GetDVDName(x.infilepath);
-
                             string title = Calculate.GetTitleNum(x.infilepath);
-                            if (title != "") title = "_T" + title;
+                            if (!string.IsNullOrEmpty(title)) title = "_T" + title;
                             x.taskname = x.dvdname + title;
                         }
 

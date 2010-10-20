@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r180 19.10.10, main changes:
+XviD4PSP 5.0.37.8 r132->r181 20.10.10, main changes:
 
+>>> (r181) "IsValidVOBName" false positive detecting some VOB-files as part of the DVD. This, and changes in r164,
+           results in some VOB-files can`t be opened (rep. by AkvenJan).
 >>> (r180) Color correction window: changed default name for user`s presets from Manual to Custom.
 >>> (r180) Video and audio encoding settings windows: fixed loading of wrong codec window after changing encoder preset
            from Copy to any other (using combobox Profile) and possible crash in video codec window.

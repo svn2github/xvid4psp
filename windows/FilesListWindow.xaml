@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.FilesListWindow"
 	x:Name="Window"
 	Title="Add or remove friend files:"
-	Width="371" Height="196" ResizeMode="NoResize" ShowInTaskbar="True" SizeToContent="WidthAndHeight" Topmost="False" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	Width="370" Height="196" ResizeMode="NoResize" MinWidth="370" ShowInTaskbar="True" SizeToContent="WidthAndHeight" Topmost="False" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid.ColumnDefinitions>
@@ -14,22 +14,28 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-		<Grid Margin="0,0,0,38.072" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<ListBox x:Name="list_files" FontSize="14" SelectionMode="Extended" KeyDown="list_files_KeyDown" IsSynchronizedWithCurrentItem="True" Margin="16,16,16,16"/>
-		</Grid>
-		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.072" Background="{DynamicResource black_gradient}">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="0.479*"/>
-				<ColumnDefinition Width="0.521*"/>
-			</Grid.ColumnDefinitions>
-			<Grid HorizontalAlignment="Right" x:Name="grid_ok_cancel" Width="190.165" Grid.Column="1">
-				<Button x:Name="button_ok" Width="85" Content="OK" Click="button_ok_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8.165,8.144,0,8"/>
-				<Button x:Name="button_cancel" Content="Cancel" Click="button_cancel_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Width="85" HorizontalAlignment="Right" Margin="0,8.144,8,8"/>
+		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
+            <ListBox x:Name="list_files" FontSize="14" SelectionMode="Extended" KeyDown="list_files_KeyDown" IsSynchronizedWithCurrentItem="True" Margin="10,10,10,10">
+                <ListBox.ContextMenu>
+                    <ContextMenu x:Name = "cmenu_files" ClipToBounds="False">
+                        <MenuItem x:Name = "cmenu_up" Click="btMoveUp_Click" Header="Move up" StaysOpenOnClick="True"/>
+                        <MenuItem x:Name = "cmenu_down" Click="btMoveDown_Click" Header="Move down" StaysOpenOnClick="True"/>
+                        <Separator/>
+                        <MenuItem x:Name = "cmenu_remove" Click="btRemove_Click" Header="Remove file" StaysOpenOnClick="False"/>
+                        <MenuItem x:Name = "cmenu_add" Click="btAdd_Click" Header="Add file" StaysOpenOnClick="False"/>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+        </Grid>
+		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38" Background="{DynamicResource black_gradient}">
+			<Grid HorizontalAlignment="Right" Margin="0,0,0,0" x:Name="grid_ok_cancel" Width="190">
+				<Button x:Name="button_ok" Width="85" Content="OK" Click="button_ok_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,8,0,8"/>
+				<Button x:Name="button_cancel" Content="Cancel" Click="button_cancel_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Width="85" HorizontalAlignment="Right" Margin="0,8,8,8"/>
 			</Grid>
-			<Grid HorizontalAlignment="Left" Margin="0,0,56.15,0" x:Name="grid_files_control" Width="119">
-				<Button Height="22" Content="+" d:LayoutOverrides="Width, Height" x:Name="btAdd" Click="btAdd_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" Width="22" HorizontalAlignment="Left" Margin="8,8.072,0,8" FontSize="14"/>
-				<Button d:LayoutOverrides="Width, Height" x:Name="btRemove" Height="22" Content="-" Click="btRemove_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" Width="22" HorizontalAlignment="Left" Margin="30,8.072,0,8" FontSize="14"/>
-				<Button Height="22" d:LayoutOverrides="HorizontalAlignment, Width, Height" x:Name="btMoveUp" Click="btMoveUp_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" Width="22" HorizontalAlignment="Right" Margin="0,8.072,41,8">
+			<Grid HorizontalAlignment="Left" Margin="0,0,0,0" x:Name="grid_files_control" Width="119">
+				<Button Height="22" Content="+" d:LayoutOverrides="Width, Height" x:Name="btAdd" Click="btAdd_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" Width="22" HorizontalAlignment="Left" Margin="8,8,0,8" FontSize="14"/>
+				<Button d:LayoutOverrides="Width, Height" x:Name="btRemove" Height="22" Content="-" Click="btRemove_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" Width="22" HorizontalAlignment="Left" Margin="30,8,0,8" FontSize="14"/>
+				<Button Height="22" d:LayoutOverrides="HorizontalAlignment, Width, Height" x:Name="btMoveUp" Click="btMoveUp_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" Width="22" HorizontalAlignment="Right" Margin="0,8,41,8">
 					<Path Width="13.928" Height="13.462" Fill="#FFFFFFFF" Stretch="Fill" Stroke="#FF000000" Data="M-0.38461538,-6.9230769 L-4.7692308,-1.0769233 -1.8846761,-1.0769233 -1.8846761,5.231012 1.1919771,5.231012 1.1919771,-1.1537272 3.8260118,-1.1537272 z" RenderTransformOrigin="0.5,0.5">
 						<Path.RenderTransform>
 							<TransformGroup>
@@ -41,7 +47,7 @@
 						</Path.RenderTransform>
 					</Path>
 				</Button>
-				<Button Height="22" d:LayoutOverrides="Height" x:Name="btMoveDown" Click="btMoveDown_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" HorizontalAlignment="Right" Margin="0,8,19,8.072" Width="22">
+				<Button Height="22" d:LayoutOverrides="Height" x:Name="btMoveDown" Click="btMoveDown_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" HorizontalAlignment="Right" Margin="0,8,19,8" Width="22">
 					<Path RenderTransformOrigin="0.5,0.5" Width="13.928" Height="13.462" Fill="#FFFFFFFF" Stretch="Fill" Stroke="#FF000000" Data="M-0.38461538,-6.9230769 L-4.7692308,-1.0769233 -1.8846761,-1.0769233 -1.8846761,5.231012 1.1919771,5.231012 1.1919771,-1.1537272 3.8260118,-1.1537272 z">
 						<Path.RenderTransform>
 							<TransformGroup>

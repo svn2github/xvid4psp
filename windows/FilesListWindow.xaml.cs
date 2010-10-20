@@ -42,10 +42,10 @@ namespace XviD4PSP
             button_ok.Content = Languages.Translate("OK");
             button_cancel.Content = Languages.Translate("Cancel");
             Title = Languages.Translate("Add or remove friend files") + ":";
-            btMoveUp.ToolTip = Languages.Translate("Move up");
-            btMoveDown.ToolTip = Languages.Translate("Move down");
-            btAdd.ToolTip = Languages.Translate("Add file");
-            btRemove.ToolTip = Languages.Translate("Remove file");
+            btMoveUp.ToolTip = cmenu_up.Header = Languages.Translate("Move up");
+            btMoveDown.ToolTip = cmenu_down.Header = Languages.Translate("Move down");
+            btAdd.ToolTip = cmenu_add.Header = Languages.Translate("Add file");
+            btRemove.ToolTip = cmenu_remove.Header = Languages.Translate("Remove file");
 
             //выдаём диалог
             ShowDialog();
@@ -150,6 +150,8 @@ namespace XviD4PSP
                     else
                         list_files.Items.Insert(l, o);
                 }
+                else
+                    cmenu_files.IsOpen = false;
             }
         }
 
@@ -182,6 +184,8 @@ namespace XviD4PSP
                     list_files.Items.Remove(o);
                     list_files.Items.Insert(f, o);
                 }
+                else
+                    cmenu_files.IsOpen = false;
             }
         }
 	}
