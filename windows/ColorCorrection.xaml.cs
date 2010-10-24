@@ -137,18 +137,12 @@ namespace XviD4PSP
             try
             {
                 foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
-                {
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    combo_profile.Items.Add(name);
-                }
+                    combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
 
             //прописываем текущий профиль
-            if (combo_profile.Items.Contains(m.sbc))
-                combo_profile.SelectedItem = m.sbc;
-            else
-                combo_profile.SelectedItem = "Disabled";
+            combo_profile.SelectedItem = m.sbc;
         }
 
         public static Massive DecodeProfile(Massive mass)//читает и передает массиву mass значения параметров из файла профиля = m.sbc
@@ -157,7 +151,7 @@ namespace XviD4PSP
             mass.iscolormatrix = false;
             mass.saturation = 1.0;
             mass.brightness = 0;
-            mass.contrast = 1.00; //1.0
+            mass.contrast = 1.00;
             mass.hue = 0;
 
             if (mass.sbc == "Disabled")
@@ -224,7 +218,7 @@ namespace XviD4PSP
             combo_saturation.SelectedItem = m.saturation.ToString("0.0").Replace(",", ".");
             combo_hue.SelectedItem = m.hue;
             combo_brightness.SelectedItem = m.brightness;
-            combo_contrast.SelectedItem = m.contrast.ToString("0.00").Replace(",", "."); //("0.0")
+            combo_contrast.SelectedItem = m.contrast.ToString("0.00").Replace(",", ".");
 
             slider_saturation.Value = m.saturation;
             slider_hue.Value = m.hue;
@@ -247,6 +241,8 @@ namespace XviD4PSP
 
         private void button_remove_Click(object sender, System.Windows.RoutedEventArgs e) //кнопка "удалить профиль"
         {
+            if (m.sbc == "Disabled") return;
+            
             if (combo_profile.Items.Count > 1)
             {
                 Message mess = new Message(this);
@@ -271,11 +267,13 @@ namespace XviD4PSP
 
                     //загружаем список фильтров
                     combo_profile.Items.Clear();
-                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                    combo_profile.Items.Add("Disabled");
+                    try
                     {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        combo_profile.Items.Add(name);
+                        foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                            combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
+                    catch { }
 
                     //прописываем текущий пресет кодирования
                     if (last_num == 0)
@@ -373,7 +371,7 @@ namespace XviD4PSP
             if (slider_contrast.IsFocused)
             {
                 m.contrast = slider_contrast.Value;
-                combo_contrast.SelectedItem = m.contrast.ToString("0.00").Replace(",", "."); //("0.00")
+                combo_contrast.SelectedItem = m.contrast.ToString("0.00").Replace(",", ".");
                 UpdateManualProfile();
             }
         }

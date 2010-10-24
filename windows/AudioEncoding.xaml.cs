@@ -366,10 +366,7 @@ namespace XviD4PSP
             try
             {
                 foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio"))
-                {
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    combo_profile.Items.Add(name);
-                }
+                    combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
             combo_profile.Items.Add("Disabled");
@@ -377,7 +374,6 @@ namespace XviD4PSP
 
             //прописываем текущий пресет кодирования
             combo_profile.SelectedItem = outstream.encoding;
-            combo_profile.UpdateLayout();
         }
 
         private void LoadProfileToCodec()
@@ -565,11 +561,12 @@ namespace XviD4PSP
 
                     //загружаем список фильтров
                     combo_profile.Items.Clear();
-                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio"))
+                    try
                     {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        combo_profile.Items.Add(name);
+                        foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio"))
+                            combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
+                    catch { }
                     combo_profile.Items.Add("Disabled");
                     combo_profile.Items.Add("Copy");
 

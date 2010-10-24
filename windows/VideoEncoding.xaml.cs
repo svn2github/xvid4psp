@@ -384,10 +384,7 @@ namespace XviD4PSP
             try
             {
                 foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video"))
-                {
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    combo_profile.Items.Add(name);
-                }
+                    combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
             combo_profile.Items.Add("Copy");
@@ -597,11 +594,12 @@ namespace XviD4PSP
 
                     //загружаем список фильтров
                     combo_profile.Items.Clear();
-                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video"))
+                    try
                     {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        combo_profile.Items.Add(name);
+                        foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video"))
+                            combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
+                    catch { }
                     combo_profile.Items.Add("Copy");
 
                     //прописываем текущий пресет кодирования

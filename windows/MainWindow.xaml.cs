@@ -276,28 +276,26 @@ namespace XviD4PSP
                     combo_filtering.Items.Add("Disabled");
                     foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering"))
                     {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        combo_filtering.Items.Add(name);
+                        combo_filtering.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
                     //прописываем текущий фильтр
                     if (combo_filtering.Items.Contains(Settings.Filtering))
                         combo_filtering.SelectedItem = Settings.Filtering;
                     else
-                        combo_filtering.SelectedItem = "Disabled";
+                        combo_filtering.SelectedItem = Settings.Filtering = "Disabled";
 
                     //загружаем списки профилей цвето коррекции
                     combo_sbc.Items.Clear();
                     combo_sbc.Items.Add("Disabled");
                     foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
                     {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        combo_sbc.Items.Add(name);
+                        combo_sbc.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
                     //прописываем текущий профиль
                     if (combo_sbc.Items.Contains(Settings.SBC))
                         combo_sbc.SelectedItem = Settings.SBC;
                     else
-                        combo_sbc.SelectedItem = "Disabled";
+                        combo_sbc.SelectedItem = Settings.SBC = "Disabled";
 
                     //загружаем профили видео кодирования
                     if (Settings.FormatOut != Format.ExportFormats.Audio)
@@ -1157,7 +1155,7 @@ namespace XviD4PSP
                         if (info.m == null) return;
                         x = info.m.Clone();
                     }
-                    
+
                     //определяем видео декодер
                     if (x.vdecoder == 0) x = Format.GetValidVDecoder(x);
 
@@ -2803,26 +2801,22 @@ namespace XviD4PSP
 
         private void LoadVideoPresets()
         {
-            string format;
-            if (m == null)
-                format = Format.EnumToString(Settings.FormatOut);
-            else
-                format = Format.EnumToString(m.format);
+            string format = Format.EnumToString((m != null) ? m.format : Settings.FormatOut);
 
             combo_vencoding.Items.Clear();
-            foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\video"))
-                combo_vencoding.Items.Add(Path.GetFileNameWithoutExtension(file));
+            try
+            {
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\video"))
+                    combo_vencoding.Items.Add(Path.GetFileNameWithoutExtension(file));
+            }
+            catch { }
             combo_vencoding.Items.Add("Disabled");
             combo_vencoding.Items.Add("Copy");
         }
 
         private void SetVideoPresetFromSettings()
         {
-            Format.ExportFormats format;
-            if (m == null)
-                format = Settings.FormatOut;
-            else
-                format = m.format;
+            Format.ExportFormats format = (m != null) ? m.format : Settings.FormatOut;
 
             //прописываем текущий пресет кодирования
             if (combo_vencoding.Items.Contains(Settings.GetVEncodingPreset(format)))
@@ -2837,27 +2831,22 @@ namespace XviD4PSP
 
         private void LoadAudioPresets()
         {
-            string format;
-            if (m == null)
-                format = Format.EnumToString(Settings.FormatOut);
-            else
-                format = Format.EnumToString(m.format);
+            string format = Format.EnumToString((m != null) ? m.format : Settings.FormatOut);
 
             combo_aencoding.Items.Clear();
-            foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\audio"))
+            try
             {
-                string name = Path.GetFileNameWithoutExtension(file);
-                combo_aencoding.Items.Add(name);
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\audio"))
+                    combo_aencoding.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
+            catch { }
             combo_aencoding.Items.Add("Disabled");
             combo_aencoding.Items.Add("Copy");
         }
 
         private void SetAudioPresetFromSettings()
         {
-            Format.ExportFormats format;
-            if (m == null) format = Settings.FormatOut;
-            else format = m.format;
+            Format.ExportFormats format = (m != null) ? m.format : Settings.FormatOut;
 
             //прописываем текущий пресет кодирования
             if (m != null && m.outaudiostreams.Count == 0)
@@ -3725,37 +3714,43 @@ namespace XviD4PSP
             }
             else
             {
-                ColorCorrection col = new ColorCorrection(m, this);
-                bool oldcolormatrix = m.iscolormatrix;
-                double oldsaturation = m.saturation;
-                int oldhue = m.hue;
-                int oldbrightness = m.brightness;
-                double oldcontrast = m.contrast;
+                bool old_colormatrix = m.iscolormatrix;
+                double old_saturation = m.saturation;
+                double old_contrast = m.contrast;
+                int old_brightness = m.brightness;
+                int old_hue = m.hue;
 
+                ColorCorrection col = new ColorCorrection(m, this);
                 m = col.m.Clone();
 
                 //загружаем списки профилей цвето коррекции
                 combo_sbc.Items.Clear();
                 combo_sbc.Items.Add("Disabled");
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                try
                 {
-                    string name = Path.GetFileNameWithoutExtension(file);
-                    combo_sbc.Items.Add(name);
+                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                        combo_sbc.Items.Add(Path.GetFileNameWithoutExtension(file));
                 }
+                catch { }
+
                 //прописываем текущий профиль
                 if (combo_sbc.Items.Contains(m.sbc))
                     combo_sbc.SelectedItem = m.sbc;
                 else
-                    combo_sbc.SelectedItem = "Disabled";
+                {
+                    //Видимо профиль был удален, сбрасываем всё на дефолты
+                    combo_sbc.SelectedItem = m.sbc = "Disabled";
+                    m = ColorCorrection.DecodeProfile(m);
+                }
 
                 Settings.SBC = m.sbc; //сохраняет название текущего профиля в реестре
 
                 //обновление при необходимости
-                if (oldbrightness != m.brightness ||
-                    oldcolormatrix != m.iscolormatrix ||
-                    oldcontrast != m.contrast ||
-                    oldhue != m.hue ||
-                    oldsaturation != m.saturation)
+                if (old_colormatrix != m.iscolormatrix ||
+                    old_saturation != m.saturation ||
+                    old_contrast != m.contrast ||
+                    old_brightness != m.brightness ||
+                    old_hue != m.hue)
                 {
                     m = AviSynthScripting.CreateAutoAviSynthScript(m);
                     LoadVideo(MediaLoad.update);

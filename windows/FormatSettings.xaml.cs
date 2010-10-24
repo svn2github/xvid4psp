@@ -227,19 +227,27 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    string text = "[FormatName]\r\n" + format + "\r\n\r\n[" + key + "]\r\n" + value + "\r\n\r\n";                    
+                    string text = "[FormatName]\r\n" + format + "\r\n\r\n[" + key + "]\r\n" + value + "\r\n\r\n";
                     File.WriteAllText(path, text, System.Text.Encoding.Default);
                 }
             }
             catch (DirectoryNotFoundException ex)
             {
+                //Если папки нет, создаем её и пробуем снова
                 if (!Directory.Exists(Calculate.StartupPath + "\\presets\\formats"))
                 {
-                    //Если папки нет, создаем её и пробуем снова
-                    Directory.CreateDirectory(Calculate.StartupPath + "\\presets\\formats");
+                    try
+                    {
+                        Directory.CreateDirectory(Calculate.StartupPath + "\\presets\\formats");
+                    }
+                    catch (Exception exc)
+                    {
+                        ErrorException("Can`t create directory: " + exc.Message);
+                        return;
+                    }
                     StoreValue(format, key, value);
                 }
-                else 
+                else
                     ErrorException("StoreValue: " + ex.Message);
             }
             catch (Exception ex)
