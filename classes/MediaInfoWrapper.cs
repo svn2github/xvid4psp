@@ -46,7 +46,6 @@ using System.Globalization;
 
 namespace XviD4PSP
 {
-        
     public enum StreamKind
     {
         General,
@@ -146,12 +145,12 @@ namespace XviD4PSP
         {
             AudioStream stream = new AudioStream();
             Open(filepath);
-           
+
             stream.audiopath = filepath;
             stream.audiofiles = new string[] { stream.audiopath };
             stream.codec = ACodecString(0);
             stream.codecshort = ACodecShort(0);
-            stream.language = "Unknown"; //"English";
+            stream.language = AudioLanguage(0); //"Unknown";
             stream.bitrate = AudioBitrate(0);
             stream.delay = 0;
             stream.samplerate = Samplerate(0);
@@ -184,7 +183,6 @@ namespace XviD4PSP
                 x == "81 / 45" ||
                 x == "81 / 1100" ||
                 x == "80" ||
-                x == "81 / 1100" ||
                 x == "1100")
                 return 1;
             else if (x == "81 / 1101" ||
@@ -202,24 +200,14 @@ namespace XviD4PSP
         {
             try
             {
+                int z = 0;
                 string s = Get(StreamKind.Video, 0, "ID");
-                int z = Convert.ToInt32(s);
+                Int32.TryParse(s, NumberStyles.Integer, null, out z);
                 return z;
             }
             catch
             {
                 return 0;
-            }
-        }
-
-        public string VCodec
-        {
-            get
-            {
-                string s = Get(StreamKind.Video, 0, "Codec");
-                if (s == "")
-                    s = Get(StreamKind.General, 0, "Codec");
-                return s;
             }
         }
 
@@ -229,6 +217,10 @@ namespace XviD4PSP
             {
                 string s = Get(StreamKind.Video, 0, "Codec/String");
                 //string fcc = Get(StreamKind.Video, 0, "Codec/CC");
+                //string a = Get(StreamKind.Video, 0, "Format");
+                //string b = Get(StreamKind.Video, 0, "CodecID");
+                //string c = Get(StreamKind.Video, 0, "CodecID/Hint");
+
                 if (s == "")
                     s = Get(StreamKind.General, 0, "Codec/String");
                 if (s == "MPEG-4 AVC" ||
@@ -281,11 +273,6 @@ namespace XviD4PSP
             }
         }
 
-        public string ACodec(int track)
-        {
-                return Get(StreamKind.Audio, track, "Codec");
-        }
-
         public string ACodecString(int track)
         {
             return Get(StreamKind.Audio, track, "Codec/String");
@@ -294,6 +281,11 @@ namespace XviD4PSP
         public string ACodecShort(int track)
         {
             string s = Get(StreamKind.Audio, track, "Codec/String");
+            //string fcc = Get(StreamKind.Audio, track, "Codec/CC");
+            //string a = Get(StreamKind.Audio, track, "Format");
+            //string b = Get(StreamKind.Audio, track, "CodecID");
+            //string c = Get(StreamKind.Audio, track, "CodecID/Hint");
+
             if (s == "MPEG-1 Audio layer 3" ||
                 s == "MPEG-1/2 L3" ||
                 s == "MPEG-1L3" ||
@@ -352,7 +344,7 @@ namespace XviD4PSP
         {
             get
             {
-                return Get(StreamKind.Video, 0, "AspectRatio/String").Replace("/", ":");
+                return Get(StreamKind.Video, 0, "DisplayAspectRatio/String").Replace("/", ":");
             }
         }
 
@@ -360,11 +352,11 @@ namespace XviD4PSP
         {
             get
             {
-                string s = Get(StreamKind.Video, 0, "AspectRatio");
-                if (s == "" || s == "1.333")
-                    return 4.0 / 3.0;
-                if (s == "1.778")
-                    return 16.0 / 9.0;
+                string s = Get(StreamKind.Video, 0, "DisplayAspectRatio");
+
+                //Подправляем DAR
+                if (s == "" || s == "1.333") return 4.0 / 3.0;
+                else if (s == "1.778") return 16.0 / 9.0;
                 return Calculate.ConvertStringToDouble(s);
             }
         }
@@ -374,9 +366,18 @@ namespace XviD4PSP
             get
             {
                 string s = Get(StreamKind.Video, 0, "PixelAspectRatio");
-                if (s == "")
-                    return 1.0;
-                return Calculate.ConvertStringToDouble(s);
+                if (s == "") return 1.0;
+
+                double ar = Aspect;
+                double we_get = Calculate.ConvertStringToDouble(s);
+                if (we_get != 1.0 && (ar == 16.0 / 9.0 || ar == 4.0 / 3.0 || ar == 2.0 || ar == 2.210))
+                {
+                    //Подправляем PAR (в дополнение к DAR)
+                    double we_calc = Aspect / ((double)Width / (double)Height);
+                    if (Math.Abs(we_get - we_calc) < 0.0006) return we_calc;
+                }
+
+                return we_get;
             }
         }
 
@@ -416,8 +417,7 @@ namespace XviD4PSP
             {
                 int n = 0;
                 string x = Get(StreamKind.Video, 0, "Width");
-                if (x != "")
-                    n = Convert.ToInt32(x);
+                Int32.TryParse(x, NumberStyles.Integer, null, out n);
                 return n;
             }
         }
@@ -428,8 +428,7 @@ namespace XviD4PSP
             {
                 int n = 0;
                 string x = Get(StreamKind.Video, 0, "Height");
-                if (x != "")
-                   n = Convert.ToInt32(x);
+                Int32.TryParse(x, NumberStyles.Integer, null, out n);
                 return n;
             }
         }
@@ -439,14 +438,16 @@ namespace XviD4PSP
             get
             {
                 long n = 0;
-                string x = Get(StreamKind.General, 0, "PlayTime");
+                string x = Get(StreamKind.General, 0, "Duration");
                 if (x != "")
                 {
                     try
                     {
+                        //Тут try-catch обязателен, т.к. MediaInfo иногда
+                        //выдает такое, что даже Int64 переполняется.
                         n = Convert.ToInt32(Calculate.ConvertStringToDouble(x));
                     }
-                    catch { }                
+                    catch { }
                 }
                 return n;
             }
@@ -592,8 +593,8 @@ namespace XviD4PSP
 
                 if (bitrates == "")
                 {
-                    bitrates = Get(StreamKind.General, 0, "BitRate");
-                    nbitrates = Get(StreamKind.General, 0, "BitRate_Nominal");
+                    bitrates = Get(StreamKind.General, 0, "OverallBitRate");
+                    nbitrates = Get(StreamKind.General, 0, "OverallBitRate_Nominal");
 
                     double bitrate = Calculate.ConvertStringToDouble(bitrates);
                     double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
@@ -631,8 +632,8 @@ namespace XviD4PSP
 
                 if (bitrates == "")
                 {
-                    bitrates = Get(StreamKind.General, 0, "BitRate");
-                    nbitrates = Get(StreamKind.General, 0, "BitRate_Nominal");
+                    bitrates = Get(StreamKind.General, 0, "OverallBitRate");
+                    nbitrates = Get(StreamKind.General, 0, "OverallBitRate_Nominal");
 
                     double bitrate = Calculate.ConvertStringToDouble(bitrates);
                     double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
@@ -681,17 +682,15 @@ namespace XviD4PSP
         {
             int n = 0;
             string x = Get(StreamKind.Audio, track, "Channel(s)");
-            if (x != "")
-               n = Convert.ToInt32(x);
+            Int32.TryParse(x, NumberStyles.Integer, null, out n);
             return n;
         }
 
         public int Bits(int track)
         {
             int n = 0;
-            string x = Get(StreamKind.Audio, track, "Resolution");
-            if (x != "" && x != null)
-               n = Convert.ToInt32(x);
+            string x = Get(StreamKind.Audio, track, "BitDepth");
+            Int32.TryParse(x, NumberStyles.Integer, null, out n);
             return n;
         }
 
@@ -741,12 +740,10 @@ namespace XviD4PSP
         {
             get
             {
-                string interlace = Get(StreamKind.Video, 0, "Interlacement");
+                string interlace = Get(StreamKind.Video, 0, "ScanType");
                 SourceType ininterlace = SourceType.PROGRESSIVE;
 
-                if (interlace == "TFF" ||
-                    interlace == "Interlaced" ||
-                    interlace == "BFF")
+                if (interlace == "Interlaced")
                     ininterlace = SourceType.INTERLACED;
 
                 return ininterlace;

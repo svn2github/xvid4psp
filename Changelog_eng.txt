@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r183 24.10.10, main changes:
+XviD4PSP 5.0.37.8 r132->r184 27.10.10, main changes:
 
+>>> (r184) MediaInfoWrapper: some deprecated Parameters was replaced.
 >>> (r183) More fixes for r180.
 >>> (r182) Some changes for DGDecNV 2021, 2032 and 2034 (DGDecodeNV.dll instead of DGMultiDecodeNV.dll, hints=true for ColorMatrix).
 >>> (r181) "IsValidVOBName" false positive detecting some VOB-files as part of the DVD. This, and changes in r164,
