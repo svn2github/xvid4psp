@@ -225,7 +225,7 @@ namespace XviD4PSP
            //выбор аудио трека
            string atrack = "";
            if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio)
-               atrack = ", atrack = " + (instream.ffid);
+               atrack = ", atrack=" + (instream.ffid);
 
            //принудительная конвертация частоты
            string convertfps = "";
@@ -295,7 +295,8 @@ namespace XviD4PSP
                        if (Settings.FFmpegSource2)
                        {
                            ffmpegsource2 = "2";
-                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
+                           if (atrack != "") atrack += ", adjustdelay=-3";
+                           cache_path = ", rffmode=0, cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
                    n++;
@@ -388,6 +389,10 @@ namespace XviD4PSP
            {
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
+               //задержка
+               if (outstream.delay != 0)
+                   m.script += "DelayAudio(" + Calculate.ConvertDoubleToPointString(Convert.ToDouble(outstream.delay) / 1000) + ")" + Environment.NewLine;
+
                //меняем канальность
                if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
                    m.script += instream.channelconverter.ToString() + "()" + Environment.NewLine;
@@ -395,9 +400,6 @@ namespace XviD4PSP
                //меняем битность
                if (instream.bits != outstream.bits)
                    m.script += "ConvertAudioTo16bit()" + Environment.NewLine;
-
-               if (outstream.delay != 0)
-                   m.script += "DelayAudio(" + Calculate.ConvertDoubleToPointString(Convert.ToDouble(outstream.delay) / 1000) + ")" + Environment.NewLine;
 
                //прописываем смену частоты
                if (instream.samplerate != outstream.samplerate && !IsAssumeFramerateConvertion && outstream.samplerate != null)
@@ -418,9 +420,11 @@ namespace XviD4PSP
 
            //Mod protection
            string mod2 = null;
-           int modw = Format.GetValidModW(m), modh = Format.GetValidModH(m);
+           //Для высоты можно и mod8 (когда в настройках стоит mod16)
+           int modw = Format.GetValidModW(m), modh = Math.Min(Format.GetValidModH(m), 8);
            if (m.inresw % modw != 0 || m.inresh % modh != 0)
            {
+               //Для интерлейсных исходников в этом месте будет проблема!
                m.script += "#Mod" + modw + "xMod" + modh + " protection" + Environment.NewLine;
                if (m.resizefilter == Resizers.BicubicResizePlus)
                    mod2 = "BicubicResize(" + Calculate.GetValid(m.inresw, modw) + ", " + Calculate.GetValid(m.inresh, modh) + ", 0, 0.75)";
@@ -467,7 +471,7 @@ namespace XviD4PSP
                m.script += "Tweak(cont=" + Calculate.ConvertDoubleToPointString(m.contrast, 2) + ")" + Environment.NewLine;
            if (m.hue != 0)
                m.script += "Tweak(hue=" + m.hue + ")" + Environment.NewLine;         
-                      
+
            //разделяем при необходимости на поля
            if (m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE && m.interlace != SourceType.DECIMATING)
            {
@@ -598,14 +602,10 @@ namespace XviD4PSP
            }
 
            //блок применяется только если разрешение поменялось
-           if (m.inresw != m.outresw || 
-               m.inresh != m.outresh || 
-               m.cropl != 0 || 
-               m.cropr != 0 || 
-               m.cropt != 0 || 
-               m.cropb != 0 || 
-               m.blackw != 0 || 
-               m.blackh != 0)
+           string newres = null;
+           bool check_mod2 = false;
+           if (m.inresw != m.outresw || m.inresh != m.outresh || m.cropl != 0 || m.cropr != 0 ||
+               m.cropt != 0 || m.cropb != 0 || m.blackw != 0 || m.blackh != 0)
            {
                int cropl = m.cropl;
                int cropr = m.cropr;
@@ -624,7 +624,7 @@ namespace XviD4PSP
                    m.interlace == SourceType.INTERLACED)
                {
                    if (m.deinterlace == DeinterlaceType.Disabled)
-                   {        
+                   {
                        outresh /= 2;
                        if (cropt != 0)
                            cropt /= 2;
@@ -641,25 +641,23 @@ namespace XviD4PSP
                if (cropl != 0 || cropr != 0 || cropt != 0 || cropb != 0)
                    m.script += "Crop(" + cropl + ", " + cropt + ", -" + cropr + ", -" + cropb + ")" + Environment.NewLine;
 
-               string newres = null;
                if (m.resizefilter == Resizers.BicubicResizePlus)
                    newres = "BicubicResize(" + (outresw - (blackw * 2)) + ", " + (outresh - (blackh * 2)) + ", 0, 0.75)";
                else
                    newres = m.resizefilter + "(" + (outresw - (blackw * 2)) + ", " + (outresh - (blackh * 2)) + ")";
 
-               //если mod2 защита отличается от нужного разрешения
-               if (cropl == 0 && cropr == 0 && cropt == 0 && cropb == 0 &&
-                   newres != mod2)
+               //Вписываем ресайз
+               if (cropl == 0 && cropr == 0 && cropt == 0 && cropb == 0 && newres != mod2)
                {
+                   //если mod2 защита отличается от нужного разрешения
                    m.script += newres + Environment.NewLine;
+                   check_mod2 = (mod2 != null);
                }
-               else
+               else if (cropl != 0 || cropr != 0 || cropt != 0 || cropb != 0)
                {
-                   //если mode2 защита равна нужному разрешению, но есть кроп
-                   if (cropl != 0 || cropr != 0 || cropt != 0 || cropb != 0)
-                   {
-                       m.script += newres + Environment.NewLine;
-                   }
+                   //если mod2 защита равна нужному разрешению, но есть кроп
+                   m.script += newres + Environment.NewLine;
+                   check_mod2 = (mod2 != null);
                }
 
                if (blackw != 0 || blackh != 0)
@@ -744,31 +742,41 @@ namespace XviD4PSP
            //Тестовая нарезка
            if (m.testscript)
                m.script += "SelectRangeEvery(FrameCount()/50,50) #2500 frames test-script\r\n\r\n";
-           
-           //убираем лишнюю mod2 защиту
-           string[] separator = new string[] { Environment.NewLine };
-           string[] lines = m.script.Split(separator, StringSplitOptions.None);
-           string sorted = "";
-           int i = 0;
-           foreach (string line in lines)
+
+           //Убираем лишнюю mod2 защиту
+           if (check_mod2)
            {
-               if (line.StartsWith(m.resizefilter.ToString()))
+               string[] lines = m.script.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+               System.Collections.ArrayList sorted = new System.Collections.ArrayList();
+               bool res_found = false, mod2_done = false;
+
+               //Перебираем скрипт с конца в поисках текущего ресайза, если
+               //между ресайзом и mod2 только строки с "" и # - mod2 не нужен
+               for (int i = lines.Length - 1; i >= 0; i--)
                {
-                   if (i + 1 <= lines.Length)
+                   string line = lines[i];
+                   if (mod2_done)
                    {
-                       if (!lines[i + 1].StartsWith(m.resizefilter.ToString()))
-                       {
-                           sorted += line + Environment.NewLine;
-                       }
+                       sorted.Add(line);
+                   }
+                   else if (res_found && line == mod2)
+                   {
+                       if (lines[i - 1].StartsWith("#Mod")) i--;
+                       mod2_done = true;
+                   }
+                   else
+                   {
+                       if (!res_found && line == newres) res_found = true;
+                       else if (res_found && line != "" && !line.StartsWith("#")) mod2_done = true;
+                       sorted.Add(line);
                    }
                }
-               else
-               {
-                   sorted += line + Environment.NewLine;
-               }
-               i++;
+
+               //Переворачиваем скрипт обратно
+               m.script = "";
+               for (int i = sorted.Count - 1; i >= 0; i--)
+                   m.script += sorted[i] + Environment.NewLine;
            }
-           m.script = sorted; 
 
            return m;
        }
@@ -898,7 +906,7 @@ namespace XviD4PSP
            string atrack = "";
            if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio)
                if (mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
-                   atrack = ", atrack = " + (instream.ffid);
+                   atrack = ", atrack=" + (instream.ffid);
            
            //ипортируем видео
            string invideostring = "";
@@ -946,7 +954,8 @@ namespace XviD4PSP
                        if (Settings.FFmpegSource2)
                        {
                            ffmpegsource2 = "2";
-                           cache_path = ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
+                           if (atrack != "") atrack += ", adjustdelay=-3";
+                           cache_path = ", rffmode=0, cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
                    n += 1;
@@ -994,6 +1003,10 @@ namespace XviD4PSP
                {
                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
+                   //задержка
+                   if (outstream.delay != 0)
+                       script += "DelayAudio(" + Calculate.ConvertDoubleToPointString(Convert.ToDouble(outstream.delay) / 1000) + ")" + Environment.NewLine;
+
                    //меняем канальность
                    if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
                        script += instream.channelconverter.ToString() + "()" + Environment.NewLine;
@@ -1001,9 +1014,6 @@ namespace XviD4PSP
                    //меняем битность
                    if (instream.bits != outstream.bits)
                        script += "ConvertAudioTo16bit()" + Environment.NewLine;
-
-                   if (outstream.delay != 0)
-                       script += "DelayAudio(" + Calculate.ConvertDoubleToPointString(Convert.ToDouble(outstream.delay) / 1000) + ")" + Environment.NewLine;
 
                    //прописываем смену частоты
                    if (instream.samplerate != outstream.samplerate && outstream.samplerate != null)
@@ -1080,12 +1090,12 @@ namespace XviD4PSP
                {
                    ffmpegsource2 = "2";
                    //Если FFMS_Enable_Audio, то разрешаем звук, чтоб файл сразу проиндексировался вместе с ним (иначе позже произойдет переиндексация)
-                   string atrack = (m.inaudiostreams.Count > 0 && Settings.FFMS_Enable_Audio) ? ", atrack = -1" : ", atrack = -2";
-                   cache_path = atrack + ", rffmode = 0, cachefile = \"" + Settings.TempPath + "\\" + Path.GetFileName(m.infilepath).ToLower() + ".ffindex\"";
+                   string atrack = (m.inaudiostreams.Count > 0 && Settings.FFMS_Enable_Audio) ? ", atrack=-1, adjustdelay=-3" : ", atrack=-2";
+                   cache_path = atrack + ", rffmode=0, cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(m.infilepath).ToLower() + ".ffindex\"";
                }
                script += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
            }
-          
+
            script += "ConvertToYUY2()" + Environment.NewLine;//тут
            script += "Trim(0, 100)" + Environment.NewLine;
 

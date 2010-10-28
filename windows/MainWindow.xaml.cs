@@ -1209,30 +1209,38 @@ namespace XviD4PSP
 
                     if (x == null) return;
 
-                    //Извлечение видео для FFMpegSource
+                    //Извлечение видео для FFmpegSource
                     if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
                     {
                         //проверяем надо ли извлекать видео
                         FFMpegSourceHelper fhelp = new FFMpegSourceHelper(x);
-                        if (fhelp.NeedVExtract)
+                        if (fhelp.IsErrors)
                         {
-                            string outext = Format.GetValidRAWVideoEXT(x);
-                            string outpath = Settings.TempPath + "\\" + x.key + "." + outext;
-
-                            //удаляем старый файл
-                            SafeDelete(outpath);
-
-                            //извлекаем новый файл
-                            Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, outpath);
-
-                            //проверка на удачное завершение
-                            if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                            if (!Settings.FFmpegSource2)
                             {
-                                x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
-                                x.infilepath_source = x.infilepath;
-                                x.infilepath = outpath;
-                                x.infileslist = new string[] { x.infilepath };
-                                deletefiles.Add(outpath);
+                                string outext = Format.GetValidRAWVideoEXT(x);
+                                string outpath = Settings.TempPath + "\\" + x.key + "." + outext;
+
+                                //удаляем старый файл
+                                SafeDelete(outpath);
+
+                                //извлекаем новый файл
+                                Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, outpath);
+
+                                //проверка на удачное завершение
+                                if (!dem.IsErrors && File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                                {
+                                    x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
+                                    x.infilepath_source = x.infilepath;
+                                    x.infilepath = outpath;
+                                    x.infileslist = new string[] { x.infilepath };
+                                    deletefiles.Add(outpath);
+                                }
+                            }
+                            else
+                            {
+                                //Для FFmpegSource2 просто выводим текст ошибки
+                                throw new Exception(fhelp.error_message);
                             }
                         }
                     }

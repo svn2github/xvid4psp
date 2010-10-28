@@ -1388,7 +1388,7 @@ namespace XviD4PSP
             }
         }
 
-        //Использовать старый или новый FFmpegSource
+        //Использовать новый FFmpegSource2
         public static bool FFmpegSource2
         {
             get
@@ -1396,8 +1396,8 @@ namespace XviD4PSP
                 object value = GetValue("FFmpegSource2");
                 if (value == null)
                 {
-                    SetBool("FFmpegSource2", false);
-                    return false;
+                    SetBool("FFmpegSource2", true);
+                    return true;
                 }
                 else
                 {

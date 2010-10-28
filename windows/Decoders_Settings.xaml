@@ -11,8 +11,8 @@
         <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
             <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
                 <TabItem Header="Video" x:Name="tab_video">
-                    <Grid Width="380" Height="296">
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_vdecoders" Header="Video decoders" Margin="4,6,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                   <StackPanel Width="380" Height="Auto">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_vdecoders" Header="Video decoders" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_avi" Content="AVI:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
@@ -32,7 +32,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_directshowsource" Header="DirectShowSource" Margin="4,114,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_directshowsource" Header="DirectShowSource" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
                                     <CheckBox x:Name="check_dss_convert_fps" Width="226" Height="Auto" Content="ConvertFPS = true" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_convert_fps_Click"/>
@@ -40,7 +40,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="Mpeg2Source" Margin="4,170,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="Mpeg2Source" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
                                     <CheckBox x:Name="check_force_film" Width="290" Height="Auto" Content="Auto force Film at (%):" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_force_film_Click"/>
@@ -48,7 +48,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource" Margin="4,226,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_ffms2" Width="226" Height="Auto" Content="Use new FFmpegSource2" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms2_Click"/>
@@ -59,11 +59,11 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                    </Grid>
+                    </StackPanel>
                 </TabItem>
                 <TabItem Header="Audio" x:Name="tab_audio">
-                    <Grid Width="380" Height="175">
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_adecoders" Header="Audio decoders" Margin="4,6,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                    <StackPanel Width="380" Height="Auto">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_adecoders" Header="Audio decoders" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_ac3" Content="AC3:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
@@ -79,7 +79,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,88,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_enable_audio" Width="Auto" Height="Auto" Content="Enable audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_enable_audio_Click"/>
@@ -92,7 +92,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                    </Grid>
+                    </StackPanel>
                 </TabItem>
             </TabControl>
         </Grid>

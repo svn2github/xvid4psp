@@ -11,8 +11,8 @@
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
 		   <TabControl Width="Auto" Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
                 <TabItem Header="Main" x:Name="tab_main">
-                    <Grid Width="386" Height="Auto">
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_interlace" Header="Interlace" Margin="4,2,4,0" Height="Auto" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                    <StackPanel Width="386" Height="Auto">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_interlace" Header="Interlace" Margin="4,3,4,0" Height="Auto" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="label_source_info" Content="Detect source type:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
@@ -36,7 +36,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Margin="4,166,4,6" Header="Framerate" Foreground="#FFFFFFFF" x:Name="group_framerate" VerticalAlignment="Top" Height="Auto" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Margin="4,3,4,6" Header="Framerate" Foreground="#FFFFFFFF" x:Name="group_framerate" VerticalAlignment="Top" Height="Auto" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_in_framerate" Content="Input framerate:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
@@ -52,17 +52,11 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                    </Grid>
+                    </StackPanel>
                 </TabItem>
                 <TabItem Header="Settings" x:Name="tab_settings">
-                    <Grid Width="386" Height="Auto">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Source detector" Margin="4,2,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                    <StackPanel Width="386" Height="Auto">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Source detector" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_analyze_percent" Content="Analyze (% of the source lenght):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
@@ -80,13 +74,13 @@
                                     <Label OpacityMask="{x:Null}" x:Name="text_hybrid_fo" Content="Hybrid field order threshold (%):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
                                     <MyUserControl:NumericUpDown Height="22" x:Name="num_hybrid_fo" HorizontalAlignment="Right" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Minimum="1" Maximum="100" Value="10" ValueChanged="num_hybrid_fo_ValueChanged"/>
                                 </DockPanel>
-                                <DockPanel Margin="0,0,0,3" Width="Auto" Height="Auto">
+                                <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_fo_portions" Content="Enable selective field order analysis" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
                                     <CheckBox x:Name="check_fo_portions" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" Click="check_fo_portions_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,7,0"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                    </Grid>
+                    </StackPanel>
                 </TabItem>
             </TabControl>
 		</Grid>

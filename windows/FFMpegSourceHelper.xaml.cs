@@ -22,29 +22,41 @@ namespace XviD4PSP
         private BackgroundWorker worker = null;
         public Massive m;
         AviSynthReader reader;
-        public bool NeedVExtract = false;
+        public bool IsErrors = false;
+        public string error_message = null;
 
         public FFMpegSourceHelper(Massive mass)
         {
             this.InitializeComponent();
-
             this.Owner = mass.owner;
-
             m = mass.Clone();
 
             //забиваем
             prCurrent.Maximum = 100;
-            Title = "FFmpegSource";
             text_info.Content = Languages.Translate("Please wait... Work in progress...");
 
+            if (Settings.FFmpegSource2)
+            {
+                Title = "FFmpegSource2";
+                text_info.ToolTip = Languages.Translate("Indexing") + "...";
+            }
+            else
+            {
+                Title = "FFmpegSource";
+                text_info.ToolTip = Languages.Translate("FFmpegSource creates CACHE files. It can take long time and hard drive space.")/*+
+                    Environment.NewLine + Languages.Translate("Use other decoders for more fast import:") + Environment.NewLine +
+                    Languages.Translate("FFmpegSource - slow, but safe and codec independed import.") + Environment.NewLine +
+                    Languages.Translate("AVISource and DirectShowSource - fast, but depend on system codecs import.")*/;
+            }
+
             //фоновое кодирование
-            CreateBackgoundWorker();
+            CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
         }
 
-        private void CreateBackgoundWorker()
+        private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
@@ -67,8 +79,30 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    if (!ex.Message.StartsWith("FFAudioSource:") && !ex.Message.Contains(" audio track"))
-                        NeedVExtract = true;
+                    //FFmpegSource: Audio decoding error                                       - FFMS1 A
+                    //FFmpegSource: Audio codec not found                                      - FFMS1 A
+                    //FFmpegSource: Video track is unseekable                                  - FFMS1 A
+                    //FFmpegSource: Selected track is not audio                                - FFMS1 A
+                    //FFmpegSource: Invalid audio track number                                 - FFMS1 
+                    //FFmpegSource: Can't create decompressor: Unsupported compression method. - FFMS1
+                    //FFmpegSource: Couldn't open                                              - FFMS1
+                    //FFmpegSource: Video codec not found                                      - FFMS1
+                    //FFVideoSource: Video codec not found                                     - FFMS1/2
+                    //FFAudioSource: Out of bounds track index selected                        - FFMS2
+                    //FFAudioSource: No audio track found                                      - FFMS2 A
+                    //FFVideoSource: The index does not match the source file                  - FFMS2
+                    //FFVideoSource: Could not open video codec                                - FFMS2
+                    //FFVideoSource: No video track found                                      - FFMS2
+                    //FFVideoSource: Can't open file                                           - FFMS2
+                    //FFIndex: Can't open file                                                 - FFMS2
+                    //FF...
+                    error_message = ex.Message;
+                    if (error_message.StartsWith("FFAudioSource:")) IsErrors = false;
+                    else if (error_message.StartsWith("FFmpegSource: Audio")) IsErrors = false;
+                    else if (error_message.StartsWith("FFmpegSource: Selected track is not audio")) IsErrors = false;
+                    else if (error_message.StartsWith("FFmpegSource: Invalid audio track number")) IsErrors = false;
+                    else if (error_message.StartsWith("FFmpegSource: Video codec not found")) IsErrors = false;
+                    else IsErrors = true;
                 }
                 finally
                 {
@@ -111,27 +145,6 @@ namespace XviD4PSP
             {
                 Message mes = new Message(this.Owner);
                 mes.ShowMessage(data, title, style);
-            }
-        }
-
-        internal delegate void StatusDelegate(string title, string pr_text, double pr_c);
-        private void SetStatus(string title, string pr_text, double pr_c)
-        {
-            if (m != null)
-            {
-                try
-                {
-                    if (!Application.Current.Dispatcher.CheckAccess())
-                        Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new StatusDelegate(SetStatus), title, pr_text, pr_c);
-                    else
-                    {
-                        //this.Title = title;
-                        this.prCurrent.Value = pr_c;
-                    }
-                }
-                catch
-                {
-                }
             }
         }
     }

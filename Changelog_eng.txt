@@ -1,5 +1,16 @@
-XviD4PSP 5.0.37.8 r132->r184 27.10.10, main changes:
+XviD4PSP 5.0.37.8 r132->r185 29.10.10, main changes:
 
+>>> (r185) Video->Decoding: option "Use new FFmpegSource2" now turned on by default.
+>>> (r185) For FFmpegSource2, if option "Enable Audio" is turned on, parameter "adjustdelay" will be set to "-3".
+           It fixes next problems (may appears only if the source file has an audio track with non-zero Delay):
+           1. "FFAudioSource: Out of bounds audio samples requested" error message - when audio encoding is mostly finished.
+           2. "Access Violation" error mesage or crash - immediately after opening the source file.
+           3. Twice-delayed audio track (delay in the FFAudioSource and function DelayAudio() in the script).
+>>> (r185) Fixed removing of needless resizer ("mod2-protection") from the script (bug since r161).
+>>> (r185) Changed order of writing into the script functions DelayAudio() and channels converter. Channels converter
+           now will be added right after DelayAudio() (it was vise versa in the previous versions). It fixes a possible
+           crash of AviSynth (if audio track has positive delay in conjunction with downmixing audio channels), that may
+           happen on some AviSynth versions (rep. by AlexalForever).
 >>> (r184) MediaInfoWrapper: some deprecated Parameters was replaced.
 >>> (r183) More fixes for r180.
 >>> (r182) Some changes for DGDecNV 2021, 2032 and 2034 (DGDecodeNV.dll instead of DGMultiDecodeNV.dll, hints=true for ColorMatrix).
