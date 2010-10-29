@@ -45,8 +45,8 @@ namespace XviD4PSP
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (IsLoaded)
-            {
+            if (IsLoaded && e.WidthChanged && e.HeightChanged)
+            {               
                 //После открытия окна разрешаем установить бОльшую ширину
                 this.MaxWidth = SystemParameters.WorkArea.Width;
                 this.SizeChanged -= new SizeChangedEventHandler(Window_SizeChanged);

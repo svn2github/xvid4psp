@@ -65,9 +65,9 @@ namespace XviD4PSP
         private IMediaPosition mediaPosition = null;
         private IVideoFrameStep frameStep = null;
 
-        private bool isAudioOnly = false;
-        private bool isFullScreen = false;
-        private bool isAviSynthError = false;
+        private bool IsAudioOnly = false;
+        private bool IsFullScreen = false;
+        private bool IsAviSynthError = false;
         public PlayState currentState = PlayState.Init;
 
         private IntPtr Handle = IntPtr.Zero;
@@ -495,7 +495,7 @@ namespace XviD4PSP
 
         private void grid_tasks_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if(!isFullScreen) MoveVideoWindow();
+            if(!IsFullScreen) MoveVideoWindow();
         }
 
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -506,12 +506,12 @@ namespace XviD4PSP
 
         private void MainWindow_LocationChanged(object sender, EventArgs e)
         {
-            if (!isFullScreen) MoveVideoWindow();
+            if (!IsFullScreen) MoveVideoWindow();
         }
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!isFullScreen) MoveVideoWindow();
+            if (!IsFullScreen) MoveVideoWindow();
         }
 
         //Сворачиваемся в трей; активируем окна при разворачивании
@@ -1835,11 +1835,11 @@ namespace XviD4PSP
             this.mediaload = mediaload;
 
             //Сбрасываем флаг ошибки Ависинта при новом открытии
-            if (mediaload == MediaLoad.load) isAviSynthError = false;
+            if (mediaload == MediaLoad.load) IsAviSynthError = false;
 
             //Чтоб позиция не сбрасывалась на ноль при включенном ScriptView
             //А так-же НЕ сохраняем позицию после ошибки Ависинта в предыдущее открытие
-            if (script_box.Visibility == Visibility.Collapsed && !isAviSynthError)
+            if (script_box.Visibility == Visibility.Collapsed && !IsAviSynthError)
                 oldpos = Position;
 
             // If we have ANY file open, close it and shut down DirectShow
@@ -1855,7 +1855,7 @@ namespace XviD4PSP
                 // Start playing the media file
                 if (Settings.ScriptView)
                 {
-                    this.isAudioOnly = false;
+                    this.IsAudioOnly = false;
                     this.currentState = PlayState.Stopped;
                     script_box.Visibility = Visibility.Visible;
                     script_box.Text = m.script;
@@ -1873,7 +1873,7 @@ namespace XviD4PSP
                         PlayWithMediaBridge(Settings.TempPath + "\\preview.avs");
                     else
                     {
-                        this.isAudioOnly = false;
+                        this.IsAudioOnly = false;
                         this.currentState = PlayState.Stopped;
                         if (mediaload == MediaLoad.load)
                         {
@@ -1883,9 +1883,10 @@ namespace XviD4PSP
                         ShowWithPictureView(m.script, pic_frame);
                     }
 
+                    this.Focus();
                     slider_pos.Focus(); //Переводит фокус на полосу прокрутки видео
                 }
-                
+
                 if (mediaload == MediaLoad.load) 
                     MenuHider(true); //Делаем пункты меню активными
 
@@ -2453,13 +2454,13 @@ namespace XviD4PSP
                 VideoElement.MediaOpened += new RoutedEventHandler(VideoElement_MediaOpened);
                 VideoElement.MediaEnded += new RoutedEventHandler(VideoElement_MediaEnded);
 
-                isAudioOnly = false;
+                IsAudioOnly = false;
                 check_engine_mediabridge.IsChecked = true;
                 Settings.PlayerEngine = Settings.PlayerEngines.MediaBridge;
             }
             else
             {
-                isAudioOnly = false;
+                IsAudioOnly = false;
                 button_play.Visibility = Visibility.Collapsed;
                 button_frame_back.Margin = new Thickness(4, 6.1, 0, 6.1);
                 button_frame_forward.Margin = new Thickness(31, 6.1, 0, 6.1);
@@ -3336,6 +3337,7 @@ namespace XviD4PSP
                 drop_data = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (drop_data != null) new Thread(new ThreadStart(this.DragOpen)).Start();
                 else IsDragOpening = false;
+                this.Activate();
             }
         }
 
@@ -3954,13 +3956,13 @@ namespace XviD4PSP
 
         public void SwitchToFullScreen()
         {
-            if (this.isAudioOnly || (this.graphBuilder == null && script_box.Visibility != Visibility.Visible && Pic.Visibility != Visibility.Visible))
-                if (!isFullScreen) return; //Если файл был закрыт при фуллскрине, продолжаем чтоб вернуть нормальный размер окна
+            if (this.IsAudioOnly || (this.graphBuilder == null && script_box.Visibility != Visibility.Visible && Pic.Visibility != Visibility.Visible))
+                if (!IsFullScreen) return; //Если файл был закрыт при фуллскрине, продолжаем чтоб вернуть нормальный размер окна
 
             //если не Фуллскрин, то делаем Фуллскрин
-            if (!isFullScreen)
+            if (!IsFullScreen)
             {
-                this.isFullScreen = true;
+                this.IsFullScreen = true;
                 oldstate = this.WindowState;
                 this.grid_tasks.Visibility = Visibility.Collapsed;
                 this.grid_menu.Visibility = Visibility.Collapsed;
@@ -3999,7 +4001,7 @@ namespace XviD4PSP
                 this.grid_top.Visibility = Visibility.Visible;
                 this.LayoutRoot.Background = oldbrush;
                 this.grid_player_buttons.Margin = new Thickness(195.856, 0, 0, 0); //Установить дефолтные отступы для панели управления плейера              
-                this.isFullScreen = false;
+                this.IsFullScreen = false;
 
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) MoveVideoWindow();
                 this.VideoElement.Margin = script_box.Margin = Pic.Margin = new Thickness(8, 56, 8, 8);
@@ -4020,7 +4022,7 @@ namespace XviD4PSP
                 // Free DirectShow interfaces
                 CloseInterfaces();
 
-                this.isAudioOnly = true; //Перенесено сюда
+                this.IsAudioOnly = true; //Перенесено сюда
 
                 // No current media state
                 if (mediaload != MediaLoad.update)
@@ -4082,7 +4084,7 @@ namespace XviD4PSP
                 lock (this)
                 {
                     // Relinquish ownership (IMPORTANT!) after hiding video window
-                    if (!this.isAudioOnly && this.videoWindow != null)
+                    if (!this.IsAudioOnly && this.videoWindow != null)
                     {
                         hr = this.videoWindow.put_Visible(OABool.False);
                         DsError.ThrowExceptionForHR(hr);
@@ -4317,7 +4319,7 @@ namespace XviD4PSP
             hr = this.mediaEventEx.SetNotifyWindow(this.source.Handle, WMGraphNotify, IntPtr.Zero);
             DsError.ThrowExceptionForHR(hr);
 
-            if (!this.isAudioOnly)
+            if (!this.IsAudioOnly)
             {
                 // Setup the video window
                 hr = this.videoWindow.put_Owner(this.source.Handle);
@@ -4325,28 +4327,35 @@ namespace XviD4PSP
 
                 hr = this.videoWindow.put_MessageDrain(this.source.Handle);
                 DsError.ThrowExceptionForHR(hr);
-               
+
                 hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings
                     | DirectShowLib.WindowStyle.ClipChildren);
                 DsError.ThrowExceptionForHR(hr);
 
-                MoveVideoWindow();
+                //Ловим ошибку Ависинта
+                IsAviSynthError = false;
+                if (NaturalDuration.TotalMilliseconds == 10000.0)
+                {
+                    double time; //Признаки ошибки: duration=10000.0 и fps=24 (округлённо)
+                    if (basicVideo.get_AvgTimePerFrame(out time) != 0 || (int)(1 / time) == 24)
+                        IsAviSynthError = true;
+                }
 
+                MoveVideoWindow();
                 GetFrameStepInterface();
             }
-
-            this.Focus();
+            else 
+            {
+                //Ловим ошибку Ависинта 2 (когда нет видео окна)
+                IsAviSynthError = (NaturalDuration.TotalMilliseconds == 10000.0);
+            }
 
             if (mediaload == MediaLoad.update) //Перенесено из HandleGraphEvent, теперь позиция устанавливается до начала воспроизведения, т.е. за один заход, а не за два
             {
                 if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
-                {
-                    isAviSynthError = false;
                     mediaPosition.put_CurrentPosition(oldpos.TotalSeconds);
-                }
-                else if (NaturalDuration.TotalMilliseconds == 10000.0) isAviSynthError = true;
-                else isAviSynthError = false;
-                //mediaPosition.put_CurrentPosition(NaturalDuration.TotalSeconds); //Ограничиваем позицию длиной клипа
+                //else
+                //    mediaPosition.put_CurrentPosition(NaturalDuration.TotalSeconds); //Ограничиваем позицию длиной клипа
             }
 
             // Run the graph to play the media file
@@ -4370,44 +4379,49 @@ namespace XviD4PSP
             //Track the movement of the container window and resize as needed
             if (this.videoWindow != null)
             {
-                int hr = 0;
-                double left = 0, top = 0, w = 0, h = 0; //h - высота, w - ширина
-                if (!isFullScreen)
+                double left = 0, top = 0, w = 0, h = 0, aspect = m.outaspect;
+                if (IsAviSynthError)
                 {
-                    top = (grid_menu.ActualHeight +
-                        grid_top.ActualHeight +
-                        splitter_tasks_preview.ActualHeight +
-                        grid_tasks.ActualHeight +
-                        grid_player_info.ActualHeight + 10);
-                    h = (grid_player_window.ActualHeight -
-                        grid_player_info.ActualHeight - 12);
-                    w = (m.outaspect * h);
+                    int w_err, h_err;
+                    DsError.ThrowExceptionForHR(basicVideo.get_VideoWidth(out w_err));
+                    DsError.ThrowExceptionForHR(basicVideo.get_VideoHeight(out h_err));
+                    aspect = ((double)w_err / (double)h_err);
+                }
+
+                if (!IsFullScreen)
+                {
+                    top = (grid_menu.ActualHeight + grid_top.ActualHeight + splitter_tasks_preview.ActualHeight +
+                        grid_tasks.ActualHeight + grid_player_info.ActualHeight + 10);
+                    h = (grid_player_window.ActualHeight - grid_player_info.ActualHeight - 12);
+                    w = (aspect * h);
                     left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
                     if (w > progress_back.ActualWidth)
                     {
                         w = progress_back.ActualWidth;
-                        h = (w / m.outaspect);
+                        h = (w / aspect);
                         left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
                         top += ((this.grid_player_window.ActualHeight - h) / 2.0) - (grid_player_info.ActualHeight) + 14;
                     }
                 }
-                else //Для ФуллСкрина
+                else
                 {
+                    //Для ФуллСкрина
                     h = this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight; //высота экрана минус высота панели
-                    w = (m.outaspect * h);
+                    w = (aspect * h);
                     left = ((this.LayoutRoot.ActualWidth - w) / 2);
                     if (w > this.LayoutRoot.ActualWidth)
                     {
                         w = this.LayoutRoot.ActualWidth;
-                        h = (w / m.outaspect);
+                        h = (w / aspect);
                         left = 0;
                         top = ((this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight - h) / 2.0);
                     }
                 }
-                hr = this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(w * dpi), (int)(h * dpi)); //Масштабируем и вводим
-                DsError.ThrowExceptionForHR(hr);
-                hr = this.videoWindow.put_BorderColor(1);
-                DsError.ThrowExceptionForHR(hr);
+
+                //Масштабируем и вводим
+                DsError.ThrowExceptionForHR(this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(w * dpi), (int)(h * dpi)));
+                //Заставляем перерисовать окно
+                DsError.ThrowExceptionForHR(this.videoWindow.put_BorderColor(1));
             }
         }
 
@@ -4420,13 +4434,13 @@ namespace XviD4PSP
             {
                 // Audio-only files have no video interfaces.  This might also
                 // be a file whose video component uses an unknown video codec.
-                this.isAudioOnly = true;
+                this.IsAudioOnly = true;
                 return;
             }
             else
             {
                 // Clear the global flag
-                this.isAudioOnly = false;
+                this.IsAudioOnly = false;
             }
 
             hr = this.videoWindow.get_Visible(out lVisible);
@@ -4439,15 +4453,15 @@ namespace XviD4PSP
                 // of a supported format.
                 if (hr == unchecked((int)0x80004002))      //E_NOINTERFACE
                 {
-                    this.isAudioOnly = true;
+                    this.IsAudioOnly = true;
                 }
                 else if (hr == unchecked((int)0x80040209)) //VFW_E_NOT_CONNECTED 
                 {
-                    this.isAudioOnly = true;
+                    this.IsAudioOnly = true;
                 }
                 else
                 {
-                    this.isAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
+                    this.IsAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
                     DsError.ThrowExceptionForHR(hr);
                 }
             }
@@ -4572,7 +4586,7 @@ namespace XviD4PSP
                         break;
                     }
                 case 0x020A: //0x020A WM_MOUSEWHEEL
-                    if (isFullScreen) 
+                    if (IsFullScreen) 
                     {
                         if (wParam.ToInt32() > 0) VolumePlus(); else VolumeMinus();
                     }
@@ -4618,7 +4632,7 @@ namespace XviD4PSP
                     }
 
                     //Считаем fps
-                    if (!isAudioOnly)
+                    if (!IsAudioOnly)
                     {
                         double AvgTimePerFrame;
                         hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
@@ -4746,11 +4760,11 @@ namespace XviD4PSP
                 {
                     if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
                     {
-                        isAviSynthError = false;
+                        IsAviSynthError = false;
                         Position = oldpos;
                     }
-                    else if (NaturalDuration.TotalMilliseconds == 10000.0) isAviSynthError = true;
-                    else isAviSynthError = false;
+                    else if (NaturalDuration.TotalMilliseconds == 10000.0) IsAviSynthError = true;
+                    else IsAviSynthError = false;
                 }
                 else if (mediaload == MediaLoad.load)
                 {

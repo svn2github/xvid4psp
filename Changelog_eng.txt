@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r186 29.10.10, main changes:
+XviD4PSP 5.0.37.8 r132->r187 29.10.10, main changes:
 
+>>> (r187) DirectShow player engine: AviSynth error messages will be shown with native AR.
 >>> (r186) Selected "Final action" sometimes not performing.
 >>> (r185) Video->Decoding: option "Use new FFmpegSource2" now turned on by default.
 >>> (r185) For FFmpegSource2, if option "Enable Audio" is turned on, parameter "adjustdelay" will be set to "-3".
