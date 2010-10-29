@@ -4866,9 +4866,10 @@ namespace XviD4PSP
                     else p.UpdateTaskStatus(m.key, "Encoded");
                 }
 
-                //финальные действия
-                if (p.outfiles.Count == 0 && !IsAborted)
+                //Смотрим, есть ли что ещё скодировать
+                if (!IsAborted && p.EncodeNextTask())
                 {
+                    //Если нет заданий со статусами Waiting, Encoding и Errors, то можно выходить 
                     if (ending == Shutdown.ShutdownMode.Exit)
                     {
                         p.IsExiting = true;
@@ -4882,10 +4883,7 @@ namespace XviD4PSP
                     }
                 }
 
-                //смотрим есть ли что ещё скодировать
-                if (!IsAborted) p.EncodeNextTask();
-
-                //выходим
+                //Закрываем окно
                 if (Settings.AutoClose && !IsErrors) Close();
             }
             catch (Exception ex)

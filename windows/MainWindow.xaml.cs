@@ -3569,8 +3569,9 @@ namespace XviD4PSP
                 list_tasks.Items.Remove(task_for_delete);
         }
 
-        public void EncodeNextTask()
+        public bool EncodeNextTask()
         {
+            bool all_clear = true;
             if (list_tasks.Items.Count != 0)
             {
                 list_tasks.UnselectAll();
@@ -3584,7 +3585,12 @@ namespace XviD4PSP
                     if (task.Status == "Waiting")
                     {
                         IsWaiting = true;
+                        all_clear = false;
                         break;
+                    }
+                    else if (task.Status == "Encoding" || task.Status == "Errors")
+                    {
+                        all_clear = false;
                     }
                 }
 
@@ -3594,6 +3600,8 @@ namespace XviD4PSP
                     action_encode(task.Mass.Clone());
                 }
             }
+
+            return all_clear;
         }
 
         private void button_encode_Click(object sender, System.Windows.RoutedEventArgs e)
