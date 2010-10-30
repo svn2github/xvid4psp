@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
+using System.Runtime.InteropServices;
 
 namespace XviD4PSP
 {
@@ -43,12 +44,18 @@ namespace XviD4PSP
             ShowDialog();
         }
 
+        [DllImport("user32.dll")]
+        static extern short GetAsyncKeyState(int vKey); //GetKeyState
+
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (IsLoaded && e.WidthChanged && e.HeightChanged)
-            {               
-                //После открытия окна разрешаем установить бОльшую ширину
+            //После открытия окна разрешаем установить бОльшую ширину, но только
+            //если размер окна изменялся мышкой (а не изменением текста внутри него).
+            //Встроенные в C# способы определения состояния мыши для этой цели не годятся.
+            if (IsLoaded && (GetAsyncKeyState(1) < 0 || GetAsyncKeyState(2) < 0))
+            {
                 this.MaxWidth = SystemParameters.WorkArea.Width;
+                this.MaxHeight = SystemParameters.WorkArea.Height;
                 this.SizeChanged -= new SizeChangedEventHandler(Window_SizeChanged);
             }
         }

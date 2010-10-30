@@ -1766,6 +1766,7 @@ namespace XviD4PSP
             CloseChildWindows();
 
             CloseClip();
+            SetPlayIcon();
 
             if (Settings.DeleteTempFiles)
             {
@@ -1791,7 +1792,7 @@ namespace XviD4PSP
                 batch_files = null;
             }
         }
-        
+
         private void clear_audio_and_video_caches()
         {
             try

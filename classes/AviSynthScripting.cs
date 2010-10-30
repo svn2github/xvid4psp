@@ -91,11 +91,7 @@ namespace XviD4PSP
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
            //определяем аудио потоки
-           AudioStream instream;
-           if (m.inaudiostreams.Count > 0)
-               instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-           else
-               instream = new AudioStream();
+           AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
            //начинаем писать скрипт
            m.script = "";
@@ -222,27 +218,19 @@ namespace XviD4PSP
            if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DSS2) && m.inframerate != "")
                fps = ", fps=" + m.inframerate;
 
-           //выбор аудио трека
-           string atrack = "";
-           if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio)
-               atrack = ", atrack=" + (instream.ffid);
-
            //принудительная конвертация частоты
            string convertfps = "";
            if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
-           //запрет обработки звука при видео импорте
+           //выбор аудио трека
            string audio = "";
-           if (m.vdecoder == Decoders.DirectShowSource)
-           {
-               if (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio)
-                   audio = ", audio=false";
-           }
-           else if (m.vdecoder == Decoders.AVISource && !Settings.EnableAudio)
-           {
+           if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio || !Settings.EnableAudio))
                audio = ", audio=false";
-           }
+           else if (m.vdecoder == Decoders.AVISource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.EnableAudio))
+               audio = ", audio=false";
+           else if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio && Settings.EnableAudio)
+               audio = ", atrack=" + (instream.ffid) + ((Settings.FFmpegSource2) ? ", adjustdelay=-3" : "");
 
            //ипортируем видео
            string invideostring = "";
@@ -258,7 +246,7 @@ namespace XviD4PSP
                {
                    n++;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\",cpu=0,info=3)";
-                   if (n < m.infileslist.Length) invideostring += " + ";
+                   if (n < m.infileslist.Length) invideostring += " ++ ";
                }
            }
            else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source) //мпег2 и MPEG2Source
@@ -272,7 +260,7 @@ namespace XviD4PSP
                {
                    n++;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
-                   if (n < m.infileslist.Length) invideostring += " + ";
+                   if (n < m.infileslist.Length) invideostring += " ++ ";
                }
            }
            else //другое
@@ -295,26 +283,21 @@ namespace XviD4PSP
                        if (Settings.FFmpegSource2)
                        {
                            ffmpegsource2 = "2";
-                           if (atrack != "") atrack += ", adjustdelay=-3";
                            cache_path = ", rffmode=0, cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
                    n++;
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
-                   if (n < m.infileslist.Length) invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + cache_path + ")" + assume_fps;
+                   if (n < m.infileslist.Length) invideostring += " ++ ";
                }
            }
-
-           //добавка для объединения звука и видео
-           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath != null)
-               invideostring = "video = " + invideostring;
-
-           //прописываем импорт видео или всего клипа
-           m.script += invideostring + Environment.NewLine;
 
            //теперь звук!
            if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath != null)
            {
+               //прописываем импорт видео
+               m.script += "video = " + invideostring + Environment.NewLine;
+               
                //пришиваем звук
                string inaudiostring = "";
                if (instream.audiofiles != null && instream.audiofiles.Length > 0)
@@ -324,7 +307,7 @@ namespace XviD4PSP
                    {
                        n++;
                        inaudiostring += instream.decoder.ToString() + "(\"" + file + "\")";
-                       if (n < instream.audiofiles.Length) inaudiostring += " + ";
+                       if (n < instream.audiofiles.Length) inaudiostring += " ++ ";
                    }
                }
                else
@@ -335,6 +318,11 @@ namespace XviD4PSP
 
                //объединение
                m.script += "AudioDub(video, audio)" + Environment.NewLine;
+           }
+           else
+           {
+               //прописываем импорт всего клипа
+               m.script += invideostring + Environment.NewLine;
            }
 
            m.script += Environment.NewLine;
@@ -809,32 +797,12 @@ namespace XviD4PSP
            return m;
        }
 
-       public static string GetPreviewScript(Massive m)
-       {
-           string[] separator = new string[] { Environment.NewLine };
-           string[] lines = m.script.Split(separator, StringSplitOptions.None);
-           string script = "";
-
-           //замена
-           foreach (string line in lines)
-               script += line + Environment.NewLine;
-
-           //добавление
-           script += "ConvertToYUY2()" + Environment.NewLine; //Без этого не работает обновление превью при перемещении окна программы //(давно вылечено)
-
-           return script;
-       }
-
        public static string GetInfoScript(Massive m, ScriptMode mode)
        {
            //определяем расширения
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           AudioStream instream;
-           if (m.inaudiostreams.Count > 0)
-               instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-           else
-               instream = new AudioStream();
+           AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
            //начинаем писать скрипт
            string script = "";
@@ -894,20 +862,18 @@ namespace XviD4PSP
            if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
-           //запрет обработки звука при видео импорте
+           //выбор аудио трека
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource && (mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace || instream.audiopath != null ||
                !Settings.DSS_Enable_Audio || !Settings.EnableAudio))
                audio = ", audio=false";
-           else if (m.vdecoder == Decoders.AVISource && (mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace || !Settings.EnableAudio))
+           else if (m.vdecoder == Decoders.AVISource && (mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace || instream.audiopath != null ||
+               !Settings.EnableAudio))
                audio = ", audio=false";
+           else if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio &&
+               Settings.EnableAudio && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
+               audio = ", atrack=" + (instream.ffid) + ((Settings.FFmpegSource2) ? ", adjustdelay=-3" : "");
 
-           //выбор аудио трека
-           string atrack = "";
-           if (m.vdecoder == Decoders.FFmpegSource && m.inaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio)
-               if (mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
-                   atrack = ", atrack=" + (instream.ffid);
-           
            //ипортируем видео
            string invideostring = "";
            if (m.vdecoder == Decoders.BlankClip)
@@ -921,7 +887,7 @@ namespace XviD4PSP
                {
                    n++;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\",cpu=0,info=3)";
-                   if (n < m.infileslist.Length) invideostring += " + ";
+                   if (n < m.infileslist.Length) invideostring += " ++ ";
                }
            }
            else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source)
@@ -935,7 +901,7 @@ namespace XviD4PSP
                {
                    n++;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
-                   if (n < m.infileslist.Length) invideostring += " + ";
+                   if (n < m.infileslist.Length) invideostring += " ++ ";
                }
            }
            else
@@ -954,26 +920,21 @@ namespace XviD4PSP
                        if (Settings.FFmpegSource2)
                        {
                            ffmpegsource2 = "2";
-                           if (atrack != "") atrack += ", adjustdelay=-3";
                            cache_path = ", rffmode=0, cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file).ToLower() + ".ffindex\"";
                        }
                    }
                    n += 1;
-                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + atrack + cache_path + ")" + assume_fps;
-                   if (n < m.infileslist.Length) invideostring += " + ";
+                   invideostring += m.vdecoder.ToString() + ffmpegsource2 + "(\"" + file + "\"" + audio + fps + convertfps + cache_path + ")" + assume_fps;
+                   if (n < m.infileslist.Length) invideostring += " ++ ";
                }
            }
-
-           //добавка для объединения звука и видео
-           if (m.inaudiostreams.Count > 0 && instream.audiopath != null)
-               invideostring = "video = " + invideostring;
-
-           //прописываем импорт видео или всего клипа
-           script += invideostring + Environment.NewLine;
 
            //импорт звука и объединение
            if (m.inaudiostreams.Count > 0 && instream.audiopath != null)
            {
+               //прописываем импорт видео
+               script += "video = " + invideostring + Environment.NewLine;
+
                //пришиваем звук
                string inaudiostring = "";
                if (instream.audiofiles != null && instream.audiofiles.Length > 0)
@@ -983,7 +944,7 @@ namespace XviD4PSP
                    {
                        n++;
                        inaudiostring += instream.decoder.ToString() + "(\"" + file + "\")";
-                       if (n < instream.audiofiles.Length) inaudiostring += " + ";
+                       if (n < instream.audiofiles.Length) inaudiostring += " ++ ";
                    }
                }
                else
@@ -994,6 +955,11 @@ namespace XviD4PSP
 
                //объединение
                script += "AudioDub(video, audio)" + Environment.NewLine;
+           }
+           else
+           {
+               //прописываем импорт всего клипа
+               script += invideostring + Environment.NewLine;
            }
 
            if (mode == ScriptMode.FastPreview || mode == ScriptMode.Normalize)
