@@ -15,10 +15,11 @@ namespace XviD4PSP
 {
 	public partial class MediaInfo
 	{
-        public enum InfoMode { MediaInfo = 1, MediaInfoFull, MP4BoxInfo, MKVInfo, FFMPEGInfo };
+        public enum InfoMode { MediaInfo = 1, MediaInfoFull, MP4BoxInfo, MKVInfo, FFmpegInfo };
 
         private InfoMode infomode;
         private string infilepath;
+        FFInfo ff;
 
         public MediaInfo(string infilepath, InfoMode infomode, System.Windows.Window owner)
         {
@@ -27,19 +28,16 @@ namespace XviD4PSP
             this.infomode = infomode;
             this.infilepath = infilepath;
 
+            Title = "Info (" + infomode.ToString() + ")";
             button_open.Content = Languages.Translate("Open");
             button_close.Content = Languages.Translate("Close");
             button_save.Content = Languages.Translate("Save");
+            tbxInfo.ToolTip = "Drag and Drop your files here";
 
-            combo_info.Items.Add("MediaInfo");
-            combo_info.Items.Add("MediaInfoFull");
-            combo_info.Items.Add("MP4BoxInfo");
-            combo_info.Items.Add("MKVInfo");
-            combo_info.Items.Add("FFMPEGInfo");
+            foreach (string info in Enum.GetNames(typeof(InfoMode)))
+                combo_info.Items.Add(info);
             combo_info.SelectedItem = infomode.ToString();
 
-            Title = "Info (" + infomode.ToString() +")";
-            
             if (infilepath != null)
                 GetInfo();
 
@@ -65,35 +63,27 @@ namespace XviD4PSP
         {
             try
             {
-                if (infomode == InfoMode.MediaInfo || infomode == InfoMode.MediaInfoFull)
+                tbxInfo.ToolTip = null; //Чтоб не мешался
+
+                if (infomode == InfoMode.MediaInfo)
                 {
+                    //краткая инфа
                     MediaInfoWrapper media = new MediaInfoWrapper();
-
-                    string ToDisplay = "";
-
                     media.Open(infilepath);
-
-                    //ToDisplay += media.Option("Info_Parameters");//список ключей
-
-                    if (infomode == InfoMode.MediaInfoFull)
-                        media.Option("Complete", "1");//полная инфа
-                    else
-                        media.Option("Complete");//краткая инфа      
-                    
-                    ToDisplay += media.Inform();
-
-                    //прицелная инфа
-                    //ToDisplay += "VideoBitrate: " + media.VideoBitrate + " kbps" + Environment.NewLine;
-                    //ToDisplay += "AudioBitrate: " + media.AudioBitrate(0) + " kbps" + Environment.NewLine;
-                    //ToDisplay += "AudioLanguage: " + media.AudioLanguage(0) + Environment.NewLine;
-
-                    tbxInfo.Text = ToDisplay;
-                    tbxInfo.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-
+                    media.Option("Complete");
+                    tbxInfo.Text = media.Inform();
                     media.Close();
                 }
-
-                if (infomode == InfoMode.MP4BoxInfo)
+                else if (infomode == InfoMode.MediaInfoFull)
+                {
+                    //полная инфа
+                    MediaInfoWrapper media = new MediaInfoWrapper();
+                    media.Open(infilepath);
+                    media.Option("Complete", "1");
+                    tbxInfo.Text = media.Inform();
+                    media.Close();
+                }
+                else if (infomode == InfoMode.MP4BoxInfo)
                 {
                     Process encoderProcess = new Process();
                     ProcessStartInfo info = new ProcessStartInfo();
@@ -102,21 +92,18 @@ namespace XviD4PSP
                     info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
                     info.UseShellExecute = false;
                     info.RedirectStandardOutput = true;
-                    info.RedirectStandardError = true;
+                    info.RedirectStandardError = false;
                     info.CreateNoWindow = true;
 
                     info.Arguments = "-info \"" + infilepath + "\"";
 
                     encoderProcess.StartInfo = info;
                     encoderProcess.Start();
-
                     encoderProcess.WaitForExit();
 
                     tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd();
-                    tbxInfo.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
                 }
-
-                if (infomode == InfoMode.MKVInfo)
+                else if (infomode == InfoMode.MKVInfo)
                 {
                     Process encoderProcess = new Process();
                     ProcessStartInfo info = new ProcessStartInfo();
@@ -125,7 +112,7 @@ namespace XviD4PSP
                     info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
                     info.UseShellExecute = false;
                     info.RedirectStandardOutput = true;
-                    info.RedirectStandardError = true;
+                    info.RedirectStandardError = false;
                     info.CreateNoWindow = true;
 
                     string charset = ((Settings.MKVMerge_Charset != "") ? (" --output-charset " + ((Settings.MKVMerge_Charset.ToLower() == "auto") ?
@@ -135,51 +122,21 @@ namespace XviD4PSP
 
                     encoderProcess.StartInfo = info;
                     encoderProcess.Start();
-
                     encoderProcess.WaitForExit();
 
-                    tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd().Replace("\r", "");
-                    tbxInfo.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                    tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd().Replace("\r\r\n", "\r\n");
                 }
-
-                if (infomode == InfoMode.FFMPEGInfo)
+                else if (infomode == InfoMode.FFmpegInfo)
                 {
-                    Process encoderProcess = new Process();
-                    ProcessStartInfo info = new ProcessStartInfo();
+                    ff = new FFInfo();
+                    ff.Open(infilepath);
 
-                    info.FileName = Calculate.StartupPath + "\\apps\\ffmpeg\\ffmpeg.exe";
-                    info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                    info.UseShellExecute = false;
-                    info.RedirectStandardOutput = true;
-                    info.RedirectStandardError = true;
-                    info.CreateNoWindow = true;
-
-                    info.Arguments = "-i \"" + infilepath + "\"";
-
-                    encoderProcess.StartInfo = info;
-                    encoderProcess.Start();
-
-                    int wseconds = 0;
-                    while (wseconds < 50 &&
-                        !encoderProcess.HasExited) //ждём не более пяти секунд
-                    {
-                        Thread.Sleep(100);
-                        wseconds++;
-                    }
-
-                    string _info = encoderProcess.StandardError.ReadToEnd();
                     string sortedinfo = "";
-                    string[] separator = new string[] { Environment.NewLine };
-                    string[] lines = _info.Split(separator, StringSplitOptions.None);
+                    string[] lines = ff.info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
                     foreach (string line in lines)
                     {
-                        if (!line.StartsWith("fFFmpeg version") &&
-                            !line.StartsWith("  configuration:") &&
-                            !line.StartsWith("  libavutil") &&
-                            !line.StartsWith("  libavcodec") &&
-                            !line.StartsWith("  libavformat") &&
-                            !line.StartsWith("  libavdevice") &&
-                            !line.StartsWith("  libsws") &&
+                        if (!line.StartsWith("  configuration:") &&
+                            !line.StartsWith("  lib") &&
                             !line.StartsWith("  built on") &&
                             !line.StartsWith("At least one output") &&
                             line != "")
@@ -187,36 +144,65 @@ namespace XviD4PSP
                     }
 
                     tbxInfo.Text = sortedinfo;
-                    tbxInfo.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
 
-                    FFInfo ff = new FFInfo();
-                    ff.Open(infilepath);
-                    tbxInfo.Text += Environment.NewLine;
-                    tbxInfo.Text += "Streams: " + ff.StreamCount() + Environment.NewLine;
-                    tbxInfo.Text += "AudioStream: " + ff.AudioStream() + Environment.NewLine;
-                    tbxInfo.Text += "VideoStream: " + ff.VideoStream() + Environment.NewLine;
-                    tbxInfo.Text += "Timeline: " + ff.Timeline() + Environment.NewLine;
-                    tbxInfo.Text += "Seconds: " + ff.Duration().TotalSeconds + Environment.NewLine;
-                    tbxInfo.Text += "W: " + ff.StreamW(ff.VideoStream()) + Environment.NewLine;
-                    tbxInfo.Text += "H: " + ff.StreamH(ff.VideoStream()) + Environment.NewLine;
-                    tbxInfo.Text += "DAR: " + ff.StreamDAR(ff.VideoStream()) + Environment.NewLine;
-                    tbxInfo.Text += "PAR: " + ff.StreamPAR(ff.VideoStream()) + Environment.NewLine;
-                    tbxInfo.Text += "Color: " + ff.StreamColor(ff.VideoStream()) + Environment.NewLine;
-                    tbxInfo.Text += "Framerate: " + ff.StreamFramerate(ff.VideoStream()) + Environment.NewLine;
-                    tbxInfo.Text += "TotalBitrate: " + ff.TotalBitrate() + Environment.NewLine;
-                    tbxInfo.Text += "VideoBitrate: " + ff.VideoBitrate(ff.VideoStream()) + Environment.NewLine;
-                    tbxInfo.Text += "AudioBitrate: " + ff.StreamBitrate(ff.AudioStream()) + Environment.NewLine;
-                    tbxInfo.Text += "Type: " + ff.StreamType(ff.AudioStream()) + Environment.NewLine;
-                    tbxInfo.Text += "Codec: " + ff.StreamCodec(ff.AudioStream()) + Environment.NewLine;
-                    tbxInfo.Text += "Channels: " + ff.StreamChannels(ff.AudioStream()) + Environment.NewLine;
-                    tbxInfo.Text += "Samplerate: " + ff.StreamSamplerate(ff.AudioStream()) + Environment.NewLine;
-                    tbxInfo.Text += "Language: " + ff.StreamLanguage(ff.AudioStream()) + Environment.NewLine;
+                    //Размер файла
+                    string size_s = "";
+                    double size = (new FileInfo(infilepath).Length) / 1048576.0;
+                    if (size > 1024) size_s = (size / 1024.0).ToString("0.##", new System.Globalization.CultureInfo("en-US")) + " Gb\r\n";
+                    else size_s = size.ToString("0.##", new System.Globalization.CultureInfo("en-US")) + " Mb\r\n";
+
+                    //Общая инфа
+                    tbxInfo.Text += "\r\n\r\nGeneral:\r\n";
+                    tbxInfo.Text += "Total streams       : " + ff.StreamsCount() + " (Video: " + ff.VideoStreams().Count + ", Audio: " + ff.AudioStreams().Count + ")\r\n";
+                    tbxInfo.Text += "Total duration      : " + ff.Timeline() + " (" + ff.Duration().TotalSeconds.ToString("0.##", new System.Globalization.CultureInfo("en-US")) + " seconds)\r\n";
+                    tbxInfo.Text += "Total bitrate       : " + ff.TotalBitrate() + " Kbps\r\n";
+                    tbxInfo.Text += "Total size          : " + size_s;
+
+                    //Видео треки
+                    int v_count = ff.VideoStreams().Count, v_num = 1;
+                    foreach (int num in ff.VideoStreams())
+                    {
+                        tbxInfo.Text += "\r\nVideo stream #" + v_num + ":\r\n";
+                        tbxInfo.Text += "ID                  : 0." + num + Environment.NewLine;
+                        tbxInfo.Text += "Codec               : " + ff.StreamCodec(num) + Environment.NewLine;
+                        tbxInfo.Text += "Width               : " + ff.StreamW(num) + " pixels\r\n";
+                        tbxInfo.Text += "Height              : " + ff.StreamH(num) + " pixels\r\n";
+                        tbxInfo.Text += "Aspect (DAR)        : " + ff.StreamDAR(num) + Environment.NewLine;
+                        tbxInfo.Text += "Aspect (PAR)        : " + ff.StreamPAR(num) + Environment.NewLine;
+                        tbxInfo.Text += "Colorspace          : " + ff.StreamColor(num) + Environment.NewLine;
+                        tbxInfo.Text += "Framerate           : " + ff.StreamFramerate(num) + " fps\r\n";
+                        tbxInfo.Text += "Bitrate             : " + ff.VideoBitrate(num) + " Kbps\r\n";
+                        v_num += 1;
+                    }
+
+                    //Аудио треки
+                    int a_count = ff.AudioStreams().Count, a_num = 1;
+                    foreach (int num in ff.AudioStreams())
+                    {
+                        tbxInfo.Text += "\r\nAudio stream #" + a_num + ":\r\n";
+                        tbxInfo.Text += "ID                  : 0." + num + Environment.NewLine;
+                        tbxInfo.Text += "Codec               : " + ff.StreamCodec(num) + Environment.NewLine;
+                        tbxInfo.Text += "Channels            : " + ff.StreamChannels(num) + Environment.NewLine;
+                        tbxInfo.Text += "Samplerate          : " + ff.StreamSamplerate(num) + " Hz\r\n";
+                        tbxInfo.Text += "Language            : " + ff.StreamLanguage(num) + Environment.NewLine;
+                        tbxInfo.Text += "Bitrate             : " + ff.StreamBitrate(num) + " Kbps\r\n";
+                        tbxInfo.Text += "Bits                : " + ff.StreamBits(num) + Environment.NewLine;
+                        a_num += 1;
+                    }
+
                     ff.Close();
+                    ff = null;
                 }
             }
             catch (Exception ex)
             {
                 ErrorExeption(ex.Message);
+
+                if (ff != null)
+                {
+                    ff.Close();
+                    ff = null;
+                }
             }
         }
 
@@ -224,6 +210,7 @@ namespace XviD4PSP
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
+                tbxInfo.ToolTip = null; //Чтоб не мешался
                 e.Effects = DragDropEffects.All;
                 e.Handled = true;
             }
@@ -237,6 +224,7 @@ namespace XviD4PSP
                 tbxInfo.ScrollToHome();
                 infilepath = dropfile;
                 GetInfo();
+                Activate();
                 return;
             }
         }
@@ -250,8 +238,8 @@ namespace XviD4PSP
                     System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
                     s.SupportMultiDottedExtensions = true;
                     s.DefaultExt = ".log";
-                    s.AddExtension = true;                    
-                    s.Title = Languages.Translate("Select unique name for output file:");                   
+                    s.AddExtension = true;
+                    s.Title = Languages.Translate("Select unique name for output file:");
                     s.Filter = "LOG " + Languages.Translate("files") + "|*.log" +
                         "|TXT " + Languages.Translate("files") + "|*.txt";
 
@@ -259,49 +247,43 @@ namespace XviD4PSP
 
                     if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        string logfilename = s.FileName;
-                        FileStream strm = new FileStream(logfilename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                        StreamWriter writer = new StreamWriter(strm);
-
-                        writer.WriteLine(tbxInfo.Text);
-                        writer.Flush();
-                        writer.Dispose();
-                        strm.Dispose();
+                        File.WriteAllText(s.FileName, tbxInfo.Text); //, System.Text.Encoding.Default);
                     }
                 }
                 catch (Exception ex)
                 {
-                       ErrorExeption(ex.Message);
+                    ErrorExeption(ex.Message);
                 }
             }
         }
 
         private void ErrorExeption(string message)
         {
-            tbxInfo.Text = (Languages.Translate("Error") + ": " + Environment.NewLine + message);            
+            tbxInfo.Text = (Languages.Translate("Error") + ": " + Environment.NewLine + message);
         }
 
         private void combo_info_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_info.IsDropDownOpen || combo_info.IsSelectionBoxHighlighted)
+            if ((combo_info.IsDropDownOpen || combo_info.IsSelectionBoxHighlighted) && combo_info.SelectedItem != null)
             {
-                if (combo_info.SelectedItem.ToString() == "MediaInfo")
-                    infomode = InfoMode.MediaInfo;
-                else if (combo_info.SelectedItem.ToString() == "MediaInfoFull")
-                    infomode = InfoMode.MediaInfoFull;
-                else if (combo_info.SelectedItem.ToString() == "MP4BoxInfo")
-                    infomode = InfoMode.MP4BoxInfo;
-                else if (combo_info.SelectedItem.ToString() == "MKVInfo")
-                    infomode = InfoMode.MKVInfo;
-                else
-                    infomode = InfoMode.FFMPEGInfo;
-                
+                infomode = (InfoMode)Enum.Parse(typeof(InfoMode), combo_info.SelectedItem.ToString(), true);
                 Title = "Info (" + infomode.ToString() + ")";
 
-                tbxInfo.Clear();
-                tbxInfo.ScrollToHome();
                 if (infilepath != null)
+                {
+                    tbxInfo.Clear();
+                    tbxInfo.ScrollToHome();
                     GetInfo();
+                }
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (ff != null)
+            {
+                ff.Close();
+                ff = null;
             }
         }
 	}

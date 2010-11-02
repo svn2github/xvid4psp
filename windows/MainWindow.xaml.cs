@@ -786,7 +786,7 @@ namespace XviD4PSP
             Decoder vdec = new Decoder(x, Decoder.DecoderModes.DecodeVideo, vpath);
             if (vdec.IsErrors)
             {
-                new Message(this).ShowMessage("Decoder: " + vdec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                new Message(this).ShowMessage("Decoding video: " + vdec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
                 return;
             }
             
@@ -806,7 +806,7 @@ namespace XviD4PSP
                     Decoder adec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, apath);
                     if (adec.IsErrors)
                     {
-                        new Message(this).ShowMessage("Decoder: " + adec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        new Message(this).ShowMessage("Decoding audio: " + adec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
                         SafeDelete(vpath);
                         return;
                     }
@@ -1262,10 +1262,12 @@ namespace XviD4PSP
                             if (outext == ".wav")
                             {
                                 Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
+                                if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
                             }
                             else
                             {
                                 Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, outpath);
+                                if (dem.IsErrors) throw new Exception(dem.error_message);
                             }
 
                             //проверка на удачное завершение
@@ -1297,6 +1299,7 @@ namespace XviD4PSP
 
                             string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + ".wav";
                             Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
+                            if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
 
                             //проверка на удачное завершение
                             if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
@@ -1311,7 +1314,7 @@ namespace XviD4PSP
 
                     //забиваем-обновляем аудио массивы
                     x = FillAudio(x);
-                    
+
                     //выбираем трек
                     if (x.inaudiostreams.Count > 1 && Settings.EnableAudio)
                     {
@@ -1319,7 +1322,7 @@ namespace XviD4PSP
                         if (ao.m == null) return;
                         x = ao.m.Clone();
                     }
-                   
+
                     //извлечение трека при badmixing
                     if (x.inaudiostreams.Count == 1 && Settings.EnableAudio)
                     {
@@ -1335,7 +1338,7 @@ namespace XviD4PSP
                             if (!File.Exists(instream.audiopath))
                             {
                                 Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                                if (dem.m != null) x = dem.m.Clone();
+                                if (dem.IsErrors) throw new Exception(dem.error_message);
                             }
                         }
                     }
@@ -1740,7 +1743,7 @@ namespace XviD4PSP
                         Demuxer dem = new Demuxer(mass, Demuxer.DemuxerMode.NeroTempWAV, outstream.nerotemp);
                         if (dem.IsErrors)
                         {
-                            ErrorException("Demuxer: " + dem.error_message);
+                            ErrorException(dem.error_message);
                             UpdateTaskStatus(mass.key, "Errors");
                             return;
                         }
@@ -3805,7 +3808,7 @@ namespace XviD4PSP
                 Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.DecodeToWAV, o.FileName);
                 if (dem.IsErrors)
                 {
-                    new Message(this).ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    new Message(this).ShowMessage(dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
                 }
             }
         }
@@ -3836,7 +3839,7 @@ namespace XviD4PSP
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, o.FileName);
                     if (dem.IsErrors)
                     {
-                        new Message(this).ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        new Message(this).ShowMessage(dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
                     }
                 }
             }
@@ -3869,7 +3872,7 @@ namespace XviD4PSP
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractVideo, o.FileName);
                     if (dem.IsErrors)
                     {
-                        new Message(this).ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                        new Message(this).ShowMessage(dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
                     }
                 }
             }

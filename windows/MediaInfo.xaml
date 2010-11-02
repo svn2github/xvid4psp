@@ -4,18 +4,17 @@
 	x:Class="XviD4PSP.MediaInfo"
 	x:Name="Window"
 	Title="Info"
-	Width="500" Height="400" SizeToContent="Manual" WindowStartupLocation="CenterOwner" >
+	Width="500" Height="450" MinWidth="370" MinHeight="150" SizeToContent="Manual" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<TextBox x:Name="tbxInfo" Text="" TextWrapping="Wrap" Margin="8,8,8,8" AllowDrop="True" PreviewDragEnter="grid_main_DragEnter" PreviewDragOver="grid_main_DragEnter" PreviewDrop="grid_main_Drop" IsReadOnly="True" ToolTip="Drop your file here" FontFamily="Lucida Console" FontSize="11" />
+			<TextBox x:Name="tbxInfo" Text="" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="8,8,8,8" AllowDrop="True" PreviewDragEnter="grid_main_DragEnter" PreviewDragOver="grid_main_DragEnter" PreviewDrop="grid_main_Drop" IsReadOnly="True" FontFamily="Lucida Console" FontSize="11"/>
 		</Grid>
 		<Grid x:Name="grid_buttons" Height="38" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom">
 			<Button x:Name="button_open" Width="75" Content="Open" HorizontalAlignment="Left" Margin="8,0,0,8" VerticalAlignment="Bottom" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_open_Click"/>    
             <Button x:Name="button_save" Width="75" Content="Save" HorizontalAlignment="Left" Margin="88,0,0,8" VerticalAlignment="Bottom" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_save_Click"/>
-			<Button x:Name="button_close" Content="Close" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="0,8,8,8" Click="button_close_Click" HorizontalAlignment="Right" Width="75"/>
 		    <ComboBox Width="90" Height="22" IsSynchronizedWithCurrentItem="True" x:Name="combo_info"  Margin="168,0,0,8" VerticalAlignment="Bottom" SelectionChanged="combo_info_SelectionChanged" HorizontalAlignment="Left"/>
-        
+            <Button x:Name="button_close" Width="75" Content="Close" HorizontalAlignment="Right" Margin="0,0,8,8" VerticalAlignment="Bottom" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_close_Click"/>
         </Grid>
 	</Grid>
 </Window>

@@ -6,7 +6,7 @@
 	x:Class="XviD4PSP.AudioOptions"
 	x:Name="Window"
 	Title="Audio options:"
-	Width="640" Height="511" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" xmlns:MyUserControl="clr-namespace:MyUserControl" OverridesDefaultStyle="False" Background="#FFFFFFFF">
+	Width="640" Height="510" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" xmlns:MyUserControl="clr-namespace:MyUserControl" OverridesDefaultStyle="False" Background="#FFFFFFFF">
 	<Window.Resources>
 		<ControlTemplate x:Key="GlassButtonRounded" TargetType="{x:Type Button}">
 			<ControlTemplate.Resources>
@@ -81,11 +81,11 @@
 			<GroupBox Margin="8,8,190,0" Header="Source" Foreground="#FFFFFFFF" x:Name="group_audio" Height="88" VerticalAlignment="Top">
 				<Grid Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="label_atrack" Content="Track:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Right" Margin="0,4,210.677,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="label_apath" Content="Path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="8,4,0,0" VerticalAlignment="Top"/>
-					<TextBox Margin="8,32.62,35.677,0" x:Name="textbox_apath" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
-					<Button x:Name="button_openapath" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="22" Margin="0,32.62,8,0" VerticalAlignment="Top" Height="22" Click="button_openapath_Click"/>
-					<ComboBox x:Name="combo_atracks" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="HorizontalAlignment, VerticalAlignment, Height" HorizontalAlignment="Right" Margin="0,5.66,36.677,0" VerticalAlignment="Top" Width="170" SelectionChanged="combo_atracks_SelectionChanged"/>
-					<Button Height="25" x:Name="button_play" HorizontalAlignment="Right" Margin="0,4,6.677,0" Width="25" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" VerticalAlignment="Top" Click="button_play_Click">
+					<Label OpacityMask="{x:Null}" x:Name="label_apath" Content="Path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="5,8,0,0" VerticalAlignment="Top"/>
+					<TextBox Margin="8,36,36,0" x:Name="textbox_apath" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" PreviewDragOver="TextBox_DragEnter" PreviewDragEnter="TextBox_DragEnter" Drop="TextBox_Drop" AllowDrop="True"/>
+					<Button x:Name="button_openapath" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="22" Margin="0,36,8,0" VerticalAlignment="Top" Height="22" Click="button_openapath_Click"/>
+					<ComboBox x:Name="combo_atracks" Height="Auto" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="HorizontalAlignment, VerticalAlignment, Height" HorizontalAlignment="Right" Margin="0,8,36,0" VerticalAlignment="Top" Width="170" SelectionChanged="combo_atracks_SelectionChanged"/>
+					<Button Height="25" x:Name="button_play" HorizontalAlignment="Right" Margin="0,6,6.677,0" Width="25" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" VerticalAlignment="Top" Click="button_play_Click">
 						<Image Width="14" Height="16" Margin="0,0,0,0" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center" Source="..\pictures\play_new.png"/>
 					</Button>
 				</Grid>
@@ -125,7 +125,7 @@
 					<ComboBox x:Name="combo_accurate" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,40.28,34,0" VerticalAlignment="Top" Width="104" SelectionChanged="combo_accurate_SelectionChanged"/>
 				</Grid>
 			</GroupBox>
-			<GroupBox Margin="0,8,8,18" Header="Info" Foreground="#FFFFFFFF" x:Name="group_info" Width="178" HorizontalAlignment="Right">
+			<GroupBox Margin="0,8,8,0" Header="Info" Foreground="#FFFFFFFF" x:Name="group_info" Width="178" Height="426" VerticalAlignment="Top" HorizontalAlignment="Right">
 				<Grid Width="Auto" Height="Auto">
 					<TextBox x:Name="texbox_info" Text="" TextWrapping="Wrap" Margin="8,8,8,8"/>
 				</Grid>

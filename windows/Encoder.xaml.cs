@@ -168,15 +168,22 @@ namespace XviD4PSP
 
             if (encoderProcess != null)
             {
-                if (!encoderProcess.HasExited)
+                try
                 {
-                    encoderProcess.Kill();
-                    encoderProcess.WaitForExit();
+                    if (!encoderProcess.HasExited)
+                    {
+                        encoderProcess.Kill();
+                        encoderProcess.WaitForExit();
+                    }
                 }
+                catch { }
             }
 
             if (avs != null && avs.IsBusy())
+            {
                 avs.stop();
+                avs = null;
+            }
 
             p.outfiles.Remove(m.outfilepath);
 

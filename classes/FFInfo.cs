@@ -10,11 +10,11 @@ using System.Globalization;
 
 namespace XviD4PSP
 {
-   public class FFInfo
+    public class FFInfo
     {
-       public string info = null;
-       string[] global_lines = null;
-       Process encoderProcess;
+        public string info = null;
+        string[] global_lines = null;
+        Process encoderProcess;
 
         public void Open(string filepath)
         {
@@ -24,7 +24,7 @@ namespace XviD4PSP
             pinfo.FileName = Calculate.StartupPath + "\\apps\\ffmpeg\\ffmpeg.exe";
             pinfo.WorkingDirectory = Path.GetDirectoryName(pinfo.FileName);
             pinfo.UseShellExecute = false;
-            pinfo.RedirectStandardOutput = true;
+            pinfo.RedirectStandardOutput = false;
             pinfo.RedirectStandardError = true;
             pinfo.CreateNoWindow = true;
 
@@ -33,370 +33,330 @@ namespace XviD4PSP
             encoderProcess.StartInfo = pinfo;
             encoderProcess.Start();
 
-            int wseconds = 0;
-            while (wseconds < 50 &&
-                !encoderProcess.HasExited) //ждём не более пяти секунд
-            {
+            //Ждём не более 10-ти секунд (для скриптов ждем чуть дольше)
+            int time = (Path.GetExtension(filepath).ToLower() == ".avs") ? 1000 : 100;
+            for (int i = 0; i < time && !encoderProcess.HasExited; i++)
                 Thread.Sleep(100);
-                wseconds++;
-            }
 
             if (!encoderProcess.HasExited)
             {
                 encoderProcess.Kill();
                 encoderProcess.WaitForExit();
-                //info = null;
             }
 
+            //Читаем и сразу делим на строки (чтоб не делать одну и ту же работу по 10 раз)
             info = encoderProcess.StandardError.ReadToEnd();
-            //Сразу делим на строки, чтоб не делать одну и ту же работу по 10 раз
             if (info != null) global_lines = info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
         }
 
         public void Close()
         {
-            if (encoderProcess != null &&
-                !encoderProcess.HasExited)
+            if (encoderProcess != null)
             {
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
+                try
+                {
+                    if (!encoderProcess.HasExited)
+                    {
+                        encoderProcess.Kill();
+                        encoderProcess.WaitForExit();
+                    }
+                }
+                catch { }
             }
             info = null;
             global_lines = null;
         }
 
-        private string SearchRegEx(string pattern, out int times)
+        private bool SearchRegEx(string pattern, out string value)
         {
-            string result = null;
-            times = 0;
+            value = "";
+            if (info == null) return false;
 
             Regex r = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-
             foreach (string line in global_lines)
             {
                 Match m = r.Match(line);
                 if (m.Success)
                 {
-                    result = m.Groups[1].Value;
-                    times++;
+                    value = m.Groups[1].Value;
+                    return true;
                 }
             }
-
-            return result;
+            return false;
         }
 
-        public int StreamCount()
+        private string SearchRegEx(string pattern, string _default)
         {
-            if (info != null)
+            if (info == null) return _default;
+
+            Regex r = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            foreach (string line in global_lines)
             {
-                int streams = 0;
-                foreach (string line in global_lines)
-                {
-                    if (line.StartsWith("    Stream #0."))
-                        streams += 1;
-                }
-                return streams;
+                Match m = r.Match(line);
+                if (m.Success) return m.Groups[1].Value;
             }
-            else
-                return 0;
+            return _default;
         }
 
-        public int AudioStreamCount()
+        private int SearchRegEx(string pattern, int _default)
         {
+            if (info == null) return _default;
+
+            Regex r = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            foreach (string line in global_lines)
+            {
+                Match m = r.Match(line);
+                if (m.Success) return Convert.ToInt32(m.Groups[1].Value);
+            }
+            return _default;
+        }
+
+        //Общее кол-во треков (всех)
+        public int StreamsCount()
+        {
+            int streams = 0;
             if (info != null)
             {
-                int streams = 0;
+                Regex r = new Regex(@"^\s+Stream\s\#0\.", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                 foreach (string line in global_lines)
                 {
-                    if (line.StartsWith("    Stream #0.") && line.Contains(": Audio:"))
-                        streams++;
+                    Match m = r.Match(line);
+                    if (m.Success) streams += 1;
                 }
-                        return streams;
             }
-            else
-                return 0;
+            return streams;
+        }
+
+        //ID первого видео трека
+        public int FirstVideoStreamID()
+        {
+            return SearchRegEx(@"^\s+Stream\s\#0\.(\d+).+Video:", 0);
+        }
+
+        //Список ID всех видео треков
+        public ArrayList VideoStreams()
+        {
+            ArrayList v_streams = new ArrayList();
+            if (info != null)
+            {
+                //Stream #0.0[0x1e0]: Video:
+                Regex r = new Regex(@"^\s+Stream\s\#0\.(\d+).+Video:", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                foreach (string line in global_lines)
+                {
+                    Match m = r.Match(line);
+                    if (m.Success) v_streams.Add(Convert.ToInt32(m.Groups[1].Value));
+                }
+            }
+            return v_streams;
+        }
+
+        //ID первого аудио трека 
+        public int FirstAudioStreamID()
+        {
+            return SearchRegEx(@"^\s+Stream\s\#0\.(\d+).+Audio:", 0);
+        }
+
+        //Список ID всех аудио треков
+        public ArrayList AudioStreams()
+        {
+            ArrayList a_streams = new ArrayList();
+            if (info != null)
+            {
+                //Stream #0.1[0x1c0]: Audio:
+                Regex r = new Regex(@"^\s+Stream\s\#0\.(\d+).+Audio:", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                foreach (string line in global_lines)
+                {
+                    Match m = r.Match(line);
+                    if (m.Success) a_streams.Add(Convert.ToInt32(m.Groups[1].Value));
+                }
+            }
+            return a_streams;
+        }
+
+        //Полностью вся строка для трека
+        public string StreamFull(int stream)
+        {
+            return SearchRegEx(@"^\s+(Stream\s\#0\." + stream + @"\D.+)", "Unknown");
         }
 
         public string StreamLanguage(int stream)
         {
-            if (info != null)
+            string value = ""; //Stream #0.1[0x1100](HUN): Audio:
+            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @".*\((\D+)\):", out value))
             {
-                int times;
-                string lang = SearchRegEx(stream + @"\((\D+)\)", out times);
-                if (times != 0)
-                {
-                    if (lang == "eng")
-                        return "English";
-                    else if (lang == "jpn")
-                        return "Japanese";
-                    else
-                        return lang;
-                }
-                else
-                    return "Unknown";
+                value = value.ToLower();
+                if (value == "ara") return "Arabic";
+                else if (value == "arm" || value == "hye") return "Armenian";
+                else if (value == "aus") return "Australian";
+                else if (value == "bel") return "Belarusian";
+                else if (value == "bul") return "Bulgarian";
+                else if (value == "cze" || value == "ces") return "Czech";
+                else if (value == "chi" || value == "zho") return "Chinese";
+                else if (value == "dan") return "Danish";
+                else if (value == "dut" || value == "nld") return "Dutch";
+                else if (value == "ger" || value == "deu") return "German";
+                else if (value == "eng" || value == "ang") return "English";
+                else if (value == "est") return "Estonian";
+                else if (value == "fin") return "Finnish";
+                else if (value == "fre" || value == "fra") return "French";
+                else if (value == "heb") return "Hebrew";
+                else if (value == "hun") return "Hungarian";
+                else if (value == "ita") return "Italian";
+                else if (value == "jpn") return "Japanese";
+                else if (value == "kor") return "Korean";
+                else if (value == "lat") return "Latin";
+                else if (value == "lav") return "Latvian";
+                else if (value == "lit") return "Lithuanian";
+                else if (value == "mul") return "Multiple";
+                else if (value == "pol") return "Polish";
+                else if (value == "por") return "Portuguese";
+                else if (value == "rum" || value == "ron") return "Romanian";
+                else if (value == "rus") return "Russian";
+                else if (value == "spa") return "Spanish";
+                else if (value == "swe") return "Swedish";
+                else if (value == "tur") return "Turkish";
+                else if (value == "ukr") return "Ukrainian";
+                else if (value == "und") return "Unknown";
+                else return value;
             }
-            else
-                return "Unknown";
-        }
-
-        public string StreamType(int stream)
-        {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+\s(\D+):", out times);
-                if (times != 0)
-                    return type;
-                else
-                    return "Unknown";
-            }
-            else
-                return "Unknown";
+            return "Unknown";
         }
 
         public string StreamCodec(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+:\s(\w+),", out times);
-                if (times != 0)
-                    return type;
-                else
-                    return "Unknown";
-            }
-            else
-                return "Unknown";
+            //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p,
+            //Stream #0.1[0x1c0]: Audio: mp2, 48000 Hz,
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+:\s(\w+),", "Unknown");
         }
 
         public string StreamCodecShort(int stream)
         {
-            if (info != null)
+            string value = ""; //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p,
+            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+:\s(\w+),", out value))
             {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+:\s(\w+),", out times);
-                if (times != 0)
-                {
-                    if (type == "liba52")
-                        type = "AC3";
-                    if (type == "mpeg4aac")
-                        type = "AAC";
-                    if (type.Contains("pcm") || type.Contains("s16"))
-                        type = "PCM";
-                    return type.ToUpper();
-                }
-                else
-                    return "Unknown";
+                if (value == "liba52") return "AC3";
+                else if (value == "mpeg4aac") return "AAC";
+                else if (value.Contains("pcm") || value.Contains("s16")) return "PCM";
+                else if (value.Contains("wma")) return "WMA";
+                return value.ToUpper();
             }
-            else
-                return "Unknown";
+            return "Unknown";
         }
 
         public string StreamColor(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+Video:.\w+,.(\w+),", out times);
-                if (times != 0)
-                    return type;
-                else
-                    return "Unknown";
-            }
-            else
-                return "Unknown";
+            //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p,
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Video:\s\w+,\s(\w+),", "Unknown");
         }
 
         public string StreamSamplerate(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+,\s(\d+)\sHz", out times);
-                if (times != 0)
-                    return type;
-                else
-                    return "Unknown";
-            }
-            else
-                return "Unknown";
+            //Stream #0.1[0x1c0]: Audio: mp2, 48000 Hz, 2 channels,
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+,\s(\d+)\sHz", "Unknown");
         }
 
         public int StreamChannels(int stream)
         {
             if (info != null)
             {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\d).channel", out times); //2 channels, 3 channels, 
-                if (times != 0)
+                string value = "";
+                //Stream #0.1[0x1c0]: Audio: mp2, 48000 Hz, 2 channels,
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Hz,\s(\d)\schannel", out value)) //2 channels, 3 channels
                 {
-                    return Convert.ToInt32(type);
+                    return Convert.ToInt32(value);
                 }
-                else
+                //Stream #0.1[0x80]: Audio: ac3, 48000 Hz, 5.1,
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Hz,\s(\d\.\d)", out value)) //5.1, 2.1
                 {
-                    type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\d\.\d),", out times); //5.1, 2.1, 
-                    if (times != 0)
-                    {
-                        string[] types;
-                        string[] separator = new string[] { "." };
-                        types = type.Split(separator, StringSplitOptions.None);
-                        return Convert.ToInt32(types[0]) + Convert.ToInt32(types[1]);
-                    }
-                    else
-                    {
-                        type = SearchRegEx(@"Stream..0." + stream + @".+Hz,.(\w+)", out times); //mono, stereo
-                        if (times != 0)
-                        {
-                            if (type == "mono")
-                                return 1;
-                            else if (type == "stereo")
-                                return 2;
-                            else
-                                return 0;
-                        }
-                    }
-                    return 0;
-                }                       
+                    string[] values = value.Split(new string[] { "." }, StringSplitOptions.None);
+                    return Convert.ToInt32(values[0]) + Convert.ToInt32(values[1]);
+                }
+                //Stream #0.1[0x80]: Audio: ac3, 48000 Hz, stereo,
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Hz,\s(\w+)", out value)) //mono, stereo
+                {
+                    if (value == "mono") return 1;
+                    if (value == "stereo") return 2;
+                }
             }
-            else
-                return 0;
+            return 0;
         }
 
         public string StreamFramerate(int stream)
         {
-            if (info != null)
+            string value = ""; //Stream #0.0: Video: mpeg2video, yuv420p, 720x576 [PAR 16:15 DAR 4:3], 9500 kb/s, 25 fps, 25 tbr, 90k tbn, 50 tbc
+            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+,\s(\d+.?\d*)\stbr", out value))
             {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+,.(\d+.*\d*).tbr", out times);
-                if (times != 0)
-                {
-                    if (type == "23.98")
-                        type = "23.976";
-                    return Calculate.ConvertDoubleToPointString(Calculate.ConvertStringToDouble(type));
-                }
-                else
-                    return "";
+                if (value == "23.98") return "23.976";
+                return Calculate.ConvertDoubleToPointString(Calculate.ConvertStringToDouble(value));
             }
-            else
-                return "";
+            return "";
         }
 
         public int StreamW(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+,.(\d+)x", out times);      
-                if (times != 0)
-                    return Convert.ToInt32(type);
-                else
-                    return 0;
-            }
-            else
-                return 0;
+            //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p, 720x576 [PAR 16:15 DAR 4:3],
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+,\s(\d+)x", 0);
         }
 
         public int StreamH(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+,.\d+x(\d+)", out times);
-                if (times != 0)
-                    return Convert.ToInt32(type);
-                else
-                    return 0;
-            }
-            else
-                return 0;
+            //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p, 720x576 [PAR 16:15 DAR 4:3],
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+,\s\d+x(\d+)", 0);
         }
 
         public int StreamBitrate(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream.+0." + stream + @".+\s(\d+)\skb", out times);
-                if (times != 0)
-                    return Convert.ToInt32(type);
-                else
-                    return 0;
-            }
-            else
-                return 0;
+            //Stream #0.0[0x810]: Video: mpeg2video, yuv420p, 1280x720 [PAR 1:1 DAR 16:9], 18300 kb/s, 25 fps,
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+,\s(\d+)\skb", 0);
         }
 
         public int VideoBitrate(int stream)
         {
             if (info != null)
             {
-                int times;
-                string type = SearchRegEx(@"Stream.+0." + stream + @".+Video.+\s(\d+)\skb", out times);
-                if (times != 0)
-                    return Convert.ToInt32(type);
+                string value = "";
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Video.+,\s(\d+)\skb", out value))
+                    return Convert.ToInt32(value);
                 else
                 {
                     //если битрейт не указан в потоке
-                    int abitrate = 0;
-                    for (int snum = AudioStream(); snum < StreamCount(); snum++)
+                    int abitrate = 0, count = StreamsCount();
+                    for (int snum = 0; snum < count; snum++)
                     {
-                        abitrate += StreamBitrate(snum);
+                        if (snum != stream)
+                            abitrate += StreamBitrate(snum);
                     }
-
-                    int vbitrate = TotalBitrate() - abitrate;
-                    if (vbitrate > 0)
-                        return vbitrate;
-                    else
-                        return 0;
+                    return Math.Max(0, TotalBitrate() - abitrate);
                 }
             }
-            else
-                return 0;
+            return 0;
         }
 
         public int TotalBitrate()
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Duration.+\s(\d+)\skb", out times);
-                if (times != 0)
-                    return Convert.ToInt32(type);
-                else
-                    return 0;
-            }
-            else
-                return 0;
+            //Duration: 00:04:34.00, start: 0.335000, bitrate: 441 kb/s
+            return SearchRegEx(@"Duration:.+,\sbitrate:\s(\d+)\skb", 0);
         }
 
         public string StreamPAR(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+PAR\s(\d+:\d+)", out times);
-                if (times != 0)
-                    return type;
-                else
-                    return "Unknown";
-            }
-            else
-                return "Unknown";
+            //Stream #0.0: Video: h264, yuv420p, 704x416 [PAR 963:907 DAR 21186:11791], PAR 26:33 DAR 4:3, 25 fps,
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+PAR\s(\d+:\d+)\s", "Unknown");
         }
 
         public double CalculatePAR(int stream)
         {
             if (info != null)
             {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+\[PAR\s(\d+:\d+)", out times);
-                if (times == 0)
+                string value = "";
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\[PAR\s(\d+:\d+)\s", out value)) //В скобках [] - значение из потока
                 {
-                    type = SearchRegEx(@"Stream..0." + stream + @".+PAR\s(\d+:\d+)", out times);
+                    string[] results = value.Split(':');
+                    return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);
                 }
-                if (times != 0)
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+PAR\s(\d+:\d+)\s", out value)) //Без скобок - значение из контейнера
                 {
-                    string[] results = type.Split(':');
+                    string[] results = value.Split(':');
                     return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);
                 }
             }
@@ -405,32 +365,23 @@ namespace XviD4PSP
 
         public string StreamDAR(int stream)
         {
-            if (info != null)
-            {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+DAR\s(\d+:\d+)", out times);
-                if (times != 0)
-                    return type;
-                else
-                    return "Unknown";
-            }
-            else
-                return "Unknown";
+            //Stream #0.0: Video: h264, yuv420p, 704x416 [PAR 963:907 DAR 21186:11791], PAR 26:33 DAR 4:3, 25 fps, 25 tbr, 1k tbn, 50 tbc
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)", "Unknown");
         }
 
         public double CalculateDAR(int stream)
         {
             if (info != null)
             {
-                int times;
-                string type = SearchRegEx(@"Stream..0." + stream + @".+DAR\s(\d+:\d+)\]", out times);
-                if (times == 0)
+                string value = "";
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)\]", out value)) //В скобках [] - значение из потока
                 {
-                    type = SearchRegEx(@"Stream..0." + stream + @".+DAR\s(\d+:\d+)", out times);
+                    string[] results = value.Split(':');
+                    return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);
                 }
-                if (times != 0)
+                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)", out value)) //Без скобок - значение из контейнера
                 {
-                    string[] results = type.Split(':');
+                    string[] results = value.Split(':');
                     return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);
                 }
             }
@@ -439,99 +390,30 @@ namespace XviD4PSP
 
         public string Timeline()
         {
-            if (info != null)
-            {
-                int times;
-                string timeline = SearchRegEx(@"Duration:.(\S+),", out times);
-                if (timeline != "")
-                {
-                    return timeline;
-                }
-                else
-                    return "Unknown";
-            }
-            else
-                return "Unknown";
-        }
-
-        public int AudioStream()
-        {
-            if (info != null)
-            {
-                string result = null;
-                int stream = 1;
-
-                Regex r = new Regex(@"Stream.+0\.(\d).+Audio", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-
-                foreach (string line in global_lines)
-                {
-                    Match m = r.Match(line);
-                    if (m.Success)
-                    {
-                        result = m.Groups[1].Value;
-                        Int32.TryParse(result, NumberStyles.Integer, null, out stream);
-                        return stream;
-                    }
-                }
-                return stream;
-                
-                //int astreams = 0;
-                //string astream = SearchRegEx(@"Stream.+0\.(\d).+Audio", out astreams);
-                //Int32.TryParse(astream, NumberStyles.Integer, null, out stream);
-                //return astreams - (stream - 1);
-            }
-            else
-                return 0;
-        }
-
-        public int VideoStream()
-        {
-            if (info != null)
-            {
-                int stream = 0;
-                string vstream = SearchRegEx(@"Stream.+0\.(\d).+Video", out stream);
-                Int32.TryParse(vstream, NumberStyles.Integer, null, out stream);
-                return stream;
-            }
-            else
-                return 0;
+            //Duration: 00:03:16.70, start: 0.440000,
+            return SearchRegEx(@"Duration:\s(\S+),", "Unknown");
         }
 
         public TimeSpan Duration()
         {
-            //Input #0, matroska, from 'D:\HardFiles_Current\Burst_Angel_clip.mkv':
-            //Duration: 00:00:12.5, start: 0.000000, bitrate: N/A
-            //Stream #0.3(eng): Subtitle: 0x0000
-            if (info != null)
+            string value = ""; //Duration: 00:03:16.70, start: 0.440000,
+            if (SearchRegEx(@"Duration:\s(\d+:\d+:\d+\.?\d*),", out value))
             {
-                int times;
-                string timeline = SearchRegEx(@"Duration:.(\S+),", out times);
-
-                string sh = SearchRegEx(@"Duration:.(\d+)", out times);
-                string sm = SearchRegEx(@"Duration:....(\d+)", out times);
-                string ss = SearchRegEx(@"Duration:.......(\d+)", out times);
-                string sms = SearchRegEx(@"Duration:..........(\d+)", out times);
-
-                if (times != 0)
-                {
-                    int ih = 0;
-                    Int32.TryParse(sh, NumberStyles.Integer, null, out ih);
-                    int im = 0;
-                    Int32.TryParse(sm, NumberStyles.Integer, null, out im);
-                    int isec = 0;
-                    Int32.TryParse(ss, NumberStyles.Integer, null, out isec);
-                    int ims = 0;
-                    Int32.TryParse(sms, NumberStyles.Integer, null, out ims);
-
-                    double totalms = (ims * 100) + (isec * 1000) + (im * 60 * 1000) + (ih * 60 * 60 * 1000);
-
-                    return TimeSpan.FromMilliseconds(totalms);
-                }
-                else
-                    return TimeSpan.Zero;
+                TimeSpan time;
+                TimeSpan.TryParse(value, out time);
+                return time;
             }
-            else
-                return TimeSpan.Zero;
+            return TimeSpan.Zero;
+        }
+
+        public int StreamBits(int stream)
+        {
+            string value = "";
+            //Stream #0.1: Audio: mp3, 44100 Hz, 2 channels, s16,
+            //Stream #0.0: Audio: wmapro, 44100 Hz, stereo, flt, - 24бит, какие еще буквы могут быть?
+            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+,\s[su](\d{1,3})", out value)) return Convert.ToInt32(value);
+            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+,\s(flt)", out value)) return 24;
+            return 0;
         }
     }
 }

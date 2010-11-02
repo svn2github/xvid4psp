@@ -101,7 +101,10 @@ namespace XviD4PSP
                 foreach (object o in m.inaudiostreams)
                 {
                     AudioStream s = (AudioStream)o;
-                    combo_atracks.Items.Add(n.ToString("00") + ". " + s.language + " " + s.codecshort + " " + s.channels + "ch");
+                    ComboBoxItem item = new ComboBoxItem();
+                    item.Content = n.ToString("00") + ". " + s.language + " " + s.codecshort + " " + s.channels + "ch";
+                    item.ToolTip = item.Content + " " + s.samplerate + "Hz " + s.bitrate + "kbps " + s.delay + "ms";
+                    combo_atracks.Items.Add(item);
                     n++;
                 }
                 combo_atracks.SelectedIndex = m.inaudiostream;
@@ -380,8 +383,12 @@ namespace XviD4PSP
                     }
                 }
 
-                if (File.Exists(Settings.TempPath + "\\tracker.avs"))
-                    File.Delete(Settings.TempPath + "\\tracker.avs");
+                try
+                {
+                    if (File.Exists(Settings.TempPath + "\\tracker.avs"))
+                        File.Delete(Settings.TempPath + "\\tracker.avs");
+                }
+                catch { }
             }
         }
 
@@ -392,11 +399,13 @@ namespace XviD4PSP
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
-                if (instream.audiopath != null &&
-                    !File.Exists(instream.audiopath))
+                if (instream.audiopath != null && !File.Exists(instream.audiopath))
                 {
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                    if (dem.m != null) m = dem.m.Clone();
+                    if (dem.IsErrors)
+                    {
+                        ErrorException(dem.error_message);
+                    }
                 }
 
                 if ((m.volume != "Disabled" && Settings.AutoVolumeMode != Settings.AutoVolumeModes.Disabled) &&
@@ -445,11 +454,18 @@ namespace XviD4PSP
                     outacodec = outstream.codec;
                 }
 
-                if (instream.audiopath != null &&
-                    !File.Exists(instream.audiopath))
+                if (instream.audiopath != null && !File.Exists(instream.audiopath))
                 {
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                    m = dem.m.Clone();
+                    if (dem.IsErrors)
+                    {
+                        ErrorException(dem.error_message);
+
+                        //Обходим анализ громкости
+                        Refresh();
+                        SetInfo();
+                        return;
+                    }
                 }
 
                 if ((m.volume != "Disabled" && Settings.AutoVolumeMode != Settings.AutoVolumeModes.Disabled) &&
@@ -463,8 +479,7 @@ namespace XviD4PSP
 
         private void button_play_Click(object sender, RoutedEventArgs e)
         {
-            if (m.outaudiostreams.Count > 0 &&
-                m.inaudiostreams.Count > 0)
+            if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
             {
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
@@ -496,117 +511,136 @@ namespace XviD4PSP
                 }
                 else   */
                 {
-                    if (instream.audiopath != null &&
-                        !File.Exists(instream.audiopath))
+                    if (instream.audiopath != null && !File.Exists(instream.audiopath))
                     {
                         Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                        m = dem.m.Clone();
+                        if (dem.IsErrors)
+                        {
+                            ErrorException(dem.error_message);
+                            return;
+                        }
                     }
 
                     string script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.FastPreview);
                     AviSynthScripting.WriteScriptToFile(script, "tracker");
-                    if (File.Exists(instream.audiopath) ||
-                        instream.audiopath == null)
+                    if (instream.audiopath == null || File.Exists(instream.audiopath))
                     {
-                        PlayInWPFPlayer(Settings.TempPath + "\\tracker.avs");
+                        try
+                        {
+                            Process.Start(Calculate.StartupPath + "\\WPF_VideoPlayer.exe", Settings.TempPath + "\\tracker.avs");
+                        }
+                        catch (Exception ex)
+                        {
+                            ErrorException(ex.Message);
+                        }
                     }
                 }
             }
         }
 
-        private void PlayInWPFPlayer(string filepath)
-        {
-            Process pr = new Process();
-            ProcessStartInfo info = new ProcessStartInfo();
-            info.FileName = Calculate.StartupPath +
-                "\\WPF_VideoPlayer.exe";
-            info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-            info.Arguments = filepath;
-            pr.StartInfo = info;
-            pr.Start();
-        }
-
         private void button_openapath_Click(object sender, RoutedEventArgs e)
         {
             ArrayList files = OpenDialogs.GetFilesFromConsole("oa");
-            if (files.Count > 0)
+            if (files.Count > 0) AddExternalTrack(files[0].ToString());
+        }
+
+        private void AddExternalTrack(string infilepath)
+        {
+
+            //разрешаем формы
+            group_channels.IsEnabled = true;
+            group_delay.IsEnabled = true;
+            group_samplerate.IsEnabled = true;
+            group_volume.IsEnabled = true;
+
+            textbox_apath.Text = infilepath;
+
+            //получаем медиа информацию
+            MediaInfoWrapper mi = new MediaInfoWrapper();
+            try
             {
-                //разрешаем формы
-                group_channels.IsEnabled = true;
-                group_delay.IsEnabled = true;
-                group_samplerate.IsEnabled = true;
-                group_volume.IsEnabled = true;
+                AudioStream stream = mi.GetAudioInfoFromAFile(infilepath);
+                stream = Format.GetValidADecoder(stream);
+                //делаем трек активным
+                m.inaudiostream = m.inaudiostreams.Count;
+                m.inaudiostreams.Add(stream);
 
-                string infilepath = files[0].ToString();
-                textbox_apath.Text = infilepath;
+                //прописываем в список внешний трек
+                ComboBoxItem item = new ComboBoxItem();
+                item.Content = (combo_atracks.Items.Count + 1).ToString("00") + ". " + stream.language + " " + stream.codecshort + " " + stream.channels + "ch";
+                item.ToolTip = item.Content + " " + stream.samplerate + "Hz " + stream.bitrate + "kbps " + stream.delay + "ms";
+                combo_atracks.Items.Add(item);
+                combo_atracks.SelectedIndex = combo_atracks.Items.Count - 1;
+            }
+            catch (Exception ex)
+            {
+                ErrorException(ex.Message);
+            }
+            finally
+            {
+                mi.Close();
+            }
 
-                //получаем медиа информацию
-                MediaInfoWrapper mi = new MediaInfoWrapper();
-                try
+            AudioStream newstream = new AudioStream();
+            m.outaudiostreams.Clear();
+            m.outaudiostreams.Add(newstream);
+            AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+
+            //забиваем аудио настройки
+            outstream.encoding = Settings.GetAEncodingPreset(Settings.FormatOut);
+            outstream.codec = PresetLoader.GetACodec(m.format, outstream.encoding);
+            outstream.passes = PresetLoader.GetACodecPasses(m);
+
+            m = Format.GetValidSamplerate(m);
+
+            //определяем битность
+            m = Format.GetValidBits(m);
+
+            //определяем колличество каналов
+            m = Format.GetValidChannelsConverter(m);
+            m = Format.GetValidChannels(m);
+
+            //проверяем можно ли копировать данный формат
+            if (outstream.codec == "Copy")
+            {
+                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+
+                outstream.audiopath = instream.audiopath;
+                outstream.bitrate = instream.bitrate;
+
+                string CopyProblems = Format.ValidateCopyAudio(m);
+                if (CopyProblems != null)
                 {
-                    AudioStream stream = mi.GetAudioInfoFromAFile(infilepath);
-                    stream = Format.GetValidADecoder(stream);
-                    //делаем трек активным
-                    m.inaudiostream = m.inaudiostreams.Count;
-                    m.inaudiostreams.Add(stream);
-
-                    //прописываем в список внешний трек
-                    combo_atracks.Items.Add((combo_atracks.Items.Count + 1).ToString("00") + ". Unknown " + stream.codecshort + " " + stream.channels + "ch");
-                    combo_atracks.SelectedIndex = combo_atracks.Items.Count - 1;
+                    Message mess = new Message(this);
+                    mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                        " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
                 }
-                catch (Exception ex)
-                {
-                    ErrorExeption(ex.Message);
-                }
-                finally
-                {
-                    mi.Close();
-                }
+            }
+            else
+            {
+                string aext = Format.GetValidRAWAudioEXT(outstream.codec);
+                outstream.audiopath = Settings.TempPath + "\\" + m.key + aext;
+            }
 
-                AudioStream newstream = new AudioStream();
-                m.outaudiostreams.Clear();
-                m.outaudiostreams.Add(newstream);
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+            SetAudioOptions();
+            SetInfo();
+        }
 
-                //забиваем аудио настройки
-                outstream.encoding = Settings.GetAEncodingPreset(Settings.FormatOut);
-                outstream.codec = PresetLoader.GetACodec(m.format, outstream.encoding);
-                outstream.passes = PresetLoader.GetACodecPasses(m);
+        private void TextBox_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.All;
+                e.Handled = true;
+            }
+        }
 
-                m = Format.GetValidSamplerate(m);
-
-                //определяем битность
-                m = Format.GetValidBits(m);
-
-                //определяем колличество каналов
-                m = Format.GetValidChannelsConverter(m);
-                m = Format.GetValidChannels(m);
-
-                //проверяем можно ли копировать данный формат
-                if (outstream.codec == "Copy")
-                {
-                    AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-
-                    outstream.audiopath = instream.audiopath;
-                    outstream.bitrate = instream.bitrate;
-
-                    string CopyProblems = Format.ValidateCopyAudio(m);
-                    if (CopyProblems != null)
-                    {
-                        Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                            " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because audio encoder = Copy)"), Languages.Translate("Warning"));
-                    }
-                }
-                else
-                {
-                    string aext = Format.GetValidRAWAudioEXT(outstream.codec);
-                    outstream.audiopath = Settings.TempPath + "\\" + m.key + aext;
-                }
-
-                SetAudioOptions();
-
-                SetInfo();
+        private void TextBox_Drop(object sender, DragEventArgs e)
+        {
+            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
+            {
+                AddExternalTrack(dropfile);
+                return;
             }
         }
 
@@ -699,11 +733,14 @@ namespace XviD4PSP
             //определяем аудио потоки
             AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
-            if (instream.audiopath != null &&
-                !File.Exists(instream.audiopath))
+            if (instream.audiopath != null && !File.Exists(instream.audiopath))
             {
                 Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                if (dem.m != null) m = dem.m.Clone();
+                if (dem.IsErrors)
+                {
+                    ErrorException(dem.error_message);
+                    return;
+                }
 
                 //обновляем скрипт
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);
@@ -755,11 +792,11 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
 
-        private void ErrorExeption(string message)
+        private void ErrorException(string message)
         {
             Message mes = new Message(this);
             mes.ShowMessage(message, Languages.Translate("Error"));

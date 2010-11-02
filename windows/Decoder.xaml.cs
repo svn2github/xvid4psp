@@ -123,7 +123,8 @@ namespace XviD4PSP
                 {
                     _vcodec = "-vcodec ffvhuff";//ffvhuff, ffv1
                     yv12 = " -pix_fmt yuv420p";
-                    //aspect = " -aspect " + ff.StreamPAR();
+                    string dar = ff.StreamDAR(ff.FirstVideoStreamID());
+                    aspect = (dar != "" && dar != "Unknown") ? " -aspect " + dar : "";
                 }
                 else if (mode == DecoderModes.DecodeAudio)
                 {
@@ -134,14 +135,16 @@ namespace XviD4PSP
                     _vcodec = "-vcodec ffvhuff";//ffvhuff, ffv1
                     yv12 = " -pix_fmt yuv420p";
                     _acodec = "-acodec pcm_s16le";
-                    m.inframerate = ff.StreamFramerate(ff.VideoStream());
+                    m.inframerate = ff.StreamFramerate(ff.FirstVideoStreamID());
                     m.format = Settings.FormatOut;
                     _framerate = " -r " + Format.GetValidFramerate(m).outframerate;
-                    //aspect = " -aspect " + ff.StreamPAR();
+                    string dar = ff.StreamDAR(ff.FirstVideoStreamID());
+                    aspect = (dar != "" && dar != "Unknown") ? " -aspect " + dar : "";
                 }
 
                 //закрываем фф
                 ff.Close();
+                ff = null;
 
                 info.Arguments = "-i \"" + source_file +
                     "\" " + _vcodec + " " + _acodec + _format + yv12 + _framerate + aspect + " \"" + outfile + "\"";
@@ -243,16 +246,23 @@ namespace XviD4PSP
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (ff != null)
+            {
                 ff.Close();
+                ff = null;
+            }
 
             if (encoderProcess != null)
             {
-                IsAborted = true;
-                if (!encoderProcess.HasExited)
+                try
                 {
-                    encoderProcess.Kill();
-                    encoderProcess.WaitForExit();
+                    IsAborted = true;
+                    if (!encoderProcess.HasExited)
+                    {
+                        encoderProcess.Kill();
+                        encoderProcess.WaitForExit();
+                    }
                 }
+                catch { }
             }
 
             if (IsAborted || IsErrors)

@@ -21,16 +21,14 @@ namespace XviD4PSP
     {
         private BackgroundWorker worker = null;
         public Massive m;
-        private int progress = 0;
         AviSynthReader reader;
         public string error;
+        private int count = 0;
 
         public Caching(Massive mass)
         {
             this.InitializeComponent();
-
             this.Owner = mass.owner;
-
             m = mass.Clone();
 
             //забиваем
@@ -38,39 +36,20 @@ namespace XviD4PSP
             Title =  Languages.Translate("Caсhing") + "...";
             text_info.Content = Languages.Translate("Please wait... Work in progress...");
 
-            if (m.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
-            {
-                text_info.ToolTip = Languages.Translate("FFmpegSource creates CACHE files. It can take long time and hard drive space.") +
-                    Environment.NewLine +
-                    Languages.Translate("Use other decoders for more fast import:") + Environment.NewLine +
-                        Languages.Translate("FFmpegSource - slow, but safe and codec independed import.") + Environment.NewLine +
-                        Languages.Translate("AVISource and DirectShowSource - fast, but depend on system codecs import.");
-            }
-
             //фоновое кодирование
-            CreateBackgoundWorker();
+            CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
         }
 
-        private void CreateBackgoundWorker()
+        private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
             worker.WorkerSupportsCancellation = true;
             worker.WorkerReportsProgress = true;
-        }
-
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            if (m != null)
-            {
-                string tmp_title = "(" + progress.ToString("##0") + "%)";
-                SetStatus(tmp_title, "", progress);
-                progress++;
-            }
         }
 
         private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -89,14 +68,9 @@ namespace XviD4PSP
                     reader.ParseScript(script);
 
                     //выходим при отмене операции
-                    if (reader == null)
-                        return;
+                    if (reader == null) return;
 
-                    AudioStream instream;
-                    if (m.inaudiostreams.Count > 0)
-                        instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                    else
-                        instream = new AudioStream();
+                    AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
                     if (reader.Framerate != Double.PositiveInfinity &&
                         reader.Framerate != 0.0)// &&m.duration == TimeSpan.Zero
@@ -124,14 +98,14 @@ namespace XviD4PSP
                     }
 
                     int samplerate = reader.Samplerate;
-                    if (samplerate == 0 && m.inaudiostreams.Count > 0)
+                    if (samplerate == 0 && m.inaudiostreams.Count > 0 && Settings.EnableAudio)
                     {
                         //похоже что звук не декодируется этим декодером
-                        throw new Exception("Can`t decode audio with DirectShowSource");
+                        throw new Exception("Script doesn't contain audio");
                     }
 
                     if (samplerate != 0 && (m.inaudiostreams.Count > 0 || instream.samplerate == null))
-                    {                       
+                    {
                         //вероятно аудио декодер меняет колличество каналов
                         if (instream.channels != reader.Channels) instream.badmixing = true;
 
@@ -198,81 +172,82 @@ namespace XviD4PSP
             if (m == null) return;
 
             string ext = Path.GetExtension(m.infilepath).ToLower();
+            AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
-            AudioStream instream;
-            if (m.inaudiostreams.Count > 0)
-                instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-            else
-                instream = new AudioStream();
-
-            if (error == null) Close();
-            
-            else if (error == "Can`t decode audio with DirectShowSource" || error.StartsWith("DirectShowSource:") || error == "Script doesn't contain video" ||
+            if (error == null)
+            {
+                Close();
+            }
+            else if (error == "Script doesn't contain video" || error == "Script doesn't contain audio" || error.StartsWith("DirectShowSource:") ||
                 error.Contains("FFmpegSource: Audio decoding error") || error.StartsWith("FFAudioSource:") || error.Contains(" audio track"))
             {
-                //Переключение с DirectShowSource на FFmpegSource (если DirectShowSource не может декодировать видео)
-                if (error.StartsWith("DirectShowSource:") || error.Contains("contain video"))
+                //Переключение на FFmpegSource при проблемах с DirectShowSource (кроме проблем со звуком)
+                //"Script doesn't contain video" - это из AviSynthReader.OpenScript, тут этого не будет, т.к. у нас ParseScript
+                if (error.StartsWith("DirectShowSource:") && !error.Contains("unable to determine the duration of the audio.") &&
+                    !error.Contains("Timeout waiting for audio.") || error == "Script doesn't contain video")
                     m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
 
-                    if (m.inaudiostreams.Count > 0 && !File.Exists(instream.audiopath))
+                if (m.inaudiostreams.Count > 0 && !File.Exists(instream.audiopath))
+                {
+                    string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
+                    string outpath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
+
+                    //удаляем старый файл
+                    SafeDelete(outpath);
+
+                    //извлекаем новый файл
+                    if (outext == ".wav")
                     {
-                        string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
-                        string outpath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
-
-                        //удаляем старый файл
-                        SafeDelete(outpath);
-
-                        //извлекаем новый файл
-                        if (outext == ".wav")
+                        Decoder dec = new Decoder(m, Decoder.DecoderModes.DecodeAudio, outpath);
+                        if (dec.IsErrors)
                         {
-                            Decoder dec = new Decoder(m, Decoder.DecoderModes.DecodeAudio, outpath);
-                            if (dec.IsErrors)
-                            {
-                                ShowMessage("Demuxer: " + dec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
-                                m = null;
-                                Close();
-                            }
-                        }
-                        else
-                        {
-                            Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, outpath);
-                            if (dem.IsErrors)
-                            {
-                                //Вместо вывода сообщения об ошибке тут можно назначить декодирование в WAV, но тогда в режиме Copy будет копироваться WAV..
-                                ShowMessage("Demuxer: " + dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
-                                m = null;
-                                Close();
-                            }
-                        }
-
-                        //проверка на удачное завершение
-                        if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
-                        {
-                            instream.audiopath = outpath;
-                            instream.audiofiles = new string[] { outpath };
-                            instream = Format.GetValidADecoder(instream);
-                            ((MainWindow)Owner).deletefiles.Add(outpath);
-                        }
-                        else
-                        {
-                            instream.audiopath = null;
-                            instream.decoder = 0;
+                            ShowMessage("Decode to WAV: " + dec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                            m = null;
+                            Close();
                         }
                     }
-                    //else if (m.inaudiostreams.Count > 0 && File.Exists(instream.audiopath))
-                    //{
-                    //    ShowMessage("Caching: " + error, Languages.Translate("Error"), Message.MessageStyle.Ok);
-                    //    m = null;
-                    //    Close();
-                    //}
+                    else
+                    {
+                        Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, outpath);
+                        if (dem.IsErrors)
+                        {
+                            //Вместо вывода сообщения об ошибке тут можно назначить декодирование в WAV, но тогда в режиме Copy будет копироваться WAV..
+                            ShowMessage(dem.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                            m = null;
+                            Close();
+                        }
+                    }
 
-                    error = null;
-                    worker.RunWorkerAsync();
-                    return;
+                    //проверка на удачное завершение
+                    if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                    {
+                        instream.audiopath = outpath;
+                        instream.audiofiles = new string[] { outpath };
+                        instream = Format.GetValidADecoder(instream);
+                        ((MainWindow)Owner).deletefiles.Add(outpath);
+                    }
+                    else
+                    {
+                        instream.audiopath = null;
+                        instream.decoder = 0;
+                    }
+                }
+                else if (m.inaudiostreams.Count > 0 && File.Exists(instream.audiopath) && count > 0)
+                {
+                    //Мы тут дважды, и звуковой файл уже извлечен - пора выходить с ошибкой..
+                    ShowMessage("Caching: " + error, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    m = null;
+                    Close();
+                }
+
+                count += 1;
+                error = null;
+                worker.RunWorkerAsync();
+                return;
             }
-            //ситуация когда стоит попробовать декодировать аудио в wav
             else if (error == "FFmpegSource: Audio codec not found")
             {
+                //ситуация когда стоит попробовать декодировать аудио в wav
                 Close(); //Позже будет декодирование в WAV
             }
             else if (error == "File could not be opened!" && instream.decoder == AviSynthScripting.Decoders.bassAudioSource)
@@ -344,10 +319,6 @@ namespace XviD4PSP
                 error = null;
                 m = null;
             }
-            //закрываем таймер
-            //timer.Close();
-            //timer.Enabled = false;
-            //timer.Elapsed -= new ElapsedEventHandler(OnTimedEvent);
             Close();
         }
 
@@ -360,27 +331,6 @@ namespace XviD4PSP
             {
                 Message mes = new Message(this.Owner);
                 mes.ShowMessage(data, title, style);
-            }
-        }
-
-        internal delegate void StatusDelegate(string title, string pr_text, double pr_c);
-        private void SetStatus(string title, string pr_text, double pr_c)
-        {
-            if (m != null)
-            {
-                try
-                {
-                    if (!Application.Current.Dispatcher.CheckAccess())
-                        Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new StatusDelegate(SetStatus), title, pr_text, pr_c);
-                    else
-                    {
-                        //this.Title = title;
-                        this.prCurrent.Value = pr_c;
-                    }
-                }
-                catch
-                {
-                }
             }
         }
 
