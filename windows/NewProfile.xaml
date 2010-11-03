@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.NewProfile"
 	x:Name="Window"
 	Title="New profile"
-	Width="232" Height="129.5204178" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+	Width="240" Height="126" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
 
 	<Grid x:Name="LayoutRoot">
 		<Grid.RowDefinitions>
@@ -13,15 +13,15 @@
 			<RowDefinition Height="0.318*"/>
 		</Grid.RowDefinitions>
 		<Grid Margin="0,0,0,0" Grid.RowSpan="1" Background="{DynamicResource black_gradient_2}">
-			<Label OpacityMask="{x:Null}" x:Name="text_profile" Content="Profile name will be:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" HorizontalAlignment="Stretch" Margin="8,8,8,8" VerticalAlignment="Top"/>
-			<TextBox Margin="12,0,12,10" x:Name="textbox_profile" VerticalAlignment="Bottom" Text="" TextWrapping="Wrap"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_profile" Content="Profile name will be:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" HorizontalAlignment="Stretch" Margin="6,8,6,8" VerticalAlignment="Top"/>
+			<TextBox Margin="10,0,10,10" Height="20" x:Name="textbox_profile" VerticalAlignment="Bottom" Text="" TextWrapping="Wrap"/>
 		</Grid>
 		<Grid x:Name="grid_main_buttons" Background="{DynamicResource black_gradient}" Margin="0,0,0,0" Grid.Row="1">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 			</Grid.ColumnDefinitions>
-			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" Click="button_cancel_Click" RenderTransformOrigin="1.122,0.428" HorizontalAlignment="Left" Margin="148,5,0,5" Grid.ColumnSpan="1" Width="70" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" Width="70" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,5,82,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" Click="button_cancel_Click" Width="70" HorizontalAlignment="Right" Margin="0,5,10,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" Width="70" HorizontalAlignment="Right" Margin="0,5,84,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 		</Grid>
 	</Grid>
 </Window>

@@ -12,10 +12,10 @@ namespace XviD4PSP
 {
 	public partial class NewProfile
 	{
-       public string profile;
        private string format;
        private ProfileType ptype;
-       public enum ProfileType { SBC = 1, VEncoding, AEncoding }
+       public string profile = null;
+       public enum ProfileType { SBC = 1, VEncoding, AEncoding, FFRebuilder }
 
 		public NewProfile(string auto_name, string format, ProfileType ptype, System.Windows.Window owner)
 		{
@@ -37,26 +37,39 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            //Имя нового профиля
+            string name = textbox_profile.Text.Trim();
+
+            //Проверка на недопустимые имена
+            if (name == "") return;
+            if (name.ToLower() == "disabled" && (ptype == ProfileType.SBC || ptype == ProfileType.AEncoding || ptype == ProfileType.VEncoding) ||
+                name.ToLower() == "default" && ptype == ProfileType.FFRebuilder)
+            {
+                new Message(this).ShowMessage(Languages.Translate("Profile with same name already exists."), Languages.Translate("Error"));
+                return;
+            }
+
             string profile_path = "";
             if (ptype == ProfileType.VEncoding)
-                profile_path = Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\video\\" + textbox_profile.Text + ".txt";
+                profile_path = Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\video\\" + name + ".txt";
             else if (ptype == ProfileType.AEncoding)
-                profile_path = Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\audio\\" + textbox_profile.Text + ".txt";
+                profile_path = Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\audio\\" + name + ".txt";
             else if (ptype == ProfileType.SBC)
-                profile_path = Calculate.StartupPath + "\\presets\\sbc\\" + textbox_profile.Text + ".avs";
+                profile_path = Calculate.StartupPath + "\\presets\\sbc\\" + name + ".avs";
+            else if (ptype == ProfileType.FFRebuilder)
+                profile_path = Calculate.StartupPath + "\\presets\\ffrebuilder\\" + name + ".txt";
 
             if (File.Exists(profile_path))
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("Profile with same name already exists.") +
-                Environment.NewLine + Languages.Translate("Replace profile?"), 
+                Environment.NewLine + Languages.Translate("Replace profile?"),
                 Languages.Translate("Question"), Message.MessageStyle.YesNo);
                 if (mess.result == Message.Result.No)
                     return;
             }
 
-            if (textbox_profile.Text != "")
-                profile = textbox_profile.Text;
+            profile = name;
             Close();
         }
 
@@ -64,6 +77,5 @@ namespace XviD4PSP
         {
             Close();
         }
-
 	}
 }

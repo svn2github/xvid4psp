@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r189 03.11.10, main changes:
+XviD4PSP 5.0.37.8 r132->r190 03.11.10, main changes:
 
+>>> (r190) FFRebuilder window was reworked. Added ability to edit command line, ability to store presets, Help tab.
 >>> (r189) "Editing audio options" window: added error messages from the Demuxer (also more error messages from the
            Demuxer in the MainWindow); drag-and-drop support for external audio tracks.
 >>> (r189) FFInfo.cs (a class for obtaining media information about the source file using FFmpeg.exe) was reworked.

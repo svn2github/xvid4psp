@@ -2441,5 +2441,26 @@ namespace XviD4PSP
                 SetBool("SD_Portions_FO", value);
             }
         }
+
+        //Пресет для FFRebuilder`а
+        public static string FFRebuilder_Profile
+        {
+            get
+            {
+                object value = GetValue("FFRebuilder_Profile");
+                if (value == null)
+                {
+                    return "Default";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("FFRebuilder_Profile", value);
+            }
+        }
     }
 }
