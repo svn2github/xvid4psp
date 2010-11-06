@@ -11,8 +11,8 @@ using System.Collections;
 
 namespace XviD4PSP
 {
-	public partial class AspectResolution
-	{
+    public partial class AspectResolution
+    {
         public Massive m;
         private Massive oldm;
         private MainWindow p;
@@ -21,8 +21,8 @@ namespace XviD4PSP
         public enum GetResolutionModes { Maximum = 1, Optimal }
 
         public AspectResolution(Massive mass, MainWindow parent)
-		{
-			this.InitializeComponent();
+        {
+            this.InitializeComponent();
 
             m = mass.Clone();
             oldm = mass.Clone();
@@ -78,7 +78,7 @@ namespace XviD4PSP
                 "\r\n" + Languages.Translate("For anamorphic encoding you must specify SAR.");
             button_calc_sar.ToolTip = Languages.Translate("Calculate SAR for specified output resolution and aspect.") +
                 "\r\n" + Languages.Translate("It must be used for anamorphic encoding only!"); ;
-            
+
             //ресайзеры
             foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
                 combo_resizer.Items.Add(resizer);
@@ -92,7 +92,7 @@ namespace XviD4PSP
                 combo_autocropframes.Items.Add(n);
             combo_autocropframes.SelectedItem = Settings.AutocropFrames;
 
-            for (int n = 0; n < 10; n ++)
+            for (int n = 0; n < 10; n++)
                 combo_visualcrop_opacity.Items.Add(n);
             combo_visualcrop_opacity.SelectedItem = Settings.VCropOpacity;
 
@@ -107,7 +107,7 @@ namespace XviD4PSP
             //ModW-ограничение
             for (int n = 4; n <= 16; n *= 2) combo_modw.Items.Add(n);
             combo_modw.SelectedItem = Settings.LimitModW;
-            
+
             //ModH-ограничение
             for (int n = 2; n <= 16; n *= 2) combo_modh.Items.Add(n);
             combo_modh.SelectedItem = Settings.LimitModH;
@@ -141,12 +141,14 @@ namespace XviD4PSP
             //загружаем выходной аспект
             LoadOutAspect();
 
+            //Кратность сторон
             CalculateMod();
 
+            //Вкладка Manual
             FillManualBox();
 
             ShowDialog();
-		}
+        }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -194,7 +196,7 @@ namespace XviD4PSP
             {
                 m.aspectfix = (AspectFixes)Enum.Parse(typeof(AspectFixes), combo_aspectfix.SelectedItem.ToString());
 
-                m = FixAspectDifference(m); 
+                m = FixAspectDifference(m);
 
                 LoadCrop();
                 LoadBlack();
@@ -214,36 +216,33 @@ namespace XviD4PSP
 
                 if (m.aspectfix == AspectFixes.SAR)
                 {
-                    m.outaspect = Calculate.ConvertStringToDouble(outasp);
-                    m = Calculate.CalculateSAR(m);
+                    if (outasp.StartsWith("1.3333")) m.outaspect = 4.0 / 3.0;
+                    else if (outasp.StartsWith("1.7778")) m.outaspect = 16.0 / 9.0;
+                    else m.outaspect = Calculate.ConvertStringToDouble(outasp);
                 }
-                //else if (m.aspectfix == AspectFixes.Crop ||
-                //    m.aspectfix == AspectFixes.Black)
-                //{
-
-                //    m.outaspect = Calculate.ConvertStringToDouble(outasp);
-                //}
                 else
                 {
-                    double oldinaspect = m.inaspect;
-                    m.inaspect = Calculate.ConvertStringToDouble(outasp);
-                    //m = Format.GetValidResolution(m);
+                    //Сохраняем значения
+                    double old_inaspect = m.inaspect;
+                    int old_outresw = m.outresw;
 
-                    //запоминаем разрешение для сравнения
-                    int outresw = m.outresw;
-
+                    //Пересчитываем разрешение
+                    m.inaspect = m.outaspect = Calculate.ConvertStringToDouble(outasp);
                     m = Format.GetValidResolution(m, m.outresw);
-                    m.inaspect = oldinaspect;
 
-                    if (outresw != m.outresw)
-                        m.outresw = outresw;
-                    
-                    m.outaspect = Calculate.ConvertStringToDouble(outasp);
+                    //Восстанавливаем значения
+                    m.inaspect = old_inaspect;
+                    m.outresw = old_outresw;
+
+                    if (Format.IsLockedOutAspect(m) && m.sar != null)
+                        m = Calculate.CalculateSAR(m);
 
                     combo_width.SelectedItem = m.outresw;
                     combo_height.SelectedItem = m.outresh;
                 }
-               
+
+                //Пересчет Black, Crop, SAR
+                //m = Format.GetValidOutAspect(m);
                 m = FixAspectDifference(m);
 
                 LoadBlack();
@@ -252,7 +251,7 @@ namespace XviD4PSP
 
                 //пересчет ошибки аспекта
                 textbox_error.Text = Calculate.ConvertDoubleToPointString(100 - ((m.outaspect * 100) / m.inaspect), 2) + "%";
-                
+
                 Refresh();
             }
         }
@@ -261,10 +260,17 @@ namespace XviD4PSP
         {
             if (combo_inaspect.IsDropDownOpen || combo_inaspect.IsSelectionBoxHighlighted)
             {
-                m.inaspect = Calculate.ConvertStringToDouble(combo_inaspect.SelectedItem.ToString());
+                double new_asp;
+                if (combo_inaspect.SelectedItem.ToString().StartsWith("1.3333")) new_asp = 4.0 / 3.0;
+                else if (combo_inaspect.SelectedItem.ToString().StartsWith("1.7778")) new_asp = 16.0 / 9.0;
+                else new_asp = Calculate.ConvertStringToDouble(combo_inaspect.SelectedItem.ToString());
+
+                //Пересчет pixelaspect при изменении Исходного аспекта
+                m.pixelaspect = new_asp / ((double)m.inresw / (double)m.inresh);
+                m.inaspect = ((double)(m.inresw - m.cropl - m.cropr) / (double)(m.inresh - m.cropt - m.cropb)) * m.pixelaspect;
 
                 m = Format.GetValidResolution(m);
-                m = Format.GetValidOutAspect(m);        
+                m = Format.GetValidOutAspect(m);
                 m = FixAspectDifference(m);
 
                 combo_aspectfix.SelectedItem = m.aspectfix.ToString();
@@ -283,30 +289,25 @@ namespace XviD4PSP
             {
                 m.outresw = Convert.ToInt32(combo_width.SelectedItem);
 
-                //запоминаем разрешение для сравнения
-                int outresw = m.outresw;
-                
-                m = Format.GetValidResolution(m, m.outresw); //пересчет высоты
-                
-                if (outresw != m.outresw)
-                {
-                    m.outresw = outresw;
-                    m = Format.GetValidOutAspect(m);
-                }
-                else //тут
-                {
-                    m = Format.GetValidOutAspect(m);
-                }
+                //Сохраняем значения
+                int old_outresw = m.outresw;
 
+                //Пересчитываем разрешение
+                m = Format.GetValidResolution(m, m.outresw);
+
+                //Восстанавливаем значения
+                m.outresw = old_outresw;
+
+                m = Format.GetValidOutAspect(m);
                 m = FixAspectDifference(m);
-         
+
                 LoadOutAspect();
                 LoadBlack();
                 LoadCrop();
 
                 combo_aspectfix.SelectedItem = m.aspectfix.ToString();//
                 combo_height.SelectedItem = m.outresh;
-                
+
                 Refresh();
             }
         }
@@ -326,7 +327,7 @@ namespace XviD4PSP
                     LoadOutAspect();
 
                 combo_aspectfix.SelectedItem = m.aspectfix.ToString();//
-             
+
                 Refresh();
             }
         }
@@ -338,7 +339,7 @@ namespace XviD4PSP
             combo_inaspect.Items.Clear();
 
             //подбираем наиболее подходящий аспект из стандартных аспектов
-            string[] aspects = Calculate.InsertAspect(new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" }, inaspect);
+            string[] aspects = Calculate.InsertAspect(new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.0000", "2.2100", "2.3529" }, inaspect);
             foreach (string _asp in aspects)
                 combo_inaspect.Items.Add(_asp);
             combo_inaspect.SelectedItem = Calculate.GetClosePointDouble(inaspect, aspects);
@@ -361,20 +362,12 @@ namespace XviD4PSP
                     aspects = Calculate.InsertAspect(aspects, inaspect);
                 else
                     aspects = Format.GetValidOutAspects(m);
-                
+
                 foreach (string _asp in aspects)
                     combo_outaspect.Items.Add(_asp);
 
-                string closeaspect = Calculate.GetClosePointDouble(outaspect, aspects);
-                //if (m.IsAnamorphic && closeaspect == "1.333 (4:3)")
-                //    combo_outaspect.SelectedItem = "Anamorphic (4:3)";
-                //else if (m.IsAnamorphic && closeaspect == "1.778 (16:9)")
-                //    combo_outaspect.SelectedItem = "Anamorphic (16:9)";
-                //else if (m.IsAnamorphic && closeaspect == "2.353")
-                //    combo_outaspect.SelectedItem = "Anamorphic (2.353)";
-                //else
-                    combo_outaspect.SelectedItem = closeaspect;
-                
+                combo_outaspect.SelectedItem = Calculate.GetClosePointDouble(outaspect, aspects);
+
                 //ошибка в выходном аспекте
                 textbox_error.Text = Calculate.ConvertDoubleToPointString(100 - ((m.outaspect * 100) / m.inaspect), 2) + "%";
             }
@@ -455,8 +448,8 @@ namespace XviD4PSP
                     m = Format.GetValidOutAspect(m);
                     LoadInAspect();//
                     LoadOutAspect();//
-                }             
-               
+                }
+
                 combo_aspectfix.SelectedItem = m.aspectfix.ToString();//
                 Refresh();
             }
@@ -475,8 +468,8 @@ namespace XviD4PSP
                     m = Format.GetValidOutAspect(m);
                     LoadInAspect();//
                     LoadOutAspect();//
-                }             
-               
+                }
+
                 combo_aspectfix.SelectedItem = m.aspectfix.ToString();//
                 Refresh();
             }
@@ -502,26 +495,13 @@ namespace XviD4PSP
 
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            p.SwitchToFullScreen(); 
+            p.SwitchToFullScreen();
         }
 
         public static Massive FixInputAspect(Massive mass)
         {
             //правим входной аспект с учётом кропа
-
-            //подправляем аспект
-            //if (mass.cropb_copy == 0 &&
-            //    mass.cropl_copy == 0 &&
-            //    mass.cropr_copy == 0 &&
-            //    mass.cropt_copy == 0)
-            //{
-            //  
-            //}
-            //else
-            {
-                mass.inaspect = ((double)(mass.inresw - mass.cropl_copy - mass.cropr_copy) /
-                    (double)(mass.inresh - mass.cropt_copy - mass.cropb_copy)) * mass.pixelaspect;
-            }
+            mass.inaspect = ((double)(mass.inresw - mass.cropl - mass.cropr) / (double)(mass.inresh - mass.cropt - mass.cropb)) * mass.pixelaspect;
             return mass;
         }
 
@@ -548,7 +528,7 @@ namespace XviD4PSP
             if (mass.aspectfix == AspectFixes.Black)
             {
                 //mass.sar = null;
-                
+
                 if (mass.inaspect < mass.outaspect)
                 {
                     double diff = ((double)mass.outresw - ((double)mass.outresw / (double)mass.outaspect) * (double)mass.inaspect);
@@ -565,11 +545,11 @@ namespace XviD4PSP
             else if (mass.aspectfix == AspectFixes.Crop)
             {
                 //mass.sar = null;
-                
+
                 //Считаем чистый исходный аспект (без учета откропленного) ..или все-же с учетом..
                 double inputasp = ((double)(mass.inresw - mass.cropl - mass.cropr) / (double)(mass.inresh - mass.cropt - mass.cropb)) * mass.pixelaspect;
                 //((double)mass.inresw / (double)mass.inresh) * mass.pixelaspect; 
-                
+
                 if (mass.inaspect < mass.outaspect)
                 {
                     //Считаем сколько нужно откропить, с учетом аспекта и уже откропленного
@@ -584,7 +564,7 @@ namespace XviD4PSP
                     mass.cropl = Calculate.GetValid((int)(diff / 2) + mass.cropl_copy, 2);
                     mass.cropr = Calculate.GetValid((int)(diff / 2) + mass.cropr_copy, 2);
                 }
-                
+
                 //Входной аспект с учетом откропленного
                 if (Settings.RecalculateAspect)
                     mass.inaspect = ((double)(mass.inresw - mass.cropl - mass.cropr) / (double)(mass.inresh - mass.cropt - mass.cropb)) * mass.pixelaspect;
@@ -607,7 +587,7 @@ namespace XviD4PSP
             combo_crop_r.Items.Clear();
             combo_crop_t.Items.Clear();
             combo_crop_b.Items.Clear();
-            
+
             for (int n = 0; n < (m.inresw / 2); n += 2)
             {
                 combo_crop_l.Items.Add(n);
@@ -634,7 +614,7 @@ namespace XviD4PSP
         {
             combo_black_w.Items.Clear();
             combo_black_h.Items.Clear();
-            
+
             for (int n = 0; n < (m.outresw / 2); n += 2)
             {
                 combo_black_w.Items.Add(n);
@@ -733,10 +713,7 @@ namespace XviD4PSP
         {
             if (combo_visualcrop_frame.IsDropDownOpen || combo_visualcrop_frame.IsSelectionBoxHighlighted)
             {
-                if (combo_visualcrop_frame.IsDropDownOpen || combo_visualcrop_frame.IsSelectionBoxHighlighted)
-                {
-                    Settings.VCropFrame = combo_visualcrop_frame.SelectedItem.ToString();
-                }
+                Settings.VCropFrame = combo_visualcrop_frame.SelectedItem.ToString();
             }
         }
 
@@ -748,7 +725,7 @@ namespace XviD4PSP
                 ApplyCrop();
             }
         }
-        
+
         private void combo_modh_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (combo_modh.IsDropDownOpen || combo_modh.IsSelectionBoxHighlighted)
@@ -868,5 +845,5 @@ namespace XviD4PSP
                 manual_outsar.Text = Calculate.CalculateSAR(w, h, asp);
             }
         }
-	}
+    }
 }

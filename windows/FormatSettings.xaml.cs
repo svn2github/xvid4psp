@@ -4,11 +4,12 @@ using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace XviD4PSP
 {
-	public partial class FormatSettings
-	{
+    public partial class FormatSettings
+    {
         public Massive m;
         private MainWindow p;
         public bool update_massive = false;
@@ -17,9 +18,26 @@ namespace XviD4PSP
         public bool update_framerate = false;
         private string format;
 
+        //Undo
+        private string undo_extension;
+        private string undo_frc_format;
+        private string undo_split;
+        private string undo_vcodecs;
+        private string undo_acodecs;
+        private string undo_aspects;
+        private string undo_framerates;
+        private string undo_samplerates;
+
+        //Дефолты (а так-же в Format.cs)
+        private string default_vcodecs = "x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy";
+        private string default_acodecs = "PCM, FLAC, AAC, MP2, MP3, AC3, Disabled, Copy";
+        private string default_aspects = "1.3333 (4:3), 1.6667, 1.7778 (16:9), 1.8500, 2.0000, 2.2100, 2.3529";
+        private string default_framerates = "20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000";
+        private string default_samplerates = "22050, 32000, 44100, 48000";
+
         public FormatSettings(Massive mass, MainWindow parent)
-		{
-			this.InitializeComponent();
+        {
+            this.InitializeComponent();
 
             p = parent;
             Owner = p;
@@ -43,15 +61,21 @@ namespace XviD4PSP
             else if (set_focus_to == 3) tab_muxing.Focus();
 
             ShowDialog();
-		}
+        }
 
         private void LoadSettings()
         {
-            textbox_vcodecs.Text = FormatReader.GetFormatInfo(format, "GetVCodecs", "x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy");
-            textbox_acodecs.Text = FormatReader.GetFormatInfo(format, "GetACodecs", "PCM, FLAC, AAC, MP2, MP3, AC3, Disabled, Copy");
-            textbox_aspects.Text = FormatReader.GetFormatInfo(format, "GetValidOutAspects", "1.3333 (4:3), 1.7778 (16:9), 1.8500, 2.3529");
-            textbox_framerates.Text = FormatReader.GetFormatInfo(format, "GetValidFramerates", "20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000");
-            textbox_samplerates.Text = FormatReader.GetFormatInfo(format, "GetValidSamplerates", "22050, 32000, 44100, 48000");
+            textbox_vcodecs.Text = undo_vcodecs = FormatReader.GetFormatInfo(format, "GetVCodecs", default_vcodecs);
+            textbox_acodecs.Text = undo_acodecs = FormatReader.GetFormatInfo(format, "GetACodecs", default_acodecs);
+            textbox_aspects.Text = undo_aspects = FormatReader.GetFormatInfo(format, "GetValidOutAspects", default_aspects);
+            textbox_framerates.Text = undo_framerates = FormatReader.GetFormatInfo(format, "GetValidFramerates", default_framerates);
+            textbox_samplerates.Text = undo_samplerates = FormatReader.GetFormatInfo(format, "GetValidSamplerates", default_samplerates);
+
+            combo_fix_ar_method.Items.Clear();
+            combo_fix_ar_method.Items.Add("Black");
+            combo_fix_ar_method.Items.Add("Crop");
+            string fix_ar = FormatReader.GetFormatInfo(format, "AspectAdjustingMethod", "Black");
+            combo_fix_ar_method.SelectedItem = (combo_fix_ar_method.Items.Contains(fix_ar)) ? fix_ar : "Black";
 
             combo_Muxer.Items.Clear();
             combo_Muxer.Items.Add("virtualdubmod");
@@ -66,6 +90,7 @@ namespace XviD4PSP
             combo_Muxer.SelectedItem = (combo_Muxer.Items.Contains(muxer)) ? muxer : "ffmpeg";
 
             combo_Extension.Items.Clear();
+            combo_Extension.Items.Add("");
             combo_Extension.Items.Add("3gp");
             combo_Extension.Items.Add("avi");
             combo_Extension.Items.Add("dpg");
@@ -78,20 +103,22 @@ namespace XviD4PSP
             combo_Extension.Items.Add("pmp");
             combo_Extension.Items.Add("ts");
             combo_Extension.Items.Add("m2ts");
-            string ext = FormatReader.GetFormatInfo(format, "GetValidExtension", "mkv");
-            if (!combo_Extension.Items.Contains(ext)) combo_Extension.Items.Add(ext);
-            combo_Extension.SelectedItem = ext;
+            undo_extension = FormatReader.GetFormatInfo(format, "GetValidExtension", "mkv");
+            if (!combo_Extension.Items.Contains(undo_extension)) combo_Extension.Items.Add(undo_extension);
+            combo_Extension.SelectedItem = undo_extension;
 
             combo_force_format.Items.Clear();
+            combo_force_format.Items.Add("");
             combo_force_format.Items.Add("None");
             combo_force_format.Items.Add("iPod");
             combo_force_format.Items.Add("PSP");
             combo_force_format.Items.Add("VOB");
-            string fmt = FormatReader.GetFormatInfo(format, "ForceFormat", "None");
-            if (!combo_force_format.Items.Contains(fmt)) combo_force_format.Items.Add(fmt);
-            combo_force_format.SelectedItem = fmt;
+            undo_frc_format = FormatReader.GetFormatInfo(format, "ForceFormat", "None");
+            if (!combo_force_format.Items.Contains(undo_frc_format)) combo_force_format.Items.Add(undo_frc_format);
+            combo_force_format.SelectedItem = undo_frc_format;
 
             combo_split.Items.Clear();
+            combo_split.Items.Add("");
             combo_split.Items.Add("Disabled");
             combo_split.Items.Add("210Mb");
             combo_split.Items.Add("350Mb");
@@ -104,9 +131,9 @@ namespace XviD4PSP
             combo_split.Items.Add("4700Mb DVD5");
             combo_split.Items.Add("8142Mb DVD9");
             combo_split.Items.Add("8500Mb DVD9");
-            string split = FormatReader.GetFormatInfo(format, "SplitOutputFile", "Disabled");
-            if (!combo_split.Items.Contains(split)) combo_split.Items.Add(split);
-            combo_split.SelectedItem = split;
+            undo_split = FormatReader.GetFormatInfo(format, "SplitOutputFile", "Disabled");
+            if (!combo_split.Items.Contains(undo_split)) combo_split.Items.Add(undo_split);
+            combo_split.SelectedItem = undo_split;
 
             combo_thm_format.Items.Clear();
             combo_thm_format.Items.Add("None");
@@ -118,7 +145,7 @@ namespace XviD4PSP
 
             combo_thm_W.Items.Clear();
             combo_thm_W.Items.Add(0);
-            for (int i = 120; i < 2000; i += 4) combo_thm_W.Items.Add(i);            
+            for (int i = 120; i < 2000; i += 4) combo_thm_W.Items.Add(i);
             combo_thm_W.SelectedItem = FormatReader.GetFormatInfo(format, "THMWidth", 160);
 
             combo_thm_H.Items.Clear();
@@ -163,7 +190,7 @@ namespace XviD4PSP
             val = FormatReader.GetFormatInfo(format, "MaxResolutionW", "1920");
             if (!combo_MaxResolutionW.Items.Contains(val)) combo_MaxResolutionW.Items.Add(val);
             combo_MaxResolutionW.SelectedItem = val;
-            
+
             //Высота
             n = 16;
             step = Format.GetValidModH(m);
@@ -188,7 +215,7 @@ namespace XviD4PSP
             if (tab_video.IsSelected) StoreValue(format, "ActiveTab", "1");
             else if (tab_audio.IsSelected) StoreValue(format, "ActiveTab", "2");
             else if (tab_muxing.IsSelected) StoreValue(format, "ActiveTab", "3");
-            
+
             Close();
         }
 
@@ -258,6 +285,7 @@ namespace XviD4PSP
 
         private void TranslateItems()
         {
+            button_reset.Content = Languages.Translate("Reset");
             button_ok.Content = Languages.Translate("OK");
             Title = Languages.Translate("Edit format") + " (" + Convert.ToString(m.format) + ")";
             group_format.Header = group_audio.Header = group_muxing.Header = Languages.Translate("Edit format");
@@ -267,9 +295,11 @@ namespace XviD4PSP
             check_fixed_ar.Content = Languages.Translate("Fixed AR");
             check_anamorph.Content = Languages.Translate("Can be anamorphic");
             acodecslist.Content = Languages.Translate("Valid audio codecs:");
+            check_stereo.Content = Languages.Translate("Limited to Stereo");
             samplerateslist.Content = Languages.Translate("Valid samplerates:");
             validmuxer.Content = Languages.Translate("Muxer for this format:");
             validextension.Content = Languages.Translate("File extension:");
+            force_format.Content = Languages.Translate("Force format:");
             split.Content = Languages.Translate("Split output file:");
             thm.Content = Languages.Translate("Create THM:");
             thm_size.Content = Languages.Translate("Resolution:");
@@ -280,6 +310,7 @@ namespace XviD4PSP
 
         private void SetTooltips()
         {
+            button_reset.ToolTip = Languages.Translate("Reset all settings");
             textbox_vcodecs.ToolTip = Languages.Translate("Codecs, that will be selectable in the video-codecs settings window.") + Environment.NewLine + Languages.Translate("Valid values:") + " x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy\r\n" + Languages.Translate("Separate by comma.");
             textbox_framerates.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000, ...\r\n" + Languages.Translate("Separate by comma.");
             combo_MinResolutionH.ToolTip = combo_MaxResolutionH.ToolTip = combo_thm_H.ToolTip = Languages.Translate("Height");
@@ -288,17 +319,17 @@ namespace XviD4PSP
             combo_ValidModH.ToolTip = Languages.Translate("Height") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "2, 4");
             textbox_aspects.ToolTip = Languages.Translate("Aspect ratios.") + Environment.NewLine + Languages.Translate("Valid values:") + " 1.3333 (4:3), 1.5000, 1.6667, 1.7647 (16:9), 1.7778 (16:9), 1.8500, 2.3529, ...\r\n" + Languages.Translate("Separate by comma.");
             check_fixed_ar.ToolTip = Languages.Translate("Use this option if you want to limit AR by values, specified above");
+            combo_fix_ar_method.ToolTip = Languages.Translate("Aspect adjusting method:") + " " + combo_fix_ar_method.SelectedItem.ToString();
             textbox_acodecs.ToolTip = Languages.Translate("Codecs, that will be selectable in the audio-codecs settings window.") + Environment.NewLine + Languages.Translate("Valid values:") + " PCM, FLAC, AAC, MP2, MP3, AC3, Disabled, Copy\r\n" + Languages.Translate("Separate by comma.");
             textbox_samplerates.ToolTip = Languages.Translate("Samplerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 22050, 32000, 44100, 48000, 96000, 192000, ...\r\n" + Languages.Translate("Separate by comma.");
-            check_stereo.ToolTip = Languages.Translate("Maximum numbers of audio channels for this format is 2");            
-            combo_Muxer.ToolTip = Languages.Translate("Muxer for this format:") + "\r\nvirtualdubmod - avi\r\nmkvmerge - mkv\r\nffmpeg - all types\r\nmp4box - mp4, m4v, mov, 3gp\r\ntsmuxer - ts, m2ts\r\ndisabled - direct encoding";
-            combo_Extension.ToolTip = Languages.Translate("File extension:");
-            combo_force_format.ToolTip = Languages.Translate("Only for this muxers:") + " mp4box, ffmpeg";
+            check_stereo.ToolTip = Languages.Translate("Maximum numbers of audio channels for this format is 2");
+            combo_Muxer.ToolTip = Languages.Translate("Muxer for this format:") + "\r\nvirtualdubmod - avi\r\nmkvmerge - mkv, webm\r\nffmpeg - all types\r\nmp4box - mp4, m4v, mov, 3gp\r\ntsmuxer - ts, m2ts\r\ndisabled - direct encoding";
+            combo_Extension.ToolTip = Languages.Translate("File extension:") + " " + undo_extension;
+            combo_force_format.ToolTip = Languages.Translate("Only for this muxers:") + " mp4box (-ipod, -psp), ffmpeg (-f value)";
             combo_split.ToolTip = Languages.Translate("Only for this muxers:") + " mkvmerge, mp4box, tsmuxer";
             combo_thm_format.ToolTip = "THM format";
             combo_thm_W.ToolTip += "\r\n" + Languages.Translate("0 - encoding size");
             combo_thm_H.ToolTip += "\r\n" + Languages.Translate("0 - encoding size");
-            check_4gb_only.ToolTip = Languages.Translate("Maximum filesize is 4Gb");
         }
 
         private void ErrorException(string message)
@@ -317,10 +348,77 @@ namespace XviD4PSP
 
         private void combo_Extension_Selection_Changed(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_Extension.IsDropDownOpen || combo_Extension.IsSelectionBoxHighlighted)
+            if ((combo_Extension.IsDropDownOpen || combo_Extension.IsSelectionBoxHighlighted || combo_Extension.IsEditable) && combo_Extension.SelectedItem != null)
             {
-                StoreValue(format, "GetValidExtension", combo_Extension.SelectedItem.ToString());
+                if (EnableEditing(combo_Extension)) return;
+                else DisableEditing(combo_Extension);
+
+                undo_extension = combo_Extension.SelectedItem.ToString();
+                combo_Extension.ToolTip = Languages.Translate("File extension:") + " " + undo_extension;
+                StoreValue(format, "GetValidExtension", undo_extension);
                 update_massive = true;
+            }
+        }
+
+        private bool EnableEditing(ComboBox box)
+        {
+            //Включаем редактирование
+            if (!box.IsEditable && box.SelectedIndex == 0)
+            {
+                box.IsEditable = true;
+                box.ToolTip = Languages.Translate("Enter - apply, Esc - cancel.");
+                box.ApplyTemplate();
+                return true;
+            }
+            return false;
+        }
+
+        private void DisableEditing(ComboBox box)
+        {
+            //Выключаем редактирование
+            if (box.IsEditable)
+            {
+                box.IsEditable = false;
+                if (box == combo_force_format) box.ToolTip = Languages.Translate("Only for this muxers:") + " mp4box (-ipod, -psp), ffmpeg (-f value)";
+                else if (box == combo_split) box.ToolTip = Languages.Translate("Only for this muxers:") + " mkvmerge, mp4box, tsmuxer";
+            }
+        }
+
+        private void UndoEdit(ComboBox box)
+        {
+            //Возвращаем исходное значение
+            if (box == combo_Extension) box.SelectedItem = undo_extension;
+            else if (box == combo_force_format) box.SelectedItem = undo_frc_format;
+            else if (box == combo_split) box.SelectedItem = undo_split;
+        }
+
+        private void ComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox box = (ComboBox)sender;
+            if (box.IsEditable && box.SelectedItem != null && !box.IsDropDownOpen && !box.IsMouseCaptured)
+                ComboBox_KeyDown(sender, new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter));
+        }
+
+        private void ComboBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                //Проверяем введённый текст
+                ComboBox box = (ComboBox)sender;
+                string text = box.Text.Trim();
+                if (text == "") { UndoEdit(box); return; }
+                else if (box == combo_split && Calculate.GetRegexValue(@"^(\d+)\D*", text) == null) { UndoEdit(box); return; }
+                else if (box == combo_force_format && Calculate.GetRegexValue(@"^([\w\-]+)$", text) == null) { UndoEdit(box); return; }
+                else if (box == combo_Extension && Calculate.GetRegexValue(@"^(\w+)$", (text = text.ToLower())) == null) { UndoEdit(box); return; }
+
+                //Добавляем и выбираем Item
+                if (!box.Items.Contains(text)) box.Items.Add(text);
+                box.SelectedItem = text;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                //Возвращаем исходное значение
+                UndoEdit((ComboBox)sender);
             }
         }
 
@@ -392,6 +490,17 @@ namespace XviD4PSP
             }
         }
 
+        private void combo_fix_ar_method_Selection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_fix_ar_method.IsDropDownOpen || combo_fix_ar_method.IsSelectionBoxHighlighted)
+            {
+                string value = combo_fix_ar_method.SelectedItem.ToString();
+                StoreValue(format, "AspectAdjustingMethod", value);
+                combo_fix_ar_method.ToolTip = Languages.Translate("Aspect adjusting method:") + " " + value;
+                update_resolution = true;
+            }
+        }
+
         private void check_Fixed_AR_Clicked(object sender, RoutedEventArgs e)
         {
             StoreValue(format, "IsLockedOutAspect", check_fixed_ar.IsChecked.Value.ToString());
@@ -418,15 +527,37 @@ namespace XviD4PSP
 
         private void textbox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Return)
+            if (e.Key == Key.Enter || e.Key == Key.Return)
             {
-                string ss = ((TextBox)sender).Name;
-                if (ss == "textbox_vcodecs") vcodecs_ok_Click(null, null);
-                else if (ss == "textbox_framerates") fps_ok_Click(null, null);
-                else if (ss == "textbox_aspects") aspects_ok_Click(null, null);
-                else if (ss == "textbox_acodecs") acodecs_ok_Click(null, null);
-                else if (ss == "textbox_samplerates") samplerates_ok_Click(null, null);
+                //Сохраняем изменения
+                TextBox tbox = (TextBox)sender;
+                if (tbox == textbox_vcodecs) vcodecs_ok_Click(null, null);
+                else if (tbox == textbox_framerates) fps_ok_Click(null, null);
+                else if (tbox == textbox_aspects) aspects_ok_Click(null, null);
+                else if (tbox == textbox_acodecs) acodecs_ok_Click(null, null);
+                else if (tbox == textbox_samplerates) samplerates_ok_Click(null, null);
             }
+            else if (e.Key == Key.Escape)
+            {
+                //Отменяем изменения
+                TextBox tbox = (TextBox)sender;
+                if (tbox == textbox_vcodecs) textbox_vcodecs.Text = undo_vcodecs;
+                else if (tbox == textbox_framerates) textbox_framerates.Text = undo_framerates;
+                else if (tbox == textbox_aspects) textbox_aspects.Text = undo_aspects;
+                else if (tbox == textbox_acodecs) textbox_acodecs.Text = undo_acodecs;
+                else if (tbox == textbox_samplerates) textbox_samplerates.Text = undo_samplerates;
+            }
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //При потере фокуса сначала проверяем, есть ли что сохранять
+            TextBox tbox = (TextBox)sender;
+            if (tbox == textbox_vcodecs) { if (textbox_vcodecs.Text != undo_vcodecs) vcodecs_ok_Click(null, null); }
+            else if (tbox == textbox_framerates) { if (textbox_framerates.Text != undo_framerates) fps_ok_Click(null, null); }
+            else if (tbox == textbox_aspects) { if (textbox_aspects.Text != undo_aspects) aspects_ok_Click(null, null); }
+            else if (tbox == textbox_acodecs) { if (textbox_acodecs.Text != undo_acodecs) acodecs_ok_Click(null, null); }
+            else if (tbox == textbox_samplerates) { if (textbox_samplerates.Text != undo_samplerates) samplerates_ok_Click(null, null); }
         }
 
         private void vcodecs_ok_Click(object sender, RoutedEventArgs e)
@@ -451,10 +582,10 @@ namespace XviD4PSP
 
                 if (!output.Contains(ss)) output += ss;
             }
-            if (output.Length > 2 && output.EndsWith(", ")) output = output.Remove(output.Length - 2, 2);
-            if (output.Length == 0) output = "x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy";
+            if (output.Length == 0) output = default_vcodecs;
+            else output = output.TrimEnd(new char[] { ',', ' ' });
 
-            textbox_vcodecs.Text = output;
+            textbox_vcodecs.Text = undo_vcodecs = output;
             StoreValue(format, "GetVCodecs", output);
         }
 
@@ -477,10 +608,10 @@ namespace XviD4PSP
 
                 if (!output.Contains(ss)) output += ss;
             }
-            if (output.Length > 2 && output.EndsWith(", ")) output = output.Remove(output.Length - 2, 2);
-            if (output.Length == 0) output = "PCM, FLAC, AAC, MP2, MP3, AC3, Disabled, Copy";
+            if (output.Length == 0) output = default_acodecs;
+            else output = output.TrimEnd(new char[] { ',', ' ' });
 
-            textbox_acodecs.Text = output;
+            textbox_acodecs.Text = undo_acodecs = output;
             StoreValue(format, "GetACodecs", output);
         }
 
@@ -491,19 +622,17 @@ namespace XviD4PSP
             foreach (string value in values)
             {
                 double dd;
-                string ss = value.Trim();
-                if (ss.Length > 1 && ss.Contains(".") && "." != Calculate.DecimalSeparator) ss = ss.Replace(".", Calculate.DecimalSeparator);
+                string ss = value.Trim().Replace(".", Calculate.DecimalSeparator);
                 if (double.TryParse(ss, out dd))
                 {
                     ss = Calculate.ConvertDoubleToPointString(dd, 3);
                     if (dd > 5 && dd < 200 && !output.Contains(ss)) output += ss + ", ";
                 }
             }
-            
-            if (output.Length > 2 && output.EndsWith(", ")) output = output.Remove(output.Length - 2, 2);
-            if (output.Length == 0) output = "15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000";
+            if (output.Length == 0) output = default_framerates;
+            else output = output.TrimEnd(new char[] { ',', ' ' });
 
-            textbox_framerates.Text = output;
+            textbox_framerates.Text = undo_framerates = output;
             StoreValue(format, "GetValidFramerates", output);
             update_framerate = true;
         }
@@ -515,15 +644,13 @@ namespace XviD4PSP
             foreach (string value in values)
             {
                 int dd;
-                string ss = value.Trim();
-                if (ss.Length > 1 && ss.Contains(".")) ss = ss.Replace(".", "");
+                string ss = value.Trim().Replace(".", "");
                 if (int.TryParse(ss, out dd) && dd >= 8000 && dd < 200000 && !output.Contains(ss)) output += ss + ", ";
             }
+            if (output.Length == 0) output = default_samplerates;
+            else output = output.TrimEnd(new char[] { ',', ' ' });
 
-            if (output.Length > 2 && output.EndsWith(", ")) output = output.Remove(output.Length - 2, 2);
-            if (output.Length == 0) output = "22050, 32000, 44100, 48000, 96000, 192000";
-
-            textbox_samplerates.Text = output;
+            textbox_samplerates.Text = undo_samplerates = output;
             StoreValue(format, "GetValidSamplerates", output);
             update_audio = true;
         }
@@ -535,43 +662,48 @@ namespace XviD4PSP
             foreach (string value in values)
             {
                 double dd;
-                string ss = value.Trim();
-                if (ss.Length > 1 && ss.Contains(".") && "." != Calculate.DecimalSeparator) ss = ss.Replace(".", Calculate.DecimalSeparator);
-                if (ss.Length > 5 && ss.Contains("(4:3)")) ss = ss.Replace("(4:3)", "");
-                if (ss.Length > 6 && ss.Contains("(16:9)")) ss = ss.Replace("(16:9)", "");
+                string ss = value.Trim().Replace(".", Calculate.DecimalSeparator);
+                if (ss.Length > 7) ss = ss.Substring(0, 7); //Удаляем лишнее
                 if (double.TryParse(ss, out dd))
                 {
                     ss = Calculate.ConvertDoubleToPointString(dd, 4);
                     if (dd > 0.5 && dd < 3 && !output.Contains(ss))
                     {
-                        if (ss.StartsWith("1.3")) ss += " (4:3)";
-                        else if (ss.StartsWith("1.7")) ss += " (16:9)";
+                        if (Math.Abs(dd - 1.33) <= 0.01) ss += " (4:3)";
+                        else if (Math.Abs(dd - 1.77) <= 0.01) ss += " (16:9)";
                         output += ss + ", ";
                     }
                 }
             }
+            if (output.Length == 0) output = default_aspects;
+            else output = output.TrimEnd(new char[] { ',', ' ' });
 
-            if (output.Length > 2 && output.EndsWith(", ")) output = output.Remove(output.Length - 2, 2);
-            if (output.Length == 0) output = "1.3333 (4:3), 1.5000, 1.6667, 1.7778 (16:9), 1.8500, 2.3529";
-
-            textbox_aspects.Text = output;
+            textbox_aspects.Text = undo_aspects = output;
             StoreValue(format, "GetValidOutAspects", output);
             update_resolution = true;
         }
 
         private void combo_force_format_Selection_Changed(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_force_format.IsDropDownOpen || combo_force_format.IsSelectionBoxHighlighted)
+            if ((combo_force_format.IsDropDownOpen || combo_force_format.IsSelectionBoxHighlighted || combo_force_format.IsEditable) && combo_force_format.SelectedItem != null)
             {
-                StoreValue(format, "ForceFormat", combo_force_format.SelectedItem.ToString());
+                if (EnableEditing(combo_force_format)) return;
+                else DisableEditing(combo_force_format);
+
+                undo_frc_format = combo_force_format.SelectedItem.ToString();
+                StoreValue(format, "ForceFormat", undo_frc_format);
             }
         }
 
         private void combo_split_Selection_Changed(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_split.IsDropDownOpen || combo_split.IsSelectionBoxHighlighted)
+            if ((combo_split.IsDropDownOpen || combo_split.IsSelectionBoxHighlighted || combo_split.IsEditable) && combo_split.SelectedItem != null)
             {
-                StoreValue(format, "SplitOutputFile", combo_split.SelectedItem.ToString());
+                if (EnableEditing(combo_split)) return;
+                else DisableEditing(combo_split);
+
+                undo_split = combo_split.SelectedItem.ToString();
+                StoreValue(format, "SplitOutputFile", undo_split);
                 update_massive = true;
             }
         }
@@ -604,7 +736,7 @@ namespace XviD4PSP
         {
             //StoreValue(format, "THMFixAR", check_thm_fix_ar.IsChecked.Value.ToString());
         }
-        
+
         private void check_direct_remux_Clicked(object sender, RoutedEventArgs e)
         {
             StoreValue(format, "UseDirectRemux", check_direct_remux.IsChecked.Value.ToString());
@@ -615,5 +747,21 @@ namespace XviD4PSP
             StoreValue(format, "DontMuxStreams", check_dont_mux.IsChecked.Value.ToString());
             update_massive = true;
         }
-	}
+
+        private void button_reset_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                //Просто удаляем всё из ini-файла, пусть используются дефолты
+                File.WriteAllText(Calculate.StartupPath + "\\presets\\formats\\" + format + ".ini", "");
+                LoadSettings();
+                SetTooltips();
+                update_audio = update_framerate = update_resolution = true;
+            }
+            catch (Exception ex)
+            {
+                ErrorException(Languages.Translate("Can`t delete profile") + " \"" + format + "\": " + ex.Message);
+            }
+        }
+    }
 }

@@ -1662,13 +1662,13 @@ namespace XviD4PSP
            if (m.format == ExportFormats.Custom)
            {
                if (!FormatReader.GetFormatInfo("Custom", "UseDirectRemux", false)) return false;
-               
+
                Muxers muxer = GetMuxer(m);
                if (muxer == Muxers.mkvmerge)
                {
                    if (m.outvcodec == "Copy" && m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "Copy")
                        return false;
-                   if (ext == ".mkv" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".rm" || ext == ".ogm")
+                   if (ext == ".mkv" || ext == ".webm" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".rm" || ext == ".ogm")
                        return true;
                    else
                        return false;
@@ -1709,7 +1709,7 @@ namespace XviD4PSP
            }
            else if (m.format == ExportFormats.Mkv)
            {
-               if (ext == ".mkv" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".rm" || ext == ".ogm")
+               if (ext == ".mkv" || ext == ".webm" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".rm" || ext == ".ogm")
                    return true;
                else
                    return false;
@@ -2008,7 +2008,7 @@ namespace XviD4PSP
 
        public static Massive GetValidOutAspect(Massive m)
        {
-           //метод для форматов с фиксированным аспектом
+           //методы для форматов с фиксированным аспектом
            if (m.format == ExportFormats.BluRay)
            {
                m.outaspect = (double)m.outresw / (double)m.outresh;
@@ -2019,20 +2019,27 @@ namespace XviD4PSP
            {
                string[] outaspects = Format.GetValidOutAspects(m);
                m.outaspect = Calculate.GetCloseDouble(m.inaspect, outaspects);
-
-               //m.sar = Calculate.ConvertDoubleToPointString(m.outaspect);
-               if (m.format == ExportFormats.Mp4PSPAVCTV ||
-                   m.format == ExportFormats.BluRay ||
-                   m.format == ExportFormats.Custom && !FormatReader.GetFormatInfo("Custom", "CanBeAnamorphic", false))
-                   m.sar = null;
-               else m = Calculate.CalculateSAR(m);
-
                m.aspectfix = AspectResolution.AspectFixes.Black;
+
+               if (m.format == ExportFormats.Custom)
+               {
+                   if (!FormatReader.GetFormatInfo("Custom", "CanBeAnamorphic", false))
+                       m.sar = null;
+                   else
+                       m = Calculate.CalculateSAR(m);
+
+                   if (FormatReader.GetFormatInfo("Custom", "AspectAdjustingMethod", "Black") == "Crop")
+                       m.aspectfix = AspectResolution.AspectFixes.Crop;
+               }
+               else if (m.format == ExportFormats.Mp4PSPAVCTV)
+                   m.sar = null;
+               else
+                   m = Calculate.CalculateSAR(m);
            }
-           //метод для остальных форматов
            else
            {
-               if ((double)m.inresw / (double)m.inresh != m.inaspect && 
+               //методы для остальных форматов
+               if ((double)m.inresw / (double)m.inresh != m.inaspect &&
                    m.aspectfix == AspectResolution.AspectFixes.SAR)
                {
                    m.outaspect = m.inaspect;
@@ -2055,9 +2062,8 @@ namespace XviD4PSP
                m.format == ExportFormats.Mpeg2NTSC ||
                m.format == ExportFormats.Mpeg2PAL ||
                m.format == ExportFormats.Mp4PSPAVCTV ||
-               m.format == ExportFormats.BluRay)
-               return true;
-           else if (m.format == ExportFormats.Custom && FormatReader.GetFormatInfo("Custom", "IsLockedOutAspect", false))
+               m.format == ExportFormats.BluRay ||
+               m.format == ExportFormats.Custom && FormatReader.GetFormatInfo("Custom", "IsLockedOutAspect", false))
                return true;
            else
                return false;
@@ -2091,7 +2097,7 @@ namespace XviD4PSP
                return new string[] { "1.3333 (4:3)", "1.6667", "1.7778 (16:9)", "1.8500", "2.3529" };
 
            else if (m.format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "GetValidOutAspects", new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" });
+               return FormatReader.GetFormatInfo("Custom", "GetValidOutAspects", new string[] { "1.3333 (4:3)", "1.6667", "1.7778 (16:9)", "1.8500", "2.0000", "2.1000", "2.3529" });
 
            else
                return new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };

@@ -916,36 +916,18 @@ namespace XviD4PSP
 
         public static double ConvertStringToDouble(string value)
         {
-            if (value == null || value == "") return 0.0;
+            if (string.IsNullOrEmpty(value)) return 0.0;
 
             if (value.Contains(".") && "." != DecimalSeparator)
                 value = value.Replace(".", DecimalSeparator);
             if (value.Contains(",") && "," != DecimalSeparator)
                 value = value.Replace(",", DecimalSeparator);
             if (value.Contains(" "))
-            {
-                string[] separator = new string[] { " " };
-                string[] a = value.Split(separator, StringSplitOptions.None);
-                if (value == "Anamorphic (4:3)")
-                    return 1.333;
-                else if (value == "Anamorphic (16:9)")
-                    return 1.778;
-                else if (value == "Anamorphic (2.353)" ||
-                         value == "Anamorphic (2,353)")
-                    return 2.353;
-                else
-                {
-                    double dvalue = 0.0;
-                    Double.TryParse(a[0], NumberStyles.Float, null, out dvalue);
-                    return dvalue;
-                }
-            }
-            else
-            {
-                double dvalue = 0.0;
-                Double.TryParse(value, NumberStyles.Float, null, out dvalue);
-                return dvalue;
-            }
+                value = value.Split(new string[] { " " }, StringSplitOptions.None)[0];
+
+            double dvalue = 0.0;
+            Double.TryParse(value, NumberStyles.Float, null, out dvalue);
+            return dvalue;
         }
 
         public static string[] ConvertArrayListToStringArray(ArrayList collection)

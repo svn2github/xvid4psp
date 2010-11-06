@@ -82,7 +82,7 @@ namespace XviD4PSP
             //Enum formats используется только для заполнения комбобокса, т.к. пользователь
             //может добавить свои форматы, но Enum уже никак не изменить.
             //combo_format.ToolTip = Languages.Translate("Format");
-            combo_format.Items.Add("...");
+            combo_format.Items.Add("");
             foreach (string _format in Enum.GetNames(typeof(formats)))
                 combo_format.Items.Add(_format);
 
@@ -880,10 +880,9 @@ namespace XviD4PSP
 
         private void combo_format_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_format.IsDropDownOpen || combo_format.IsSelectionBoxHighlighted)
+            if ((combo_format.IsDropDownOpen || combo_format.IsSelectionBoxHighlighted || combo_format.IsEditable) && combo_format.SelectedItem != null)
             {
-                if (combo_format.SelectedItem == null) return;
-                if (combo_format.SelectedItem.ToString() == "...")
+                if (combo_format.SelectedIndex == 0)
                 {
                     //Включаем редактирование
                     combo_format.IsEditable = true;
@@ -958,13 +957,23 @@ namespace XviD4PSP
             }
         }
 
+        private void ComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox box = (ComboBox)sender;
+            if (box.IsEditable && box.SelectedItem != null && !box.IsDropDownOpen && !box.IsMouseCaptured)
+                combo_format_KeyDown(sender, new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter));
+        }
+
         private void combo_format_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Return)
             {
+                //Проверяем введённый текст
+                string text = combo_format.Text.Trim().ToUpper();
+                if (text == "" || Calculate.GetRegexValue(@"^(\w+)$", text) == null)
+                { combo_format.SelectedItem = format; return; }
+
                 //Добавляем и выбираем Item
-                string text = combo_format.Text.ToUpper();
-                if (text == "" || text == "...") return;
                 if (!combo_format.Items.Contains(text))
                     combo_format.Items.Add(text);
                 combo_format.SelectedItem = text;
