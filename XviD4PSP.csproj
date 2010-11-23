@@ -462,6 +462,7 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="pictures\folder_magnify.png" />
     <Resource Include="main.ico" />
     <Resource Include="pictures\logo_FF_FLAC.png" />
     <Resource Include="pictures\vc_background.PNG" />

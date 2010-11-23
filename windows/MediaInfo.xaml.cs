@@ -243,7 +243,8 @@ namespace XviD4PSP
                     s.Filter = "LOG " + Languages.Translate("files") + "|*.log" +
                         "|TXT " + Languages.Translate("files") + "|*.txt";
 
-                    s.FileName = infilepath + " - " + infomode.ToString(); //.ToLower();
+                    s.InitialDirectory = Path.GetDirectoryName(infilepath);
+                    s.FileName = Path.GetFileName(infilepath) + " - " + infomode.ToString(); //.ToLower();
 
                     if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {

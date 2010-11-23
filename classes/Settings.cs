@@ -2462,5 +2462,90 @@ namespace XviD4PSP
                 SetString("FFRebuilder_Profile", value);
             }
         }
+
+        //Путь до Windows Media Player
+        public static string WMP_Path
+        {
+            get
+            {
+                object value = GetValue("WMP_Path");
+                if (value == null || value.ToString() == "")
+                {
+                    return Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Windows Media Player\\wmplayer.exe";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("WMP_Path", value);
+            }
+        }
+
+        //Путь до Media Player Classic
+        public static string MPC_Path
+        {
+            get
+            {
+                object value = GetValue("MPC_Path");
+                if (value == null || value.ToString() == "")
+                {
+                    string path = "";
+
+                    //Сначала пробуем найти путь к плейеру через реестр
+                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Gabest\Media Player Classic", false))
+                    {
+                        if (key != null)
+                        {
+                            path = key.GetValue("ExePath", "").ToString();
+                            if (File.Exists(path) && !Path.GetFileName(path).Contains("64")) goto done;
+                        }
+                    }
+
+                    //Если не вышло, ищем во всех возможных местах
+                    if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mpc-hc.exe"))
+                        if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Media Player Classic - Home Cinema\\mpc-hc.exe"))
+                            if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\MPC HomeCinema\\mpc-hc.exe"))
+                                if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mplayerc.exe"))
+                                    if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Media Player Classic\\mplayerc.exe"))
+                                        return "";
+
+                    done:
+                    SetString("MPC_Path", path);
+                    return path;
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("MPC_Path", value);
+            }
+        }
+
+        //Путь до WPF_VideoPlayer
+        public static string WPF_Path
+        {
+            get
+            {
+                object value = GetValue("WPF_Path");
+                if (value == null || value.ToString() == "")
+                {
+                    return Calculate.StartupPath + "\\WPF_VideoPlayer.exe";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("WPF_Path", value);
+            }
+        }
     }
 }

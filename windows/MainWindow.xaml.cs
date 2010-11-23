@@ -2028,6 +2028,7 @@ namespace XviD4PSP
 
                 menu_save_script.Header = Languages.Translate("Save script");
 
+                edit_wmp.ToolTip = edit_mpc.ToolTip = edit_wpf.ToolTip = Languages.Translate("Edit path");
                 menu_playinwmp.Header = Languages.Translate("Play in") + " Windows Media Player";
                 menu_playinmpc.Header = Languages.Translate("Play in") + " Media Player Classic";
                 menu_playinwpf.Header = Languages.Translate("Play in") + " WPF Video Player";
@@ -2570,9 +2571,9 @@ namespace XviD4PSP
             if (m == null) return;
             try
             {
-                string oldscript = m.script;
                 Filtering f = new Filtering(m, this);
-                m = f.m.Clone();
+                string oldscript = m.script;
+                m.script = f.m.script;
 
                 //обновление при необходимости
                 if (m.script.Trim() != oldscript.Trim())
@@ -3880,30 +3881,24 @@ namespace XviD4PSP
 
         private void menu_info_media_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            string filepath = null;
-            if (m != null)
-                filepath = m.infilepath;
-            MediaInfo media = new MediaInfo(filepath, MediaInfo.InfoMode.MediaInfo, this);
+            MediaInfo media = new MediaInfo(((m != null) ? m.infilepath : null), MediaInfo.InfoMode.MediaInfo, this);
         }
-       
+
         private void menu_play_in_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null) return;
             try
             {
-                string path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Windows Media Player\\wmplayer.exe";
-                if (sender == menu_playinwpf) path = Calculate.StartupPath + "\\WPF_VideoPlayer.exe";
-                else if (sender == menu_playinmpc) //Ох и развелось же их, МедиаПлейерКлассиков...
-                    if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mpc-hc.exe"))
-                        if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\MPC HomeCinema\\mpc-hc.exe"))
-                            if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mplayerc.exe"))
-                                path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Media Player Classic\\mplayerc.exe";
+                string path = (sender == menu_playinwmp) ? Settings.WMP_Path : (sender == menu_playinmpc) ? Settings.MPC_Path : Settings.WPF_Path;
+                if (!File.Exists(path)) throw new Exception(Languages.Translate("Can`t find file") + ((path != "") ? (": " + Path.GetFileName(path)) : "!"));
 
-                if (!File.Exists(m.scriptpath)) AviSynthScripting.WriteScriptToFile(m);
                 ProcessStartInfo info = new ProcessStartInfo();
-                if (File.Exists(path)) info.FileName = path; else return;
+                info.FileName = path;
                 info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                info.Arguments = Settings.TempPath + "\\preview.avs";
+                if (m != null)
+                {
+                    if (!File.Exists(m.scriptpath)) AviSynthScripting.WriteScriptToFile(m);
+                    info.Arguments = Settings.TempPath + "\\preview.avs";
+                }
                 Process pr = new Process();
                 pr.StartInfo = info;
                 pr.Start();
@@ -3913,7 +3908,30 @@ namespace XviD4PSP
                 new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
             }
         }
-               
+
+        private void edit_player_Click(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                System.Windows.Forms.OpenFileDialog s = new System.Windows.Forms.OpenFileDialog();
+                string path = (sender == edit_wmp) ? Settings.WMP_Path : (sender == edit_mpc) ? Settings.MPC_Path : Settings.WPF_Path;
+                s.InitialDirectory = (path != "" && Directory.Exists(Path.GetDirectoryName(path))) ? Path.GetDirectoryName(path) : Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                s.FileName = File.Exists(path) ? Path.GetFileName(path) : "";
+                s.Title = Languages.Translate("Select executable file") + ":";
+                s.Filter = "EXE " + Languages.Translate("files") + "|*.exe|" + Languages.Translate("All files") + "|*.*";
+                if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    if (sender == edit_wmp) Settings.WMP_Path = s.FileName;
+                    else if (sender == edit_mpc) Settings.MPC_Path = s.FileName;
+                    else Settings.WPF_Path = s.FileName;
+                }
+            }
+            catch (Exception ex)
+            {
+                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
+            }
+        }
+
         private void list_tasks_KeyUp(object sender, System.Windows.Input.KeyEventArgs e) //keyup
         {
             if (e.Key == System.Windows.Input.Key.Delete)
@@ -5850,9 +5868,6 @@ namespace XviD4PSP
             menu_editscript.IsEnabled = ShowItems;
             menu_createautoscript.IsEnabled = ShowItems;
             menu_save_script.IsEnabled = ShowItems;
-            menu_playinwmp.IsEnabled = ShowItems;
-            menu_playinmpc.IsEnabled = ShowItems;
-            menu_playinwpf.IsEnabled = ShowItems;
             target_goto.IsEnabled = ShowItems;
             menu_createtestscript.IsEnabled = ShowItems;
             cmn_addtobookmarks.IsEnabled = cmn_deletebookmarks.IsEnabled = ShowItems;

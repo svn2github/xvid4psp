@@ -82,10 +82,22 @@
 					<MenuItem x:Name="menu_createtestscript" Header="Test script" Width="Auto" Height="Auto" IsCheckable="True"  Click="ApplyTestScript"/>
                     <MenuItem x:Name="menu_save_script" Header="Save script" Click="SaveScript" Width="Auto" Height="Auto"/>
 					<Separator/>
-					<MenuItem x:Name="menu_playinwmp" Header="Play in Windows Media Player" Click="menu_play_in_Click"/>
-					<MenuItem x:Name="menu_playinmpc" Header="Play in Media Player Classic" Click="menu_play_in_Click"/>
-					<MenuItem x:Name="menu_playinwpf" Header="Play in WPF Video Player" Click="menu_play_in_Click"/>
-				</MenuItem>
+					<MenuItem x:Name="menu_playinwmp" Header="Play in Windows Media Player" Click="menu_play_in_Click">
+                        <MenuItem.Icon>
+                            <Image x:Name="edit_wmp" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="edit_player_Click" IsHitTestVisible="True"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="menu_playinmpc" Header="Play in Media Player Classic" Click="menu_play_in_Click">
+                        <MenuItem.Icon>
+                            <Image x:Name="edit_mpc" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="edit_player_Click" IsHitTestVisible="True"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="menu_playinwpf" Header="Play in WPF Video Player" Click="menu_play_in_Click">
+                        <MenuItem.Icon>
+                            <Image x:Name="edit_wpf" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="edit_player_Click" IsHitTestVisible="True"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
 				<MenuItem Header="Settings" x:Name="mnSettings">
                     <MenuItem x:Name="mnLanguage" Header="Language">
                         <MenuItem x:Name="English" Header="English" StaysOpenOnClick="True" Click="Languages_Click">
