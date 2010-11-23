@@ -84,7 +84,7 @@ namespace XviD4PSP
                     }
 
                     if (m.isvideo && ext != ".avs" && (reader.Width == 0 || reader.Height == 0))
-                        throw new Exception("Caching: " + m.vdecoder.ToString() + " can`t decode video (zero-size image was returned)!");
+                        throw new Exception(m.vdecoder.ToString() + " can`t decode video (zero-size image was returned)!");
                     else
                     {
                         m.inresw = reader.Width;
@@ -106,8 +106,9 @@ namespace XviD4PSP
 
                     if (samplerate != 0 && (m.inaudiostreams.Count > 0 || instream.samplerate == null))
                     {
-                        //вероятно аудио декодер меняет колличество каналов
-                        if (instream.channels != reader.Channels) instream.badmixing = true;
+                        //вероятно аудио декодер меняет количество каналов
+                        if (instream.channels != reader.Channels && instream.channels > 0)
+                            instream.badmixing = true;
 
                         instream.samplerate = samplerate.ToString();
                         instream.bits = reader.BitsPerSample;

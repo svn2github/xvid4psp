@@ -3086,86 +3086,6 @@ namespace XviD4PSP
 
         private void make_tsmuxer()
         {
-            //MUXOPT --no-pcr-on-video-pid --new-audio-pes --vbr 
-            //V_MPEG4/ISO/AVC, D:\media\test\stream.h264, fps=25
-            //A_AC3, D:\media\test\stream.ac3, timeshift=-10000ms
-
-            //Наименования кодеков в meta файле:
-            //V_MPEG4/ISO/AVC - H264
-            //V_MS/VFW/WVC1   - VC1
-            //V_MPEG-2        - MPEG2
-
-            //A_AC3 - DD (AC3) / DD+ (E-AC3) / True HD (True HD только для дорожек с AC3 core внутри).
-            //A_AAC - AAC
-            //A_DTS - DTS / DTS-HD
-            //A_MP3 - MPEG audio layer 1/2/3
-            //A_LPCM - raw pcm data or PCM WAVE file
-
-            //S_PGS - сабтитры в формате Presentation Graphic Stream.
-
-            //Дополнительные параметы аудио/видео дорожек:
-            //fps - для видеодорожки H264 можно явно задать значение fps (см. пример выше). Если fps не указан, он начитывается из потока.
-
-            //level - позволяет перезаписать поле level в потоке H264. Например, можно изменить профиль High@5.1 на High@4.1.
-            //Следует иметь ввиду, что обновляется только заголовок. H264 Поток может не удовлетворять требованиям 
-            //более низкого level. 
-
-            //insertSEI - параметр используется только для видео H.264. При его включении просиходит следующее: если оригинальный видеопоток не содержит 
-            //информации SEI picture timing и SEI buffering period, то такая инфомация добавляется в поток. Этот параметр рекомендуется включать
-            //для лучшей совместимости с приставкой Sony Playstation 3.
-
-            //contSPS - параметр используется только для видео H.264. При включении параметра, если оригинальный видеопоток не содержит циклически повторяющихся 
-            //элементов SPS/PPS (при импорте из MKV они могут быть записаны только один раз в начале файла), то SPS/PPS будут дополнительно вставляться в поток
-            //перед каждым ключевым кадром. Рекомендуется всегда включать этот параметр. 
-            //Примечание: для x264 потоков видеоплейер Dune HD не может декодировать повторный SPS элемент, видимо это ошибка в текущей прошивке плейера.
-
-
-            //timeshift - Для аудио дорожек поддерживается параметр timeshift, может быть как больше, так и меньше нуля. 
-            //Значение для timeshift задается в миллисекундах (в конце должно стоять ms) или в секундах (в конце буква s). Этот параметр 
-            //позволяет сдвинуть аудиодорожку по времени вперед (положительное значение параметра) или назад.
-
-            //down-to-dts - доступно только для дорожек DTS-HD. Делает преобразование DTS-HD в стандартный DTS.
-            //down-to-ac3 - доступно только для дорожек TRUE-HD c ядром AC3 внутри (обычно такие пишут на Blu-ray диски).
-
-            //track - начиная с версии 0.9.96 появилась возможность ссылаться на дорожки, лежащие в других контейнерах. В этом случае нужно указывать
-            //номер дорожки внутри контейнера. 
-            //Список поддерживаемых контейнеров:
-            //- TS/M2TS
-            //- EVO/VOB/MPG
-            //- MKV
-
-            /*Дополнительные параметры мьюксера в строке MUXOPT.
-
-            Параметры этой группы влият на весь поток в целом, а не на отдельную дорожку. Параметры перечисляются через пробел.
-
-            --pcr-on-video-pid - не выделять отдельный PID для PCR, а использовать существующий video PID.
-            --new-audio-pes - использовать байт 0xfd вместо 0xbd для дорожек AC3, True-HD, DTS и DTS-HD. Это соответствует стандарту Blu-ray.
-            -vbr - использовать переменный битрейт 
-            --minbitrate=xxxx - задает нижнюю границу vbr битрейта. Если поток занимает меньшее количество байт, будут вставляться NULL пакеты
-            для забивания потока до нужной полосы.
-            --maxbitrate=xxxx - верхняя граница vbr битрейта. 
-            --cbr - режим мьюксинга с фиксированным битрейтом. Опции --vbr и --cbr не должны использоваться совместно.
-            --vbv-len - длина виртуального буфера в миллисекундах. Значение по умолчанию 500. Обычно этот параметр используется совместно с --cbr.
-            Параметр аналогичен значению vbv-buffer-size в кодере x264, но задается не в килобитах, а в миллисекундах (при константном битрейте
-            их можно пересчитать друг в друга). Если вы самостоятельно кодировали файл в x264 в режиме константного битрейта, для более
-            плавного вещания файла в сеть рекомендуется выставлять такое же (или меньшее) значение этого параметра чем в x264. При переполнении виртуального
-            буфера в лог будут выведены соответствующие ошибки.
-            --bitrate=xxxx - битрейт для режима мьюксинга с фиксированным битрейтом.
-            Значения --maxbitrate, --minbitrate и --bitrate указывается в килобитах в секунду. Можно использовать не целое число, разделитель
-            между целой и дробной частью символ точка. Например: --maxbitrate=19423.432
-            --no-asyncio - не создавать отдельный поток для записи выходных файлов. Включение этого режима также отменяет флаг FILE_FLAG_NO_BUFFERING.
-            Это несколько снижает скорость записи, но позволяет видеть объем выходного файла во время работы.
-            --auto-chapters=nn - вставлять главы каждые nn минут. Используется только в режиме blu-ray muxing.
-            --custom-chapters=<строка параметров> - вставлять главы в указанных местах. Используется только в режиме blu-ray muxing.
-            Строка параметров имеет следующий вид: hh:mm:ss;hh:mm:ss и т.д. Через точку с запятой перечисляются временные метки, в которых
-            надо вставить новую главу. Строка не должна содержать пробелов.
-            --demux - в этом режиме выбранные аудио/видео треки сохраняются как отдельные файлы. При обработке дорожек на них накладываются
-              все выбранные эффекты, например, смена level для h.264. В режиме demux некоторые типы дорожек всегда подвераются изменениям при
-              сохранении в файл:
-               - Субтитры в формате Presentation graphic stream преобразуются в формат sup
-               - PCM аудиодорожки сохраняются в виде WAV файлов. Также происходит автоматическое разбиение на несколько файлов,
-                 если размер WAV файла превышает 4Gb.*/
-
             SafeDelete(m.outfilepath);
 
             if (m.format == Format.ExportFormats.BluRay)
@@ -3208,35 +3128,13 @@ namespace XviD4PSP
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
-            string addaudio = "";
-            if (m.outaudiostreams.Count > 0)
-            {
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                addaudio = " \"" + outstream.audiopath + "\"";
-            }
-
             //создаём мета файл
             string metapath = Settings.TempPath + "\\" + m.key + ".meta";
-
-            string vcodec = m.outvcodec;
-            if (m.outvcodec == "Copy")
-                vcodec = m.invcodecshort;
-
-            string vtag = "V_MPEG4/ISO/AVC";
-            if (vcodec == "MPEG2")
-                vtag = "V_MPEG-2";
-            if (vcodec == "VC1")
-                vtag = "V_MS/VFW/WVC1";
-
-            string fps = ", fps=" + m.outframerate;
-            if (m.outvcodec == "Copy")
-                fps = ", fps=" + m.inframerate;
-            if (fps == ", fps=")
-                fps = "";
-
-            string h264tweak = "";
-            if (vtag == "V_MPEG4/ISO/AVC")
-                h264tweak = ", level=4.1, insertSEI, contSPS";
+            string vcodec = (m.outvcodec == "Copy") ? m.invcodecshort : m.outvcodec;
+            string vtag = (vcodec == "MPEG2") ? "V_MPEG-2" : (vcodec == "VC1") ? "V_MS/VFW/WVC1" : "V_MPEG4/ISO/AVC";
+            string fps = (m.outvcodec == "Copy") ? ((!string.IsNullOrEmpty(m.inframerate)) ? ", fps=" + m.inframerate : "") : (!string.IsNullOrEmpty(m.outframerate)) ? ", fps=" + m.outframerate : "";
+            string h264tweak = (vtag == "V_MPEG4/ISO/AVC") ? ", level=4.1, insertSEI, contSPS" : "";
+            string bluray = (m.format == Format.ExportFormats.BluRay) ? " --blu-ray --auto-chapters=5" : "";
 
             string split = "";
             if (m.format == Format.ExportFormats.BluRay)
@@ -3268,63 +3166,52 @@ namespace XviD4PSP
                 }
             }
 
-            string bluray = "";
-            if (m.format == Format.ExportFormats.BluRay)
-                bluray = " --blu-ray --auto-chapters=5";
-
-            string meta = "MUXOPT --no-pcr-on-video-pid --new-audio-pes --vbr --vbv-len=500" + bluray + split + Environment.NewLine;
-
-            string ext = Path.GetExtension(m.infilepath).ToLower();
-
             //video path
-            string vpath = m.outvideofile;
-            string vtrack = "";
-            if (Format.IsDirectRemuxingPossible(m) &&
-                m.outvcodec == "Copy")
+            string vpath = m.outvideofile, vtrack = "";
+            if (m.outvcodec == "Copy" && Format.IsDirectRemuxingPossible(m))
             {
                 vpath = m.infilepath;
                 //if (ext == ".mkv")
-                    vtrack = ", track=" + m.invideostream_mkvid + ", lang=eng";
+                vtrack = ", track=" + m.invideostream_mkvid + ", lang=eng";
                 //else
                 //    vtrack = ", track=" + m.invideostream_ffid + ", lang=eng";
             }
+            else if (Path.GetExtension(m.outvideofile).ToLower() == ".mp4")
+            {
+                vtrack = ", track=1, lang=eng";
+            }
 
-            meta += vtag + ", \"" + vpath + "\"" + fps + h264tweak + vtrack + Environment.NewLine;
+            //Параметры мукса
+            string meta = "";
+            meta += "MUXOPT --no-pcr-on-video-pid --new-audio-pes --vbr --vbv-len=500" + bluray + split + Environment.NewLine; //meta - общие
+            meta += vtag + ", \"" + vpath + "\"" + fps + h264tweak + vtrack + Environment.NewLine;                             //meta - video
 
             if (m.outaudiostreams.Count > 0)
             {
                 AudioStream i = (AudioStream)m.inaudiostreams[m.inaudiostream];
                 AudioStream o = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-                string acodec = o.codec;
-                if (o.codec == "Copy")
-                    acodec = i.codecshort;
+                string acodec = (o.codec == "Copy") ? i.codecshort : o.codec;
 
                 string atag = "A_AC3";
-                if (acodec == "AAC")
-                    atag = "A_AAC";
-                if (acodec == "DTS")
-                    atag = "A_DTS";
-                if (acodec == "MP2" ||
-                    acodec == "MP3")
-                    atag = "A_MP3";
-                if (acodec == "PCM" ||
-                    acodec == "LPCM")
-                    atag = "A_LPCM";
+                if (acodec == "AAC") atag = "A_AAC";
+                else if (acodec == "DTS") atag = "A_DTS";
+                else if (acodec == "MP2" || acodec == "MP3") atag = "A_MP3";
+                else if (acodec == "PCM" || acodec == "LPCM") atag = "A_LPCM";
 
                 //audio path
-                string apath = o.audiopath;
-                string atrack = "";
-
+                string apath = o.audiopath, atrack = "";
                 if (File.Exists(o.audiopath))
                 {
                     apath = o.audiopath;
-                    atrack = ", track=0, lang=eng";
+                    if (Path.GetExtension(o.audiopath).ToLower() == ".m4a")
+                        atrack = ", track=1, lang=eng";
+                    else
+                        atrack = ", track=0, lang=eng";
                 }
                 else
                 {
-                    if (Format.IsDirectRemuxingPossible(m) &&
-                        o.codec == "Copy")
+                    if (o.codec == "Copy" && Format.IsDirectRemuxingPossible(m))
                     {
                         apath = m.infilepath;
                         //if (ext == ".mkv")
@@ -3336,16 +3223,11 @@ namespace XviD4PSP
 
                 if (CopyDelay) atrack += ", timeshift=" + o.delay + "ms";
 
-                meta += atag + ", \"" + apath + "\"" + atrack;
+                meta += atag + ", \"" + apath + "\"" + atrack; //meta - audio
             }
 
             //пишем meta в файл
-            StreamWriter sw = new StreamWriter(metapath, false, System.Text.Encoding.Default);
-            string[] separator = new string[] { Environment.NewLine };
-            string[] lines = meta.Split(separator, StringSplitOptions.None);
-            foreach (string l in lines)
-                sw.WriteLine(l);
-            sw.Close();
+            File.WriteAllText(metapath, meta, System.Text.Encoding.Default);
 
             info.Arguments = "\"" + metapath + "\" \"" + m.outfilepath + "\"";
 
@@ -3375,7 +3257,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         double procent = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
                         worker.ReportProgress(Convert.ToInt32((procent / 100.0) * (double)m.outframes));
@@ -3389,17 +3271,19 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = 0;
-            cf = 0;
+            of = cf = 0;
+
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
+            {
+                IsErrors = true;
+                ErrorException(encoderProcess.StandardError.ReadToEnd());
+            }
 
             //чистим ресурсы
             encoderProcess.Close();
             encoderProcess.Dispose();
             encoderProcess = null;
-
-            //проверка на ошибки в логе
-            if (encodertext != null && encodertext.Contains("error,"))
-                IsErrors = true;
 
             if (IsAborted || IsErrors) return;
 

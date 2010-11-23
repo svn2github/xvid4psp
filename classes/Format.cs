@@ -1675,7 +1675,7 @@ namespace XviD4PSP
                }
                else if (muxer == Muxers.tsmuxer)
                {
-                   if (ext == ".mkv" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".evo" || ext == ".mts" || ext == ".mpg")
+                   if (ext == ".mkv" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".evo" || ext == ".mts" || ext == ".mpg" || ext == ".mp4" || ext == ".mov")
                        return true;
                    else
                        return false;
@@ -1702,7 +1702,7 @@ namespace XviD4PSP
 
            if (m.format == ExportFormats.TS || m.format == ExportFormats.M2TS || m.format == ExportFormats.BluRay)
            {
-               if (ext == ".mkv" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".evo" || ext == ".mts" || ext == ".mpg")
+               if (ext == ".mkv" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".evo" || ext == ".mts" || ext == ".mpg" || ext == ".mp4" || ext == ".mov")
                    return true;
                else
                    return false;
@@ -1746,6 +1746,7 @@ namespace XviD4PSP
 
            if (m.invcodecshort == "DivX" || m.invcodecshort == "XviD") ext = "avi";
            else if (ext.Contains("vp5") || ext.Contains("vp6") || ext == "h263") ext = "avi";
+           else if (ext.Contains("vp8")) ext = "ivf"; //vp8
            else if (m.invcodecshort == "MPEG1") ext = "m1v";
            else if (m.invcodecshort == "MPEG2") ext = "m2v";
            else if (m.invcodecshort == "h264") ext = "h264";
@@ -1756,11 +1757,14 @@ namespace XviD4PSP
            else if (ext.Contains("m") && ext.Contains("jp")) ext = "avi"; //M-JPEG
            else if (ext == "huffman" || ext == "hfyu" || ext == "ffvh") ext = "avi";
            else if (ext == "ffv1") ext = "avi";
-           else if (fext == "avi") ext = "avi";
+           else if (fext == ".avi") ext = "avi";
 
            Demuxers dem = GetDemuxer(m);
-           //Muxers mux = GetMuxer(m);
            if (dem == Demuxers.mp4box && ext == "avi") ext = "m4v";
+           //ffmpeg извлекает кривой raw-h264 (из mkv, mp4, mov, flv - точно, но из avi, mpg, ts, m2ts вроде нормальный)
+           else if (dem == Demuxers.ffmpeg && ext == "h264" && fext != ".avi" && fext != ".mpg" && fext != ".ts" && fext != ".m2ts") ext = "mp4";
+
+           //Muxers mux = GetMuxer(m);
            //if (mux == Muxers.ffmpeg && ext == "h263") ext = "flv";
 
            return ext;
@@ -1978,9 +1982,9 @@ namespace XviD4PSP
       public static Demuxers GetDemuxer(Massive m)
       {
           //Muxers mux = GetMuxer(m);
-          string ext = Path.GetExtension(m.infilepath);
+          string ext = Path.GetExtension(m.infilepath).ToLower();
 
-          if (ext == ".mkv")
+          if (ext == ".mkv" || ext == ".webm")
           {
               if (m.invcodecshort == "VC1" || m.invcodecshort.Contains("WMV"))
                   return Demuxers.ffmpeg;
@@ -1992,6 +1996,7 @@ namespace XviD4PSP
           else if (ext == ".pmp")
               return Demuxers.pmpdemuxer;
           else if (ext == ".mp4" ||
+                   ext == ".m4v" ||
                    ext == ".mov" ||
                    ext == ".3gp")
           {

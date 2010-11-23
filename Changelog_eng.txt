@@ -1,5 +1,11 @@
-XviD4PSP 5.0.37.8 r132->r191 06.11.10, main changes:
+XviD4PSP 5.0.37.8 r132->r192 23.11.10, main changes:
 
+>>> (r192) Fixed demuxing of VP8 video (from WebM).
+>>> (r192) tsMuxeR: better error handling; fixed muxing of AAC stored in M4A; MOV and MP4 file extensions added to
+           the list of valid extensions for Direct Remuxing.
+>>> (r192) FFmpeg produces broken H264 stream when extracting a raw video from some containers (MKV, MP4, MOV, FLV,..).
+           As a workaround, extracting from such containers will be performed not to raw H264, but to MP4.
+>>> (r192) GetDemuxer() always returns FFmpeg as demuxer for files with extension in uppercase (rep. by newsky).
 >>> (r191) Resolution/Aspect window: fixed (?) "Input aspect" switcher.
 >>> (r191) Custom format settings window: editing of parameters is now more user-friendly.
 >>> (r190) FFRebuilder window was reworked. Added ability to edit command line, ability to store presets, Help tab.

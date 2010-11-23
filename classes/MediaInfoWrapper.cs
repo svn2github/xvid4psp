@@ -269,6 +269,8 @@ namespace XviD4PSP
                 }
                 else if (s == "Flash Video")
                     s = "FLV";
+                else if (s == "V_VP8")
+                    s = "VP8";
                 return s;
             }
         }
