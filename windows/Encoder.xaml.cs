@@ -500,59 +500,8 @@ namespace XviD4PSP
                 SetLog("");
             }
 
-            encoderProcess.StartInfo = info;
-            encoderProcess.Start();
-            SetPriority(Settings.ProcessPriority);
-
-            string line;
-            string pat = @"(\d+)/(\d+).frames,.(\d+.\d+).fps"; //@"(\d+)/(\d+)"
-            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match mat;
-
-            //первый проход
-            while (!encoderProcess.HasExited)
-            {
-                locker.WaitOne();
-                line = encoderProcess.StandardError.ReadLine();
-
-                if (line != null)
-                {
-                    mat = r.Match(line);
-                    if (mat.Success == true)
-                    {
-                        worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                        encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
-                    }
-                    else
-                    {
-                        if (line.StartsWith("encoded"))
-                        {
-                            SetLog("x264 [total]: " + line);
-                        }
-                        else
-                        {
-                            if (encodertext != null) encodertext += Environment.NewLine;
-                            encodertext += line;
-                            SetLog(line);
-                        }
-                    }
-                }
-            }
-
-            //Дочитываем остатки лога, если что-то не успело считаться
-            SetLog(encoderProcess.StandardError.ReadToEnd());
-
-            //обнуляем прогресс
-            encoder_fps = of = cf = 0;
-
-            //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-            {
-                IsErrors = true;
-                ErrorException(encodertext);
-            }
-
-            encodertext = null;
+            //Кодируем первый проход
+            Do_x264_Encoding_Cycle(info);
 
             //второй проход
             if (m.vpasses.Count > 1 && !IsAborted && !IsErrors)
@@ -610,52 +559,8 @@ namespace XviD4PSP
                     SetLog("");
                 }
 
-                encoderProcess.StartInfo = info;
-                encoderProcess.Start();
-                SetPriority(Settings.ProcessPriority);
-
-                while (!encoderProcess.HasExited)
-                {
-                    locker.WaitOne();
-                    line = encoderProcess.StandardError.ReadLine();
-                    if (line != null)
-                    {
-                        mat = r.Match(line);
-                        if (mat.Success == true)
-                        {
-                            worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                            encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
-                        }
-                        else
-                        {
-                            if (line.StartsWith("encoded"))
-                            {
-                                SetLog("x264 [total]: " + line);
-                            }
-                            else
-                            {
-                                if (encodertext != null) encodertext += Environment.NewLine;
-                                encodertext += line;
-                                SetLog(line);
-                            }
-                        }
-                    }
-                }
-
-                //Дочитываем остатки лога, если что-то не успело считаться
-                SetLog(encoderProcess.StandardError.ReadToEnd());
-
-                //обнуляем прогресс
-                encoder_fps = of = cf = 0;
-
-                //Отлавливаем ошибку по ErrorLevel
-                if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-                {
-                    IsErrors = true;
-                    ErrorException(encodertext);
-                }
-
-                encodertext = null;
+                //Кодируем второй проход
+                Do_x264_Encoding_Cycle(info);
             }
 
             //третий проход
@@ -679,52 +584,8 @@ namespace XviD4PSP
                     SetLog("");
                 }
 
-                encoderProcess.StartInfo = info;
-                encoderProcess.Start();
-                SetPriority(Settings.ProcessPriority);
-
-                while (!encoderProcess.HasExited)
-                {
-                    locker.WaitOne();
-                    line = encoderProcess.StandardError.ReadLine();
-                    if (line != null)
-                    {
-                        mat = r.Match(line);
-                        if (mat.Success == true)
-                        {
-                            worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                            encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
-                        }
-                        else
-                        {
-                            if (line.StartsWith("encoded"))
-                            {
-                                SetLog("x264 [total]: " + line);
-                            }
-                            else
-                            {
-                                if (encodertext != null) encodertext += Environment.NewLine;
-                                encodertext += line;
-                                SetLog(line);
-                            }
-                        }
-                    }
-                }
-
-                //Дочитываем остатки лога, если что-то не успело считаться
-                SetLog(encoderProcess.StandardError.ReadToEnd());
-
-                //обнуляем прогресс
-                encoder_fps = of = cf = 0;
-
-                //Отлавливаем ошибку по ErrorLevel
-                if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-                {
-                    IsErrors = true;
-                    ErrorException(encodertext);
-                }
-
-                encodertext = null;
+                //Кодируем третий проход
+                Do_x264_Encoding_Cycle(info);
             }
 
             //чистим ресурсы
@@ -745,6 +606,64 @@ namespace XviD4PSP
 
             SafeDelete(passlog);
             SafeDelete(passlog + ".mbtree");
+        }
+
+        private void Do_x264_Encoding_Cycle(ProcessStartInfo info)
+        {
+            encoderProcess.StartInfo = info;
+            encoderProcess.Start();
+            SetPriority(Settings.ProcessPriority);
+
+            string line;
+            string pat = @"(\d+)/(\d+).frames,.(\d+.\d+).fps";
+            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match mat;
+
+            while (!encoderProcess.HasExited)
+            {
+                locker.WaitOne();
+                line = encoderProcess.StandardError.ReadLine();
+
+                if (line != null)
+                {
+                    mat = r.Match(line);
+                    if (mat.Success == true)
+                    {
+                        worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
+                        encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
+                    }
+                    else
+                    {
+                        if (line.StartsWith("encoded"))
+                        {
+                            SetLog("x264 [total]: " + line);
+                        }
+                        else
+                        {
+                            if (encodertext != null) encodertext += Environment.NewLine;
+                            encodertext += line;
+                            SetLog(line);
+                        }
+                    }
+                }
+            }
+
+            //Дочитываем остатки лога, если что-то не успело считаться
+            line = encoderProcess.StandardError.ReadToEnd();
+            if (!string.IsNullOrEmpty(line)) SetFilteredLog(r, line);
+            SetLog("");
+
+            //обнуляем прогресс
+            encoder_fps = of = cf = 0;
+
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
+            {
+                IsErrors = true;
+                ErrorException(encodertext);
+            }
+
+            encodertext = null;
         }
 
         private void make_ffmpeg()
@@ -1200,8 +1119,15 @@ namespace XviD4PSP
             }
         }
 
-        private void Do_XviD_Encoding_Cycle()
+        private void Do_XviD_Encoding_Cycle(ProcessStartInfo info)
         {
+            encodertext = null;
+            encoderProcess.StartInfo = info;
+            readFromStdErrThread = new Thread(new ThreadStart(readErrStream));
+            encoderProcess.Start();
+            readFromStdErrThread.Start();
+            SetPriority(Settings.ProcessPriority);
+
             string line = "";
             string pat = @"(\d+):\Dkey=";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -1330,8 +1256,7 @@ namespace XviD4PSP
             }
 
             //Zones
-            if (m.XviD_options.cartoon ||
-                m.XviD_options.grey)
+            if (m.XviD_options.cartoon || m.XviD_options.grey)
             {
                 ArrayList newclis = new ArrayList();
                 foreach (string cli in m.vpasses)
@@ -1439,19 +1364,11 @@ namespace XviD4PSP
                 SetLog("");
             }
 
-            encoderProcess.StartInfo = info;
-            readFromStdErrThread = new Thread(new ThreadStart(readErrStream));
-            encoderProcess.Start();
-            readFromStdErrThread.Start();
-            SetPriority(Settings.ProcessPriority);
-
-            //первый проход
-            Do_XviD_Encoding_Cycle();
-
-            if (IsAborted || IsErrors) return;
+            //Кодируем первый проход
+            Do_XviD_Encoding_Cycle(info);
 
             //второй проход
-            if (m.vpasses.Count > 1)
+            if (m.vpasses.Count > 1 && !IsAborted && !IsErrors)
             {
                 //режим двойного качества
                 int vbitrate = 0;
@@ -1506,21 +1423,12 @@ namespace XviD4PSP
                     SetLog("");
                 }
 
-                encodertext = null;
-                encoderProcess.StartInfo = info;
-                readFromStdErrThread = new Thread(new ThreadStart(readErrStream));
-                encoderProcess.Start();
-                readFromStdErrThread.Start();
-                SetPriority(Settings.ProcessPriority);
-
-                //второй проход
-                Do_XviD_Encoding_Cycle();
+                //Кодируем второй проход
+                Do_XviD_Encoding_Cycle(info);
             }
 
-            if (IsAborted || IsErrors) return;
-
             //третий проход
-            if (m.vpasses.Count == 3)
+            if (m.vpasses.Count == 3 && !IsAborted && !IsErrors)
             {
                 SetLog("...last pass...");
 
@@ -1540,15 +1448,8 @@ namespace XviD4PSP
                     SetLog("");
                 }
 
-                encodertext = null;
-                encoderProcess.StartInfo = info;
-                readFromStdErrThread = new Thread(new ThreadStart(readErrStream));
-                encoderProcess.Start();
-                readFromStdErrThread.Start();
-                SetPriority(Settings.ProcessPriority);
-
-                //третий проход
-                Do_XviD_Encoding_Cycle();
+                //Кодируем третий проход
+                Do_XviD_Encoding_Cycle(info);
             }
 
             //чистим ресурсы
@@ -3877,7 +3778,6 @@ namespace XviD4PSP
 
         private void make_pmp()
         {
-
             if (m.outaudiostreams.Count == 0)
             {
                 AudioStream stream = new AudioStream();
@@ -4049,8 +3949,7 @@ namespace XviD4PSP
             if (IsAborted || IsErrors) return;
 
             //проверка на удачное завершение
-            if (!File.Exists(m.outfilepath) ||
-                new FileInfo(m.outfilepath).Length == 0)
+            if (!File.Exists(m.outfilepath) || new FileInfo(m.outfilepath).Length == 0)
             {
                 IsErrors = true;
                 ErrorException(encodertext);

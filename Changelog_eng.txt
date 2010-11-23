@@ -1,5 +1,6 @@
-XviD4PSP 5.0.37.8 r132->r192 23.11.10, main changes:
+XviD4PSP 5.0.37.8 r132->r193 23.11.10, main changes:
 
+>>> (r193) Final log from x264.exe sometimes may contain garbage (progress info) - fixed.
 >>> (r192) Fixed demuxing of VP8 video (from WebM).
 >>> (r192) tsMuxeR: better error handling; fixed muxing of AAC stored in M4A; MOV and MP4 file extensions added to
            the list of valid extensions for Direct Remuxing.
