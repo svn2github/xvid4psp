@@ -44,7 +44,7 @@ namespace XviD4PSP
                 string file = "\\Changelog_eng.txt";
                 if (Settings.Language == "Russian") file = "\\Changelog_rus.txt";
                 using (StreamReader sr = new StreamReader(Calculate.StartupPath + file, System.Text.Encoding.Default))
-                    new ShowWindow(this, "Changelog", sr.ReadToEnd(), new FontFamily("Tahoma"));
+                    new ShowWindow(this, "Changelog", sr.ReadToEnd(), new FontFamily("Lucida Console"));
             }
             catch (Exception ex)
             {

@@ -13,10 +13,10 @@
         </Grid.ColumnDefinitions>
         <Border BorderThickness="1,1,1,1" BorderBrush="Gray" Margin="0,0,14.75,0" Grid.RowSpan="2" HorizontalAlignment="Stretch" d:LayoutOverrides="HorizontalAlignment">
             <!--Bind the TextBlock to the Value property-->
-            <TextBox Width="Auto" Height="Auto" Text="{Binding Path=Value, ElementName=userControl, Mode=Default}" TextWrapping="Wrap" TextChanged="TextBox_TextChanged" KeyUp="TextBox_KeyUp" MouseWheel="TextBox_MouseWheel"/>
+            <TextBox Width="Auto" Height="Auto" VerticalContentAlignment="Center" Text="{Binding Path=Value, ElementName=userControl, Mode=Default}" TextWrapping="Wrap" TextChanged="TextBox_TextChanged" KeyUp="TextBox_KeyUp" MouseWheel="TextBox_MouseWheel"/>
         </Border>
-        <RepeatButton x:Name="upButton" Click="upButton_Click" Grid.Row="0" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient}">
-            <Path Height="5" Fill="#FFFFFFFF" Stretch="Fill" Stroke="{x:Null}" Data="M175.49994,160.88001 C227.12474,220.02856 227.12474,220.03166 227.12474,220.03166 L278.74953,160.92" Width="8" RenderTransformOrigin="0.5,0.5">
+        <RepeatButton x:Name="upButton" Focusable="False" Click="upButton_Click" Grid.Row="0" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient}">
+            <Path Height="4" Fill="#FFFFFFFF" Stretch="Fill" Stroke="{x:Null}" Data="M175.49994,160.88001 C227.12474,220.02856 227.12474,220.03166 227.12474,220.03166 L278.74953,160.92" Width="8" RenderTransformOrigin="0.5,0.5">
                 <Path.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1" ScaleY="-1"/>
@@ -27,8 +27,8 @@
                 </Path.RenderTransform>
             </Path>
         </RepeatButton>
-        <RepeatButton x:Name="downButton" Click="downButton_Click" Grid.Row="1" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient}">
-            <Path Height="5" Fill="#FFFFFFFF" Stretch="Fill" Stroke="{x:Null}" Data="M175.49994,160.88001 C227.12474,220.02856 227.12474,220.03166 227.12474,220.03166 L278.74953,160.92" Width="8" RenderTransformOrigin="0.5,0.5">
+        <RepeatButton x:Name="downButton" Focusable="False" Click="downButton_Click" Grid.Row="1" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient}">
+            <Path Height="4" Fill="#FFFFFFFF" Stretch="Fill" Stroke="{x:Null}" Data="M175.49994,160.88001 C227.12474,220.02856 227.12474,220.03166 227.12474,220.03166 L278.74953,160.92" Width="8" RenderTransformOrigin="0.5,0.5">
                 <Path.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1" ScaleY="1"/>

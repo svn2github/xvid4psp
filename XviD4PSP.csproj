@@ -267,7 +267,7 @@
     <Compile Include="windows\OpenDialog.xaml.cs">
       <DependentUpon>OpenDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="windows\CopyOrDisabled.xaml.cs">
+    <Compile Include="codec_controls\CopyOrDisabled.xaml.cs">
       <DependentUpon>CopyOrDisabled.xaml</DependentUpon>
     </Compile>
     <Compile Include="windows\Demuxer.xaml.cs">
@@ -379,7 +379,7 @@
     <Page Include="windows\DVDImport.xaml" />
     <Page Include="windows\MainWindow.xaml" />
     <Page Include="windows\OpenDialog.xaml" />
-    <Page Include="windows\CopyOrDisabled.xaml" />
+    <Page Include="codec_controls\CopyOrDisabled.xaml" />
     <Page Include="windows\Demuxer.xaml" />
     <Page Include="windows\Shutdown.xaml" />
     <Page Include="windows\Encoder.xaml" />

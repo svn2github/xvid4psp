@@ -5,8 +5,7 @@
 	x:Class="XviD4PSP.ColorCorrection"
 	x:Name="Window"
 	Title="Color correction"
-	Width="352" Height="394" ResizeMode="NoResize" SizeToContent="Manual" WindowStartupLocation="CenterOwner">
-
+	Width="352" Height="Auto" ResizeMode="NoResize" SizeToContent="Height" WindowStartupLocation="CenterOwner">
 	<Grid x:Name="LayoutRoot">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
@@ -14,40 +13,46 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-		<Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,66.045">
-			<Label OpacityMask="{x:Null}" x:Name="text_hue" Content="Hue:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="7,11.38,0,0" VerticalAlignment="Top"/>
-			<ComboBox x:Name="combo_hue" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="63" HorizontalAlignment="Right" Margin="0,18.04,8,0" VerticalAlignment="Top" SelectionChanged="combo_hue_SelectionChanged"/>
-			<Slider x:Name="slider_hue" Style="{DynamicResource GlassSlider}" Margin="7,44,9,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_hue_ValueChanged" />
-			<Label OpacityMask="{x:Null}" x:Name="text_saturation" Content="Saturation:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="7,70.184,0,0" VerticalAlignment="Top"/>
-			<ComboBox x:Name="combo_saturation" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,76.844,8,0" VerticalAlignment="Top" Width="63" SelectionChanged="combo_saturation_SelectionChanged"/>
-			<Slider x:Name="slider_saturation" Style="{DynamicResource GlassSlider}" Margin="8,102.804,8,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_saturation_ValueChanged" />
-			<Label OpacityMask="{x:Null}" x:Name="text_brightness" Content="Brightness:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,128.988,0,0" VerticalAlignment="Top"/>
-			<ComboBox x:Name="combo_brightness" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="63" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,135.648,8,132.347" VerticalAlignment="Top" SelectionChanged="combo_brightness_SelectionChanged"/>
-			<Slider x:Name="slider_brightness" Style="{DynamicResource GlassSlider}" Margin="8,161.6,8,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_brightness_ValueChanged" />
-			<Label OpacityMask="{x:Null}" x:Name="text_contrast" Content="Contrast:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,187.792,0,0" VerticalAlignment="Top"/>
-			<ComboBox x:Name="combo_contrast" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="63" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,194.452,9,0" VerticalAlignment="Top" SelectionChanged="combo_contrast_SelectionChanged"/>
-			<Slider x:Name="slider_contrast" Style="{DynamicResource GlassSlider}" Margin="8,220.4,8,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_contrast_ValueChanged" />
-			<CheckBox x:Name="check_colormatrix" Width="Auto" Height="Auto" Content="ColorMatrix" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="11,255,0,21" VerticalAlignment="Top" Checked="check_colormatrix_Checked" Unchecked="check_colormatrix_Unchecked"/>
-		<ComboBox Width="100" IsSynchronizedWithCurrentItem="True" x:Name="combo_histogram" d:LayoutOverrides="Height" Margin="0,255,9,0" VerticalAlignment="Top" SelectionChanged="combo_histogram_SelectionChanged" HorizontalAlignment="Right"/>
-       <Label OpacityMask="{x:Null}" x:Name="text_histogram" Content="Histogram:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,250,110,0" VerticalAlignment="Top"/>
-        </Grid>
-		<Grid HorizontalAlignment="Stretch" Margin="0,0,0,32.877" x:Name="grid_profiles" Width="Auto" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom" Height="33.168">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*"/>
-			</Grid.ColumnDefinitions>
-			<ComboBox Width="Auto" IsSynchronizedWithCurrentItem="True" x:Name="combo_profile" d:LayoutOverrides="Height" Margin="112,6,68,0" VerticalAlignment="Top" SelectionChanged="combo_profile_SelectionChanged" HorizontalAlignment="Stretch"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_profile" Content="Profile:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment, Width, Height" Margin="8,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-			<Button HorizontalAlignment="Right" Margin="0,6,36,6" x:Name="button_add" Width="24" Content="+" Click="button_add_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-			<Button HorizontalAlignment="Right" Margin="0,6,10,6" x:Name="button_remove" Width="24" Content="-" Click="button_remove_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-		</Grid>
-		<Grid HorizontalAlignment="Stretch" x:Name="grid_main_buttons" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom" Height="32.877">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*"/>
-			</Grid.ColumnDefinitions>
-			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" Click="button_cancel_Click" RenderTransformOrigin="1.122,0.428" d:LayoutOverrides="GridBox" HorizontalAlignment="Right" Margin="0,5,8,5" Width="75" Grid.ColumnSpan="1" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" Width="75" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,5,87,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-			<Button x:Name="button_apply" Content="Apply" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,5,0,5" Width="75" Click="button_apply_Click"/>
-		    <Button x:Name="button_fullscreen" Content="Fullscreen" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="88,5,0,5" Width="75" Click="button_fullscreen_Click"/>
-        </Grid>
-	</Grid>
+        <StackPanel>
+            <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,0">
+                <Label OpacityMask="{x:Null}" x:Name="text_hue" Content="Hue:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="7,11.38,0,0" VerticalAlignment="Top"/>
+                <ComboBox x:Name="combo_hue" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="63" HorizontalAlignment="Right" Margin="0,18.04,8,0" VerticalAlignment="Top" SelectionChanged="combo_hue_SelectionChanged"/>
+                <Slider x:Name="slider_hue" Style="{DynamicResource GlassSlider}" Margin="7,44,9,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_hue_ValueChanged" />
+                <Label OpacityMask="{x:Null}" x:Name="text_saturation" Content="Saturation:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="7,70.184,0,0" VerticalAlignment="Top"/>
+                <ComboBox x:Name="combo_saturation" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,76.844,8,0" VerticalAlignment="Top" Width="63" SelectionChanged="combo_saturation_SelectionChanged"/>
+                <Slider x:Name="slider_saturation" Style="{DynamicResource GlassSlider}" Margin="8,102.804,8,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_saturation_ValueChanged" />
+                <Label OpacityMask="{x:Null}" x:Name="text_brightness" Content="Brightness:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,128.988,0,0" VerticalAlignment="Top"/>
+                <ComboBox x:Name="combo_brightness" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="63" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,135.648,8,132.347" VerticalAlignment="Top" SelectionChanged="combo_brightness_SelectionChanged"/>
+                <Slider x:Name="slider_brightness" Style="{DynamicResource GlassSlider}" Margin="8,161.6,8,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_brightness_ValueChanged" />
+                <Label OpacityMask="{x:Null}" x:Name="text_contrast" Content="Contrast:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,187.792,0,0" VerticalAlignment="Top"/>
+                <ComboBox x:Name="combo_contrast" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="63" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,194.452,9,0" VerticalAlignment="Top" SelectionChanged="combo_contrast_SelectionChanged"/>
+                <Slider x:Name="slider_contrast" Style="{DynamicResource GlassSlider}" Margin="8,220.4,8,0" VerticalAlignment="Top" Height="22.184" ValueChanged="slider_contrast_ValueChanged" />
+                <CheckBox x:Name="check_colormatrix" Width="Auto" Height="Auto" Content="ColorMatrix" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="11,255,0,23" VerticalAlignment="Top" Checked="check_colormatrix_Checked" Unchecked="check_colormatrix_Unchecked"/>
+                <ComboBox Width="100" IsSynchronizedWithCurrentItem="True" x:Name="combo_histogram" d:LayoutOverrides="Height" Margin="0,255,9,0" VerticalAlignment="Top" SelectionChanged="combo_histogram_SelectionChanged" HorizontalAlignment="Right"/>
+                <Label OpacityMask="{x:Null}" x:Name="text_histogram" Content="Histogram:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,250,110,0" VerticalAlignment="Top"/>
+            </Grid>
+            <Grid Margin="0,0,0,0" x:Name="grid_profiles" Width="Auto" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom" Height="Auto">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="64"/>
+                </Grid.ColumnDefinitions>
+                <Grid Margin="0,6,0,6" x:Name="combo_grid" Grid.Column="1">
+                    <ComboBox Width="Auto" MaxWidth="{Binding Path=ActualWidth, ElementName=combo_grid}" IsSynchronizedWithCurrentItem="True" x:Name="combo_profile" d:LayoutOverrides="Height" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="combo_profile_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
+                </Grid>
+                <Label OpacityMask="{x:Null}" x:Name="text_profile" Content="Profile:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment, Width, Height" Margin="3,0,2,2" VerticalAlignment="Center"/>
+                <Button HorizontalAlignment="Right" Margin="0,6,34,6" x:Name="button_add" Width="24" Content="+" Click="button_add_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Grid.Column="2"/>
+                <Button HorizontalAlignment="Right" Margin="0,6,8,6" x:Name="button_remove" Width="24" Content="-" Click="button_remove_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Grid.Column="2"/>
+            </Grid>
+            <Grid HorizontalAlignment="Stretch" x:Name="grid_main_buttons" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom" Height="32.877">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="button_apply" Content="Apply" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="8,5,0,5" Width="75" Click="button_apply_Click"/>
+                <Button x:Name="button_fullscreen" Content="Fullscreen" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="88,5,0,5" Width="75" Click="button_fullscreen_Click"/>
+                <Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" Width="75" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,5,87,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+                <Button x:Name="button_cancel" Height="Auto" Content="Cancel" Click="button_cancel_Click" RenderTransformOrigin="1.122,0.428" d:LayoutOverrides="GridBox" HorizontalAlignment="Right" Margin="0,5,8,5" Width="75" Grid.ColumnSpan="1" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
 </Window>

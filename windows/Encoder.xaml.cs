@@ -1184,6 +1184,21 @@ namespace XviD4PSP
 
         private void make_XviD()
         {
+            //Версия XviD
+            bool xvid_old = Settings.XviD_Old_Version;
+
+            //Меняем ключи lumimasking/masking
+            if (m.XviD_options.masking > 0)
+            {
+                for (int n = 0; n < m.vpasses.Count; n++)
+                {
+                    if (xvid_old)
+                        m.vpasses[n] = m.vpasses[n].ToString().Replace(" -masking " + m.XviD_options.masking, " -lumimasking");
+                    else
+                        m.vpasses[n] = m.vpasses[n].ToString().Replace(" -lumimasking", " -masking 2");
+                }
+            }
+
             //прописываем интерлейс флаги
             if (m.interlace == SourceType.FILM ||
                 m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
@@ -1193,21 +1208,9 @@ namespace XviD4PSP
             {
                 if (m.deinterlace == DeinterlaceType.Disabled)
                 {
-                    //порядок полей
-                    int fieldorder = 1; //TopFieldFirst
-                    if (m.fieldOrder == FieldOrder.BFF)
-                        fieldorder = 0;
-
-                    ArrayList newclis = new ArrayList();
-                    foreach (string cli in m.vpasses)
-                    {
-                        string newclie = cli;
-                        newclie = newclie + " -interlaced " + fieldorder;
-                        newclis.Add(newclie);
-                    }
-
-                    //передаём обновленные параметры
-                    m.vpasses = (ArrayList)newclis.Clone();
+                    //(BFF:1, TFF:2) (1)
+                    for (int n = 0; n < m.vpasses.Count; n++)
+                        m.vpasses[n] = m.vpasses[n].ToString() + " -interlaced " + (m.fieldOrder == FieldOrder.TFF ? "2" : "1");
                 }
             }
 
@@ -1236,38 +1239,23 @@ namespace XviD4PSP
                 }
 
                 m.outvbitrate = bitrate;
-
-                ArrayList newclis = new ArrayList();
-                foreach (string cli in m.vpasses)
-                    newclis.Add(cli.Replace("-size " + targetsize + "000", "-bitrate " + bitrate + "000"));
-                m.vpasses = (ArrayList)newclis.Clone();
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace("-size " + targetsize + "000", "-bitrate " + bitrate + "000");
             }
 
             //FOURCC
             if (m.XviD_options.fourcc != "XVID")
             {
-                ArrayList newclis = new ArrayList();
-                foreach (string cli in m.vpasses)
-                {
-                    newclis.Add(cli.Replace(" -fourcc " + m.XviD_options.fourcc, ""));
-                }
-                //передаём обновленные параметры
-                m.vpasses = (ArrayList)newclis.Clone();
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace(" -fourcc " + m.XviD_options.fourcc, "");
             }
 
             //Zones
-            if (m.XviD_options.cartoon || m.XviD_options.grey)
+            if (m.XviD_options.cartoon || m.XviD_options.gray)
             {
-                ArrayList newclis = new ArrayList();
-                foreach (string cli in m.vpasses)
-                {
-                    string sline = cli.Replace("-5G/1000", "-5G/" + m.outframes);
-                    sline = sline.Replace("-5C/1000", "-5C/" + m.outframes);
-                    sline = sline.Replace("-5GC/1000", "-5GC/" + m.outframes);
-                    newclis.Add(sline);
-                }
-                //передаём обновленные параметры
-                m.vpasses = (ArrayList)newclis.Clone();
+                int frames = m.outframes;
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace("-5G/1000", "-5G/" + frames).Replace("-5C/1000", "-5C/" + frames).Replace("-5GC/1000", "-5GC/" + frames);
             }
 
             step++;
@@ -1328,7 +1316,7 @@ namespace XviD4PSP
             ProcessStartInfo info = new ProcessStartInfo();
             string arguments;
 
-            info.FileName = Calculate.StartupPath + "\\apps\\xvid_encraw\\xvid_encraw.exe";
+            info.FileName = Calculate.StartupPath + "\\apps\\xvid_encraw" + (xvid_old ? "\\1.2.2" : "") + "\\xvid_encraw.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
             info.RedirectStandardOutput = true;

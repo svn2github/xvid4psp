@@ -71,7 +71,7 @@
 	<Grid x:Name="LayoutRoot" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient_2}">
 		<Image Margin="0,0,0,0" Source="..\pictures\logo_xvid.png" Stretch="None" VerticalAlignment="Top" Height="95" HorizontalAlignment="Center"/>
 		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,92,0,0">
-			<TabItem Header="Main">
+			<TabItem Header="Main" Width="50" Padding="0,2,0,2">
 				<Grid Width="304" Height="210">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
@@ -81,18 +81,18 @@
 					</Grid.RowDefinitions>
 					<ComboBox Margin="0,20.66,4,0" x:Name="combo_mode" VerticalAlignment="Top" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mode_SelectionChanged" HorizontalAlignment="Right" d:LayoutOverrides="HorizontalAlignment"/>
 					<Label OpacityMask="{x:Null}" x:Name="text_mode" Content="Encoding mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" Margin="4,14,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate: (kbps)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="4,43,0,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_codec_preset" Width="127" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_codec_preset_SelectionChanged" HorizontalAlignment="Right" Margin="0,77.9,4,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_codec_preset" Content="Preset:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="4,74,0,0" VerticalAlignment="Top"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,47.777,4,0" Width="127" x:Name="num_bitrate" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_fourcc" Width="127" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,105.52,4,0" VerticalAlignment="Top" SelectionChanged="combo_fourcc_SelectionChanged" IsEnabled="True"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_fourcc" Content="FOURCC:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="4,100,0,0" VerticalAlignment="Top"/>					
-                    <CheckBox x:Name="check_fullpass" Width="Auto" Height="Auto" Content="Full 1-st pass" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Left" Margin="9,0,0,35" VerticalAlignment="Bottom" Click="check_fullpass_Clicked"/>
-                    <CheckBox x:Name="check_cartoon" Width="Auto" Height="Auto" Content="Cartoon" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Left" Margin="9,0,0,12.5" VerticalAlignment="Bottom" Click="check_cartoon_Clicked"/>
-					<CheckBox x:Name="check_grayscale" Width="Auto" Height="Auto" Content="Grayscale" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="120,0,0,12.5" VerticalAlignment="Bottom" Click="check_grayscale_Clicked"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate: (kbps)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="4,43,0,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_codec_preset" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_codec_preset_SelectionChanged" HorizontalAlignment="Right" Margin="0,77.9,4,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_codec_preset" Content="Preset:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="4,74,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_fourcc" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,105.52,4,0" VerticalAlignment="Top" SelectionChanged="combo_fourcc_SelectionChanged" IsEnabled="True"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_fourcc" Content="FOURCC:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="4,100,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="check_cartoon" Width="Auto" Height="Auto" Content="Cartoon" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="9,0,0,35" VerticalAlignment="Bottom" Click="check_cartoon_Clicked"/>
+					<CheckBox x:Name="check_grayscale" Width="Auto" Height="Auto" Content="Grayscale" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="9,0,0,12.5" VerticalAlignment="Bottom" Click="check_grayscale_Clicked"/>
+                    <CheckBox x:Name="check_fullpass" Width="130" Height="Auto" Content="Full 1-st pass" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Right" Margin="0,0,1,12.5" VerticalAlignment="Bottom" Click="check_fullpass_Clicked"/>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Motion">
+			<TabItem Header="Motion" Width="57" Padding="0,2,0,2">
 				<Grid Width="304" Height="180">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
@@ -109,17 +109,20 @@
 				    <CheckBox x:Name="check_chroma" d:LayoutOverrides="HorizontalAlignment, Height" HorizontalAlignment="Left" Margin="9,0,0,12.5" VerticalAlignment="Bottom" Width="Auto" Height="Auto" Content="Chroma motion estimation" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_chroma_Clicked"/>
                 </Grid>
 			</TabItem>
-			<TabItem Header="Frames">
+			<TabItem Header="Frames" Width="60" Padding="0,2,0,2">
 				<Grid Width="304" Height="210">
 					<Label OpacityMask="{x:Null}" x:Name="text_bframes" Content="B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,16,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bframes_SelectionChanged" HorizontalAlignment="Right" Margin="0,20.66,4,0" VerticalAlignment="Top"/>
                     <Label OpacityMask="{x:Null}" x:Name="text_bquants" Content="B-frames ratio: | offset:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,43,0,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown x:Name="num_bquant_ratio" Height="22" HorizontalAlignment="Right" Margin="0,47.777,70,0" VerticalAlignment="Top" Width="62" Change="10" DecimalPlaces="0" Maximum="1000" Minimum="0" Value="150" ValueChanged="num_bquant_ratio_ValueChanged" />
-                    <MyUserControl:NumericUpDown x:Name="num_bquant_offset" Height="22" HorizontalAlignment="Right" Margin="0,47.777,4,0" VerticalAlignment="Top" Width="62" Change="10" DecimalPlaces="0" Maximum="1000" Minimum="-1000" Value="100" ValueChanged="num_bquant_offset_ValueChanged" />
+                    <MyUserControl:NumericUpDown x:Name="num_bquant_ratio" Width="62" Height="Auto" HorizontalAlignment="Right" Margin="0,47.777,70,0" VerticalAlignment="Top" Change="10" DecimalPlaces="0" Maximum="1000" Minimum="0" Value="150" ValueChanged="num_bquant_ratio_ValueChanged" />
+                    <MyUserControl:NumericUpDown x:Name="num_bquant_offset" Width="62" Height="Auto" HorizontalAlignment="Right" Margin="0,47.777,4,0" VerticalAlignment="Top" Change="10" DecimalPlaces="0" Maximum="1000" Minimum="-1000" Value="100" ValueChanged="num_bquant_offset_ValueChanged" />
                     <Label OpacityMask="{x:Null}" x:Name="text_keyint" Content="Key-frames interval:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,74,0,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown Height="22" x:Name="num_keyint" HorizontalAlignment="Right" Margin="0,77.9,4,0" Width="127" VerticalAlignment="Top" Minimum="0" Maximum="9999999" ValueChanged="num_keyint_ValueChanged"/>
-                    <Label OpacityMask="{x:Null}" x:Name="text_q_min" Content="Min Q" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,68,74" VerticalAlignment="Bottom"/>
-                    <Label OpacityMask="{x:Null}" x:Name="text_q_max" Content="Max Q" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,8,74" VerticalAlignment="Bottom"/>
+                    <MyUserControl:NumericUpDown Width="128" Height="Auto" x:Name="num_keyint" HorizontalAlignment="Right" Margin="0,77.9,4,0" VerticalAlignment="Top" Minimum="0" Maximum="9999999" ValueChanged="num_keyint_ValueChanged"/>
+                    <CheckBox x:Name="check_closedgop" Width="Auto" Height="Auto" Content="Closed GOP" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_closedgop_Clicked" HorizontalAlignment="Left" Margin="9,0,0,57.5" VerticalAlignment="Bottom"/>
+                    <CheckBox x:Name="check_packedmode" Width="Auto" Height="Auto" Content="Packed bitstream" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_packedmode_Clicked" HorizontalAlignment="Left" Margin="9,0,0,35" VerticalAlignment="Bottom"/>
+                    <CheckBox x:Name="check_bvhq" Width="Auto" Height="Auto" Content="VHQ for B-frames" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_bvhq_Clicked" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="9,0,0,12.5" VerticalAlignment="Bottom"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_q_min" Content="Min Q" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,68,75" VerticalAlignment="Bottom"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_q_max" Content="Max Q" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,8,75" VerticalAlignment="Bottom"/>
                     <Label OpacityMask="{x:Null}" x:Name="text_i" Content="I:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,111.5,55" VerticalAlignment="Bottom"/>
                     <ComboBox x:Name="combo_imin" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_imin_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,60,58" VerticalAlignment="Bottom"/>
                     <ComboBox x:Name="combo_imax" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_imax_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,4,58" VerticalAlignment="Bottom"/>
@@ -129,56 +132,9 @@
                     <Label OpacityMask="{x:Null}" x:Name="text_b" Content="B:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,110,7" VerticalAlignment="Bottom"/>
                     <ComboBox x:Name="combo_bmin" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bmin_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,60,10" VerticalAlignment="Bottom"/>
                     <ComboBox x:Name="combo_bmax" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bmax_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,4,10" VerticalAlignment="Bottom"/>
-					<CheckBox x:Name="check_closedgop" Width="Auto" Height="Auto" Content="Closed GOP" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_closedgop_Clicked" HorizontalAlignment="Left" Margin="9,0,0,57.5" VerticalAlignment="Bottom"/>
-                    <CheckBox x:Name="check_packedmode" Width="Auto" Height="Auto" Content="Packed bitstream" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_packedmode_Clicked" HorizontalAlignment="Left" Margin="9,0,0,35" VerticalAlignment="Bottom"/>
-                    <CheckBox x:Name="check_bvhq" Width="Auto" Height="Auto" Content="VHQ for B-frames" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_bvhq_Clicked" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="9,0,0,12.5" VerticalAlignment="Bottom"/>
                 </Grid>
 			</TabItem>
-            <TabItem Header="Rate">
-                <Grid Width="304" Height="210">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>                    
-                    <Label OpacityMask="{x:Null}" x:Name="text_kboost" Content="KBoost:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,14,0,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown x:Name="num_kboost" Height="22" HorizontalAlignment="Left" Margin="84,19,4,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="10" ValueChanged="num_kboost_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_chigh" Content="CHigh:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,42,0,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown x:Name="num_chigh" Height="22" HorizontalAlignment="Left" Margin="84,47,0,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="0" ValueChanged="num_chigh_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_clow" Content="CLow:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,70,0,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown x:Name="num_clow" Height="22" HorizontalAlignment="Left" Margin="84,75,0,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="0" ValueChanged="num_clow_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_ostrength" Content="OStrength:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,14,68,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown x:Name="num_ostrength" Height="22" HorizontalAlignment="Right" Margin="0,19,4,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="5" ValueChanged="num_ostrength_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_oimprove" Content="OImprove:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,42,68,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown x:Name="num_oimprove" Height="22" HorizontalAlignment="Right" Margin="0,47,4,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="5" ValueChanged="num_oimprove_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_odegrade" Content="ODegrade:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,70,68,0" VerticalAlignment="Top"/>
-                    <MyUserControl:NumericUpDown x:Name="num_odegrade" Height="22" HorizontalAlignment="Right" Margin="0,75,4,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="5" ValueChanged="num_odegrade_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_reaction" Content="Reaction:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,0,0,73" VerticalAlignment="Bottom"/>
-                    <MyUserControl:NumericUpDown x:Name="num_reaction" Height="22" HorizontalAlignment="Left" Margin="84,0,0,74" VerticalAlignment="Bottom" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="16" ValueChanged="num_reaction_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_averaging" Content="Averaging:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,0,0,45" VerticalAlignment="Bottom"/>
-                    <MyUserControl:NumericUpDown x:Name="num_averaging" Height="22" HorizontalAlignment="Left" Margin="84,0,0,46" VerticalAlignment="Bottom" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="100" ValueChanged="num_averaging_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_smoother" Content="Smoother:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,0,0,17" VerticalAlignment="Bottom"/>
-                    <MyUserControl:NumericUpDown x:Name="num_smoother" Height="22" HorizontalAlignment="Left" Margin="84,75,0,18" VerticalAlignment="Bottom" Width="62" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="100" ValueChanged="num_smoother_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_vbvsize" Content="VBVsize:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,80,73" VerticalAlignment="Bottom"/>
-                    <MyUserControl:NumericUpDown x:Name="num_vbvsize" Height="22" HorizontalAlignment="Right" Margin="0,0,4,74" VerticalAlignment="Bottom" Width="76" Change="10" DecimalPlaces="0" Maximum="99999999" Minimum="0" Value="0" ValueChanged="num_vbvsize_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_vbvmax" Content="VBVmax:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,80,45" VerticalAlignment="Bottom"/>
-                    <MyUserControl:NumericUpDown x:Name="num_vbvmax" Height="22" HorizontalAlignment="Right" Margin="0,0,4,46" VerticalAlignment="Bottom" Width="76" Change="10" DecimalPlaces="0" Maximum="99999999" Minimum="0" Value="0" ValueChanged="num_vbvmax_ValueChanged" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_vbvpeak" Content="VBVpeak:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,80,17" VerticalAlignment="Bottom"/>
-                    <MyUserControl:NumericUpDown x:Name="num_vbvpeak" Height="22" HorizontalAlignment="Right" Margin="0,0,4,18" VerticalAlignment="Bottom" Width="76" Change="10" DecimalPlaces="0" Maximum="99999999" Minimum="0" Value="0" ValueChanged="num_vbvpeak_ValueChanged" />
-                </Grid>
-            </TabItem>
-			<TabItem Header="Misc">
-				<Grid Width="304" Height="180">
-					<Label OpacityMask="{x:Null}" x:Name="text_qmatrix" Content="Matrix:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,14,0,0" VerticalAlignment="Top"/>
-                    <ComboBox x:Name="combo_qmatrix" Width="200" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_qmatrix_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,20.66,4,0" VerticalAlignment="Top"/>					
-                    <CheckBox x:Name="check_trellis" Width="Auto" Height="Auto" Content="Trellis quantization" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_trellis_Clicked" HorizontalAlignment="Left" Margin="9,0,0,35.14" VerticalAlignment="Bottom"/>
-					<CheckBox x:Name="check_lumimasking" Width="Auto" Height="Auto" Content="Lumimasking" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_lumimasking_Clicked" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="9,0,0,12.52" VerticalAlignment="Bottom"/>
-                    <ComboBox x:Name="combo_threads" Width="60" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,0,4,10" VerticalAlignment="Bottom" SelectionChanged="combo_threads_SelectionChanged" d:LayoutOverrides="Height" />
-                    <Label OpacityMask="{x:Null}" x:Name="text_threads_count" Content="Threads:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,0,66,7" VerticalAlignment="Bottom" HorizontalAlignment="Right" d:LayoutOverrides="Width, Height" />
-                </Grid>
-			</TabItem>
-		<TabItem Header="CLI">
+            <TabItem Header="Rate" Width="49" Padding="0,2,0,2">
                 <Grid Width="304" Height="210">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -186,10 +142,56 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBox Margin="-4,0,-4,30.8" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
-                    <Button x:Name="Apply_CLI" Content="Apply" Click="button_Apply_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="219,185.2,-5,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
-                    <Button x:Name="Reset_CLI" Content="Reset" Click="button_Reset_CLI_Click" d:LayoutOverrides="HorizontalAlignment" Margin="107.2,185.2,106.6,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
-                    <Button x:Name="xvid_help" Content="Help" Click="button_xvid_help_Click" d:LayoutOverrides="HorizontalAlignment" Margin="-4.98,185.266,218.98,2.734" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_kboost" Content="KBoost:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,14,0,0" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown x:Name="num_kboost" Width="62" Height="Auto" HorizontalAlignment="Left" Margin="84,19,4,0" VerticalAlignment="Top" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="10" ValueChanged="num_kboost_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_chigh" Content="CHigh:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,42,0,0" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown x:Name="num_chigh" Width="62" Height="Auto" HorizontalAlignment="Left" Margin="84,47,0,0" VerticalAlignment="Top" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="0" ValueChanged="num_chigh_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_clow" Content="CLow:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,70,0,0" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown x:Name="num_clow" Width="62" Height="Auto" HorizontalAlignment="Left" Margin="84,75,0,0" VerticalAlignment="Top" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="0" ValueChanged="num_clow_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_ostrength" Content="OStrength:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,14,68,0" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown x:Name="num_ostrength" Width="62" Height="Auto" HorizontalAlignment="Right" Margin="0,19,4,0" VerticalAlignment="Top" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="5" ValueChanged="num_ostrength_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_oimprove" Content="OImprove:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,42,68,0" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown x:Name="num_oimprove" Width="62" Height="Auto" HorizontalAlignment="Right" Margin="0,47,4,0" VerticalAlignment="Top" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="5" ValueChanged="num_oimprove_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_odegrade" Content="ODegrade:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,70,68,0" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown x:Name="num_odegrade" Width="62" Height="Auto" HorizontalAlignment="Right" Margin="0,75,4,0" VerticalAlignment="Top" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="5" ValueChanged="num_odegrade_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_reaction" Content="Reaction:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="4,0,0,73" VerticalAlignment="Bottom"/>
+                    <MyUserControl:NumericUpDown x:Name="num_reaction" Width="62" Height="Auto" HorizontalAlignment="Left" Margin="84,0,0,74" VerticalAlignment="Bottom" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="16" ValueChanged="num_reaction_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_averaging" Content="Averaging:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,0,0,45" VerticalAlignment="Bottom"/>
+                    <MyUserControl:NumericUpDown x:Name="num_averaging" Width="62" Height="Auto" HorizontalAlignment="Left" Margin="84,0,0,46" VerticalAlignment="Bottom" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="100" ValueChanged="num_averaging_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_smoother" Content="Smoother:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,0,0,17" VerticalAlignment="Bottom"/>
+                    <MyUserControl:NumericUpDown x:Name="num_smoother" Width="62" Height="Auto" HorizontalAlignment="Left" Margin="84,75,0,18" VerticalAlignment="Bottom" Change="1" DecimalPlaces="0" Maximum="9999" Minimum="0" Value="100" ValueChanged="num_smoother_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_vbvsize" Content="VBVsize:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,80,73" VerticalAlignment="Bottom"/>
+                    <MyUserControl:NumericUpDown x:Name="num_vbvsize" Width="76" Height="Auto" HorizontalAlignment="Right" Margin="0,0,4,74" VerticalAlignment="Bottom" Change="10" DecimalPlaces="0" Maximum="99999999" Minimum="0" Value="0" ValueChanged="num_vbvsize_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_vbvmax" Content="VBVmax:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,80,45" VerticalAlignment="Bottom"/>
+                    <MyUserControl:NumericUpDown x:Name="num_vbvmax" Width="76" Height="Auto" HorizontalAlignment="Right" Margin="0,0,4,46" VerticalAlignment="Bottom" Change="10" DecimalPlaces="0" Maximum="99999999" Minimum="0" Value="0" ValueChanged="num_vbvmax_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_vbvpeak" Content="VBVpeak:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,0,80,17" VerticalAlignment="Bottom"/>
+                    <MyUserControl:NumericUpDown x:Name="num_vbvpeak" Width="76" Height="Auto" HorizontalAlignment="Right" Margin="0,0,4,18" VerticalAlignment="Bottom" Change="10" DecimalPlaces="0" Maximum="99999999" Minimum="0" Value="0" ValueChanged="num_vbvpeak_ValueChanged" />
+                </Grid>
+            </TabItem>
+			<TabItem Header="Misc" Width="49" Padding="0,2,0,2">
+				<Grid Width="304" Height="180">
+					<Label OpacityMask="{x:Null}" x:Name="text_qmatrix" Content="Matrix:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,14,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_qmatrix" Width="Auto" Height="Auto" MinWidth="127" MaxWidth="200" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_qmatrix_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,20.66,4,0" VerticalAlignment="Top"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_masking" Content="HVS masking:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,42.62,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_masking" Width="127" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_masking_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,49.28,4,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="check_trellis" Width="Auto" Height="Auto" Content="Trellis quantization" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_trellis_Clicked" HorizontalAlignment="Left" Margin="9,0,0,35.14" VerticalAlignment="Bottom"/>
+					<CheckBox x:Name="check_xvid_old" Width="Auto" Height="Auto" Content="Use old XviD 1.2.2" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_xvid_old_Clicked" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="9,0,0,12.52" VerticalAlignment="Bottom"/>
+                    <ComboBox x:Name="combo_threads" Width="60" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,0,4,10" VerticalAlignment="Bottom" SelectionChanged="combo_threads_SelectionChanged" d:LayoutOverrides="Height" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_threads_count" Content="Threads:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,0,66,7" VerticalAlignment="Bottom" HorizontalAlignment="Right" d:LayoutOverrides="Width, Height" />
+                </Grid>
+			</TabItem>
+		<TabItem Header="CLI" Width="46" Padding="0,2,0,2">
+                <Grid Width="304" Height="210">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBox Margin="-2,-1,-2,31" BorderThickness="0" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
+                    <Button x:Name="xvid_help" Content="Help" Click="button_xvid_help_Click" Width="92" HorizontalAlignment="Left" Margin="-1,185,0,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="Reset_CLI" Content="Reset" Click="button_Reset_CLI_Click" Width="92" HorizontalAlignment="Center" Margin="0,185,0,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="Apply_CLI" Content="Apply" Click="button_Apply_CLI_Click" Width="92" HorizontalAlignment="Right" Margin="0,185,-1,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
                 </Grid>
             </TabItem>
         </TabControl>

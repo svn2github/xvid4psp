@@ -45,18 +45,12 @@ namespace XviD4PSP
         private void SetToolTips()
         {
             combo_fourcc.ToolTip = "Force video tag/fourcc (Default: DVSD)";
-            combo_preset.ToolTip = "DV standarts (Default: DVCAM)";
+            combo_preset.ToolTip = "DV standarts (Default: DVCAM)\r\nDVCAM - colorspace yuv420p (only for PAL!)\r\n" +
+                "DVCPRO25 - colorspace yuv411p\r\nDVCPRO50 - colorspace yuv422p\r\n";
         }
 
         public void LoadFromProfile()
         {
-            //битрейт
-            //if (m.format == Format.ExportFormats.AviDVPAL)
-            //    m.outvbitrate = 28792353 / 1000;
-            //if (m.format == Format.ExportFormats.AviDVNTSC)
-            //    m.outvbitrate = 28763702 / 1000;
-            //m.encodingmode = Settings.EncodingModes.OnePass;
-
             combo_fourcc.SelectedItem = m.ffmpeg_options.fourcc_dv;
             combo_preset.SelectedItem = m.ffmpeg_options.dvpreset;
         }
@@ -83,25 +77,18 @@ namespace XviD4PSP
                 if (value == "-pix_fmt")
                 {
                     string dvstandart = cli[n + 1];
-                    if (dvstandart == "yuv420p")
-                        m.ffmpeg_options.dvpreset = "DVCAM";
-                    if (dvstandart == "yuv411p")
-                        m.ffmpeg_options.dvpreset = "DVCPRO25";
-                    if (dvstandart == "yuv422p")
-                        m.ffmpeg_options.dvpreset = "DVCPRO50";
-                }
+                    if (dvstandart == "yuv420p") m.ffmpeg_options.dvpreset = "DVCAM";
+                    else if (dvstandart == "yuv411p") m.ffmpeg_options.dvpreset = "DVCPRO25";
+                    else if (dvstandart == "yuv422p") m.ffmpeg_options.dvpreset = "DVCPRO50";
 
-                //дешифруем флаги
-                if (value == "-flags")
-                {
-                    string flags_string = cli[n + 1];
-                    string[] separator2 = new string[] { "+" };
-                    string[] flags = flags_string.Split(separator2, StringSplitOptions.RemoveEmptyEntries);
+                    //dvcam 
+                    //-f mov -vcodec dvvideo -r 25 -pix_fmt yuv420p -vtag dvcp -acodec pcm_s16be -ac 2
 
-                    foreach (string flag in flags)
-                    {
+                    //dvcpro25 
+                    //-f mov -vcodec dvvideo -r 25 -pix_fmt yuv411p -vtag dvpp -acodec pcm_s16be -ac 2 
 
-                    }
+                    //dvcpro50 
+                    //-f mov -vcodec dvvideo -r 25 -pix_fmt yuv422p -vtag dv5p -acodec pcm_s16be -ac 2 
                 }
 
                 n++;
@@ -133,26 +120,14 @@ namespace XviD4PSP
 
             string line = "-vcodec dvvideo -an";
 
-            if (m.ffmpeg_options.dvpreset == "DVCAM")
-                line += " -pix_fmt yuv420p";
-            if (m.ffmpeg_options.dvpreset == "DVCPRO25")
-                line += " -pix_fmt yuv411p";
-            if (m.ffmpeg_options.dvpreset == "DVCPRO50")
-                line += " -pix_fmt yuv422p";
+            if (m.ffmpeg_options.dvpreset == "DVCAM") line += " -pix_fmt yuv420p";
+            else if (m.ffmpeg_options.dvpreset == "DVCPRO25") line += " -pix_fmt yuv411p";
+            else if (m.ffmpeg_options.dvpreset == "DVCPRO50") line += " -pix_fmt yuv422p";
 
             //fourcc
             line += " -vtag " + m.ffmpeg_options.fourcc_dv;
 
-            //создаём пустой массив -flags
-            string flags = " -flags ";
-
-            //передаём массив флагов
-            if (flags != " -flags ")
-                line += flags;
-
             m.vpasses.Add(line);
-
-
             return m;
         }
 
@@ -190,8 +165,5 @@ namespace XviD4PSP
                 root_window.UpdateManualProfile();
             }
         }
-
- 
-
 	}
 }

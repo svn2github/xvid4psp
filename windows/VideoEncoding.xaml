@@ -5,8 +5,7 @@
 	x:Class="XviD4PSP.VideoEncoding"
 	x:Name="Window"
 	Title="Video encoding settings"
-	Width="Auto" Height="Auto" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" Background="{DynamicResource BlackGradientHard}" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
-
+	Width="Auto" Height="Auto" MinWidth="300" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" Background="{DynamicResource BlackGradientHard}" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 	<Grid x:Name="LayoutRoot">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
@@ -39,22 +38,23 @@
 			<Grid x:Name="grid_codec" Background="{x:Null}" d:LayoutOverrides="GridBox" Width="Auto" Height="Auto"/>
 			<Grid x:Name="grid_profiles" Width="Auto" Background="{DynamicResource black_gradient}" Height="Auto">
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="0.186*"/>
-					<ColumnDefinition Width="0.645*"/>
-					<ColumnDefinition Width="0.076*"/>
-					<ColumnDefinition Width="0.093*"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="64"/>
 				</Grid.ColumnDefinitions>
-				<ComboBox Width="172" IsSynchronizedWithCurrentItem="True" x:Name="combo_profile" d:LayoutOverrides="Height" Margin="0,6,8,6" VerticalAlignment="Stretch" SelectionChanged="combo_profile_SelectionChanged" HorizontalAlignment="Stretch" Grid.Column="1"/>
-				<Label OpacityMask="{x:Null}" x:Name="text_profile" Content="Profile:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" Margin="8,0,4,0" VerticalAlignment="Center"/>
-				<Button HorizontalAlignment="Left" Margin="0,6,2,6" x:Name="button_add" Width="24" Content="+" Grid.Column="2" Click="button_add_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-				<Button HorizontalAlignment="Left" Margin="0,6,8,6" x:Name="button_remove" Width="24" Content="-" Grid.Column="3" Click="button_remove_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+                <Grid Margin="0,6,0,6" x:Name="combo_grid" Grid.Column="1">
+                    <ComboBox Width="Auto" MaxWidth="{Binding Path=ActualWidth, ElementName=combo_grid}" IsSynchronizedWithCurrentItem="True" x:Name="combo_profile" d:LayoutOverrides="Height" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectionChanged="combo_profile_SelectionChanged" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
+				</Grid>
+                <Label OpacityMask="{x:Null}" x:Name="text_profile" Content="Profile:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" Margin="3,0,2,2" VerticalAlignment="Center"/>
+				<Button HorizontalAlignment="Right" Margin="0,6,34,6" x:Name="button_add" Width="24" Content="+" Grid.Column="2" Click="button_add_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+				<Button HorizontalAlignment="Right" Margin="0,6,8,6" x:Name="button_remove" Width="24" Content="-" Grid.Column="2" Click="button_remove_Click" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			</Grid>
 			<Grid x:Name="grid_main_buttons" Background="{DynamicResource black_gradient}" Width="Auto" Height="Auto">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="*"/>
 				</Grid.ColumnDefinitions>
-				<Button x:Name="button_cancel" Height="22" Content="Cancel" Click="button_cancel_Click" RenderTransformOrigin="1.122,0.428" d:LayoutOverrides="GridBox" HorizontalAlignment="Right" Margin="0,5,8,5" Width="70" Grid.ColumnSpan="1" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-				<Button x:Name="button_ok" Height="22" Content="Ok" Click="button_ok_Click" Width="70" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" Margin="0,5,82,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+				<Button x:Name="button_ok" Height="22" Content="Ok" Click="button_ok_Click" Width="70" HorizontalAlignment="Right" Margin="0,5,82,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+                <Button x:Name="button_cancel" Height="22" Content="Cancel" Click="button_cancel_Click" Width="70" HorizontalAlignment="Right" Margin="0,5,8,5" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			</Grid>
 		</StackPanel>
 	</Grid>

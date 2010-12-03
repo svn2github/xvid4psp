@@ -15,7 +15,6 @@ namespace XviD4PSP
 		public CopyOrDisabled()
 		{
 			this.InitializeComponent();
-
 			// Insert code required on object creation below this point.
 		}
 	}

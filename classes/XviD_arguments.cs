@@ -107,7 +107,7 @@ namespace XviD4PSP
         }
 
         private bool _grey = false;
-        public bool grey
+        public bool gray
         {
             get
             {
@@ -197,16 +197,16 @@ namespace XviD4PSP
             }
         }
 
-        private bool _limimasking = false;
-        public bool limimasking
+        private int _masking = 0;
+        public int masking
         {
             get
             {
-                return _limimasking;
+                return _masking;
             }
             set
             {
-                _limimasking = value;
+                _masking = value;
             }
         }
 

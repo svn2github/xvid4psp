@@ -2547,5 +2547,26 @@ namespace XviD4PSP
                 SetString("WPF_Path", value);
             }
         }
+
+        //Выбор версии XviD (true = старая 1.2.2)
+        public static bool XviD_Old_Version
+        {
+            get
+            {
+                object value = GetValue("XviD_Old_Version");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("XviD_Old_Version", value);
+            }
+        }
     }
 }
