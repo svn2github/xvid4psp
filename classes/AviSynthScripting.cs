@@ -136,14 +136,14 @@ namespace XviD4PSP
            else if (m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI)
            {
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TMM.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.YadifModEDI || m.deinterlace == DeinterlaceType.YadifModEDI2 ||
                m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI)
            {
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadifmod.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\LeakKernelDeint.dll\")" + Environment.NewLine;
@@ -152,7 +152,7 @@ namespace XviD4PSP
            else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace)
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SmoothDeinterlacer.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.NNEDI)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.MCBob)
            {
                m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
@@ -161,7 +161,7 @@ namespace XviD4PSP
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Repair.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.QTGMC)
            {
@@ -172,7 +172,6 @@ namespace XviD4PSP
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\fft3dfilter.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi2.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI3.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
                m.script += "#loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
@@ -487,7 +486,7 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.YadifModEDI)
            {
-               string deinterlacer = "YadifMod(order=" + order + ", edeint=nnedi2(field=" + order + "))";
+               string deinterlacer = "YadifMod(order=" + order + ", edeint=nnedi3(field=" + order + "))";
                m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
                    "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
@@ -524,14 +523,14 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI)
            {
-               m.script += "interp = nnedi2(field=" + order + ", qual=2)" + Environment.NewLine;
+               m.script += "interp = nnedi3(field=" + order + ", qual=2)" + Environment.NewLine;
                m.script += "tmmask = TMM(order=" + order + ", field=" + order + ")" + Environment.NewLine;
                m.script += "deint = TDeint(order=" + order + ", field=" + order + ", edeint=interp, slow=2, emask=tmmask)" + Environment.NewLine;
                m.script += "TFM(order=" + order + ", mode=3, clip2=deint, slow=2).TDecimate(hybrid=1)" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI)
            {
-               m.script += "interp = nnedi2(field=" + order + ", qual=2)" + Environment.NewLine;
+               m.script += "interp = nnedi3(field=" + order + ", qual=2)" + Environment.NewLine;
                m.script += "deint = YadifMod(order=" + order + ", edeint=interp)" + Environment.NewLine;
                m.script += "TFM(order=" + order + ", mode=3, clip2=deint, slow=2).TDecimate(hybrid=1)" + Environment.NewLine;
            }
@@ -568,16 +567,16 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.NNEDI)
            {
-               m.script += "nnedi2(field=" + ((order == 1) ? "3" : (order == 0) ? "2" : "-2") + ")" + Environment.NewLine;
+               m.script += "nnedi3(field=" + ((order == 1) ? "3" : (order == 0) ? "2" : "-2") + ")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.YadifModEDI2)
            {
                int field = ((order == 1) ? 3 : (order == 0) ? 2 : -2);
-               m.script += "YadifMod(order=" + order + ", mode=1, edeint=nnedi2(field=" + field + "))" + Environment.NewLine;
+               m.script += "YadifMod(order=" + order + ", mode=1, edeint=nnedi3(field=" + field + "))" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.QTGMC)
            {
-               m.script += "QTGMC(2, 1, 1, 4, 0, 4, \"NNEDI3\") #or try \"NNEDI2\" for speed up" + Environment.NewLine; ;
+               m.script += "QTGMC(2, 1, 1, 4, 0, 4, \"NNEDI3\")" + Environment.NewLine; ;
            }
 
            //Фильтрация до ресайза
