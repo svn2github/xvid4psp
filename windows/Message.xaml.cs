@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -10,12 +11,15 @@ using System.Windows.Navigation;
 
 namespace XviD4PSP
 {
-	public partial class Message
-	{
+    public partial class Message
+    {
         public enum MessageStyle { Ok = 1, YesNo, OkCancel };
         public enum Result { Yes = 1, No, Ok, Cancel };
 
-		public Message()
+        public Result result = Result.No;
+        private MessageStyle mstyle = MessageStyle.Ok;
+
+        public Message()
         {
             this.InitializeComponent();
             // Insert code required on object creation below this point.
@@ -28,43 +32,41 @@ namespace XviD4PSP
         }
 
         public void ShowMessage(string text)
-        {
-           text_message.Content = text;
-            mstyle = MessageStyle.Ok;
-            btYes.Visibility = Visibility.Hidden;
-            btNo.Content = Languages.Translate("OK");
-            ShowDialog();
-        }
+        { SetUpWindow(text, null, "Message", MessageStyle.Ok); }
 
         public void ShowMessage(string text, string title)
-        {
-            text_message.Content = text;
-            this.Title = title;
-            mstyle = MessageStyle.Ok;
-            SetButtons();
-            ShowDialog();
-        }
+        { SetUpWindow(text, null, title, MessageStyle.Ok); }
 
         public void ShowMessage(string text, string title, MessageStyle style)
-        {
-            text_message.Content = text;
-            this.Title = title;
-            mstyle = style;
-            SetButtons();
-            ShowDialog();
-        }
+        { SetUpWindow(text, null, title, style); }
 
         public void ShowMessage(string text, MessageStyle style)
-        {
-            text_message.Content = text;
-            mstyle = style;
-            SetButtons();
-            ShowDialog();
-        }
+        { SetUpWindow(text, null, "Message", style); }
 
-        public void SetButtons()
+        public void ShowMessage(string text, string info, string title)
+        { SetUpWindow(text, info, title, MessageStyle.Ok); }
+
+        public void ShowMessage(string text, string info, string title, MessageStyle style)
+        { SetUpWindow(text, info, title, style); }
+
+        //Выводим инфу в окно
+        private void SetUpWindow(string text, string info, string title, MessageStyle style)
         {
-            if (mstyle == MessageStyle.YesNo)
+            this.Title = title;
+            text_message.Content = text;
+            if (!string.IsNullOrEmpty(info))
+            {
+                text_info.Content = info;
+                btInfo.Visibility = Visibility.Visible;
+            }
+
+            mstyle = style;
+            if (mstyle == MessageStyle.Ok)
+            {
+                btYes.Visibility = Visibility.Hidden;
+                btNo.Content = Languages.Translate("OK");
+            }
+            else if (mstyle == MessageStyle.YesNo)
             {
                 btYes.Content = Languages.Translate("Yes");
                 btNo.Content = Languages.Translate("No");
@@ -79,32 +81,8 @@ namespace XviD4PSP
                 btYes.Visibility = Visibility.Hidden;
                 btNo.Content = Languages.Translate("OK");
             }
-        }
 
-        private Result _result = Result.No;
-        public Result result
-        {
-            get
-            {
-                return _result;
-            }
-            set
-            {
-                _result = value;
-            }
-        }
-
-        private MessageStyle _mstyle = MessageStyle.Ok;
-        public MessageStyle mstyle
-        {
-            get
-            {
-                return _mstyle;
-            }
-            set
-            {
-                _mstyle = value;
-            }
+            ShowDialog();
         }
 
         private void btYes_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -129,5 +107,17 @@ namespace XviD4PSP
             this.Close();
         }
 
-	}
+        private void btInfo_Click(object sender, RoutedEventArgs e)
+        {
+            if (text_info.Visibility == Visibility.Collapsed)
+                text_info.Visibility = Visibility.Visible;
+            else
+                text_info.Visibility = Visibility.Collapsed;
+        }
+
+        private void LayoutRoot_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed) DragMove();
+        }
+    }
 }

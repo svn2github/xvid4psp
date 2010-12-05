@@ -11,11 +11,69 @@ using System.Windows.Media.Animation;
 using System.Windows.Navigation;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace XviD4PSP
 {
 	public partial class App: System.Windows.Application
 	{
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            //Ловим необработанные исключения
+            Application.Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(Current_DispatcherUnhandledException);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            ShowExceptionInfo(e.Exception);
+
+            //e.Handled = true;
+            //App.Current.Shutdown(1);
+            AppDomain.CurrentDomain.UnhandledException -= new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            ShowExceptionInfo(e.ExceptionObject);
+        }
+
+        private void ShowExceptionInfo(object obj)
+        {
+            string path = "";
+            string txt = "An unhandled exception has occurred in XviD4PSP";
+            bool log_saved = false;
+
+            try
+            {
+                path = Settings.TempPath + "\\exception_info";
+                DateTime d = DateTime.Now;
+                path += "_(" + d.Year + "." + d.Month + "." + d.Day + "_" + d.Hour + "." + d.Minute + "." + d.Second + ").log";
+                AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
+                txt += " v" + asinfo.Version + " " + asinfo.Trademark;
+            }
+            catch { }
+
+            Exception ex = (obj as Exception);
+            if (ex != null)
+            {
+                txt += "!\r\n\r\nSource:\r\n  " + ex.Source + "\r\n\r\nException:\r\n  " + ex.Message + "\r\n\r\nStack trace:\r\n" + ex.StackTrace +
+                    (ex.InnerException != null ? "\r\n\r\nInner Exception:\r\n  " + ex.InnerException : "");
+            }
+            else
+                txt += "!\r\n\r\n" + obj.ToString();
+
+            try
+            {
+                File.WriteAllText(path, txt, System.Text.Encoding.Default);
+                log_saved = true;
+            }
+            catch { }
+
+            MessageBox.Show(txt + (log_saved ? "\r\n\r\nThis log was saved here:\r\n  " + path + "\r\n" : ""),
+                "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Stop);
+        }
+
         [DllImport("user32.dll")]
         static extern bool OpenClipboard(IntPtr hWndNewOwner);
         [DllImport("user32.dll")]

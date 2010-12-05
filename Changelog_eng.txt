@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r196 04.12.10, main changes:
+XviD4PSP 5.0.37.8 r132->r197 05.12.10, main changes:
 
+>>> (r197) Into error messages added a StackTrace info (currently only for MainWindow).
+>>> (r197) An unhandled exceptions catching.
 >>> (r196) Avisynth plugin NNEDI2 was replaced by NNEDI3.
 >>> (r195) A "Search" function added to "Help" window (help for XviD, x264, Changelog).
 >>> (r195) In the XviD settings window added ability to choose encoder version (old 1.2.2 or recent 1.3.0);

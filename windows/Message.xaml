@@ -5,9 +5,9 @@
 	x:Class="XviD4PSP.Message"
 	x:Name="Window"
 	Title="Message"
-	Width="287" Height="159" ResizeMode="NoResize" ShowInTaskbar="True" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
+	Width="287" Height="Auto" MinWidth="260" ResizeMode="NoResize" ShowInTaskbar="True" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
 
-	<Grid x:Name="LayoutRoot" Background="{x:Null}">
+	<Grid x:Name="LayoutRoot" Background="{x:Null}" MouseLeftButtonDown="LayoutRoot_MouseLeftButtonDown">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
 			<ColumnDefinition Width="0*"/>
@@ -17,28 +17,30 @@
 			<RowDefinition Height="0*"/>
 			<RowDefinition Height="0.271*"/>
 		</Grid.RowDefinitions>
-		<Grid Margin="0,0,0,0" Background="{DynamicResource black_gradient_2}">
-            <Grid.Resources>
-                <Style x:Key="{x:Type Label}" TargetType="Label">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Label">
-                                <Border>
-                                    <ContentPresenter
+            <StackPanel Margin="0,0,0,0" Background="{DynamicResource black_gradient_2}">
+                <StackPanel.Resources>
+                    <Style x:Key="{x:Type Label}" TargetType="Label">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Label">
+                                    <Border>
+                                        <ContentPresenter
                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                   RecognizesAccessKey="False" />
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Grid.Resources>
-            <Label OpacityMask="{x:Null}" x:Name="text_message" Content="Message windows text" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="16,16,16,16"/>
-		</Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </StackPanel.Resources>
+                <Label OpacityMask="{x:Null}" x:Name="text_message" Content="Message text" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="16,16,16,16"/>
+                <Label OpacityMask="{x:Null}" x:Name="text_info" Content="Info text" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="12" Foreground="#FFFFFFFF" Margin="6,0,16,16" Visibility="Collapsed"/>
+            </StackPanel>
 		<Grid Margin="0,0,0,0" Grid.Row="2" Background="{DynamicResource black_gradient}">
 			<Button d:LayoutOverrides="Width, Height" x:Name="btNo" Width="70" Height="22" Content="No" Click="btNo_Click" HorizontalAlignment="Right" Margin="0,6.043,8,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 			<Button x:Name="btYes" Content="Yes" Click="btYes_Click" Margin="0,6.043,82,8" HorizontalAlignment="Right" Width="70" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+            <Button x:Name="btInfo" Content="Info" Click="btInfo_Click" Margin="8,6.043,0,8" HorizontalAlignment="Left" Width="70" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Visibility="Collapsed"/>
 		</Grid>
 	</Grid>
 </Window>

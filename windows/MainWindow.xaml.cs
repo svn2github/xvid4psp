@@ -231,7 +231,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("Initializing: " + ex.Message, ex.StackTrace);
             }
 
             //events
@@ -256,7 +256,7 @@ namespace XviD4PSP
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerAsync();
         }
-        
+
         internal delegate void MainFormLoaderDelegate();
         private void MainFormLoader()
         {
@@ -410,7 +410,7 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    ErrorException(ex.Message);
+                    ErrorException("LoadSettings: " + ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -422,7 +422,7 @@ namespace XviD4PSP
             string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
             string PressedKeys = "=" + ((mod.Length > 0) ? mod + "+" : "") + key;
             //textbox_frame.Text = PressedKeys;
-            
+
             string Action = HotKeys.GetAction(PressedKeys);
             e.Handled = (Action.Length > 0);
             //textbox_frame.Text = Action;
@@ -910,7 +910,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("ResetSettings: " + ex.Message, ex.StackTrace);
                 Close();
             }
         }
@@ -1019,7 +1019,7 @@ namespace XviD4PSP
             catch (Exception ex)
             {
                 x = null;
-                ErrorException(ex.Message);
+                ErrorException("AppendFile: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -1608,7 +1608,7 @@ namespace XviD4PSP
                     }
                 }
                 else
-                    ErrorException(ex.Message);
+                    ErrorException("OpenFile: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -1759,7 +1759,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("RunEncoder: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -1773,7 +1773,7 @@ namespace XviD4PSP
 
             if (Settings.DeleteTempFiles)
             {
-                clear_ff_cache();                // - Кэш от FFmpegSource1            
+                clear_ff_cache();                // - Кэш от FFmpegSource1
                 clear_dgindex_cache();           // - Кэш от DGIndex
                 clear_audio_and_video_caches();  // - Извлеченные или декодированные аудио и видео файлы
             }
@@ -1830,8 +1830,14 @@ namespace XviD4PSP
 
         private void ErrorException(string message)
         {
-            Message mes = new Message(this);
+            Message mes = new Message(this.IsLoaded ? this : null);
             mes.ShowMessage(message, Languages.Translate("Error"));
+        }
+
+        private void ErrorException(string message, string info)
+        {
+            Message mes = new Message(this.IsLoaded ? this : null);
+            mes.ShowMessage(message, info, Languages.Translate("Error"));
         }
 
         public void LoadVideo(MediaLoad mediaload)
@@ -1915,7 +1921,7 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    ErrorException(ex.Message);
+                    ErrorException("LoadVideo: " + ex.Message, ex.StackTrace);
                 }
 
                 return;
@@ -2400,7 +2406,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("FrameShift: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -2417,8 +2423,8 @@ namespace XviD4PSP
                 this.LocationChanged -= new EventHandler(MainWindow_LocationChanged);
                 this.SizeChanged -= new SizeChangedEventHandler(MainWindow_SizeChanged);
                 this.grid_tasks.SizeChanged -= new SizeChangedEventHandler(grid_tasks_SizeChanged);
-                
-                source.RemoveHook(new HwndSourceHook(WndProc));
+
+                if (source != null) source.RemoveHook(new HwndSourceHook(WndProc));
             }
             else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
             {
@@ -2584,7 +2590,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("EditScript: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -2740,7 +2746,7 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
+                    ErrorException("SaveScript: " + ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -2760,7 +2766,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
+                ErrorException("SaveScripts: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -3306,7 +3312,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("SafeFileDelete: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -3319,7 +3325,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("SafeDirDelete: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -3905,7 +3911,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
+                ErrorException("PlayIn: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -3928,7 +3934,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage(ex.Message, Languages.Translate("Error"));
+                ErrorException("EditPlayerPath: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -4153,7 +4159,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                ErrorException("CloseInterfaces: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -4165,6 +4171,7 @@ namespace XviD4PSP
             bool has_video = true;
             string avs_error = null;
             string exception = null;
+            string stacktrace = null;
             ImageSource picture = null;
             System.Drawing.Bitmap bmp = null;
             System.Drawing.Graphics g = null;
@@ -4256,6 +4263,7 @@ namespace XviD4PSP
                 //Отрисовка ГУИ тормозится при удалении мусора в finally, оставляя остатки
                 //сообщения если оно было выведено тут, поэтому перенесено
                 exception = ex.Message;
+                stacktrace = ex.StackTrace;
             }
             finally
             {
@@ -4270,7 +4278,7 @@ namespace XviD4PSP
                 else textbox_frame.Text = "NO VIDEO";
 
                 if (exception != null)
-                    ErrorException("PictureView Error: " + exception);
+                    ErrorException("PictureView: " + exception, stacktrace);
             }
         }
 
@@ -4851,7 +4859,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                ErrorException("BridgeCallback: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -5179,7 +5187,7 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    ErrorException(ex.Message);
+                    ErrorException("SaveFrame: " + ex.Message, ex.StackTrace);
                 }
                 finally
                 {
@@ -5305,7 +5313,7 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    ErrorException(ex.Message);
+                    ErrorException("SaveTHM: " + ex.Message, ex.StackTrace);
                 }
                 finally
                 {
@@ -5717,7 +5725,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("OpenFolder: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -5785,7 +5793,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("MultiOpen: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -5839,7 +5847,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("CheckTempFolder: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -6080,7 +6088,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage("AvsP editor: " + ex.Message, Languages.Translate("Error"));
+                ErrorException("AvsP editor: " + ex.Message, ex.StackTrace);
             }
         }
 
