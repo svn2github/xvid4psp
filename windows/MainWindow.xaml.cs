@@ -1001,7 +1001,6 @@ namespace XviD4PSP
                         if (cach.m == null) return;
                         x = cach.m.Clone();
 
-
                         //x.inframes = (int)frames;
                         //x.induration = TimeSpan.FromMilliseconds(msec);
                         //x.outduration = x.induration;
@@ -2650,7 +2649,7 @@ namespace XviD4PSP
 
         //повторное открытие файла после смены декодера
         private void reopen_file(Massive old_m)
-        {           
+        {
             //Получаем информацию через AviSynth и ловим ошибки
             Caching cach = new Caching(m);
             if (cach.m == null)

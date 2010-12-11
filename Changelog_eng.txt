@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r198 05.12.10, main changes:
+XviD4PSP 5.0.37.8 r132->r199 11.12.10, main changes:
 
+>>> (r199) After opening a "Select video (audio, subtitles) file" dialog window and switching to another
+           application, when we switching back to XviD4PSP this window will not be activated - fixed.
 >>> (r198) Removed a hard-specified icon from the MainWindow.
 >>> (r197) Into error messages added a StackTrace info (currently only for MainWindow).
 >>> (r197) An unhandled exceptions catching.

@@ -16,133 +16,147 @@ using System.ComponentModel;
 using System.Collections;
 using System.Globalization;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace XviD4PSP
 {
-	public partial class OpenDialog
-	{
-
+    public partial class OpenDialog
+    {
         private BackgroundWorker worker = null;
         private Process encoderProcess = null;
-        public ArrayList files;
+        public ArrayList files = new ArrayList();
         private string arguments;
+        private string title;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public OpenDialog(string arguments, System.Windows.Window owner)
         {
             this.InitializeComponent();
-
             //this.Owner = owner;
             this.arguments = arguments;
 
             this.Top = 0.0;
             this.Left = 0.0;
 
-            //фоновое кодирование
-            CreateBackgoundWorker();
+            //Когда XviD4PSP станет активным приложением, нужно будет вывести
+            //окно SafeOpenDialog на первый план, т.к. само оно этого не сделает
+            Application.Current.Activated += new EventHandler(Application_Activated);
+
+            //Определяем текст заголовка, по которому будем искать окно
+            if (arguments.StartsWith("oa")) title = Languages.Translate("Select audio files") + ":";
+            else if (arguments == "sub") title = Languages.Translate("Select subtitles file") + ":";
+            else title = Languages.Translate("Select video files") + ":";
+
+            //BackgroundWorker
+            CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
         }
 
-        private void CreateBackgoundWorker()
+        private void Application_Activated(object sender, EventArgs e)
+        {
+            try
+            {
+                Thread.Sleep(150);
+
+                //Ищем наше окно и выводим его на первый план
+                if (encoderProcess != null && !encoderProcess.HasExited)
+                {
+                    IntPtr w_handle = FindWindow("#32770", title);
+                    if (w_handle != IntPtr.Zero) SetForegroundWindow(w_handle);
+                }
+            }
+            catch { }
+        }
+
+        private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-            worker.WorkerSupportsCancellation = true;
         }
 
-        private void GetFiles()
+        private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try
             {
-                files = new ArrayList();
-
                 encoderProcess = new Process();
                 ProcessStartInfo info = new ProcessStartInfo();
                 info.WorkingDirectory = Calculate.StartupPath;
                 info.FileName = "SafeOpenDialog.exe";
                 info.UseShellExecute = false;
                 info.RedirectStandardOutput = true;
-                info.RedirectStandardError = true;
+                info.RedirectStandardError = false;
                 info.StandardOutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
                 info.CreateNoWindow = true;
-
                 info.Arguments = arguments;
 
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
                 encoderProcess.PriorityClass = ProcessPriorityClass.Normal;
-
                 encoderProcess.WaitForExit();
 
-                string[] separator = new string[] { Environment.NewLine };
-                string[] a = encoderProcess.StandardOutput.ReadToEnd().Split(separator, StringSplitOptions.RemoveEmptyEntries);
-
+                string[] a = encoderProcess.StandardOutput.ReadToEnd().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string file in a)
                     files.Add(file);
-
-                //while (!encoderProcess.StandardOutput.EndOfStream)
-                //    files.Add(encoderProcess.StandardOutput.ReadLine());
-
-                encoderProcess.Close();
-                encoderProcess = null;
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                e.Result = ex;
             }
         }
 
-       private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            GetFiles();
-        }
+            if (e.Result != null)
+                ShowMessage("SafeOpenDialog: " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
 
-       private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
-        {
             Close();
         }
 
-        private void ErrorExeption(string message)
-        {
-            ShowMessage(this, message);
-        }
-
-        internal delegate void MessageDelegate(object sender, string data);
-        private void ShowMessage(object sender, string data)
-        {
-            if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), sender, data);
-            else
-            {
-                Message mes = new Message(this);
-                mes.ShowMessage(data, Languages.Translate("Error"));
-            }
-        }
-
-        //internal delegate void InfoDelegate(string data);
-        //private void SetInfo(string data)
-        //{
-        //    if (!Application.Current.Dispatcher.CheckAccess())
-        //        Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new InfoDelegate(SetInfo), data);
-        //    else
-        //    {
-        //        text_info.Content = data;
-        //    }
-        //}
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            //Отпускаем EventHandler
+            Application.Current.Activated -= new EventHandler(Application_Activated);
+
+            if (worker != null)
+            {
+                worker.Dispose();
+                worker = null;
+            }
+
             if (encoderProcess != null)
             {
-                if (!encoderProcess.HasExited)
+                try
                 {
-                    encoderProcess.Kill();
-                    encoderProcess.WaitForExit();
+                    if (!encoderProcess.HasExited)
+                    {
+                        encoderProcess.Kill();
+                        encoderProcess.WaitForExit();
+                    }
                 }
+                catch { }
+                encoderProcess.Close();
+                encoderProcess.Dispose();
+                encoderProcess = null;
             }
         }
 
-	}
+        internal delegate void MessageDelegate(string data, string info);
+        private void ShowMessage(string data, string info)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), data, info);
+            else
+            {
+                Message mes = new Message(/*this.Owner != null ? this.Owner : */Application.Current.MainWindow);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
+            }
+        }
+    }
 }
