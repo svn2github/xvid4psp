@@ -47,10 +47,8 @@ namespace XviD4PSP
             try
             {
                 path = Settings.TempPath + "\\exception_info";
-                DateTime d = DateTime.Now;
-                path += "_(" + d.Year + "." + d.Month + "." + d.Day + "_" + d.Hour + "." + d.Minute + "." + d.Second + ").log";
-                AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
-                txt += " v" + asinfo.Version + " " + asinfo.Trademark;
+                path += "_(" + DateTime.Now.ToString("dd.MM.yyyy_HH.mm.ss") + ").log";
+                txt += " v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             }
             catch { }
 

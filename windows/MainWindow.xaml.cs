@@ -5880,10 +5880,11 @@ namespace XviD4PSP
             cmn_addtobookmarks.IsEnabled = cmn_deletebookmarks.IsEnabled = ShowItems;
 
             cmn_bookmarks.Items.Clear();
-            AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
+
+            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             if (m != null)
             {
-                this.Title = Path.GetFileName(m.infilepath) + "  - XviD4PSP - v" + asinfo.Version + "  " + asinfo.Trademark;
+                this.Title = Path.GetFileName(m.infilepath) + "  - XviD4PSP - v" + version;
                 this.menu_createtestscript.IsChecked = m.testscript;
                 if (m.trim_start != 0 || m.trim_end != 0) //Восстанавливаем трим (из сохраненного задания)
                 {
@@ -5908,11 +5909,10 @@ namespace XviD4PSP
             }
             else
             {
-                this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + asinfo.Version + "  " + asinfo.Trademark;
+                this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + version;
                 this.menu_createtestscript.IsChecked = false;
                 this.cmn_bookmarks.IsEnabled = false;
             }
-            asinfo = null;
         }
 
         private void GoTo_KeyDown(object sender, KeyEventArgs e)

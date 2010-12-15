@@ -4066,14 +4066,9 @@ namespace XviD4PSP
 
                 SetLog("XVID4PSP");
                 SetLog("------------------------------");
-                //Assembly ainfo = Assembly.GetExecutingAssembly();
-                //AssemblyName aname = ainfo.GetName();
-                //string ver = aname.Version.ToString(2) + aname.Version.Build + aname.Version.Revision;
-                AssemblyInfoHelper asinfo = new AssemblyInfoHelper(); 
-                string ver = asinfo.Version + " " + asinfo.Trademark;
-                DateTime ct = File.GetLastWriteTime(Calculate.StartupPath + "\\XviD4PSP.exe");
-                SetLog("Version: " + ver);
-                SetLog("Created: " + ct.ToString());
+                Assembly this_assembly = Assembly.GetExecutingAssembly();
+                SetLog("Version: " + this_assembly.GetName().Version.ToString());
+                SetLog("Created: " + File.GetLastWriteTime(this_assembly.GetModules()[0].FullyQualifiedName).ToString("dd.MM.yyyy HH:mm:ss"));
                 SetLog("TempPath: " + Settings.TempPath);
                 SetLog("AppPath: " + Calculate.StartupPath);
                 SetLog("");

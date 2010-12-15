@@ -19,10 +19,14 @@ namespace XviD4PSP
 		{
             this.Owner = owner;
             this.InitializeComponent();
-            
-            AssemblyInfoHelper asinfo = new AssemblyInfoHelper();
-            text_version.Text = "Version " + asinfo.Version + ", SVN revision " + asinfo.Trademark.Replace("rev", "");
-            asinfo = null;
+
+            try
+            {
+                Assembly this_assembly = Assembly.GetExecutingAssembly();
+                text_version.Text = "Version: " + this_assembly.GetName().Version.ToString();
+                text_version.Text += " (" + File.GetLastWriteTime(this_assembly.GetModules()[0].FullyQualifiedName).ToString("dd.MM.yyyy") + ")";
+            }
+            catch { }
 
             Title = Languages.Translate("About");
             text_import.Text = Languages.Translate("Output codecs:");
@@ -48,7 +52,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage(ex.Message, "Error");
+                new Message(this).ShowMessage(ex.Message, ex.StackTrace, Languages.Translate("Error"));
             }
         }
 	}

@@ -9,8 +9,8 @@
 	Width="496" Height="361" ResizeMode="NoResize" ShowInTaskbar="True" Topmost="False" WindowStartupLocation="CenterOwner" xmlns:MyUserControl="clr-namespace:MyUserControl">
 
 	<Grid x:Name="LayoutRoot" Width="Auto" Height="Auto" Background="{x:Null}">
-		<Grid Margin="0,0,1,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
-			<Grid x:Name="grid_mainlogo" Margin="125.584,33.567,-8.851,134.936">
+		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
+			<Grid x:Name="grid_mainlogo" Margin="125.584,33.567,-8.851,0" Height="116" VerticalAlignment="Top">
 				<TextBlock TextWrapping="Wrap" FontSize="61" FontWeight="Normal" Text="Xvid" FontFamily="Segoe UI" d:LayoutOverrides="HorizontalAlignment, Width" Margin="34.208,10.656,201.192,26.973" Foreground="#FFFFFFFF" />
 				<TextBlock d:LayoutOverrides="HorizontalAlignment, Width, Height" Margin="32.732,0,182.039,78.323" FontSize="28" Text="winnydows" TextWrapping="Wrap" FontWeight="Normal" Foreground="{DynamicResource brush_strawberry_gradient_2}" />
 				<TextBlock d:LayoutOverrides="Height" x:Name="text_about" FontFamily="Segoe UI" FontSize="20" Foreground="#FFFFFFFF" Text="AviSynth-based MultiMedia Converter" TextWrapping="Wrap" Margin="8.149,87.2,7.851,-1.6" />
@@ -24,8 +24,8 @@
                 <TextBlock FontSize="14" Margin="0,70.8,301.4,31.6" Foreground="#FFFFFFFF" Text="Output containers:" TextWrapping="Wrap" x:Name="text_export" />
 				<TextBlock Margin="0,89.6,0,12" FontSize="14" Foreground="#FFFFFFFF" Text="MKV, AVI, MP4, MOV, 3GP, MPG, FLV, TS, M2TS, PMP, DPG" TextWrapping="Wrap" />
             </Grid>
-			<Image Margin="8,-11.011,0,119.011" Source="..\pictures\main_logo_134.png" Stretch="None" Width="198.372" HorizontalAlignment="Left"/>
-            <TextBlock d:LayoutOverrides="Width, Height" Margin="128,3.774,0,0" FontFamily="Segoe UI" FontSize="23" FontWeight="Normal" Foreground="Honeydew" Text="Version 5.0.37.X, SVN revision XX" TextWrapping="Wrap" x:Name="text_version" Height="34.583" VerticalAlignment="Top" />
+			<Image Margin="8,12,0,0" Source="..\pictures\main_logo_134.png" Stretch="None" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <TextBlock d:LayoutOverrides="Width, Height" Margin="126,4,0,0" FontFamily="Segoe UI" FontSize="23" FontWeight="Normal" Foreground="Honeydew" Text="Version info here" HorizontalAlignment="Center" x:Name="text_version" Height="Auto" VerticalAlignment="Top" />
 		</Grid>
 		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38" Background="{DynamicResource black_gradient}">
 			<Button x:Name="button_ok" Content="Ok" Click="button_ok_Click" HorizontalAlignment="Right" Margin="0,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>

@@ -1,5 +1,7 @@
-XviD4PSP 5.0.37.8 r132->r199 11.12.10, main changes:
+XviD4PSP 5.10.200.0 15.12.10, main changes:
 
+>>> (r200) Version numeration changed (5.0.37.8 r200 -> 5.10.200.0, where 5 - series, 10 - version,
+           200 - SVN revision, 0 - subrevision/test build).
 >>> (r199) After opening a "Select video (audio, subtitles) file" dialog window and switching to another
            application, when we switching back to XviD4PSP this window will not be activated - fixed.
 >>> (r198) Removed a hard-specified icon from the MainWindow.
