@@ -92,7 +92,7 @@
                     <CheckBox x:Name="check_fullpass" Width="130" Height="Auto" Content="Full 1-st pass" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Right" Margin="0,0,1,12.5" VerticalAlignment="Bottom" Click="check_fullpass_Clicked"/>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Motion" Width="57" Padding="0,2,0,2">
+			<TabItem Header="Motion" Width="58" Padding="0,2,0,2">
 				<Grid Width="304" Height="180">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
@@ -109,7 +109,7 @@
 				    <CheckBox x:Name="check_chroma" d:LayoutOverrides="HorizontalAlignment, Height" HorizontalAlignment="Left" Margin="9,0,0,12.5" VerticalAlignment="Bottom" Width="Auto" Height="Auto" Content="Chroma motion estimation" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_chroma_Clicked"/>
                 </Grid>
 			</TabItem>
-			<TabItem Header="Frames" Width="60" Padding="0,2,0,2">
+			<TabItem Header="Frames" Width="61" Padding="0,2,0,2">
 				<Grid Width="304" Height="210">
 					<Label OpacityMask="{x:Null}" x:Name="text_bframes" Content="B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,16,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bframes_SelectionChanged" HorizontalAlignment="Right" Margin="0,20.66,4,0" VerticalAlignment="Top"/>
@@ -168,7 +168,7 @@
                     <MyUserControl:NumericUpDown x:Name="num_vbvpeak" Width="76" Height="Auto" HorizontalAlignment="Right" Margin="0,0,4,18" VerticalAlignment="Bottom" Change="10" DecimalPlaces="0" Maximum="99999999" Minimum="0" Value="0" ValueChanged="num_vbvpeak_ValueChanged" />
                 </Grid>
             </TabItem>
-			<TabItem Header="Misc" Width="49" Padding="0,2,0,2">
+			<TabItem Header="Misc" Width="48" Padding="0,2,0,2">
 				<Grid Width="304" Height="180">
 					<Label OpacityMask="{x:Null}" x:Name="text_qmatrix" Content="Matrix:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,14,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="combo_qmatrix" Width="Auto" Height="Auto" MinWidth="128" MaxWidth="200" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_qmatrix_SelectionChanged" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,20.66,4,0" VerticalAlignment="Top"/>
@@ -180,7 +180,7 @@
                     <Label OpacityMask="{x:Null}" x:Name="text_threads_count" Content="Threads:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,0,66,7" VerticalAlignment="Bottom" HorizontalAlignment="Right" d:LayoutOverrides="Width, Height" />
                 </Grid>
 			</TabItem>
-		<TabItem Header="CLI" Width="46" Padding="0,2,0,2">
+		<TabItem Header="CLI" Width="44" Padding="0,2,0,2">
                 <Grid Width="304" Height="210">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -188,7 +188,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBox Margin="-2,-1,-2,31" BorderThickness="0" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
+                    <TextBox Margin="-2,-2,-2,31" BorderThickness="0" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
                     <Button x:Name="xvid_help" Content="Help" Click="button_xvid_help_Click" Width="92" HorizontalAlignment="Left" Margin="-1,185,0,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
                     <Button x:Name="Reset_CLI" Content="Reset" Click="button_Reset_CLI_Click" Width="92" HorizontalAlignment="Center" Margin="0,185,0,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
                     <Button x:Name="Apply_CLI" Content="Apply" Click="button_Apply_CLI_Click" Width="92" HorizontalAlignment="Right" Margin="0,185,-1,2.8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />

@@ -74,8 +74,8 @@
 		</Grid.RowDefinitions>
 		<Image Source="..\pictures\logo_FF_mpeg4.png" Stretch="None" Height="95" Margin="0,0,0,0" VerticalAlignment="Top"/>
 		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Grid.RowSpan="1" Margin="0,92,0,0" VerticalAlignment="Stretch">
-			<TabItem Header="Main">
-				<Grid Width="304" Height="159.48">
+			<TabItem Header="Main" Width="50" Padding="0,2,0,2">
+				<Grid Width="304" Height="158">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
@@ -84,15 +84,15 @@
 					</Grid.RowDefinitions>
 					<ComboBox Margin="0,26.165,8,0" x:Name="combo_mode" VerticalAlignment="Top" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mode_SelectionChanged" HorizontalAlignment="Right" d:LayoutOverrides="HorizontalAlignment"/>
 					<Label OpacityMask="{x:Null}" x:Name="text_mode" Content="Encoding mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" Margin="8,21.505,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.125,0,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_fourcc" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,112.025,8,0" VerticalAlignment="Top" SelectionChanged="combo_fourcc_SelectionChanged"/>
+					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,53.522,8,0" x:Name="num_bitrate" VerticalAlignment="Top" Width="128" Height="Auto"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.125,0,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_codec_preset" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,83.405,8,0" VerticalAlignment="Top" SelectionChanged="combo_codec_preset_SelectionChanged" d:LayoutOverrides="Height"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_codec_preset" Content="Preset:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.745,0,0" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
+                    <ComboBox x:Name="combo_fourcc" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,112.025,8,0" VerticalAlignment="Top" SelectionChanged="combo_fourcc_SelectionChanged"/>
 					<Label OpacityMask="{x:Null}" x:Name="text_fourcc" Content="FOURCC:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,107.365,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_codec_preset" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,83.405,8,0" VerticalAlignment="Top" SelectionChanged="combo_codec_preset_SelectionChanged" d:LayoutOverrides="Height"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_codec_preset" Content="Preset:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.745,0,0" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
-					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,53.125,8,0" x:Name="num_bitrate" VerticalAlignment="Top" Width="128" Height="Auto"/>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Motion">
+			<TabItem Header="Motion" Width="59" Padding="0,2,0,2">
 				<Grid Width="304" Height="267.4">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
@@ -100,52 +100,52 @@
 					<Grid.RowDefinitions>
 						<RowDefinition Height="*"/>
 					</Grid.RowDefinitions>
-					<ComboBox x:Name="combo_me_method" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,25.66,8,0" VerticalAlignment="Top" SelectionChanged="combo_me_method_SelectionChanged"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="ME algorithm:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="9,19,0,0" VerticalAlignment="Top"/>
-					<CheckBox x:Name="check_gmc" Width="Auto" Height="Auto" Content="Global motion compensation (GMC)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="14.807,0,0,16.24" VerticalAlignment="Bottom" Checked="check_gmc_Checked" Unchecked="check_gmc_Unchecked"/>
-					<CheckBox x:Name="check_qpel" Width="Auto" Height="Auto" Content="Quarter pixel search (QPEL)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="15.614,0,0,38.86" VerticalAlignment="Bottom" Checked="check_qpel_Checked" Unchecked="check_qpel_Unchecked"/>
-					<ComboBox x:Name="combo_mbd" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,54.28,8,0" VerticalAlignment="Top" SelectionChanged="combo_mbd_SelectionChanged"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_mbd" Content="Macroblock decision:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="9,47.62,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_mvectors" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,82.9,8,0" VerticalAlignment="Top" SelectionChanged="combo_mvectors_SelectionChanged"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_mvectors" Content="Motion vectors:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9,76.24,0,0" VerticalAlignment="Top"/>
-					<CheckBox x:Name="check_qprd" Width="Auto" Height="Auto" Content="RD optimization for QP" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_qprd_Checked" Unchecked="check_qprd_Unchecked" d:LayoutOverrides="Width" Margin="15.614,0,124.119,84.1" VerticalAlignment="Bottom"/>
-					<CheckBox x:Name="check_cbp" Width="Auto" Height="Auto" Content="RD optimization for CBP" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_cbp_Checked" Unchecked="check_cbp_Unchecked" d:LayoutOverrides="Width" Margin="15.614,0,117.979,61.48" VerticalAlignment="Bottom"/>
-					<ComboBox x:Name="combo_cmp" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,111.52,8,0" VerticalAlignment="Top" SelectionChanged="combo_cmp_SelectionChanged"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_cmp" Content="ME compare:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="9,104.86,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_me_method" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,26.165,8,0" VerticalAlignment="Top" SelectionChanged="combo_me_method_SelectionChanged"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="ME algorithm:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="8,21.505,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_mbd" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,54.28,8,0" VerticalAlignment="Top" SelectionChanged="combo_mbd_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_mbd" Content="Macroblock decision:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="8,50.125,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_mvectors" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,83.405,8,0" VerticalAlignment="Top" SelectionChanged="combo_mvectors_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_mvectors" Content="Motion vectors:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.745,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_cmp" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,112.025,8,0" VerticalAlignment="Top" SelectionChanged="combo_cmp_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_cmp" Content="ME compare:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,107.365,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="check_qprd" Width="Auto" Height="Auto" Content="RD optimization for QP" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_qprd_Checked" Unchecked="check_qprd_Unchecked" d:LayoutOverrides="Width" Margin="14,0,124.119,84.1" VerticalAlignment="Bottom"/>
+                    <CheckBox x:Name="check_cbp" Width="Auto" Height="Auto" Content="RD optimization for CBP" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_cbp_Checked" Unchecked="check_cbp_Unchecked" d:LayoutOverrides="Width" Margin="14,0,117.979,61.48" VerticalAlignment="Bottom"/>
+                    <CheckBox x:Name="check_qpel" Width="Auto" Height="Auto" Content="Quarter pixel search (QPEL)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="14,0,0,38.86" VerticalAlignment="Bottom" Checked="check_qpel_Checked" Unchecked="check_qpel_Unchecked"/>
+                    <CheckBox x:Name="check_gmc" Width="Auto" Height="Auto" Content="Global motion compensation (GMC)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="14,0,0,16.24" VerticalAlignment="Bottom" Checked="check_gmc_Checked" Unchecked="check_gmc_Unchecked"/>
 				</Grid>
 			</TabItem>
-			<TabItem Header="B-frames">
-				<Grid Width="304" Height="133">
-					<ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bframes_SelectionChanged" HorizontalAlignment="Right" Margin="0,26,8,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_bframes" Content="B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="VerticalAlignment" HorizontalAlignment="Left" Margin="10,23,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_bdecision" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,54.62,8,0" VerticalAlignment="Top" SelectionChanged="combo_bdecision_SelectionChanged"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_bdecision" Content="B-frames decision:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="10,51.62,0,0" VerticalAlignment="Top"/>
-					<ComboBox x:Name="combo_brefine" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,83.24,8,0" VerticalAlignment="Top" SelectionChanged="combo_brefine_SelectionChanged"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_brefine" Content="B-frames refine:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="10,80.24,0,0" VerticalAlignment="Top"/>
+			<TabItem Header="B-frames" Width="70" Padding="0,2,0,2">
+				<Grid Width="304" Height="130">
+					<ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bframes_SelectionChanged" HorizontalAlignment="Right" Margin="0,26.165,8,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_bframes" Content="B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="VerticalAlignment" HorizontalAlignment="Left" Margin="8,21.505,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_bdecision" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,54.28,8,0" VerticalAlignment="Top" SelectionChanged="combo_bdecision_SelectionChanged"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_bdecision" Content="B-frames decision:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.125,0,0" VerticalAlignment="Top"/>
+					<ComboBox x:Name="combo_brefine" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,83.405,8,0" VerticalAlignment="Top" SelectionChanged="combo_brefine_SelectionChanged"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_brefine" Content="B-frames refine:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.745,0,0" VerticalAlignment="Top"/>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Quantization">
+			<TabItem Header="Quantization" Width="82" Padding="0,2,0,2">
 				<Grid Width="304" Height="158">
-					<CheckBox x:Name="check_trellis" Width="Auto" Height="Auto" Content="Trellis quantization" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_trellis_Checked" Unchecked="check_trellis_Unchecked" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="16,0,0,38.62" VerticalAlignment="Bottom"/>
-					<ComboBox x:Name="combo_qmatrix" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_qmatrix_SelectionChanged" d:LayoutOverrides="Height" Margin="0,26.405,8,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="200"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_qmatrix" Content="Matrix:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,19.745,0,0" VerticalAlignment="Top"/>
-					<CheckBox x:Name="check_aic" Width="Auto" Height="Auto" Content="Advanced intra coding" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Width" Margin="16,0,127.76,16" VerticalAlignment="Bottom" Checked="check_aic_Checked" Unchecked="check_aic_Unchecked"/>
-					<CheckBox x:Name="check_intra" Width="Auto" Height="Auto" Content="Intra frames only" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_intra_Checked" Unchecked="check_intra_Unchecked" HorizontalAlignment="Left" Margin="16,0,0,61.24" VerticalAlignment="Bottom"/>
+					<ComboBox x:Name="combo_qmatrix" Height="Auto" Width="Auto" MinWidth="128" MaxWidth="200" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_qmatrix_SelectionChanged" d:LayoutOverrides="Height" Margin="0,26.165,8,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_qmatrix" Content="Matrix:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,21.505,0,0" VerticalAlignment="Top"/>
+					<CheckBox x:Name="check_intra" Width="Auto" Height="Auto" Content="Intra frames only" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_intra_Checked" Unchecked="check_intra_Unchecked" HorizontalAlignment="Left" Margin="14,0,0,61.24" VerticalAlignment="Bottom"/>
+                    <CheckBox x:Name="check_trellis" Width="Auto" Height="Auto" Content="Trellis quantization" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Checked="check_trellis_Checked" Unchecked="check_trellis_Unchecked" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="14,0,0,38.62" VerticalAlignment="Bottom"/>
+                    <CheckBox x:Name="check_aic" Width="Auto" Height="Auto" Content="Advanced intra coding" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Width" Margin="14,0,127.76,16" VerticalAlignment="Bottom" Checked="check_aic_Checked" Unchecked="check_aic_Unchecked"/>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Rate">
-				<Grid Width="304" Height="234">
-					<Label OpacityMask="{x:Null}" x:Name="text_minbitrate" Content="Minimum bitrate: (kbps)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,21.745,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_maxbitrate" Content="Maximum bitrate: (kbps)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.365,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_buffsize" Content="Bitstream buffer size: (kbit)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="8,136.225,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_gopsize" Content="GOP size:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,107.605,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_bittolerance" Content="Bitrate tolerance: (kb)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.985,0,0" VerticalAlignment="Top"/>
-					<CheckBox x:Name="check_bitexact" Width="Auto" Height="Auto" Content="Bitexact staff only" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="15.614,0,0,16.56" VerticalAlignment="Bottom" Checked="check_bitexact_Checked" Unchecked="check_bitexact_Unchecked"/>
+			<TabItem Header="Rate" Width="49" Padding="0,2,0,2">
+				<Grid Width="304" Height="224">
+					<Label OpacityMask="{x:Null}" x:Name="text_minbitrate" Content="Minimum bitrate (kbps):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,21.505,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_maxbitrate" Content="Maximum bitrate (kbps):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.125,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_buffsize" Content="Bitstream buffer size (kbit):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="8,136.225,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_gopsize" Content="GOP size:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,107.365,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_bittolerance" Content="Bitrate tolerance (kb):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.745,0,0" VerticalAlignment="Top"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,24.902,8,0" x:Name="num_minbitrate" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,53.522,8,0" x:Name="num_maxbitrate" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,82.105,8,0" x:Name="num_bittolerance" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,110.762,8,0" x:Name="num_gopsize" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,139.382,8,0" VerticalAlignment="Top" Width="109" Height="Auto" x:Name="num_buffsize"/>
+                    <CheckBox x:Name="check_bitexact" Width="Auto" Height="Auto" Content="Bitexact staff only" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="14,0,0,16.56" VerticalAlignment="Bottom" Checked="check_bitexact_Checked" Unchecked="check_bitexact_Unchecked"/>
 				</Grid>
 			</TabItem>
 		</TabControl>

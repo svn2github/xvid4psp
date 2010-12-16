@@ -324,6 +324,10 @@ namespace XviD4PSP
 
         private void make_x264()
         {
+            //Убираем метку " --extra:"
+            for (int n = 0; n < m.vpasses.Count; n++)
+                m.vpasses[n] = m.vpasses[n].ToString().Replace(" --extra:", "");
+
             //прописываем интерлейс флаги
             if (m.interlace == SourceType.FILM ||
                 m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
@@ -333,20 +337,8 @@ namespace XviD4PSP
             {
                 if (m.deinterlace == DeinterlaceType.Disabled)
                 {
-                    string forfer = " --tff";
-                    if (m.fieldOrder == FieldOrder.BFF)
-                        forfer = " --bff";
-
-                    ArrayList newclis = new ArrayList();
-                    foreach (string cli in m.vpasses)
-                    {
-                        string newclie = cli;
-                        //newclie = newclie + " --interlaced";
-                        newclie = newclie + forfer;
-                        newclis.Add(newclie);
-                    }
-                    //передаём обновленные параметры
-                    m.vpasses = (ArrayList)newclis.Clone();
+                    for (int n = 0; n < m.vpasses.Count; n++)
+                        m.vpasses[n] = m.vpasses[n].ToString() + (m.fieldOrder == FieldOrder.BFF ? " --bff" : " --tff");
                 }
             }
 
@@ -375,10 +367,8 @@ namespace XviD4PSP
 
                 m.outvbitrate = bitrate;
 
-                ArrayList newclis = new ArrayList();
-                foreach (string cli in m.vpasses)
-                    newclis.Add(cli.Replace("--size " + targetsize, "--bitrate " + bitrate));
-                m.vpasses = (ArrayList)newclis.Clone();
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace("--size " + targetsize, "--bitrate " + bitrate);
             }
 
             step++;

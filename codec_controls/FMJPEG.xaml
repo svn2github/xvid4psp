@@ -74,7 +74,7 @@
 		</Grid.RowDefinitions>
 		<Image Source="..\pictures\logo_FF_MJPEG.png" Stretch="None" Height="95" Margin="0,0,0,0" VerticalAlignment="Top"/>
 		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Grid.RowSpan="1" Margin="0,92,0,0" VerticalAlignment="Stretch">
-			<TabItem Header="Main">
+			<TabItem Header="Main" Width="56" Padding="0,2,0,2">
 				<Grid Width="304" Height="102.48">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*"/>
@@ -85,22 +85,22 @@
 					<ComboBox Margin="0,26.165,8,0" x:Name="combo_mode" VerticalAlignment="Top" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mode_SelectionChanged" HorizontalAlignment="Right" d:LayoutOverrides="HorizontalAlignment"/>
 					<Label OpacityMask="{x:Null}" x:Name="text_mode" Content="Encoding mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" Margin="8,21.505,0,0" VerticalAlignment="Top"/>
 					<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.125,0,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top"/>
-					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,53.125,8,0" x:Name="num_bitrate" VerticalAlignment="Top" Width="128" Height="Auto"/>
+					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,53.522,8,0" x:Name="num_bitrate" VerticalAlignment="Top" Width="128" Height="Auto"/>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Rate">
-				<Grid Width="304" Height="234">
-					<Label OpacityMask="{x:Null}" x:Name="text_minbitrate" Content="Minimum bitrate: (kbps)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,21.745,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_maxbitrate" Content="Maximum bitrate: (kbps)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.365,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_buffsize" Content="Bitstream buffer size: (kbit)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="8,136.225,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_gopsize" Content="GOP size:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,107.605,0,0" VerticalAlignment="Top"/>
-					<Label OpacityMask="{x:Null}" x:Name="text_bittolerance" Content="Bitrate tolerance: (kb)" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.985,0,0" VerticalAlignment="Top"/>
-					<CheckBox x:Name="check_bitexact" Width="Auto" Height="Auto" Content="Bitexact staff only" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="15.614,0,0,16.56" VerticalAlignment="Bottom" Checked="check_bitexact_Checked" Unchecked="check_bitexact_Unchecked"/>
+			<TabItem Header="Rate" Width="56" Padding="0,2,0,2">
+				<Grid Width="304" Height="224">
+					<Label OpacityMask="{x:Null}" x:Name="text_minbitrate" Content="Minimum bitrate (kbps):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,21.505,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_maxbitrate" Content="Maximum bitrate (kbps):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,50.125,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_buffsize" Content="Bitstream buffer size (kbit):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="8,136.225,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_gopsize" Content="GOP size:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,107.365,0,0" VerticalAlignment="Top"/>
+					<Label OpacityMask="{x:Null}" x:Name="text_bittolerance" Content="Bitrate tolerance (kb):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,78.745,0,0" VerticalAlignment="Top"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,24.902,8,0" x:Name="num_minbitrate" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,53.522,8,0" x:Name="num_maxbitrate" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,82.105,8,0" x:Name="num_bittolerance" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,110.762,8,0" x:Name="num_gopsize" VerticalAlignment="Top" Width="109" Height="Auto"/>
 					<MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,139.382,8,0" VerticalAlignment="Top" Width="109" Height="Auto" x:Name="num_buffsize"/>
+                    <CheckBox x:Name="check_bitexact" Width="Auto" Height="Auto" Content="Bitexact staff only" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="14,0,0,16.56" VerticalAlignment="Bottom" Checked="check_bitexact_Checked" Unchecked="check_bitexact_Unchecked"/>
 				</Grid>
 			</TabItem>
 		</TabControl>

@@ -12,10 +12,10 @@
 		</Grid.RowDefinitions>
 		<Image Source="..\pictures\logo_FF_dv.png" Stretch="None" VerticalAlignment="Top" Height="95" HorizontalAlignment="Center"/>
 		<Grid Margin="0,95,0,0" Background="{DynamicResource black_gradient_2}" Height="102" Width="312">
-			<ComboBox x:Name="combo_fourcc" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,55.28,7.833,0" VerticalAlignment="Top" SelectionChanged="combo_fourcc_SelectionChanged"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_fourcc" Content="FOURCC:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8.167,50.62,0,0" VerticalAlignment="Top"/>
 			<ComboBox x:Name="combo_preset" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,26.66,8,0" VerticalAlignment="Top" SelectionChanged="combo_preset_SelectionChanged"/>
 			<Label OpacityMask="{x:Null}" x:Name="text_codec_preset" Content="Standart:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,22,0,0" VerticalAlignment="Top"/>
-		</Grid>
+            <ComboBox x:Name="combo_fourcc" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,55.28,8,0" VerticalAlignment="Top" SelectionChanged="combo_fourcc_SelectionChanged"/>
+            <Label OpacityMask="{x:Null}" x:Name="text_fourcc" Content="FOURCC:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,50.62,0,0" VerticalAlignment="Top"/>
+        </Grid>
 	</Grid>
 </UserControl>

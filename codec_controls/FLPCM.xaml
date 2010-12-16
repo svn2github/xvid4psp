@@ -6,7 +6,7 @@
 	x:Name="UserControl"
 	Width="Auto" Height="Auto">
 
-	<Grid Width="Auto" Height="Auto" x:Name="LayoutRoot" Background="{x:Null}">
+	<Grid Width="Auto" Height="Auto" x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>

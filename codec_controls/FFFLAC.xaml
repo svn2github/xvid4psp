@@ -6,14 +6,14 @@
 	x:Name="UserControl"
 	Width="Auto" Height="Auto">
 
-	<Grid Width="Auto" Height="Auto" x:Name="LayoutRoot" Background="{x:Null}">
+	<Grid Width="Auto" Height="Auto" x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-		<Image Margin="0,0,0,0" Source="..\pictures\logo_FF_FLAC.png" Stretch="None" VerticalAlignment="Top" Height="95" d:LayoutOverrides="Width" HorizontalAlignment="Center"/>
+		<Image Margin="0,0,0,0" Source="..\pictures\logo_FF_FLAC.png" Stretch="None" VerticalAlignment="Top" d:LayoutOverrides="Width" HorizontalAlignment="Center"/>
 		<Grid VerticalAlignment="Bottom" Height="124" Background="{DynamicResource black_gradient_2}" Margin="0,95,0,0" Width="312">
 			<ComboBox Margin="0,23.66,8,0" x:Name="combo_level" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_level_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Top"/>
 			<Label OpacityMask="{x:Null}" x:Name="text_level" Content="Compression level:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,19,0,0" VerticalAlignment="Top"/>

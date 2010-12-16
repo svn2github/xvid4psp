@@ -4,16 +4,167 @@ using System.Text;
 
 namespace XviD4PSP
 {
-   public class x264_arguments
+    public class x264_arguments
     {
-       public x264_arguments()
-       {
-       }
+        public x264_arguments()
+        {
+        }
 
-       public x264_arguments Clone()
-       {
-           return (x264_arguments)this.MemberwiseClone();
-       }
+        public x264_arguments(int codec_preset)
+        {
+            //Выставляем значения в соответствии с пресетом
+            if (codec_preset == 0)
+            {
+                //Ultrafast
+                _adaptivedct = false;
+                _analyse = "none";
+                _aqmode = 0;
+                _b_adapt = 0;
+                _bframes = 0;
+                _bpyramid = 0;
+                _cabac = false;
+                _deblocking = false;
+                _direct = "none";//
+                _lookahead = 0;
+                _me = "dia";
+                _mixedrefs = false;
+                _no_mbtree = true;
+                _psyrdo = 0.0m;//
+                _reference = 1;
+                _subme = 0;
+                _trellis = 0;
+                _weightb = false;
+                _weightp = 0;
+                //--scenecut 0
+            }
+            else if (codec_preset == 1)
+            {
+                //Superfast
+                _analyse = "i8x8,i4x4";
+                _lookahead = 0;
+                _me = "dia";
+                _mixedrefs = false;
+                _no_mbtree = true;
+                _reference = 1;
+                _subme = 1;
+                _trellis = 0;
+                _weightp = 0;
+            }
+            else if (codec_preset == 2)
+            {
+                //Veryfast
+                _lookahead = 10;
+                _mixedrefs = false;
+                _reference = 1;
+                _subme = 2;
+                _trellis = 0;
+                _weightp = 0;
+            }
+            else if (codec_preset == 3)
+            {
+                //Faster
+                _lookahead = 20;
+                _mixedrefs = false;
+                _reference = 2;
+                _subme = 4;
+                _weightp = 1;
+            }
+            else if (codec_preset == 4)
+            {
+                //Fast
+                _reference = 2;
+                _subme = 6;
+                _lookahead = 30;
+            }
+            else if (codec_preset == 5)
+            {
+                //Medium
+                //(defaults)
+            }
+            else if (codec_preset == 6)
+            {
+                //Slow
+                _b_adapt = 2;
+                _direct = "auto";
+                _lookahead = 50;
+                _me = "umh";
+                _reference = 5;
+                _subme = 8;
+            }
+            else if (codec_preset == 7)
+            {
+                //Slower
+                _analyse = "all";
+                _b_adapt = 2;
+                _direct = "auto";
+                _lookahead = 60;
+                _me = "umh";
+                _reference = 8;
+                _subme = 9;
+                _trellis = 2;
+            }
+            else if (codec_preset == 8)
+            {
+                //Veryslow
+                _analyse = "all";
+                _b_adapt = 2;
+                _bframes = 8;
+                _direct = "auto";
+                _lookahead = 60;
+                _me = "umh";
+                _merange = 24;
+                _reference = 16;
+                _subme = 10;
+                _trellis = 2;
+            }
+            else if (codec_preset == 9)
+            {
+                //Placebo
+                _analyse = "all";
+                _b_adapt = 2;
+                _bframes = 16;
+                _direct = "auto";
+                _lookahead = 60;
+                _me = "tesa";
+                _merange = 24;
+                _no_fastpskip = true;
+                _reference = 16;
+                _slow_frstpass = true;
+                _subme = 10;
+                _trellis = 2;
+            }
+        }
+
+        public x264_arguments Clone()
+        {
+            return (x264_arguments)this.MemberwiseClone();
+        }
+
+        private int _preset = 5;
+        public int preset
+        {
+            get
+            {
+                return _preset;
+            }
+            set
+            {
+                _preset = value;
+            }
+        }
+
+        private string _profile = "auto";
+        public string profile
+        {
+            get
+            {
+                return _profile;
+            }
+            set
+            {
+                _profile = value;
+            }
+        }
 
         private string _level = "unrestricted";
         public string level
@@ -40,7 +191,6 @@ namespace XviD4PSP
                 _reference = value;
             }
         }
-
 
         private string _analyse = "p8x8,b8x8,i8x8,i4x4";
         public string analyse
@@ -302,7 +452,7 @@ namespace XviD4PSP
             }
         }
 
-        private int _min_quant = 10;
+        private int _min_quant = 0;
         public int min_quant
         {
             get
@@ -354,8 +504,8 @@ namespace XviD4PSP
             }
         }
 
-        private string _aqmode = "1";
-        public string aqmode
+        private int _aqmode = 1;
+        public int aqmode
         {
             get
             {
@@ -365,13 +515,9 @@ namespace XviD4PSP
             {
                 _aqmode = value;
             }
-        } 
-       
-       
-       
-       
-       
-       private bool _aud = false;
+        }
+
+        private bool _aud = false;
         public bool aud
         {
             get
@@ -394,6 +540,19 @@ namespace XviD4PSP
             set
             {
                 _pictiming = value;
+            }
+        }
+
+        private bool _no_psy = false;
+        public bool no_psy
+        {
+            get
+            {
+                return _no_psy;
+            }
+            set
+            {
+                _no_psy = value;
             }
         }
 
@@ -436,6 +595,19 @@ namespace XviD4PSP
             }
         }
 
+        private bool _thread_input = false;
+        public bool thread_input
+        {
+            get
+            {
+                return _thread_input;
+            }
+            set
+            {
+                _thread_input = value;
+            }
+        }
+
         private int _b_adapt = 1;
         public int b_adapt
         {
@@ -474,9 +646,9 @@ namespace XviD4PSP
                 _vbv_maxrate = value;
             }
         }
-       
-       private int _vbv_bufsize = 0;
-       public int vbv_bufsize
+
+        private int _vbv_bufsize = 0;
+        public int vbv_bufsize
         {
             get
             {
@@ -488,108 +660,264 @@ namespace XviD4PSP
             }
         }
 
-       private string _qp_offset = "0";
-       public string qp_offset
-       {
-           get
-           {
-               return _qp_offset;
-           }
-           set
-           {
-               _qp_offset = value;
-           }
-       }
-       
-       private bool _slow_frstpass = false;
-       public bool slow_frstpass
-       {
-           get
-           {
-               return _slow_frstpass;
-           }
-           set
-           {
-               _slow_frstpass = value;
-           }
-       }
+        private decimal _vbv_init = 0.90m;
+        public decimal vbv_init
+        {
+            get
+            {
+                return _vbv_init;
+            }
+            set
+            {
+                _vbv_init = value;
+            }
+        }
 
-       private bool _no_mbtree = false;
-       public bool no_mbtree
-       {
-           get
-           {
-               return _no_mbtree;
-           }
-           set
-           {
-               _no_mbtree = value;
-           }
-       }
+        private int _qp_offset = 0;
+        public int qp_offset
+        {
+            get
+            {
+                return _qp_offset;
+            }
+            set
+            {
+                _qp_offset = value;
+            }
+        }
 
-       private int _lookahead = 40;
-       public int lookahead
-       {
-           get
-           {
-               return _lookahead;
-           }
-           set
-           {
-               _lookahead = value;
-           }
-       }
-       
-       private bool _no_psy = false;
-       public bool no_psy
-       {
-           get
-           {
-               return _no_psy;
-           }
-           set
-           {
-               _no_psy = value;
-           }
-       }
+        private bool _slow_frstpass = false;
+        public bool slow_frstpass
+        {
+            get
+            {
+                return _slow_frstpass;
+            }
+            set
+            {
+                _slow_frstpass = value;
+            }
+        }
 
-       private bool _nal_hrd = false;
-       public bool nal_hrd
-       {
-           get
-           {
-               return _nal_hrd;
-           }
-           set
-           {
-               _nal_hrd = value;
-           }
-       }
+        private bool _no_mbtree = false;
+        public bool no_mbtree
+        {
+            get
+            {
+                return _no_mbtree;
+            }
+            set
+            {
+                _no_mbtree = value;
+            }
+        }
 
-       private int _gop_min = 25;
-       public int gop_min
-       {
-           get
-           {
-               return _gop_min;
-           }
-           set
-           {
-               _gop_min = value;
-           }
-       }
+        private int _lookahead = 40;
+        public int lookahead
+        {
+            get
+            {
+                return _lookahead;
+            }
+            set
+            {
+                _lookahead = value;
+            }
+        }
+        
+        private string _nal_hrd = "none";
+        public string nal_hrd
+        {
+            get
+            {
+                return _nal_hrd;
+            }
+            set
+            {
+                _nal_hrd = value;
+            }
+        }
 
-       private int _gop_max = 250;
-       public int gop_max
-       {
-           get
-           {
-               return _gop_max;
-           }
-           set
-           {
-               _gop_max = value;
-           }
-       }
+        private int _gop_min = 0;
+        public int gop_min
+        {
+            get
+            {
+                return _gop_min;
+            }
+            set
+            {
+                _gop_min = value;
+            }
+        }
+
+        private int _gop_max = 250;
+        public int gop_max
+        {
+            get
+            {
+                return _gop_max;
+            }
+            set
+            {
+                _gop_max = value;
+            }
+        }
+
+        private string _open_gop = "none";
+        public string open_gop
+        {
+            get
+            {
+                return _open_gop;
+            }
+            set
+            {
+                _open_gop = value;
+            }
+        }
+
+        private decimal _ratio_ip = 1.40m;
+        public decimal ratio_ip
+        {
+            get
+            {
+                return _ratio_ip;
+            }
+            set
+            {
+                _ratio_ip = value;
+            }
+        }
+
+        private decimal _ratio_pb = 1.30m;
+        public decimal ratio_pb
+        {
+            get
+            {
+                return _ratio_pb;
+            }
+            set
+            {
+                _ratio_pb = value;
+            }
+        }
+
+        private int _slices = 0;
+        public int slices
+        {
+            get
+            {
+                return _slices;
+            }
+            set
+            {
+                _slices = value;
+            }
+        }
+
+        private bool _pic_struct = false;
+        public bool pic_struct
+        {
+            get
+            {
+                return _pic_struct;
+            }
+            set
+            {
+                _pic_struct = value;
+            }
+        }
+
+        private bool _fake_int = false;
+        public bool fake_int
+        {
+            get
+            {
+                return _fake_int;
+            }
+            set
+            {
+                _fake_int = value;
+            }
+        }
+
+        private bool _full_range = false;
+        public bool full_range
+        {
+            get
+            {
+                return _full_range;
+            }
+            set
+            {
+                _full_range = value;
+            }
+        }
+
+        private string _colorprim = "Undefined";
+        public string colorprim
+        {
+            get
+            {
+                return _colorprim;
+            }
+            set
+            {
+                _colorprim = value;
+            }
+        }
+
+        private string _transfer = "Undefined";
+        public string transfer
+        {
+            get
+            {
+                return _transfer;
+            }
+            set
+            {
+                _transfer = value;
+            }
+        }
+
+        private string _colormatrix = "Undefined";
+        public string colormatrix
+        {
+            get
+            {
+                return _colormatrix;
+            }
+            set
+            {
+                _colormatrix = value;
+            }
+        }
+
+        private bool _non_deterministic = false;
+        public bool non_deterministic
+        {
+            get
+            {
+                return _non_deterministic;
+            }
+            set
+            {
+                _non_deterministic = value;
+            }
+        }
+
+        private string _extra_cli = "";
+        public string extra_cli
+        {
+            get
+            {
+                return _extra_cli;
+            }
+            set
+            {
+                _extra_cli = value;
+            }
+        }
     }
 }

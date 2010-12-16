@@ -6,7 +6,7 @@
 	x:Name="UserControl"
 	Width="Auto" Height="Auto">
 
-	<Grid Width="Auto" Height="Auto" x:Name="LayoutRoot" xmlns:MyUserControl="clr-namespace:MyUserControl" Background="{x:Null}">
+	<Grid Width="Auto" Height="Auto" x:Name="LayoutRoot" xmlns:MyUserControl="clr-namespace:MyUserControl" Background="{DynamicResource black_gradient_2}">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
@@ -21,7 +21,7 @@
 			<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,76.24,0,0" VerticalAlignment="Top"/>
 			<ComboBox x:Name="combo_aac_profile" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,52.28,8,0" SelectionChanged="combo_aac_profile_SelectionChanged" VerticalAlignment="Top"/>
 			<Label OpacityMask="{x:Null}" x:Name="text_aac_profile" Content="AAC profile:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="8,47.62,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,109.52,8,0" VerticalAlignment="Top" Width="128" Height="23" x:Name="num_period" Minimum="0" Maximum="10000000" />
+            <MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,109,8,0" VerticalAlignment="Top" Width="128" Height="Auto" x:Name="num_period" Minimum="0" Maximum="10000000" />
             <Label OpacityMask="{x:Null}" x:Name="text_period" Content="Bitrate averaging period:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,105,0,0" VerticalAlignment="Top"/>
         </Grid>
 	</Grid>
