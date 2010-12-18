@@ -1,5 +1,7 @@
-XviD4PSP 5.10.201.0 (16.12.2010), main changes:
+XviD4PSP 5.10.202.0 (18.12.2010), main changes:
 
+>>> (r202) Added support for Windows 7 taskbar progress indication. Enabled by default for Win7, can be disabled
+           in "Settings->Global settings->Enable Windows 7 taskbar progress indication" (req. by Procrustean).
 >>> (r201) Various changes in the x264 codec settings window. Some options was reallocated between tabs; few
            new options was added; added support for "--preset" key; added a key-sign "--extra": everything
            that placed after this key will remain unchanged when preset is recreated (for all passes will be

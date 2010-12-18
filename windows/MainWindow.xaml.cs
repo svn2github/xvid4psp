@@ -70,7 +70,7 @@ namespace XviD4PSP
         private bool IsAviSynthError = false;
         public PlayState currentState = PlayState.Init;
 
-        private IntPtr Handle = IntPtr.Zero;
+        public IntPtr Handle = IntPtr.Zero;
 
         private HwndSource source;
         private System.Timers.Timer timer;
@@ -251,7 +251,14 @@ namespace XviD4PSP
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            TrayIcon.Visible = Settings.TrayIconEnabled;
+            TrayIcon.Visible = Settings.TrayIconIsEnabled;
+            Handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (Settings.Win7TaskbarIsEnabled && !Win7Taskbar.InitializeWin7Taskbar())
+            {
+                ErrorException(Languages.Translate("Failed to initialize Windows 7 taskbar interface.") +
+                    " " + Languages.Translate("This feature will be disabled!"));
+                Settings.Win7TaskbarIsEnabled = false;
+            }
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerAsync();
@@ -519,7 +526,7 @@ namespace XviD4PSP
         {
             if (this.WindowState == System.Windows.WindowState.Minimized)
             {
-                if (Settings.TrayIconEnabled && Settings.TrayMinimize) this.Hide();
+                if (Settings.TrayIconIsEnabled && Settings.TrayMinimize) this.Hide();
             }
             else
             {
@@ -579,7 +586,7 @@ namespace XviD4PSP
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //Сворачиваемся в трей
-            if (!IsExiting && Settings.TrayIconEnabled && Settings.TrayClose)
+            if (!IsExiting && Settings.TrayIconIsEnabled && Settings.TrayClose)
             {
                 e.Cancel = true;
                 this.StateChanged -= new EventHandler(MainWindow_StateChanged);

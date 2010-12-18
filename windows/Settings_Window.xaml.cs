@@ -74,6 +74,7 @@ namespace XviD4PSP
                 "\r\n" + Languages.Translate("Or for experiments. In any other cases this option must be disabled (unchecked)!");
             check_read_prmtrs.ToolTip = Languages.Translate("Read from the script: width, height, fps, duration and frames count.") + "\r\n" +
                 Languages.Translate("Use it only if these parameters was changed manually in the script!");
+            check_use_win7taskbar.Content = Languages.Translate("Enable Windows 7 taskbar progress indication");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -106,7 +107,7 @@ namespace XviD4PSP
             check_logfile_tempfolder.IsChecked = Settings.LogInTemp;                              //.. а файл поместить во временную папку
             textbox_extensions.Text = Settings.GoodFilesExtensions;                               //окно со списком допустимых расширений файлов (при пакетной обработке)
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding;                      //автозапуск кодирования (при пакетной обработке)
-            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp;                       //помещать DGIndex-кэш в Темп-папку            
+            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp;                       //помещать DGIndex-кэш в Темп-папку
             check_clone_ar.IsChecked = Settings.BatchCloneAR;                                     //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
             check_clone_trim.IsChecked = Settings.BatchCloneTrim;                                 //То-же что и выше, но для обрезки
             check_clone_deint.IsChecked = Settings.BatchCloneDeint;                               //А это для деинтерлейса
@@ -117,8 +118,9 @@ namespace XviD4PSP
             cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
             check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled
                  = check_delete_dgindex_cache.IsEnabled = Settings.DeleteTempFiles);              //Удалять кэши и временные файлы
-            check_use_trayicon.IsChecked = Settings.TrayIconEnabled;                              //Иконка в трее вкл\выкл
+            check_use_trayicon.IsChecked = Settings.TrayIconIsEnabled;                            //Иконка в трее вкл\выкл
             cmenu_audio_first.IsChecked = Settings.EncodeAudioFirst;                              //Кодировать сначала звук, потом видео
+            check_use_win7taskbar.IsChecked = Settings.Win7TaskbarIsEnabled;                      //Поддержка таскбара в Win7 вкл\выкл
 
             //Загружаем HotKeys (плюс перевод к действиям)
             foreach (string line in HotKeys.Data)
@@ -172,7 +174,7 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    ErrorExeption(Languages.Translate("Temp folder path:") + " " + ex.Message);
+                    ErrorException(Languages.Translate("Temp folder path:") + " " + ex.Message);
                     return;
                 }
             }
@@ -186,7 +188,7 @@ namespace XviD4PSP
             Close();
         }
 
-        private void ErrorExeption(string message)
+        private void ErrorException(string message)
         {
             new Message(this).ShowMessage(message, Languages.Translate("Error"));
         }
@@ -297,7 +299,7 @@ namespace XviD4PSP
             Settings.LogInTemp = check_logfile_tempfolder.IsChecked.Value;
         }
         
-        //кнопка "Открыть" для временной папки       
+        //кнопка "Открыть" для временной папки
         private void button_temppath_open_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -306,7 +308,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException(ex.Message);
             }
         }
 
@@ -406,7 +408,7 @@ namespace XviD4PSP
                     string Action = HotKeys.GetAction("=" + textbox_combination.Text);
                     if (Action != "" && Action != raw_action[combo_action.SelectedIndex].ToString())
                     {
-                        new Message(this).ShowMessage(Languages.Translate("Combination") + " \"" + textbox_combination.Text + "\" " + Languages.Translate("already used for") + " \"" + Languages.Translate(Action) + "\".", Languages.Translate("Error"));
+                        ErrorException(Languages.Translate("Combination") + " \"" + textbox_combination.Text + "\" " + Languages.Translate("already used for") + " \"" + Languages.Translate(Action) + "\".");
                         return;
                     }
                 }
@@ -481,12 +483,29 @@ namespace XviD4PSP
 
         private void check_use_trayicon_Click(object sender, RoutedEventArgs e)
         {
-            p.TrayIcon.Visible = Settings.TrayIconEnabled = check_use_trayicon.IsChecked.Value;
+            p.TrayIcon.Visible = Settings.TrayIconIsEnabled = check_use_trayicon.IsChecked.Value;
         }
 
         private void cmenu_audio_first_Click(object sender, RoutedEventArgs e)
         {
             Settings.EncodeAudioFirst = cmenu_audio_first.IsChecked.Value;
+        }
+
+        private void check_use_win7taskbar_Click(object sender, RoutedEventArgs e)
+        {
+            if (Settings.Win7TaskbarIsEnabled = check_use_win7taskbar.IsChecked.Value)
+            {
+                if (!Win7Taskbar.InitializeWin7Taskbar())
+                {
+                    ErrorException(Languages.Translate("Failed to initialize Windows 7 taskbar interface.") +
+                    " " + Languages.Translate("This feature will be disabled!"));
+                    check_use_win7taskbar.IsChecked = Settings.Win7TaskbarIsEnabled = false;
+                }
+            }
+            else
+            {
+                Win7Taskbar.UninitializeWin7Taskbar();
+            }
         }
 	}
 }

@@ -2123,11 +2123,11 @@ namespace XviD4PSP
         }
 
         //Разрешаем иконку в трее
-        public static bool TrayIconEnabled
+        public static bool TrayIconIsEnabled
         {
             get
             {
-                object value = GetValue("TrayIconEnabled");
+                object value = GetValue("TrayIconIsEnabled");
                 if (value == null)
                 {
                     return true;
@@ -2139,7 +2139,7 @@ namespace XviD4PSP
             }
             set
             {
-                SetBool("TrayIconEnabled", value);
+                SetBool("TrayIconIsEnabled", value);
             }
         }
 
@@ -2566,6 +2566,28 @@ namespace XviD4PSP
             set
             {
                 SetBool("XviD_Old_Version", value);
+            }
+        }
+
+        //Поддержка таскбара в Windows 7
+        public static bool Win7TaskbarIsEnabled
+        {
+            get
+            {
+                object value = GetValue("Win7TaskbarIsEnabled");
+                if (value == null)
+                {
+                    OperatingSystem osInfo = Environment.OSVersion;
+                    return ((osInfo.Version.Major == 6 && osInfo.Version.Minor >= 1) || (osInfo.Version.Major > 6));
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("Win7TaskbarIsEnabled", value);
             }
         }
     }

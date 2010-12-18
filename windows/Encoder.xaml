@@ -32,7 +32,16 @@
 			</ComboBox>
 			<Button x:Name="button_play" Height="Auto" Content="Play" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,8,0,8" Width="88" Click="button_play_Click"/>
 			<Button x:Name="button_info" Height="Auto" Content="Info" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="100,8,0,8" Width="88" Click="button_info_Click"/>
-			<ComboBox x:Name="combo_ending" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="110" Margin="122,8,0,8" HorizontalAlignment="Left" d:LayoutOverrides="Height" SelectionChanged="combo_ending_SelectionChanged"/>
-		</Grid>
+            <ComboBox x:Name="combo_ending" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="110" Margin="122,8,0,8" HorizontalAlignment="Left" d:LayoutOverrides="Height" SelectionChanged="combo_ending_SelectionChanged">
+                <ComboBox.Background>
+                    <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                        <GradientStop Color="#FFF3F3F3" Offset="0"/>
+                        <GradientStop Color="#FFEBEBEB" Offset="0.5"/>
+                        <GradientStop Color="#FFDDDDDD" Offset="0.5"/>
+                        <GradientStop Color="#FF808080" Offset="1"/>
+                    </LinearGradientBrush>
+                </ComboBox.Background>
+            </ComboBox>
+        </Grid>
 	</Grid>
 </Window>

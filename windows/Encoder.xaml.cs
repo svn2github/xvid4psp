@@ -26,10 +26,12 @@ namespace XviD4PSP
         private ManualResetEvent locker = new ManualResetEvent(true);
         private BackgroundWorker worker = null;
         private Process encoderProcess = null;
+        private AviSynthEncoder avs = null;
         private Massive m;
         private MainWindow p;
         private string encodertext;
         private bool IsAborted = false;
+        private bool IsPaused = false;
         private bool IsErrors = false;
         private bool CopyDelay = false;
         private bool Splitting = false;
@@ -48,7 +50,10 @@ namespace XviD4PSP
         private DateTime start_time;
         private Shutdown.ShutdownMode ending = Settings.FinalAction;
 
-        private AviSynthEncoder avs;
+        //Таскбар
+        private IntPtr ActiveHandle = IntPtr.Zero;
+        private UInt64 total_pr_max = 0;
+        private int Finished = -1; //0 - OK, 1 - Error
 
 		public Encoder()
 		{
@@ -69,17 +74,21 @@ namespace XviD4PSP
 
             m = mass.Clone();
             p = parent;
-            
-            //Show();
 
             //Прячем окно, если программа минимизирована или свернута в трей
             if (!p.IsVisible || p.WindowState == WindowState.Minimized)
             {
                 this.Hide();
                 this.Name = "Hidden";
+                this.ActiveHandle = p.Handle;
             }
             else
+            {
                 this.Show();
+                this.ActiveHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            }
+
+            this.IsVisibleChanged += new DependencyPropertyChangedEventHandler(Encoder_IsVisibleChanged);
 
             Format.Muxers muxer = Format.GetMuxer(m);
 
@@ -136,6 +145,54 @@ namespace XviD4PSP
             //фоновое кодирование
             CreateBackgoundWorker();
             worker.RunWorkerAsync();
+        }
+
+        void Encoder_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!Win7Taskbar.IsInitialized) return;
+            if (this.IsVisible)
+            {
+                //Окно энкодера развернулось, переключаем вывод прогресса на него
+                ActiveHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                new Thread(new ThreadStart(this.SetTaskbarStatus)).Start();
+            }
+            else
+            {
+                //Окно энкодера свернулось, переключаем вывод прогресса в MainWindow
+                ActiveHandle = p.Handle;
+                if (IsPaused) new Thread(new ThreadStart(this.SetTaskbarStatus)).Start();
+            }
+        }
+
+        internal delegate void SetTaskbarStatusDelegate();
+        private void SetTaskbarStatus()
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new SetTaskbarStatusDelegate(SetTaskbarStatus));
+            else
+            {
+                Thread.Sleep(100);
+                Win7Taskbar.SetProgressState(p.Handle, TBPF.NOPROGRESS);
+
+                if (Finished == 0)
+                {
+                    //"Готово" в Taskbar
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NOPROGRESS);
+                    if (this.IsVisible) this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(Encoder_IsVisibleChanged);
+                }
+                else if (Finished == 1)
+                {
+                    //"Ошибка" в Taskbar
+                    Win7Taskbar.SetProgressTaskComplete(ActiveHandle, TBPF.ERROR);
+                    if (this.IsVisible) this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(Encoder_IsVisibleChanged);
+                }
+                else if (IsPaused)
+                {
+                    //"Пауза" в Taskbar
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.PAUSED);
+                    Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(prTotal.Value), total_pr_max);
+                }
+            }
         }
 
         private void CreateBackgoundWorker()
@@ -195,24 +252,25 @@ namespace XviD4PSP
 
         private void button_pause_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (button_pause.Content.ToString() == Languages.Translate("Pause"))
+            if (!IsPaused)
             {
                 locker.Reset();
-                if (avs != null && avs.IsBusy())
-                    avs.pause();
+                IsPaused = true;
+                if (avs != null && avs.IsBusy()) avs.pause();
                 button_pause.Content = Languages.Translate("Resume");
                 button_pause.ToolTip = Languages.Translate("Resume encoding");
+                Win7Taskbar.SetProgressState(ActiveHandle, TBPF.PAUSED);
             }
             else
             {
                 locker.Set();
-                if (avs != null && avs.IsBusy())
-                    avs.resume();
+                IsPaused = false;
+                if (avs != null && avs.IsBusy()) avs.resume();
                 button_pause.Content = Languages.Translate("Pause");
                 button_pause.ToolTip = Languages.Translate("Pause encoding");
+                Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NORMAL);
             }
         }
-
 
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {  
@@ -234,6 +292,11 @@ namespace XviD4PSP
         {
             try
             {
+                //Нужно сбросить прогресс в MainWindow
+                this.ActiveHandle = IntPtr.Zero;
+                this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(Encoder_IsVisibleChanged);
+                Win7Taskbar.SetProgressState(p.Handle, TBPF.NOPROGRESS);
+
                 AbortAction();
             }
             catch (Exception ex)
@@ -3955,7 +4018,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (worker != null && worker.IsBusy)
+                if (worker != null && worker.IsBusy && !IsPaused)
                 {
                     //получаем текущее время и текущий фрейм
                     DateTime ct = DateTime.Now;
@@ -4012,6 +4075,7 @@ namespace XviD4PSP
                         //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + "\r\nEncoded: " + pr.ToString("##0.00") + "%\r\n" + e_s;
                         //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + pr.ToString("##0.00") + "%)\r\nTime left: " + e_s;
                         p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + pr.ToString("##0.00") + "%)\r\n" + e_s;
+                        Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(pr_t), total_pr_max);
                         SetStatus(title, pr_text, cframe, pr_t);
                     }
                 }
@@ -4514,16 +4578,56 @@ namespace XviD4PSP
             button_cancel.Content = Languages.Translate("Close");
             p.TrayIcon.Text = "XviD4PSP";
 
+            if (this.IsVisible)
+                this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(Encoder_IsVisibleChanged);
+
             if (!IsErrors && !IsAborted)
             {
+                //Нет ошибок
+                Finished = 0;
                 button_info.Visibility = Visibility.Visible;
                 button_play.Visibility = Visibility.Visible;
+
+                //"Готово" в TrayIcon
                 if (!Settings.TrayNoBalloons && (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized))
                 {
                     p.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
                     p.TrayIcon.BalloonTipTitle = Languages.Translate("Complete") + "!";
                     p.TrayIcon.BalloonTipText = Path.GetFileName(m.outfilepath);
                     p.TrayIcon.ShowBalloonTip(5000);
+                }
+
+                //"Готово" в Taskbar
+                Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NOPROGRESS);
+            }
+            else if (IsErrors && !IsAborted)
+            {
+                //Есть ошибки
+                Finished = 1;
+
+                //"Ошибка" в TrayIcon
+                if (!Settings.TrayNoBalloons && (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized))
+                {
+                    p.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+                    p.TrayIcon.BalloonTipTitle = Languages.Translate("Error") + "!";
+                    p.TrayIcon.BalloonTipText = Path.GetFileName(m.outfilepath);
+                    p.TrayIcon.ShowBalloonTip(5000);
+                }
+
+                //"Ошибка" в Taskbar
+                Win7Taskbar.SetProgressTaskComplete(ActiveHandle, TBPF.ERROR);
+
+                try
+                {
+                    //Сохранение лога при ошибке
+                    string logfilename = m.outfilepath + ".error.log";
+                    File.WriteAllText(logfilename, tbxLog.Text + Environment.NewLine, System.Text.Encoding.Default);
+
+                    SetLog(Environment.NewLine + "This log was saved here: " + logfilename);
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage(ex.Message);
                 }
             }
 
@@ -4556,29 +4660,7 @@ namespace XviD4PSP
                             SafeDelete(a.nerotemp); //Временный WAV-файл от 2pass AAC
                     }
                 }
-                else
-                {
-                    if (!Settings.TrayNoBalloons && (!p.IsVisible || !this.IsVisible || this.WindowState == WindowState.Minimized))
-                    {
-                        p.TrayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
-                        p.TrayIcon.BalloonTipTitle = Languages.Translate("Error") + "!";
-                        p.TrayIcon.BalloonTipText = Path.GetFileName(m.outfilepath);
-                        p.TrayIcon.ShowBalloonTip(5000);
-                    }
-                    
-                    try
-                    {   
-                        //Сохранение лога при ошибке
-                        string logfilename = m.outfilepath + ".error.log";
-                        File.WriteAllText(logfilename, tbxLog.Text + Environment.NewLine, System.Text.Encoding.Default);
 
-                        SetLog(Environment.NewLine + "This log was saved here: " + logfilename);
-                    }
-                    catch (Exception ex)
-                    {
-                        ShowMessage(ex.Message);
-                    }
-                }
                 SafeDelete(m.scriptpath);
                 if (m.outvideofile != null)
                 {
@@ -4750,6 +4832,7 @@ namespace XviD4PSP
             {
                 prCurrent.Maximum = maximum;
                 prTotal.Maximum = maximum * steps;
+                total_pr_max = Convert.ToUInt64(prTotal.Maximum);
             }
         }
 
@@ -4824,7 +4907,7 @@ namespace XviD4PSP
             catch (Exception ex)
             {
                 ShowMessage(ex.Message);
-            }          
+            }
         }
 	}
 }

@@ -19,12 +19,20 @@ namespace XviD4PSP
 {
     public partial class FFRebuilder
     {
-        private bool IsErrors = false;
-        private bool IsAborted = false;
-        private BackgroundWorker worker = null;
         private ManualResetEvent locker = new ManualResetEvent(true);
+        private static object lock_pr = new object();
+        private static object lock_ff = new object();
+        private BackgroundWorker worker = null;
         private Process encoderProcess = null;
+        private bool IsErrors = false;
+        private bool IsPaused = false;
+        private bool IsAborted = false;
         private FFInfo ff = null;
+
+        //Таскбар
+        private MainWindow p;
+        private IntPtr ActiveHandle = IntPtr.Zero;
+        private int Finished = -1; //0 - OK, 1 - Error
 
         private enum acodecs { COPY, PCM, FLAC, DISABLED }
         private enum vcodecs { COPY, FFV1, FFVHUFF, UNCOMPRESSED, DISABLED }
@@ -50,10 +58,11 @@ namespace XviD4PSP
         private string srate = "AUTO";
         private string channels = "AUTO";
 
-        public FFRebuilder(System.Windows.Window owner)
+        public FFRebuilder(MainWindow owner)
         {
             this.InitializeComponent();
             this.Owner = owner;
+            this.p = owner;
 
             //переводим
             button_cancel.Content = Languages.Translate("Cancel");
@@ -182,6 +191,56 @@ namespace XviD4PSP
             UpdateCombosIsEnabled();
 
             Show();
+
+            this.ActiveHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        }
+
+        void FFRebuilder_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!Win7Taskbar.IsInitialized) return;
+            if (this.IsVisible)
+            {
+                //Окно FFRebuilder`а развернулось, переключаем вывод прогресса на него
+                ActiveHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                new Thread(new ThreadStart(this.SetTaskbarStatus)).Start();
+            }
+            else
+            {
+                //Окно FFRebuilder`а свернулось, переключаем вывод прогресса в MainWindow
+                ActiveHandle = p.Handle;
+                if (IsPaused) new Thread(new ThreadStart(this.SetTaskbarStatus)).Start();
+            }
+        }
+
+        internal delegate void SetTaskbarStatusDelegate();
+        private void SetTaskbarStatus()
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new SetTaskbarStatusDelegate(SetTaskbarStatus));
+            else
+            {
+                Thread.Sleep(100);
+                Win7Taskbar.SetProgressState(p.Handle, TBPF.NOPROGRESS);
+
+                if (Finished == 0)
+                {
+                    //"Готово" в Taskbar
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NOPROGRESS);
+                    if (this.IsVisible) this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(FFRebuilder_IsVisibleChanged);
+                }
+                else if (Finished == 1)
+                {
+                    //"Ошибка" в Taskbar
+                    Win7Taskbar.SetProgressTaskComplete(ActiveHandle, TBPF.ERROR);
+                    if (this.IsVisible) this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(FFRebuilder_IsVisibleChanged);
+                }
+                else if (IsPaused)
+                {
+                    //"Пауза" в Taskbar
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.PAUSED);
+                    Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(progress.Value), 100);
+                }
+            }
         }
 
         private void LoadAllProfiles()
@@ -330,11 +389,7 @@ namespace XviD4PSP
             }
             finally
             {
-                if (ff != null)
-                {
-                    ff.Close();
-                    ff = null;
-                }
+                CloseFF();
             }
         }
 
@@ -358,8 +413,7 @@ namespace XviD4PSP
                 ff = new FFInfo();
                 ff.Open(infile);
                 int seconds = (int)ff.Duration().TotalSeconds;
-                ff.Close();
-                ff = null;
+                CloseFF();
 
                 encoderProcess = new Process();
                 ProcessStartInfo info = new ProcessStartInfo();
@@ -413,9 +467,7 @@ namespace XviD4PSP
                     IsErrors = true;
 
                 //чистим ресурсы
-                encoderProcess.Close();
-                encoderProcess.Dispose();
-                encoderProcess = null;
+                FinalizeEncoderProcess(false);
 
                 if (!IsErrors && !IsAborted)
                 {
@@ -433,8 +485,11 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                IsErrors = true;
-                SetLog("\r\n" + ex.Message);
+                if (!IsAborted)
+                {
+                    IsErrors = true;
+                    SetLog("\r\n" + ex.Message);
+                }
             }
         }
 
@@ -442,28 +497,52 @@ namespace XviD4PSP
         {
             progress.Value = e.ProgressPercentage;
             Title = "(" + e.ProgressPercentage + "%)";
+            Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(e.ProgressPercentage), 100);
         }
 
         private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             try
             {
+                if (this.IsVisible)
+                    this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(FFRebuilder_IsVisibleChanged);
+
                 //проверка на удачное завершение
                 if (File.Exists(outfile))
                 {
                     FileInfo out_info = new FileInfo(outfile);
                     if (out_info.Length > 0 && !IsErrors && !IsAborted)
                     {
+                        //Нет ошибок
+                        Finished = 0;
                         SetLog(Languages.Translate("Out file size is:") + " " + Calculate.ConvertDoubleToPointString((double)out_info.Length / 1024.0 / 1024.0, 2) + " mb");
                         button_play.Visibility = Visibility.Visible;
+
+                        //"Готово" в Taskbar
+                        Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NOPROGRESS);
                     }
                     else //if (out_info.Length == 0)
                     {
                         SafeDelete(outfile);
                     }
                 }
-                if (IsErrors) SetLog("\r\n\r\n" + Languages.Translate("Error") + "!");
-                if (IsAborted) SetLog("\r\n\r\n" + Languages.Translate("Cancelled") + "!");
+
+                if (IsErrors && !IsAborted)
+                {
+                    //Есть ошибки
+                    Finished = 1;
+                    SetLog("\r\n\r\n" + Languages.Translate("Error") + "!");
+
+                    //"Ошибка" в Taskbar
+                    Win7Taskbar.SetProgressTaskComplete(ActiveHandle, TBPF.ERROR);
+                }
+                else if (IsAborted)
+                {
+                    SetLog("\r\n\r\n" + Languages.Translate("Cancelled") + "!");
+
+                    //"Отмена" в Taskbar
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NOPROGRESS);
+                }
             }
             catch (Exception ex)
             {
@@ -586,40 +665,64 @@ namespace XviD4PSP
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (ff != null)
-            {
-                ff.Close();
-                ff = null;
-            }
+            //Нужно сбросить прогресс в MainWindow
+            this.ActiveHandle = IntPtr.Zero;
+            this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(FFRebuilder_IsVisibleChanged);
+            Win7Taskbar.SetProgressState(p.Handle, TBPF.NOPROGRESS);
 
-            FinalizeEncoderProcess();
+            CloseFF();
+            FinalizeEncoderProcess(true);
         }
 
         private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (worker != null && worker.IsBusy)
-                FinalizeEncoderProcess();
+            {
+                if (IsPaused)
+                    button_start_Click(null, null);
+
+                CloseFF();
+                FinalizeEncoderProcess(true);
+            }
             else if (worker == null || !worker.IsBusy)
                 Close();
         }
 
-        private void FinalizeEncoderProcess()
+        private void CloseFF()
         {
-            if (encoderProcess != null)
+            lock (lock_ff)
             {
-                try
+                if (ff != null)
                 {
-                    IsAborted = true;
-                    if (!encoderProcess.HasExited)
-                    {
-                        encoderProcess.Kill();
-                        encoderProcess.WaitForExit();
-                    }
+                    ff.Close();
+                    ff = null;
                 }
-                catch { }
-                finally
+            }
+        }
+
+        private void FinalizeEncoderProcess(bool is_aborted)
+        {
+            lock (lock_pr)
+            {
+                if (encoderProcess != null)
                 {
-                    SafeDelete(outfile);
+                    try
+                    {
+                        IsAborted = is_aborted;
+                        if (!encoderProcess.HasExited)
+                        {
+                            encoderProcess.Kill();
+                            encoderProcess.WaitForExit();
+                        }
+                    }
+                    catch { }
+                    finally
+                    {
+                        encoderProcess.Close();
+                        encoderProcess.Dispose();
+                        encoderProcess = null;
+                        if (is_aborted) SafeDelete(outfile);
+                    }
                 }
             }
         }
@@ -641,21 +744,25 @@ namespace XviD4PSP
         {
             if (worker != null && worker.IsBusy)
             {
-                if (button_start.Content.ToString() == Languages.Translate("Pause"))
+                if (!IsPaused)
                 {
                     locker.Reset();
+                    IsPaused = true;
                     button_start.Content = Languages.Translate("Resume");
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.PAUSED);
                 }
                 else
                 {
                     locker.Set();
+                    IsPaused = false;
                     button_start.Content = Languages.Translate("Pause");
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NORMAL);
                 }
             }
             else
             {
                 if (textbox_infile.Text != "" && File.Exists(textbox_infile.Text) && textbox_outfile.Text != "")
-                {                   
+                {
                     //запоминаем переменные
                     infile = textbox_infile.Text;
                     outfile = textbox_outfile.Text;
@@ -689,12 +796,14 @@ namespace XviD4PSP
                         }
                     }
 
+                    this.IsVisibleChanged += new DependencyPropertyChangedEventHandler(FFRebuilder_IsVisibleChanged);
                     button_start.Content = Languages.Translate("Pause");
                     tabs.SelectedIndex = 1;
 
                     //Сброс
+                    Finished = -1;
                     textbox_log.Clear();
-                    IsErrors = IsAborted = false;
+                    IsErrors = IsAborted = IsPaused = false;
                     button_play.Visibility = Visibility.Collapsed;
 
                     //фоновое кодирование
