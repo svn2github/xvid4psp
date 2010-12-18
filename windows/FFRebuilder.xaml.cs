@@ -708,7 +708,7 @@ namespace XviD4PSP
                 {
                     try
                     {
-                        IsAborted = is_aborted;
+                        if (is_aborted) IsAborted = true;
                         if (!encoderProcess.HasExited)
                         {
                             encoderProcess.Kill();

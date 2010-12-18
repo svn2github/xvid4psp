@@ -1,7 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XviD4PSP", "XviD4PSP.csproj", "{6AC85262-C5F1-46AA-9A7E-CADCAAF33107}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XviD4PSP", "XviD4PSP_2010.csproj", "{6AC85262-C5F1-46AA-9A7E-CADCAAF33107}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
