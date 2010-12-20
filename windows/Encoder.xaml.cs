@@ -35,6 +35,7 @@ namespace XviD4PSP
         private bool IsErrors = false;
         private bool CopyDelay = false;
         private bool Splitting = false;
+        private bool AudioFirst = Settings.EncodeAudioFirst;
         private string estimated = Languages.Translate("estimated");
 
         private System.Timers.Timer timer;
@@ -4209,9 +4210,10 @@ namespace XviD4PSP
                     }
                     else
                     {
-                        SetLog("Resolution: " + m.inresw + "x" + m.inresh);
+                        SetLog("VCodecPreset: Copy");
                         SetLog("VideoCodec: " + m.invcodecshort);
                         SetLog("VideoBitrate: " + m.invbitrate);
+                        SetLog("Resolution: " + m.inresw + "x" + m.inresh);
                         SetLog("Framerate: " + m.inframerate);
                     }
                 }
@@ -4264,6 +4266,7 @@ namespace XviD4PSP
                     }
                     else
                     {
+                        SetLog("AEncodingPreset: Copy");
                         SetLog("AudioCodec: " + instream.codecshort);
                         SetLog("AudioBitrate: " + instream.bitrate);
                         SetLog("Samplerate: " + instream.samplerate);
@@ -4289,7 +4292,7 @@ namespace XviD4PSP
                 }
 
                 //кодирование звука (до кодирования видео)
-                if (Settings.EncodeAudioFirst)
+                if (AudioFirst)
                 {
                     if (m.outaudiostreams.Count > 0)
                     {
@@ -4370,7 +4373,7 @@ namespace XviD4PSP
                 if (IsAborted || IsErrors) return;
 
                 //кодирование звука (после кодирования видео)
-                if (!Settings.EncodeAudioFirst)
+                if (!AudioFirst)
                 {
                     if (m.outaudiostreams.Count > 0)
                     {

@@ -131,18 +131,19 @@ namespace XviD4PSP
 
         public static void CreateVProfile(Massive m)
         {
-            StreamWriter sw = new StreamWriter(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video\\" + m.vencoding + ".txt", false, System.Text.Encoding.Default);
-            
-            sw.WriteLine("video codec:");
-            sw.WriteLine(m.outvcodec);
+            using (StreamWriter sw = new StreamWriter(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\video\\" + m.vencoding + ".txt", false, System.Text.Encoding.Default))
+            {
+                sw.WriteLine("video codec:");
+                sw.WriteLine(m.outvcodec);
 
-            sw.WriteLine();
+                sw.WriteLine();
 
-            sw.WriteLine("video cli:");
-            foreach (string line in m.vpasses)
-                sw.WriteLine(line);
+                sw.WriteLine("video cli:");
+                foreach (string line in m.vpasses)
+                    sw.WriteLine(line);
 
-            sw.Close();
+                sw.Close();
+            }
         }
 
         public static string GetACodec(Format.ExportFormats format, string encodingpreset)
@@ -174,7 +175,7 @@ namespace XviD4PSP
 
             if (outstream.encoding == "Copy" ||
                 outstream.encoding == "Disabled")
-                return "stream copy or disable";     
+                return "stream copy or disable";
             else
             {
                 using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio\\" + outstream.encoding + ".txt", System.Text.Encoding.Default))
@@ -197,17 +198,18 @@ namespace XviD4PSP
         {
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-            StreamWriter sw = new StreamWriter(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio\\" + outstream.encoding + ".txt", false, System.Text.Encoding.Default);
+            using (StreamWriter sw = new StreamWriter(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio\\" + outstream.encoding + ".txt", false, System.Text.Encoding.Default))
+            {
+                sw.WriteLine("audio codec:");
+                sw.WriteLine(outstream.codec);
 
-            sw.WriteLine("audio codec:");
-            sw.WriteLine(outstream.codec);
+                sw.WriteLine();
 
-            sw.WriteLine();
+                sw.WriteLine("audio cli:");
+                sw.WriteLine(outstream.passes);
 
-            sw.WriteLine("audio cli:");
-            sw.WriteLine(outstream.passes);
-
-            sw.Close();
+                sw.Close();
+            }
         }
 
         public static Massive DecodePresets(Massive m)

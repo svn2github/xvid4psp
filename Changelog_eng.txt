@@ -1,5 +1,10 @@
-XviD4PSP 5.10.203.0 (18.12.2010), main changes:
+XviD4PSP 5.10.204.0 (20.12.2010), main changes:
 
+>>> (r204) Fix for possible crash when switching a "Format" combobox and file with audio preset wasn`t found.
+>>> (r204) Option "Encode audio first, then video" (Settings->Global settings->Encoding) now enabled
+           by default; AAC defaults was changed.
+>>> (r204) Some audio options still was common for tasks, based on one source file. Not fix but workaround,
+           see also r124 (rep. by LonerD).
 >>> (r203) Fix for project configurations (Release/Debug).
 >>> (r202) Added support for Windows 7 taskbar progress indication. Enabled by default for Win7, can be disabled
            in "Settings->Global settings->Enable Windows 7 taskbar progress indication" (req. by Procrustean).

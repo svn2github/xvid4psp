@@ -4,9 +4,8 @@ using System.Text;
 
 namespace XviD4PSP
 {
-   public class aac_arguments
+    public class aac_arguments
     {
-
         public aac_arguments()
         {
         }
@@ -16,7 +15,7 @@ namespace XviD4PSP
             return (aac_arguments)this.MemberwiseClone();
         }
 
-        private Settings.AudioEncodingModes _encodingmode = Settings.AudioEncodingModes.ABR;
+        private Settings.AudioEncodingModes _encodingmode = Settings.AudioEncodingModes.VBR;
         public Settings.AudioEncodingModes encodingmode
         {
             get
@@ -29,7 +28,7 @@ namespace XviD4PSP
             }
         }
 
-        private string _aacprofile = "AAC-LC";
+        private string _aacprofile = "Auto";
         public string aacprofile
         {
             get

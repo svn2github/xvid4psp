@@ -41,6 +41,7 @@ namespace XviD4PSP
             temp.inaudiostreams = (ArrayList)this.inaudiostreams.Clone();
             temp.outaudiostreams = (ArrayList)this.outaudiostreams.Clone();
             //Это решит проблему с неправильным клонированием AudioStreams, но создаст новые проблемы
+            //(в некоторых местах аудио параметры обновляются, не явно используя этот баг)
             //for (int i = 0; this.inaudiostreams.Count > 0 && i < this.inaudiostreams.Count; i++)
             //{
             //    temp.inaudiostreams[i] = ((AudioStream)this.inaudiostreams[i]).Clone();

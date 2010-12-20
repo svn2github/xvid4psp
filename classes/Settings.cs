@@ -2256,7 +2256,7 @@ namespace XviD4PSP
                 object value = GetValue("EncodeAudioFirst");
                 if (value == null)
                 {
-                    return false;
+                    return true;
                 }
                 else
                 {

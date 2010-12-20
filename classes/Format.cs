@@ -1836,9 +1836,9 @@ namespace XviD4PSP
                format == ExportFormats.Audio ||
                format == ExportFormats.AviMeizuM6)
                return "MP3 CBR 128k";
-           else if (format == ExportFormats.Mp4SonyEricssonK800 ||
-               format == ExportFormats.Mp4SonyEricssonK610 ||
-                              format == ExportFormats.Flv)
+           else if (format == ExportFormats.Flv ||
+               format == ExportFormats.Mp4SonyEricssonK800 ||
+               format == ExportFormats.Mp4SonyEricssonK610)
                return "MP3 CBR 96k";
            else if (format == ExportFormats.AviDVNTSC ||
                format == ExportFormats.AviDVPAL)
@@ -1856,15 +1856,19 @@ namespace XviD4PSP
                return "MP2 128k";
            else if (format == ExportFormats.Mp4Nokia5700)
                return "AAC-LC ABR 96k";
-
            else if (format == ExportFormats.Mp4BlackBerry8830)
                return "AAC-HE CBR 64k";
-
            else if (format == ExportFormats.WMV)
                return "WMA3 CBR 128k";
-
-           else
+           else if (format == ExportFormats.Mp4Archos5G ||
+               format == ExportFormats.Mp4BlackBerry8100 ||
+               format == ExportFormats.Mp4BlackBerry8800 ||
+               format == ExportFormats.Mp4MotorolaK1 ||
+               format == ExportFormats.Mp4Prada ||
+               format == ExportFormats.PmpAvc)
                return "AAC-LC ABR 128k";
+           else
+               return "AAC-LC VBR 0.45";
        }
 
        public static Muxers GetMuxer(Massive m)

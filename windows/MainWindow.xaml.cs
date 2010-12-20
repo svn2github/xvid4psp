@@ -1665,17 +1665,20 @@ namespace XviD4PSP
                         //убираем выделение из списка заданий
                         list_tasks.SelectedIndex = -1;
 
-                        //Клонируем исходную outaudiostream чтоб потом восстановить её в массиве m, т.к. Mass.Clone() не клонирует,
-                        //а создает связанную копию - баг, но я пока-что не знаю как его убрать, зато его можно частично обойти :)
-                        AudioStream oldstream = new AudioStream();
                         if (m.outaudiostreams.Count > 0)
-                            oldstream = ((AudioStream)m.outaudiostreams[m.outaudiostream]).Clone();
+                        {
+                            //Клонируем исходные audiostreams чтоб потом восстановить их в массиве m, т.к. Mass.Clone() не клонирует,
+                            //а создает связанные копии - баг, но его можно частично обойти :) (см. Massive.Clone())
+                            AudioStream old_instream = ((AudioStream)m.inaudiostreams[m.inaudiostream]).Clone();
+                            AudioStream old_outstream = ((AudioStream)m.outaudiostreams[m.outaudiostream]).Clone();
 
-                        mass = UpdateOutAudioPath(mass);
+                            mass = UpdateOutAudioPath(mass);
 
-                        //Восстанавливаем исходную outaudiostream в массиве m
-                        if (m.outaudiostreams.Count > 0)
-                            m.outaudiostreams[m.outaudiostream] = oldstream.Clone();
+                            //Восстанавливаем исходные audiostreams в массиве m,
+                            //теперь audiostreams в m и в mass разделены
+                            m.inaudiostreams[m.inaudiostream] = old_instream.Clone();
+                            m.outaudiostreams[m.outaudiostream] = old_outstream.Clone();
+                        }
 
                         //добавляем задание в список
                         AddTask(mass, "Waiting");
@@ -2901,6 +2904,10 @@ namespace XviD4PSP
                     if (Settings.FormatOut != Format.ExportFormats.Audio)
                         LoadVideoPresets();
                     LoadAudioPresets();
+
+                    //Ставим "Copy" для звука, если аудио пресет не найден
+                    if (!combo_aencoding.Items.Contains(Settings.GetAEncodingPreset(m.format)))
+                        Settings.SetAEncodingPreset(m.format, "Copy");
 
                     //забиваем-обновляем аудио массивы
                     m = FillAudio(m);
@@ -5071,7 +5078,7 @@ namespace XviD4PSP
                     outstream.encoding = Settings.GetAEncodingPreset(Settings.FormatOut);
                     outstream.codec = PresetLoader.GetACodec(mass.format, outstream.encoding);
                     outstream.passes = PresetLoader.GetACodecPasses(mass);
-                    
+
                     mass = Format.GetValidSamplerate(mass);
 
                     //определяем битность
