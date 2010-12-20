@@ -314,12 +314,10 @@ namespace XviD4PSP
                 source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
                 source.AddHook(new HwndSourceHook(WndProc));
 
-                //timer
+                //Таймер для обновления позиции
                 timer = new System.Timers.Timer();
                 timer.Elapsed += new System.Timers.ElapsedEventHandler(timer_Elapsed);
-                timer.Interval = 10;
-                timer.Enabled = true;
-                timer.Start();
+                timer.Interval = 50;
 
                 VideoElement.Visibility = Visibility.Collapsed;
             }
@@ -402,14 +400,14 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateClockDelegate(UpdateClock));
             else
             {
-                if (this.graphBuilder != null)
+                if (this.graphBuilder != null && NaturalDuration != TimeSpan.Zero)
                 {
                     progress_top.Width = (Position.TotalSeconds / NaturalDuration.TotalSeconds) * progress_back.ActualWidth;
                     TimeSpan tCode = TimeSpan.Parse(Position.ToString().Split('.')[0]);
                     textbox_time.Text = tCode.ToString();
 
                     Visual visual = Mouse.Captured as Visual;
-                    if (visual == null)
+                    if (visual == null || !visual.IsDescendantOf(slider_pos))
                     {
                         slider_pos.Value = Position.TotalSeconds;
                     }
@@ -427,8 +425,7 @@ namespace XviD4PSP
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            StopClip();
-            CloseInterfaces();
+            CloseClip();
         }
 
         private void MainWindow_LocationChanged(object sender, EventArgs e)
@@ -483,6 +480,9 @@ namespace XviD4PSP
 
         private void CloseClip()
         {
+            //Останавливаем таймер обновления позиции
+            if (timer != null) timer.Stop();
+
             if (this.graphBuilder != null && this.VideoElement.Source == null)
             {
                 int hr = 0;
@@ -525,7 +525,6 @@ namespace XviD4PSP
                 }
 
                 Thread.Sleep(100);
-
                 string url = "MediaBridge://MyDataString";
                 MediaBridge.MediaBridgeManager.UnregisterCallback(url);
             }
@@ -701,6 +700,9 @@ namespace XviD4PSP
             hr = mediaPosition.get_Duration(out duration);
             DsError.ThrowExceptionForHR(hr);
             slider_pos.Maximum = duration;
+
+            //Запускаем таймер обновления позиции
+            if (timer != null) timer.Start();
         }
 
         private void MoveVideoWindow()
@@ -978,7 +980,7 @@ namespace XviD4PSP
                 textbox_time.Text = tCode.ToString();
 
                 Visual visual = Mouse.Captured as Visual;
-                if (visual == null)
+                if (visual == null || !visual.IsDescendantOf(slider_pos))
                 {
                     slider_pos.Value = VideoElement.Position.TotalSeconds;
                 }
@@ -989,19 +991,26 @@ namespace XviD4PSP
         {
             get
             {
-                if (this.graphBuilder != null && this.VideoElement.Source == null)
+                try
                 {
-                    double duration;
-                    int hr = mediaPosition.get_Duration(out duration);
-                    DsError.ThrowExceptionForHR(hr);
-                    return TimeSpan.FromSeconds(duration);
+                    if (this.graphBuilder != null && this.VideoElement.Source == null)
+                    {
+                        double duration;
+                        int hr = mediaPosition.get_Duration(out duration);
+                        DsError.ThrowExceptionForHR(hr);
+                        return TimeSpan.FromSeconds(duration);
+                    }
+                    else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                    {
+                        return this.VideoElement.NaturalDuration.TimeSpan;
+                    }
+                    else
+                        return TimeSpan.Zero;
                 }
-                else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                catch
                 {
-                    return this.VideoElement.NaturalDuration.TimeSpan;
-                }
-                else
                     return TimeSpan.Zero;
+                }
             }
         }
 
@@ -1009,26 +1018,40 @@ namespace XviD4PSP
         {
             get
             {
-                if (this.graphBuilder != null && this.VideoElement.Source == null)
+                try
                 {
-                    double position;
-                    int hr = mediaPosition.get_CurrentPosition(out position);
-                    DsError.ThrowExceptionForHR(hr);
-                    return TimeSpan.FromSeconds(position);
+                    if (this.graphBuilder != null && this.VideoElement.Source == null)
+                    {
+                        double position;
+                        int hr = mediaPosition.get_CurrentPosition(out position);
+                        DsError.ThrowExceptionForHR(hr);
+                        return TimeSpan.FromSeconds(position);
+                    }
+                    else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                    {
+                        return this.VideoElement.Position;
+                    }
+                    else
+                        return TimeSpan.Zero;
                 }
-                else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                catch
                 {
-                    return this.VideoElement.Position;
-                }
-                else
                     return TimeSpan.Zero;
+                }
             }
             set
             {
-                if (this.graphBuilder != null && this.VideoElement.Source == null)
-                    mediaPosition.put_CurrentPosition(value.TotalSeconds);
-                else if (this.graphBuilder != null && this.VideoElement.Source != null)
-                    VideoElement.Position = value;
+                try
+                {
+                    if (this.graphBuilder != null && this.VideoElement.Source == null)
+                        mediaPosition.put_CurrentPosition(value.TotalSeconds);
+                    else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                        VideoElement.Position = value;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is AccessViolationException) throw;
+                }
             }
         }
 

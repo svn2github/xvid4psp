@@ -163,9 +163,7 @@ namespace WPF_VideoPlayer
 
             this.timer = new System.Timers.Timer();
             this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.timer_Elapsed);
-            this.timer.Interval = 30;
-            this.timer.Enabled = true;
-            this.timer.Start();
+            this.timer.Interval = 50;
 
             this.worker = new BackgroundWorker();
             this.worker.DoWork += new DoWorkEventHandler(this.worker_DoWork);
@@ -252,12 +250,12 @@ namespace WPF_VideoPlayer
 
         private void button_frame_back_Click(object sender, RoutedEventArgs e)
         {
-            Shift_Frame(1);
+            Shift_Frame(-1);
         }
 
         private void button_frame_forward_Click(object sender, RoutedEventArgs e)
         {
-            Shift_Frame(-1);
+            Shift_Frame(1);
         }
 
         private void button_fullscreen_Click(object sender, RoutedEventArgs e)
@@ -340,6 +338,9 @@ namespace WPF_VideoPlayer
 
         private void CloseClip()
         {
+            //Останавливаем таймер обновления позиции
+            if (timer != null) timer.Stop();
+
             if ((this.graphBuilder != null) && (this.VideoElement.Source == null))
             {
                 if (this.mediaControl != null)
@@ -514,7 +515,6 @@ namespace WPF_VideoPlayer
         
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-            this.StopClip();
             this.CloseClip();
 
             //Определяем и сохраняем размер и положение окна при выходе
@@ -638,6 +638,9 @@ namespace WPF_VideoPlayer
                 this.PlayWithMediaBridge(file);
 
             this.slider_pos.Focus();
+
+            //Запускаем таймер обновления позиции
+            if (timer != null) timer.Start();
         }
 
         private void PlayMovieInWindow(string filename)
@@ -821,8 +824,8 @@ namespace WPF_VideoPlayer
         {
             if (OldSeeking && this.slider_pos.IsMouseOver && this.graphBuilder != null)
             {
-                Visual captured = Mouse.Captured as Visual;
-                if ((captured != null) && captured.IsDescendantOf(this.slider_pos))
+                Visual visual = Mouse.Captured as Visual;
+                if (visual != null && visual.IsDescendantOf(this.slider_pos))
                 {
                     this.Position = TimeSpan.FromSeconds(this.slider_pos.Value);
                 }
@@ -902,7 +905,8 @@ namespace WPF_VideoPlayer
             {
                 textbox_time.Text = TimeSpan.Parse(TimeSpan.FromSeconds(slider_pos.Value).ToString().Split('.')[0]).ToString();
 
-                if (!(Mouse.Captured is Visual))
+                Visual visual = Mouse.Captured as Visual;
+                if (visual == null || !visual.IsDescendantOf(slider_pos))
                 {
                     this.slider_pos.Value = this.Position.TotalSeconds;
                 }
@@ -982,11 +986,11 @@ namespace WPF_VideoPlayer
                     else
                         return TimeSpan.Zero;
                 }
-                catch (Exception ex)
+                catch //(Exception ex)
                 {
-                    this.CloseClip();
-                    this.filepath = string.Empty;
-                    System.Windows.MessageBox.Show(ex.Message);
+                    //this.CloseClip();
+                    //this.filepath = string.Empty;
+                    //System.Windows.MessageBox.Show(ex.Message);
                     return TimeSpan.Zero;
                 }
             }
@@ -1011,23 +1015,30 @@ namespace WPF_VideoPlayer
                     else
                         return TimeSpan.Zero;
                 }
-                catch (Exception ex)
+                catch //(Exception ex)
                 {
-                    this.CloseClip();
-                    this.filepath = string.Empty;
-                    System.Windows.MessageBox.Show(ex.Message);
+                    //this.CloseClip();
+                    //this.filepath = string.Empty;
+                    //System.Windows.MessageBox.Show(ex.Message);
                     return TimeSpan.Zero;
                 }
             }
             set
             {
-                if (this.graphBuilder != null && this.VideoElement.Source == null)
+                try
                 {
-                    this.mediaPosition.put_CurrentPosition(value.TotalSeconds);
+                    if (this.graphBuilder != null && this.VideoElement.Source == null)
+                    {
+                        this.mediaPosition.put_CurrentPosition(value.TotalSeconds);
+                    }
+                    else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                    {
+                        this.VideoElement.Position = value;
+                    }
                 }
-                else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                catch (Exception ex)
                 {
-                    this.VideoElement.Position = value;
+                    if (ex is AccessViolationException) throw;
                 }
             }
         }
