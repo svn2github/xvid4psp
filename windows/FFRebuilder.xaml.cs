@@ -796,15 +796,15 @@ namespace XviD4PSP
                         }
                     }
 
-                    this.IsVisibleChanged += new DependencyPropertyChangedEventHandler(FFRebuilder_IsVisibleChanged);
-                    button_start.Content = Languages.Translate("Pause");
-                    tabs.SelectedIndex = 1;
-
                     //Сброс
                     Finished = -1;
                     textbox_log.Clear();
+                    tabs.SelectedIndex = 1;
                     IsErrors = IsAborted = IsPaused = false;
                     button_play.Visibility = Visibility.Collapsed;
+                    button_start.Content = Languages.Translate("Pause");
+                    Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NOPROGRESS); //NORMAL
+                    this.IsVisibleChanged += new DependencyPropertyChangedEventHandler(FFRebuilder_IsVisibleChanged);
 
                     //фоновое кодирование
                     CreateBackgroundWorker();
