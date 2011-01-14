@@ -1,5 +1,7 @@
-XviD4PSP 5.10.207.0 (14.01.2011), main changes:
+XviD4PSP 5.10.208.0 (14.01.2011), main changes:
 
+>>> (r208) For batch opening option "Clone from the already opened file to each other" doesn`t work if selected
+           player engine is ScriptView or PictureView (rep. by newsky).
 >>> (r207) In order to minimize negative effects of crashing XviD4PSP, the task list now will be automatically
            saved into backup file. If backup.tsks exists in Temp folder on application startup, then user will be
            asked about restoring previously saved tasks from this backup file. Since crashes not producing temporary

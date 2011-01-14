@@ -29,23 +29,33 @@ namespace XviD4PSP
     public partial class MainWindow
     {
         public Massive m;
-        private object backup_lock = new object();
         public ArrayList outfiles = new ArrayList();
         public ArrayList deletefiles = new ArrayList();
         private ArrayList ffcache = new ArrayList();
         private ArrayList dgcache = new ArrayList();
-
-        public enum MediaLoad { load = 1, update }
-
-        private bool IsInsertAction = false;
+        private object backup_lock = new object();
 
         //player
+        private string filepath = "";
         private Brush oldbrush;
-        public TimeSpan oldpos;
+        private TimeSpan oldpos;
+        private Thickness oldmargin;
         private System.Windows.WindowState oldstate;
         private const int WMGraphNotify = 0x0400 + 13;
-        public MediaLoad mediaload;
+        private PlayState currentState = PlayState.Init;
+        private MediaLoad mediaload;
         private int VolumeSet; //Громкость DirectShow плейера
+
+        private IFilterGraph graph;
+        private IGraphBuilder graphBuilder = null;
+        private IMediaControl mediaControl = null;
+        private IMediaEventEx mediaEventEx = null;
+        private IVideoWindow videoWindow = null;
+        private IBasicAudio basicAudio = null;
+        private IBasicVideo basicVideo = null;
+        private IMediaSeeking mediaSeeking = null;
+        private IMediaPosition mediaPosition = null;
+        private IVideoFrameStep frameStep = null;
 
         //PictureView
         private int pic_frame = 0;
@@ -57,30 +67,13 @@ namespace XviD4PSP
         private int trim_end = 0;
         private bool trim_is_on = false;
 
-        private IGraphBuilder graphBuilder = null;
-        private IMediaControl mediaControl = null;
-        private IMediaEventEx mediaEventEx = null;
-        private IVideoWindow videoWindow = null;
-        private IBasicAudio basicAudio = null;
-        private IBasicVideo basicVideo = null;
-        private IMediaSeeking mediaSeeking = null;
-        private IMediaPosition mediaPosition = null;
-        private IVideoFrameStep frameStep = null;
-
         private bool IsAudioOnly = false;
         private bool IsFullScreen = false;
         private bool IsAviSynthError = false;
-        public PlayState currentState = PlayState.Init;
 
         public IntPtr Handle = IntPtr.Zero;
-
         private HwndSource source;
         private System.Timers.Timer timer;
-
-        private IFilterGraph graph;
-        private string filepath = "";
-        private Thickness oldmargin;
-
         private BackgroundWorker worker = null;
 
         //Tray
@@ -91,6 +84,7 @@ namespace XviD4PSP
         private System.Windows.Forms.ToolStripMenuItem tmnTrayClickOnce;   //Пункт меню "1-Click"
         private System.Windows.Forms.ToolStripMenuItem tmnTrayNoBalloons;  //Пункт меню "Disable balloons"
 
+        private bool IsInsertAction = false;  //true, когда в list_tasks перемещаются задания
         private string path_to_save;          //Путь для конечных файлов при перекодировании папки
         private int opened_files = 0;         //Кол-во открытых файлов при открытии папки
         private double fps = 0;               //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
@@ -99,24 +93,12 @@ namespace XviD4PSP
         private bool IsBatchOpening = false;  //true при пакетном открытии
         private bool PauseAfterFirst = false; //Пакетное открытие с паузой после 1-го файла
         private string[] batch_files;         //Сохраненный список файлов для пакетного открытия с паузой
-        private bool CloneIsEnabled = false;  //true, если есть открытый файл от которого можно брать параметры при пакетном открытии
         private string[] drop_data;           //Список забрасываемых файлов (drag-and-drop)
         private bool IsDragOpening = false;   //true всё время, пока идет открытие drag-and-drop
         public bool IsExiting = false;        //true, если надо выйти из программы, false - если свернуть в трей
 
-        public enum MediaType
-        {
-            Audio,
-            Video
-        }
-
-        public enum PlayState
-        {
-            Stopped,
-            Paused,
-            Running,
-            Init
-        }
+        private enum MediaLoad { load = 1, update }
+        private enum PlayState { Stopped, Paused, Running, Init }
 
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
         public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
@@ -1415,7 +1397,7 @@ namespace XviD4PSP
                     if (x.format != Format.ExportFormats.Audio)
                     {
                         //Клонируем деинтерлейс от предыдущего файла
-                        if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneDeint)
+                        if (IsBatchOpening && m != null && Settings.BatchCloneDeint)
                         {
                             x.interlace = m.interlace;
                             x.fieldOrder = m.fieldOrder;
@@ -1468,7 +1450,7 @@ namespace XviD4PSP
                     if (x.format != Format.ExportFormats.Audio)
                     {
                         //Клонируем АР от предыдущего файла
-                        if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneAR)
+                        if (IsBatchOpening && m != null && Settings.BatchCloneAR)
                         {
                             x.outresw = m.outresw;
                             x.outresh = m.outresh;
@@ -1508,7 +1490,7 @@ namespace XviD4PSP
                         }
                         
                         //Клонируем частоту кадров от предыдущего файла
-                        if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneFPS)
+                        if (IsBatchOpening && m != null && Settings.BatchCloneFPS)
                         {
                             x.outframerate = m.outframerate;
                         }
@@ -1546,7 +1528,7 @@ namespace XviD4PSP
                     x = PresetLoader.DecodePresets(x);
 
                     //Клонируем Трим от предыдущего файла
-                    if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneTrim)
+                    if (IsBatchOpening && m != null && Settings.BatchCloneTrim)
                     {                       
                         x.trim_start = m.trim_start;
                         x.trim_end = m.trim_end;
@@ -1903,7 +1885,7 @@ namespace XviD4PSP
             mes.ShowMessage(message, info, Languages.Translate("Error"));
         }
 
-        public void LoadVideo(MediaLoad mediaload)
+        private void LoadVideo(MediaLoad mediaload)
         {
             this.mediaload = mediaload;
 
@@ -5132,7 +5114,7 @@ namespace XviD4PSP
                 AudioStream outstream = (AudioStream)mass.outaudiostreams[mass.outaudiostream];
 
                 //Клонируем звуковые параметры от предыдущего файла
-                if (IsBatchOpening && CloneIsEnabled && Settings.BatchCloneAudio)
+                if (IsBatchOpening && m != null && Settings.BatchCloneAudio)
                 {
                     if (m.outaudiostreams.Count > 0)
                     {
@@ -5827,7 +5809,6 @@ namespace XviD4PSP
             {
                 opened_files = 0; //Обнуляем счетчик успешно открытых файлов
                 int count = files_to_open.Length; //Кол-во файлов для открытия
-                CloneIsEnabled = (m != null && (this.videoWindow != null || this.VideoElement.Source != null));
 
                 //Вывод первичной инфы об открытии
                 textbox_name.Text = count + " - " + Languages.Translate("total files, ") + opened_files + " - " + Languages.Translate("opened files, ") + outfiles.Count + " - " + Languages.Translate("in queue");
