@@ -4,6 +4,7 @@ using System.Text;
 
 namespace XviD4PSP
 {
+    [Serializable]
     public class x264_arguments
     {
         public x264_arguments()
@@ -724,7 +725,7 @@ namespace XviD4PSP
                 _lookahead = value;
             }
         }
-        
+
         private string _nal_hrd = "none";
         public string nal_hrd
         {

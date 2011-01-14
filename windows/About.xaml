@@ -30,7 +30,7 @@
 		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38" Background="{DynamicResource black_gradient}">
 			<Button x:Name="button_ok" Content="Ok" Click="button_ok_Click" HorizontalAlignment="Right" Margin="0,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
 		    <Button x:Name="button_changelog" Content="Changelog" Click="button_changelog_Click" HorizontalAlignment="Left" Margin="8,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-            <TextBlock d:LayoutOverrides="Width, Height" Margin="0,8.822,0,8" Width="300" HorizontalAlignment="Center" FontFamily="Segoe UI" FontSize="14.3" FontWeight="Normal" Foreground="#60ffffff" Text="© 2007-2008 Winnydows, 2009-2010 fcp team" TextWrapping="Wrap" x:Name="text_copyright" />
+            <TextBlock d:LayoutOverrides="Width, Height" Margin="0,8.822,0,8" Width="Auto" HorizontalAlignment="Center" FontFamily="Segoe UI" FontSize="14.3" FontWeight="Normal" Foreground="#60ffffff" Text="© 2007-2008 Winnydows, 2009-2011 fcp team" TextWrapping="Wrap" x:Name="text_copyright" />
         </Grid>
 	</Grid>
 </Window>

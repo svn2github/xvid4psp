@@ -35,12 +35,10 @@ namespace XviD4PSP
         public Decoder(Massive mass, DecoderModes mode, string outfile)
         {
             this.InitializeComponent();
-
-            this.Owner = mass.owner;
-            this.mode = mode;
+            this.Owner = App.Current.MainWindow;
+            this.m = mass.Clone();
             this.outfile = outfile;
-
-            m = mass.Clone();
+            this.mode = mode;
 
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
 

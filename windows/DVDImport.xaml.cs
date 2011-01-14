@@ -70,9 +70,8 @@ namespace XviD4PSP
         public DVDImport(Massive mass, string dvdpath, double dpi)
         {
             this.InitializeComponent();
-
-            this.Owner = mass.owner;
-            m = mass.Clone();
+            this.Owner = App.Current.MainWindow;
+            this.m = mass.Clone();
             this.dpi = dpi;
 
             //tooltips

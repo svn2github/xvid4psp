@@ -4,9 +4,9 @@ using System.Text;
 
 namespace XviD4PSP
 {
-   public class flac_arguments
+    [Serializable]
+    public class flac_arguments
     {
-
         public flac_arguments()
         {
         }

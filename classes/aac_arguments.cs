@@ -4,6 +4,7 @@ using System.Text;
 
 namespace XviD4PSP
 {
+    [Serializable]
     public class aac_arguments
     {
         public aac_arguments()

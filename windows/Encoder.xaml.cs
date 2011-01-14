@@ -64,17 +64,14 @@ namespace XviD4PSP
         public Encoder(Massive mass, MainWindow parent)
         {
             this.InitializeComponent();
-
-            Owner = mass.owner;
+            this.Owner = this.p = parent;
+            this.m = mass.Clone();
 
             button_info.Visibility = Visibility.Hidden;
             button_play.Visibility = Visibility.Hidden;
 
             button_play.Content = Languages.Translate("Play");
             button_info.Content = Languages.Translate("Info");
-
-            m = mass.Clone();
-            p = parent;
 
             //Прячем окно, если программа минимизирована или свернута в трей
             if (!p.IsVisible || p.WindowState == WindowState.Minimized)
@@ -246,7 +243,7 @@ namespace XviD4PSP
             p.outfiles.Remove(m.outfilepath);
 
             //if (IsAborted)
-            //    p.UpdateTaskStatus(m.key, "Waiting");
+            //    p.UpdateTaskStatus(m.key, TaskStatus.Waiting);
 
             //Close();
         }
@@ -4706,12 +4703,12 @@ namespace XviD4PSP
                 }
 
                 //меняем статус кодирования
-                if (IsAborted) p.UpdateTaskStatus(m.key, "Waiting");
-                else if (IsErrors) p.UpdateTaskStatus(m.key, "Errors");
+                if (IsAborted) p.UpdateTaskStatus(m.key, TaskStatus.Waiting);
+                else if (IsErrors) p.UpdateTaskStatus(m.key, TaskStatus.Errors);
                 else
                 {
                     if (Settings.AutoDeleteTasks) p.RemoveTask(m.key);
-                    else p.UpdateTaskStatus(m.key, "Encoded");
+                    else p.UpdateTaskStatus(m.key, TaskStatus.Encoded);
                 }
 
                 //Смотрим, есть ли что ещё скодировать

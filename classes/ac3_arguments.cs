@@ -4,9 +4,9 @@ using System.Text;
 
 namespace XviD4PSP
 {
+    [Serializable]
     public class ac3_arguments
     {
-
         public ac3_arguments()
         {
         }

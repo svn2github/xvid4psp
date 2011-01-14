@@ -4,9 +4,9 @@ using System.Text;
 
 namespace XviD4PSP
 {
+    [Serializable]
     public class mp3_arguments
     {
-
         public mp3_arguments()
         {
         }
@@ -106,7 +106,5 @@ namespace XviD4PSP
                 _encquality = value;
             }
         }
-
-
     }
 }

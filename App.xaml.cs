@@ -17,6 +17,8 @@ namespace XviD4PSP
 {
 	public partial class App: System.Windows.Application
 	{
+        private bool tasks_saved = false;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             //Ловим необработанные исключения
@@ -67,6 +69,22 @@ namespace XviD4PSP
                 log_saved = true;
             }
             catch { }
+
+            if (!tasks_saved)
+            {
+                //Это не для того, чтобы знать, сохранили мы задания или нет.
+                //Это чтобы ограничиться одним разом (при множественных срабатываниях).
+                tasks_saved = true;
+                try
+                {
+                    if (App.Current.MainWindow.IsLoaded)
+                    {
+                        //Сохраняем (обновляем) файл с заданиями
+                        ((MainWindow)App.Current.MainWindow).UpdateTasksBackup();
+                    }
+                }
+                catch { }
+            }
 
             MessageBox.Show(txt + (log_saved ? "\r\n\r\nThis log was saved here:\r\n  " + path + "\r\n" : ""),
                 "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Stop);

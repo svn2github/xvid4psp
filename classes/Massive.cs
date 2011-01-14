@@ -5,6 +5,7 @@ using System.Collections;
 
 namespace XviD4PSP
 {
+    [Serializable]
     public class Massive
     {
         public enum InterlaceModes { Progressive = 1, Interlaced }
@@ -53,19 +54,6 @@ namespace XviD4PSP
             temp.bookmarks = (ArrayList)this.bookmarks.Clone();
 
             return temp;
-        }
-
-        private System.Windows.Window _owner;
-        public System.Windows.Window owner
-        {
-            get
-            {
-                return _owner;
-            }
-            set
-            {
-                _owner = value;
-            }
         }
 
         private string _key;

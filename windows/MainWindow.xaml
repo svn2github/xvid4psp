@@ -404,6 +404,7 @@
 							<MenuItem x:Name = "cmenu_delete_all_tasks" Click="cmenu_delete_all_tasks_Click" Header="Delete all tasks"/>
 							<Separator/>
                             <MenuItem x:Name = "cmenu_save_all_scripts" Click="cmenu_save_all_scripts_Click" Header="Save all scripts"/>
+                            <MenuItem x:Name = "cmenu_save_tasks" Click="cmenu_save_tasks_Click" Header="Save tasks list"/>
                             <Separator/>
                             <MenuItem x:Name = "cmenu_is_always_delete_encoded" IsCheckable="True" Click="cmenu_is_always_delete_encoded_Click" Header="Always delete from list encoded tasks" StaysOpenOnClick="True"/>					
 						</ContextMenu>

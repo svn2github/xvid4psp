@@ -2590,5 +2590,26 @@ namespace XviD4PSP
                 SetBool("Win7TaskbarIsEnabled", value);
             }
         }
+
+        //Создавать резервную копию списка заданий
+        public static bool EnableBackup
+        {
+            get
+            {
+                object value = GetValue("EnableBackup");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("EnableBackup", value);
+            }
+        }
     }
 }

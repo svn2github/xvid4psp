@@ -19,11 +19,9 @@ namespace XviD4PSP
         private ArrayList raw_action = new ArrayList(); //Action, не переведенные
 
         public Settings_Window(MainWindow parent, int set_focus_to)
-		{
-			this.InitializeComponent();
-
-            p = parent;
-            Owner = p;
+        {
+            this.InitializeComponent();
+            this.Owner = this.p = parent;
 
             //переводим
             button_ok.Content = Languages.Translate("OK");
@@ -35,7 +33,7 @@ namespace XviD4PSP
             check_delete_ff_cache.Content = Languages.Translate("Auto delete FFmpegSource cache");
             check_delete_dgindex_cache.Content = Languages.Translate("Auto delete DGIndex cache");
             check_search_temp.Content = Languages.Translate("Search the best temp folder place on program start");
-            check_save_anamorph.Content = Languages.Translate("Maintain anamorph aspect");
+            check_save_anamorph.Content = Languages.Translate("Maintain anamorphic aspect");
             check_alwaysprogressive.Content = Languages.Translate("Always encode to progressive video");
             check_auto_colormatrix.Content = Languages.Translate("Auto apply ColorMatrix for MPEG2 files");
             label_temppath.Content = Languages.Translate("Temp folder path:");
@@ -75,6 +73,7 @@ namespace XviD4PSP
             check_read_prmtrs.ToolTip = Languages.Translate("Read from the script: width, height, fps, duration and frames count.") + "\r\n" +
                 Languages.Translate("Use it only if these parameters was changed manually in the script!");
             check_use_win7taskbar.Content = Languages.Translate("Enable Windows 7 taskbar progress indication");
+            check_enable_backup.Content = Languages.Translate("Create a backup of the tasks list");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -121,6 +120,7 @@ namespace XviD4PSP
             check_use_trayicon.IsChecked = Settings.TrayIconIsEnabled;                            //Иконка в трее вкл\выкл
             cmenu_audio_first.IsChecked = Settings.EncodeAudioFirst;                              //Кодировать сначала звук, потом видео
             check_use_win7taskbar.IsChecked = Settings.Win7TaskbarIsEnabled;                      //Поддержка таскбара в Win7 вкл\выкл
+            check_enable_backup.IsChecked = Settings.EnableBackup;                                //Разрешаем сохранять резервную копию списка заданий
 
             //Загружаем HotKeys (плюс перевод к действиям)
             foreach (string line in HotKeys.Data)
@@ -131,13 +131,13 @@ namespace XviD4PSP
                     raw_action.Add(action_and_combination[0].Trim());
                     string translated_action = Languages.Translate(action_and_combination[0].Trim());
                     combo_action.Items.Add(translated_action);
-                    listview_hotkeys.Items.Add(new { Column1 = translated_action, Column2 = action_and_combination[1] }); 
+                    listview_hotkeys.Items.Add(new { Column1 = translated_action, Column2 = action_and_combination[1] });
                 }
             }
             combo_action.SelectedIndex = listview_hotkeys.SelectedIndex = 0;
             textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
             list_loaded = true;
-            
+
             //Чтоб открыть окно на нужной вкладке
             if (set_focus_to == 2) tab_temp.Focus();
             else if (set_focus_to == 3) tab_encoding.Focus();
@@ -145,7 +145,7 @@ namespace XviD4PSP
             else if (set_focus_to == 5) tab_hotkeys.Focus();
 
             ShowDialog();
-		}
+        }
 
         //Нажатия кнопок для HotKeys
         private void Settings_KeyDown(object sender, KeyEventArgs e)
@@ -505,6 +505,19 @@ namespace XviD4PSP
             else
             {
                 Win7Taskbar.UninitializeWin7Taskbar();
+            }
+        }
+
+        private void check_enable_backup_Click(object sender, RoutedEventArgs e)
+        {
+            if (Settings.EnableBackup = check_enable_backup.IsChecked.Value)
+            {
+                p.UpdateTasksBackup();
+            }
+            else
+            {
+                try { File.Delete(Settings.TempPath + "\\backup.tsks"); }
+                catch { }
             }
         }
 	}

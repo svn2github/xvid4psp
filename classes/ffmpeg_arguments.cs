@@ -4,17 +4,17 @@ using System.Text;
 
 namespace XviD4PSP
 {
-   public class ffmpeg_arguments
+    [Serializable]
+    public class ffmpeg_arguments
     {
-  
-       public ffmpeg_arguments()
-       {
-       }
+        public ffmpeg_arguments()
+        {
+        }
 
-       public ffmpeg_arguments Clone()
-       {
-           return (ffmpeg_arguments)this.MemberwiseClone();
-       }
+        public ffmpeg_arguments Clone()
+        {
+            return (ffmpeg_arguments)this.MemberwiseClone();
+        }
 
         private int _memethod = 2;
         public int memethod
@@ -471,7 +471,6 @@ namespace XviD4PSP
             }
         }
 
-
         private int _buffsize = 0;
         public int buffsize
         {
@@ -485,7 +484,6 @@ namespace XviD4PSP
             }
         }
 
-       //     
         private int _dia_size = 0;
         public int dia_size
         {
@@ -497,8 +495,6 @@ namespace XviD4PSP
             {
                 _dia_size = value;
             }
-        }  
-   
-   
-   }
+        }
+    }
 }

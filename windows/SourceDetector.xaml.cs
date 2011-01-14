@@ -68,9 +68,8 @@ namespace XviD4PSP
         public SourceDetector(Massive mass)
         {
             this.InitializeComponent();
-
-            this.Owner = mass.owner;
-            m = mass.Clone();
+            this.Owner = App.Current.MainWindow;
+            this.m = mass.Clone();
 
             Title = Languages.Translate("Detecting interlace") + "...";
             label_info.Content = Languages.Translate("Please wait... Work in progress...");

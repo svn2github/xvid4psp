@@ -24,13 +24,13 @@ namespace XviD4PSP
         FFLAC fflac;
         CopyOrDisabled copyordisabled;
 
-        public AudioEncoding(Massive mass)
+        public AudioEncoding(Massive mass, MainWindow parent)
 		{
 			this.InitializeComponent();
 
-            m = mass.Clone();
-            oldm = mass.Clone();
-            Owner = m.owner;
+            this.m = mass.Clone();
+            this.oldm = mass.Clone();
+            this.Owner = parent;
 
             //определяем аудио потоки
             AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];

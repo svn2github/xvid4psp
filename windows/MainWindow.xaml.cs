@@ -21,13 +21,15 @@ using System.Windows.Interop;
 using System.Windows.Input;
 using Microsoft.Win32;
 using System.Windows.Media.Imaging;
-
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace XviD4PSP
 {
     public partial class MainWindow
     {
         public Massive m;
+        private object backup_lock = new object();
         public ArrayList outfiles = new ArrayList();
         public ArrayList deletefiles = new ArrayList();
         private ArrayList ffcache = new ArrayList();
@@ -393,6 +395,23 @@ namespace XviD4PSP
                         slider_pos.Margin = new Thickness(60, 7.7, 4, 7.7);
                     }
 
+                    //Восстановление заданий из резервной копии (после вылета)
+                    if (Settings.EnableBackup && File.Exists(Settings.TempPath + "\\backup.tsks"))
+                    {
+                        Message mes = new Message(this);
+                        mes.ShowMessage(Languages.Translate("It seems that the previous session was finished abnormally.") + "\r\n" +
+                            Languages.Translate("Do you want to restore previously saved tasks from a backup?"), Languages.Translate("Question"), Message.MessageStyle.YesNo);
+                        if (mes.result == Message.Result.Yes)
+                        {
+                            Massive x = new Massive();
+                            x.infilepath = Settings.TempPath + "\\backup.tsks";
+                            action_open(x);
+                            return;
+                        }
+                        else
+                            SafeDelete(Settings.TempPath + "\\backup.tsks");
+                    }
+
                     //Открытие файла из командной строки (command line arguments)
                     string[] args = Environment.GetCommandLineArgs();
                     if (args.Length > 1)
@@ -403,7 +422,6 @@ namespace XviD4PSP
                             Massive x = new Massive();
                             x.infilepath = args[1];
                             x.infileslist = new string[] { args[1] };
-                            x.owner = this;
 
                             //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
                             if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(x.infilepath) ||
@@ -594,12 +612,13 @@ namespace XviD4PSP
                 if (!Settings.TrayNoBalloons) TrayIcon.ShowBalloonTip(5000, "XviD4PSP", " ", System.Windows.Forms.ToolTipIcon.Info);
                 return;
             }
+            else
+                IsExiting = true;
 
             //проверяем есть ли задания в работе
-            foreach (object _task in list_tasks.Items)
+            foreach (Task task in list_tasks.Items)
             {
-                Task task = (Task)_task;
-                if (task.Status == "Encoding")
+                if (task.Status == TaskStatus.Encoding)
                 {
                     Message mes = new Message(this);
                     mes.ShowMessage(Languages.Translate("Some jobs are still in progress!") + "\r\n" + Languages.Translate("Are you sure you want to quit?"), Languages.Translate("Warning"), Message.MessageStyle.YesNo);
@@ -623,6 +642,9 @@ namespace XviD4PSP
 
             if (m != null) CloseFile();
 
+            //Удаляем резервную копию заданий
+            SafeDelete(Settings.TempPath + "\\backup.tsks");
+
             //Временные файлы
             if (Settings.DeleteTempFiles)
             {
@@ -641,7 +663,7 @@ namespace XviD4PSP
                     foreach (string f in Directory.GetFiles(Settings.TempPath, "*.ffindex")) SafeDelete(f);
                 }
 
-                //Удаление DGIndex-кеша
+                //Удаление DGIndex-кэша
                 if (Settings.DeleteDGIndexCache)
                 {
                     foreach (string cache_path in dgcache)
@@ -694,14 +716,10 @@ namespace XviD4PSP
                             filesinwork.Add(_file);
 
                     //все файлы в заданиях
-                    if (list_tasks.Items.Count != 0)
+                    foreach (Task task in list_tasks.Items)
                     {
-                        foreach (object _task in list_tasks.Items)
-                        {
-                            Task task = (Task)_task;
-                            foreach (string _file in task.Mass.infileslist)
-                                filesinwork.Add(_file);
-                        }
+                        foreach (string _file in task.Mass.infileslist)
+                            filesinwork.Add(_file);
                     }
 
                     ArrayList cache_for_delete = new ArrayList();
@@ -734,12 +752,9 @@ namespace XviD4PSP
                 if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && Settings.DeleteDGIndexCache)
                 {
                     //Если есть задания, проверяем, занят ли там наш кэш-файл, если не занят - то удаляем его
-                    if (list_tasks.Items.Count != 0)
+                    foreach (Task task in list_tasks.Items)
                     {
-                        foreach (object _task in list_tasks.Items)
-                        {
-                            if (((Task)_task).Mass.indexfile == m.indexfile) return;
-                        }
+                        if (task.Mass.indexfile == m.indexfile) return;
                     }
                     SafeDirDelete(Path.GetDirectoryName(m.indexfile));
                     dgcache.Remove(m.indexfile);
@@ -754,7 +769,6 @@ namespace XviD4PSP
             CloseChildWindows();
            
             //открываем файл
-            OpenDialogs.owner = this;
             Massive x = OpenDialogs.OpenFile();
             if (x != null)
             {
@@ -779,7 +793,6 @@ namespace XviD4PSP
             CloseChildWindows();
 
             //открываем файл
-            OpenDialogs.owner = this;
             Massive x = OpenDialogs.OpenFile();
             if (x == null) return;
 
@@ -927,7 +940,6 @@ namespace XviD4PSP
             else
             {
                 //открываем файл
-                OpenDialogs.owner = this;
                 Massive x = OpenDialogs.OpenFile();
                 action_open(x);
             }
@@ -1034,13 +1046,50 @@ namespace XviD4PSP
             {
                 if (x != null)
                 {
-                    //сразу-же обнуляем трим и его кнопки
+                    //Уводим фокус с комбобоксов куда-нибудь!
+                    if (!slider_pos.Focus()) slider_Volume.Focus();
+
+                    //Обнуляем трим и его кнопки
                     ResetTrim();
 
-                    //Пока-что вот так..
-                    if (!IsBatchOpening && m != null /*&& list_tasks.Items.Count == 0*/) CloseFile();
+                    //Закрываем уже открытый файл, пока-что вот так..
+                    if (!IsBatchOpening && m != null) CloseFile();
 
                     string ext = Path.GetExtension(x.infilepath).ToLower();
+
+                    //Загружаем сохраненные задания
+                    if (ext == ".tsks")
+                    {
+                        RestoreTasks(x.infilepath, ref x);
+
+                        //Выходим при ошибке или если были только одни задания;
+                        //если был и массив, то открываем его
+                        if (x == null) return;
+                        else m = x.Clone();
+                        x = null;
+
+                        LoadVideoPresets();
+
+                        if (m.outaudiostreams.Count > 0)
+                        {
+                            AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                            LoadAudioPresets();
+                            combo_aencoding.SelectedItem = outstream.encoding;
+                            Settings.SetAEncodingPreset(m.format, outstream.encoding);
+                        }
+                        else
+                        {
+                            combo_aencoding.SelectedItem = "Disabled";
+                        }
+
+                        combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut = m.format);
+                        combo_sbc.SelectedItem = Settings.SBC = m.sbc;
+                        combo_filtering.SelectedItem = Settings.Filtering = m.filtering;
+                        combo_vencoding.SelectedItem = m.vencoding;
+                        Settings.SetVEncodingPreset(m.format, m.vencoding);
+
+                        goto finish;
+                    }
 
                     //добавляем список на очистку
                     ffcache.AddRange(add_ff_cache(x.infileslist));
@@ -1053,9 +1102,6 @@ namespace XviD4PSP
                     //имя
                     if (x.taskname == null)
                         x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
-
-                    //задаём хозяина
-                    x.owner = this;
 
                     //забиваем основные параметры кодирования
                     x.format = Settings.FormatOut;
@@ -1556,10 +1602,12 @@ namespace XviD4PSP
                     //настройки форматов
                     x.dontmuxstreams = Format.GetMultiplexing(x.format);
                     x.split = Format.GetSplitting(x.format);
-                   
+
                     //передаём массив
                     m = x.Clone();
                     x = null;
+
+                finish:
 
                     //снимаем выделение
                     list_tasks.SelectedIndex = -1;
@@ -1679,7 +1727,7 @@ namespace XviD4PSP
                         }
 
                         //добавляем задание в список
-                        AddTask(mass, "Waiting");
+                        AddTask(mass, TaskStatus.Waiting);
                     }
                     if (PauseAfterFirst)
                     {
@@ -1751,7 +1799,7 @@ namespace XviD4PSP
                         if (dem.IsErrors)
                         {
                             ErrorException(dem.error_message);
-                            UpdateTaskStatus(mass.key, "Errors");
+                            UpdateTaskStatus(mass.key, TaskStatus.Errors);
                             return;
                         }
                         deletefiles.Add(outstream.nerotemp);
@@ -1793,6 +1841,17 @@ namespace XviD4PSP
             ResetTrim();      //Обнуляем всё что связано с тримом
             MenuHider(false); //Делаем пункты меню неактивными
 
+            if (IsExiting)
+            {
+                //Удаляем резервную копию заданий - при выходе
+                SafeDelete(Settings.TempPath + "\\backup.tsks");
+            }
+            else
+            {
+                //Обновляем резервную копию заданий - при закрытии файла
+                UpdateTasksBackup();
+            }
+
             //Если пользователь передумал пакетно открывать файлы
             if (PauseAfterFirst && button_encode.Content.ToString() == Languages.Translate("Resume"))
             {
@@ -1809,14 +1868,11 @@ namespace XviD4PSP
             {
                 //Если есть задания, проверяем, занят ли там наш файл
                 bool busy = false;
-                if (list_tasks.Items.Count != 0)
+                foreach (Task task in list_tasks.Items)
                 {
-                    foreach (object _task in list_tasks.Items)
+                    if (task.Mass.infilepath == m.infilepath) //m.taskname, m.infilepath
                     {
-                        if (((Task)_task).Mass.infilepath == m.infilepath) //m.taskname, m.infilepath
-                        {
-                            busy = true; break;
-                        }
+                        busy = true; break;
                     }
                 }
                 //Удаляем кэши сразу, или помещаем их в список на удаление, если они участвует в кодировании
@@ -1851,11 +1907,14 @@ namespace XviD4PSP
         {
             this.mediaload = mediaload;
 
+            //Обновляем резервную копию заданий
+            UpdateTasksBackup();
+
             //Сбрасываем флаг ошибки Ависинта при новом открытии
             if (mediaload == MediaLoad.load) IsAviSynthError = false;
 
-            //Чтоб позиция не сбрасывалась на ноль при включенном ScriptView
-            //А так-же НЕ сохраняем позицию после ошибки Ависинта в предыдущее открытие
+            //Чтоб позиция не сбрасывалась на ноль при включенном ScriptView,
+            //а так-же НЕ сохраняем позицию после ошибки Ависинта в предыдущее открытие
             if (script_box.Visibility == Visibility.Collapsed && !IsAviSynthError)
                 oldpos = Position;
 
@@ -2134,6 +2193,8 @@ namespace XviD4PSP
                 cmenu_is_always_delete_encoded.Header = Languages.Translate("Always delete encoded tasks from list");
                 cmenu_reset_status.Header = Languages.Translate("Reset task status");
                 cmenu_save_all_scripts.Header = Languages.Translate("Save all scripts");
+                cmenu_save_tasks.Header = Languages.Translate("Save tasks list");
+                cmenu_save_tasks.ToolTip = Languages.Translate("This option is experimental!");
 
                 menu_directx_update.Header = Languages.Translate("Update DirectX");
                 menu_autocrop.Header = Languages.Translate("Detect black borders");
@@ -2156,7 +2217,7 @@ namespace XviD4PSP
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
                 target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.") +
                     "\r\n" + Languages.Translate("Enter - apply, Esc - cancel.");
-                
+
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
                 check_scriptview_white.ToolTip = Languages.Translate("Enable white background for ScriptView");
@@ -2766,9 +2827,8 @@ namespace XviD4PSP
             if (list_tasks.Items.Count == 0) return;
             try
             {
-                foreach (object _task in list_tasks.Items)
+                foreach (Task task in list_tasks.Items)
                 {
-                    Task task = (Task)_task;
                     string path = Path.GetDirectoryName(task.Mass.outfilepath) + "\\" + Path.GetFileNameWithoutExtension(task.Mass.outfilepath) + ".avs";
                     WriteScriptToFile(task.Mass, path);
                 }
@@ -2893,7 +2953,7 @@ namespace XviD4PSP
 
         private void combo_format_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_format.IsDropDownOpen || combo_format.IsSelectionBoxHighlighted)
+            if ((combo_format.IsDropDownOpen || combo_format.IsSelectionBoxHighlighted) && combo_format.SelectedItem != null)
             {
                 Settings.FormatOut = Format.StringToEnum(combo_format.SelectedItem.ToString());
 
@@ -3037,195 +3097,184 @@ namespace XviD4PSP
 
         private void combo_filtering_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_filtering.IsDropDownOpen || combo_filtering.IsSelectionBoxHighlighted)
+            if ((combo_filtering.IsDropDownOpen || combo_filtering.IsSelectionBoxHighlighted) && combo_filtering.SelectedItem != null)
             {
-                if (combo_filtering.SelectedItem != null)
+                Settings.Filtering = combo_filtering.SelectedItem.ToString();
+
+                if (m != null)
                 {
-                    Settings.Filtering = combo_filtering.SelectedItem.ToString();
+                    m.filtering = combo_filtering.SelectedItem.ToString();
 
-                    if (m != null)
-                    {
-                        m.filtering = combo_filtering.SelectedItem.ToString();
+                    //создаём новый AviSynth скрипт
+                    m.filtering_changed = true;
+                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                    m.filtering_changed = false;
 
-                        //создаём новый AviSynth скрипт
-                        m.filtering_changed = true;
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                        m.filtering_changed = false;
-
-                        //загружаем обновлённый скрипт
-                        LoadVideo(MediaLoad.update);
-                    }
+                    //загружаем обновлённый скрипт
+                    LoadVideo(MediaLoad.update);
+                    UpdateTaskMassive(m);
                 }
             }
         }
 
         private void combo_sbc_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_sbc.IsDropDownOpen || combo_sbc.IsSelectionBoxHighlighted)
+            if ((combo_sbc.IsDropDownOpen || combo_sbc.IsSelectionBoxHighlighted) && combo_sbc.SelectedItem != null)
             {
-                if (combo_sbc.SelectedItem != null)
+                Settings.SBC = combo_sbc.SelectedItem.ToString();
+
+                if (m != null)
                 {
-                    Settings.SBC = combo_sbc.SelectedItem.ToString();
+                    m.sbc = combo_sbc.SelectedItem.ToString();
 
-                    if (m != null)
-                    {
-                        m.sbc = combo_sbc.SelectedItem.ToString();
+                    //дешифруем парметры из профиля
+                    m = ColorCorrection.DecodeProfile(m);
 
-                        //дешифруем парметры из профиля
-                        m = ColorCorrection.DecodeProfile(m);
+                    //создаём новый AviSynth скрипт
+                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
 
-                        //создаём новый AviSynth скрипт
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
-
-                        //загружаем обновлённый скрипт
-                        LoadVideo(MediaLoad.update);
-                        UpdateTaskMassive(m);
-                    }
+                    //загружаем обновлённый скрипт
+                    LoadVideo(MediaLoad.update);
+                    UpdateTaskMassive(m);
                 }
             }
         }
 
         private void combo_aencoding_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_aencoding.IsDropDownOpen || combo_aencoding.IsSelectionBoxHighlighted)
+            if ((combo_aencoding.IsDropDownOpen || combo_aencoding.IsSelectionBoxHighlighted) && combo_aencoding.SelectedItem != null)
             {
-                if (combo_aencoding.SelectedItem != null)
-                {
-                    Format.ExportFormats format;
-                    if (m == null) format = Settings.FormatOut;
-                    else format = m.format;
+                Format.ExportFormats format;
+                if (m == null) format = Settings.FormatOut;
+                else format = m.format;
 
-                    if (format == Format.ExportFormats.Audio &&
-                        combo_aencoding.SelectedItem.ToString() == "Disabled")
+                if (format == Format.ExportFormats.Audio &&
+                    combo_aencoding.SelectedItem.ToString() == "Disabled")
+                {
+                    if (m != null && m.inaudiostreams.Count > 0) combo_aencoding.SelectedItem = "MP3 CBR 128k";
+                    return;
+                }
+
+                if (combo_aencoding.SelectedItem.ToString() != "Disabled")
+                    Settings.SetAEncodingPreset(format, combo_aencoding.SelectedItem.ToString());
+
+                if (m != null)
+                {
+                    if (m.inaudiostreams.Count == 0 &&
+                        combo_aencoding.SelectedItem.ToString() != "Disabled")
                     {
-                        if (m!= null && m.inaudiostreams.Count > 0) combo_aencoding.SelectedItem = "MP3 CBR 128k";
+                        combo_aencoding.SelectedItem = "Disabled";
                         return;
                     }
 
-                    if (combo_aencoding.SelectedItem.ToString() != "Disabled")
-                        Settings.SetAEncodingPreset(format, combo_aencoding.SelectedItem.ToString());
+                    //Запоминаем старый кодер
+                    string old_codec = (m.outaudiostreams.Count > 0) ?
+                        ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec : "";
 
-                    if (m != null)
+                    //запрещаем или разрешаем звук
+                    if (m.outaudiostreams.Count > 0 &&
+                        combo_aencoding.SelectedItem.ToString() == "Disabled")
                     {
-                        if (m.inaudiostreams.Count == 0 &&
-                            combo_aencoding.SelectedItem.ToString() != "Disabled")
-                        {
-                            combo_aencoding.SelectedItem = "Disabled";
-                            return;
-                        }
-
-                        //Запоминаем старый кодер
-                        string old_codec = (m.outaudiostreams.Count > 0) ? 
-                            ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec : "";
-
-                        //запрещаем или разрешаем звук
-                        if (m.outaudiostreams.Count > 0 &&
-                            combo_aencoding.SelectedItem.ToString() == "Disabled")
-                        {
-                            m.outaudiostreams.Clear();
-                            old_codec = ".";
-                        }
-                        else
-                        {
-                            //забиваем-обновляем аудио массивы
-                            m = FillAudio(m);
-                        }
-
-                        //Пересоздаем скрипт при изменении кодера. combo aencoding selection
-                        if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
-                            old_codec == ".")
-                        {
-                            //Меняем расширение
-                            if (m.format == Format.ExportFormats.Audio && m.outfilepath != null)
-                                m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
-                            
-                            string old_script = m.script;
-                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                            if (old_script != m.script) LoadVideo(MediaLoad.update);
-                        }
-
-                        m = PresetLoader.DecodePresets(m);
-
-                        //проверка на размер
-                        m.outfilesize = Calculate.GetEncodingSize(m);
-
-                        //загружаем обновлённый скрипт
-                        UpdateTaskMassive(m);
-
-                        //обновляем дочерние окна
-                        ReloadChildWindows();
-                        ValidateTrimAndCopy(m);
+                        m.outaudiostreams.Clear();
+                        old_codec = ".";
                     }
+                    else
+                    {
+                        //забиваем-обновляем аудио массивы
+                        m = FillAudio(m);
+                    }
+
+                    //Пересоздаем скрипт при изменении кодера. combo aencoding selection
+                    if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
+                        old_codec == ".")
+                    {
+                        //Меняем расширение
+                        if (m.format == Format.ExportFormats.Audio && m.outfilepath != null)
+                            m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
+
+                        string old_script = m.script;
+                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        if (old_script != m.script) LoadVideo(MediaLoad.update);
+                    }
+
+                    m = PresetLoader.DecodePresets(m);
+
+                    //проверка на размер
+                    m.outfilesize = Calculate.GetEncodingSize(m);
+
+                    //загружаем обновлённый скрипт
+                    UpdateTaskMassive(m);
+
+                    //обновляем дочерние окна
+                    ReloadChildWindows();
+                    ValidateTrimAndCopy(m);
                 }
             }
         }
 
         private void combo_vencoding_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_vencoding.IsDropDownOpen || combo_vencoding.IsSelectionBoxHighlighted)
+            if ((combo_vencoding.IsDropDownOpen || combo_vencoding.IsSelectionBoxHighlighted) && combo_vencoding.SelectedItem != null)
             {
-                if (combo_vencoding.SelectedItem != null)
+                //переводим программу в режим кодирования звука
+                if (combo_vencoding.SelectedItem.ToString() == "Disabled")
                 {
-                    //переводим программу в режим кодирования звука
-                    if (combo_vencoding.SelectedItem.ToString() == "Disabled")
-                    {
-                        combo_format.SelectedItem = Format.EnumToString(Format.ExportFormats.Audio);
-                        Settings.FormatOut = Format.ExportFormats.Audio;
-                        combo_vencoding.IsEnabled = false;
-                        button_edit_vencoding.IsEnabled = false;
-                        combo_sbc.IsEnabled = false;
-                        button_edit_sbc.IsEnabled = false;
+                    combo_format.SelectedItem = Format.EnumToString(Format.ExportFormats.Audio);
+                    Settings.FormatOut = Format.ExportFormats.Audio;
+                    combo_vencoding.IsEnabled = false;
+                    button_edit_vencoding.IsEnabled = false;
+                    combo_sbc.IsEnabled = false;
+                    button_edit_sbc.IsEnabled = false;
 
-                        if (m != null) m.format = Format.ExportFormats.Audio;
-                    }
-
-                    Format.ExportFormats format;
-                    if (m == null) format = Settings.FormatOut;
-                    else format = m.format;
-
-                    Settings.SetVEncodingPreset(format, combo_vencoding.SelectedItem.ToString());
-
-                    if (m != null)
-                    {
-                        //забиваем настройки из профиля
-                        m.vencoding = combo_vencoding.SelectedItem.ToString();
-
-                        if (m.vencoding != "Disabled")
-                        {
-                            m.outvcodec = PresetLoader.GetVCodec(m);
-                            m.vpasses = PresetLoader.GetVCodecPasses(m);
-                        }
-                        else
-                        {
-                            m.outvcodec = "Disabled";
-                            m.vpasses.Clear();
-                        }
-                        m = PresetLoader.DecodePresets(m);
-
-                        if (m.outvcodec == "Disabled") m.outvbitrate = 0;
-
-                        //проверка на размер
-                        m.outfilesize = Calculate.GetEncodingSize(m);
-
-                        UpdateTaskMassive(m);
-
-                        //проверяем можно ли копировать данный формат
-                        if (m.vencoding == "Copy")
-                        {
-                            string CopyProblems = Format.ValidateCopyVideo(m);
-                            if (CopyProblems != null)
-                            {
-                                Message mess = new Message(this);
-                                mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                    " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
-                            }
-                            ValidateTrimAndCopy(m);
-                        }
-                    }
-                    
-                    //обновляем дочерние окна
-                    ReloadChildWindows();
+                    if (m != null) m.format = Format.ExportFormats.Audio;
                 }
+
+                Format.ExportFormats format;
+                if (m == null) format = Settings.FormatOut;
+                else format = m.format;
+
+                Settings.SetVEncodingPreset(format, combo_vencoding.SelectedItem.ToString());
+
+                if (m != null)
+                {
+                    //забиваем настройки из профиля
+                    m.vencoding = combo_vencoding.SelectedItem.ToString();
+
+                    if (m.vencoding != "Disabled")
+                    {
+                        m.outvcodec = PresetLoader.GetVCodec(m);
+                        m.vpasses = PresetLoader.GetVCodecPasses(m);
+                    }
+                    else
+                    {
+                        m.outvcodec = "Disabled";
+                        m.vpasses.Clear();
+                    }
+                    m = PresetLoader.DecodePresets(m);
+
+                    if (m.outvcodec == "Disabled") m.outvbitrate = 0;
+
+                    //проверка на размер
+                    m.outfilesize = Calculate.GetEncodingSize(m);
+
+                    UpdateTaskMassive(m);
+
+                    //проверяем можно ли копировать данный формат
+                    if (m.vencoding == "Copy")
+                    {
+                        string CopyProblems = Format.ValidateCopyVideo(m);
+                        if (CopyProblems != null)
+                        {
+                            Message mess = new Message(this);
+                            mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                                " " + Format.EnumToString(m.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
+                        }
+                        ValidateTrimAndCopy(m);
+                    }
+                }
+
+                //обновляем дочерние окна
+                ReloadChildWindows();
             }
         }
 
@@ -3276,7 +3325,7 @@ namespace XviD4PSP
                 //Запоминаем старый кодер
                 string old_codec = outstream.codec;
 
-                AudioEncoding enc = new AudioEncoding(m);
+                AudioEncoding enc = new AudioEncoding(m, this);
                 m = enc.m.Clone();
                 LoadAudioPresets();
 
@@ -3403,7 +3452,6 @@ namespace XviD4PSP
                         Massive x = new Massive();
                         x.infilepath = drop_data[0];
                         x.infileslist = new string[] { drop_data[0] };
-                        x.owner = this;
 
                         //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
                         if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(x.infilepath) ||
@@ -3417,7 +3465,6 @@ namespace XviD4PSP
                     PauseAfterFirst = Settings.BatchPause;
                     if (!PauseAfterFirst)
                     {
-                        OpenDialogs.owner = this;
                         path_to_save = OpenDialogs.SaveFolder();
                         if (path_to_save == null) { IsDragOpening = false; return; }
                     }
@@ -3445,17 +3492,18 @@ namespace XviD4PSP
                     AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                     LoadAudioPresets();
                     combo_aencoding.SelectedItem = outstream.encoding;
+                    Settings.SetAEncodingPreset(m.format, outstream.encoding);
                 }
                 else
                 {
                     combo_aencoding.SelectedItem = "Disabled";
                 }
 
-                combo_format.SelectedItem = Format.EnumToString(m.format);
-                combo_sbc.SelectedItem = m.sbc;
-                combo_filtering.SelectedItem = m.filtering;
+                combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut = m.format);
+                combo_sbc.SelectedItem = Settings.SBC = m.sbc;
+                combo_filtering.SelectedItem = Settings.Filtering = m.filtering;
                 combo_vencoding.SelectedItem = m.vencoding;
-
+                Settings.SetVEncodingPreset(m.format, m.vencoding);
 
                 //запоминаем выделенное задание
                 //OldSelectedIndex = list_tasks.SelectedIndex;
@@ -3503,7 +3551,7 @@ namespace XviD4PSP
             {
                 Task task = (Task)list_tasks.SelectedItem;
 
-                if (task.Status == "Encoding")
+                if (task.Status == TaskStatus.Encoding)
                 {
                     Message mes = new Message(this);
                     mes.ShowMessage(Languages.Translate("The tasks in encoding process are disabled for removal!"), Languages.Translate("Error"));
@@ -3515,15 +3563,17 @@ namespace XviD4PSP
                     outfiles.Remove(task.Mass.outfilepath);
 
                 clear_ff_cache();
+                UpdateTasksBackup();
             }
         }
 
-        private void AddTask(Massive mass, string status)
+        private void AddTask(Massive mass, TaskStatus status)
         {
             list_tasks.Items.Add(new Task("THM", status, mass));
+            UpdateTasksBackup();
         }
 
-        public void UpdateTaskStatus(string key, string status)
+        public void UpdateTaskStatus(string key, TaskStatus status)
         {
             int index = 0;
             bool IsTask = false;
@@ -3543,7 +3593,7 @@ namespace XviD4PSP
             if (IsTask)
             {
                 //добавлем задание в лок
-                if (task.Status == "Encoded" && status == "Waiting")
+                if (task.Status == TaskStatus.Encoded && status == TaskStatus.Waiting)
                     outfiles.Add(task.Mass.outfilepath);
 
                 IsInsertAction = true;
@@ -3551,6 +3601,8 @@ namespace XviD4PSP
                 task.Status = status;
                 list_tasks.Items.Insert(index, task);
                 IsInsertAction = false;
+
+                UpdateTasksBackup();
             }
         }
 
@@ -3564,7 +3616,7 @@ namespace XviD4PSP
             foreach (object _task in list_tasks.Items)
             {
                 task = (Task)_task;
-                if (task.Id == mass.key && task.Status != "Encoding")
+                if (task.Id == mass.key && task.Status != TaskStatus.Encoding)
                 {
                     IsTask = true;
                     break;
@@ -3576,9 +3628,11 @@ namespace XviD4PSP
             {
                 IsInsertAction = true;
                 list_tasks.Items.RemoveAt(task_index);
-                list_tasks.Items.Insert(task_index, new Task(task.THM, "Waiting", mass.Clone()));
+                list_tasks.Items.Insert(task_index, new Task(task.THM, TaskStatus.Waiting, mass.Clone()));
                 list_tasks.SelectedIndex = task_index;
                 IsInsertAction = false;
+
+                UpdateTasksBackup();
             }
         }
 
@@ -3593,7 +3647,10 @@ namespace XviD4PSP
             }
 
             if (task_for_delete != null)
+            {
                 list_tasks.Items.Remove(task_for_delete);
+                UpdateTasksBackup();
+            }
         }
 
         public bool EncodeNextTask()
@@ -3609,13 +3666,13 @@ namespace XviD4PSP
                 foreach (object _task in list_tasks.Items)
                 {
                     task = (Task)_task;
-                    if (task.Status == "Waiting")
+                    if (task.Status == TaskStatus.Waiting)
                     {
                         IsWaiting = true;
                         all_clear = false;
                         break;
                     }
-                    else if (task.Status == "Encoding" || task.Status == "Errors")
+                    else if (task.Status == TaskStatus.Encoding || task.Status == TaskStatus.Errors)
                     {
                         all_clear = false;
                     }
@@ -3623,7 +3680,7 @@ namespace XviD4PSP
 
                 if (IsWaiting)
                 {
-                    UpdateTaskStatus(task.Id, "Encoding");
+                    UpdateTaskStatus(task.Id, TaskStatus.Encoding);
                     action_encode(task.Mass.Clone());
                 }
             }
@@ -3638,11 +3695,10 @@ namespace XviD4PSP
             {
                 bool IsEncoding = false;
                 bool IsWaiting = false;
-                foreach (object _task in list_tasks.Items)
+                foreach (Task task in list_tasks.Items)
                 {
-                    Task task = (Task)_task;
-                    if (task.Status == "Encoding") IsEncoding = true;
-                    if (task.Status == "Waiting") IsWaiting = true;
+                    if (task.Status == TaskStatus.Encoding) IsEncoding = true;
+                    if (task.Status == TaskStatus.Waiting) IsWaiting = true;
                 }
 
                 if (IsEncoding && IsWaiting)
@@ -3663,12 +3719,12 @@ namespace XviD4PSP
             if (list_tasks.SelectedItem != null)
             {
                 Task task = (Task)list_tasks.SelectedItem;
-                if (task.Status == "Encoded")
+                if (task.Status == TaskStatus.Encoded)
                 {
                     //добавлем задание в лок
                     outfiles.Add(task.Mass.outfilepath);
                     //обновляем список
-                    UpdateTaskStatus(task.Id, "Waiting");
+                    UpdateTaskStatus(task.Id, TaskStatus.Waiting);
                 }
             }
         }
@@ -3684,8 +3740,8 @@ namespace XviD4PSP
             if (list_tasks.SelectedItem != null)
             {
                 Task task = (Task)list_tasks.SelectedItem;
-                if (task.Status != "Encoding")
-                    UpdateTaskStatus(task.Id, "Waiting");
+                if (task.Status != TaskStatus.Encoding)
+                    UpdateTaskStatus(task.Id, TaskStatus.Waiting);
             }
         }
 
@@ -3700,17 +3756,17 @@ namespace XviD4PSP
             if (list_tasks.HasItems)
             {
                 ArrayList ready = new ArrayList();
-                foreach (object _task in list_tasks.Items)
+                foreach (Task task in list_tasks.Items)
                 {
-                    Task task = (Task)_task;
-                    if (task.Status == "Encoded")
-                        ready.Add(_task);
+                    if (task.Status == TaskStatus.Encoded)
+                        ready.Add(task);
                 }
 
-                foreach (object _task in ready)
-                    list_tasks.Items.Remove(_task);
+                foreach (Task task in ready)
+                    list_tasks.Items.Remove(task);
 
                 clear_ff_cache();
+                UpdateTasksBackup();
             }
         }
 
@@ -3719,21 +3775,21 @@ namespace XviD4PSP
             if (list_tasks.HasItems)
             {
                 ArrayList fordelete = new ArrayList();
-                foreach (object _task in list_tasks.Items)
+                foreach (Task task in list_tasks.Items)
                 {
-                    Task task = (Task)_task;
-                    if (task.Status != "Encoding")
+                    if (task.Status != TaskStatus.Encoding)
                     {
-                        fordelete.Add(_task);
+                        fordelete.Add(task);
                         if (outfiles.Contains(task.Mass.outfilepath))
                             outfiles.Remove(task.Mass.outfilepath);
                     }
                 }
 
-                foreach (object _task in fordelete)
-                    list_tasks.Items.Remove(_task);
+                foreach (Task task in fordelete)
+                    list_tasks.Items.Remove(task);
 
                 clear_ff_cache();
+                UpdateTasksBackup();
             }
         }
 
@@ -5169,7 +5225,6 @@ namespace XviD4PSP
                 
                 Settings.DVDPath = folder.SelectedPath;
                 Massive x = new Massive();
-                x.owner = this;
                 DVDImport dvd = new DVDImport(x, folder.SelectedPath, dpi);
 
                 if (dvd.m != null)
@@ -5745,7 +5800,6 @@ namespace XviD4PSP
 
             try
             {
-                OpenDialogs.owner = this;
                 string path_to_open = OpenDialogs.OpenFolder();
                 if (path_to_open == null || Directory.GetFiles(path_to_open).Length == 0) return;
 
@@ -5838,17 +5892,17 @@ namespace XviD4PSP
         private void action_auto_save(Massive mass)
         {
             if (mass != null && path_to_save != null)
-            {               
+            {
                 //Разбираемся с названием для перекодированного файла
                 mass.outfilepath = path_to_save + "\\" + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
                 while(File.Exists(mass.outfilepath))
                     mass.outfilepath = Path.GetDirectoryName(mass.outfilepath) + "\\(" + Path.GetFileName(m.infilepath) + ") " + Path.GetFileName(mass.outfilepath);
                     //mass.outfilepath = path_to_save + "\\(" + Path.GetFileName(m.infilepath) + ") " + Path.GetFileNameWithoutExtension(m.infilepath) + Format.GetValidExtension(m);
-                
+
                 //Выход отсюда, если такое задание уже имеется (видимо была ошибка при открытии файла, и текущее задание дублирует предыдущее)
                 if (outfiles.Contains(mass.outfilepath))
                     return;
-           
+
                 //запоминаем уникальный ключ
                 int n = Convert.ToInt32(Settings.Key) + 1;
                 Settings.Key = n.ToString("0000");
@@ -5859,13 +5913,13 @@ namespace XviD4PSP
 
                 //убираем выделение из списка заданий
                 list_tasks.SelectedIndex = -1;
-                
+
                 //добавляем задание в список
                 mass = UpdateOutAudioPath(mass);
-                AddTask(mass, "Waiting");
-                
+                AddTask(mass, TaskStatus.Waiting);
+
                 //Увеличиваем счетчик успешно открытых файлов
-                opened_files += 1;            
+                opened_files += 1;
             }
         }
 
@@ -6079,7 +6133,6 @@ namespace XviD4PSP
                 if (m == null)
                 {
                     Massive x = new Massive();
-                    x.owner = this;
                     x.taskname = "Untitled";
                     x.outfilepath = OpenDialogs.SaveDialog(x);
                     if (x.outfilepath != null)
@@ -6246,6 +6299,148 @@ namespace XviD4PSP
             TimeSpan position;
             if (TimeSpan.TryParse(((MenuItem)sender).Header.ToString(), out position) && position <= NaturalDuration)
                 Position = position;
+        }
+
+        public void UpdateTasksBackup()
+        {
+            lock (backup_lock)
+            {
+                if (Settings.EnableBackup) SaveTasks(Settings.TempPath + "\\backup.tsks", false);
+            }
+        }
+
+        private void cmenu_save_tasks_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null && list_tasks.Items.Count == 0) return;
+            System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
+            s.SupportMultiDottedExtensions = true;
+            s.DefaultExt = ".tsks";
+            s.AddExtension = true;
+            s.Title = Languages.Translate("Select unique name for output file:");
+            s.Filter = "TSKS " + Languages.Translate("files") + "|*.tsks";
+            s.FileName = "stored_tasks_(" + DateTime.Now.ToString("dd.MM.yyyy_HH.mm.ss") + ").tsks";
+
+            if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                SaveTasks(s.FileName, true);
+            }
+        }
+
+        private void SaveTasks(string path, bool show_errors)
+        {
+            try
+            {
+                if (m == null && list_tasks.Items.Count == 0 && !path.EndsWith("backup.tsks")) return;
+
+                bool something_saved = false;
+                using (Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    IFormatter formatter = new BinaryFormatter();
+
+                    //Сохраняем задания
+                    foreach (Task task in list_tasks.Items)
+                    {
+                        if (task.Status != TaskStatus.Encoding)
+                        {
+                            formatter.Serialize(stream, task);
+                            something_saved = true;
+                        }
+                    }
+
+                    //Сохраняем массив
+                    if (m != null)
+                    {
+                        formatter.Serialize(stream, m);
+                        something_saved = true;
+                    }
+
+                    //Сохраняем список файлов на удаление
+                    if (something_saved && deletefiles.Count > 0)
+                        formatter.Serialize(stream, deletefiles);
+                }
+
+                //Если сохранять было нечего, удаляем пустой файл
+                if (!something_saved) File.Delete(path);
+            }
+            catch (Exception ex)
+            {
+                if (show_errors)
+                    ErrorException("SaveTasks: " + ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void RestoreTasks(string path, ref Massive x)
+        {
+            try
+            {
+                using (Stream stream = new FileStream(x.infilepath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    x = null; //Будем использовать его повторно
+                    IFormatter formatter = new BinaryFormatter();
+
+                    object obj = null;
+                    while (stream.Position < stream.Length)
+                    {
+                        obj = formatter.Deserialize(stream);
+                        if (obj is Massive)
+                        {
+                            //Massive
+                            x = obj as Massive;
+
+                            //Кэши на удаление
+                            RestoreCaches(x);
+                        }
+                        else if (obj is Task)
+                        {
+                            //Task
+                            Task task = obj as Task;
+                            list_tasks.Items.Add(task);
+
+                            //Имена конечных файлов
+                            if (!outfiles.Contains(task.Mass.outfilepath))
+                                outfiles.Add(task.Mass.outfilepath);
+
+                            //Кэши на удаление
+                            RestoreCaches(task.Mass);
+                        }
+                        else if (obj is ArrayList)
+                        {
+                            //Список файлов на удаление (при закрытии программы)
+                            foreach (string file in obj as ArrayList)
+                            {
+                                try
+                                {
+                                    if (File.Exists(file) && !deletefiles.Contains(file))
+                                        deletefiles.Add(file);
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorException("RestoreTasks: " + ex.Message, ex.StackTrace);
+                x = null;
+            }
+        }
+
+        private void RestoreCaches(Massive mass)
+        {
+            //Кэш от FFmpegSource1
+            ffcache.AddRange(add_ff_cache(mass.infileslist));
+
+            //Кэш от DGIndex
+            if (mass.vdecoder == AviSynthScripting.Decoders.MPEG2Source && mass.indexfile != null)
+            {
+                try
+                {
+                    if (File.Exists(mass.indexfile) && !dgcache.Contains(mass.indexfile))
+                        dgcache.Add(mass.indexfile);
+                }
+                catch { }
+            }
         }
     }
 }

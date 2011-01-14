@@ -4,42 +4,43 @@ using System.Text;
 
 namespace XviD4PSP
 {
-   public class XviD_arguments
+    [Serializable]
+    public class XviD_arguments
     {
-       public XviD_arguments()
-       {
-       }
+        public XviD_arguments()
+        {
+        }
 
-       public XviD_arguments Clone()
-       {
-           return (XviD_arguments)this.MemberwiseClone();
-       }
+        public XviD_arguments Clone()
+        {
+            return (XviD_arguments)this.MemberwiseClone();
+        }
 
-       private bool _cartoon = false;
-       public bool cartoon
-       {
-           get
-           {
-               return _cartoon;
-           }
-           set
-           {
-               _cartoon = value;
-           }
-       }
+        private bool _cartoon = false;
+        public bool cartoon
+        {
+            get
+            {
+                return _cartoon;
+            }
+            set
+            {
+                _cartoon = value;
+            }
+        }
 
-       private string _fourcc = "XVID";
-       public string fourcc
-       {
-           get
-           {
-               return _fourcc;
-           }
-           set
-           {
-               _fourcc = value;
-           }
-       }
+        private string _fourcc = "XVID";
+        public string fourcc
+        {
+            get
+            {
+                return _fourcc;
+            }
+            set
+            {
+                _fourcc = value;
+            }
+        }
 
         private int _quality = 6;
         public int quality

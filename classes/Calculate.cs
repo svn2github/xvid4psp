@@ -607,10 +607,9 @@ namespace XviD4PSP
 
                     ssize = Calculate.ConvertDoubleToPointString(outsize, 1) + " mb";
 
-                    if (Format.Is4GBlimitedFormat(m) &&
-                        outsize > 4000)
+                    if (Format.Is4GBlimitedFormat(m) && outsize > 4000)
                     {
-                        Message mess = new Message(m.owner);
+                        Message mess = new Message(App.Current.MainWindow);
                         mess.ShowMessage(ssize + " - " + Languages.Translate("exceed maximum file size for format") + " " + Format.EnumToString(m.format) + "!",
                             Languages.Translate("Warning"), Message.MessageStyle.Ok);
                     }

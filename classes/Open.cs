@@ -17,7 +17,7 @@ namespace XviD4PSP
         {
             get
             {
-                return _owner;
+                return (_owner != null) ? _owner : App.Current.MainWindow;
             }
             set
             {
@@ -54,7 +54,6 @@ namespace XviD4PSP
                 Massive m = new Massive();
                 m.infilepath = infilepath;
                 m.infileslist = new string[] { infilepath };
-                m.owner = owner;
 
                 //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
                 if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(m.infilepath) ||
@@ -86,7 +85,7 @@ namespace XviD4PSP
                     //проверяем есть ли файлы в папке
                     if (Calculate.GetFolderSize(folder.SelectedPath) != 0)
                     {
-                        Message mess = new Message(m.owner);
+                        Message mess = new Message(App.Current.MainWindow);
                         mess.ShowMessage(Languages.Translate("Folder already have files! Do you want replace files ?")
                             , Languages.Translate("Path") + ": " + folder.SelectedPath, Message.MessageStyle.YesNo);
                         if (mess.result == Message.Result.No)

@@ -35,9 +35,8 @@ namespace XviD4PSP
 			this.InitializeComponent();
 
             this.m = mass.Clone();
-            this.p = parent;
-            oldm = mass.Clone();
-            Owner = m.owner;
+            this.oldm = mass.Clone();
+            this.Owner = this.p = parent;
 
             //загружаем список кодеков соответвующий формату
             foreach (string codec in Format.GetVCodecsList(m.format)) combo_codec.Items.Add(codec);

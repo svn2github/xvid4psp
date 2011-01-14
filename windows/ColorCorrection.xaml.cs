@@ -21,10 +21,9 @@ namespace XviD4PSP
         {
             this.InitializeComponent();
 
-            m = mass.Clone();
-            oldm = mass.Clone();
-            p = parent;
-            Owner = m.owner;
+            this.m = mass.Clone();
+            this.oldm = mass.Clone();
+            this.Owner = this.p = parent;
 
             //переводим
             Title = Languages.Translate("Color correction");
@@ -44,7 +43,7 @@ namespace XviD4PSP
 
             combo_brightness.ToolTip = Languages.Translate("Is used to change the brightness of the image.") + Environment.NewLine +
                Languages.Translate("Positive values increase the brightness.") + Environment.NewLine +
-              Languages.Translate("Negative values decrease the brightness.");
+               Languages.Translate("Negative values decrease the brightness.");
 
             combo_hue.ToolTip = Languages.Translate("Is used to adjust the color hue of the image.") + Environment.NewLine +
                 Languages.Translate("Positive values shift the image towards red.") + Environment.NewLine +

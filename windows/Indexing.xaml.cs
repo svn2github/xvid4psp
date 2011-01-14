@@ -39,10 +39,8 @@ namespace XviD4PSP
         public Indexing(Massive mass)
         {
             this.InitializeComponent();
-
-            this.Owner = mass.owner;
-
-            m = mass.Clone();
+            this.Owner = App.Current.MainWindow;
+            this.m = mass.Clone();
 
             //забиваем
             prCurrent.Maximum = 100;

@@ -7,6 +7,9 @@ using System.IO;
 
 namespace XviD4PSP
 {
+    public enum TaskStatus { Waiting, Encoding, Encoded, Errors };
+
+    [Serializable]
     public class Task
     {
         private string _id;
@@ -23,8 +26,8 @@ namespace XviD4PSP
             set { _thm = value; }
         }
 
-        private string _status;
-        public string Status
+        private TaskStatus _status;
+        public TaskStatus Status
         {
             get { return _status; }
             set { _status = value; }
@@ -51,7 +54,7 @@ namespace XviD4PSP
             set { _mass = value; }
         }
 
-        public Task(string thm, string status, Massive mass)
+        public Task(string thm, TaskStatus status, Massive mass)
         {
             _thm = thm;
             _status = status;
@@ -145,10 +148,9 @@ namespace XviD4PSP
         }
     }
 
-    public class myTask :
-        ObservableCollection<Task>
+    public class myTask : ObservableCollection<Task>
     {
-        public myTask(string thm, string status, Massive mass)
+        public myTask(string thm, TaskStatus status, Massive mass)
         {
             Add(new Task(thm, status, mass));
         }

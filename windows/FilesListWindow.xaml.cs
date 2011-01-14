@@ -14,23 +14,20 @@ using System.Diagnostics;
 
 namespace XviD4PSP
 {
-	public partial class FilesListWindow
-	{
-       public Massive m;
+    public partial class FilesListWindow
+    {
+        public Massive m;
 
-		public FilesListWindow()
-		{
-			this.InitializeComponent();
-			
-			// Insert code required on object creation below this point.
-		}
+        public FilesListWindow()
+        {
+            this.InitializeComponent();
+        }
 
         public FilesListWindow(Massive mass)
         {
             this.InitializeComponent();
-
-            this.Owner = mass.owner;
-            m = mass.Clone();
+            this.Owner = App.Current.MainWindow;
+            this.m = mass.Clone();
 
             //забиваем список в форму
             list_files.Items.Clear();
@@ -188,5 +185,5 @@ namespace XviD4PSP
                     cmenu_files.IsOpen = false;
             }
         }
-	}
+    }
 }

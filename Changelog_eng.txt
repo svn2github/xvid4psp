@@ -1,5 +1,16 @@
-XviD4PSP 5.10.206.0 (28.12.2010), main changes:
+XviD4PSP 5.10.207.0 (14.01.2011), main changes:
 
+>>> (r207) In order to minimize negative effects of crashing XviD4PSP, the task list now will be automatically
+           saved into backup file. If backup.tsks exists in Temp folder on application startup, then user will be
+           asked about restoring previously saved tasks from this backup file. Since crashes not producing temporary
+           files deleting, all saved tasks will be (probably) restored successfuly. This option can be disabled
+           in settings: Settings->Global settings->Create a backup of the tasks list.
+>>> (r207) Added experimental ability to save and restore tasks list, including the current (not queued yet)
+           task, but excluding the tasks that are currently encoding. Tasks list context menu, option "Save
+           tasks list". To restore tasks, you need to open previously saved *.tsks file. Note: the ordinal
+           numbers of tasks will not be checked nor changed; due to deleting temp files on closing XviD4PSP,
+           some tasks will be impossible to re-load later if they uses such files (extracted audio- or video-
+           tracks, index-files etc). So, successful restoring of saved tasks is not guaranteed!
 >>> (r206) FFRebuilder: reset Windows 7 taskbar progress state when starting a new task (rep. by Procrustean).
 >>> (r205) Fixed a possible unhandled exception on closing DVD-Import window (rep. by Mihanja80).
 >>> (r204) Fix for possible crash when switching a "Format" combobox and file with audio preset wasn`t found.

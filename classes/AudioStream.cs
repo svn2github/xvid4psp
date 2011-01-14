@@ -5,9 +5,9 @@ using System.Collections;
 
 namespace XviD4PSP
 {
+    [Serializable]
     public class AudioStream
     {
-
         public AudioStream()
         {
             //this.aac_options = new aac_arguments();

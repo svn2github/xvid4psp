@@ -36,12 +36,10 @@ namespace XviD4PSP
         public Demuxer(Massive mass, DemuxerMode mode, string outfile)
         {
             this.InitializeComponent();
-
-            this.Owner = mass.owner;
-            this.mode = mode;
+            this.Owner = App.Current.MainWindow;
+            this.m = mass.Clone();
             this.outfile = outfile;
-
-            m = mass.Clone();
+            this.mode = mode;
 
             //забиваем
             progress.Maximum = 100;
