@@ -789,7 +789,7 @@ namespace XviD4PSP
                 new Message(this).ShowMessage("Decoding video: " + vdec.error_message, Languages.Translate("Error"), Message.MessageStyle.Ok);
                 return;
             }
-            
+
             //проверка на удачное завершение
             if (File.Exists(vpath) && new FileInfo(vpath).Length != 0)
             {
@@ -923,7 +923,7 @@ namespace XviD4PSP
             {
                 //открываем файл
                 Massive x = OpenDialogs.OpenFile();
-                action_open(x);
+                if (x != null) action_open(x);
             }
         }
 
@@ -1028,16 +1028,18 @@ namespace XviD4PSP
             {
                 if (x != null)
                 {
+                    string ext = Path.GetExtension(x.infilepath).ToLower();
+
                     //Уводим фокус с комбобоксов куда-нибудь!
                     if (!slider_pos.Focus()) slider_Volume.Focus();
 
-                    //Обнуляем трим и его кнопки
-                    ResetTrim();
+                    //Проверка на "нехорошие" символы в путях
+                    if (ext != ".tsks" && !Calculate.ValidatePath(x.infilepath, !IsBatchOpening))
+                        return;
 
-                    //Закрываем уже открытый файл, пока-что вот так..
+                    //Закрываем уже открытый файл; обнуляем трим и его кнопки
                     if (!IsBatchOpening && m != null) CloseFile();
-
-                    string ext = Path.GetExtension(x.infilepath).ToLower();
+                    else ResetTrim();
 
                     //Загружаем сохраненные задания
                     if (ext == ".tsks")
@@ -3344,6 +3346,7 @@ namespace XviD4PSP
                 //m.outfilesize = Calculate.GetEncodingSize(m);
 
                 UpdateTaskMassive(m);
+                ReloadChildWindows();
                 ValidateTrimAndCopy(m);
             }
         }
@@ -3404,55 +3407,65 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new DragOpenDelegate(DragOpen));
             else
             {
-                if (drop_data.Length == 1) //Обычное открытие
+                try
                 {
-                    //Копирование exe-файлов
-                    if (Path.GetFileName(drop_data[0]).ToLower().EndsWith(".exe"))
+                    if (drop_data.Length == 1) //Обычное открытие
                     {
-                        string file_c = "", path_c = "", file_d = Path.GetFileName(drop_data[0]).ToLower();
-                        if (file_d == "x264.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264.exe"; }
-                        else if (file_d == "x264_64.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264_64.exe"; }
-                        else if (file_d == "ffmpeg.exe") { path_c = Calculate.StartupPath + "\\apps\\ffmpeg\\"; file_c = "ffmpeg.exe"; }
-
-                        if (!string.IsNullOrEmpty(file_c))
+                        //Копирование exe-файлов
+                        if (Path.GetFileName(drop_data[0]).ToLower().EndsWith(".exe"))
                         {
-                            try
+                            string file_c = "", path_c = "", file_d = Path.GetFileName(drop_data[0]).ToLower();
+                            if (file_d == "x264.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264.exe"; }
+                            else if (file_d == "x264_64.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264_64.exe"; }
+                            else if (file_d == "ffmpeg.exe") { path_c = Calculate.StartupPath + "\\apps\\ffmpeg\\"; file_c = "ffmpeg.exe"; }
+
+                            if (!string.IsNullOrEmpty(file_c))
                             {
-                                File.Copy(drop_data[0], path_c + file_c, true);
-                                new Message(this).ShowMessage("The file \"" + file_c + "\" was successfully copied to \r\n\"" + path_c + "\"", Languages.Translate("Complete"));
+                                try
+                                {
+                                    File.Copy(drop_data[0], path_c + file_c, true);
+                                    new Message(this).ShowMessage("The file \"" + file_c + "\" was successfully copied to \r\n\"" + path_c + "\"", Languages.Translate("Complete"));
+                                }
+                                catch (Exception ex)
+                                {
+                                    new Message(this).ShowMessage("Copying file \"" + file_c + "\" to \"" + path_c + "\" thrown an Error:\r\n" + ex.Message, Languages.Translate("Error"));
+                                }
                             }
-                            catch (Exception ex)
-                            {
-                                new Message(this).ShowMessage("Copying file \"" + file_c + "\" to \"" + path_c + "\" thrown an Error:\r\n" + ex.Message, Languages.Translate("Error"));
-                            }
+                            else
+                                new Message(this).ShowMessage("I don`t know what to do with \"" + Path.GetFileName(drop_data[0]) + "\"!", Languages.Translate("Error"));
                         }
                         else
-                            new Message(this).ShowMessage("I don`t know what to do with \"" + Path.GetFileName(drop_data[0]) + "\"!", Languages.Translate("Error"));
-                    }
-                    else
-                    {
-                        Massive x = new Massive();
-                        x.infilepath = drop_data[0];
-                        x.infileslist = new string[] { drop_data[0] };
+                        {
+                            Massive x = new Massive();
+                            x.infilepath = drop_data[0];
+                            x.infileslist = new string[] { drop_data[0] };
 
-                        //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
-                        if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(x.infilepath) ||
-                            Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
-                            x = OpenDialogs.GetFriendFilesList(x);
-                        if (x != null) action_open(x);
+                            //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
+                            if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(x.infilepath) ||
+                                Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
+                                x = OpenDialogs.GetFriendFilesList(x);
+                            if (x != null) action_open(x);
+                        }
                     }
-                }
-                else if (drop_data.Length > 1) //Мульти-открытие
-                {
-                    PauseAfterFirst = Settings.BatchPause;
-                    if (!PauseAfterFirst)
+                    else if (drop_data.Length > 1) //Мульти-открытие
                     {
-                        path_to_save = OpenDialogs.SaveFolder();
-                        if (path_to_save == null) { IsDragOpening = false; return; }
+                        PauseAfterFirst = Settings.BatchPause;
+                        if (!PauseAfterFirst)
+                        {
+                            path_to_save = OpenDialogs.SaveFolder();
+                            if (path_to_save == null) { IsDragOpening = false; return; }
+                        }
+                        MultiOpen(drop_data);
                     }
-                    MultiOpen(drop_data);
                 }
-                IsDragOpening = false;
+                catch (Exception ex)
+                {
+                    ErrorException("DragOpen: " + ex.Message, ex.StackTrace);
+                }
+                finally
+                {
+                    IsDragOpening = false;
+                }
             }
         }
 
@@ -5056,10 +5069,9 @@ namespace XviD4PSP
 
         private void CloseChildWindows()
         {
-            string stitle = Languages.Translate("Editing audio options") + ":";
             foreach (Window ownedWindow in this.OwnedWindows)
             {
-                if (ownedWindow.Title == stitle)
+                if (ownedWindow is AudioOptions)
                     ownedWindow.Close();
             }
         }
@@ -5068,13 +5080,11 @@ namespace XviD4PSP
         {
             if (m == null) return;
 
-            string stitle = Languages.Translate("Editing audio options") + ":";
             foreach (Window ownedWindow in this.OwnedWindows)
             {
-                if (ownedWindow.Title == stitle)
+                if (ownedWindow is AudioOptions)
                 {
-                    AudioOptions ao = (AudioOptions)ownedWindow;
-                    ao.Reload(m);
+                    ((AudioOptions)ownedWindow).Reload(m);
                 }
             }
         }
@@ -5082,10 +5092,9 @@ namespace XviD4PSP
         private void AudioOptions_Click(object sender, RoutedEventArgs e)
         {
             //разрешаем только одно окно
-            string stitle = Languages.Translate("Editing audio options") + ":";
             foreach (Window ownedWindow in this.OwnedWindows)
             {
-                if (ownedWindow.Title == stitle)
+                if (ownedWindow is AudioOptions)
                 {
                     ownedWindow.Activate();
                     return;
@@ -5193,24 +5202,34 @@ namespace XviD4PSP
             //закрываем все дочерние окна
             CloseChildWindows();
 
-            System.Windows.Forms.FolderBrowserDialog folder = new System.Windows.Forms.FolderBrowserDialog();
-            folder.Description = Languages.Translate("Select drive or folder with VOB files:");
-            folder.ShowNewFolderButton = false;
-
-            if (Settings.DVDPath != null && Directory.Exists(Settings.DVDPath))
-                folder.SelectedPath = Settings.DVDPath;
-
-            if (folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            try
             {
-                this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
-                this.Height = this.Window.Height - 1;
-                
-                Settings.DVDPath = folder.SelectedPath;
-                Massive x = new Massive();
-                DVDImport dvd = new DVDImport(x, folder.SelectedPath, dpi);
+                System.Windows.Forms.FolderBrowserDialog folder = new System.Windows.Forms.FolderBrowserDialog();
+                folder.Description = Languages.Translate("Select drive or folder with VOB files:");
+                folder.ShowNewFolderButton = false;
 
-                if (dvd.m != null)
-                    action_open(dvd.m);
+                if (Settings.DVDPath != null && Directory.Exists(Settings.DVDPath))
+                    folder.SelectedPath = Settings.DVDPath;
+
+                if (folder.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    this.Height = this.Window.Height + 1; //чтоб убрать остатки от окна выбора директории, вот такой вот способ...
+                    this.Height = this.Window.Height - 1;
+
+                    //Проверка на "нехорошие" символы в путях
+                    Calculate.ValidatePath(folder.SelectedPath, true);
+
+                    Settings.DVDPath = folder.SelectedPath;
+                    Massive x = new Massive();
+                    DVDImport dvd = new DVDImport(x, folder.SelectedPath, dpi);
+
+                    if (dvd.m != null)
+                        action_open(dvd.m);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorException("OpenDVD: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -5621,7 +5640,7 @@ namespace XviD4PSP
             this.textbox_time.Visibility = Visibility.Visible;
             this.textbox_duration.Visibility = Visibility.Collapsed;
         }
-     
+
         private void ResetTrim()
         {
             trim_start = trim_end = 0;
@@ -5631,7 +5650,7 @@ namespace XviD4PSP
             button_apply_trim.Content = Languages.Translate("Apply Trim");
             textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = false;
         }
-        
+
         private void button_set_start_Click(object sender, RoutedEventArgs e)
         {
             if (m != null && !trim_is_on)
@@ -5785,6 +5804,9 @@ namespace XviD4PSP
                 string path_to_open = OpenDialogs.OpenFolder();
                 if (path_to_open == null || Directory.GetFiles(path_to_open).Length == 0) return;
 
+                //Проверка на "нехорошие" символы в путях
+                Calculate.ValidatePath(path_to_open, true);
+
                 PauseAfterFirst = Settings.BatchPause;
                 if (!PauseAfterFirst)
                 {
@@ -5834,7 +5856,7 @@ namespace XviD4PSP
                                 foreach (string f in files_to_open) { if (f != file) newArray.Add(f); }
                                 batch_files = (string[])newArray.ToArray(typeof(string));
                                 action_open(x);
-                                if (m == null) { PauseAfterFirst = false; return; }
+                                if (m == null) { textbox_name.Text = ""; PauseAfterFirst = false; return; }
                                 button_save.Content = button_encode.Content = Languages.Translate("Resume");
                                 textbox_name.Text = Languages.Translate("Press Resume to continue batch opening");
                                 return;

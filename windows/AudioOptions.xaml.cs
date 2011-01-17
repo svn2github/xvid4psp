@@ -404,7 +404,7 @@ namespace XviD4PSP
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
                     if (dem.IsErrors)
                     {
-                        ErrorException(dem.error_message);
+                        ErrorException(dem.error_message, null);
                     }
                 }
 
@@ -459,7 +459,7 @@ namespace XviD4PSP
                     Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
                     if (dem.IsErrors)
                     {
-                        ErrorException(dem.error_message);
+                        ErrorException(dem.error_message, null);
 
                         //Обходим анализ громкости
                         Refresh();
@@ -516,7 +516,7 @@ namespace XviD4PSP
                         Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
                         if (dem.IsErrors)
                         {
-                            ErrorException(dem.error_message);
+                            ErrorException(dem.error_message, null);
                             return;
                         }
                     }
@@ -531,7 +531,7 @@ namespace XviD4PSP
                         }
                         catch (Exception ex)
                         {
-                            ErrorException(ex.Message);
+                            ErrorException(ex.Message, ex.StackTrace);
                         }
                     }
                 }
@@ -546,7 +546,6 @@ namespace XviD4PSP
 
         private void AddExternalTrack(string infilepath)
         {
-
             //разрешаем формы
             group_channels.IsEnabled = true;
             group_delay.IsEnabled = true;
@@ -574,7 +573,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("AddExternalTrack: " + ex.Message, ex.StackTrace);
             }
             finally
             {
@@ -639,7 +638,15 @@ namespace XviD4PSP
         {
             foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
             {
-                AddExternalTrack(dropfile);
+                try
+                {
+                    if (Calculate.ValidatePath(dropfile, true))
+                        AddExternalTrack(dropfile);
+                }
+                catch (Exception ex)
+                {
+                    ErrorException("DragOpen: " + ex.Message, ex.StackTrace);
+                }
                 return;
             }
         }
@@ -738,7 +745,7 @@ namespace XviD4PSP
                 Demuxer dem = new Demuxer(m, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
                 if (dem.IsErrors)
                 {
-                    ErrorException(dem.error_message);
+                    ErrorException(dem.error_message, null);
                     return;
                 }
 
@@ -792,14 +799,14 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException("SafeFileDelete: " + ex.Message, ex.StackTrace);
             }
         }
 
-        private void ErrorException(string message)
+        private void ErrorException(string message, string info)
         {
             Message mes = new Message(this);
-            mes.ShowMessage(message, Languages.Translate("Error"));
+            mes.ShowMessage(message, info, Languages.Translate("Error"));
         }
 
         private void combo_mixing_SelectionChanged(object sender, SelectionChangedEventArgs e)

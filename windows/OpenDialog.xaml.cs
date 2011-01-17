@@ -48,7 +48,7 @@ namespace XviD4PSP
 
             //Определяем текст заголовка, по которому будем искать окно
             if (arguments.StartsWith("oa")) title = Languages.Translate("Select audio files") + ":";
-            else if (arguments == "sub") title = Languages.Translate("Select subtitles file") + ":";
+            else if (arguments.StartsWith("sub")) title = Languages.Translate("Select subtitles file") + ":";
             else title = Languages.Translate("Select video files") + ":";
 
             //BackgroundWorker
@@ -92,9 +92,17 @@ namespace XviD4PSP
                 info.UseShellExecute = false;
                 info.RedirectStandardOutput = true;
                 info.RedirectStandardError = false;
-                info.StandardOutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
                 info.CreateNoWindow = true;
                 info.Arguments = arguments;
+
+                try
+                {
+                    info.StandardOutputEncoding = Encoding.UTF8; //Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
+                }
+                catch
+                {
+                    info.StandardOutputEncoding = Encoding.Default;
+                }
 
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
@@ -103,7 +111,11 @@ namespace XviD4PSP
 
                 string[] a = encoderProcess.StandardOutput.ReadToEnd().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string file in a)
-                    files.Add(file);
+                {
+                    //Проверка файла на его наличие (мы могли получить мусор из консоли) и на "нехорошие" символы в путях к нему
+                    if (File.Exists(file) && Calculate.ValidatePath(file, (a.Length == 1))) files.Add(file);
+                    else if (a.Length == 1) throw new FileNotFoundException(Languages.Translate("Can`t find file") + ": " + file);
+                }
             }
             catch (Exception ex)
             {

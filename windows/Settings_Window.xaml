@@ -5,20 +5,20 @@
 	x:Class="XviD4PSP.Settings_Window"
 	x:Name="Window"
 	Title="Settings:"
-	Width="520" Height="300" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	Width="520" Height="Auto" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
 			<TabControl Height="Auto" SelectionChanged="Menu_Changed" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,0,0,0" VerticalAlignment="Stretch">
 				<TabItem Header="Main" x:Name="tab_main">
-					<Grid Width="Auto" Height="Auto">
+					<Grid Height="Auto">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
 						</Grid.ColumnDefinitions>
 						<Grid.RowDefinitions>
 							<RowDefinition Height="*"/>
 						</Grid.RowDefinitions>
-						<StackPanel Margin="8,8,8,0" VerticalAlignment="Top" Height="Auto">
+						<StackPanel Margin="8,8,8,8" VerticalAlignment="Top" Height="Auto">
 							<CheckBox x:Name="check_use_trayicon" Width="Auto" Height="Auto" Content="Enable system tray icon" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_trayicon_Click"/>
                             <CheckBox x:Name="check_use_win7taskbar" Width="Auto" Height="Auto" Content="Enable Windows 7 taskbar progress indication" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_win7taskbar_Click"/>
                             <CheckBox x:Name="check_window_dim" Width="Auto" Height="Auto" Content="Remember last window location" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_window_pos_Click"/>
@@ -28,52 +28,53 @@
                             <CheckBox x:Name="check_hide_comments" Width="Auto" Height="Auto" Content="Remove comments (#text) from the AviSynth script" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_hide_comments_Click"/>
                             <CheckBox x:Name="check_resize_first" Width="Auto" Height="Auto" Content="Make crop/resize before filtering (otherwise - after filtering)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_resize_first_Click"/>
                             <CheckBox x:Name="check_read_prmtrs" Width="Auto" Height="Auto" Content="Read parameters from the script when saving a new task" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_read_prmtrs_Click"/>
-                            <CheckBox x:Name="check_enable_backup" Width="Auto" Height="Auto" Content="Create a backup of the tasks list" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_enable_backup_Click"/>
+                            <CheckBox x:Name="check_enable_backup" Width="Auto" Height="Auto" Content="Create a backups of the tasks list" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_enable_backup_Click"/>
+                            <CheckBox x:Name="check_validate_pathes" Width="Auto" Height="Auto" Content="Check for illegal characters in pathes" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_validate_pathes_Click"/>
                         </StackPanel>
                     </Grid>
 				</TabItem>
 				<TabItem x:Name="tab_temp" Header="Temp files">
-					<Grid>
-						<TextBox Margin="8,0,68,8" x:Name="textbox_temp" Text="" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="22"/>
+					<Grid Height="180">
+						<CheckBox x:Name="check_search_temp" Width="Auto" Height="Auto" Content="Search the best temp folder place on program start" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Click="check_search_temp_Click"/>
+                        <CheckBox x:Name="check_dont_delete_caches" Width="Auto" Height="Auto" Content="Don`t delete any caches and temporal files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,30,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Click="check_dont_delete_caches_Click"/>
+                        <CheckBox x:Name="check_delete_ff_cache" Width="Auto" Height="Auto" Content="Auto delete FFmpegSource cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,52,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width" HorizontalAlignment="Left" Click="check_delete_ff_cache_Click"/>
+                        <CheckBox x:Name="check_delete_dgindex_cache" Width="Auto" Height="Auto" Content="Auto delete DGIndex cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,74,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" IsEnabled="True" Click="check_delete_dgindex_cache_Click"/>
+                        <CheckBox x:Name="check_dgindex_cache_in_temp" Width="Auto" Height="Auto" Content="Create DGIndex cache in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,96,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Click="check_dgindex_cache_in_temp_Click"/>
+                        <Label OpacityMask="{x:Null}" x:Name="label_temppath" Content="Temp folder path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="5,0,0,30" d:LayoutOverrides="Height" VerticalAlignment="Bottom"/>
+                        <TextBox Margin="8,0,68,8" x:Name="textbox_temp" Text="" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="22"/>
 						<Button x:Name="button_temppath" Content="..." Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="22" Margin="0,0,44,8" VerticalAlignment="Bottom" Height="22" Click="button_temppath_Click"/>
 						<Button x:Name="button_temppath_open" Content="Open" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="36" Margin="0,0,6,8" VerticalAlignment="Bottom" Height="22" Click="button_temppath_open_Click"/>
-                        <CheckBox x:Name="check_search_temp" Width="Auto" Height="Auto" Content="Search the best temp folder place on program start" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Click="check_search_temp_Click"/>
-						<Label OpacityMask="{x:Null}" x:Name="label_temppath" Content="Temp folder path:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="5,0,0,30" d:LayoutOverrides="Height" VerticalAlignment="Bottom"/>
-						<CheckBox x:Name="check_delete_ff_cache" Width="Auto" Height="Auto" Content="Auto delete FFmpegSource cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,52,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width" HorizontalAlignment="Left" Click="check_delete_ff_cache_Click"/>
-						<CheckBox x:Name="check_delete_dgindex_cache" Width="Auto" Height="Auto" Content="Auto delete DGIndex cache" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,74,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" IsEnabled="True" Click="check_delete_dgindex_cache_Click"/>
-					    <CheckBox x:Name="check_dgindex_cache_in_temp" Width="Auto" Height="Auto" Content="Create DGIndex cache in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,96,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Click="check_dgindex_cache_in_temp_Click"/>
-                        <CheckBox x:Name="check_dont_delete_caches" Width="Auto" Height="Auto" Content="Don`t delete any caches and temporal files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,30,0,0" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Click="check_dont_delete_caches_Click"/>
                     </Grid>
 				</TabItem>
 				<TabItem Header="Encoding" x:Name="tab_encoding">
-					<Grid>
-						<CheckBox x:Name="check_use_64bit" Width="Auto" Height="Auto" Content="Use 64 bit x264" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,30,0,0" VerticalAlignment="Top" Click="check_use_64bit_Click"/>
+					<Grid Height="Auto">
+						<CheckBox x:Name="check_show_ssim" Width="Auto" Height="Auto" Content="SSIM" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Click="check_show_ssim_Click"/>
                         <CheckBox x:Name="check_show_psnr" Width="Auto" Height="Auto" Content="PSNR" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="70,8,0,0" VerticalAlignment="Top" Click="check_show_psnr_Click"/>
-						<CheckBox x:Name="check_show_ssim" Width="Auto" Height="Auto" Content="SSIM" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,8,0,0" VerticalAlignment="Top" Click="check_show_ssim_Click" d:LayoutOverrides="Height"/>
+                        <CheckBox x:Name="check_use_64bit" Width="Auto" Height="Auto" Content="Use 64 bit x264" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,30,0,0" VerticalAlignment="Top" Click="check_use_64bit_Click"/>
 						<CheckBox x:Name="check_show_arguments" Width="Auto" Height="Auto" Content="Show encoding arguments" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,52,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Click="check_show_arguments_Click"/>
 						<CheckBox x:Name="check_show_script" Width="Auto" Height="Auto" Content="Show AviSynth script" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,74,0,0" VerticalAlignment="Top" Click="check_show_script_Click" d:LayoutOverrides="Width, Height"/>
                         <CheckBox x:Name="cmenu_audio_first" Width="Auto" Height="Auto" Content="Encode audio first, then video" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_audio_first_Click" HorizontalAlignment="Left" Margin="8.3,96,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
                         <CheckBox x:Name="check_log_to_file" Width="Auto" Height="Auto" Content="Write encoding log to file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,118,0,0" VerticalAlignment="Top" Click="check_log_to_file_Click" d:LayoutOverrides="Width, Height"/>
                         <CheckBox x:Name="check_logfile_tempfolder" Width="Auto" Height="Auto" Content="in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="320,118,0,0" VerticalAlignment="Top" Click="check_logfile_tempfolder_Click" d:LayoutOverrides="Width, Height"/>
-                        <CheckBox x:Name="cmenu_is_always_close_encoding" Width="Auto" Height="Auto" Content="Autoclose encoding window if task was successfully accomplished" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8.3,140,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
+                        <CheckBox x:Name="cmenu_is_always_close_encoding" Width="Auto" Height="Auto" Content="Autoclose encoding window if task was successfully accomplished" FontSize="14" Foreground="#FFFFFFFF" Click="cmenu_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8.3,140,0,8" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
                     </Grid>
 				</TabItem>
 			    <TabItem Header="Batch encoding" x:Name="tab_open_folder">
-                    <Grid> 
-                        <Label OpacityMask="{x:Null}" x:Name="label_extensions" Content="Only files with this extensions will be opened:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="3,4,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
-                        <TextBox Margin="8,30,8,0" Height="60" x:Name="textbox_extensions" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" VerticalScrollBarVisibility="Auto" />
-                        <CheckBox x:Name="check_batch_autoencoding" Height="16.9" Content="Start encoding after opening all files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,173,0,0" VerticalAlignment="Top" Click="check_batch_autoencoding_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
-                        <Label OpacityMask="{x:Null}" x:Name="label_clone" Content="Clone from the already opened file to each other:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" Margin="3,90,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto" />
-                        <CheckBox x:Name="check_clone_ar" Height="16.9" Content="Aspect/Resolution info (crop, aspect, etc)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,114,0,0" VerticalAlignment="Top" Click="check_clone_ar_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
-                        <CheckBox x:Name="check_batch_pause" Height="16.9" Content="Make a pause after 1-st opened file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,155,0,0" VerticalAlignment="Top" Click="check_batch_pause_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
-                        <CheckBox x:Name="check_clone_trim" Height="16.9" Content="Trim" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="373,133,0,0" VerticalAlignment="Top" Click="check_clone_trim_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
-                        <CheckBox x:Name="check_clone_deint" Height="16.9" Content="Deinterlace" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,133,0,0" VerticalAlignment="Top" Click="check_clone_deint_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
-                        <CheckBox x:Name="check_clone_fps" Height="16.9" Content="Framerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="130,133,0,0" VerticalAlignment="Top" Click="check_clone_fps_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
-                        <CheckBox x:Name="check_clone_audio" Height="16.9" Content="Audio options" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="253,133,0,0" VerticalAlignment="Top" Click="check_clone_audio_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto" />
+                    <Grid Height="198"> 
+                        <Label OpacityMask="{x:Null}" x:Name="label_extensions" Content="Only files with this extensions will be opened:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="3,3,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
+                        <TextBox Margin="8,29,8,0" Height="60" x:Name="textbox_extensions" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" VerticalScrollBarVisibility="Auto"/>
+                        <Label OpacityMask="{x:Null}" x:Name="label_clone" Content="Clone from the already opened file to each other:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="26.9" Margin="3,89,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto"/>
+                        <CheckBox x:Name="check_clone_ar" Height="16.9" Content="Aspect/Resolution info (crop, aspect, etc)" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,114,0,0" VerticalAlignment="Top" Click="check_clone_ar_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto"/>
+                        <CheckBox x:Name="check_clone_deint" Height="16.9" Content="Deinterlace" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,133,0,0" VerticalAlignment="Top" Click="check_clone_deint_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto"/>
+                        <CheckBox x:Name="check_clone_fps" Height="16.9" Content="Framerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="130,133,0,0" VerticalAlignment="Top" Click="check_clone_fps_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto"/>
+                        <CheckBox x:Name="check_clone_audio" Height="16.9" Content="Audio options" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="253,133,0,0" VerticalAlignment="Top" Click="check_clone_audio_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto"/>
+                        <CheckBox x:Name="check_clone_trim" Height="16.9" Content="Trim" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="373,133,0,0" VerticalAlignment="Top" Click="check_clone_trim_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto"/>
+                        <CheckBox x:Name="check_batch_pause" Height="16.9" Content="Make a pause after 1-st opened file" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,155,0,0" VerticalAlignment="Top" Click="check_batch_pause_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto"/>
+                        <CheckBox x:Name="check_batch_autoencoding" Height="16.9" Content="Start encoding after opening all files" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Margin="8,173,0,0" VerticalAlignment="Top" Click="check_batch_autoencoding_Click" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Width="Auto"/>
                     </Grid>
                 </TabItem>
                 <TabItem Header="HotKeys" x:Name="tab_hotkeys">
-                    <Grid>
+                    <Grid Height="198">
                         <Label OpacityMask="{x:Null}" x:Name="label_action" Content="Action:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,48,44,0" d:LayoutOverrides="Height" VerticalAlignment="Top" HorizontalAlignment="Right" Width="129" Height="26.9" />
                         <Label OpacityMask="{x:Null}" x:Name="label_combination" Content="Combination:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,94,46,0" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="129" Height="29.263" VerticalAlignment="Top" />
                         <ListView Margin="6,6,176.5,6" x:Name="listview_hotkeys" Background="#FF2A2A2A" Foreground="#FFFFFFFF" SelectionMode="Single" FontSize="12" SelectionChanged="listview_hotkeys_SelectionChanged">

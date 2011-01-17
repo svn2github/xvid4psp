@@ -2611,5 +2611,26 @@ namespace XviD4PSP
                 SetBool("EnableBackup", value);
             }
         }
+
+        //Проверять пути на "нехорошие" символы
+        public static bool ValidatePathes
+        {
+            get
+            {
+                object value = GetValue("ValidatePathes");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("ValidatePathes", value);
+            }
+        }
     }
 }

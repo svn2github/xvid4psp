@@ -962,5 +962,49 @@ namespace XviD4PSP
                 return Path.GetPathRoot(path) + "...\\" + Path.GetFileName(path);
             return path;
         }
+
+        public static bool ValidatePath(string path, bool throw_if_illegal)
+        {
+            if (Settings.ValidatePathes)
+            {
+                //Наша дефолтная кодировка
+                Encoding encoding = Encoding.Default;
+
+                //Чтоб определить наличие "нехороших" символов в пути, прогоняем его через нашу кодировку
+                string reencoded = encoding.GetString(encoding.GetBytes(path));
+                if (path != reencoded)
+                {
+                    if (throw_if_illegal)
+                    {
+                        //Выделяем "нехорошие" символы
+                        string characters = ":\r\n\r\n";
+                        ArrayList chars = new ArrayList();
+                        if (path.Length == reencoded.Length)
+                        {
+                            char[] _in = path.ToCharArray();
+                            char[] _out = reencoded.ToCharArray();
+
+                            for (int i = 0; i < _in.Length; i++)
+                            {
+                                if (_in[i] != _out[i] && !chars.Contains(_in[i])) chars.Add(_in[i]);
+                            }
+
+                            chars.Sort();
+                            foreach (char ch in chars)
+                            {
+                                characters += Char.ConvertFromUtf32(ch) + " ";
+                            }
+                        }
+                        else
+                            characters = ".";
+
+                        throw new Exception(Languages.Translate("The path contains characters not supported by the current code page") +
+                            " (" + encoding.CodePage + ")" + characters);
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }

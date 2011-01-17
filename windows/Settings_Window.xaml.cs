@@ -73,7 +73,8 @@ namespace XviD4PSP
             check_read_prmtrs.ToolTip = Languages.Translate("Read from the script: width, height, fps, duration and frames count.") + "\r\n" +
                 Languages.Translate("Use it only if these parameters was changed manually in the script!");
             check_use_win7taskbar.Content = Languages.Translate("Enable Windows 7 taskbar progress indication");
-            check_enable_backup.Content = Languages.Translate("Create a backup of the tasks list");
+            check_enable_backup.Content = Languages.Translate("Create a backups of the tasks list");
+            check_validate_pathes.Content = Languages.Translate("Check for illegal characters in pathes");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -121,6 +122,7 @@ namespace XviD4PSP
             cmenu_audio_first.IsChecked = Settings.EncodeAudioFirst;                              //Кодировать сначала звук, потом видео
             check_use_win7taskbar.IsChecked = Settings.Win7TaskbarIsEnabled;                      //Поддержка таскбара в Win7 вкл\выкл
             check_enable_backup.IsChecked = Settings.EnableBackup;                                //Разрешаем сохранять резервную копию списка заданий
+            check_validate_pathes.IsChecked = Settings.ValidatePathes;                            //Проверять пути на "нехорошие" символы
 
             //Загружаем HotKeys (плюс перевод к действиям)
             foreach (string line in HotKeys.Data)
@@ -519,6 +521,11 @@ namespace XviD4PSP
                 try { File.Delete(Settings.TempPath + "\\backup.tsks"); }
                 catch { }
             }
+        }
+
+        private void check_validate_pathes_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.ValidatePathes = check_validate_pathes.IsChecked.Value;
         }
 	}
 }

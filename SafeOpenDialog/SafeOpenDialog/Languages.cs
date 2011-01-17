@@ -8,35 +8,36 @@ using System.Reflection;
 
 namespace SafeOpenDialog
 {
-   static class Languages
+    static class Languages
     {
-
-       public static ArrayList Translate(ArrayList phrases)
+        public static ArrayList Translate(ArrayList phrases)
         {
-            //определяем рабочую папку
-            string StartupPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
-
-            //узнаём язык программы
-            string lang;
-            using (RegistryKey myHive = Registry.CurrentUser.OpenSubKey("Software\\Winnydows\\XviD4PSP5", true))
+            try
             {
-                if (myHive != null)
-                {
-                    object l = myHive.GetValue("Language");
-                    if (l != null)
-                        lang = l.ToString();
-                    else
-                        lang = "English"; 
-                }
-                else
-                    lang = "English"; 
-            }
+                //определяем рабочую папку
+                string StartupPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
 
-            //получаем фразу
-            using (StreamReader sr = new StreamReader(StartupPath + "\\languages\\" + lang + ".txt", System.Text.Encoding.Default))
+                //узнаём язык программы
+                string lang;
+                using (RegistryKey myHive = Registry.CurrentUser.OpenSubKey("Software\\Winnydows\\XviD4PSP5", true))
+                {
+                    if (myHive != null)
+                    {
+                        object l = myHive.GetValue("Language");
+                        if (l != null)
+                            lang = l.ToString();
+                        else
+                            lang = "English";
+                    }
+                    else
+                        lang = "English";
+                }
+
+                //получаем фразу
+                using (StreamReader sr = new StreamReader(StartupPath + "\\languages\\" + lang + ".txt", System.Text.Encoding.Default))
                 {
                     string line;
-                    while (sr.EndOfStream == false)
+                    while (!sr.EndOfStream)
                     {
                         line = sr.ReadLine();
 
@@ -52,10 +53,10 @@ namespace SafeOpenDialog
                         }
                     }
                 }
+            }
+            catch { }
 
             return phrases;
         }
-
-
     }
 }
