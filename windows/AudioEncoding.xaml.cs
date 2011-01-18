@@ -361,7 +361,7 @@ namespace XviD4PSP
         {
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-            //загружаем список фильтров
+            //загружаем список пресетов
             combo_profile.Items.Clear();
             try
             {
@@ -559,7 +559,7 @@ namespace XviD4PSP
                         return;
                     }
 
-                    //загружаем список фильтров
+                    //загружаем список пресетов
                     combo_profile.Items.Clear();
                     try
                     {
@@ -572,9 +572,16 @@ namespace XviD4PSP
 
                     //прописываем текущий пресет кодирования
                     if (last_num == 0)
+                    {
+                        //Самый первый пресет (кроме "Disabled")
                         outstream.encoding = combo_profile.Items[0].ToString();
+                        if (outstream.encoding == "Disabled") outstream.encoding = "Copy";
+                    }
                     else
+                    {
+                        //Предыдущий (перед удалённым) пресет
                         outstream.encoding = combo_profile.Items[last_num - 1].ToString();
+                    }
                     combo_profile.SelectedItem = outstream.encoding;
                     combo_profile.UpdateLayout();
 

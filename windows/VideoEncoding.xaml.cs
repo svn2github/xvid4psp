@@ -378,7 +378,7 @@ namespace XviD4PSP
 
         public void LoadProfiles()
         {
-            //загружаем список фильтров
+            //загружаем список пресетов
             combo_profile.Items.Clear();
             try
             {
@@ -591,7 +591,7 @@ namespace XviD4PSP
                         return;
                     }
 
-                    //загружаем список фильтров
+                    //загружаем список пресетов
                     combo_profile.Items.Clear();
                     try
                     {
@@ -603,9 +603,15 @@ namespace XviD4PSP
 
                     //прописываем текущий пресет кодирования
                     if (last_num == 0)
+                    {
+                        //Самый первый пресет
                         m.vencoding = combo_profile.Items[0].ToString();
+                    }
                     else
+                    {
+                        //Предыдущий (перед удалённым) пресет
                         m.vencoding = combo_profile.Items[last_num - 1].ToString();
+                    }
                     combo_profile.SelectedItem = m.vencoding;
                     combo_profile.UpdateLayout();
 

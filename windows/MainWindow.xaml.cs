@@ -292,7 +292,7 @@ namespace XviD4PSP
                     if (Settings.FormatOut != Format.ExportFormats.Audio)
                     {
                         LoadVideoPresets();
-                        SetVideoPresetFromSettings();
+                        SetVideoPreset();
                     }
                     else
                     {
@@ -306,7 +306,7 @@ namespace XviD4PSP
 
                     //загружаем профили аудио кодирования
                     LoadAudioPresets();
-                    SetAudioPresetFromSettings();
+                    SetAudioPreset();
 
                     //загружаем настройки
                     LoadSettings();
@@ -1227,7 +1227,7 @@ namespace XviD4PSP
                         Settings.FormatOut = Format.ExportFormats.Audio;
                         combo_format.SelectedItem = Format.EnumToString(Format.ExportFormats.Audio);
                         LoadAudioPresets();
-                        SetAudioPresetFromSettings();
+                        SetAudioPreset();
                     }
 
                     //пытаемся точно узнать фреймрейт (если до этого не вышло)
@@ -2888,19 +2888,35 @@ namespace XviD4PSP
             combo_vencoding.Items.Add("Copy");
         }
 
-        private void SetVideoPresetFromSettings()
+        private void SetVideoPreset()
         {
             Format.ExportFormats format = (m != null) ? m.format : Settings.FormatOut;
+            string preset = ChooseVideoPreset(format);
 
-            //прописываем текущий пресет кодирования
-            if (combo_vencoding.Items.Contains(Settings.GetVEncodingPreset(format)))
-                combo_vencoding.SelectedItem = Settings.GetVEncodingPreset(format);
-            else
+            combo_vencoding.SelectedItem = preset;
+            Settings.SetVEncodingPreset(format, preset);
+        }
+
+        private string ChooseVideoPreset(Format.ExportFormats format)
+        {
+            //Сначала пробуем пресет из настроек
+            string preset = Settings.GetVEncodingPreset(format);
+            if (!combo_vencoding.Items.Contains(preset))
             {
-                //если пресет из настроек не подошёл, грузим первый попавшийся
-                combo_vencoding.SelectedItem = "Copy";
-                Settings.SetVEncodingPreset(format, "Copy");
+                //Потом дефолтный для данного формата
+                preset = Format.GetValidVPreset(format);
+                if (!combo_vencoding.Items.Contains(preset))
+                {
+                    //Если и его нет - то берём самый первый (или "Copy")
+                    if (combo_vencoding.Items.Count == 0) preset = "Copy";
+                    else preset = combo_vencoding.Items[0].ToString();
+
+                    //Но только не "Disabled"
+                    if (preset == "Disabled") preset = "Copy";
+                }
             }
+
+            return preset;
         }
 
         private void LoadAudioPresets()
@@ -2918,21 +2934,43 @@ namespace XviD4PSP
             combo_aencoding.Items.Add("Copy");
         }
 
-        private void SetAudioPresetFromSettings()
+        private void SetAudioPreset()
         {
-            Format.ExportFormats format = (m != null) ? m.format : Settings.FormatOut;
-
             //прописываем текущий пресет кодирования
             if (m != null && m.outaudiostreams.Count == 0)
+            {
                 combo_aencoding.SelectedItem = "Disabled";
-            else if (combo_aencoding.Items.Contains(Settings.GetAEncodingPreset(format)))
-                combo_aencoding.SelectedItem = Settings.GetAEncodingPreset(format);
+            }
             else
             {
-                //если пресет из настроек не подошёл, грузим первый попавшийся
-                combo_aencoding.SelectedItem = "Copy";
-                Settings.SetAEncodingPreset(format, "Copy");
+                Format.ExportFormats format = (m != null) ? m.format : Settings.FormatOut;
+                string preset = ChooseAudioPreset(format);
+
+                combo_aencoding.SelectedItem = preset;
+                Settings.SetAEncodingPreset(format, preset);
             }
+        }
+
+        private string ChooseAudioPreset(Format.ExportFormats format)
+        {
+            //Сначала пробуем пресет из настроек
+            string preset = Settings.GetAEncodingPreset(format);
+            if (!combo_aencoding.Items.Contains(preset))
+            {
+                //Потом дефолтный для данного формата
+                preset = Format.GetValidAPreset(format);
+                if (!combo_aencoding.Items.Contains(preset))
+                {
+                    //Если и его нет - то берём самый первый (или "Copy")
+                    if (combo_aencoding.Items.Count == 0) preset = "Copy";
+                    else preset = combo_aencoding.Items[0].ToString();
+
+                    //Но только не "Disabled"
+                    if (preset == "Disabled") preset = "Copy";
+                }
+            }
+
+            return preset;
         }
 
         private void combo_format_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -2950,14 +2988,13 @@ namespace XviD4PSP
                         LoadVideoPresets();
                     LoadAudioPresets();
 
-                    //Ставим "Copy" для звука, если аудио пресет не найден
-                    if (!combo_aencoding.Items.Contains(Settings.GetAEncodingPreset(m.format)))
-                        Settings.SetAEncodingPreset(m.format, "Copy");
+                    //Подбираем подходящий аудио пресет
+                    Settings.SetAEncodingPreset(m.format, ChooseAudioPreset(m.format));
 
                     //забиваем-обновляем аудио массивы
                     m = FillAudio(m);
 
-                    //забиваем настройки из профиля
+                    //Подбираем подходящий видео пресет
                     if (Settings.FormatOut == Format.ExportFormats.Audio)
                     {
                         m.vencoding = "Disabled";
@@ -2966,9 +3003,7 @@ namespace XviD4PSP
                     }
                     else
                     {
-                        m.vencoding = Settings.GetVEncodingPreset(m.format);
-                        if (!combo_vencoding.Items.Contains(m.vencoding))
-                            m.vencoding = "Copy";
+                        m.vencoding = ChooseVideoPreset(m.format);
                         m.outvcodec = PresetLoader.GetVCodec(m);
                         m.vpasses = PresetLoader.GetVCodecPasses(m);
                     }
@@ -3042,16 +3077,16 @@ namespace XviD4PSP
                     }
                 }
                 else
-                {                   
+                {
                     //загружаем профили
                     if (Settings.FormatOut != Format.ExportFormats.Audio)
                         LoadVideoPresets();
                     LoadAudioPresets();
                 }
-                
+
                 if (Settings.FormatOut != Format.ExportFormats.Audio)
-                    SetVideoPresetFromSettings();
-                SetAudioPresetFromSettings();
+                    SetVideoPreset();
+                SetAudioPreset();
 
                 //для звуковых заданий
                 if (Settings.FormatOut == Format.ExportFormats.Audio)
@@ -3278,10 +3313,9 @@ namespace XviD4PSP
 
                 //защита от удаления профиля
                 if (!combo_vencoding.Items.Contains(m.vencoding))
-                    m.vencoding = "Copy";
+                    m.vencoding = ChooseVideoPreset(m.format);
 
                 combo_vencoding.SelectedItem = m.vencoding;
-
                 Settings.SetVEncodingPreset(m.format, m.vencoding);
 
                 //проверка на размер
@@ -3315,7 +3349,7 @@ namespace XviD4PSP
 
                 //защита от удаления профиля
                 if (!combo_aencoding.Items.Contains(outstream.encoding))
-                    outstream.encoding = "Copy";
+                    outstream.encoding = ChooseAudioPreset(m.format);
 
                 combo_aencoding.SelectedItem = outstream.encoding;
 
