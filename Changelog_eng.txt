@@ -1,5 +1,7 @@
-XviD4PSP 5.10.210.0 (18.01.2011), main changes:
+XviD4PSP 5.10.211.0 (24.01.2011), main changes:
 
+>>> (r211) Lame MP3 settings window: fixed some bugs with command line re-creation; added mode "Auto" for 
+           "Channels mode", selected by default; added combobox for Replay Gain (rep./req. by Procrustean).
 >>> (r210) If video or audio preset wasn`t found, instead of switching to "Copy", preset will be chosen by
            the following scheme: default preset for this format->a very first preset in the list (except
            "Disabled")->"Copy" (req. by Procrustean).

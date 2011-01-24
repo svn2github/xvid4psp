@@ -274,7 +274,11 @@ namespace XviD4PSP
                         resample = Calculate.ConvertDoubleToPointString(Convert.ToDouble(stream.samplerate) / 1000.0, 1);
                     info.Arguments = stream.passes + resample + " - \"" + outfilepath + "\"";
                     if (stream.channels == 1)
-                        info.Arguments = info.Arguments.Replace(" -m s", " -m m").Replace(" -m j", " -m m").Replace(" -m f", " -m m");
+                    {
+                        //Не уверен, что это вообще нужно..
+                        info.Arguments = info.Arguments.Replace("-m s", "-m m").Replace("-m j", "-m m").Replace("-m f", "-m m");
+                        if (!info.Arguments.Contains("-m m")) info.Arguments = "-m m " + info.Arguments;
+                    }
                 }
                 else if (encoderPath.Contains("ffmpeg.exe"))
                     info.Arguments = "-i - " + stream.passes + " -vn \"" + outfilepath + "\"";

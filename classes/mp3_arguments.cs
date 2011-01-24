@@ -29,7 +29,7 @@ namespace XviD4PSP
             }
         }
 
-        private string _channelsmode = "Stereo";
+        private string _channelsmode = "Auto";
         public string channelsmode
         {
             get
@@ -94,8 +94,8 @@ namespace XviD4PSP
             }
         }
 
-        private string _encquality = "2 - Recomended";
-        public string encquality
+        private int _encquality = 2;
+        public int encquality
         {
             get
             {
@@ -104,6 +104,19 @@ namespace XviD4PSP
             set
             {
                 _encquality = value;
+            }
+        }
+
+        private int _replay_gain = 1;
+        public int replay_gain
+        {
+            get
+            {
+                return _replay_gain;
+            }
+            set
+            {
+                _replay_gain = value;
             }
         }
     }
