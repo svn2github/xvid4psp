@@ -394,12 +394,14 @@ namespace MyUserControl
 
         private void upButton_Click(object sender, RoutedEventArgs e)
         {
+            this.txt_box.Focus();
             IsAction = true;
             Value+= Change;
         }
 
         private void downButton_Click(object sender, RoutedEventArgs e)
         {
+            this.txt_box.Focus();
             IsAction = true;
             Value-= Change;
         }
