@@ -1,5 +1,9 @@
-XviD4PSP 5.10.212.0 (27.01.2011), main changes:
+XviD4PSP 5.10.213.0 (27.01.2011), main changes:
 
+>>> (r213) Fixed invalid deletion of DGIndex caches if option "Auto delete DGIndex cache" is enabled, but index
+           folder was created by user. Now index folder will NOT be deleted if user opened a *.d2v file in the
+           XviD4PSP; folder will be deleted only if the path ends with ".index"; subfolders will not be deleted
+           (rep. by Лидка, bug since r32).
 >>> (r212) The NumericUpDown user control must receive focus on pressing the up (+) or down (-) buttons (bug since r195).
 >>> (r211) Lame MP3 settings window: fixed some bugs with command line re-creation; added mode "Auto" for 
            "Channels mode", selected by default; added combobox for Replay Gain (rep./req. by Procrustean).

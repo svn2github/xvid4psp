@@ -390,8 +390,8 @@ namespace XviD4PSP
                             action_open(x);
                             return;
                         }
-                        else
-                            SafeDelete(Settings.TempPath + "\\backup.tsks");
+                        //else
+                        //    SafeDelete(Settings.TempPath + "\\backup.tsks");
                     }
 
                     //Открытие файла из командной строки (command line arguments)
@@ -650,7 +650,7 @@ namespace XviD4PSP
                 {
                     foreach (string cache_path in dgcache)
                     {
-                        SafeDirDelete(Path.GetDirectoryName(cache_path));
+                        SafeDirDelete(Path.GetDirectoryName(cache_path), false);
                     }
                 }
             }
@@ -733,12 +733,17 @@ namespace XviD4PSP
             {
                 if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && Settings.DeleteDGIndexCache)
                 {
-                    //Если есть задания, проверяем, занят ли там наш кэш-файл, если не занят - то удаляем его
+                    //Выходим, если кэш-файл был создан не нами
+                    if (!dgcache.Contains(m.indexfile) || m.indexfile == m.infilepath) return;
+
+                    //Выходим, если кэш-файл используется в каком-либо задании
                     foreach (Task task in list_tasks.Items)
                     {
                         if (task.Mass.indexfile == m.indexfile) return;
                     }
-                    SafeDirDelete(Path.GetDirectoryName(m.indexfile));
+
+                    //Удаляем папку с кэшем
+                    SafeDirDelete(Path.GetDirectoryName(m.indexfile), false);
                     dgcache.Remove(m.indexfile);
                 }
             }
@@ -1171,13 +1176,19 @@ namespace XviD4PSP
                             if (ich.m == null) return;
                             x = ich.m.Clone();
 
-                            //индексация
-                            if (x.indexfile != null && !File.Exists(x.indexfile))
+                            if (x.indexfile != null)
                             {
-                                Indexing index = new Indexing(x);
-                                if (index.m == null) return;
-                                x = index.m.Clone();
-                                dgcache.Add(x.indexfile); //Добавление кэш-файла в сиписок на удаление
+                                //индексация
+                                if (!File.Exists(x.indexfile))
+                                {
+                                    Indexing index = new Indexing(x);
+                                    if (index.m == null) return;
+                                    x = index.m.Clone();
+                                }
+
+                                //Добавление кэш-файла в список на удаление
+                                if (!dgcache.Contains(x.indexfile) && Path.GetDirectoryName(x.indexfile).EndsWith(".index") && x.indexfile != x.infilepath)
+                                    dgcache.Add(x.indexfile);
                             }
                         }
                     }
@@ -3398,12 +3409,27 @@ namespace XviD4PSP
             }
         }
 
-        private void SafeDirDelete(string dir)
+        private void SafeDirDelete(string dir, bool recursive)
         {
             try
             {
-                if (Directory.Exists(dir))
+                if (!Directory.Exists(dir)) return;
+
+                if (recursive)
+                {
+                    //Удаляем папку целиком со всем содержимым
                     Directory.Delete(dir, true);
+                }
+                else
+                {
+                    //Удаляем все файлы, после чего саму папку..
+                    foreach (string file in Directory.GetFiles(dir))
+                        File.Delete(file);
+
+                    //..если в ней нет никаких подпапок
+                    if (Directory.GetDirectories(dir).Length == 0)
+                        Directory.Delete(dir, false);
+                }
             }
             catch (Exception ex)
             {
@@ -6473,7 +6499,8 @@ namespace XviD4PSP
             {
                 try
                 {
-                    if (File.Exists(mass.indexfile) && !dgcache.Contains(mass.indexfile))
+                    if (File.Exists(mass.indexfile) && !dgcache.Contains(mass.indexfile) &&
+                        Path.GetDirectoryName(mass.indexfile).EndsWith(".index") && mass.indexfile != mass.infilepath)
                         dgcache.Add(mass.indexfile);
                 }
                 catch { }
