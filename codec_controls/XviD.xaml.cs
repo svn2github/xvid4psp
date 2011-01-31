@@ -55,6 +55,9 @@ namespace XviD4PSP
             combo_vhqmode.Items.Add("3 - Medium Search");
             combo_vhqmode.Items.Add("4 - Wide Search");
 
+            combo_metric.Items.Add("0 - PSNR");
+            combo_metric.Items.Add("1 - PSNR_HVSM");
+
             //прогружаем матрицы квантизации
             combo_qmatrix.Items.Add("H263");
             combo_qmatrix.Items.Add("MPEG");
@@ -166,12 +169,14 @@ namespace XviD4PSP
 
             combo_quality.SelectedIndex = m.XviD_options.quality;
             combo_vhqmode.SelectedIndex = m.XviD_options.vhqmode;
+            combo_metric.SelectedIndex = m.XviD_options.metric;
             check_chroma.IsChecked = m.XviD_options.chromame;
             combo_qmatrix.SelectedItem = m.XviD_options.qmatrix;
             check_trellis.IsChecked = m.XviD_options.trellis;
             check_fullpass.IsChecked = m.XviD_options.full_first_pass;
             check_grayscale.IsChecked = m.XviD_options.gray;
             check_cartoon.IsChecked = m.XviD_options.cartoon;
+            check_chroma_opt.IsChecked = m.XviD_options.chroma_opt;
             check_packedmode.IsChecked = m.XviD_options.packedmode;
             check_gmc.IsChecked = m.XviD_options.gmc;
             check_qpel.IsChecked = m.XviD_options.qpel;
@@ -189,7 +194,7 @@ namespace XviD4PSP
             combo_pmax.SelectedItem = m.XviD_options.pmax;
             combo_bmin.SelectedItem = m.XviD_options.bmin;
             combo_bmax.SelectedItem = m.XviD_options.bmax;
-            check_xvid_old.IsChecked = Settings.XviD_Old_Version;
+            check_xvid_new.IsChecked = Settings.UseXviD_130;
             combo_threads.SelectedIndex = Settings.XviD_Threads;
             num_kboost.Value = m.XviD_options.kboost;
             num_chigh.Value = m.XviD_options.chigh;
@@ -203,6 +208,7 @@ namespace XviD4PSP
             num_vbvmax.Value = m.XviD_options.vbvmax;
             num_vbvsize.Value = m.XviD_options.vbvsize;
             num_vbvpeak.Value = m.XviD_options.vbvpeak;
+            num_firstpass_q.Value = m.XviD_options.firstpass_q;
 
             SetToolTips();
             DetectCodecPreset();
@@ -224,11 +230,13 @@ namespace XviD4PSP
 
             combo_quality.ToolTip = "Motion search quality (-quality, default: 6)";
             combo_vhqmode.ToolTip = "Level of R-D optimizations (-vhqmode, default: 1)";
+            combo_metric.ToolTip = "Distortion metric for R-D optimizations (-metric, default: 0)\r\nOnly for XviD 1.3.0";
             check_chroma.ToolTip = "Chroma motion estimation (-nochromame if unchecked, default: checked)";
             combo_qmatrix.ToolTip = "Use custom MPEG4 quantization matrix (-qmatrix, default: H263)";
             check_trellis.ToolTip = "Trellis quantization (-notrellis if unchecked, default: checked)";
-            check_grayscale.ToolTip = "Grayscale mode (Default: Disabled)";
+            check_grayscale.ToolTip = "Grayscale encoding (Default: Disabled)";
             check_cartoon.ToolTip = "Cartoon mode (Default: Disabled)";
+            check_chroma_opt.ToolTip = "Chroma optimizer (Default: Disabled)";
             check_packedmode.ToolTip = "Packed mode (-nopacked if unchecked, default: checked).\r\nNot compatible with multi-passes encoding!";
             check_gmc.ToolTip = "Use global motion compensation (-gmc if checked, default: unchecked)";
             check_qpel.ToolTip = "Use quarter pixel ME (-qpel if checked, default: unchecked)";
@@ -239,7 +247,7 @@ namespace XviD4PSP
             num_bquant_offset.ToolTip = "B-frames quantizer offset (-bquant_offset, default: 100)";
             num_keyint.ToolTip = "Maximum keyframe interval (-max_key_interval, default: 300)";
             combo_masking.ToolTip = "HVS masking mode\r\n0 - None (default)\r\n1 - Lumi (-lumimasking for XviD 1.2.2," +
-                " -masking 1 for XviD 1.3.x)\r\n2 - Variance (-lumimasking for XviD 1.2.2, -masking 2 for XviD 1.3.x)";
+                " -masking 1 for XviD 1.3.0)\r\n2 - Variance (-lumimasking for XviD 1.2.2, -masking 2 for XviD 1.3.0)";
             if (m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
@@ -267,7 +275,7 @@ namespace XviD4PSP
             combo_bmin.ToolTip = "Minimum quantizer for B-frames (-bmin, default: 2)";
             combo_bmax.ToolTip = "Maximum quantizer for B-frames (-bmax, default: 31)";
             combo_threads.ToolTip = "Set number of threads for encoding (-threads, Auto (default) = CPU count + 2).\r\nThis is a global option.";
-            check_fullpass.ToolTip = "Perform full first pass (-full1pass if checked, default: unchecked)";
+            check_fullpass.ToolTip = "Perform full (i.e. slow) first pass (-full1pass if checked, default: unchecked)";
             num_kboost.ToolTip = "I frame boost (-kboost, default: 10)";
             num_chigh.ToolTip = "High bitrate scenes degradation (-chigh, default: 0)";
             num_clow.ToolTip = "Low bitrate scenes improvement (-clow, default: 0)";
@@ -280,7 +288,8 @@ namespace XviD4PSP
             num_vbvsize.ToolTip = "Use VBV buffer size (-vbvsize, default: 0)";
             num_vbvmax.ToolTip = "VBV max bitrate (-vbvmax, default: 0)";
             num_vbvpeak.ToolTip = "VBV peak bitrate over 1 second (-vbvpeak, default: 0)";
-            check_xvid_old.ToolTip = "Enable this option if you want to use XviD 1.2.2 for encoding. By default, version 1.3.x is used.\r\nThis is a global option.";
+            check_xvid_new.ToolTip = "Enable this option if you want to use version 1.3.0 for encoding. By default, version 1.2.2 is used.\r\nThis is a global option.";
+            num_firstpass_q.ToolTip = "Redefine quantizer for the 1-st pass of multi-passes encoding, default: 2.0\r\nChange it only if you know what you're doing.";
         }
 
         public static Massive DecodeLine(Massive m)
@@ -294,6 +303,15 @@ namespace XviD4PSP
                 mode = Settings.EncodingModes.ThreePass;
             else if (m.vpasses.Count == 2)
                 mode = Settings.EncodingModes.TwoPass;
+
+            //Определяем нестандартный первый проход
+            if (m.vpasses.Count > 1)
+            {
+                decimal res_q = 0;
+                string zonesq = Calculate.GetRegexValue(@"\-zones\s0,q,(\d{1,2}\.?\d?)", m.vpasses[0].ToString());
+                if (decimal.TryParse(zonesq, NumberStyles.Any, new CultureInfo("en-US"), out res_q))
+                    m.XviD_options.firstpass_q = res_q;
+            }
 
             //берём пока что за основу последнюю строку
             string line = m.vpasses[m.vpasses.Count - 1].ToString();
@@ -360,9 +378,9 @@ namespace XviD4PSP
 
                 else if (value == "-qmatrix")
                 {
-                    string mpath = cli[n + 1].Replace("\"", "");
-                    if (File.Exists(mpath))
-                        m.XviD_options.qmatrix = Path.GetFileNameWithoutExtension(mpath);
+                    string path = Calculate.GetRegexValue(@"\-qmatrix\s+""(.+)""", line);
+                    if (File.Exists(path))
+                        m.XviD_options.qmatrix = Path.GetFileNameWithoutExtension(path);
                 }
 
                 else if (value == "-notrellis")
@@ -371,18 +389,15 @@ namespace XviD4PSP
                 else if (value == "-vhqmode")
                     m.XviD_options.vhqmode = Convert.ToInt32(cli[n + 1]);
 
+                else if (value == "-metric")
+                    m.XviD_options.metric = Convert.ToInt32(cli[n + 1]);
+
                 else if (value == "-zones")
                 {
                     string zone = cli[n + 1];
-                    if (zone == "0,w,1.0,-5G/1000,q,4")
-                        m.XviD_options.gray = true;
-                    else if (zone == "0,w,1.0,-5C/1000,q,4")
-                        m.XviD_options.cartoon = true;
-                    else if (zone == "0,w,1.0,-5GC/1000,q,4")
-                    {
-                        m.XviD_options.gray = true;
-                        m.XviD_options.cartoon = true;
-                    }
+                    m.XviD_options.gray = zone.Contains("G");
+                    m.XviD_options.cartoon = zone.Contains("C");
+                    m.XviD_options.chroma_opt = zone.Contains("O");
                 }
 
                 else if (value == "-nopacked")
@@ -461,19 +476,28 @@ namespace XviD4PSP
                     m.XviD_options.vbvpeak = Convert.ToInt32(cli[n + 1]);
 
                 else if (value == "-imin")
+                {
+                    m.XviD_options.mins += 1;
                     m.XviD_options.imin = Convert.ToInt32(cli[n + 1]);
+                }
+
+                else if (value == "-pmin")
+                {
+                    m.XviD_options.mins += 1;
+                    m.XviD_options.pmin = Convert.ToInt32(cli[n + 1]);
+                }
+
+                else if (value == "-bmin")
+                {
+                    m.XviD_options.mins += 1;
+                    m.XviD_options.bmin = Convert.ToInt32(cli[n + 1]);
+                }
 
                 else if (value == "-imax")
                     m.XviD_options.imax = Convert.ToInt32(cli[n + 1]);
 
-                else if (value == "-pmin")
-                    m.XviD_options.pmin = Convert.ToInt32(cli[n + 1]);
-
                 else if (value == "-pmax")
                     m.XviD_options.pmax = Convert.ToInt32(cli[n + 1]);
-
-                else if (value == "-bmin")
-                    m.XviD_options.bmin = Convert.ToInt32(cli[n + 1]);
 
                 else if (value == "-bmax")
                     m.XviD_options.bmax = Convert.ToInt32(cli[n + 1]);
@@ -517,14 +541,16 @@ namespace XviD4PSP
             if (m.XviD_options.vhqmode != 1)
                 line += " -vhqmode " + m.XviD_options.vhqmode;
 
-            if (m.XviD_options.gray && !m.XviD_options.cartoon)
-                line += " -zones 0,w,1.0,-5G/1000,q,4";
+            if (m.XviD_options.metric != 0)
+                line += " -metric " + m.XviD_options.metric;
 
-            if (!m.XviD_options.gray && m.XviD_options.cartoon)
-                line += " -zones 0,w,1.0,-5C/1000,q,4";
-
-            if (m.XviD_options.gray && m.XviD_options.cartoon)
-                line += " -zones 0,w,1.0,-5GC/1000,q,4";
+            if (m.XviD_options.gray || m.XviD_options.cartoon || m.XviD_options.chroma_opt)
+            {
+                line += " -zones 0,w,1.0,";
+                if (m.XviD_options.gray) line += "G";
+                if (m.XviD_options.cartoon) line += "C";
+                if (m.XviD_options.chroma_opt) line += "O";
+            }
 
             if (!m.XviD_options.packedmode)
                 line += " -nopacked";
@@ -551,9 +577,9 @@ namespace XviD4PSP
                 line += " -bquant_offset " + m.XviD_options.b_offset;
 
             if (m.XviD_options.masking == 1)
-                line += Settings.XviD_Old_Version ? " -lumimasking" : " -masking 1";
+                line += Settings.UseXviD_130 ? " -masking 1" : " -lumimasking";
             else if (m.XviD_options.masking == 2)
-                line += Settings.XviD_Old_Version ? " -lumimasking" : " -masking 2";
+                line += Settings.UseXviD_130 ? " -masking 2" : " -lumimasking";
 
             if (m.XviD_options.fourcc != "XVID")
                 line += " -fourcc " + m.XviD_options.fourcc;
@@ -576,6 +602,47 @@ namespace XviD4PSP
             //передаём параметры в турбо строку
             line_turbo = line;
 
+            //Восстанавливаем нестандартный первый проход
+            if (m.XviD_options.firstpass_q > 0 && m.XviD_options.firstpass_q != 2)
+            {
+                //Меняем\добавляем ключ -zones 0,q
+                if (m.XviD_options.gray || m.XviD_options.cartoon || m.XviD_options.chroma_opt)
+                    line_turbo = line_turbo.Replace("-zones 0,w,1.0", "-zones 0,q," + m.XviD_options.firstpass_q.ToString("F1", new CultureInfo("en-US")));
+                else
+                    line_turbo += " -zones 0,q," + m.XviD_options.firstpass_q.ToString("F1", new CultureInfo("en-US"));
+
+                //-zones 0,q сбивает настройки первого прохода на full 1-st pass (-zones 0,w этого не делает)
+                //xvidcore\src\plugins\plugin_2pass1.c #ifdef FAST1PASS
+                if (!m.XviD_options.full_first_pass)
+                {
+                    //-quality 5 (6)
+                    if (m.XviD_options.quality != 6)
+                        line_turbo = line_turbo.Replace("-quality " + m.XviD_options.quality, "-quality " + Math.Max(0, m.XviD_options.quality - 1));
+                    else
+                        line_turbo += " -quality " + Math.Max(0, m.XviD_options.quality - 1);
+
+                    //-vhqmode 1 (4)
+                    if (m.XviD_options.vhqmode != 1)
+                        line_turbo = line_turbo.Replace("-vhqmode " + m.XviD_options.vhqmode, "-vhqmode " + (m.XviD_options.vhqmode >= 1 ? "1" : "0"));
+                    else
+                        line_turbo += " -vhqmode " + (m.XviD_options.vhqmode >= 1 ? "1" : "0");
+
+                    //-bvhq
+                    if (m.XviD_options.bvhq)
+                        line_turbo = line_turbo.Replace(" -bvhq", "");
+
+                    //-notrellis
+                    line_turbo += (m.XviD_options.trellis) ? " -notrellis" : "";
+
+                    //-nochromame
+                    line_turbo += (m.XviD_options.chromame) ? " -nochromame" : "";
+
+                    //-turbo
+                    line_turbo += " -turbo";
+                }
+            }
+
+            //Битрейт\Квантизер\Размер
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
                 m.encodingmode == Settings.EncodingModes.TwoPass ||
                 m.encodingmode == Settings.EncodingModes.ThreePass)
@@ -628,29 +695,27 @@ namespace XviD4PSP
             //Ограничения q
             string q_limits = "";
 
-            if (m.XviD_options.imin != 2)
+            if (m.XviD_options.imin != 2 || m.XviD_options.mins > 0)
                 q_limits += " -imin " + m.XviD_options.imin;
 
             if (m.XviD_options.imax != 31)
                 q_limits += " -imax " + m.XviD_options.imax;
 
-            if (m.XviD_options.pmin != 2)
+            if (m.XviD_options.pmin != 2 || m.XviD_options.mins > 0)
                 q_limits += " -pmin " + m.XviD_options.pmin;
 
             if (m.XviD_options.pmax != 31)
                 q_limits += " -pmax " + m.XviD_options.pmax;
 
-            if (m.XviD_options.bmin != 2)
+            if (m.XviD_options.bmin != 2 || m.XviD_options.mins > 0)
                 q_limits += " -bmin " + m.XviD_options.bmin;
 
             if (m.XviD_options.bmax != 31)
                 q_limits += " -bmax " + m.XviD_options.bmax;
 
             //удаляем пустоту в начале
-            if (line.StartsWith(" "))
-                line = line.Remove(0, 1);
-            if (line_turbo.StartsWith(" "))
-                line_turbo = line_turbo.Remove(0, 1);
+            line = line.TrimStart(new char[] { ' ' });
+            line_turbo = line_turbo.TrimStart(new char[] { ' ' });
 
             //забиваем данные в массив
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
@@ -663,7 +728,7 @@ namespace XviD4PSP
                 m.encodingmode == Settings.EncodingModes.TwoPassSize)
             {
                 m.vpasses.Add(line_turbo);
-                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                if (q_limits.Length > 0)
                     m.vpasses.Add(line + q_limits);
                 else
                     m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
@@ -672,7 +737,7 @@ namespace XviD4PSP
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
                 m.vpasses.Add(line_turbo);
-                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                if (q_limits.Length > 0)
                 {
                     m.vpasses.Add(line + q_limits);
                     m.vpasses.Add(line + q_limits);
@@ -686,7 +751,7 @@ namespace XviD4PSP
             else if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
             {
                 m.vpasses.Add(line);
-                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                if (q_limits.Length > 0)
                     m.vpasses.Add(line + q_limits);
                 else
                     m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
@@ -695,7 +760,7 @@ namespace XviD4PSP
             {
                 m.vpasses.Add(line);
                 m.vpasses.Add(line);
-                if (q_limits.Contains("-imin") || q_limits.Contains("-bmin") || q_limits.Contains("-pmin"))
+                if (q_limits.Length > 0)
                     m.vpasses.Add(line + q_limits);
                 else
                     m.vpasses.Add(line + " -imin 1 -bmin 1 -pmin 1");
@@ -858,6 +923,16 @@ namespace XviD4PSP
             }
         }
 
+        private void combo_metric_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_metric.IsDropDownOpen || combo_metric.IsSelectionBoxHighlighted)
+            {
+                m.XviD_options.metric = Convert.ToInt32(combo_metric.SelectedItem.ToString().Substring(0, 1));
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
+        }
+
         private void check_grayscale_Clicked(object sender, RoutedEventArgs e)
         {
             m.XviD_options.gray = check_grayscale.IsChecked.Value;
@@ -868,6 +943,13 @@ namespace XviD4PSP
         private void check_cartoon_Clicked(object sender, RoutedEventArgs e)
         {
             m.XviD_options.cartoon = check_cartoon.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            DetectCodecPreset();
+        }
+
+        private void check_chroma_opt_Clicked(object sender, RoutedEventArgs e)
+        {
+            m.XviD_options.chroma_opt = check_chroma_opt.IsChecked.Value;
             root_window.UpdateManualProfile();
             DetectCodecPreset();
         }
@@ -975,6 +1057,7 @@ namespace XviD4PSP
                     m.XviD_options.quality = 6;
                     m.XviD_options.trellis = true;
                     m.XviD_options.vhqmode = 1;
+                    m.XviD_options.metric = 0;
                     m.XviD_options.fourcc = "XVID";
                     m.XviD_options.keyint = 300;
                     m.XviD_options.imin = 2;
@@ -983,6 +1066,7 @@ namespace XviD4PSP
                     m.XviD_options.pmax = 31;
                     m.XviD_options.bmin = 2;
                     m.XviD_options.bmax = 31;
+                    m.XviD_options.mins = 0;
                     m.XviD_options.full_first_pass = false;
                     m.XviD_options.b_ratio = 150;
                     m.XviD_options.b_offset = 100;
@@ -998,6 +1082,7 @@ namespace XviD4PSP
                     m.XviD_options.vbvmax = 0;
                     m.XviD_options.vbvsize = 0;
                     m.XviD_options.vbvpeak = 0;
+                    m.XviD_options.firstpass_q = 2.0M;
 
                     SetDefaultBitrates();
                 }
@@ -1015,6 +1100,8 @@ namespace XviD4PSP
                     m.XviD_options.quality = 1;
                     m.XviD_options.trellis = false;
                     m.XviD_options.vhqmode = 0;
+                    m.XviD_options.metric = 0;
+                    m.XviD_options.firstpass_q = 2.0M;
                 }
                 else if (preset == CodecPresets.Ultra)
                 {
@@ -1030,6 +1117,8 @@ namespace XviD4PSP
                     m.XviD_options.quality = 6;
                     m.XviD_options.trellis = true;
                     m.XviD_options.vhqmode = 1;
+                    m.XviD_options.metric = 0;
+                    m.XviD_options.firstpass_q = 2.0M;
                 }
                 else if (preset == CodecPresets.Extreme)
                 {
@@ -1045,6 +1134,8 @@ namespace XviD4PSP
                     m.XviD_options.quality = 6;
                     m.XviD_options.trellis = true;
                     m.XviD_options.vhqmode = 4;
+                    m.XviD_options.metric = 0;
+                    m.XviD_options.firstpass_q = 2.0M;
                 }
 
                 if (preset != CodecPresets.Custom)
@@ -1082,6 +1173,7 @@ namespace XviD4PSP
                 m.XviD_options.quality == 6 &&
                 m.XviD_options.trellis == true &&
                 m.XviD_options.vhqmode == 1 &&
+                m.XviD_options.metric == 0 &&
                 m.XviD_options.fourcc == "XVID" &&
                 m.XviD_options.keyint == 300 &&
                 m.XviD_options.imin == 2 &&
@@ -1104,7 +1196,8 @@ namespace XviD4PSP
                 m.XviD_options.smoother == 100 &&
                 m.XviD_options.vbvmax == 0 &&
                 m.XviD_options.vbvsize == 0 &&
-                m.XviD_options.vbvpeak == 0)
+                m.XviD_options.vbvpeak == 0 &&
+                m.XviD_options.firstpass_q == 2)
                 preset = CodecPresets.Default;
 
             //Turbo
@@ -1119,7 +1212,9 @@ namespace XviD4PSP
                 m.XviD_options.qpel == false &&
                 m.XviD_options.quality == 1 &&
                 m.XviD_options.trellis == false &&
-                m.XviD_options.vhqmode == 0)
+                m.XviD_options.vhqmode == 0 &&
+                m.XviD_options.metric == 0 &&
+                m.XviD_options.firstpass_q == 2)
                 preset = CodecPresets.Turbo;
 
             //Ultra
@@ -1134,7 +1229,9 @@ namespace XviD4PSP
                 m.XviD_options.qpel == Format.GetValidQPEL(m) &&
                 m.XviD_options.quality == 6 &&
                 m.XviD_options.trellis == true &&
-                m.XviD_options.vhqmode == 1)
+                m.XviD_options.vhqmode == 1 &&
+                m.XviD_options.metric == 0 &&
+                m.XviD_options.firstpass_q == 2)
                 preset = CodecPresets.Ultra;
 
             //Extreme
@@ -1149,7 +1246,9 @@ namespace XviD4PSP
                 m.XviD_options.qpel == Format.GetValidQPEL(m) &&
                 m.XviD_options.quality == 6 &&
                 m.XviD_options.trellis == true &&
-                m.XviD_options.vhqmode == 4)
+                m.XviD_options.vhqmode == 4 &&
+                m.XviD_options.metric == 0 &&
+                m.XviD_options.firstpass_q == 2)
                 preset = CodecPresets.Extreme;
 
             combo_codec_preset.SelectedItem = preset.ToString();
@@ -1260,7 +1359,7 @@ namespace XviD4PSP
             try
             {
                 System.Diagnostics.ProcessStartInfo help = new System.Diagnostics.ProcessStartInfo();
-                help.FileName = Calculate.StartupPath + "\\apps\\xvid_encraw" + (Settings.XviD_Old_Version ? "\\1.2.2" : "") + "\\xvid_encraw.exe";
+                help.FileName = Calculate.StartupPath + "\\apps\\xvid_encraw" + (!Settings.UseXviD_130 ? "\\1.2.2" : "") + "\\xvid_encraw.exe";
                 help.WorkingDirectory = Path.GetDirectoryName(help.FileName);
                 help.Arguments = " -help";
                 help.UseShellExecute = false;
@@ -1526,11 +1625,22 @@ namespace XviD4PSP
             }
         }
 
-        private void check_xvid_old_Clicked(object sender, RoutedEventArgs e)
+        private void check_xvid_new_Clicked(object sender, RoutedEventArgs e)
         {
-            Settings.XviD_Old_Version = check_xvid_old.IsChecked.Value;
+            Settings.UseXviD_130 = check_xvid_new.IsChecked.Value;
             root_window.UpdateManualProfile();
             DetectCodecPreset();
+        }
+
+        private void num_firstpass_q_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_firstpass_q.IsAction)
+            {
+                m.XviD_options.firstpass_q = num_firstpass_q.Value;
+
+                root_window.UpdateManualProfile();
+                DetectCodecPreset();
+            }
         }
 	}
 }

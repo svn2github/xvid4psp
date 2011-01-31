@@ -1,5 +1,11 @@
-XviD4PSP 5.10.213.0 (27.01.2011), main changes:
+XviD4PSP 5.10.214.0 (31.01.2011), main changes:
 
+>>> (r214) XviD settings window: fixed detection of custom-matrix from the encoding preset (rep. by brusya).
+>>> (r214) XviD settings window: added ability to redefine quantizer for the 1-st pass of multi-passes
+           encoding, "Misc->1-st pass Quantizer" (req. by Tempter57).
+>>> (r214) XviD settings window: added options VHQ metric (-metric, only for 1.3.0) and Chroma optimizer.
+>>> (r214) XviD: version 1.2.2 now will be used for encoding by default, again. You can switch to version
+           1.3.0 in "Misc->Use new XviD 1.3.0".
 >>> (r213) Fixed invalid deletion of DGIndex caches if option "Auto delete DGIndex cache" is enabled, but index
            folder was created by user. Now index folder will NOT be deleted if user opened a *.d2v file in the
            XviD4PSP; folder will be deleted only if the path ends with ".index"; subfolders will not be deleted

@@ -16,19 +16,6 @@ namespace XviD4PSP
             return (XviD_arguments)this.MemberwiseClone();
         }
 
-        private bool _cartoon = false;
-        public bool cartoon
-        {
-            get
-            {
-                return _cartoon;
-            }
-            set
-            {
-                _cartoon = value;
-            }
-        }
-
         private string _fourcc = "XVID";
         public string fourcc
         {
@@ -107,16 +94,42 @@ namespace XviD4PSP
             }
         }
 
-        private bool _grey = false;
+        private bool _cartoon = false;
+        public bool cartoon
+        {
+            get
+            {
+                return _cartoon;
+            }
+            set
+            {
+                _cartoon = value;
+            }
+        }
+
+        private bool _gray = false;
         public bool gray
         {
             get
             {
-                return _grey;
+                return _gray;
             }
             set
             {
-                _grey = value;
+                _gray = value;
+            }
+        }
+
+        private bool _chroma_opt = false;
+        public bool chroma_opt
+        {
+            get
+            {
+                return _chroma_opt;
+            }
+            set
+            {
+                _chroma_opt = value;
             }
         }
 
@@ -497,6 +510,19 @@ namespace XviD4PSP
             }
         }
 
+        private int _mins = 0;
+        public int mins
+        {
+            get
+            {
+                return _mins;
+            }
+            set
+            {
+                _mins = value;
+            }
+        }
+
         private bool _full_first_pass = false;
         public bool full_first_pass
         {
@@ -507,6 +533,32 @@ namespace XviD4PSP
             set
             {
                 _full_first_pass = value;
+            }
+        }
+
+        private decimal _firstpass_q = 2.0M;
+        public decimal firstpass_q
+        {
+            get
+            {
+                return _firstpass_q;
+            }
+            set
+            {
+                _firstpass_q = value;
+            }
+        }
+
+        private int _metric = 0;
+        public int metric
+        {
+            get
+            {
+                return _metric;
+            }
+            set
+            {
+                _metric = value;
             }
         }
     }

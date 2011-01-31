@@ -1174,26 +1174,6 @@ namespace XviD4PSP
             }
         }
 
-        public static bool ffmpeg_pipe
-        {
-            get
-            {
-                object value = GetValue("ffmpeg_pipe");
-                if (value == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return Convert.ToBoolean(value);
-                }
-            }
-            set
-            {
-                SetBool("ffmpeg_pipe", value);
-            }
-        }
-
         public static bool Mpeg2MultiplexDisabled
         {
             get
@@ -2548,12 +2528,12 @@ namespace XviD4PSP
             }
         }
 
-        //Выбор версии XviD (true = старая 1.2.2)
-        public static bool XviD_Old_Version
+        //Выбор версии XviD (true = новая 1.3.0)
+        public static bool UseXviD_130
         {
             get
             {
-                object value = GetValue("XviD_Old_Version");
+                object value = GetValue("UseXviD_130");
                 if (value == null)
                 {
                     return false;
@@ -2565,7 +2545,7 @@ namespace XviD4PSP
             }
             set
             {
-                SetBool("XviD_Old_Version", value);
+                SetBool("UseXviD_130", value);
             }
         }
 

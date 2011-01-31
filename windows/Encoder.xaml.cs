@@ -1236,18 +1236,25 @@ namespace XviD4PSP
         private void make_XviD()
         {
             //Версия XviD
-            bool xvid_old = Settings.XviD_Old_Version;
+            bool xvid_new = Settings.UseXviD_130;
 
             //Меняем ключи lumimasking/masking
             if (m.XviD_options.masking > 0)
             {
                 for (int n = 0; n < m.vpasses.Count; n++)
                 {
-                    if (xvid_old)
-                        m.vpasses[n] = m.vpasses[n].ToString().Replace(" -masking " + m.XviD_options.masking, " -lumimasking");
-                    else
+                    if (xvid_new)
                         m.vpasses[n] = m.vpasses[n].ToString().Replace(" -lumimasking", " -masking 2");
+                    else
+                        m.vpasses[n] = m.vpasses[n].ToString().Replace(" -masking " + m.XviD_options.masking, " -lumimasking");
                 }
+            }
+
+            //Убираем -metric
+            if (!xvid_new)
+            {
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace(" -metric " + m.XviD_options.metric, "");
             }
 
             //прописываем интерлейс флаги
@@ -1299,14 +1306,6 @@ namespace XviD4PSP
             {
                 for (int n = 0; n < m.vpasses.Count; n++)
                     m.vpasses[n] = m.vpasses[n].ToString().Replace(" -fourcc " + m.XviD_options.fourcc, "");
-            }
-
-            //Zones
-            if (m.XviD_options.cartoon || m.XviD_options.gray)
-            {
-                int frames = m.outframes;
-                for (int n = 0; n < m.vpasses.Count; n++)
-                    m.vpasses[n] = m.vpasses[n].ToString().Replace("-5G/1000", "-5G/" + frames).Replace("-5C/1000", "-5C/" + frames).Replace("-5GC/1000", "-5GC/" + frames);
             }
 
             step++;
@@ -1367,7 +1366,7 @@ namespace XviD4PSP
             ProcessStartInfo info = new ProcessStartInfo();
             string arguments;
 
-            info.FileName = Calculate.StartupPath + "\\apps\\xvid_encraw" + (xvid_old ? "\\1.2.2" : "") + "\\xvid_encraw.exe";
+            info.FileName = Calculate.StartupPath + "\\apps\\xvid_encraw" + (!xvid_new ? "\\1.2.2" : "") + "\\xvid_encraw.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
             info.RedirectStandardOutput = true;
@@ -4161,10 +4160,14 @@ namespace XviD4PSP
 
                         SetLog("VCodecPreset: " + m.vencoding);
                         SetLog("VEncodingMode: " + m.encodingmode);
+
+                        string vcodec_info = (m.outvcodec == "x264") ? (Settings.Use64x264) ? " (64-bit)" : "" :
+                            (m.outvcodec == "XviD") ? (Settings.UseXviD_130) ? " (1.3.0)" : " (1.2.2)" : "";
+
                         if (m.invcodec != m.outvcodec)
-                            SetLog("VideoCodec: " + m.invcodecshort + " > " + m.outvcodec);
+                            SetLog("VideoCodec: " + m.invcodecshort + " > " + m.outvcodec + vcodec_info);
                         else
-                            SetLog("VideoCodec: " + m.invcodecshort);
+                            SetLog("VideoCodec: " + m.invcodecshort + vcodec_info);
 
                         if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                             m.encodingmode == Settings.EncodingModes.ThreePassSize ||
