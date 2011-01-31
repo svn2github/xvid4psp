@@ -171,12 +171,12 @@ namespace XviD4PSP
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RepairSSE2.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\fft3dfilter.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI3.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
                m.script += "#loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
-               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\AddGrainC.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.FieldDeinterlace)
@@ -576,7 +576,7 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.QTGMC)
            {
-               m.script += "QTGMC(2, 1, 1, 4, 0, 4, \"NNEDI3\")" + Environment.NewLine; ;
+               m.script += "QTGMC(2, 1, 1, 4, 0, 4)" + Environment.NewLine;
            }
 
            //Фильтрация до ресайза
