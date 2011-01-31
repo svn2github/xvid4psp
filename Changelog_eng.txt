@@ -1,5 +1,6 @@
-XviD4PSP 5.10.214.0 (31.01.2011), main changes:
+XviD4PSP 5.10.215.0 (31.01.2011), main changes:
 
+>>> (r215) NumericUpDown: set IsAction=false when value out of limits.
 >>> (r214) XviD settings window: fixed detection of custom-matrix from the encoding preset (rep. by brusya).
 >>> (r214) XviD settings window: added ability to redefine quantizer for the 1-st pass of multi-passes
            encoding, "Misc->1-st pass Quantizer" (req. by Tempter57).
