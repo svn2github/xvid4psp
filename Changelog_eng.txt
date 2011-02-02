@@ -1,5 +1,7 @@
-XviD4PSP 5.10.216.0 (31.01.2011), main changes:
+XviD4PSP 5.10.217.0 (02.02.2011), main changes:
 
+>>> (r217) Added check for AviSynth on start-up.
+>>> (r217) Print more info about the System in the encoding log (req. by Procrustean).
 >>> (r216) Small changes for the QTGMC3.0.
 >>> (r215) NumericUpDown: set IsAction=false when value out of limits.
 >>> (r214) XviD settings window: fixed detection of custom-matrix from the encoding preset (rep. by brusya).

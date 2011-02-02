@@ -4104,18 +4104,20 @@ namespace XviD4PSP
                 //прописываем инфо в лог
                 SetLog("PLATFORM");
                 SetLog("------------------------------");
-                SetLog("OS: " + Environment.OSVersion.ToString());
-                SetLog("OEMCodePage: " + CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
-                SetLog("Language: " + CultureInfo.CurrentCulture.ThreeLetterWindowsLanguageName);
-                SetLog("DecimalSeparator: " + CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
-                SetLog("Framework: " + Environment.Version);
-                SetLog("Processors: " + Environment.ProcessorCount);
-                //SetLog("Machine: " + Environment.MachineName);
-                //SetLog("UserName: " + Environment.UserName);
-                SetLog("SystemDrive: " + Environment.ExpandEnvironmentVariables("%SystemDrive%"));
+                SetLog("OS Code: " + Environment.OSVersion.ToString());
+                SetLog("OS Name: " + SysInfo.GetOSNameFull());
+                SetLog("Framework: " + Environment.Version + SysInfo.GetFrameworkVersion());
+                SetLog("AviSynth: " + SysInfo.RetrievedAviSynthVersion);
+                SetLog("CPU Info: " + SysInfo.GetCPUInfo() + ", " + Environment.ProcessorCount + " core(s)");
+                SetLog("RAM Total: " + SysInfo.GetTotalRAM());
+                SetLog("Language: " + CultureInfo.CurrentCulture.ThreeLetterWindowsLanguageName + " (" +
+                    //CultureInfo.CurrentCulture.TextInfo.ANSICodePage + ", \"" +
+                    System.Text.Encoding.Default.CodePage + ", \"" +
+                    CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator + "\")");
+                SetLog("SystemDrive: " + Environment.GetEnvironmentVariable("SystemDrive"));
                 SetLog("");
 
-                SetLog("XVID4PSP");
+                SetLog("XviD4PSP");
                 SetLog("------------------------------");
                 Assembly this_assembly = Assembly.GetExecutingAssembly();
                 SetLog("Version: " + this_assembly.GetName().Version.ToString());

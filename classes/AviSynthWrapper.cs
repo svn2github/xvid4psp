@@ -428,8 +428,13 @@ namespace XviD4PSP
         {
             //Позаимствовано из MeGUI (для уменьшения вылетов из-за DGMultiSource)
             System.Threading.Thread.Sleep(100);
-            
-            dimzon_avs_destroy(ref _avs);
+
+            try
+            {
+                dimzon_avs_destroy(ref _avs);
+            }
+            catch (DllNotFoundException) { }
+
             _avs = new IntPtr(0);
             if (disposing)
                 GC.SuppressFinalize(this);

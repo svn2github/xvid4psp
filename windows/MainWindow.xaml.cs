@@ -133,8 +133,8 @@ namespace XviD4PSP
 
             try
             {
-                //Установка параметров окна из сохраненных настроек (если эта опция включена)
-                if (Settings.WindowResize == true)
+                //Установка параметров окна из сохраненных настроек
+                if (Settings.WindowResize)
                 {
                     string[] value = (Settings.WindowLocation + "/" + Settings.TasksRows).Split('/');
                     if (value.Length == 6)
@@ -149,7 +149,24 @@ namespace XviD4PSP
                         this.TasksRow2.Height = (GridLength)conv.ConvertFromString(value[5].Replace(".", sep).Replace(",", sep));
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ErrorException("Initializing (WindowSize): " + ex.Message, ex.StackTrace);
+            }
 
+            try
+            {
+                //Определяем наличие Ависинта
+                SysInfo.RetrieveAviSynthVersion();
+            }
+            catch (Exception ex)
+            {
+                ErrorException("Initializing (AviSynth): " + ex.Message, ex.StackTrace);
+            }
+
+            try
+            {
                 //Трей
                 System.Windows.Forms.ContextMenuStrip TrayMenu = new System.Windows.Forms.ContextMenuStrip();
                 TrayIcon = new System.Windows.Forms.NotifyIcon();
@@ -198,7 +215,14 @@ namespace XviD4PSP
 
                 TrayIcon.ContextMenuStrip = TrayMenu;
                 TrayIcon.Text = "XviD4PSP";
+            }
+            catch (Exception ex)
+            {
+                ErrorException("Initializing (TrayIcon): " + ex.Message, ex.StackTrace);
+            }
 
+            try
+            {
                 UpdateRecentFiles();  //Список недавних файлов
                 MenuHider(false);     //Делаем пункты меню неактивными
                 SetHotKeys();         //Загружаем HotKeys
@@ -215,22 +239,24 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException("Initializing: " + ex.Message, ex.StackTrace);
+                ErrorException("Initializing (Misc): " + ex.Message, ex.StackTrace);
             }
 
-            //events
-            this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
-            this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown);
-            this.StateChanged += new EventHandler(MainWindow_StateChanged);
-            this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter); //Мышь вошла в зону с названием файла
-            this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave); //Мышь вышла из зоны с названием файла
-            if (Settings.TrayClickOnce) TrayIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
-            else TrayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
-        }
-
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            MainFormLoader();
+            try
+            {
+                //events
+                this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
+                this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown);
+                this.StateChanged += new EventHandler(MainWindow_StateChanged);
+                this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter); //Мышь вошла в зону с названием файла
+                this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave); //Мышь вышла из зоны с названием файла
+                if (Settings.TrayClickOnce) TrayIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+                else TrayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+            }
+            catch (Exception ex)
+            {
+                ErrorException("Initializing (Events): " + ex.Message, ex.StackTrace);
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -246,6 +272,11 @@ namespace XviD4PSP
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerAsync();
+        }
+
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            MainFormLoader();
         }
 
         internal delegate void MainFormLoaderDelegate();
@@ -310,37 +341,44 @@ namespace XviD4PSP
 
                     //загружаем настройки
                     LoadSettings();
-                   
-                    //ищем оптимальную темп папку
-                    if (Settings.SearchTempPath)
+
+                    try
                     {
-                        string drivestring = "C:\\";
-                        string dlabel = "";
-                        long maxspace = long.MinValue;
-                        foreach (DriveInfo drive in DriveInfo.GetDrives())
-                            if (drive.DriveType == DriveType.Fixed && drive.IsReady && drive.AvailableFreeSpace > maxspace)
-                            {
-                                maxspace = drive.AvailableFreeSpace;
-                                drivestring = drive.Name;
-                                dlabel = drive.VolumeLabel;
-                            }
-                        if (drivestring != Settings.TempPath.Substring(0, 3) || Settings.Key == "0000")
+                        //ищем оптимальную темп папку
+                        if (Settings.SearchTempPath)
                         {
-                            Message mess = new Message(this);
-                            mess.ShowMessage(Languages.Translate("Maximum free drive space detected on") + " " + drivestring.Substring(0, 2) + " (" + dlabel + ").\r\n" +
-                                Languages.Translate("Do you want use this drive for temp files?"), Languages.Translate("Place for temp files"), Message.MessageStyle.YesNo);
-                            if (mess.result == Message.Result.Yes)
+                            string drivestring = "C:\\";
+                            string dlabel = "";
+                            long maxspace = long.MinValue;
+                            foreach (DriveInfo drive in DriveInfo.GetDrives())
+                                if (drive.DriveType == DriveType.Fixed && drive.IsReady && drive.AvailableFreeSpace > maxspace)
+                                {
+                                    maxspace = drive.AvailableFreeSpace;
+                                    drivestring = drive.Name;
+                                    dlabel = drive.VolumeLabel;
+                                }
+                            if (drivestring != Settings.TempPath.Substring(0, 3) || Settings.Key == "0000")
                             {
-                                Settings.TempPath = drivestring + "Temp";
-                                TempFolderFiles(); //Проверка папки на наличие в ней файлов
-                            }
-                            else if (Settings.Key == "0000") //Чтоб не доставать каждый раз окном выбора Темп-папки, а только при первом запуске
-                            {
-                                new Settings_Window(this, 2);
+                                Message mess = new Message(this);
+                                mess.ShowMessage(Languages.Translate("Maximum free drive space detected on") + " " + drivestring.Substring(0, 2) + " (" + dlabel + ").\r\n" +
+                                    Languages.Translate("Do you want use this drive for temp files?"), Languages.Translate("Place for temp files"), Message.MessageStyle.YesNo);
+                                if (mess.result == Message.Result.Yes)
+                                {
+                                    Settings.TempPath = drivestring + "Temp";
+                                    TempFolderFiles(); //Проверка папки на наличие в ней файлов
+                                }
+                                else if (Settings.Key == "0000") //Чтоб не доставать каждый раз окном выбора Темп-папки, а только при первом запуске
+                                {
+                                    new Settings_Window(this, 2);
+                                }
                             }
                         }
+                        if (!Directory.Exists(Settings.TempPath)) Directory.CreateDirectory(Settings.TempPath);
                     }
-                    if (!Directory.Exists(Settings.TempPath)) Directory.CreateDirectory(Settings.TempPath);
+                    catch (Exception ex)
+                    {
+                        ErrorException("SearchTempFolder: " + ex.Message, ex.StackTrace);
+                    }
 
                     //Запускаем таймер, по которому потом будем обновлять позицию слайдера, счетчик времени, и еще одну хреновину..
                     timer = new System.Timers.Timer();
@@ -377,6 +415,13 @@ namespace XviD4PSP
                         slider_pos.Margin = new Thickness(60, 7.7, 4, 7.7);
                     }
 
+                    //Если AviSynth не был найден при старте
+                    if (SysInfo.RetrievedAviSynthVersion.Length == 0)
+                    {
+                        throw new Exception(Languages.Translate("AviSynth is not found!") + "\r\n" +
+                            Languages.Translate("Please install AviSynth 2.5.7 MT or higher."));
+                    }
+
                     //Восстановление заданий из резервной копии (после вылета)
                     if (Settings.EnableBackup && File.Exists(Settings.TempPath + "\\backup.tsks"))
                     {
@@ -390,8 +435,6 @@ namespace XviD4PSP
                             action_open(x);
                             return;
                         }
-                        //else
-                        //    SafeDelete(Settings.TempPath + "\\backup.tsks");
                     }
 
                     //Открытие файла из командной строки (command line arguments)
@@ -1031,609 +1074,614 @@ namespace XviD4PSP
         {
             try
             {
-                if (x != null)
+                if (x == null) return;
+
+                //Если AviSynth не был найден при старте и не был установлен после него
+                if (SysInfo.RetrievedAviSynthVersion.Length == 0 && !SysInfo.RetrieveAviSynthVersion())
                 {
-                    string ext = Path.GetExtension(x.infilepath).ToLower();
+                    throw new Exception(Languages.Translate("AviSynth is not found!") + "\r\n" +
+                        Languages.Translate("Please install AviSynth 2.5.7 MT or higher."));
+                }
 
-                    //Уводим фокус с комбобоксов куда-нибудь!
-                    if (!slider_pos.Focus()) slider_Volume.Focus();
+                string ext = Path.GetExtension(x.infilepath).ToLower();
 
-                    //Проверка на "нехорошие" символы в путях
-                    if (ext != ".tsks" && !Calculate.ValidatePath(x.infilepath, !IsBatchOpening))
-                        return;
+                //Уводим фокус с комбобоксов куда-нибудь!
+                if (!slider_pos.Focus()) slider_Volume.Focus();
 
-                    //Закрываем уже открытый файл; обнуляем трим и его кнопки
-                    if (!IsBatchOpening && m != null) CloseFile();
-                    else ResetTrim();
+                //Проверка на "нехорошие" символы в путях
+                if (ext != ".tsks" && !Calculate.ValidatePath(x.infilepath, !IsBatchOpening))
+                    return;
 
-                    //Загружаем сохраненные задания
-                    if (ext == ".tsks")
-                    {
-                        RestoreTasks(x.infilepath, ref x);
+                //Закрываем уже открытый файл; обнуляем трим и его кнопки
+                if (!IsBatchOpening && m != null) CloseFile();
+                else ResetTrim();
 
-                        //Выходим при ошибке или если были только одни задания;
-                        //если был и массив, то открываем его
-                        if (x == null) return;
-                        else m = x.Clone();
-                        x = null;
+                //Загружаем сохраненные задания
+                if (ext == ".tsks")
+                {
+                    RestoreTasks(x.infilepath, ref x);
 
-                        LoadVideoPresets();
-
-                        if (m.outaudiostreams.Count > 0)
-                        {
-                            AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                            LoadAudioPresets();
-                            combo_aencoding.SelectedItem = outstream.encoding;
-                            Settings.SetAEncodingPreset(m.format, outstream.encoding);
-                        }
-                        else
-                        {
-                            combo_aencoding.SelectedItem = "Disabled";
-                        }
-
-                        combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut = m.format);
-                        combo_sbc.SelectedItem = Settings.SBC = m.sbc;
-                        combo_filtering.SelectedItem = Settings.Filtering = m.filtering;
-                        combo_vencoding.SelectedItem = m.vencoding;
-                        Settings.SetVEncodingPreset(m.format, m.vencoding);
-
-                        goto finish;
-                    }
-
-                    //добавляем список на очистку
-                    ffcache.AddRange(add_ff_cache(x.infileslist));
-
-                    //присваиваем заданию уникальный ключ
-                    if (Settings.Key == "9999")
-                        Settings.Key = "0000";
-                    x.key = Settings.Key;
-
-                    //имя
-                    if (x.taskname == null)
-                        x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
-
-                    //забиваем основные параметры кодирования
-                    x.format = Settings.FormatOut;
-                    x.sbc = Settings.SBC;
-                    x = ColorCorrection.DecodeProfile(x);
-                    x.filtering = Settings.Filtering;
-                    x.resizefilter = Settings.ResizeFilter;
-
-                    //Звук для d2v, dga и dgi файлов
-                    if (ext == ".d2v" || ext == ".dga" || ext == ".dgi")
-                    {
-                        x.indexfile = x.infilepath;
-                        ArrayList atracks = Indexing.GetTracks(x.indexfile);
-                        int n = 0;
-                        if (atracks.Count > 0 && Settings.EnableAudio)
-                        {
-                            foreach (string apath in atracks)
-                            {
-                                //забиваем в список все найденные треки
-                                MediaInfoWrapper med = new MediaInfoWrapper();
-                                AudioStream stream = med.GetAudioInfoFromAFile(apath);
-                                stream.delay = Calculate.GetDelay(apath);
-                                x.inaudiostreams.Add(stream.Clone());
-                                n++;
-                            }
-                            x.inaudiostream = 0;
-                        }
-                    }
-
-                    //блок для файлов с обязательной разборкой
-                    if (ext == ".dpg")
-                    {
-                        x.invcodecshort = "MPEG1";
-                        string outext = Format.GetValidRAWVideoEXT(x);
-                        string vpath = Settings.TempPath + "\\" + x.key + "." + outext;
-                        string apath = Settings.TempPath + "\\" + x.key + "_0.mp2";
-
-                        //удаляем старый файл
-                        SafeDelete(vpath);
-                        SafeDelete(apath);
-
-                        //извлекаем новый файл
-                        Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, vpath);
-                        if (!dem.IsErrors && Settings.EnableAudio) dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, apath);
-
-                        //проверка на удачное завершение
-                        if (File.Exists(vpath) && new FileInfo(vpath).Length != 0)
-                        {
-                            x.infilepath_source = x.infilepath;
-                            x.infilepath = vpath;
-                            x.infileslist = new string[] { x.infilepath };
-                            deletefiles.Add(vpath);
-                        }
-
-                        //проверка на удачное завершение
-                        if (File.Exists(apath) && new FileInfo(apath).Length != 0)
-                        {
-                            AudioStream stream = new AudioStream();
-                            stream.audiopath = apath;
-                            stream.audiofiles = new string[] { apath };
-                            stream = Format.GetValidADecoder(stream);
-                            x.inaudiostreams.Add(stream);
-                            x.inaudiostream = 0;
-                            deletefiles.Add(apath);
-                        }
-                    }
-
-                    //если файл MPEG делаем запрос на индексацию
-                    if (Calculate.IsMPEG(x.infilepath) && ext != ".d2v")
-                    {
-                        if (Calculate.IsValidVOBName(x.infilepath))
-                        {
-                            x.dvdname = Calculate.GetDVDName(x.infilepath);
-                            string title = Calculate.GetTitleNum(x.infilepath);
-                            if (!string.IsNullOrEmpty(title)) title = "_T" + title;
-                            x.taskname = x.dvdname + title;
-                        }
-
-                        if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source)
-                        {
-                            //проверяем индекс папку (проверка содержимого файла - если там МПЕГ, то нужна индексация; тут-же идет запуск МедиаИнфо)
-                            IndexChecker ich = new IndexChecker(x);
-                            if (ich.m == null) return;
-                            x = ich.m.Clone();
-
-                            if (x.indexfile != null)
-                            {
-                                //индексация
-                                if (!File.Exists(x.indexfile))
-                                {
-                                    Indexing index = new Indexing(x);
-                                    if (index.m == null) return;
-                                    x = index.m.Clone();
-                                }
-
-                                //Добавление кэш-файла в список на удаление
-                                if (!dgcache.Contains(x.indexfile) && Path.GetDirectoryName(x.indexfile).EndsWith(".index") && x.indexfile != x.infilepath)
-                                    dgcache.Add(x.indexfile);
-                            }
-                        }
-                    }
-
-                    //получаем информацию через MediaInfo
-                    if (ext != ".vdr")
-                    {
-                        Informer info = new Informer(x);
-                        if (info.m == null) return;
-                        x = info.m.Clone();
-                    }
-
-                    //определяем видео декодер
-                    if (x.vdecoder == 0) x = Format.GetValidVDecoder(x);
-
-                    //проверка на невозможность создать кеш файл для ffmpegsource
-                    if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Calculate.IsReadOnly(x.infilepath) && !Settings.FFmpegSource2)
-                    {
-                        Message mess = new Message(this);
-                        mess.ShowMessage(Languages.Translate("Input file on CD or DVD! FFmpegSource decodes files only from HardDrive.") + Environment.NewLine +
-                            Languages.Translate("Copy files to HardDrive or use DirectShowSource decoder.") + Environment.NewLine +
-                            Languages.Translate("Switch decoder to DirectShowSource and try once again?"), Languages.Translate("Error"), Message.MessageStyle.YesNo);
-                        if (mess.result == Message.Result.Yes)
-                        {
-                            x.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
-                        }
-                        else return;
-                    }
- 
-                    //принудительный фикс цвета для DVD
-                    if (Settings.AutoColorMatrix && x.format != Format.ExportFormats.Audio)
-                    {
-                        if (x.iscolormatrix == false &&
-                            x.invcodecshort == "MPEG2")
-                        {
-                            x.iscolormatrix = true;
-                            if (combo_sbc.Items.Contains("MPEG2Fix") &&
-                                Settings.SBC == "Disabled")
-                                combo_sbc.SelectedItem = "MPEG2Fix";
-                        }
-                    }
-
-                    //похоже что к нам идёт звковой файл
-                    if (x.format != Format.ExportFormats.Audio && !x.isvideo)
-                    {
-                        x.format = Format.ExportFormats.Audio;
-                        Settings.FormatOut = Format.ExportFormats.Audio;
-                        combo_format.SelectedItem = Format.EnumToString(Format.ExportFormats.Audio);
-                        LoadAudioPresets();
-                        SetAudioPreset();
-                    }
-
-                    //пытаемся точно узнать фреймрейт (если до этого не вышло)
-                    if (x.format != Format.ExportFormats.Audio)
-                    {
-                        if (x.inframerate == "" && ext != ".y4m" && ext != ".yuv")
-                        {
-                            FramerateDetector frd = new FramerateDetector(x);
-                            if (frd.m != null)
-                                x = frd.m.Clone();
-                        }
-                    }
-
+                    //Выходим при ошибке или если были только одни задания;
+                    //если был и массив, то открываем его
                     if (x == null) return;
+                    else m = x.Clone();
+                    x = null;
 
-                    //Извлечение видео для FFmpegSource
-                    if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
+                    LoadVideoPresets();
+
+                    if (m.outaudiostreams.Count > 0)
                     {
-                        //проверяем надо ли извлекать видео
-                        FFMpegSourceHelper fhelp = new FFMpegSourceHelper(x);
-                        if (fhelp.IsErrors)
-                        {
-                            if (!Settings.FFmpegSource2)
-                            {
-                                string outext = Format.GetValidRAWVideoEXT(x);
-                                string outpath = Settings.TempPath + "\\" + x.key + "." + outext;
-
-                                //удаляем старый файл
-                                SafeDelete(outpath);
-
-                                //извлекаем новый файл
-                                Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, outpath);
-
-                                //проверка на удачное завершение
-                                if (!dem.IsErrors && File.Exists(outpath) && new FileInfo(outpath).Length != 0)
-                                {
-                                    x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
-                                    x.infilepath_source = x.infilepath;
-                                    x.infilepath = outpath;
-                                    x.infileslist = new string[] { x.infilepath };
-                                    deletefiles.Add(outpath);
-                                }
-                            }
-                            else
-                            {
-                                //Для FFmpegSource2 просто выводим текст ошибки
-                                throw new Exception(fhelp.error_message);
-                            }
-                        }
+                        AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                        LoadAudioPresets();
+                        combo_aencoding.SelectedItem = outstream.encoding;
+                        Settings.SetAEncodingPreset(m.format, outstream.encoding);
+                    }
+                    else
+                    {
+                        combo_aencoding.SelectedItem = "Disabled";
                     }
 
-                    //Извлечение звука (1-й трек) для FFmpegSource и DirectShowSource, для DSS2 звук будет извлечен в Caching
-                    if (x.inaudiostreams.Count > 0 && Settings.EnableAudio && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource &&
-                        !Settings.FFMS_Enable_Audio || x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio))
+                    combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut = m.format);
+                    combo_sbc.SelectedItem = Settings.SBC = m.sbc;
+                    combo_filtering.SelectedItem = Settings.Filtering = m.filtering;
+                    combo_vencoding.SelectedItem = m.vencoding;
+                    Settings.SetVEncodingPreset(m.format, m.vencoding);
+
+                    goto finish;
+                }
+
+                //добавляем список на очистку
+                ffcache.AddRange(add_ff_cache(x.infileslist));
+
+                //присваиваем заданию уникальный ключ
+                if (Settings.Key == "9999")
+                    Settings.Key = "0000";
+                x.key = Settings.Key;
+
+                //имя
+                if (x.taskname == null)
+                    x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
+
+                //забиваем основные параметры кодирования
+                x.format = Settings.FormatOut;
+                x.sbc = Settings.SBC;
+                x = ColorCorrection.DecodeProfile(x);
+                x.filtering = Settings.Filtering;
+                x.resizefilter = Settings.ResizeFilter;
+
+                //Звук для d2v, dga и dgi файлов
+                if (ext == ".d2v" || ext == ".dga" || ext == ".dgi")
+                {
+                    x.indexfile = x.infilepath;
+                    ArrayList atracks = Indexing.GetTracks(x.indexfile);
+                    int n = 0;
+                    if (atracks.Count > 0 && Settings.EnableAudio)
                     {
-                        AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
-                        if (instream.audiopath == null)
+                        foreach (string apath in atracks)
                         {
-                            string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
-                            string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
+                            //забиваем в список все найденные треки
+                            MediaInfoWrapper med = new MediaInfoWrapper();
+                            AudioStream stream = med.GetAudioInfoFromAFile(apath);
+                            stream.delay = Calculate.GetDelay(apath);
+                            x.inaudiostreams.Add(stream.Clone());
+                            n++;
+                        }
+                        x.inaudiostream = 0;
+                    }
+                }
+
+                //блок для файлов с обязательной разборкой
+                if (ext == ".dpg")
+                {
+                    x.invcodecshort = "MPEG1";
+                    string outext = Format.GetValidRAWVideoEXT(x);
+                    string vpath = Settings.TempPath + "\\" + x.key + "." + outext;
+                    string apath = Settings.TempPath + "\\" + x.key + "_0.mp2";
+
+                    //удаляем старый файл
+                    SafeDelete(vpath);
+                    SafeDelete(apath);
+
+                    //извлекаем новый файл
+                    Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, vpath);
+                    if (!dem.IsErrors && Settings.EnableAudio) dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, apath);
+
+                    //проверка на удачное завершение
+                    if (File.Exists(vpath) && new FileInfo(vpath).Length != 0)
+                    {
+                        x.infilepath_source = x.infilepath;
+                        x.infilepath = vpath;
+                        x.infileslist = new string[] { x.infilepath };
+                        deletefiles.Add(vpath);
+                    }
+
+                    //проверка на удачное завершение
+                    if (File.Exists(apath) && new FileInfo(apath).Length != 0)
+                    {
+                        AudioStream stream = new AudioStream();
+                        stream.audiopath = apath;
+                        stream.audiofiles = new string[] { apath };
+                        stream = Format.GetValidADecoder(stream);
+                        x.inaudiostreams.Add(stream);
+                        x.inaudiostream = 0;
+                        deletefiles.Add(apath);
+                    }
+                }
+
+                //если файл MPEG делаем запрос на индексацию
+                if (Calculate.IsMPEG(x.infilepath) && ext != ".d2v")
+                {
+                    if (Calculate.IsValidVOBName(x.infilepath))
+                    {
+                        x.dvdname = Calculate.GetDVDName(x.infilepath);
+                        string title = Calculate.GetTitleNum(x.infilepath);
+                        if (!string.IsNullOrEmpty(title)) title = "_T" + title;
+                        x.taskname = x.dvdname + title;
+                    }
+
+                    if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source)
+                    {
+                        //проверяем индекс папку (проверка содержимого файла - если там МПЕГ, то нужна индексация; тут-же идет запуск МедиаИнфо)
+                        IndexChecker ich = new IndexChecker(x);
+                        if (ich.m == null) return;
+                        x = ich.m.Clone();
+
+                        if (x.indexfile != null)
+                        {
+                            //индексация
+                            if (!File.Exists(x.indexfile))
+                            {
+                                Indexing index = new Indexing(x);
+                                if (index.m == null) return;
+                                x = index.m.Clone();
+                            }
+
+                            //Добавление кэш-файла в список на удаление
+                            if (!dgcache.Contains(x.indexfile) && Path.GetDirectoryName(x.indexfile).EndsWith(".index") && x.indexfile != x.infilepath)
+                                dgcache.Add(x.indexfile);
+                        }
+                    }
+                }
+
+                //получаем информацию через MediaInfo
+                if (ext != ".vdr")
+                {
+                    Informer info = new Informer(x);
+                    if (info.m == null) return;
+                    x = info.m.Clone();
+                }
+
+                //определяем видео декодер
+                if (x.vdecoder == 0) x = Format.GetValidVDecoder(x);
+
+                //проверка на невозможность создать кеш файл для ffmpegsource
+                if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Calculate.IsReadOnly(x.infilepath) && !Settings.FFmpegSource2)
+                {
+                    Message mess = new Message(this);
+                    mess.ShowMessage(Languages.Translate("Input file on CD or DVD! FFmpegSource decodes files only from HardDrive.") + Environment.NewLine +
+                        Languages.Translate("Copy files to HardDrive or use DirectShowSource decoder.") + Environment.NewLine +
+                        Languages.Translate("Switch decoder to DirectShowSource and try once again?"), Languages.Translate("Error"), Message.MessageStyle.YesNo);
+                    if (mess.result == Message.Result.Yes)
+                    {
+                        x.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
+                    }
+                    else return;
+                }
+
+                //принудительный фикс цвета для DVD
+                if (Settings.AutoColorMatrix && x.format != Format.ExportFormats.Audio)
+                {
+                    if (x.iscolormatrix == false &&
+                        x.invcodecshort == "MPEG2")
+                    {
+                        x.iscolormatrix = true;
+                        if (combo_sbc.Items.Contains("MPEG2Fix") &&
+                            Settings.SBC == "Disabled")
+                            combo_sbc.SelectedItem = "MPEG2Fix";
+                    }
+                }
+
+                //похоже что к нам идёт звковой файл
+                if (x.format != Format.ExportFormats.Audio && !x.isvideo)
+                {
+                    x.format = Format.ExportFormats.Audio;
+                    Settings.FormatOut = Format.ExportFormats.Audio;
+                    combo_format.SelectedItem = Format.EnumToString(Format.ExportFormats.Audio);
+                    LoadAudioPresets();
+                    SetAudioPreset();
+                }
+
+                //пытаемся точно узнать фреймрейт (если до этого не вышло)
+                if (x.format != Format.ExportFormats.Audio)
+                {
+                    if (x.inframerate == "" && ext != ".y4m" && ext != ".yuv")
+                    {
+                        FramerateDetector frd = new FramerateDetector(x);
+                        if (frd.m != null)
+                            x = frd.m.Clone();
+                    }
+                }
+
+                if (x == null) return;
+
+                //Извлечение видео для FFmpegSource
+                if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
+                {
+                    //проверяем надо ли извлекать видео
+                    FFMpegSourceHelper fhelp = new FFMpegSourceHelper(x);
+                    if (fhelp.IsErrors)
+                    {
+                        if (!Settings.FFmpegSource2)
+                        {
+                            string outext = Format.GetValidRAWVideoEXT(x);
+                            string outpath = Settings.TempPath + "\\" + x.key + "." + outext;
 
                             //удаляем старый файл
                             SafeDelete(outpath);
 
                             //извлекаем новый файл
-                            if (outext == ".wav")
-                            {
-                                Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
-                                if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
-                            }
-                            else
-                            {
-                                Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, outpath);
-                                if (dem.IsErrors) throw new Exception(dem.error_message);
-                            }
+                            Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, outpath);
 
                             //проверка на удачное завершение
-                            if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                            if (!dem.IsErrors && File.Exists(outpath) && new FileInfo(outpath).Length != 0)
                             {
-                                instream.audiopath = outpath;
-                                instream.audiofiles = new string[] { outpath };
-                                instream = Format.GetValidADecoder(instream);
+                                x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
+                                x.infilepath_source = x.infilepath;
+                                x.infilepath = outpath;
+                                x.infileslist = new string[] { x.infilepath };
                                 deletefiles.Add(outpath);
                             }
                         }
-                    }
-
-                    //получаем выходной фреймрейт
-                    x = Format.GetValidFramerate(x);
-                    x = Calculate.UpdateOutFrames(x);
-
-                    //Получаем информацию через AviSynth и ловим ошибки
-                    Caching cach = new Caching(x);
-                    if (cach.m == null) return;
-                    x = cach.m.Clone();
-
-                    if (x.format != Format.ExportFormats.Audio)
-                    {
-                        //ситуация когда стоит попробовать декодировать аудио в wav
-                        if (cach.error == "FFmpegSource: Audio codec not found")
+                        else
                         {
-                            AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
+                            //Для FFmpegSource2 просто выводим текст ошибки
+                            throw new Exception(fhelp.error_message);
+                        }
+                    }
+                }
 
-                            string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + ".wav";
+                //Извлечение звука (1-й трек) для FFmpegSource и DirectShowSource, для DSS2 звук будет извлечен в Caching
+                if (x.inaudiostreams.Count > 0 && Settings.EnableAudio && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource &&
+                    !Settings.FFMS_Enable_Audio || x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio))
+                {
+                    AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
+                    if (instream.audiopath == null)
+                    {
+                        string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
+                        string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
+
+                        //удаляем старый файл
+                        SafeDelete(outpath);
+
+                        //извлекаем новый файл
+                        if (outext == ".wav")
+                        {
                             Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
                             if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
+                        }
+                        else
+                        {
+                            Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, outpath);
+                            if (dem.IsErrors) throw new Exception(dem.error_message);
+                        }
 
-                            //проверка на удачное завершение
-                            if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
-                            {
-                                instream.audiopath = outpath;
-                                instream.audiofiles = new string[] { outpath };
-                                instream = Format.GetValidADecoder(instream);
-                                deletefiles.Add(outpath);
-                            }
+                        //проверка на удачное завершение
+                        if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                        {
+                            instream.audiopath = outpath;
+                            instream.audiofiles = new string[] { outpath };
+                            instream = Format.GetValidADecoder(instream);
+                            deletefiles.Add(outpath);
                         }
                     }
+                }
 
-                    //забиваем-обновляем аудио массивы
-                    x = FillAudio(x);
+                //получаем выходной фреймрейт
+                x = Format.GetValidFramerate(x);
+                x = Calculate.UpdateOutFrames(x);
 
-                    //выбираем трек
-                    if (x.inaudiostreams.Count > 1 && Settings.EnableAudio)
-                    {
-                        AudioOptions ao = new AudioOptions(x, this, AudioOptions.AudioOptionsModes.TracksOnly);
-                        if (ao.m == null) return;
-                        x = ao.m.Clone();
-                    }
+                //Получаем информацию через AviSynth и ловим ошибки
+                Caching cach = new Caching(x);
+                if (cach.m == null) return;
+                x = cach.m.Clone();
 
-                    //извлечение трека при badmixing
-                    if (x.inaudiostreams.Count == 1 && Settings.EnableAudio)
+                if (x.format != Format.ExportFormats.Audio)
+                {
+                    //ситуация когда стоит попробовать декодировать аудио в wav
+                    if (cach.error == "FFmpegSource: Audio codec not found")
                     {
                         AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
 
-                        if (instream.badmixing)
-                        {
-                            string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
-                            instream.audiopath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
-                            instream.audiofiles = new string[] { instream.audiopath };
-                            instream = Format.GetValidADecoder(instream);
+                        string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + ".wav";
+                        Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
+                        if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
 
-                            if (!File.Exists(instream.audiopath))
-                            {
-                                Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
-                                if (dem.IsErrors) throw new Exception(dem.error_message);
-                            }
+                        //проверка на удачное завершение
+                        if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                        {
+                            instream.audiopath = outpath;
+                            instream.audiofiles = new string[] { outpath };
+                            instream = Format.GetValidADecoder(instream);
+                            deletefiles.Add(outpath);
                         }
                     }
+                }
 
-                    //забиваем видео настройки
-                    if (x.format != Format.ExportFormats.Audio)
+                //забиваем-обновляем аудио массивы
+                x = FillAudio(x);
+
+                //выбираем трек
+                if (x.inaudiostreams.Count > 1 && Settings.EnableAudio)
+                {
+                    AudioOptions ao = new AudioOptions(x, this, AudioOptions.AudioOptionsModes.TracksOnly);
+                    if (ao.m == null) return;
+                    x = ao.m.Clone();
+                }
+
+                //извлечение трека при badmixing
+                if (x.inaudiostreams.Count == 1 && Settings.EnableAudio)
+                {
+                    AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
+
+                    if (instream.badmixing)
                     {
-                        x.vencoding = Settings.GetVEncodingPreset(Settings.FormatOut);
-                        x.outvcodec = PresetLoader.GetVCodec(x);
-                        x.vpasses = PresetLoader.GetVCodecPasses(x);
+                        string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
+                        instream.audiopath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
+                        instream.audiofiles = new string[] { instream.audiopath };
+                        instream = Format.GetValidADecoder(instream);
+
+                        if (!File.Exists(instream.audiopath))
+                        {
+                            Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, instream.audiopath);
+                            if (dem.IsErrors) throw new Exception(dem.error_message);
+                        }
+                    }
+                }
+
+                //забиваем видео настройки
+                if (x.format != Format.ExportFormats.Audio)
+                {
+                    x.vencoding = Settings.GetVEncodingPreset(Settings.FormatOut);
+                    x.outvcodec = PresetLoader.GetVCodec(x);
+                    x.vpasses = PresetLoader.GetVCodecPasses(x);
+                }
+                else
+                {
+                    x.vencoding = "Disabled";
+                    x.outvcodec = "Disabled";
+                    x.vpasses.Clear();
+                    combo_vencoding.SelectedItem = x.vencoding;
+                }
+
+                //забиваем аргументы к кодированию аудио и видео
+                x = PresetLoader.DecodePresets(x);
+
+                //автоматический деинтерлейс
+                if (x.format != Format.ExportFormats.Audio)
+                {
+                    //Клонируем деинтерлейс от предыдущего файла
+                    if (IsBatchOpening && m != null && Settings.BatchCloneDeint)
+                    {
+                        x.interlace = m.interlace;
+                        x.fieldOrder = m.fieldOrder;
+                        x.deinterlace = m.deinterlace;
                     }
                     else
                     {
-                        x.vencoding = "Disabled";
-                        x.outvcodec = "Disabled";
-                        x.vpasses.Clear();
-                        combo_vencoding.SelectedItem = x.vencoding;
-                    }
-
-                    //забиваем аргументы к кодированию аудио и видео
-                    x = PresetLoader.DecodePresets(x);
-
-                    //автоматический деинтерлейс
-                    if (x.format != Format.ExportFormats.Audio)
-                    {
-                        //Клонируем деинтерлейс от предыдущего файла
-                        if (IsBatchOpening && m != null && Settings.BatchCloneDeint)
+                        if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.AllFiles &&
+                            x.outvcodec != "Copy" ||
+                            Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
+                            Calculate.IsMPEG(x.infilepath) &&
+                            x.outvcodec != "Copy" ||
+                            Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
+                            ext == ".evo" &&
+                            x.outvcodec != "Copy")
                         {
-                            x.interlace = m.interlace;
-                            x.fieldOrder = m.fieldOrder;
-                            x.deinterlace = m.deinterlace;
-                        }
-                        else
-                        {
-                            if (Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.AllFiles &&
-                                x.outvcodec != "Copy" ||
-                                Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
-                                Calculate.IsMPEG(x.infilepath) &&
-                                x.outvcodec != "Copy" ||
-                                Settings.AutoDeinterlaceMode == Settings.AutoDeinterlaceModes.MPEGs &&
-                                ext == ".evo" &&
-                                x.outvcodec != "Copy")
+                            if (x.inframerate == "23.976")
                             {
-                                if (x.inframerate == "23.976")
-                                {
-                                    x.interlace = SourceType.PROGRESSIVE;
-                                    x = Format.GetOutInterlace(x);
-                                }
-                                else
-                                {
-                                    //перепроверяем входной интерлейс
-                                    SourceDetector sd = new SourceDetector(x);
-                                    if (sd.m != null) x = sd.m.Clone();
-                                }
+                                x.interlace = SourceType.PROGRESSIVE;
+                                x = Format.GetOutInterlace(x);
                             }
                             else
                             {
-                                x = Format.GetOutInterlace(x);
+                                //перепроверяем входной интерлейс
+                                SourceDetector sd = new SourceDetector(x);
+                                if (sd.m != null) x = sd.m.Clone();
                             }
-                        }
-                    }
-
-                    //ищем субтитры
-                    if (x.format != Format.ExportFormats.Audio)
-                    {
-                        string subs = Calculate.RemoveExtention(x.infilepath, true);
-                        if (File.Exists(subs + ".srt")) x.subtitlepath = subs + ".srt";
-                        if (File.Exists(subs + ".sub")) x.subtitlepath = subs + ".sub";
-                        if (File.Exists(subs + ".idx")) x.subtitlepath = subs + ".idx";
-                        if (File.Exists(subs + ".ssa")) x.subtitlepath = subs + ".ssa";
-                        if (File.Exists(subs + ".ass")) x.subtitlepath = subs + ".ass";
-                        if (File.Exists(subs + ".psb")) x.subtitlepath = subs + ".psb";
-                        if (File.Exists(subs + ".smi")) x.subtitlepath = subs + ".smi";
-                    }
-
-                    //автокроп
-                    if (x.format != Format.ExportFormats.Audio)
-                    {
-                        //Клонируем АР от предыдущего файла
-                        if (IsBatchOpening && m != null && Settings.BatchCloneAR)
-                        {
-                            x.outresw = m.outresw;
-                            x.outresh = m.outresh;
-                            x.cropl = x.cropl_copy = m.cropl;
-                            x.cropt = x.cropt_copy = m.cropt;
-                            x.cropr = x.cropr_copy = m.cropr;
-                            x.cropb = x.cropb_copy = m.cropb;
-                            x.blackw = m.blackw;
-                            x.blackh = m.blackh;
-                            x.sar = m.sar;
-                            x.outaspect = m.outaspect;
-                            x.aspectfix = m.aspectfix;
                         }
                         else
                         {
-                            if (Settings.AutocropMode == Autocrop.AutocropMode.AllFiles &&
-                            x.outvcodec != "Copy" ||
-                            Settings.AutocropMode == Autocrop.AutocropMode.MPEGOnly &&
-                            Calculate.IsMPEG(x.infilepath) &&
-                            x.outvcodec != "Copy")
-                            {
-                                if (x.format != Format.ExportFormats.BluRay)
-                                {
-                                    Autocrop acrop = new Autocrop(x, this);
-                                    if (acrop.m == null) return;
-                                    x = acrop.m.Clone();
-                                }
-                            }
+                            x = Format.GetOutInterlace(x);
+                        }
+                    }
+                }
 
-                            //подправляем входной аспект
-                            x = AspectResolution.FixInputAspect(x);
+                //ищем субтитры
+                if (x.format != Format.ExportFormats.Audio)
+                {
+                    string subs = Calculate.RemoveExtention(x.infilepath, true);
+                    if (File.Exists(subs + ".srt")) x.subtitlepath = subs + ".srt";
+                    if (File.Exists(subs + ".sub")) x.subtitlepath = subs + ".sub";
+                    if (File.Exists(subs + ".idx")) x.subtitlepath = subs + ".idx";
+                    if (File.Exists(subs + ".ssa")) x.subtitlepath = subs + ".ssa";
+                    if (File.Exists(subs + ".ass")) x.subtitlepath = subs + ".ass";
+                    if (File.Exists(subs + ".psb")) x.subtitlepath = subs + ".psb";
+                    if (File.Exists(subs + ".smi")) x.subtitlepath = subs + ".smi";
+                }
 
-                            //забиваем видео параметры на выход
-                            x = Format.GetValidResolution(x);
-                            x = Format.GetValidOutAspect(x);
-                            x = AspectResolution.FixAspectDifference(x);
-                        }
-                        
-                        //Клонируем частоту кадров от предыдущего файла
-                        if (IsBatchOpening && m != null && Settings.BatchCloneFPS)
-                        {
-                            x.outframerate = m.outframerate;
-                        }
-                        else
-                        {
-                            x = Format.GetValidFramerate(x);
-                        }
-                        
-                        //обновление выходных битрейтов
-                        if (x.outvcodec == "Disabled") x.outvbitrate = 0;
+                //автокроп
+                if (x.format != Format.ExportFormats.Audio)
+                {
+                    //Клонируем АР от предыдущего файла
+                    if (IsBatchOpening && m != null && Settings.BatchCloneAR)
+                    {
+                        x.outresw = m.outresw;
+                        x.outresh = m.outresh;
+                        x.cropl = x.cropl_copy = m.cropl;
+                        x.cropt = x.cropt_copy = m.cropt;
+                        x.cropr = x.cropr_copy = m.cropr;
+                        x.cropb = x.cropb_copy = m.cropb;
+                        x.blackw = m.blackw;
+                        x.blackh = m.blackh;
+                        x.sar = m.sar;
+                        x.outaspect = m.outaspect;
+                        x.aspectfix = m.aspectfix;
                     }
                     else
                     {
-                        //для звуковых заданий 
-                        x.outframerate = x.inframerate;
-                        x.outresw = x.inresw;
-                        x.outresh = x.inresh;
-                        x.outaspect = x.inaspect;
-
-                        //обнуляем делей
-                        foreach (object o in x.outaudiostreams)
+                        if (Settings.AutocropMode == Autocrop.AutocropMode.AllFiles &&
+                        x.outvcodec != "Copy" ||
+                        Settings.AutocropMode == Autocrop.AutocropMode.MPEGOnly &&
+                        Calculate.IsMPEG(x.infilepath) &&
+                        x.outvcodec != "Copy")
                         {
-                            AudioStream s = (AudioStream)o;
-                            s.delay = 0;
+                            if (x.format != Format.ExportFormats.BluRay)
+                            {
+                                Autocrop acrop = new Autocrop(x, this);
+                                if (acrop.m == null) return;
+                                x = acrop.m.Clone();
+                            }
                         }
 
-                        //запрещаем видео разделы
-                        combo_vencoding.IsEnabled = false;
-                        button_edit_vencoding.IsEnabled = false;
-                        combo_sbc.IsEnabled = false;
-                        button_edit_sbc.IsEnabled = false;
+                        //подправляем входной аспект
+                        x = AspectResolution.FixInputAspect(x);
+
+                        //забиваем видео параметры на выход
+                        x = Format.GetValidResolution(x);
+                        x = Format.GetValidOutAspect(x);
+                        x = AspectResolution.FixAspectDifference(x);
                     }
 
-                    //переполучаем параметры из профилей
-                    x = PresetLoader.DecodePresets(x);
-
-                    //Клонируем Трим от предыдущего файла
-                    if (IsBatchOpening && m != null && Settings.BatchCloneTrim)
-                    {                       
-                        x.trim_start = m.trim_start;
-                        x.trim_end = m.trim_end;
-                    }
-
-                    //Пересчитываем кол-во кадров и продолжительность
-                    x = Calculate.UpdateOutFrames(x);
-
-                    //создаём AviSynth скрипт
-                    x = AviSynthScripting.CreateAutoAviSynthScript(x);
-
-                    //Автогромкость
-                    if (x.inaudiostreams.Count > 0)
+                    //Клонируем частоту кадров от предыдущего файла
+                    if (IsBatchOpening && m != null && Settings.BatchCloneFPS)
                     {
-                        //определяем громкоcть
-                        x.volume = Settings.Volume;
-                        if (Settings.Volume != "Disabled" &&
-                            Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnImport)
-                        {
-                            Normalize norm = new Normalize(x);
-                            if (norm.m == null) return;
-                            x = norm.m.Clone();
-                            x = AviSynthScripting.CreateAutoAviSynthScript(x);
-                        }
-                    }
-
-                    //проверка на размер
-                    x.outfilesize = Calculate.GetEncodingSize(x);
-
-                    //запрещаем профиль кодирования если нет звука
-                    if (x.inaudiostreams.Count == 0 || x.outaudiostreams.Count == 0)
-                    {
-                        combo_aencoding.SelectedItem = "Disabled";
+                        x.outframerate = m.outframerate;
                     }
                     else
                     {
-                        if (combo_aencoding.SelectedItem.ToString() == "Disabled")
-                            combo_aencoding.SelectedItem = Settings.GetAEncodingPreset(x.format);
+                        x = Format.GetValidFramerate(x);
                     }
 
-                    //проверяем можно ли копировать данный формат
-                    if (x.vencoding == "Copy")
-                    {
-                        string CopyProblems = Format.ValidateCopyVideo(x);
-                        if (CopyProblems != null)
-                        {
-                            Message mess = new Message(this);
-                            mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
-                                " " + Format.EnumToString(x.format) + ": " + CopyProblems + "." + Environment.NewLine + Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
-                        }
-                    }
-
-                    //настройки форматов
-                    x.dontmuxstreams = Format.GetMultiplexing(x.format);
-                    x.split = Format.GetSplitting(x.format);
-
-                    //передаём массив
-                    m = x.Clone();
-                    x = null;
-
-                finish:
-
-                    //снимаем выделение
-                    list_tasks.SelectedIndex = -1;
-                    //OldSelectedIndex = -1;
-
-                    //загружаем скрипт в форму
-                    if (!IsBatchOpening)
-                    {
-                        if (!PauseAfterFirst)
-                        {
-                            //Обновляем список недавно открытых файлов
-                            string source = (string.IsNullOrEmpty(m.infilepath_source)) ? m.infilepath : m.infilepath_source;
-                            string[] rfiles = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
-                            string output = source + "; ";
-                            for (int i = 0; i < rfiles.Length && i < 5; i++)
-                            {
-                                string line = rfiles[i].Trim();
-                                if (line != source && line != "") output += (line + "; ");
-                            }
-                            Settings.RecentFiles = output;
-                            UpdateRecentFiles();
-                        }
-
-                        LoadVideo(MediaLoad.load);
-                    }
-
-                    //удаляем старый кеш
-                    clear_ff_cache();
+                    //обновление выходных битрейтов
+                    if (x.outvcodec == "Disabled") x.outvbitrate = 0;
                 }
                 else
-                    return;
+                {
+                    //для звуковых заданий 
+                    x.outframerate = x.inframerate;
+                    x.outresw = x.inresw;
+                    x.outresh = x.inresh;
+                    x.outaspect = x.inaspect;
+
+                    //обнуляем делей
+                    foreach (object o in x.outaudiostreams)
+                    {
+                        AudioStream s = (AudioStream)o;
+                        s.delay = 0;
+                    }
+
+                    //запрещаем видео разделы
+                    combo_vencoding.IsEnabled = false;
+                    button_edit_vencoding.IsEnabled = false;
+                    combo_sbc.IsEnabled = false;
+                    button_edit_sbc.IsEnabled = false;
+                }
+
+                //переполучаем параметры из профилей
+                x = PresetLoader.DecodePresets(x);
+
+                //Клонируем Трим от предыдущего файла
+                if (IsBatchOpening && m != null && Settings.BatchCloneTrim)
+                {
+                    x.trim_start = m.trim_start;
+                    x.trim_end = m.trim_end;
+                }
+
+                //Пересчитываем кол-во кадров и продолжительность
+                x = Calculate.UpdateOutFrames(x);
+
+                //создаём AviSynth скрипт
+                x = AviSynthScripting.CreateAutoAviSynthScript(x);
+
+                //Автогромкость
+                if (x.inaudiostreams.Count > 0)
+                {
+                    //определяем громкоcть
+                    x.volume = Settings.Volume;
+                    if (Settings.Volume != "Disabled" &&
+                        Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnImport)
+                    {
+                        Normalize norm = new Normalize(x);
+                        if (norm.m == null) return;
+                        x = norm.m.Clone();
+                        x = AviSynthScripting.CreateAutoAviSynthScript(x);
+                    }
+                }
+
+                //проверка на размер
+                x.outfilesize = Calculate.GetEncodingSize(x);
+
+                //запрещаем профиль кодирования если нет звука
+                if (x.inaudiostreams.Count == 0 || x.outaudiostreams.Count == 0)
+                {
+                    combo_aencoding.SelectedItem = "Disabled";
+                }
+                else
+                {
+                    if (combo_aencoding.SelectedItem.ToString() == "Disabled")
+                        combo_aencoding.SelectedItem = Settings.GetAEncodingPreset(x.format);
+                }
+
+                //проверяем можно ли копировать данный формат
+                if (x.vencoding == "Copy")
+                {
+                    string CopyProblems = Format.ValidateCopyVideo(x);
+                    if (CopyProblems != null)
+                    {
+                        Message mess = new Message(this);
+                        mess.ShowMessage(Languages.Translate("The stream contains parameters incompatible with this format") +
+                            " " + Format.EnumToString(x.format) + ": " + CopyProblems + "." + Environment.NewLine +
+                            Languages.Translate("(You see this message because video encoder = Copy)"), Languages.Translate("Warning"));
+                    }
+                }
+
+                //настройки форматов
+                x.dontmuxstreams = Format.GetMultiplexing(x.format);
+                x.split = Format.GetSplitting(x.format);
+
+                //передаём массив
+                m = x.Clone();
+                x = null;
+
+            finish:
+
+                //снимаем выделение
+                list_tasks.SelectedIndex = -1;
+                //OldSelectedIndex = -1;
+
+                //загружаем скрипт в форму
+                if (!IsBatchOpening)
+                {
+                    if (!PauseAfterFirst)
+                    {
+                        //Обновляем список недавно открытых файлов
+                        string source = (string.IsNullOrEmpty(m.infilepath_source)) ? m.infilepath : m.infilepath_source;
+                        string[] rfiles = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
+                        string output = source + "; ";
+                        for (int i = 0; i < rfiles.Length && i < 5; i++)
+                        {
+                            string line = rfiles[i].Trim();
+                            if (line != source && line != "") output += (line + "; ");
+                        }
+                        Settings.RecentFiles = output;
+                        UpdateRecentFiles();
+                    }
+
+                    LoadVideo(MediaLoad.load);
+                }
+
+                //удаляем старый кеш
+                clear_ff_cache();
             }
             catch (Exception ex)
             {
