@@ -466,7 +466,7 @@ namespace XviD4PSP
             }
         }
 
-        private int _max_quant = 51;
+        private int _max_quant = 69;
         public int max_quant
         {
             get

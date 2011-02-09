@@ -573,9 +573,9 @@ namespace XviD4PSP
                       m.encodingmode == Settings.EncodingModes.ThreePassSize)
                 num_bitrate.ToolTip = "Set file size (Default: InFileSize)";
             else if (m.encodingmode == Settings.EncodingModes.Quantizer)
-                num_bitrate.ToolTip = "Set target quantizer. Lower - better quality but bigger filesize.\r\n(Default: 23)";
+                num_bitrate.ToolTip = "Set target quantizer (0 - 69). Lower - better quality but bigger filesize.\r\n(Default: 23)";
             else
-                num_bitrate.ToolTip = "Set target quality. Lower - better quality but bigger filesize.\r\n(Default: 23)";
+                num_bitrate.ToolTip = "Set target quality (0 - 51). Lower - better quality but bigger filesize.\r\n(Default: 23)";
 
             combo_mode.ToolTip = "Encoding mode";
             check_lossless.ToolTip = "Lossless encoding mode. High 4:4:4 AVC profile only!";
@@ -1809,19 +1809,21 @@ namespace XviD4PSP
                 num_bitrate.Minimum = 1;
                 num_bitrate.Maximum = Format.GetMaxVBitrate(m);
             }
-            else if (m.encodingmode == Settings.EncodingModes.Quality ||
-                m.encodingmode == Settings.EncodingModes.Quantizer ||
-                m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
-                m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-            {
-                num_bitrate.Minimum = 0;
-                num_bitrate.Maximum = 51;
-            }
             else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
                 m.encodingmode == Settings.EncodingModes.ThreePassSize)
             {
                 num_bitrate.Minimum = 1;
                 num_bitrate.Maximum = 50000;
+            }
+            else if (m.encodingmode == Settings.EncodingModes.Quantizer)
+            {
+                num_bitrate.Minimum = 0;
+                num_bitrate.Maximum = 69;
+            }
+            else
+            {
+                num_bitrate.Minimum = 0;
+                num_bitrate.Maximum = 51;
             }
         }
 

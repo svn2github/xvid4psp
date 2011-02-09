@@ -206,7 +206,7 @@ namespace XviD4PSP
         public static bool RetrieveAviSynthVersion()
         {
 #if DEBUG
-            AviSynthVersion = "Unknown (DEBUG mode)";
+            RetrievedAviSynthVersion = "Unknown (DEBUG mode)";
 #else
             AviSynthReader reader = new AviSynthReader();
 
