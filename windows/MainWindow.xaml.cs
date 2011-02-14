@@ -36,6 +36,7 @@ namespace XviD4PSP
         private object backup_lock = new object();
 
         //player
+        private string total_frames = "";
         private string filepath = "";
         private Brush oldbrush;
         private TimeSpan oldpos;
@@ -61,11 +62,6 @@ namespace XviD4PSP
         private int pic_frame = 0;
         private int pic_total_frames = 0;
         private TimeSpan pic_duration = TimeSpan.Zero;
-
-        private string total_frames = "";
-        private int trim_start = 0;
-        private int trim_end = 0;
-        private bool trim_is_on = false;
 
         private bool IsAudioOnly = false;
         private bool IsFullScreen = false;
@@ -534,8 +530,8 @@ namespace XviD4PSP
                 case ("Fullscreen"): SwitchToFullScreen(); break;
                 case ("Volume+"): VolumePlus(); break;
                 case ("Volume-"): VolumeMinus(); break;
-                case ("Set Start"): button_set_start_Click(null, null); break;
-                case ("Set End"): button_set_end_Click(null, null); break;
+                case ("Set Start"): button_set_trim_value_Click(button_set_start, null); break;
+                case ("Set End"): button_set_trim_value_Click(button_set_end, null); break;
                 case ("Apply Trim"): button_apply_trim_Click(null, null); break;
                 case ("Add/Remove bookmark"): AddToBookmarks_Click(null, null); break;
             }
@@ -1593,8 +1589,9 @@ namespace XviD4PSP
                 //Клонируем Трим от предыдущего файла
                 if (IsBatchOpening && m != null && Settings.BatchCloneTrim)
                 {
-                    x.trim_start = m.trim_start;
-                    x.trim_end = m.trim_end;
+                    x.trims = (ArrayList)m.trims.Clone();
+                    x.trim_is_on = m.trim_is_on;
+                    x.trim_num = m.trim_num;
                 }
 
                 //Пересчитываем кол-во кадров и продолжительность
@@ -1830,8 +1827,8 @@ namespace XviD4PSP
                 if (outstream.codec == "AAC" && mass.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass)
                 {
                     if (File.Exists(instream.audiopath) && Path.GetExtension(instream.audiopath) == ".wav" && mass.script == AviSynthScripting.CreateAutoAviSynthScript(mass).script &&
-                        mass.trim_start == 0 && mass.trim_end == 0 && !m.testscript && instream.bits == outstream.bits && instream.channels == outstream.channels && instream.delay ==
-                        outstream.delay && instream.gain == outstream.gain && instream.samplerate == outstream.samplerate)
+                        !mass.trim_is_on && !m.testscript && instream.bits == outstream.bits && instream.channels == outstream.channels && instream.delay == outstream.delay &&
+                        instream.gain == outstream.gain && instream.samplerate == outstream.samplerate)
                     {
                         outstream.nerotemp = instream.audiopath;
                     }
@@ -2248,13 +2245,23 @@ namespace XviD4PSP
                 menu_avisynth_guide_en.Header = Languages.Translate("AviSynth guide") + " (EN)";
                 menu_avisynth_guide_ru.Header = Languages.Translate("AviSynth guide") + " (RU)";
 
-                button_set_start.Content = Languages.Translate("Set Start");
-                button_set_end.Content = Languages.Translate("Set End");
-                button_apply_trim.Content = Languages.Translate("Apply Trim");
-                textbox_start.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", button_set_start.Content.ToString()) +
+                if (m != null)
+                {
+                    SetTrimsButtons();
+                }
+                else
+                {
+                    button_set_start.Content = Languages.Translate("Set Start");
+                    button_set_end.Content = Languages.Translate("Set End");
+                    button_apply_trim.Content = Languages.Translate("Apply Trim");
+                }
+                textbox_start.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", Languages.Translate("Set Start")) +
                     "\r\n" + Languages.Translate("If you leave this field empty, then current frame number will be entered automatically.");
-                textbox_end.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", button_set_end.Content.ToString()) +
+                textbox_end.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", Languages.Translate("Set End")) +
                     "\r\n" + Languages.Translate("If you leave this field empty, then current frame number will be entered automatically.");
+                button_trim_plus.ToolTip = Languages.Translate("Next/New region");
+                button_trim_minus.ToolTip = Languages.Translate("Previous region");
+                button_trim_delete.ToolTip = Languages.Translate("Delete current region");
                 menu_open_folder.Header = Languages.Translate("Open folder") + "...";
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
@@ -3614,6 +3621,8 @@ namespace XviD4PSP
 
                 if (script != m.script)
                     LoadVideo(MediaLoad.load);
+                else
+                    MenuHider(true);
 
                 //обновляем дочерние окна
                 ReloadChildWindows();
@@ -5751,113 +5760,197 @@ namespace XviD4PSP
 
         private void ResetTrim()
         {
-            trim_start = trim_end = 0;
+            button_apply_trim.ToolTip = null;
             textbox_start.Text = textbox_end.Text = "";
             button_set_start.Content = Languages.Translate("Set Start");
             button_set_end.Content = Languages.Translate("Set End");
             button_apply_trim.Content = Languages.Translate("Apply Trim");
-            textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = false;
+            textbox_start.IsReadOnly = textbox_end.IsReadOnly = false;
         }
 
-        private void button_set_start_Click(object sender, RoutedEventArgs e)
+        private void SetTrimsButtons()
         {
-            if (m != null && !trim_is_on)
+            string tooltip = null;
+            for (int i = 0; i < m.trims.Count; i++)
             {
-                if (Convert.ToString(button_set_start.Content) != Languages.Translate("Clear"))
-                {
-                    if (textbox_start.Text == "") //Ничего не вписано - определяем текущий кадр
-                    {
-                        trim_start = Convert.ToInt32(Position.TotalSeconds * fps);
-                        textbox_start.Text = Convert.ToString(trim_start);
-                    }
-                    else if (textbox_start.Text.Contains(":")) //Вписано время - пересчитываем в кадр
-                    {
-                        TimeSpan result = TimeSpan.Zero;
-                        if (TimeSpan.TryParse(textbox_start.Text, out result))
-                        {
-                            trim_start = Convert.ToInt32(result.TotalSeconds * fps);
-                            textbox_start.Text = Convert.ToString(trim_start);
-                        }
-                        else
-                            return;
-                    }
-                    else if (!int.TryParse(textbox_start.Text, out trim_start)) //Вписан номер кадра
-                        return;
+                tooltip += (i + 1) + ". " + (((Trim)m.trims[i]).start > 0 ? ((Trim)m.trims[i]).start.ToString() : "start") +
+                    "-" + (((Trim)m.trims[i]).end > 0 ? ((Trim)m.trims[i]).end.ToString() : "end");
 
-                    textbox_start.IsReadOnly = true;
-                    button_set_start.Content = Languages.Translate("Clear");
+                if (i == m.trim_num) tooltip += " <-";
+                if (i != m.trims.Count - 1) tooltip += "\r\n";
+                else if (i < m.trim_num) tooltip += "\r\n" + (i + 2) + ". new_region <-";
+            }
+
+            Trim trim = (m.trims.Count > m.trim_num) ? (Trim)m.trims[m.trim_num] : null;
+
+            //"Начало"
+            if (trim != null && trim.start >= 0 || m.trim_is_on)
+            {
+                textbox_start.IsReadOnly = true;
+                button_set_start.Content = Languages.Translate("Clear");
+                textbox_start.Text = (trim != null && trim.start >= 0) ? trim.start.ToString() : "";
+            }
+            else
+            {
+                textbox_start.IsReadOnly = false;
+                button_set_start.Content = Languages.Translate("Set Start");
+                textbox_start.Text = "";
+            }
+
+            //"Конец"
+            if (trim != null && trim.end >= 0 || m.trim_is_on)
+            {
+                textbox_end.IsReadOnly = true;
+                button_set_end.Content = Languages.Translate("Clear");
+                textbox_end.Text = (trim != null && trim.end >= 0) ? trim.end.ToString() : "";
+            }
+            else
+            {
+                textbox_end.IsReadOnly = false;
+                button_set_end.Content = Languages.Translate("Set End");
+                textbox_end.Text = "";
+            }
+
+            //"Обрезать"
+            button_apply_trim.ToolTip = tooltip;
+            button_apply_trim.Content = ((m.trim_is_on) ? Languages.Translate("Remove Trim") : Languages.Translate("Apply Trim")) +
+                (m.trims.Count > 0 ? " (" + (m.trim_num + 1) + "/" + m.trims.Count + ")" : "");
+        }
+
+        private void button_trim_plus_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null || m.trims.Count == 0 || m.trim_num >= m.trims.Count)
+                return;
+
+            if (m.trim_num == m.trims.Count - 1)
+            {
+                if (!m.trim_is_on && ((Trim)m.trims[m.trim_num]).start >= 0 && ((Trim)m.trims[m.trim_num]).end >= 0)
+                {
+                    m.trim_num += 1;
+                }
+                else
+                    return;
+            }
+            else
+                m.trim_num += 1;
+
+            SetTrimsButtons();
+        }
+
+        private void button_trim_minus_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null || m.trims.Count == 0)
+                return;
+
+            m.trim_num = Math.Max(m.trim_num - 1, 0);
+            SetTrimsButtons();
+        }
+
+        private void button_trim_delete_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null || m.trims.Count == 0 || m.trim_is_on)
+                return;
+
+            if (m.trim_num < m.trims.Count)
+                m.trims.RemoveAt(m.trim_num);
+
+            m.trim_num = Math.Max(m.trim_num - 1, 0);
+            UpdateTaskMassive(m);
+            SetTrimsButtons();
+        }
+
+        private void button_set_trim_value_Click(object sender, RoutedEventArgs e)
+        {
+            if (m == null || m.trim_is_on)
+                return;
+
+            TextBox textbox = (sender == button_set_start) ? textbox_start : textbox_end;
+
+            int value = -1;
+            if (textbox.IsReadOnly) { } //Сброс
+            else if (textbox.Text.Length == 0) //Ничего не вписано - определяем текущий кадр
+            {
+                value = Convert.ToInt32(Position.TotalSeconds * fps);
+                textbox.Text = Convert.ToString(value);
+            }
+            else if (textbox.Text.Contains(":")) //Вписано время - пересчитываем в кадр
+            {
+                TimeSpan result = TimeSpan.Zero;
+                if (TimeSpan.TryParse(textbox.Text, out result))
+                {
+                    value = Convert.ToInt32(result.TotalSeconds * fps);
+                    textbox.Text = Convert.ToString(value);
                 }
                 else
                 {
-                    trim_start = 0;
-                    textbox_start.Text = "";
-                    textbox_start.IsReadOnly = false;
-                    button_set_start.Content = Languages.Translate("Set Start");
+                    textbox.Text = "";
+                    return;
                 }
             }
-        }
-
-        private void button_set_end_Click(object sender, RoutedEventArgs e)
-        {
-            if (m != null && !trim_is_on)
+            else if (!int.TryParse(textbox.Text, out value) || value < 0) //Вписан номер кадра
             {
-                if (Convert.ToString(button_set_end.Content) != Languages.Translate("Clear"))
-                {
-                    if (textbox_end.Text == "") //Ничего не вписано - определяем текущий кадр
-                    {
-                        trim_end = Convert.ToInt32(Position.TotalSeconds * fps);
-                        textbox_end.Text = Convert.ToString(trim_end);
-                    }
-                    else if (textbox_end.Text.Contains(":")) //Вписано время - пересчитываем в кадр
-                    {
-                        TimeSpan result = TimeSpan.Zero;
-                        if (TimeSpan.TryParse(textbox_end.Text, out result))
-                        {
-                            trim_end = Convert.ToInt32(result.TotalSeconds * fps);
-                            textbox_end.Text = Convert.ToString(trim_end);
-                        }
-                        else
-                            return;
-                    }
-                    else if (!int.TryParse(textbox_end.Text, out trim_end)) //Вписан номер кадра
-                        return;
+                textbox.Text = "";
+                return;
+            }
 
-                    textbox_end.IsReadOnly = true;
-                    button_set_end.Content = Languages.Translate("Clear");
+            //Добавляем новый Trim
+            if (m.trim_num >= m.trims.Count)
+            {
+                m.trims.Add(new Trim());
+            }
+            else if (value > 0)
+            {
+                Trim trim = (Trim)m.trims[m.trim_num];
+
+                //Проверка введённого
+                if (sender == button_set_start)
+                {
+                    if (value > trim.end && trim.end > 0)
+                        ErrorException(Languages.Translate("Error") + ": [" + Languages.Translate("Set Start") + "] > [" + Languages.Translate("Set End") + "]");
+                    else if (value == trim.end && trim.end > 0)
+                        ErrorException(Languages.Translate("Error") + ": [" + Languages.Translate("Set Start") + "] = [" + Languages.Translate("Set End") + "]");
                 }
                 else
                 {
-                    trim_end = 0;
-                    textbox_end.Text = "";
-                    textbox_end.IsReadOnly = false;
-                    button_set_end.Content = Languages.Translate("Set End");
+                    if (value < trim.start)
+                        ErrorException(Languages.Translate("Error") + ": [" + Languages.Translate("Set Start") + "] > [" + Languages.Translate("Set End") + "]");
+                    else if (value == trim.start)
+                        ErrorException(Languages.Translate("Error") + ": [" + Languages.Translate("Set Start") + "] = [" + Languages.Translate("Set End") + "]");
                 }
             }
+            else if (value < 0)
+            {
+                //Удаляем пустой Trim
+                if (sender == button_set_start && ((Trim)m.trims[m.trim_num]).end < 0 ||
+                    sender == button_set_end && ((Trim)m.trims[m.trim_num]).start < 0)
+                {
+                    button_trim_delete_Click(null, null);
+                    return;
+                }
+            }
+
+            //Вводим значения
+            if (sender == button_set_start)
+                ((Trim)m.trims[m.trim_num]).start = value;
+            else
+                ((Trim)m.trims[m.trim_num]).end = value;
+
+            UpdateTaskMassive(m);
+            SetTrimsButtons();
         }
 
         private void button_apply_trim_Click(object sender, RoutedEventArgs e)
         {
-            if (m == null) return;
-            if (!trim_is_on && trim_start != trim_end)
-            {
-                if (trim_end != 0 && trim_start > trim_end) return;
+            if (m == null || m.trims.Count == 0)
+                return;
 
-                m.trim_start = trim_start;
-                m.trim_end = trim_end;
-                button_apply_trim.Content = Languages.Translate("Remove Trim");
-                textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = true;
-                UpdateScriptAndDuration();
+            m.trim_is_on = !m.trim_is_on;
+            UpdateScriptAndDuration();
+
+            if (m.trim_is_on)
                 ValidateTrimAndCopy(m);
-            }
-            else if (trim_is_on)
-            {
-                if (Convert.ToString(button_set_start.Content) != Languages.Translate("Clear")) textbox_start.IsReadOnly = false;
-                if (Convert.ToString(button_set_end.Content) != Languages.Translate("Clear")) textbox_end.IsReadOnly = false;
-                button_apply_trim.Content = Languages.Translate("Apply Trim");
-                m.trim_start = m.trim_end = 0;
-                trim_is_on = false;
-                UpdateScriptAndDuration();
-            }
+
+            SetTrimsButtons();
         }
 
         private void UpdateScriptAndDuration()
@@ -5879,7 +5972,7 @@ namespace XviD4PSP
                 outframes = reader.FrameCount;
                 outduration = TimeSpan.FromSeconds((double)outframes / reader.Framerate); // / fps)
             }
-            catch 
+            catch
             {
                 is_errors = true;
             }
@@ -6090,14 +6183,10 @@ namespace XviD4PSP
             {
                 this.Title = Path.GetFileName(m.infilepath) + "  - XviD4PSP - v" + version;
                 this.menu_createtestscript.IsChecked = m.testscript;
-                if (m.trim_start != 0 || m.trim_end != 0) //Восстанавливаем трим (из сохраненного задания)
-                {
-                    textbox_start.Text = (trim_start = m.trim_start).ToString();
-                    textbox_end.Text = (trim_end = m.trim_end).ToString();
-                    textbox_start.IsReadOnly = textbox_end.IsReadOnly = trim_is_on = true;
-                    button_set_start.Content = button_set_end.Content = Languages.Translate("Clear");
-                    button_apply_trim.Content = Languages.Translate("Remove Trim");
-                }
+
+                //Восстанавливаем трим
+                if (m.trims.Count > 0)
+                    SetTrimsButtons();
                 else
                     ResetTrim();
 
@@ -6172,7 +6261,7 @@ namespace XviD4PSP
         {
             if (combo_aencoding.SelectedItem.ToString() == "Copy" || combo_vencoding.SelectedItem.ToString() == "Copy")
             {
-                if (mass.trim_start != 0 || mass.trim_end != 0)
+                if (mass.trims.Count > 0 && mass.trim_is_on)
                     new Message(this).ShowMessage(Languages.Translate("Trimming feature doesn't affect the track(s) in Copy mode!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
 
                 if (mass.testscript)

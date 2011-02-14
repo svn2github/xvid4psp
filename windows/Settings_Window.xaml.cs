@@ -63,7 +63,7 @@ namespace XviD4PSP
             check_batch_pause.ToolTip = Languages.Translate("So you can tune all encoding settings as needed, and then continue opening");
             check_clone_ar.ToolTip = Languages.Translate("Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method.") +
                 "\r\n" + Languages.Translate("Note: Autocrop analysis will not be performed!");
-            check_clone_trim.ToolTip = Languages.Translate("Clone: trim start and trim end");
+            check_clone_trim.ToolTip = Languages.Translate("Clone: trim start and trim end (for each region)");
             check_clone_deint.ToolTip = Languages.Translate("Clone: source type, field order, deinterlace method.") +
                 "\r\n" + Languages.Translate("Note: Autodeinterlace analysis will not be performed!");
             check_clone_fps.ToolTip = Languages.Translate("Clone: output framerate");
@@ -396,6 +396,7 @@ namespace XviD4PSP
                 list_loaded = false;
                 textbox_combination.Text = HotKeys.GetKeys(raw_action[combo_action.SelectedIndex].ToString());
                 listview_hotkeys.SelectedIndex = combo_action.SelectedIndex;
+                listview_hotkeys.ScrollIntoView(listview_hotkeys.SelectedItem);
                 listview_hotkeys.Focus();
                 list_loaded = true;
             }

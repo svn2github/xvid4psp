@@ -723,12 +723,18 @@ namespace XviD4PSP
            }
 
            //Трим
-           if (m.trim_start != 0 || m.trim_end != 0)
-               m.script += "Trim(" + m.trim_start + "," + m.trim_end + ")" + Environment.NewLine;
+           if (m.trim_is_on)
+           {
+               for (int i = 0; i < m.trims.Count; i++)
+               {
+                   m.script += "Trim(" + Math.Max(((Trim)m.trims[i]).start, 0) + ", " + Math.Max(((Trim)m.trims[i]).end, 0) +
+                       (i < m.trims.Count - 1 ? ((i + 1) % 5 == 0) ? ")++\\\r\n" : ")++" : ")\r\n");
+               }
+           }
 
            //Тестовая нарезка
            if (m.testscript)
-               m.script += "SelectRangeEvery(FrameCount()/50,50) #2500 frames test-script\r\n\r\n";
+               m.script += "SelectRangeEvery(FrameCount()/50, 50) #2500 frames test-script\r\n\r\n";
 
            //Убираем лишнюю mod2 защиту
            if (check_mod2)

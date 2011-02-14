@@ -25,6 +25,7 @@ namespace XviD4PSP
             this.inaudiostreams = new ArrayList();
             this.outaudiostreams = new ArrayList();
             this.bookmarks = new ArrayList();
+            this.trims = new ArrayList();
         }
 
         public Massive Clone()
@@ -52,6 +53,7 @@ namespace XviD4PSP
             //    temp.outaudiostreams[i] = ((AudioStream)this.outaudiostreams[i]).Clone();
             //}
             temp.bookmarks = (ArrayList)this.bookmarks.Clone();
+            temp.trims = (ArrayList)this.trims.Clone();
 
             return temp;
         }
@@ -1283,31 +1285,42 @@ namespace XviD4PSP
 
         }
 
-        //Трим - начало
-        private int _trim_start = 0;
-        public int trim_start
+        private ArrayList _trims;
+        public ArrayList trims
         {
             get
             {
-                return _trim_start;
+                return _trims;
             }
             set
             {
-                _trim_start = value;
+                _trims = value;
             }
         }
-        
-        //Трим - конец
-        private int _trim_end = 0;
-        public int trim_end
+
+        private int _trim_num = 0;
+        public int trim_num
         {
             get
             {
-                return _trim_end;
+                return _trim_num;
             }
             set
             {
-                _trim_end = value;
+                _trim_num = value;
+            }
+        }
+
+        private bool _trim_is_on = false;
+        public bool trim_is_on
+        {
+            get
+            {
+                return _trim_is_on;
+            }
+            set
+            {
+                _trim_is_on = value;
             }
         }
 

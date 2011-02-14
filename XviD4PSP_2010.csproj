@@ -117,6 +117,7 @@
     <Compile Include="classes\FormatReader.cs" />
     <Compile Include="classes\HotKeys.cs" />
     <Compile Include="classes\flac_arguments.cs" />
+    <Compile Include="classes\Trim.cs" />
     <Compile Include="classes\Win7Taskbar.cs" />
     <Compile Include="classes\wmv_arguments.cs" />
     <Compile Include="classes\FFInfo.cs" />

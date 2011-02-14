@@ -181,8 +181,25 @@ namespace XviD4PSP
                 m.outframes = Convert.ToInt32(Calculate.ConvertStringToDouble(m.outframerate) * m.induration.TotalSeconds);
             }
 
-            //Учитываем обрезку     
-            m.outframes = ((m.trim_end == 0 || m.trim_end > m.outframes) ? m.outframes : m.trim_end) - m.trim_start;
+            //Учитываем обрезку
+            if (m.trims.Count > 0 && m.trim_is_on)
+            {
+                int total = m.outframes;
+                m.outframes = 0;
+
+                for (int i = 0; i < m.trims.Count; i++)
+                {
+                    int trim_start = Math.Max(((Trim)m.trims[i]).start, 0);
+                    int trim_end = Math.Max(((Trim)m.trims[i]).end, 0);
+
+                    trim_start = Math.Min(trim_start, total);
+                    trim_end = Math.Min((trim_end == 0 ? total - 1 : trim_end), total - 1);
+
+                    m.outframes += 1;
+                    if (trim_end - trim_start > 0)
+                        m.outframes += (trim_end - trim_start);
+                }
+            }
 
             //С тест-скриптом тоже что-то надо делать..
             if (m.testscript && m.outframes > 2555) m.outframes = 2555;

@@ -1,5 +1,6 @@
-XviD4PSP 5.10.218.0 (09.02.2011), main changes:
+XviD4PSP 5.10.219.0 (15.02.2011), main changes:
 
+>>> (r219) Trim: added ability to specify more than one region.
 >>> (r218) x264: --qpmax and --qp - changed default/maximum values.
 >>> (r217) Added check for AviSynth on start-up.
 >>> (r217) Print more info about the System in the encoding log (req. by Procrustean).
