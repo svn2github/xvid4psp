@@ -295,7 +295,7 @@ namespace XviD4PSP
                     textbox_name.Text = "";
                     CloseClip();
                     this.filepath = String.Empty;
-                    MessageBox.Show(ex.Message);
+                    ErrorException(ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -387,7 +387,7 @@ namespace XviD4PSP
                     textbox_name.Text = "";
                     CloseClip();
                     this.filepath = String.Empty;
-                    MessageBox.Show(ex.Message);
+                    ErrorException(ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -589,7 +589,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -952,14 +952,13 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
         private void VideoElement_MediaOpened(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (VideoElement.HasVideo ||
-                VideoElement.HasAudio)
+            if (VideoElement.HasVideo || VideoElement.HasAudio)
             {
                 slider_pos.Maximum = VideoElement.NaturalDuration.TimeSpan.TotalSeconds;
             }
@@ -1095,6 +1094,19 @@ namespace XviD4PSP
             bi.UriSource = new Uri(@"../pictures/play_new.png", UriKind.RelativeOrAbsolute);
             bi.EndInit();
             image_play.Source = bi;
+        }
+
+        private void ErrorException(string data, string info)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                MessageBox.Show(data + "\r\n\r\n" + info, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                Message mes = new Message(this.IsLoaded ? this : Owner);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
+            }
         }
     }
 }

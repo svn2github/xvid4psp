@@ -8,7 +8,6 @@ namespace XviD4PSP
 {
     public class VStripWrapper
     {
-
         [DllImport("dlls//VStrip//vStrip.dll", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
         private static extern int ifoOpen(string v_Filename, int v_Flags);
 
@@ -46,7 +45,6 @@ namespace XviD4PSP
             public byte s3;
             public byte s4;
         }
-
 
         public struct t_vs_vobcellid
         {
@@ -109,26 +107,22 @@ namespace XviD4PSP
 
         public TimeSpan Duration()
         {
-            int CellsCount;
             TitleTime tt = new TitleTime();
             TimeSpan duration = TimeSpan.Zero;
+            TimeSpan c_duration = TimeSpan.Zero;
 
-            //for (int i = 0; i <= 1; i++)
-            //{
-            //    CellsCount = ifoGetPGCIInfo(Handle, i, ref tt);
+            for (int i = 0; i < ifoGetNumPGCI(Handle); i++)
+            {
+                ifoGetPGCIInfo(Handle, i, ref tt);
+                c_duration = TimeSpan.FromHours(tt.s1) +
+                TimeSpan.FromMinutes(tt.s2) +
+                TimeSpan.FromSeconds(tt.s3) +
+                TimeSpan.FromMilliseconds(tt.s4);
 
-            //    duration = TimeSpan.FromHours(tt.s1) +
-            //    TimeSpan.FromMinutes(tt.s2) +
-            //    TimeSpan.FromSeconds(tt.s3) +
-            //    TimeSpan.FromMilliseconds(tt.s4);
-            //}
-
-            CellsCount = ifoGetPGCIInfo(Handle, 0, ref tt);
-
-            duration = TimeSpan.FromHours(tt.s1) +
-            TimeSpan.FromMinutes(tt.s2) +
-            TimeSpan.FromSeconds(tt.s3) +
-            TimeSpan.FromMilliseconds(tt.s4);
+                //Отбрасываем мусор
+                if (c_duration.TotalMinutes > 1)
+                    duration += c_duration;
+            }
 
             return duration;
         }
@@ -153,6 +147,7 @@ namespace XviD4PSP
 
             return s[0];
         }
+
         public string Height()
         {
             string info = GetVideoDesc();
@@ -165,6 +160,5 @@ namespace XviD4PSP
 
             return s[1];
         }
-
     }
 }

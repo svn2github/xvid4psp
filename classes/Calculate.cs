@@ -732,13 +732,27 @@ namespace XviD4PSP
                     title = "_T" + title;
             }
 
+            string indexpath;
             string dvdname = GetDVDName(infilepath);
 
-            string indexpath = Path.GetDirectoryName(infilepath) + "\\" + dvdname + ".index\\" + dvdname + title + ".d2v";
-
-            //если файл ReadOnly или если в настройках выбрано создавать DGIndex-кэш в Темп-папке
+            //Куда помещать индекс-папку
             if (IsReadOnly(infilepath) || Settings.DGIndexInTemp)
+            {
+                //В Temp-папку
                 indexpath = Settings.TempPath + "\\" + dvdname + ".index\\" + dvdname + title + ".d2v";
+            }
+            else
+            {
+                //Рядом с исходником (если это ДВД, то имеет смысл изменить имя папки на более короткое)
+                indexpath = Path.GetDirectoryName(infilepath) + "\\" + ((title.Length > 0 && dvdname.Length > 10) ? "DGIndex" : dvdname) +
+                    ".index\\" + dvdname + title + ".d2v";
+            }
+
+            //Проверяем длину пути, если есть превышение - вылезет Exception с красивым сообщением :)
+            if (Settings.EnableAudio)
+                title = Path.GetDirectoryName(indexpath + "_extra_characters_for_audio_info"); //+32
+            else
+                title = Path.GetDirectoryName(indexpath);
 
             return indexpath;
         }
@@ -756,10 +770,9 @@ namespace XviD4PSP
         {
             if (IsValidVOBName(infilepath))
             {
-                string dvdname = "";
                 string dvdpath = Path.GetDirectoryName(infilepath);
-                dvdname = Path.GetFileName(dvdpath);
-                if (dvdname == "VIDEO_TS")
+                string dvdname = Path.GetFileName(dvdpath);
+                if (dvdname.Equals("VIDEO_TS", StringComparison.InvariantCultureIgnoreCase))
                 {
                     dvdpath = Path.GetDirectoryName(dvdpath);
                     dvdname = Path.GetFileName(dvdpath);

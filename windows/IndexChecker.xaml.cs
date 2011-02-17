@@ -19,9 +19,11 @@ namespace XviD4PSP
 {
 	public partial class IndexChecker
 	{
+        private static object locker = new object();
         private BackgroundWorker worker = null;
+        private AviSynthReader reader = null;
+        private int num_closes = 0;
         public Massive m;
-        AviSynthReader reader;
 
         public IndexChecker(Massive mass)
         {
@@ -31,18 +33,17 @@ namespace XviD4PSP
 
             //забиваем
             prCurrent.Maximum = 100;
-
             Title = Languages.Translate("Checking index folder") + "...";
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
 
-            //фоновое кодирование
-            CreateBackgoundWorker();
+            //BackgroundWorker
+            CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
         }
 
-        private void CreateBackgoundWorker()
+        private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
@@ -63,6 +64,9 @@ namespace XviD4PSP
                 m.inframerate = media.FrameRate;
                 media.Close();
 
+                //Выходим при отмене
+                if (worker.CancellationPending) return;
+
                 //проверка на невалидную индексацию
                 if (m.invcodecshort != "MPEG2" && m.invcodecshort != "MPEG1")
                 {
@@ -76,7 +80,7 @@ namespace XviD4PSP
                 //определяем видео декодер
                 m = Format.GetValidVDecoder(m);
 
-                if (File.Exists(m.indexfile))
+                if (File.Exists(m.indexfile) && !worker.CancellationPending)
                 {
                     //проверяем папки
                     string script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
@@ -85,89 +89,139 @@ namespace XviD4PSP
                     m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
 
                     //Закрываем ридер
-                    reader.Close();
-                    reader = null;
+                    CloseReader(true);
 
                     //проверка на устаревшую индекс папку
                     string ifopath = Calculate.GetIFO(m.infilepath);
-                    if (File.Exists(ifopath))
+                    if (File.Exists(ifopath) && !worker.CancellationPending)
                     {
                         VStripWrapper vs = new VStripWrapper();
                         vs.Open(ifopath);
                         TimeSpan duration = vs.Duration();
                         vs.Close();
 
-                        //папка устарела (если разница между тем что есть, и тем что должно быть, больше 5-ти секунд)                       
-                        if (Math.Abs(m.induration.Duration().TotalSeconds - duration.TotalSeconds) > 5)
+                        //папка устарела (если разница между продолжительностью в скрипте и в IFO больше 10-ти секунд)
+                        if (Math.Abs(m.induration.Duration().TotalSeconds - duration.TotalSeconds) > 10)
                         {
-                            try
-                            {
-                                Directory.Delete(Path.GetDirectoryName(m.indexfile), true);
-                            }
-                            catch { }
+                            //Будем папку удалять..
+                            throw new Exception("MPEG2Source");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                //Проблемы при открытии существующего d2v-файла (возможно это кэш от другого файла, уже не существующего)
-                if (ex.Message.StartsWith("MPEG2Source"))
+                if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
                 {
-                    try
-                    {
-                        if (reader != null)
-                        {
-                            reader.Close();
-                            reader = null;
-                        }
-                        Directory.Delete(Path.GetDirectoryName(m.indexfile), true);
-                    }
-                    catch { }
-                }
-                else
-                {
-                    m = null;
-                    ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                    //Ошибка
+                    e.Result = ex;
                 }
             }
             finally
             {
-                if (reader != null)
-                {
-                    reader.Close();
-                    reader = null;
-                }
+                CloseReader(true);
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (worker.IsBusy)
+            bool cancel_closing = false;
+
+            if (worker != null)
             {
-                worker.CancelAsync();
+                if (worker.IsBusy && num_closes < 5)
+                {
+                    //Отмена
+                    cancel_closing = true;
+                    worker.CancelAsync();
+                    num_closes += 1;
+                }
+                else
+                {
+                    worker.Dispose();
+                    worker = null;
+                }
+            }
+
+            //Отменяем закрытие окна
+            if (cancel_closing)
+            {
+                //CloseReader(false);
+
+                label_info.Content = Languages.Translate("Aborting... Please wait...");
+                e.Cancel = true;
+            }
+            else
+                CloseReader(true);
+        }
+
+        private void CloseReader(bool _null)
+        {
+            lock (locker)
+            {
                 if (reader != null)
                 {
                     reader.Close();
-                    reader = null;
+                    if (_null) reader = null;
                 }
             }
         }
 
         private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
+            if (e.Error != null)
+            {
+                m = null;
+                ErrorException("IndexChecker (Unhandled): " + ((Exception)e.Error).Message, ((Exception)e.Error).StackTrace);
+            }
+            else if (e.Result != null)
+            {
+                Exception ex = (Exception)e.Result;
+
+                //Проблемы при открытии существующего d2v-файла (возможно это кэш от другого файла, уже не существующего)
+                if (ex.Message.StartsWith("MPEG2Source"))
+                {
+                    SafeDirDelete(Path.GetDirectoryName(m.indexfile));
+                }
+                else
+                {
+                    m = null;
+                    ErrorException("IndexChecker: " + ex.Message, ex.StackTrace);
+                }
+            }
+
             Close();
         }
 
-        internal delegate void MessageDelegate(string data, string title, Message.MessageStyle style);
-        private void ShowMessage(string data, string title, Message.MessageStyle style)
+        private void SafeDirDelete(string dir)
+        {
+            try
+            {
+                if (!Directory.Exists(dir)) return;
+
+                //Удаляем все файлы, после чего саму папку..
+                foreach (string file in Directory.GetFiles(dir))
+                    File.Delete(file);
+
+                //..если в ней нет никаких подпапок
+                if (Directory.GetDirectories(dir).Length == 0)
+                    Directory.Delete(dir, false);
+            }
+            catch (Exception) //ex)
+            {
+                //ShowErrorMessage("SafeDirDelete: " + ex.Message, ex.StackTrace);
+            }
+        }
+
+        internal delegate void ErrorExceptionDelegate(string data, string info);
+        private void ErrorException(string data, string info)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), data, title, style);
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
             else
             {
-                Message mes = new Message(this.Owner);
-                mes.ShowMessage(data, title, style);
+                Message mes = new Message(this.IsLoaded ? this : Owner);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
 	}

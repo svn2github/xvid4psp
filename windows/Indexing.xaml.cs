@@ -7,7 +7,6 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
-
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
@@ -16,23 +15,26 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Collections;
+using System.Windows.Interop;
 
 namespace XviD4PSP
 {
 	public partial class Indexing
 	{
+        private static object locker = new object();
         private BackgroundWorker worker = null;
         private Process encoderProcess = null;
-        public Massive m;
-        private int iHandle;
+        private IntPtr Handle = IntPtr.Zero;
         private string filelistpath;
-        private int FilmPercent = 0;
-        private bool IsAborted;
+        private string indexfile;
+        private int FilmPercent = -1;
+        private int num_closes = 0;
+        private int iHandle;
+        public Massive m;
 
 		public Indexing()
 		{
 			this.InitializeComponent();
-			
 			// Insert code required on object creation below this point.
 		}
 
@@ -46,35 +48,85 @@ namespace XviD4PSP
             prCurrent.Maximum = 100;
             Title = Languages.Translate("Indexing");
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
+            this.ContentRendered += new EventHandler(Window_ContentRendered);
 
-            //фоновое кодирование
-            CreateBackgoundWorker();
+            //BackgroundWorker
+            CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
         }
 
+        void Window_ContentRendered(object sender, EventArgs e)
+        {
+            if (Handle == IntPtr.Zero)
+                Win7Taskbar.SetProgressIndeterminate(this, ref Handle);
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (worker != null && worker.IsBusy)
+            bool cancel_closing = false;
+
+            if (worker != null)
             {
-                IsAborted = true;
-                KillIndexing();
-                if (File.Exists(m.indexfile)) SafeDirDelete(Path.GetDirectoryName(m.indexfile));
+                if (worker.IsBusy && num_closes < 5)
+                {
+                    //Отмена
+                    cancel_closing = true;
+                    worker.CancelAsync();
+                    num_closes += 1;
+                    m = null;
+                }
+                else
+                {
+                    worker.Dispose();
+                    worker = null;
+                }
+            }
+
+            CloseIndexer();
+
+            //Отменяем закрытие окна
+            if (cancel_closing)
+            {
+                worker.WorkerReportsProgress = false;
+                label_info.Content = Languages.Translate("Aborting... Please wait...");
+                Win7Taskbar.SetProgressState(Handle, TBPF.INDETERMINATE);
+                prCurrent.IsIndeterminate = true;
+                e.Cancel = true;
+            }
+            else
+            {
+                //Удаляем мусор
                 SafeFileDelete(filelistpath);
-                m = null;
+
+                //Удаление индекс-папки при отмене или ошибке
+                if ((num_closes > 0 || m == null) && File.Exists(indexfile))
+                    SafeDirDelete(Path.GetDirectoryName(indexfile));
             }
         }
 
-        private void KillIndexing()
+        private void CloseIndexer()
         {
-            //прибиваем dgindex
-            if (encoderProcess != null)
+            lock (locker)
             {
-                if (!encoderProcess.HasExited)
+                if (encoderProcess != null)
                 {
-                    encoderProcess.Kill();
-                    encoderProcess.WaitForExit();
+                    try
+                    {
+                        if (!encoderProcess.HasExited)
+                        {
+                            encoderProcess.Kill();
+                            encoderProcess.WaitForExit();
+                        }
+                    }
+                    catch (Exception) { }
+                    finally
+                    {
+                        encoderProcess.Close();
+                        encoderProcess.Dispose();
+                        encoderProcess = null;
+                    }
                 }
             }
         }
@@ -88,7 +140,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException("SafeFileDelete: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -96,16 +148,23 @@ namespace XviD4PSP
         {
             try
             {
-                if (Directory.Exists(dir))
-                    Directory.Delete(dir, true);
+                if (!Directory.Exists(dir)) return;
+
+                //Удаляем все файлы, после чего саму папку..
+                foreach (string file in Directory.GetFiles(dir))
+                    File.Delete(file);
+
+                //..если в ней нет никаких подпапок
+                if (Directory.GetDirectories(dir).Length == 0)
+                    Directory.Delete(dir, false);
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException("SafeDirDelete: " + ex.Message, ex.StackTrace);
             }
         }
 
-        private void CreateBackgoundWorker()
+        private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
@@ -117,20 +176,29 @@ namespace XviD4PSP
 
         private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
-            if (prCurrent.IsIndeterminate)
+            if (((BackgroundWorker)sender).WorkerReportsProgress)
             {
-                prCurrent.IsIndeterminate = false;
-                label_info.Content = Languages.Translate("Indexing") + "...";
-            }
+                if (prCurrent.IsIndeterminate)
+                {
+                    prCurrent.IsIndeterminate = false;
+                    label_info.Content = Languages.Translate("Indexing") + "...";
+                }
 
-            prCurrent.Value = e.ProgressPercentage;
-            Title = "(" + e.ProgressPercentage.ToString("0") + "%)";
+                prCurrent.Value = e.ProgressPercentage;
+                Title = "(" + e.ProgressPercentage.ToString("0") + "%)";
+
+                //Прогресс в Taskbar
+                //if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressValue(Handle, Convert.ToUInt64(e.ProgressPercentage), 100);
+            }
         }
 
         private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try //Индексация
             {
+                indexfile = m.indexfile;
+
                 //создаём папку
                 if (!Directory.Exists(Path.GetDirectoryName(m.indexfile)))
                     Directory.CreateDirectory(Path.GetDirectoryName(m.indexfile));
@@ -142,10 +210,12 @@ namespace XviD4PSP
                 info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
 
                 //создаём список файлов
-                filelistpath = Settings.TempPath + "\\" + m.key + ".lst";
-                StreamWriter sw = new StreamWriter(filelistpath, false, System.Text.Encoding.Default);
-                foreach (string _line in m.infileslist) sw.WriteLine(_line);
-                sw.Close();
+                string files_list = "";
+                foreach (string _line in m.infileslist) files_list += _line + "\r\n";
+                File.WriteAllText((filelistpath = Settings.TempPath + "\\" + m.key + ".lst"), files_list, System.Text.Encoding.Default);
+
+                //Выходим при отмене
+                if (worker.CancellationPending) return;
 
                 //Извлекаем звук, только если он нам нужен
                 string ademux = (Settings.EnableAudio) ? "-OM=2" : "-OM=0";
@@ -181,22 +251,38 @@ namespace XviD4PSP
 
                 encoderProcess.WaitForExit();
 
-                if (!IsAborted && !File.Exists(m.indexfile))
+                //Индекс-файл не найден
+                if (!worker.CancellationPending && !File.Exists(m.indexfile))
                     throw new Exception(Languages.Translate("Can`t find file") + ": " + m.indexfile);
             }
             catch (Exception ex)
             {
-                ErrorExeption("Indexing (DGIndex): " + ex.Message);
+                if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
+                {
+                    //Ошибка
+                    e.Result = ex;
+                }
+
                 m = null;
                 return;
             }
 
-            //Auto ForceFilm (только для 23.976, 29.970, и если частота неизвестна)
-            if (IsAborted || !Settings.DGForceFilm || !string.IsNullOrEmpty(m.inframerate) && m.inframerate != "23.976" && m.inframerate != "29.970")
-                return;
-
             try
             {
+                //Auto ForceFilm (только для 23.976, 29.970, и если частота неизвестна)
+                if (worker.CancellationPending || !Settings.DGForceFilm || !string.IsNullOrEmpty(m.inframerate) && m.inframerate != "23.976" && m.inframerate != "29.970")
+                    return;
+            }
+            catch (Exception)
+            {
+                //worker или m == null
+                return;
+            }
+
+            try //Теперь ForceFilm
+            {
+                FilmPercent = 0;
+
                 //Получение процента для ForceFilm
                 Match mat; //FINISHED  94.57% FILM
                 Regex r = new Regex(@"FINISHED\s+(\d+\.*\d*)%.FILM", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -207,8 +293,8 @@ namespace XviD4PSP
                         if (mat.Success) FilmPercent = Convert.ToInt32(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
                     }
 
-                //Выход, если процент Film недостаточен
-                if (FilmPercent < Settings.DGFilmPercent) return;
+                //Выход при отмене, или если процент Film недостаточен
+                if (worker.CancellationPending || FilmPercent < Settings.DGFilmPercent) return;
 
                 //Перезапись d2v-файла
                 string file = "", line = "";
@@ -228,64 +314,72 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption("Auto ForceFilm: " + ex.Message);
+                if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
+                {
+                    //Ошибка
+                    e.Result = ex;
+                }
+
                 m = null;
             }
         }
 
         private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            SafeFileDelete(filelistpath);
+            if (e.Error != null)
+            {
+                m = null;
+                ErrorException("Indexing (Unhandled): " + ((Exception)e.Error).Message, ((Exception)e.Error).StackTrace);
+            }
+            else if (e.Result != null)
+            {
+                m = null;
+                if (FilmPercent < 0)
+                    ErrorException("Indexing (DGIndex): " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
+                else
+                    ErrorException("Auto ForceFilm: " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
+            }
+
             Close();
         }
 
         public static ArrayList GetTracks(string indexfile) //звук, получение списка звуковых треков
         {
             ArrayList tracklist = new ArrayList();
-            foreach (string f in Directory.GetFiles(Path.GetDirectoryName(indexfile), "*"))
+            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(indexfile), "*"))
             {
-                string ext = Path.GetExtension(f);
+                string ext = Path.GetExtension(file).ToLower();
                 string path = Path.GetFileNameWithoutExtension(indexfile);
-                
-                //Отрезаем .track_number (для файлов полученых после tsMuxeR`а)
-                if (path.Length >= 12 && path.Contains(".track_"))
-                {
-                  //path = path.Substring(0, path.Length - 11);
-                    Regex r = new Regex(@"(\.track_\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                    Match mat;
-                    mat = r.Match(path);
-                    if (mat.Success == true)
-                    {
-                        path = path.Replace(mat.Groups[1].Value, "");
-                    }
-                }
 
-                if (f.Contains(path))
+                //Отрезаем .track_number (для файлов, полученных после tsMuxeR`а)
+                if (path.Length >= 12 && path.Contains(".track_"))
+                    path = Regex.Replace(path, @"\.track_\d+", "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+
+                if (Path.GetFileNameWithoutExtension(file).StartsWith(path))
                 {
                     if (ext == ".mpa" || ext == ".ac3" || ext == ".wav" || ext == ".mp2" || ext == ".mp3" || ext == ".dts" || ext == ".m4a" || ext == ".aac"
                          || ext == ".flac" || ext == ".ape" || ext == ".aiff" || ext == ".aif" || ext == ".wv" || ext == ".ogg" || ext == ".wma")
                     {
-                        tracklist.Add(f);
+                        tracklist.Add(file);
                     }
                 }
             }
             return tracklist;
         }
 
-        private void ErrorExeption(string message)
-        {
-            ShowMessage(this, message);
-        }
-
-        internal delegate void MessageDelegate(object sender, string data);
-        private void ShowMessage(object sender, string data)
+        internal delegate void ErrorExceptionDelegate(string data, string info);
+        private void ErrorException(string data, string info)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), sender, data);
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
             else
             {
-                Message mes = new Message(this.Owner);
-                mes.ShowMessage(data, Languages.Translate("Error"));
+                if (worker != null) worker.WorkerReportsProgress = false;
+                if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressTaskComplete(Handle, TBPF.ERROR);
+
+                Message mes = new Message(this.IsLoaded ? this : Owner);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
 	}
