@@ -1,5 +1,6 @@
-XviD4PSP 5.10.220.0 (17.02.2011), main changes:
+XviD4PSP 5.10.221.0 (22.02.2011), main changes:
 
+>>> (r221) FFInfo: fixes for recent versions of FFmpeg.
 >>> (r220) Various changes for DVDImport, IndexChecker and Indexing windows (added StackTrace info
            for error messages; added Windows 7 taskbar progress indication when indexing).
 >>> (r220) Fixed incorrect detection of the DVD`s titles duration.

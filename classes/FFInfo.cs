@@ -226,18 +226,21 @@ namespace XviD4PSP
         {
             //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p,
             //Stream #0.1[0x1c0]: Audio: mp2, 48000 Hz,
-            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+:\s(\w+),", "Unknown");
+            //Stream #0.0: Video: h264 (Constrained Baseline),
+            //Stream #0.0: Video: SVQ3 / 0x33515653,
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+:\s(\w+)[\s,]", "Unknown");
         }
 
         public string StreamCodecShort(int stream)
         {
             string value = ""; //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p,
-            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+:\s(\w+),", out value))
+            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+:\s(\w+)[\s,]", out value))
             {
                 if (value == "liba52") return "AC3";
                 else if (value == "mpeg4aac") return "AAC";
                 else if (value.Contains("pcm") || value.Contains("s16")) return "PCM";
                 else if (value.Contains("wma")) return "WMA";
+                else if (value == "dca") return "DTS";
                 return value.ToUpper();
             }
             return "Unknown";
@@ -246,7 +249,8 @@ namespace XviD4PSP
         public string StreamColor(int stream)
         {
             //Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p,
-            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Video:\s\w+,\s(\w+),", "Unknown");
+            //Stream #0.0: Video: h264 (Constrained Baseline), yuv420p,
+            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Video:\s.+?,\s(\w+),", "Unknown");
         }
 
         public string StreamSamplerate(int stream)
