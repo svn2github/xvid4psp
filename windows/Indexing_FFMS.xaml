@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	x:Class="XviD4PSP.Indexing_FFMS"
 	x:Name="Window"
-	Title="FFMpegSourceHelper"
+	Title="Indexing"
 	MinWidth="298" Height="90" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
     <Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">

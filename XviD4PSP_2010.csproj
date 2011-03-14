@@ -248,8 +248,8 @@
     <Compile Include="windows\Decoder.xaml.cs">
       <DependentUpon>Decoder.xaml</DependentUpon>
     </Compile>
-    <Compile Include="windows\FFMpegSourceHelper.xaml.cs">
-      <DependentUpon>FFMpegSourceHelper.xaml</DependentUpon>
+    <Compile Include="windows\Indexing_FFMS.xaml.cs">
+      <DependentUpon>Indexing_FFMS.xaml</DependentUpon>
     </Compile>
     <Compile Include="windows\FramerateDetector.xaml.cs">
       <DependentUpon>FramerateDetector.xaml</DependentUpon>
@@ -474,7 +474,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="windows\FFMpegSourceHelper.xaml">
+    <Page Include="windows\Indexing_FFMS.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
