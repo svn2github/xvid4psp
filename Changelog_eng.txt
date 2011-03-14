@@ -1,5 +1,30 @@
-XviD4PSP 5.10.221.0 (22.02.2011), main changes:
+XviD4PSP 5.10.222.0 (14.03.2011), main changes:
 
+>>> (r222) Various changes for Caching window. For error messages added StackTrace info and current
+           AviSynth script.
+>>> (r222) Some fixes for "Join file" function. But still, it doesn`t work as good as it should..
+>>> (r222) DirectShowSource2 (DSS2): added a workaround, that may help with hanging on the last frame(s).
+           From now, the last 3 frames, instead of receiving them from the decoder, will be duplicated from
+           the previous (4-th from the end) frame. This behavior can be tweaked by editing the VideoFunctions.avs.
+>>> (r222) NicAC3Source and NicDTSSource: added DRC checkboxes (by default DRC is disabled).
+>>> (r222) A new options was added for FFmpegSource2: "Overwrite existing index files" - always re-index
+           the source file and overwrite existing index file, even if it was valid; disabled by default.
+           "Timecodes" - extract timecodes to a file during indexing (this file will be placed in the same
+           folder with the index file); disabled by default. "Create FFmpegSource2 cache in Temp folder" -
+           if enabled (or if the source file is on the Read Only drive), index file will be created in Temp
+           folder, otherwise it will be created near the source file; enabled by default.
+>>> (r222) FFmpegSource1 was completely removed. For FFmpegSource2 indexing now will be performed using
+           ffmsindex.exe, this makes it possible to show progress indication and also to safely cancel this
+           operation.
+>>> (r222) The following decoders now also can be choosen: QTInput (for videos encoded with ProRes; QuickTime
+           is required!), DirectShowSource (as audio decoder), FFAudioSource.
+>>> (r222) Changed the way to choose video and audio decoders. From now, the user can add their own or edit existing
+           extensions and select appropriated decoder for every extension. But be careful! Before switching
+           to one or another decoder, take a look at the "Supported formats" in the tooltips, because not all
+           decoders are multiformat decoders, so, for example, attempting to use MPEG2Source for an MKV files
+           will results in error on file opening. "Reset" button - to reset extensions/decoders list to default values.
+           "Delete" button - to delete current (highlighted) line, you can delete all lines, except "mpeg_ps/ts" and "*"
+           ("MPEG-files" and "Other files" accordingly). "Add" button - to add a new line to the list.
 >>> (r221) FFInfo: fixes for recent versions of FFmpeg.
 >>> (r220) Various changes for DVDImport, IndexChecker and Indexing windows (added StackTrace info
            for error messages; added Windows 7 taskbar progress indication when indexing).

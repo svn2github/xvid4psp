@@ -147,12 +147,4 @@ namespace XviD4PSP
             _id = mass.key;
         }
     }
-
-    public class myTask : ObservableCollection<Task>
-    {
-        public myTask(string thm, TaskStatus status, Massive mass)
-        {
-            Add(new Task(thm, status, mass));
-        }
-    }
 }

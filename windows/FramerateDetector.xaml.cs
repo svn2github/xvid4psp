@@ -97,7 +97,7 @@ namespace XviD4PSP
                 //если всё ещё не получилось используем FF
                 if (m.inframerate == "")
                 {
-                    m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
+                    m.vdecoder = AviSynthScripting.Decoders.FFmpegSource2;
 
                     string script = AviSynthScripting.GetFramerateScript(m);
 

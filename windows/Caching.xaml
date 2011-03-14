@@ -4,10 +4,10 @@
 	x:Class="XviD4PSP.Caching"
 	x:Name="Window"
 	Title="Caching"
-	Width="305" Height="90" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	MinWidth="298" Height="90" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
-	<Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
+    <Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
 		<ProgressBar x:Name="prCurrent" Foreground="{DynamicResource StrawBerryBrush}" Margin="8,0,8,8" VerticalAlignment="Bottom" Height="12" IsIndeterminate="True"/>
-		<Label OpacityMask="{x:Null}" x:Name="text_info" Content="Please wait... Work in progress..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="8,8,8,0" VerticalAlignment="Top" Height="Auto"/>
+		<Label OpacityMask="{x:Null}" x:Name="text_info" Content="Please wait... Work in progress..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,6,0" VerticalAlignment="Top"/>
 	</Grid>
 </Window>

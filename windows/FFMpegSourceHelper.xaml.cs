@@ -7,25 +7,31 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
-
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Timers;
 using System.Text.RegularExpressions;
+using System.Windows.Interop;
+using System.Collections;
 
 namespace XviD4PSP
 {
-    public partial class FFMpegSourceHelper
+    public partial class Indexing_FFMS
     {
+        private static object locker = new object();
         private BackgroundWorker worker = null;
+        private Process encoderProcess = null;
+        private IntPtr Handle = IntPtr.Zero;
+        private int num_closes = 0;
         public Massive m;
-        AviSynthReader reader;
-        public bool IsErrors = false;
-        public string error_message = null;
 
-        public FFMpegSourceHelper(Massive mass)
+        private ArrayList index_files = new ArrayList();
+        private int current = 0;
+        private int total = 0;
+
+        public Indexing_FFMS(Massive mass)
         {
             this.InitializeComponent();
             this.Owner = App.Current.MainWindow;
@@ -33,27 +39,23 @@ namespace XviD4PSP
 
             //забиваем
             prCurrent.Maximum = 100;
+            total = m.infileslist.Length;
+            Title = Languages.Translate("Indexing");
             text_info.Content = Languages.Translate("Please wait... Work in progress...");
+            text_info.ToolTip = "FFmpegSource2";
+            this.ContentRendered += new EventHandler(Window_ContentRendered);
 
-            if (Settings.FFmpegSource2)
-            {
-                Title = "FFmpegSource2";
-                text_info.ToolTip = Languages.Translate("Indexing") + "...";
-            }
-            else
-            {
-                Title = "FFmpegSource";
-                text_info.ToolTip = Languages.Translate("FFmpegSource creates CACHE files. It can take long time and hard drive space.")/*+
-                    Environment.NewLine + Languages.Translate("Use other decoders for more fast import:") + Environment.NewLine +
-                    Languages.Translate("FFmpegSource - slow, but safe and codec independed import.") + Environment.NewLine +
-                    Languages.Translate("AVISource and DirectShowSource - fast, but depend on system codecs import.")*/;
-            }
-
-            //фоновое кодирование
+            //BackgroundWorker
             CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
+        }
+
+        void Window_ContentRendered(object sender, EventArgs e)
+        {
+            if (Handle == IntPtr.Zero)
+                Win7Taskbar.SetProgressIndeterminate(this, ref Handle);
         }
 
         private void CreateBackgroundWorker()
@@ -61,6 +63,7 @@ namespace XviD4PSP
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+            worker.ProgressChanged += new ProgressChangedEventHandler(worker_ProgressChanged);
             worker.WorkerSupportsCancellation = true;
             worker.WorkerReportsProgress = true;
         }
@@ -69,82 +72,219 @@ namespace XviD4PSP
         {
             try
             {
-                //проверяем насколько успешно декодируется видео
-                string script = AviSynthScripting.GetFramerateScript(m);
+                //Параметры индексации
+                string reindex = (Settings.FFMS_Reindex) ? "-f " : "";
+                string timecodes = (Settings.FFMS_TimeCodes) ? "-c " : "";
+                string audio = (Settings.EnableAudio && Settings.FFMS_Enable_Audio) ? "-t -1 " : "-t 0 ";
 
-                try
+                encoderProcess = new Process();
+                ProcessStartInfo info = new ProcessStartInfo();
+                info.FileName = Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\ffmsindex.exe";
+                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+                info.UseShellExecute = false;
+                info.RedirectStandardOutput = true;
+                info.RedirectStandardError = false;
+                info.CreateNoWindow = true;
+
+                //Будем поочерёдно индексировать все имеющиеся файлы
+                for (current = 0; current < m.infileslist.Length && !worker.CancellationPending && m != null; current ++)
                 {
-                    reader = new AviSynthReader();
-                    reader.ParseScript(script);
-                }
-                catch (Exception ex)
-                {
-                    //FFmpegSource: Audio decoding error                                       - FFMS1 A
-                    //FFmpegSource: Audio codec not found                                      - FFMS1 A
-                    //FFmpegSource: Video track is unseekable                                  - FFMS1 A
-                    //FFmpegSource: Selected track is not audio                                - FFMS1 A
-                    //FFmpegSource: Invalid audio track number                                 - FFMS1 
-                    //FFmpegSource: Can't create decompressor: Unsupported compression method. - FFMS1
-                    //FFmpegSource: Couldn't open                                              - FFMS1
-                    //FFmpegSource: Video codec not found                                      - FFMS1
-                    //FFVideoSource: Video codec not found                                     - FFMS1/2
-                    //FFAudioSource: Out of bounds track index selected                        - FFMS2
-                    //FFAudioSource: No audio track found                                      - FFMS2 A
-                    //FFVideoSource: The index does not match the source file                  - FFMS2
-                    //FFVideoSource: Could not open video codec                                - FFMS2
-                    //FFVideoSource: No video track found                                      - FFMS2
-                    //FFVideoSource: Can't open file                                           - FFMS2
-                    //FFIndex: Can't open file                                                 - FFMS2
-                    //FF...
-                    error_message = ex.Message;
-                    if (error_message.StartsWith("FFAudioSource:")) IsErrors = false;
-                    else if (error_message.StartsWith("FFmpegSource: Audio")) IsErrors = false;
-                    else if (error_message.StartsWith("FFmpegSource: Selected track is not audio")) IsErrors = false;
-                    else if (error_message.StartsWith("FFmpegSource: Invalid audio track number")) IsErrors = false;
-                    else if (error_message.StartsWith("FFmpegSource: Video codec not found")) IsErrors = false;
-                    else IsErrors = true;
-                }
-                finally
-                {
-                    if (reader != null)
+                    //Определяем индекс-файл и строчку с аргументами для ffmsindex.exe
+                    index_files.Add(((m.ffms_indexintemp) ? Settings.TempPath + "\\" + Path.GetFileName(m.infileslist[current]) : m.infileslist[current]) + ".ffindex");
+                    info.Arguments = reindex + timecodes + audio + "\"" + m.infileslist[current] + "\" \"" + index_files[current] + "\"";
+
+                    encoderProcess.StartInfo = info;
+                    encoderProcess.Start();
+                    encoderProcess.PriorityClass = ProcessPriorityClass.Normal;
+                    encoderProcess.PriorityBoostEnabled = true;
+
+                    string line;
+                    string ffindex_out = "";
+                    string pat = @"\.\.\.\s(\d+)%";
+                    Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                    Match mat;
+
+                    while (!encoderProcess.HasExited)
                     {
-                        reader.Close();
-                        reader = null;
+                        line = encoderProcess.StandardOutput.ReadLine();
+                        if (line != null)
+                        {
+                            mat = r.Match(line);
+                            if (mat.Success)
+                                worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
+                            else
+                                ffindex_out += line + "\r\n";
+                        }
+                    }
+
+                    //Ловим ошибки
+                    ffindex_out += encoderProcess.StandardOutput.ReadToEnd();
+                    if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && ffindex_out != null)
+                    {
+                        //"index file already exists" - это не ошибка, игнорируем
+                        if (!ffindex_out.Contains("index file already exists"))
+                        {
+                            //Отрезаем мусор
+                            int start = 0;
+                            if ((start = ffindex_out.IndexOf("Indexing error")) >= 0)
+                                ffindex_out = ffindex_out.Substring(start);
+
+                            ffindex_out = ffindex_out.Trim();
+                            throw new Exception("FFIndex: " + ffindex_out);
+                        }
+                    }
+
+                    if (total > current + 1)
+                    {
+                        encoderProcess.Close();
+                        worker.ReportProgress(0);
                     }
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
+                if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
+                {
+                    //Ошибка
+                    e.Result = ex;
+                }
+
+                m = null;
             }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
-            if (worker.IsBusy)
+            if (((BackgroundWorker)sender).WorkerReportsProgress)
             {
-                if (reader != null)
+                if (prCurrent.IsIndeterminate)
                 {
-                    reader.Close();
-                    reader = null;
+                    prCurrent.IsIndeterminate = false;
+                    text_info.Content = Languages.Translate("Indexing") + "...";
                 }
+
+                prCurrent.Value = e.ProgressPercentage;
+                if (total > 1)
+                    Title = e.ProgressPercentage.ToString("0") + "% (" + (current + 1) + " of " + total + ")";
+                else
+                    Title = "(" + e.ProgressPercentage.ToString("0") + "%)";
+
+                //Прогресс в Taskbar
+                //if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressValue(Handle, Convert.ToUInt64(e.ProgressPercentage), 100);
             }
         }
 
         private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
+            if (e.Error != null)
+            {
+                m = null;
+                ErrorException("Indexing (Unhandled): " + ((Exception)e.Error).Message, ((Exception)e.Error).StackTrace);
+            }
+            else if (e.Result != null)
+            {
+                m = null;
+                ErrorException("Indexing (FFMS2): " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
+            }
+
             Close();
         }
 
-        internal delegate void MessageDelegate(string data, string title, Message.MessageStyle style);
-        private void ShowMessage(string data, string title, Message.MessageStyle style)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), data, title, style);
+            bool cancel_closing = false;
+
+            if (worker != null)
+            {
+                if (worker.IsBusy && num_closes < 5)
+                {
+                    //Отмена
+                    cancel_closing = true;
+                    worker.CancelAsync();
+                    num_closes += 1;
+                    m = null;
+                }
+                else
+                {
+                    worker.Dispose();
+                    worker = null;
+                }
+            }
+
+            CloseIndexer();
+
+            //Отменяем закрытие окна
+            if (cancel_closing)
+            {
+                worker.WorkerReportsProgress = false;
+                text_info.Content = Languages.Translate("Aborting... Please wait...");
+                Win7Taskbar.SetProgressState(Handle, TBPF.INDETERMINATE);
+                prCurrent.IsIndeterminate = true;
+                e.Cancel = true;
+            }
             else
             {
-                Message mes = new Message(this.Owner);
-                mes.ShowMessage(data, title, style);
+                //Удаление индекс-файлов при отмене или ошибке
+                if (num_closes > 0 || m == null)
+                {
+                    foreach (string file in index_files)
+                        SafeFileDelete(file);
+                }
+            }
+        }
+
+        private void CloseIndexer()
+        {
+            lock (locker)
+            {
+                if (encoderProcess != null)
+                {
+                    try
+                    {
+                        if (!encoderProcess.HasExited)
+                        {
+                            encoderProcess.Kill();
+                            encoderProcess.WaitForExit();
+                        }
+                    }
+                    catch (Exception) { }
+                    finally
+                    {
+                        encoderProcess.Close();
+                        encoderProcess.Dispose();
+                        encoderProcess = null;
+                    }
+                }
+            }
+        }
+
+        private void SafeFileDelete(string file)
+        {
+            try
+            {
+                if (File.Exists(file))
+                    File.Delete(file);
+            }
+            catch (Exception ex)
+            {
+                ErrorException("SafeFileDelete: " + ex.Message, ex.StackTrace);
+            }
+        }
+
+        internal delegate void ErrorExceptionDelegate(string data, string info);
+        private void ErrorException(string data, string info)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
+            else
+            {
+                if (worker != null) worker.WorkerReportsProgress = false;
+                if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressTaskComplete(Handle, TBPF.ERROR);
+
+                Message mes = new Message(this.IsLoaded ? this : Owner);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
     }

@@ -303,7 +303,7 @@ namespace XviD4PSP
 
                 //Только FFmpegSource умеет переключать треки
                 if (instream.audiopath == null && instream.decoder == 0 && m.inaudiostream > 0 &&
-                    !(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Settings.FFMS_Enable_Audio))
+                    !(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && Settings.FFMS_Enable_Audio))
                 {
                     string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
                     instream.audiopath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;

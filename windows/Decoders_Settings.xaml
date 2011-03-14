@@ -1,37 +1,79 @@
 ﻿<Window
-	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
-	x:Class="XviD4PSP.Decoders_Settings"
+    x:Class="XviD4PSP.Decoders_Settings"
 	x:Name="Window"
 	Title="Decoding Settings"
-	Width="Auto" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
-
+	Width="Auto" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight" Opacity="0" ContentRendered="Window_ContentRendered" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
     <Grid x:Name="LayoutRoot">
         <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
-            <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
-                <TabItem Header="Video" x:Name="tab_video">
-                   <StackPanel Width="380" Height="Auto">
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_vdecoders" Header="Video decoders" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
-                            <StackPanel>
-                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_avi" Content="AVI:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_avi_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_avi_dec_SelectionChanged"/>
-                                    <Label OpacityMask="{x:Null}" x:Name="text_mp4" Content="MP4:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_mp4_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mp4_dec_SelectionChanged"/>
-                                </DockPanel>
-                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_mpg" Content="MPG:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_mpg_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mpg_dec_SelectionChanged"/>
-                                    <Label OpacityMask="{x:Null}" x:Name="text_mkv" Content="MKV:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_mkv_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mkv_dec_SelectionChanged"/>
-                                </DockPanel>
-                                <DockPanel Margin="0,0,0,3" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_other" Content="Other files:" Width="222" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_oth_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_oth_dec_SelectionChanged"/>
-                                </DockPanel>
+            <TabControl x:Name="tabs" Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True">
+                <TabItem x:Name="tab_video">
+                    <TabItem.Header>
+                        <TextBlock x:Name="tab_video_Header" Text="Video"/>
+                    </TabItem.Header>
+                    <StackPanel Width="380" Height="Auto">
+                        <StackPanel Orientation="Horizontal">
+                            <ListView x:Name="listview_vdecoders" Background="#FF202020" Foreground="#FFFFFFFF" Margin="4,6,0,0" Width="280" Height="130" FontSize="12" SelectionMode="Single" ScrollViewer.ScrollChanged="ScrollChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Loaded="listview_Loaded">
+                                <ListView.Resources>
+                                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsFocused" Value="False">
+                                                <Setter Property="Background" Value="#00000000"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    <Style TargetType="{x:Type ComboBoxItem}">
+                                        <Setter Property="Background" Value="#FF202020"/>
+                                    </Style>
+                                    <Style TargetType="{x:Type ListViewItem}">
+                                        <Setter Property="Template" Value="{DynamicResource ListViewItemNoAero}"/>
+                                        <Setter Property="ToolTip" Value="{Binding Path=ToolTip}"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#F03095FF"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.Resources>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridView.ColumnHeaderContainerStyle>
+                                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                                <Setter Property="Height" Value="1"/>
+                                                <Setter Property="Opacity" Value="0"/>
+                                            </Style>
+                                        </GridView.ColumnHeaderContainerStyle>
+                                        <GridView.Columns>
+                                            <GridViewColumn x:Name="vextension" Width="100">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBox Text="{Binding Extension, Mode=OneWay}" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="textbox_Initialized" TextChanged="textbox_ext_TextChanged"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn x:Name="vdecoder" Width="150">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="vcombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView.Columns>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <StackPanel Orientation="Vertical">
+                                <Button x:Name="button_vdec_reset" Width="80" Height="25" Content="Reset" Click="button_decoders_reset_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="10,14,0,0"/>
+                                <Button x:Name="button_vdec_delete" Width="80" Height="25" Content="Delete" Click="button_decoder_delete_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="10,22,0,0"/>
+                                <Button x:Name="button_vdec_add" Width="80" Height="25" Content="Add" Click="button_decoder_add_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="10,22,0,0"/>
                             </StackPanel>
-                        </GroupBox>
+                        </StackPanel>
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_directshowsource" Header="DirectShowSource" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
@@ -40,7 +82,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="Mpeg2Source" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="MPEG2Source" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
                                     <CheckBox x:Name="check_force_film" Width="290" Height="Auto" Content="Auto force Film at (%):" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_force_film_Click"/>
@@ -48,34 +90,90 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource2" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
-                                    <CheckBox x:Name="check_ffms2" Width="226" Height="Auto" Content="Use new FFmpegSource2" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms2_Click"/>
+                                    <CheckBox x:Name="check_ffms_force_fps" Width="226" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_force_fps_Click"/>
                                     <CheckBox x:Name="check_ffms_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_audio_Click"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
-                                    <CheckBox x:Name="check_ffms_force_fps" Width="Auto" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_force_fps_Click"/>
+                                    <CheckBox x:Name="check_ffms_reindex" Width="226" Height="Auto" Content="Overwrite existing index file" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_reindex_Click"/>
+                                    <CheckBox x:Name="check_ffms_timecodes" Width="Auto" Height="Auto" Content="Timecodes" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_timecodes_Click"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="Audio" x:Name="tab_audio">
+                <TabItem x:Name="tab_audio">
+                    <TabItem.Header>
+                        <TextBlock x:Name="tab_audio_Header" Text="Audio"/>
+                    </TabItem.Header>
                     <StackPanel Width="380" Height="Auto">
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_adecoders" Header="Audio decoders" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <StackPanel Orientation="Horizontal">
+                            <ListView x:Name="listview_adecoders" Background="#FF202020" Foreground="#FFFFFFFF" Margin="4,6,0,0" Width="280" Height="130" FontSize="12" SelectionMode="Single" ScrollViewer.ScrollChanged="ScrollChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Loaded="listview_Loaded">
+                                <ListView.Resources>
+                                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsFocused" Value="False">
+                                                <Setter Property="Background" Value="#00000000"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    <Style TargetType="{x:Type ComboBoxItem}">
+                                        <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"/>
+                                    </Style>
+                                    <Style TargetType="{x:Type ListViewItem}">
+                                        <Setter Property="Template" Value="{DynamicResource ListViewItemNoAero}"/>
+                                        <Setter Property="ToolTip" Value="{Binding Path=ToolTip}"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#F03095FF"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.Resources>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridView.ColumnHeaderContainerStyle>
+                                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                                <Setter Property="Height" Value="1"/>
+                                                <Setter Property="Opacity" Value="0"/>
+                                            </Style>
+                                        </GridView.ColumnHeaderContainerStyle>
+                                        <GridView.Columns>
+                                            <GridViewColumn x:Name="aextension" Width="100">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBox Text="{Binding Extension, Mode=OneWay}" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="textbox_Initialized" TextChanged="textbox_ext_TextChanged"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn x:Name="adecoder" Width="150">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="acombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView.Columns>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <StackPanel Orientation="Vertical">
+                                <Button x:Name="button_adec_reset" Width="80" Height="25" Content="Reset" Click="button_decoders_reset_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="10,14,0,0"/>
+                                <Button x:Name="button_adec_delete" Width="80" Height="25" Content="Delete" Click="button_decoder_delete_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="10,22,0,0"/>
+                                <Button x:Name="button_adec_add" Width="80" Height="25" Content="Add" Click="button_decoder_add_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="10,22,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_nicaudio" Header="DRC" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
-                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_ac3" Content="AC3:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_ac3_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_ac3_dec_SelectionChanged"/>
-                                    <Label OpacityMask="{x:Null}" x:Name="text_mpa" Content="MPA:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_mpa_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mpa_dec_SelectionChanged"/>
-                                </DockPanel>
-                                <DockPanel Margin="0,0,0,3" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_wav" Content="WAV:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_wav_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_wav_dec_SelectionChanged"/>
-                                    <Label OpacityMask="{x:Null}" x:Name="text_mp3" Content="MP3:" Width="40" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="13" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_mp3_dec" Width="122" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="11" Margin="10,0,0,0" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_mp3_dec_SelectionChanged"/>
+                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_drc_ac3" Width="190" Height="Auto" Content="NicAC3Source +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_ac3_Click"/>
+                                    <CheckBox x:Name="check_drc_dts" Width="Auto" Height="Auto" Content="NicDTSSource +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_dts_Click"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -97,7 +195,7 @@
             </TabControl>
         </Grid>
         <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
-            <Button x:Name="button_ok" Width="80" Height="25" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="290,0,4,0"/>
+            <Button x:Name="button_ok" Width="80" Height="25" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
         </Grid>
     </Grid>
 </Window>

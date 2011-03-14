@@ -486,6 +486,7 @@ namespace XviD4PSP
                 //Video
                 case ("Refresh preview"): mnUpdateVideo_Click(null, null); break;
                 case ("VDemux"): menu_demux_video_Click(null, null); break;
+                case ("Decoding"): mnDecoding_Click(mnVideoDecoding, null); break;
                 case ("Detect black borders"): menu_autocrop_Click(null, null); break;
                 case ("Detect interlace"): menu_detect_interlace_Click(null, null); break;
                 case ("Color correction"): ColorCorrection_Click(null, null); break;
@@ -508,6 +509,8 @@ namespace XviD4PSP
                 case ("Windows Media Player"): menu_play_in_Click(menu_playinwmp, null); break;
                 case ("Media Player Classic"): menu_play_in_Click(menu_playinmpc, null); break;
                 case ("WPF Video Player"): menu_play_in_Click(menu_playinwpf, null); break;
+                //Settings
+                case ("Global settings"): menu_settings_Click(null, null); break;
                 //Tools
                 case ("Media Info"): menu_info_media_Click(menu_info_media, null); break;
                 case ("FFRebuilder"): menu_ffrebuilder_Click(null, null); break;
@@ -675,22 +678,21 @@ namespace XviD4PSP
                     if (!dfile.Contains("cache")) SafeDelete(dfile);
                 }
 
-                //подчищаем мусор за FFmpegSource
+                //Удаление индекс-файлов от FFmpegSource2
                 if (Settings.DeleteFFCache)
                 {
-                    foreach (string dfile in ffcache) SafeDelete(dfile);
+                    //Которые рядом с исходником
+                    foreach (string file in ffcache) SafeDelete(file);
 
-                    //Кэш от FFmpegSource2
-                    foreach (string f in Directory.GetFiles(Settings.TempPath, "*.ffindex")) SafeDelete(f);
+                    //Которые в Темп-папке
+                    foreach (string file in Directory.GetFiles(Settings.TempPath, "*.ffindex")) SafeDelete(file);
                 }
 
                 //Удаление DGIndex-кэша
                 if (Settings.DeleteDGIndexCache)
                 {
                     foreach (string cache_path in dgcache)
-                    {
                         SafeDirDelete(Path.GetDirectoryName(cache_path), false);
-                    }
                 }
             }
 
@@ -705,65 +707,6 @@ namespace XviD4PSP
             //Чистим трей
             TrayIcon.Visible = false;
             TrayIcon.Dispose();
-        }
-
-        private ArrayList add_ff_cache(string[] infileslist)
-        {
-            ArrayList cachefiles = new ArrayList();
-            foreach (string dfile in infileslist)
-            {
-                for (int n = 0; n < 10; n++)
-                {
-                    string test = dfile + ".ffa" + n + "cache";
-                    cachefiles.Add(test);
-                    test = dfile + ".ffv" + n + "cache";
-                    cachefiles.Add(test);
-                }
-            }
-            return cachefiles;
-        }
-
-        private void clear_ff_cache()
-        {
-            try
-            {
-                if (Settings.DeleteFFCache && Settings.DeleteTempFiles)
-                {
-                    ArrayList filesinwork = new ArrayList();
-
-                    //все файлы в текущем массиве
-                    if (m != null)
-                        foreach (string _file in m.infileslist)
-                            filesinwork.Add(_file);
-
-                    //все файлы в заданиях
-                    foreach (Task task in list_tasks.Items)
-                    {
-                        foreach (string _file in task.Mass.infileslist)
-                            filesinwork.Add(_file);
-                    }
-
-                    ArrayList cache_for_delete = new ArrayList();
-                    //сопоставление
-                    foreach (string _file in ffcache)
-                    {
-                        string cachefile = Calculate.RemoveExtention(_file, true);
-                        //если файл больше не используется удаляем его кеш
-                        if (!filesinwork.Contains(cachefile))
-                            cache_for_delete.Add(_file);
-                    }
-
-                    //удаляем свободные кеш файлы
-                    foreach (string _file in cache_for_delete)
-                    {
-                        ffcache.Remove(_file);
-                        SafeDelete(_file);
-                    }
-                }
-            }
-            catch (Exception)
-            {
-            }
         }
 
         private void clear_dgindex_cache()
@@ -841,7 +784,7 @@ namespace XviD4PSP
                 x.infilepath_source = x.infilepath;
                 x.infilepath = vpath;
                 x.infileslist = new string[] { vpath };
-                x.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
+                x.vdecoder = AviSynthScripting.Decoders.FFmpegSource2;
                 deletefiles.Add(vpath);
 
                 if (Settings.EnableAudio)
@@ -979,88 +922,133 @@ namespace XviD4PSP
 
             try
             {
-                bool needupdate = false;
                 FilesListWindow f = new FilesListWindow(x);
-                if (f.m != null)
-                    x = f.m.Clone();
-                if (x != null)
+                if (f.m == null) return;
+                x = f.m.Clone();
+
+                //если что-то изменилось
+                bool needupdate = false;
+                if (oldfiles.Length != x.infileslist.Length)
+                    needupdate = true;
+                else
                 {
-                    //если что-то изменилось
-                    if (oldfiles.Length != x.infileslist.Length)
-                        needupdate = true;
-                    else
+                    for (int i = 0; i < x.infileslist.Length; i++)
                     {
-                        int n = 0;
-                        foreach (string file in oldfiles)
+                        //Файлы поменялись местами
+                        if (oldfiles[i] != x.infileslist[i])
                         {
-                            if (file != x.infileslist[n])
-                            {
-                                needupdate = true;
-                            }
-                            n++;
+                            needupdate = true; break;
                         }
-                    }
-
-                    if (needupdate == true)
-                    {
-                        string ext = Path.GetExtension(x.infilepath).ToLower();
-                        if (x.inaudiostreams.Count > 0)
-                        {
-                            AudioStream s = (AudioStream)x.inaudiostreams[x.inaudiostream];
-                            ArrayList afiles = new ArrayList();
-                            afiles.Add(s.audiopath);
-                            if (ext == ".d2v")
-                            {
-                                string newfile = x.infileslist[x.infileslist.Length - 1];
-                                ArrayList afileslist = Indexing.GetTracks(newfile);
-                                afiles.Add(afileslist[x.inaudiostream]);
-                            }
-                            s.audiofiles = Calculate.ConvertArrayListToStringArray(afiles);
-                        }
-
-                        //создаём новый AviSynth скрипт
-                        x = AviSynthScripting.CreateAutoAviSynthScript(x);
-
-                        if (ext != ".d2v" && ext != ".dga" && ext != ".dgi")
-                        {
-                            //подсчитываем размер
-                            long sizeb = 0;
-                            //long msec = 0;
-                            //long frames = 0;
-                            foreach (string file in x.infileslist)
-                            {
-                                sizeb += new FileInfo(file).Length;
-                                //MediaInfoWrapper med = new MediaInfoWrapper();
-                                //med.Open(file);
-                                //frames += med.Frames;
-                                //msec += med.Milliseconds;
-                                //med.Close();
-                            }
-                            x.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511, 1) + " mb";
-                        }
-
-                        //получаем длительность и фреймы
-                        Caching cach = new Caching(x);
-                        if (cach.m == null) return;
-                        x = cach.m.Clone();
-
-                        //x.inframes = (int)frames;
-                        //x.induration = TimeSpan.FromMilliseconds(msec);
-                        //x.outduration = x.induration;
-
-                        x = Calculate.UpdateOutFrames(x);
-
-                        //загружаем обновлённый скрипт
-                        m = x.Clone();
-                        LoadVideo(MediaLoad.load);
                     }
                 }
-                else
-                    CloseFile();
+
+                if (needupdate)
+                {
+                    string ext = Path.GetExtension(x.infilepath).ToLower();
+
+                    //Для MPEG2Source надо переиндексировать - проще закрыть и открыть файл(ы) заново
+                    if (x.vdecoder == AviSynthScripting.Decoders.MPEG2Source && !string.IsNullOrEmpty(x.indexfile) && ext != ".d2v")
+                    {
+                        //Наверно не самое удачное решение..
+                        bool delete_temp = Settings.DeleteTempFiles;
+                        bool delete_dgindex = Settings.DeleteDGIndexCache;
+                        Settings.DeleteTempFiles = Settings.DeleteDGIndexCache = true;
+
+                        try
+                        {
+                            //Тут должна удалиться индекс-папка
+                            CloseFile();
+                        }
+                        finally
+                        {
+                            Settings.DeleteTempFiles = delete_temp;
+                            Settings.DeleteDGIndexCache = delete_dgindex;
+                        }
+
+                        x.inaudiostreams = new ArrayList();
+                        x.outaudiostreams = new ArrayList();
+                        action_open(x);
+                        return;
+                    }
+
+                    //Обновляем возможные индекс-файлы от FFmpegSource2
+                    if (!x.ffms_indexintemp)
+                    {
+                        foreach (string file in x.infileslist)
+                        {
+                            if (!ffcache.Contains(file + ".ffindex"))
+                                ffcache.Add(file + ".ffindex");
+                        }
+                    }
+
+                    //Переиндексация для FFmpegSource2
+                    if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2)
+                    {
+                        Indexing_FFMS ffindex = new Indexing_FFMS(x);
+                        if (ffindex.m == null)
+                        {
+                            CloseFile();
+                            return;
+                        }
+                    }
+
+                    if (x.inaudiostreams.Count > 0)
+                    {
+                        AudioStream s = (AudioStream)x.inaudiostreams[x.inaudiostream];
+                        ArrayList afiles = new ArrayList();
+                        if (ext == ".d2v" || ext == ".dga" || ext == ".dgi")
+                        {
+                            foreach (string file in x.infileslist)
+                            {
+                                ArrayList afileslist = Indexing.GetTracks(file);
+                                if (afileslist.Count > 0)
+                                    afiles.Add(afileslist[Math.Min(x.inaudiostream, afileslist.Count - 1)]);
+                            }
+                        }
+                        else if (!x.isvideo) //Для аудио файлов
+                        {
+                            foreach (string file in x.infileslist)
+                                afiles.Add(file);
+
+                            x.inframes = 0;
+                            x.induration = TimeSpan.Zero;
+                        }
+                        else
+                            afiles.Add(s.audiopath);
+
+                        s.audiofiles = Calculate.ConvertArrayListToStringArray(afiles);
+                    }
+
+                    //создаём новый AviSynth скрипт
+                    x = AviSynthScripting.CreateAutoAviSynthScript(x);
+
+                    //подсчитываем размер
+                    long sizeb = 0;
+                    foreach (string file in x.infileslist)
+                    {
+                        sizeb += new FileInfo(file).Length;
+                    }
+                    x.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511, 1) + " mb";
+                    x.infilesizeint = (int)((double)sizeb / 1049511);
+
+                    //получаем длительность и фреймы
+                    Caching cach = new Caching(x);
+                    if (cach.m == null) return;
+                    x = cach.m.Clone();
+
+                    //Нужно обновить кол-во кадров в BlankClip()
+                    if (x.vdecoder == AviSynthScripting.Decoders.BlankClip)
+                        x = AviSynthScripting.CreateAutoAviSynthScript(x);
+
+                    x = Calculate.UpdateOutFrames(x);
+
+                    //загружаем обновлённый скрипт
+                    m = x.Clone();
+                    LoadVideo(MediaLoad.load);
+                }
             }
             catch (Exception ex)
             {
-                x = null;
                 ErrorException("AppendFile: " + ex.Message, ex.StackTrace);
             }
         }
@@ -1126,8 +1114,15 @@ namespace XviD4PSP
                     goto finish;
                 }
 
-                //добавляем список на очистку
-                ffcache.AddRange(add_ff_cache(x.infileslist));
+                //Определяем, где создавать индекс-файлы для FFmpegSource2 + занесение их в список на удаление
+                if (!(x.ffms_indexintemp = (Settings.FFMS_IndexInTemp || Calculate.IsReadOnly(x.infilepath))))
+                {
+                    foreach (string file in x.infileslist)
+                    {
+                        if (!ffcache.Contains(file + ".ffindex"))
+                            ffcache.Add(file + ".ffindex");
+                    }
+                }
 
                 //присваиваем заданию уникальный ключ
                 if (Settings.Key == "9999")
@@ -1215,7 +1210,7 @@ namespace XviD4PSP
                         x.taskname = x.dvdname + title;
                     }
 
-                    if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source)
+                    if (Format.GetValidVDecoder(x) == AviSynthScripting.Decoders.MPEG2Source)
                     {
                         //проверяем индекс папку (проверка содержимого файла - если там МПЕГ, то нужна индексация; тут-же идет запуск МедиаИнфо)
                         IndexChecker ich = new IndexChecker(x);
@@ -1248,21 +1243,7 @@ namespace XviD4PSP
                 }
 
                 //определяем видео декодер
-                if (x.vdecoder == 0) x = Format.GetValidVDecoder(x);
-
-                //проверка на невозможность создать кеш файл для ffmpegsource
-                if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Calculate.IsReadOnly(x.infilepath) && !Settings.FFmpegSource2)
-                {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("Input file on CD or DVD! FFmpegSource decodes files only from HardDrive.") + Environment.NewLine +
-                        Languages.Translate("Copy files to HardDrive or use DirectShowSource decoder.") + Environment.NewLine +
-                        Languages.Translate("Switch decoder to DirectShowSource and try once again?"), Languages.Translate("Error"), Message.MessageStyle.YesNo);
-                    if (mess.result == Message.Result.Yes)
-                    {
-                        x.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
-                    }
-                    else return;
-                }
+                if (x.vdecoder == 0) x.vdecoder = Format.GetValidVDecoder(x);
 
                 //принудительный фикс цвета для DVD
                 if (Settings.AutoColorMatrix && x.format != Format.ExportFormats.Audio)
@@ -1288,9 +1269,9 @@ namespace XviD4PSP
                 }
 
                 //пытаемся точно узнать фреймрейт (если до этого не вышло)
-                if (x.format != Format.ExportFormats.Audio)
+                if (x.format != Format.ExportFormats.Audio && x.isvideo)
                 {
-                    if (x.inframerate == "" && ext != ".y4m" && ext != ".yuv")
+                    if (x.inframerate == "" && ext != ".vdr" && ext != ".y4m" && ext != ".yuv")
                     {
                         FramerateDetector frd = new FramerateDetector(x);
                         if (frd.m != null)
@@ -1298,46 +1279,15 @@ namespace XviD4PSP
                     }
                 }
 
-                if (x == null) return;
-
-                //Извлечение видео для FFmpegSource
-                if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource)
+                //Индексация для FFmpegSource2
+                if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2)
                 {
-                    //проверяем надо ли извлекать видео
-                    FFMpegSourceHelper fhelp = new FFMpegSourceHelper(x);
-                    if (fhelp.IsErrors)
-                    {
-                        if (!Settings.FFmpegSource2)
-                        {
-                            string outext = Format.GetValidRAWVideoEXT(x);
-                            string outpath = Settings.TempPath + "\\" + x.key + "." + outext;
-
-                            //удаляем старый файл
-                            SafeDelete(outpath);
-
-                            //извлекаем новый файл
-                            Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractVideo, outpath);
-
-                            //проверка на удачное завершение
-                            if (!dem.IsErrors && File.Exists(outpath) && new FileInfo(outpath).Length != 0)
-                            {
-                                x.taskname = Path.GetFileNameWithoutExtension(x.infilepath);
-                                x.infilepath_source = x.infilepath;
-                                x.infilepath = outpath;
-                                x.infileslist = new string[] { x.infilepath };
-                                deletefiles.Add(outpath);
-                            }
-                        }
-                        else
-                        {
-                            //Для FFmpegSource2 просто выводим текст ошибки
-                            throw new Exception(fhelp.error_message);
-                        }
-                    }
+                    Indexing_FFMS ffindex = new Indexing_FFMS(x);
+                    if (ffindex.m == null) return;
                 }
 
-                //Извлечение звука (1-й трек) для FFmpegSource и DirectShowSource, для DSS2 звук будет извлечен в Caching
-                if (x.inaudiostreams.Count > 0 && Settings.EnableAudio && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource &&
+                //Извлечение звука (1-й трек) для FFmpegSource2 и DirectShowSource, для DirectShowSource2 звук будет извлечен в Caching
+                if (x.inaudiostreams.Count > 0 && Settings.EnableAudio && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 &&
                     !Settings.FFMS_Enable_Audio || x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio))
                 {
                     AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
@@ -1380,28 +1330,6 @@ namespace XviD4PSP
                 Caching cach = new Caching(x);
                 if (cach.m == null) return;
                 x = cach.m.Clone();
-
-                if (x.format != Format.ExportFormats.Audio)
-                {
-                    //ситуация когда стоит попробовать декодировать аудио в wav
-                    if (cach.error == "FFmpegSource: Audio codec not found")
-                    {
-                        AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
-
-                        string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + ".wav";
-                        Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
-                        if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
-
-                        //проверка на удачное завершение
-                        if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
-                        {
-                            instream.audiopath = outpath;
-                            instream.audiofiles = new string[] { outpath };
-                            instream = Format.GetValidADecoder(instream);
-                            deletefiles.Add(outpath);
-                        }
-                    }
-                }
 
                 //забиваем-обновляем аудио массивы
                 x = FillAudio(x);
@@ -1676,9 +1604,6 @@ namespace XviD4PSP
 
                     LoadVideo(MediaLoad.load);
                 }
-
-                //удаляем старый кеш
-                clear_ff_cache();
             }
             catch (Exception ex)
             {
@@ -1700,7 +1625,7 @@ namespace XviD4PSP
                     }
                 }
                 else
-                    ErrorException("OpenFile: " + ex.Message, ex.StackTrace);
+                    ErrorException("LoadFile: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -1826,9 +1751,9 @@ namespace XviD4PSP
                 //Временный WAV-файл для 2pass AAC
                 if (outstream.codec == "AAC" && mass.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass)
                 {
-                    if (File.Exists(instream.audiopath) && Path.GetExtension(instream.audiopath) == ".wav" && mass.script == AviSynthScripting.CreateAutoAviSynthScript(mass).script &&
+                    if ((instream.audiofiles == null || instream.audiofiles.Length < 2) && File.Exists(instream.audiopath) && Path.GetExtension(instream.audiopath).ToLower() == ".wav" &&
                         !mass.trim_is_on && !m.testscript && instream.bits == outstream.bits && instream.channels == outstream.channels && instream.delay == outstream.delay &&
-                        instream.gain == outstream.gain && instream.samplerate == outstream.samplerate)
+                        instream.gain == outstream.gain && instream.samplerate == outstream.samplerate && mass.script == AviSynthScripting.CreateAutoAviSynthScript(mass).script)
                     {
                         outstream.nerotemp = instream.audiopath;
                     }
@@ -1868,7 +1793,6 @@ namespace XviD4PSP
 
             if (Settings.DeleteTempFiles)
             {
-                clear_ff_cache();                // - Кэш от FFmpegSource1
                 clear_dgindex_cache();           // - Кэш от DGIndex
                 clear_audio_and_video_caches();  // - Извлеченные или декодированные аудио и видео файлы
             }
@@ -1915,18 +1839,39 @@ namespace XviD4PSP
                         busy = true; break;
                     }
                 }
+
                 //Удаляем кэши сразу, или помещаем их в список на удаление, если они участвует в кодировании
-                foreach (object s in m.inaudiostreams) //Аудио
+                foreach (AudioStream a in m.inaudiostreams)
                 {
-                    AudioStream a = (AudioStream)s;
-                    if (a.audiopath != null &&
-                        Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
-                        a.audiopath != m.infilepath) //Защита от удаления исходника
-                        if (!busy) SafeDelete(a.audiopath); else deletefiles.Add(a.audiopath);
+                    //Аудио
+                    if (a.audiopath != null && Path.GetDirectoryName(a.audiopath) == Settings.TempPath)
+                    {
+                        //Защита от удаления исходников
+                        bool garbage = (a.audiopath != m.infilepath);
+                        foreach (string file in m.infileslist)
+                        {
+                            if (a.audiopath == file)
+                            {
+                                garbage = false; break;
+                            }
+                        }
+
+                        if (garbage)
+                        {
+                            if (!busy) SafeDelete(a.audiopath);
+                            else deletefiles.Add(a.audiopath);
+                        }
+                    }
                 }
-                if (Path.GetFileNameWithoutExtension(m.infilepath) != m.taskname && //Видео
-                    Path.GetDirectoryName(m.infilepath) == Settings.TempPath)
-                    if (!busy) SafeDelete(m.infilepath); else deletefiles.Add(m.infilepath);
+
+                //Видео
+                if (Path.GetFileNameWithoutExtension(m.infilepath) != m.taskname &&
+                    Path.GetDirectoryName(m.infilepath) == Settings.TempPath &&
+                    m.infilepath_source != null)
+                {
+                    if (!busy) SafeDelete(m.infilepath);
+                    else deletefiles.Add(m.infilepath);
+                }
             }
             catch (Exception) { }
         }
@@ -2056,6 +2001,7 @@ namespace XviD4PSP
                 //Video
                 mnUpdateVideo.InputGestureText = cmn_refresh.InputGestureText = HotKeys.GetKeys("Refresh preview");
                 menu_demux_video.InputGestureText = HotKeys.GetKeys("VDemux");                //
+                mnVideoDecoding.InputGestureText = HotKeys.GetKeys("Decoding");
                 menu_autocrop.InputGestureText = HotKeys.GetKeys("Detect black borders");
                 menu_detect_interlace.InputGestureText = HotKeys.GetKeys("Detect interlace");
                 menu_saturation_brightness.InputGestureText = HotKeys.GetKeys("Color correction");
@@ -2078,6 +2024,8 @@ namespace XviD4PSP
                 menu_playinwmp.InputGestureText = HotKeys.GetKeys("Windows Media Player");
                 menu_playinmpc.InputGestureText = HotKeys.GetKeys("Media Player Classic");
                 menu_playinwpf.InputGestureText = HotKeys.GetKeys("WPF Video Player");
+                //Settings
+                menu_settings.InputGestureText = HotKeys.GetKeys("Global settings");
                 //Tools
                 menu_info_media.InputGestureText = HotKeys.GetKeys("Media Info");
                 menu_ffrebuilder.InputGestureText = HotKeys.GetKeys("FFRebuilder");
@@ -2750,21 +2698,16 @@ namespace XviD4PSP
 
         private void mnDecoding_Click(object sender, RoutedEventArgs e)
         {
-            Decoders_Settings ds;
-
-            if (((MenuItem)sender).Name == "mnAudioDecoding")
-                ds = new Decoders_Settings(m, this, 2);
-            else
-                ds = new Decoders_Settings(m, this, 1);
+            Decoders_Settings ds = new Decoders_Settings(m, this, (sender == mnAudioDecoding ? 2 : 1));
 
             if (m != null && ds.NeedUpdate)
             {
                 //Дублируем текущий массив для возможности восстановления
                 Massive old_m = m.Clone();
-                
+
                 //Новый массив с измененными декодерами и скриптом
                 m = ds.m.Clone();
-                
+
                 reopen_file(old_m);
             }
         }
@@ -2772,14 +2715,51 @@ namespace XviD4PSP
         //повторное открытие файла после смены декодера
         private void reopen_file(Massive old_m)
         {
+            bool restore = false;
+
+            //Переключились на MPEG2Source
+            if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && old_m.vdecoder != AviSynthScripting.Decoders.MPEG2Source)
+            {
+                //Если индекс-файла нет, то надо индексировать (со всеми проверками - проще открыть файл заново)
+                if ((string.IsNullOrEmpty(m.indexfile) || !File.Exists(m.indexfile)))
+                {
+                    //Но проверить на МПЕГ можно и тут
+                    if (m.invcodecshort == "MPEG1" || m.invcodecshort == "MPEG2")
+                    {
+                        Massive x = m.Clone();
+                        x.inaudiostreams = new ArrayList();
+                        x.outaudiostreams = new ArrayList();
+
+                        CloseFile();
+                        action_open(x);
+                        return;
+                    }
+                    else
+                    {
+                        restore = true;
+                        goto finish;
+                    }
+                }
+            }
+
+            //Переключились на FFmpegSource2
+            if (m.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && old_m.vdecoder != AviSynthScripting.Decoders.FFmpegSource2)
+            {
+                //Индексация для FFmpegSource2
+                Indexing_FFMS ffindex = new Indexing_FFMS(m);
+                if (ffindex.m == null)
+                {
+                    restore = true;
+                    goto finish;
+                }
+            }
+
             //Получаем информацию через AviSynth и ловим ошибки
             Caching cach = new Caching(m);
             if (cach.m == null)
             {
-                //Восстанавливаем массив из сохраненного
-                m = old_m.Clone();
-                old_m = null;
-                return;
+                restore = true;
+                goto finish;
             }
             m = cach.m.Clone();
             old_m = null;
@@ -2814,6 +2794,14 @@ namespace XviD4PSP
             //загружаем видео в плеер
             LoadVideo(MediaLoad.update);
             UpdateTaskMassive(m);
+
+        finish:
+            if (restore)
+            {
+                //Восстанавливаем массив из сохраненного
+                m = old_m.Clone();
+                old_m = null;
+            }
         }
 
         private void menu_after_i_nothing_Click(object sender, RoutedEventArgs e)
@@ -3639,9 +3627,9 @@ namespace XviD4PSP
             if (list_tasks.SelectedIndex != -1 && list_tasks.SelectedItem != null && list_tasks.Items.Count > 1)
             {
                 int index = 0;
-                if (((MenuItem)sender).Name == "cmenu_up") index = list_tasks.SelectedIndex - 1;
-                else if (((MenuItem)sender).Name == "cmenu_down") index = list_tasks.SelectedIndex + 1;
-                else if (((MenuItem)sender).Name == "cmenu_last") index = list_tasks.Items.Count - 1;
+                if (sender == cmenu_up) index = list_tasks.SelectedIndex - 1;
+                else if (sender == cmenu_down) index = list_tasks.SelectedIndex + 1;
+                else if (sender == cmenu_last) index = list_tasks.Items.Count - 1;
 
                 if (index >= 0 && index < list_tasks.Items.Count && list_tasks.SelectedIndex != index)
                 {
@@ -3674,7 +3662,6 @@ namespace XviD4PSP
                 if (outfiles.Contains(task.Mass.outfilepath))
                     outfiles.Remove(task.Mass.outfilepath);
 
-                clear_ff_cache();
                 UpdateTasksBackup();
             }
         }
@@ -3877,7 +3864,6 @@ namespace XviD4PSP
                 foreach (Task task in ready)
                     list_tasks.Items.Remove(task);
 
-                clear_ff_cache();
                 UpdateTasksBackup();
             }
         }
@@ -3900,7 +3886,6 @@ namespace XviD4PSP
                 foreach (Task task in fordelete)
                     list_tasks.Items.Remove(task);
 
-                clear_ff_cache();
                 UpdateTasksBackup();
             }
         }
@@ -6628,8 +6613,15 @@ namespace XviD4PSP
 
         private void RestoreCaches(Massive mass)
         {
-            //Кэш от FFmpegSource1
-            ffcache.AddRange(add_ff_cache(mass.infileslist));
+            //Возможные индекс-файлы от FFmpegSource2
+            if (!mass.ffms_indexintemp)
+            {
+                foreach (string file in mass.infileslist)
+                {
+                    if (!ffcache.Contains(file + ".ffindex"))
+                        ffcache.Add(file + ".ffindex");
+                }
+            }
 
             //Кэш от DGIndex
             if (mass.vdecoder == AviSynthScripting.Decoders.MPEG2Source && mass.indexfile != null)

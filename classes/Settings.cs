@@ -588,129 +588,45 @@ namespace XviD4PSP
             }
         }
 
-        public static AviSynthScripting.Decoders AVIDecoder
+        //Список видео декодеров и расширений
+        public static string VDecoders
         {
             get
             {
-                object value = GetValue("AVIDecoder");
-                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+                object value = GetValue("VDecoders");
+                if (value == null || value.ToString().Length == 0)
+                {
+                    return "mpeg_ps/ts=MPEG2Source; avi=DirectShowSource; mp4=DirectShowSource; mkv=DirectShowSource; evo=FFmpegSource2; *=DirectShowSource";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
             }
             set
             {
-                SetString("AVIDecoder", value.ToString());
+                SetString("VDecoders", value);
             }
         }
 
-        public static AviSynthScripting.Decoders MKVDecoder
+        //Список аудио декодеров и расширений
+        public static string ADecoders
         {
             get
             {
-                object value = GetValue("MKVDecoder");
-                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
+                object value = GetValue("ADecoders");
+                if (value == null || value.ToString().Length == 0)
+                {
+                    return "ac3=NicAC3Source; mpa=NicMPG123Source; mp1=NicMPG123Source; mp2=NicMPG123Source; mp3=bassAudioSource; wav=RaWavSource; w64=RaWavSource; dts=NicDTSSource; wma=bassAudioSource; *=bassAudioSource";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
             }
             set
             {
-                SetString("MKVDecoder", value.ToString());
-            }
-        }
-
-        public static AviSynthScripting.Decoders MP4Decoder
-        {
-            get
-            {
-                object value = GetValue("MP4Decoder");
-                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
-            }
-            set
-            {
-                SetString("MP4Decoder", value.ToString());
-            }
-        }
-
-        public static AviSynthScripting.Decoders MPEGDecoder
-        {
-            get
-            {
-                object value = GetValue("MPEGDecoder");
-                if (value == null) return AviSynthScripting.Decoders.MPEG2Source;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
-            }
-            set
-            {
-                SetString("MPEGDecoder", value.ToString());
-            }
-        }
-
-        public static AviSynthScripting.Decoders OtherDecoder
-        {
-            get
-            {
-                object value = GetValue("OtherDecoder");
-                if (value == null) return AviSynthScripting.Decoders.DirectShowSource;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
-            }
-            set
-            {
-                SetString("OtherDecoder", value.ToString());
-            }
-        }
-
-        public static AviSynthScripting.Decoders AC3Decoder
-        {
-            get
-            {
-                object value = GetValue("AC3Decoder");
-                if (value == null) return AviSynthScripting.Decoders.NicAC3Source;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
-            }
-            set
-            {
-                SetString("AC3Decoder", value.ToString());
-            }
-        }
-
-        public static AviSynthScripting.Decoders MPADecoder
-        {
-            get
-            {
-                object value = GetValue("MPADecoder");
-                if (value == null) return AviSynthScripting.Decoders.NicMPG123Source;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
-            }
-            set
-            {
-                SetString("MPADecoder", value.ToString());
-            }
-        }
-
-        public static AviSynthScripting.Decoders MP3Decoder
-        {
-            get
-            {
-                object value = GetValue("MP3Decoder");
-                if (value == null) return AviSynthScripting.Decoders.bassAudioSource;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
-            }
-            set
-            {
-                SetString("MP3Decoder", value.ToString());
-            }
-        }
-
-        public static AviSynthScripting.Decoders WAVDecoder
-        {
-            get
-            {
-                object value = GetValue("WAVDecoder");
-                if (value == null) return AviSynthScripting.Decoders.RaWavSource;
-                else return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), value.ToString());
-            }
-            set
-            {
-                SetString("WAVDecoder", value.ToString());
+                SetString("ADecoders", value);
             }
         }
 
@@ -1074,6 +990,26 @@ namespace XviD4PSP
             }
         }
 
+        public static bool FFMS_IndexInTemp
+        {
+            get
+            {
+                object value = GetValue("FFMS_IndexInTemp");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("FFMS_IndexInTemp", value);
+            }
+        }
+
         public static bool DeleteDGIndexCache
         {
             get
@@ -1368,16 +1304,15 @@ namespace XviD4PSP
             }
         }
 
-        //Использовать новый FFmpegSource2
-        public static bool FFmpegSource2
+        //Переиндексация для FFmpegSource2
+        public static bool FFMS_Reindex
         {
             get
             {
-                object value = GetValue("FFmpegSource2");
+                object value = GetValue("FFMS_Reindex");
                 if (value == null)
                 {
-                    SetBool("FFmpegSource2", true);
-                    return true;
+                    return false;
                 }
                 else
                 {
@@ -1386,7 +1321,28 @@ namespace XviD4PSP
             }
             set
             {
-                SetBool("FFmpegSource2", value);
+                SetBool("FFMS_Reindex", value);
+            }
+        }
+
+        //Извлекать таймкоды при индексации (FFmpegSource2)
+        public static bool FFMS_TimeCodes
+        {
+            get
+            {
+                object value = GetValue("FFMS_TimeCodes");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("FFMS_TimeCodes", value);
             }
         }
 
@@ -1928,9 +1884,9 @@ namespace XviD4PSP
                 if (value == null || Convert.ToString(value) == "")
                 {
                     return "Open file(s)=Ctrl+O; Open folder=Ctrl+Alt+O; Open DVD folder=Ctrl+D; Decode file=Ctrl+Alt+D; Join file=Ctrl+J; Close file=Ctrl+C; Save task=Ctrl+S; Save frame=Ctrl+F; Save THM frame=Ctrl+Alt+F; Refresh preview=Shift+R; VDemux=Shift+V; " +
-                        "Detect black borders=Shift+B; Detect interlace=Shift+I; Color correction=C; Resolution/Aspect=R; Interlace/Framerate=I; VEncoding settings=V; ADemux=Shift+A; Save to WAV=W; Editing options=Ctrl+A; AEncoding settings=A; Add subtitles=Insert; " +
-                        "Remove subtitles=Delete; AvsP editor=E; Edit filtering script=S; Test script=Ctrl+T; Save script=Shift+S; Windows Media Player=Shift+M; Media Player Classic=M; WPF Video Player=Ctrl+M; Media Info=F1; FFRebuilder=F2; MKVRebuilder=F3; DGIndex=F4; " +
-                        "DGPulldown=F5; DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; Play-Pause=Space; Fullscreen=Esc; " +
+                        "Decoding=D; Detect black borders=Shift+B; Detect interlace=Shift+I; Color correction=C; Resolution/Aspect=R; Interlace/Framerate=I; VEncoding settings=V; ADemux=Shift+A; Save to WAV=W; Editing options=Ctrl+A; AEncoding settings=A; Add subtitles=Insert; " +
+                        "Remove subtitles=Delete; AvsP editor=E; Edit filtering script=S; Test script=Ctrl+T; Save script=Shift+S; Windows Media Player=Shift+M; Media Player Classic=M; WPF Video Player=Ctrl+M; Global settings=G; Media Info=F1; FFRebuilder=F2; MKVRebuilder=F3;" +
+                        "DGIndex=F4; DGPulldown=F5; DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; Play-Pause=Space; Fullscreen=Esc; " +
                         "Volume+=Up; Volume-=Down; Set Start=Home; Set End=End; Apply Trim=T; Add/Remove bookmark=Ctrl+B";
                 }
                 else
@@ -1960,11 +1916,11 @@ namespace XviD4PSP
             }
         }
 
-        public static bool FFmpegAssumeFPS
+        public static bool FFMS_AssumeFPS
         {
             get
             {
-                object value = GetValue("FFmpegAssumeFPS");
+                object value = GetValue("FFMS_AssumeFPS");
                 if (value == null)
                 {
                     return true;
@@ -1976,7 +1932,7 @@ namespace XviD4PSP
             }
             set
             {
-                SetBool("FFmpegAssumeFPS", value);
+                SetBool("FFMS_AssumeFPS", value);
             }
         }
 
@@ -2610,6 +2566,48 @@ namespace XviD4PSP
             set
             {
                 SetBool("ValidatePathes", value);
+            }
+        }
+
+        //DRC для NicAC3Source
+        public static bool NicAC3_DRC
+        {
+            get
+            {
+                object value = GetValue("NicAC3_DRC");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("NicAC3_DRC", value);
+            }
+        }
+
+        //DRC для NicDTSSource
+        public static bool NicDTS_DRC
+        {
+            get
+            {
+                object value = GetValue("NicDTS_DRC");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("NicDTS_DRC", value);
             }
         }
     }

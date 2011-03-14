@@ -8,23 +8,85 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
 using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace XviD4PSP
 {
-	public partial class Decoders_Settings
-	{
+    public partial class Decoders_Settings
+    {
+        private class MyObj
+        {
+            public string Extension { get; set; }
+            public string Decoder { get; set; }
+            public string ToolTip { get; set; }
+            public int Index { get; set; }
+        }
+
+        //"MPEG2-PS/TS" и "Другие файлы"
+        public const string mpeg_psts = "mpeg_ps/ts";
+        public const string other_files = "*";
+
+        //Список видео декодеров
+        private string dec_avi = AviSynthScripting.Decoders.AVISource.ToString();
+        private string dec_m2s = AviSynthScripting.Decoders.MPEG2Source.ToString();
+        private string dec_dss = AviSynthScripting.Decoders.DirectShowSource.ToString();
+        private string dec_dss2 = AviSynthScripting.Decoders.DirectShowSource2.ToString();
+        private string dec_ffms = AviSynthScripting.Decoders.FFmpegSource2.ToString();
+        private string dec_qts = AviSynthScripting.Decoders.QTInput.ToString();
+
+        //Список аудио декодеров
+        private string dec_ac3 = AviSynthScripting.Decoders.NicAC3Source.ToString();
+        private string dec_mp3 = AviSynthScripting.Decoders.NicMPG123Source.ToString();
+        private string dec_dts = AviSynthScripting.Decoders.NicDTSSource.ToString();
+        private string dec_rawav = AviSynthScripting.Decoders.RaWavSource.ToString();
+        private string dec_wav = AviSynthScripting.Decoders.WAVSource.ToString();
+        private string dec_bass = AviSynthScripting.Decoders.bassAudioSource.ToString();
+        private string dec_ffas = AviSynthScripting.Decoders.FFAudioSource.ToString();
+
+        //Подсказки к видео декодерам
+        private string tltp_avi = Languages.Translate("This decoder uses VFW AVIFile interface, or AviSynth`s built-in OpenDML code (taken from VirtualDub).") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": avi, vdr";
+        private string tltp_m2s = Languages.Translate("Probably the best choice for MPEG-files. It provides frame accurate seeking and uses internal MPEG1/2 decoder.") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": MPEG2-PS/TS (mpg, vob, mod,..)";
+        private string tltp_dss = Languages.Translate("This decoder uses installed on your system DirecShow filters (splitters and decoders, including their settings!) for decoding.") +
+            "\r\n" + Languages.Translate("Frame accurate seeking is not guaranteed!") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_dss2 = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame accurate seeking when it`s possible.") +
+            Environment.NewLine + Languages.Translate("Path to the source file must not contain any non-Latin characters!") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_ffms = Languages.Translate("This decoder (based on FFmpeg) uses their own splitters and decoders, but requires some extra time for indexing your file.") +
+            "\r\n" + Languages.Translate("However, Haali Media Splitter is still required if you want to open MPEG-PS/TS or OGM files with this decoder.") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_qts = Languages.Translate("This decoder uses QuickTime environment for decoding, so QuickTime is required!") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": mov";
+
+        //Подсказки к аудио декодерам
+        private string tltp_ac3 = Languages.Translate("Supported formats") + ": ac3";
+        private string tltp_mp3 = Languages.Translate("Supported formats") + ": mpa, mp1, mp2, mp3";
+        private string tltp_dts = Languages.Translate("Supported formats") + ": dts, dtswav";
+        private string tltp_rawav = Languages.Translate("Supported formats") + ": wav, w64, lpcm";
+        private string tltp_wav = Languages.Translate("Supported formats") + ": wav (2Gb max!)";
+        private string tltp_bass = Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_ffas = Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+
         public Massive m;
         private string old_raw_script;
         public bool NeedUpdate = false;
-        
-        public Decoders_Settings(Massive mass, System.Windows.Window owner, int set_focus_to)
-		{
-			this.InitializeComponent();
+        private bool vdecoders_loaded = false;
+        private bool adecoders_loaded = false;
+        private bool text_editing = false;
+        private int default_index = 0;
 
-            Owner = owner;
+        public Decoders_Settings(Massive mass, System.Windows.Window owner, int set_focus_to)
+        {
+            this.InitializeComponent();
+            this.Owner = owner;
 
             if (mass != null)
             {
+                default_index = -1;
                 m = mass.Clone();
 
                 //Скрипт для определения изменений
@@ -35,125 +97,93 @@ namespace XviD4PSP
             //переводим
             Title = Languages.Translate("Decoding");
             button_ok.Content = Languages.Translate("OK");
-            text_other.Content = Languages.Translate("Other files") + ":";
-            check_dss_audio.ToolTip = Languages.Translate("Allow DirectShowSource to decode audio directly from the source-file (without demuxing).");
+            check_dss_audio.Content = check_ffms_audio.Content = Languages.Translate("Enable Audio");
+            check_dss_audio.ToolTip = Languages.Translate("Allow DirectShowSource to decode audio directly from the source-file (without demuxing)");
             check_force_film.Content = Languages.Translate("Auto force Film at") + " (%):";
             check_force_film.ToolTip = Languages.Translate("Auto force Film if Film percentage is more than selected value (for NTSC sources only)");
-            check_ffms2.Content = Languages.Translate("Use new FFmpegSource2");
-            check_ffms2.ToolTip = Languages.Translate("Choose what kind of FFmpegSource (old or new) will be used for decoding associated file types");
-            check_ffms_force_fps.ToolTip = Languages.Translate("Force FPS");
-            check_ffms_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "FFmpegSource") + "\r\n" +
-                Languages.Translate("Note: FFmpegSource1 will decode audio to RAW-data file, so it can take a lot of space on your HDD.");
+            check_ffms_force_fps.Content = Languages.Translate("Add AssumeFPS()");
+            check_ffms_force_fps.ToolTip = Languages.Translate("Force FPS using AssumeFPS()");
+            check_ffms_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "FFmpegSource2");
+            check_ffms_reindex.Content = Languages.Translate("Overwrite existing index files");
+            check_ffms_reindex.ToolTip = Languages.Translate("Always re-index the source file and overwrite existing index file, even if it was valid");
+            check_ffms_timecodes.Content = Languages.Translate("Timecodes");
+            check_ffms_timecodes.ToolTip = Languages.Translate("Extract timecodes to a file");
+            check_drc_ac3.ToolTip = check_drc_dts.ToolTip = Languages.Translate("Apply DRC (Dynamic Range Compression) for this decoder");
             check_enable_audio.Content = Languages.Translate("Enable audio in input files");
             check_enable_audio.ToolTip = Languages.Translate("If checked, input files will be opened with audio, otherwise they will be opened WITHOUT audio!")
                 + "\r\n" + Languages.Translate("Audio files - exception, they always will be opened.");
             check_new_delay.Content = Languages.Translate("Use new Delay calculation method");
             check_new_delay.ToolTip = Languages.Translate("A new method uses the difference between video and audio delays, while old method uses audio delay only."); //+
-                //"\r\n" + Languages.Translate("This new method can be helpfull for the FFmpegSource decoders, but harmful for the DirectShowSource.");
+            //"\r\n" + Languages.Translate("This new method can be helpfull for the FFmpegSource decoders, but harmful for the DirectShowSource.");
             check_copy_delay.Content = Languages.Translate("Apply Delay in Copy mode");
-
-            text_avi.ToolTip = "avi";
-            text_mkv.ToolTip = "mkv";
-            text_mp4.ToolTip = "mp4, m4v";
-            text_mpg.ToolTip = "various mpeg-files";
-
-            text_ac3.ToolTip = "ac3";
-            text_wav.ToolTip = "wav, w64";
-            text_mpa.ToolTip = "mp1, mp2, mpa";
-            text_mp3.ToolTip = "mp3";
-
-            //Video
-            combo_avi_dec.Items.Add("AVISource");
-            combo_avi_dec.Items.Add("DirectShowSource");
-            combo_avi_dec.Items.Add("DirectShowSource2");
-            combo_avi_dec.Items.Add("FFmpegSource");
-
-            combo_mkv_dec.Items.Add("DirectShowSource");
-            combo_mkv_dec.Items.Add("DirectShowSource2");
-            combo_mkv_dec.Items.Add("FFmpegSource");
-
-            combo_mp4_dec.Items.Add("DirectShowSource");
-            combo_mp4_dec.Items.Add("DirectShowSource2");
-            combo_mp4_dec.Items.Add("FFmpegSource");
-
-            combo_mpg_dec.Items.Add("DirectShowSource");
-            combo_mpg_dec.Items.Add("DirectShowSource2");
-            combo_mpg_dec.Items.Add("FFmpegSource");
-            combo_mpg_dec.Items.Add("Mpeg2Source");
-
-            combo_oth_dec.Items.Add("DirectShowSource");
-            combo_oth_dec.Items.Add("DirectShowSource2");
-            combo_oth_dec.Items.Add("FFmpegSource");
-
-            //Audio
-            combo_ac3_dec.Items.Add("BassAudioSource");
-            combo_ac3_dec.Items.Add("NicAC3Source");
-
-            combo_mpa_dec.Items.Add("BassAudioSource");
-            combo_mpa_dec.Items.Add("NicMPG123Source");
-
-            combo_mp3_dec.Items.Add("BassAudioSource");
-            combo_mp3_dec.Items.Add("NicMPG123Source");
-
-            combo_wav_dec.Items.Add("BassAudioSource");
-            combo_wav_dec.Items.Add("RaWavSource");
-            combo_wav_dec.Items.Add("WavSource");
+            button_vdec_add.Content = button_adec_add.Content = Languages.Translate("Add");
+            button_vdec_delete.Content = button_adec_delete.Content = Languages.Translate("Remove");
+            button_vdec_reset.Content = button_adec_reset.Content = Languages.Translate("Reset");
 
             //DirectShowSource
             check_dss_convert_fps.IsChecked = Settings.DSS_ConvertFPS;
             check_dss_audio.IsChecked = Settings.DSS_Enable_Audio;
-            
-            //Mpeg2Source
+
+            //MPEG2Source
             check_force_film.IsChecked = Settings.DGForceFilm;
             num_force_film.Value = Settings.DGFilmPercent;
 
-            //FFmpegSource
-            check_ffms2.IsChecked = Settings.FFmpegSource2;
-            check_ffms_force_fps.IsChecked = Settings.FFmpegAssumeFPS;
+            //FFmpegSource2
+            check_ffms_force_fps.IsChecked = Settings.FFMS_AssumeFPS;
             check_ffms_audio.IsChecked = Settings.FFMS_Enable_Audio;
+            check_ffms_reindex.IsChecked = Settings.FFMS_Reindex;
+            check_ffms_timecodes.IsChecked = Settings.FFMS_TimeCodes;
+
+            //NicAudio
+            check_drc_ac3.IsChecked = Settings.NicAC3_DRC;
+            check_drc_dts.IsChecked = Settings.NicDTS_DRC;
 
             //Audio
             check_enable_audio.IsChecked = Settings.EnableAudio;
             check_new_delay.IsChecked = Settings.NewDelayMethod;
             check_copy_delay.IsChecked = Settings.CopyDelay;
 
-            SetDecoders();
-            
-            //Тултипы для декодеров
-            SetVDecoderToolTip(combo_avi_dec);
-            SetVDecoderToolTip(combo_mkv_dec);
-            SetVDecoderToolTip(combo_mp4_dec);
-            SetVDecoderToolTip(combo_mpg_dec);
-            SetVDecoderToolTip(combo_oth_dec);
+            //Выбираем вкладку
+            if (set_focus_to == 2) tab_audio.IsSelected = true;
 
-            //Переводим фокус
-            if (set_focus_to == 2) tab_audio.Focus();
+            //Загружаем Видео\Аудио декодеры
+            LoadVDecodersListView(default_index);
+            LoadADecodersListView(default_index);
+
+            //Выбираем декодеры
+            SelectDecoders();
 
             ShowDialog();
-		}
+        }
+
+        void Window_ContentRendered(object sender, EventArgs e)
+        {
+            //Подгоняем высоту ListView
+            double new_height = 136;
+            ListView listview = (listview_vdecoders.IsVisible) ? listview_vdecoders : listview_adecoders;
+            if (listview.Items.Count > 0)
+            {
+                ListViewItem item = (listview.ItemContainerGenerator.ContainerFromItem(listview.Items[0]) as ListViewItem);
+                if (item != null)
+                {
+                    int show_items = 6; //Должно уместиться 6 штук
+                    double item_height = item.ActualHeight;
+                    double thickness = item.BorderThickness.Top;
+                    if (!double.IsNaN(item_height) && item_height > 0)
+                        new_height = (item_height * show_items) + ((!double.IsNaN(thickness)) ? thickness * show_items : 0) + show_items;
+                }
+            }
+
+            listview_vdecoders.Height = listview_adecoders.Height = new_height;
+            this.Opacity = 1;
+        }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m != null)
             {
-                //Прячем индекс-файл для переключения МПЕГ-декодера
-                string ext = Path.GetExtension(m.infilepath).ToLower();
-                if (m.isvideo && ext != ".d2v" && Calculate.IsMPEG(m.infilepath) && m.invcodecshort != "h264")
-                {
-                    if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source && m.oldindexfile != null)
-                    {
-                        m.indexfile = m.oldindexfile;
-                        m.oldindexfile = null;
-                    }
-                    else if (Settings.MPEGDecoder != AviSynthScripting.Decoders.MPEG2Source && m.indexfile != null)
-                    {
-                        m.oldindexfile = m.indexfile;
-                        m.indexfile = null;
-                    }
-                }
-
                 //Новый видео декодер
-                m = Format.GetValidVDecoder(m);
+                m.vdecoder = Format.GetValidVDecoder(m);
 
                 //Новый аудио декодер
                 foreach (object o in m.inaudiostreams)
@@ -168,174 +198,444 @@ namespace XviD4PSP
                 //Проверяем, изменился ли скрипт
                 NeedUpdate = (old_raw_script != m.script);
             }
-            
+
             Close();
         }
 
-        private void SetDecoders()
+        private void textbox_Initialized(object sender, EventArgs e)
         {
-            string dec = Settings.AVIDecoder.ToString();
-            if (dec == "AVISource") combo_avi_dec.SelectedIndex = 0;
-            else if (dec == "DirectShowSource") combo_avi_dec.SelectedIndex = 1;
-            else if (dec == "DSS2") combo_avi_dec.SelectedIndex = 2;
-            else combo_avi_dec.SelectedIndex = 3;
-
-            dec = Settings.MPEGDecoder.ToString();
-            if (dec == "DirectShowSource") combo_mpg_dec.SelectedIndex = 0;
-            else if (dec == "DSS2") combo_mpg_dec.SelectedIndex = 1;
-            else if (dec == "FFmpegSource") combo_mpg_dec.SelectedIndex = 2;
-            else combo_mpg_dec.SelectedIndex = 3;
-
-            dec = Settings.MP4Decoder.ToString();
-            if (dec == "DirectShowSource") combo_mp4_dec.SelectedIndex = 0;
-            else if (dec == "DSS2") combo_mp4_dec.SelectedIndex = 1;
-            else combo_mp4_dec.SelectedIndex = 2;
-
-            dec = Settings.MKVDecoder.ToString();
-            if (dec == "DirectShowSource") combo_mkv_dec.SelectedIndex = 0;
-            else if (dec == "DSS2") combo_mkv_dec.SelectedIndex = 1;
-            else combo_mkv_dec.SelectedIndex = 2;
-
-            dec = Settings.OtherDecoder.ToString();
-            if (dec == "DirectShowSource") combo_oth_dec.SelectedIndex = 0;
-            else if (dec == "DSS2") combo_oth_dec.SelectedIndex = 1;
-            else combo_oth_dec.SelectedIndex = 2;
-
-            dec = Settings.AC3Decoder.ToString();
-            if (dec == "bassAudioSource") combo_ac3_dec.SelectedIndex = 0;
-            else combo_ac3_dec.SelectedIndex = 1;
-
-            dec = Settings.WAVDecoder.ToString();
-            if (dec == "bassAudioSource") combo_wav_dec.SelectedIndex = 0;
-            else if (dec == "RaWavSource") combo_wav_dec.SelectedIndex = 1;
-            else combo_wav_dec.SelectedIndex = 2;
-            
-            dec = Settings.MPADecoder.ToString();
-            if (dec == "bassAudioSource") combo_mpa_dec.SelectedIndex = 0;
-            else combo_mpa_dec.SelectedIndex = 1;
-
-            dec = Settings.MP3Decoder.ToString();
-            if (dec == "bassAudioSource") combo_mp3_dec.SelectedIndex = 0;
-            else combo_mp3_dec.SelectedIndex = 1;
+            //Редактировать можно не всё!
+            TextBox text = (TextBox)sender;
+            if (text.Text == mpeg_psts || text.Text == other_files)
+            {
+                text.IsReadOnly = true;
+                text.IsHitTestVisible = false;
+            }
         }
 
-        private void SetVDecoderToolTip(ComboBox box)
+        private void vcombo_Initialized(object sender, EventArgs e)
         {
-            if (box.SelectedItem == null) return;
+            vdecoders_loaded = false;
+            ComboBox vcombo = (ComboBox)sender;
+            vcombo.Items.Clear();
 
-            string dec = box.SelectedItem.ToString();
-            if (dec == "DirectShowSource")
-                box.ToolTip = Languages.Translate("This decoder uses installed on your system DirecShow filters-decoders (and theirs settings!) for audio and video decoding.");
-            else if (dec == "DirectShowSource2")
-                box.ToolTip = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame-accuracy seeking and don`t use your system decoders for audio.") +
-                    Environment.NewLine + Languages.Translate("Path to the source file must not contains cyrillic and some other symbols!");
-            else if (dec == "FFmpegSource")
-                box.ToolTip = Languages.Translate("This decoder (old or new) is fully independent from your system decoders and theirs settings, but needs some time for indexing video (especially new FFmpegSource2).");
-            else if (dec == "Mpeg2Source")
-                box.ToolTip = Languages.Translate("Probably the best decoder for MPEG-files. Fully independent and frame-accurate.");
+            //Из-за глюков с IemsSource+ComboBoxItem+Binding приходится вот так вот
+            //извращаться с заполнением комбобокса и выбором нужного элемента из списка..
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_avi, ToolTip = tltp_avi });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_m2s, ToolTip = tltp_m2s });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_dss, ToolTip = tltp_dss });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_dss2, ToolTip = tltp_dss2 });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_ffms, ToolTip = tltp_ffms });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_qts, ToolTip = tltp_qts });
+            vcombo.SelectedIndex = (int)vcombo.Tag;
+            vdecoders_loaded = true;
+        }
+
+        private void acombo_Initialized(object sender, EventArgs e)
+        {
+            adecoders_loaded = false;
+            ComboBox acombo = (ComboBox)sender;
+            acombo.Items.Clear();
+
+            //Из-за глюков с IemsSource+ComboBoxItem+Binding приходится вот так вот
+            //извращаться с заполнением комбобокса и выбором нужного элемента из списка..
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_ac3, ToolTip = tltp_ac3 });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_mp3, ToolTip = tltp_mp3 });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_dts, ToolTip = tltp_dts });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_rawav, ToolTip = tltp_rawav });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_wav, ToolTip = tltp_wav });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_bass, ToolTip = tltp_bass });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_ffas, ToolTip = tltp_ffas });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_dss, ToolTip = tltp_dss });
+            acombo.SelectedIndex = (int)acombo.Tag;
+            adecoders_loaded = true;
+        }
+
+        private void LoadVDecodersListView(int item_index)
+        {
+            vdecoders_loaded = false;
+            listview_vdecoders.Items.Clear();
+
+            int mpeg_index = -1, other_index = 2;
+            string mpeg_dec = "", other_dec = dec_dss; //Дефолты
+            foreach (string line in (Settings.VDecoders.ToLower().Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)))
+            {
+                string[] extension_and_decoder = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
+                if (extension_and_decoder.Length == 2)
+                {
+                    int index = -1;
+                    string ext = extension_and_decoder[0].Trim();
+                    string dec = extension_and_decoder[1].Trim();
+
+                    //Определяем декодер (и его индекс в комбобоксе) без учета регистра
+                    if (dec.Equals(dec_avi, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_avi; index = 0; }
+                    else if (dec.Equals(dec_m2s, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_m2s; index = 1; }
+                    else if (dec.Equals(dec_dss, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dss; index = 2; }
+                    else if (dec.Equals(dec_dss2, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dss2; index = 3; }
+                    else if (dec.Equals(dec_ffms, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_ffms; index = 4; }
+                    else if (dec.Equals(dec_qts, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_qts; index = 5; }
+
+                    //Сортировка начала\конца списка
+                    if (ext == mpeg_psts) { mpeg_dec = dec; mpeg_index = index; } //Это в начало
+                    else if (ext == other_files) { other_dec = dec; other_index = index; } //Это в конец
+                    else listview_vdecoders.Items.Add(new MyObj() { Extension = ext, Decoder = dec, Index = index });
+                }
+            }
+
+            //Начало списка
+            if (mpeg_dec.Length > 0)
+                listview_vdecoders.Items.Insert(0, new MyObj() { Extension = mpeg_psts, Decoder = mpeg_dec, ToolTip = "MPEG2-PS/TS " + Languages.Translate("files"), Index = mpeg_index });
+
+            //Конец списка
+            if (other_dec.Length > 0)
+                listview_vdecoders.Items.Add(new MyObj() { Extension = other_files, Decoder = other_dec, ToolTip = Languages.Translate("Other files"), Index = other_index });
+
+            listview_vdecoders.SelectedIndex = (item_index >= listview_vdecoders.Items.Count) ? listview_vdecoders.Items.Count - 1 : item_index;
+            vdecoders_loaded = true;
+        }
+
+        private void LoadADecodersListView(int item_index)
+        {
+            adecoders_loaded = false;
+            listview_adecoders.Items.Clear();
+
+            string other_dec = dec_bass; int other_index = 5; //Дефолты
+            foreach (string line in (Settings.ADecoders.ToLower().Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)))
+            {
+                string[] extension_and_decoder = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
+                if (extension_and_decoder.Length == 2)
+                {
+                    int index = -1;
+                    string ext = extension_and_decoder[0].Trim();
+                    string dec = extension_and_decoder[1].Trim();
+
+                    //Определяем декодер (и его индекс в комбобоксе) без учета регистра
+                    if (dec.Equals(dec_ac3, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_ac3; index = 0; }
+                    else if (dec.Equals(dec_mp3, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_mp3; index = 1; }
+                    else if (dec.Equals(dec_dts, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dts; index = 2; }
+                    else if (dec.Equals(dec_rawav, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_rawav; index = 3; }
+                    else if (dec.Equals(dec_wav, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_wav; index = 4; }
+                    else if (dec.Equals(dec_bass, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_bass; index = 5; }
+                    else if (dec.Equals(dec_ffas, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_ffas; index = 6; }
+                    else if (dec.Equals(dec_dss, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dss; index = 7; }
+
+                    //Сортировка начала\конца списка
+                    if (ext == other_files) { other_dec = dec; other_index = index; } //Это в конец
+                    else listview_adecoders.Items.Add(new MyObj() { Extension = ext, Decoder = dec, Index = index });
+                }
+            }
+
+            //Конец списка
+            if (other_dec.Length > 0)
+                listview_adecoders.Items.Add(new MyObj() { Extension = other_files, Decoder = other_dec, ToolTip = Languages.Translate("Other files"), Index = other_index });
+
+            listview_adecoders.SelectedIndex = (item_index >= listview_adecoders.Items.Count) ? listview_adecoders.Items.Count - 1 : item_index;
+            adecoders_loaded = true;
+        }
+
+        private void SelectDecoders()
+        {
+            if (m == null) return;
+
+            //Выбираем видео декодер
+            if (m.vdecoder > 0)
+            {
+                int vid = -1, vnum = 0;
+                string vext = Path.GetExtension(m.infilepath).ToLower().TrimStart(new char[] { '.' });
+                tab_video_Header.ToolTip = Languages.Translate("File extension:") + " " + vext + "\r\n" + Languages.Translate("Current decoder") + ": " + m.vdecoder.ToString();
+                if (m.isvideo && vext != "d2v" && vext != "dga" && vext != "dgi" && vext != "avs")
+                {
+                    foreach (MyObj obj in listview_vdecoders.Items)
+                    {
+                        if (obj.Extension == vext)
+                        {
+                            vid = vnum; break;
+                        }
+                        vnum += 1;
+                    }
+
+                    if (vid < 0 && vext != "pmp" && vext != "vdr" && vext != "y4m" && vext != "yuv")
+                    {
+                        if (Calculate.IsMPEG(m.infilepath) && (m.invcodecshort == "MPEG1" || m.invcodecshort == "MPEG2"))
+                        { if (((MyObj)listview_vdecoders.Items[0]).Extension == mpeg_psts) vid = 0; }
+                        else vid = listview_vdecoders.Items.Count - 1;
+                    }
+
+                    if (vid >= 0)
+                    {
+                        listview_vdecoders.SelectedIndex = vid;
+                        if (listview_vdecoders.IsVisible)
+                            listview_vdecoders.ScrollIntoView(listview_vdecoders.SelectedItem);
+                    }
+                }
+            }
+
+            //Выбираем аудио декодер
+            if (m.inaudiostreams.Count > 0)
+            {
+                AudioStream stream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                if (stream.decoder > 0)
+                {
+                    int aud = -1, anum = 0;
+                    string aext = Path.GetExtension(stream.audiopath).ToLower().TrimStart(new char[] { '.' });
+                    tab_audio_Header.ToolTip = Languages.Translate("File extension:") + " " + aext + "\r\n" + Languages.Translate("Current decoder") + ": " + stream.decoder.ToString();
+                    foreach (MyObj obj in listview_adecoders.Items)
+                    {
+                        if (obj.Extension == aext)
+                        {
+                            aud = anum; break;
+                        }
+                        anum += 1;
+                    }
+
+                    if (aud < 0)
+                        listview_adecoders.SelectedIndex = listview_adecoders.Items.Count - 1;
+
+                    if (aud >= 0)
+                    {
+                        listview_adecoders.SelectedIndex = aud;
+                        if (listview_adecoders.IsVisible)
+                            listview_adecoders.ScrollIntoView(listview_adecoders.SelectedItem);
+                    }
+                }
+            }
+        }
+
+        void listview_Loaded(object sender, RoutedEventArgs e)
+        {
+            //Делаем ScrollIntoView для выбранной строки, т.к.
+            //на автомате оно иногда делается через одно место
+            ListView listview = (ListView)sender;
+            if (listview.SelectedItem != null)
+            {
+                //Просто Loaded или Initialized не достаточно, поэтому с задержкой, хоть это и не правильно..
+                System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
+                timer.Interval = new TimeSpan(0, 0, 0, 0, 10);
+                timer.Tick += (a, b) =>
+                {
+                    if (listview.SelectedItem != null)
+                        listview.ScrollIntoView(listview.SelectedItem);
+                    timer.Stop();
+                    timer = null;
+                };
+                timer.Start();
+            }
+        }
+
+        private void combo_decoder_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!vdecoders_loaded || !adecoders_loaded) return;
+
+            ComboBox combo = (ComboBox)sender;
+            ListView listview = (combo.IsDescendantOf(listview_vdecoders)) ? listview_vdecoders : listview_adecoders;
+            if ((combo.IsDropDownOpen || combo.IsSelectionBoxHighlighted) && combo.SelectedItem != null && listview.SelectedItem != null)
+            {
+                string result = "";
+                int index = listview.SelectedIndex;
+                for (int i = 0; i < listview.Items.Count; i++)
+                {
+                    if (i == index)
+                    {
+                        result += ((MyObj)listview.Items[i]).Extension + "=" + ((ComboBoxItem)combo.SelectedItem).Content.ToString() + "; ";
+                    }
+                    else
+                    {
+                        MyObj obj = (MyObj)listview.Items[i];
+                        result += obj.Extension + "=" + obj.Decoder + "; ";
+                    }
+                }
+
+                if (combo.IsDescendantOf(listview_vdecoders))
+                {
+                    Settings.VDecoders = result;
+                    LoadVDecodersListView(index);
+                }
+                else
+                {
+                    Settings.ADecoders = result;
+                    LoadADecodersListView(index);
+                }
+            }
+        }
+
+        private void textbox_ext_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!vdecoders_loaded || !adecoders_loaded || text_editing) return;
+
+            TextBox textbox = (TextBox)sender;
+            ListView listview = (textbox.IsDescendantOf(listview_vdecoders)) ? listview_vdecoders : listview_adecoders;
+            if (textbox.IsFocused && listview.SelectedItem != null)
+            {
+                text_editing = true;
+
+                //Проверяем, что введено
+                string new_ext = "";
+                string old_ext = ((MyObj)listview.SelectedItem).Extension;
+                if (old_ext == mpeg_psts || old_ext == other_files || (new_ext = Calculate.GetRegexValue(@"^([0-9a-z]{1,6})$", textbox.Text.ToLower())) == null)
+                {
+                    textbox.Text = old_ext;
+                    text_editing = false;
+                    return;
+                }
+
+                //Проверяем, что такого расширения еще нет в списке
+                foreach (MyObj obj in listview.Items)
+                {
+                    if (new_ext == obj.Extension)
+                    {
+                        textbox.Text = old_ext;
+                        text_editing = false;
+                        return;
+                    }
+                }
+
+                string result = "";
+                int index = listview.SelectedIndex;
+                for (int i = 0; i < listview.Items.Count; i++)
+                {
+                    if (i == index)
+                    {
+                        result += new_ext + "=" + ((MyObj)listview.Items[i]).Decoder + "; ";
+                    }
+                    else
+                    {
+                        MyObj obj = (MyObj)listview.Items[i];
+                        result += obj.Extension + "=" + obj.Decoder + "; ";
+                    }
+                }
+
+                if (textbox.IsDescendantOf(listview_vdecoders))
+                    Settings.VDecoders = result;
+                else
+                    Settings.ADecoders = result;
+
+                ((MyObj)listview.SelectedItem).Extension = new_ext;
+                text_editing = false;
+            }
+        }
+
+        private void button_decoder_delete_Click(object sender, RoutedEventArgs e)
+        {
+            ListView listview = (sender == button_vdec_delete) ? listview_vdecoders : listview_adecoders;
+            if (vdecoders_loaded && adecoders_loaded && listview.SelectedItem != null)
+            {
+                //Удалять можно не всё!
+                string old_ext = ((MyObj)listview.SelectedItem).Extension;
+                if (old_ext == mpeg_psts || old_ext == other_files) return;
+
+                string result = "";
+                int index = listview.SelectedIndex;
+                for (int i = 0; i < listview.Items.Count; i++)
+                {
+                    if (i != index)
+                    {
+                        MyObj obj = (MyObj)listview.Items[i];
+                        result += obj.Extension + "=" + obj.Decoder + "; ";
+                    }
+                }
+
+                if (sender == button_vdec_delete)
+                {
+                    Settings.VDecoders = result;
+                    LoadVDecodersListView(index);
+                }
+                else
+                {
+                    Settings.ADecoders = result;
+                    LoadADecodersListView(index);
+                }
+            }
+        }
+
+        private void button_decoder_add_Click(object sender, RoutedEventArgs e)
+        {
+            ListView listview = (sender == button_vdec_add) ? listview_vdecoders : listview_adecoders;
+
+            //Проверяем, что такого расширения еще нет в списке
+            for (int i = 0; i < listview.Items.Count; i++)
+            {
+                if (((MyObj)listview.Items[i]).Extension == "edit")
+                {
+                    //А если есть, то переводим на него фокус
+                    listview.SelectedIndex = i;
+                    listview.ScrollIntoView(listview.Items[i]);
+                    return;
+                }
+            }
+
+            //Добавляем
+            if (sender == button_vdec_add)
+            {
+                string result = Settings.VDecoders.Trim();
+                if (result.EndsWith(";")) result += " edit=" + dec_dss;
+                else result += "; edit=" + dec_dss;
+
+                Settings.VDecoders = result;
+                LoadVDecodersListView(listview_vdecoders.Items.Count - 1);
+            }
             else
-                box.ToolTip = null;
+            {
+                string result = Settings.ADecoders.Trim();
+                if (result.EndsWith(";")) result += " edit=" + dec_bass;
+                else result += "; edit=" + dec_bass;
+
+                Settings.ADecoders = result;
+                LoadADecodersListView(listview_adecoders.Items.Count - 1);
+            }
+
+            listview.ScrollIntoView(listview.SelectedItem);
         }
 
-        private void combo_avi_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void button_decoders_reset_Click(object sender, RoutedEventArgs e)
         {
-            if (combo_avi_dec.IsDropDownOpen || combo_avi_dec.IsSelectionBoxHighlighted)
+            if (sender == button_vdec_reset)
             {
-                if (combo_avi_dec.SelectedIndex == 0) Settings.AVIDecoder = AviSynthScripting.Decoders.AVISource;
-                else if (combo_avi_dec.SelectedIndex == 1) Settings.AVIDecoder = AviSynthScripting.Decoders.DirectShowSource;
-                else if (combo_avi_dec.SelectedIndex == 2) Settings.AVIDecoder = AviSynthScripting.Decoders.DSS2;
-                else Settings.AVIDecoder = AviSynthScripting.Decoders.FFmpegSource;
-
-                SetVDecoderToolTip(combo_avi_dec);
+                Settings.VDecoders = "";
+                LoadVDecodersListView(default_index);
+                if (m != null) SelectDecoders();
+                else listview_Loaded(listview_vdecoders, null);
+            }
+            else
+            {
+                Settings.ADecoders = "";
+                LoadADecodersListView(default_index);
+                if (m != null) SelectDecoders();
+                else listview_Loaded(listview_adecoders, null);
             }
         }
 
-        private void combo_mkv_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (combo_mkv_dec.IsDropDownOpen || combo_mkv_dec.IsSelectionBoxHighlighted)
+            //Подгоняем ширину второй колонки ListView
+            ListView listview = (ListView)sender;
+            if (listview.IsVisible && e.ViewportHeightChange > 0 && e.ViewportWidthChange > 0)
             {
-                if (combo_mkv_dec.SelectedIndex == 0) Settings.MKVDecoder = AviSynthScripting.Decoders.DirectShowSource;
-                else if (combo_mkv_dec.SelectedIndex == 1) Settings.MKVDecoder = AviSynthScripting.Decoders.DSS2;
-                else Settings.MKVDecoder = AviSynthScripting.Decoders.FFmpegSource;
+                //С учётом скроллбара
+                double scroll_width = 0;
+                Decorator border = VisualTreeHelper.GetChild(listview, 0) as Decorator;
+                if (border != null)
+                {
+                    ScrollViewer scroll = border.Child as ScrollViewer;
+                    scroll_width = (scroll != null && scroll.ComputedVerticalScrollBarVisibility == Visibility.Visible) ? SystemParameters.VerticalScrollBarWidth : 0;
+                }
 
-                SetVDecoderToolTip(combo_mkv_dec);
+                if (listview == listview_vdecoders)
+                    vdecoder.Width = listview.Width - vextension.Width - scroll_width - 5;
+                else
+                    adecoder.Width = listview.Width - aextension.Width - scroll_width - 5;
             }
         }
 
-        private void combo_mp4_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void combo_Closed(object sender, EventArgs e)
         {
-            if (combo_mp4_dec.IsDropDownOpen || combo_mp4_dec.IsSelectionBoxHighlighted)
-            {
-                if (combo_mp4_dec.SelectedIndex == 0) Settings.MP4Decoder = AviSynthScripting.Decoders.DirectShowSource;
-                else if (combo_mp4_dec.SelectedIndex == 1) Settings.MP4Decoder = AviSynthScripting.Decoders.DSS2;
-                else Settings.MP4Decoder = AviSynthScripting.Decoders.FFmpegSource;
-
-                SetVDecoderToolTip(combo_mp4_dec);
-            }
+            //Уводим фокус с комбобокса, чтоб случайно не изменить
+            //выбор после его закрытия (при попытке скроллить)
+            if (((ComboBox)sender).IsDescendantOf(listview_vdecoders))
+                listview_vdecoders.Focus();
+            else
+                listview_adecoders.Focus();
         }
 
-        private void combo_mpg_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_mpg_dec.IsDropDownOpen || combo_mpg_dec.IsSelectionBoxHighlighted)
-            {
-                if (combo_mpg_dec.SelectedIndex == 0) Settings.MPEGDecoder = AviSynthScripting.Decoders.DirectShowSource;
-                else if (combo_mpg_dec.SelectedIndex == 1) Settings.MPEGDecoder = AviSynthScripting.Decoders.DSS2;
-                else if (combo_mpg_dec.SelectedIndex == 2) Settings.MPEGDecoder = AviSynthScripting.Decoders.FFmpegSource;
-                else Settings.MPEGDecoder = AviSynthScripting.Decoders.MPEG2Source;
-
-                SetVDecoderToolTip(combo_mpg_dec);
-            }
-        }
-
-        private void combo_oth_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_oth_dec.IsDropDownOpen || combo_oth_dec.IsSelectionBoxHighlighted)
-            {
-                if (combo_oth_dec.SelectedIndex == 0) Settings.OtherDecoder = AviSynthScripting.Decoders.DirectShowSource;
-                else if (combo_oth_dec.SelectedIndex == 1) Settings.OtherDecoder = AviSynthScripting.Decoders.DSS2;
-                else Settings.OtherDecoder = AviSynthScripting.Decoders.FFmpegSource;
-
-                SetVDecoderToolTip(combo_oth_dec);
-            }
-        }
-
-        private void combo_ac3_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_ac3_dec.IsDropDownOpen || combo_ac3_dec.IsSelectionBoxHighlighted)
-            {
-                if (combo_ac3_dec.SelectedIndex == 0) Settings.AC3Decoder = AviSynthScripting.Decoders.bassAudioSource;
-                else Settings.AC3Decoder = AviSynthScripting.Decoders.NicAC3Source;
-            }
-        }
-
-        private void combo_wav_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_wav_dec.IsDropDownOpen || combo_wav_dec.IsSelectionBoxHighlighted)
-            {
-                if (combo_wav_dec.SelectedIndex == 0) Settings.WAVDecoder = AviSynthScripting.Decoders.bassAudioSource;
-                else if (combo_wav_dec.SelectedIndex == 1) Settings.WAVDecoder = AviSynthScripting.Decoders.RaWavSource;
-                else Settings.WAVDecoder = AviSynthScripting.Decoders.WAVSource;
-            }
-        }
-
-        private void combo_mpa_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_mpa_dec.IsDropDownOpen || combo_mpa_dec.IsSelectionBoxHighlighted)
-            {
-                if (combo_mpa_dec.SelectedIndex == 0) Settings.MPADecoder = AviSynthScripting.Decoders.bassAudioSource;
-                else Settings.MPADecoder = AviSynthScripting.Decoders.NicMPG123Source;
-            }
-        }   
-
-        private void combo_mp3_dec_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_mp3_dec.IsDropDownOpen || combo_mp3_dec.IsSelectionBoxHighlighted)
-            {
-                if (combo_mp3_dec.SelectedIndex == 0) Settings.MP3Decoder = AviSynthScripting.Decoders.bassAudioSource;
-                else Settings.MP3Decoder = AviSynthScripting.Decoders.NicMPG123Source;
-            }
-        }
-       
         private void num_force_film_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
             if (num_force_film.IsAction)
@@ -359,14 +659,9 @@ namespace XviD4PSP
             Settings.DGForceFilm = check_force_film.IsChecked.Value;
         }
 
-        private void check_ffms2_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.FFmpegSource2 = check_ffms2.IsChecked.Value;
-        }
-
         private void check_ffms_force_fps_Click(object sender, RoutedEventArgs e)
         {
-            Settings.FFmpegAssumeFPS = check_ffms_force_fps.IsChecked.Value;
+            Settings.FFMS_AssumeFPS = check_ffms_force_fps.IsChecked.Value;
         }
 
         private void check_ffms_audio_Click(object sender, RoutedEventArgs e)
@@ -374,11 +669,31 @@ namespace XviD4PSP
             Settings.FFMS_Enable_Audio = check_ffms_audio.IsChecked.Value;
         }
 
+        private void check_ffms_reindex_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.FFMS_Reindex = check_ffms_reindex.IsChecked.Value;
+        }
+
+        private void check_ffms_timecodes_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.FFMS_TimeCodes = check_ffms_timecodes.IsChecked.Value;
+        }
+
+        private void check_drc_ac3_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.NicAC3_DRC = check_drc_ac3.IsChecked.Value;
+        }
+
+        private void check_drc_dts_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.NicDTS_DRC = check_drc_dts.IsChecked.Value;
+        }
+
         private void check_new_delay_Click(object sender, RoutedEventArgs e)
         {
             Settings.NewDelayMethod = check_new_delay.IsChecked.Value;
         }
-        
+
         private void check_copy_delay_Click(object sender, RoutedEventArgs e)
         {
             Settings.CopyDelay = check_copy_delay.IsChecked.Value;
@@ -388,5 +703,5 @@ namespace XviD4PSP
         {
             Settings.EnableAudio = check_enable_audio.IsChecked.Value;
         }
-	}
+    }
 }

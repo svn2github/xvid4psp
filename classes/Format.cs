@@ -335,54 +335,80 @@ namespace XviD4PSP
            }
        }
 
-       public static Massive GetValidVDecoder(Massive m)
+       public static AviSynthScripting.Decoders GetValidVDecoder(Massive m)
        {
            if (!m.isvideo)
            {
-               m.vdecoder = AviSynthScripting.Decoders.BlankClip;
-               return m;
+               return AviSynthScripting.Decoders.BlankClip;
            }
-           string ext = Path.GetExtension(m.infilepath).ToLower();
-           if (Calculate.IsMPEG(m.infilepath) && (m.invcodecshort == "MPEG1" || m.invcodecshort == "MPEG2")) //m.invcodecshort != "h264")
+
+           string ext = Path.GetExtension(m.infilepath).ToLower().TrimStart(new char[] { '.' });
+           if (ext == "avs") return AviSynthScripting.Decoders.Import;
+
+           if (m.indexfile != null)
            {
-               if (m.indexfile != null)
-                   m.vdecoder = AviSynthScripting.Decoders.MPEG2Source;
-               else
+               if (ext == "d2v") return AviSynthScripting.Decoders.MPEG2Source;
+               else if (ext == "dga") return AviSynthScripting.Decoders.AVCSource;
+               else if (ext == "dgi") return AviSynthScripting.Decoders.DGMultiSource;
+           }
+
+           string mpeg_dec = "", other_dec = AviSynthScripting.Decoders.DirectShowSource.ToString(); //Дефолты
+           foreach (string line in (Settings.VDecoders.ToLower().Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)))
+           {
+               string[] extension_and_decoder = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
+               if (extension_and_decoder.Length == 2)
                {
-                   if (Settings.MPEGDecoder == AviSynthScripting.Decoders.MPEG2Source && m.indexfile == null)
-                       m.vdecoder = Settings.OtherDecoder; //FFmpegSource
-                   else
-                       m.vdecoder = Settings.MPEGDecoder;
+                   string extension = extension_and_decoder[0].Trim();
+                   string decoder = extension_and_decoder[1].Trim();
+
+                   if (extension == Decoders_Settings.mpeg_psts) mpeg_dec = decoder;
+                   else if (extension == Decoders_Settings.other_files) other_dec = decoder;
+                   else if (extension == ext && decoder.Length > 0)
+                   {
+                       //Мы нашли декодер для этого расширения
+                       return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), decoder, true);
+                   }
                }
            }
-           else
+
+           //mpeg_ps/ts
+           if (mpeg_dec.Length > 0 && Calculate.IsMPEG(m.infilepath) && (string.IsNullOrEmpty(m.invcodecshort) || (m.invcodecshort == "MPEG1" || m.invcodecshort == "MPEG2")))
            {
-               if (ext == ".avi") m.vdecoder = Settings.AVIDecoder;
-               else if (ext == ".mkv") m.vdecoder = Settings.MKVDecoder;
-               else if (ext == ".mp4" || ext == ".m4v") m.vdecoder = Settings.MP4Decoder;
-               else if (ext == ".evo") m.vdecoder = AviSynthScripting.Decoders.FFmpegSource;
-               else if (ext == ".pmp") m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
-               else if (ext == ".vdr") m.vdecoder = AviSynthScripting.Decoders.AVISource;
-               else if (ext == ".avs") m.vdecoder = AviSynthScripting.Decoders.Import;
-               else if (ext == ".dga") m.vdecoder = AviSynthScripting.Decoders.AVCSource;
-               else if (ext == ".dgi") m.vdecoder = AviSynthScripting.Decoders.DGMultiSource;
-               else if (ext == ".y4m" || ext == ".yuv") m.vdecoder = AviSynthScripting.Decoders.RawSource;
-               else m.vdecoder = Settings.OtherDecoder;
+               return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), mpeg_dec, true);
            }
-           return m;
+
+           if (ext == "pmp") return AviSynthScripting.Decoders.DirectShowSource;
+           else if (ext == "vdr") return AviSynthScripting.Decoders.AVISource;
+           else if (ext == "y4m" || ext == "yuv") return AviSynthScripting.Decoders.RawSource;
+           else if (other_dec.Length > 0) return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), other_dec, true);
+           else return AviSynthScripting.Decoders.DirectShowSource;
        }
 
        public static AudioStream GetValidADecoder(AudioStream instream)
        {
            if (instream.audiopath != null)
            {
-               string aext = Path.GetExtension(instream.audiopath).ToLower();
-               if (aext == ".ac3") instream.decoder = Settings.AC3Decoder;
-               else if (aext == ".mp1" || aext == ".mp2" || aext == ".mpa") instream.decoder = Settings.MPADecoder;
-               else if (aext == ".mp3") instream.decoder = Settings.MP3Decoder;
-               else if (aext == ".wav" || aext == ".w64") instream.decoder = Settings.WAVDecoder;
-               else if (aext == ".dts") instream.decoder = AviSynthScripting.Decoders.NicDTSSource;
-               else if (aext == ".wma") instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
+               string ext = Path.GetExtension(instream.audiopath).ToLower().TrimStart(new char[] { '.' });
+               string other_dec = AviSynthScripting.Decoders.bassAudioSource.ToString(); //Дефолт
+               foreach (string line in (Settings.ADecoders.ToLower().Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)))
+               {
+                   string[] extension_and_decoder = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
+                   if (extension_and_decoder.Length == 2)
+                   {
+                       string extension = extension_and_decoder[0].Trim();
+                       string decoder = extension_and_decoder[1].Trim();
+
+                       if (extension == Decoders_Settings.other_files) other_dec = decoder;
+                       else if (extension == ext && decoder.Length > 0)
+                       {
+                           //Мы нашли декодер для этого расширения
+                           instream.decoder = (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), decoder, true);
+                           return instream;
+                       }
+                   }
+               }
+
+               if (other_dec.Length > 0) instream.decoder = (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), other_dec, true);
                else instream.decoder = AviSynthScripting.Decoders.bassAudioSource;
            }
            else instream.decoder = 0;
@@ -1751,6 +1777,7 @@ namespace XviD4PSP
            else if (m.invcodecshort == "MPEG2") ext = "m2v";
            else if (m.invcodecshort == "h264") ext = "h264";
            else if (m.invcodecshort == "MPEG4") ext = "avi";
+           else if (ext.Contains("sorenson")) ext = "avi";
            else if (ext.Contains("vc1")) ext = "avi";
            else if (ext.Contains("wmv")) ext = "wmv";
            else if (ext.Contains("dv")) ext = "avi";

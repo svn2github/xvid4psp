@@ -4145,10 +4145,7 @@ namespace XviD4PSP
                 {
                     if (m.outvcodec != "Copy")
                     {
-                        if (m.vdecoder == AviSynthScripting.Decoders.FFmpegSource && Settings.FFmpegSource2)
-                            SetLog("VideoDecoder: FFmpegSource2");
-                        else
-                            SetLog("VideoDecoder: " + m.vdecoder);
+                        SetLog("VideoDecoder: " + m.vdecoder);
 
                         if (m.inresw != m.outresw || m.inresh != m.outresh)
                             SetLog("Resolution: " + m.inresw + "x" + m.inresh + " > " + m.outresw + "x" + m.outresh);
@@ -4225,7 +4222,9 @@ namespace XviD4PSP
                     AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                     if (outstream.codec != "Copy")
                     {
-                        SetLog("AudioDecoder: " + instream.decoder);
+                        if (instream.decoder > 0)
+                            SetLog("AudioDecoder: " + instream.decoder);
+
                         SetLog("AEncodingPreset: " + outstream.encoding);
                         if (instream.codecshort != outstream.codec)
                             SetLog("AudioCodec: " + instream.codecshort + " > " + outstream.codec);
@@ -4641,28 +4640,61 @@ namespace XviD4PSP
                 //удаляем временные файлы
                 if (!IsErrors)
                 {
-                    if (m.infilepath != m.outvideofile &&
-                        m.outvideofile != null && !m.dontmuxstreams)
-                        SafeDelete(m.outvideofile);
+                    if (m.outvideofile != null && !m.dontmuxstreams &&
+                        Path.GetDirectoryName(m.outvideofile) == Settings.TempPath)
+                    {
+                        //Защита от удаления исходников
+                        bool garbage = (m.outvideofile != m.infilepath);
+                        foreach (string file in m.infileslist)
+                        {
+                            if (m.outvideofile == file)
+                            {
+                                garbage = false; break;
+                            }
+                        }
+                        if (garbage) SafeDelete(m.outvideofile);
+                    }
 
                     foreach (object s in m.inaudiostreams)
                     {
                         AudioStream a = (AudioStream)s;
-                        if (a.audiopath != null &&
-                            Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
-                            a.audiopath != m.infilepath) //Защита от удаления исходника
-                            p.deletefiles.Add(a.audiopath);
+                        if (a.audiopath != null && Path.GetDirectoryName(a.audiopath) == Settings.TempPath)
+                        {
+                            //Защита от удаления исходников
+                            bool garbage = (a.audiopath != m.infilepath);
+                            foreach (string file in m.infileslist)
+                            {
+                                if (a.audiopath == file)
+                                {
+                                    garbage = false; break;
+                                }
+                            }
+                            if (garbage) p.deletefiles.Add(a.audiopath);
+                        }
                     }
 
                     foreach (object s in m.outaudiostreams)
                     {
                         AudioStream a = (AudioStream)s;
-                        if (!m.dontmuxstreams && a.audiopath != null &&
+                        if (a.audiopath != null && !m.dontmuxstreams &&
                             Path.GetDirectoryName(a.audiopath) == Settings.TempPath &&
                             a.audiopath != m.outfilepath) //Защита от удаления результата кодирования
                             p.deletefiles.Add(a.audiopath);
-                        if (!string.IsNullOrEmpty(a.nerotemp) && a.nerotemp != m.infilepath && Path.GetDirectoryName(a.nerotemp) == Settings.TempPath)
-                            SafeDelete(a.nerotemp); //Временный WAV-файл от 2pass AAC
+
+                        //Временный WAV-файл от 2pass AAC
+                        if (!string.IsNullOrEmpty(a.nerotemp) && Path.GetDirectoryName(a.nerotemp) == Settings.TempPath)
+                        {
+                            //Защита от удаления исходников
+                            bool garbage = (a.nerotemp != m.infilepath);
+                            foreach (string file in m.infileslist)
+                            {
+                                if (a.nerotemp == file)
+                                {
+                                    garbage = false; break;
+                                }
+                            }
+                            if (garbage) SafeDelete(a.nerotemp);
+                        }
                     }
                 }
 

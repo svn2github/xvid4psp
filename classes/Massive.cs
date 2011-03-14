@@ -149,19 +149,19 @@ namespace XviD4PSP
             }
         }
 
-        private string _oldindexfile;
-        public string oldindexfile
+        private bool _ffms_indexintemp;
+        public bool ffms_indexintemp
         {
             get
             {
-                return _oldindexfile;
+                return _ffms_indexintemp;
             }
             set
             {
-                _oldindexfile = value;
+                _ffms_indexintemp = value;
             }
         }
-                
+
         private string _dgdecnv_path;
         public string dgdecnv_path
         {

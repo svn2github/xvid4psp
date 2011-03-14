@@ -70,15 +70,17 @@ namespace XviD4PSP
                 //проверка на невалидную индексацию
                 if (m.invcodecshort != "MPEG2" && m.invcodecshort != "MPEG1")
                 {
-                    //m.vdecoder = AviSynthScripting.Decoders.DirectShowSource;
-                    return; //Просто выходим отсюда, декодер будет выбран позже (Settings.OtherDecoder)
+                    //Выходим отсюда, декодер будет выбран позже
+                    m.indexfile = null;
+                    m.vdecoder = 0;
+                    return;
                 }
 
                 //получаем индекс файл
                 m.indexfile = Calculate.GetBestIndexFile(m.infilepath);
 
                 //определяем видео декодер
-                m = Format.GetValidVDecoder(m);
+                m.vdecoder = AviSynthScripting.Decoders.MPEG2Source;
 
                 if (File.Exists(m.indexfile) && !worker.CancellationPending)
                 {
@@ -135,6 +137,7 @@ namespace XviD4PSP
                     cancel_closing = true;
                     worker.CancelAsync();
                     num_closes += 1;
+                    m = null;
                 }
                 else
                 {

@@ -30,7 +30,8 @@ namespace XviD4PSP
             check_show_ssim.ToolTip = Languages.Translate("Show x264 SSIM info");
             check_show_arguments.Content = Languages.Translate("Show encoding arguments");
             check_show_script.Content = Languages.Translate("Show AviSynth script");
-            check_delete_ff_cache.Content = Languages.Translate("Auto delete FFmpegSource cache");
+            check_ffms_cache_in_temp.Content = Languages.Translate("Create FFmpegSource2 cache in Temp folder");
+            check_delete_ff_cache.Content = Languages.Translate("Auto delete FFmpegSource2 cache");
             check_delete_dgindex_cache.Content = Languages.Translate("Auto delete DGIndex cache");
             check_search_temp.Content = Languages.Translate("Search the best temp folder place on program start");
             check_save_anamorph.Content = Languages.Translate("Maintain anamorphic aspect");
@@ -99,15 +100,16 @@ namespace XviD4PSP
             check_save_anamorph.IsChecked = Settings.SaveAnamorph;
             check_alwaysprogressive.IsChecked = Settings.AlwaysProgressive;
             check_auto_colormatrix.IsChecked = Settings.AutoColorMatrix;
-            check_window_dim.IsChecked = Settings.WindowResize;                                   //запоминать параметры окна
-            check_hide_comments.IsChecked = Settings.HideComments;                                //удалять комментарии из скрипта
-            check_resize_first.IsChecked = Settings.ResizeFirst;                                  //ресайз перед фильтрацией
-            check_read_prmtrs.IsChecked = Settings.ReadScript;                                    //считывать параметры скрипта
-            check_log_to_file.IsChecked = check_logfile_tempfolder.IsEnabled = Settings.WriteLog; //записывать лог кодирования в файл..
+            check_window_dim.IsChecked = Settings.WindowResize;                                   //Запоминать параметры окна
+            check_hide_comments.IsChecked = Settings.HideComments;                                //Удалять комментарии из скрипта
+            check_resize_first.IsChecked = Settings.ResizeFirst;                                  //Ресайз перед фильтрацией
+            check_read_prmtrs.IsChecked = Settings.ReadScript;                                    //Считывать параметры скрипта
+            check_log_to_file.IsChecked = check_logfile_tempfolder.IsEnabled = Settings.WriteLog; //Записывать лог кодирования в файл..
             check_logfile_tempfolder.IsChecked = Settings.LogInTemp;                              //.. а файл поместить во временную папку
-            textbox_extensions.Text = Settings.GoodFilesExtensions;                               //окно со списком допустимых расширений файлов (при пакетной обработке)
-            check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding;                      //автозапуск кодирования (при пакетной обработке)
-            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp;                       //помещать DGIndex-кэш в Темп-папку
+            textbox_extensions.Text = Settings.GoodFilesExtensions;                               //Окно со списком допустимых расширений файлов (при пакетной обработке)
+            check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding;                      //Автозапуск кодирования (при пакетной обработке)
+            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp;                       //Помещать DGIndex-кэш в Темп-папку
+            check_ffms_cache_in_temp.IsChecked = Settings.FFMS_IndexInTemp;                       //Помещать FFMS2-кэш в Темп-папку
             check_clone_ar.IsChecked = Settings.BatchCloneAR;                                     //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
             check_clone_trim.IsChecked = Settings.BatchCloneTrim;                                 //То-же что и выше, но для обрезки
             check_clone_deint.IsChecked = Settings.BatchCloneDeint;                               //А это для деинтерлейса
@@ -141,10 +143,10 @@ namespace XviD4PSP
             list_loaded = true;
 
             //Чтоб открыть окно на нужной вкладке
-            if (set_focus_to == 2) tab_temp.Focus();
-            else if (set_focus_to == 3) tab_encoding.Focus();
-            else if (set_focus_to == 4) tab_open_folder.Focus();
-            else if (set_focus_to == 5) tab_hotkeys.Focus();
+            if (set_focus_to == 2) tab_temp.IsSelected = true;
+            else if (set_focus_to == 3) tab_encoding.IsSelected = true;
+            else if (set_focus_to == 4) tab_open_folder.IsSelected = true;
+            else if (set_focus_to == 5) tab_hotkeys.IsSelected = true;
 
             ShowDialog();
         }
@@ -224,6 +226,11 @@ namespace XviD4PSP
         private void check_delete_ff_cache_Click(object sender, RoutedEventArgs e)
         {
             Settings.DeleteFFCache = check_delete_ff_cache.IsChecked.Value;
+        }
+
+        private void check_ffms_cache_in_temp_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.FFMS_IndexInTemp = check_ffms_cache_in_temp.IsChecked.Value;
         }
 
         private void check_delete_dgindex_cache_Click(object sender, RoutedEventArgs e)
