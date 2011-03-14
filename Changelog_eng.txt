@@ -1,5 +1,6 @@
-XviD4PSP 5.10.222.0 (14.03.2011), main changes:
+XviD4PSP 5.10.224.0 (14.03.2011), main changes:
 
+>>> (r224) Added resizers: SplineResize, Spline100Resize and Spline144Resize (all 3 powered by SplineResize.dll).
 >>> (r222) Various changes for Caching window. For error messages added StackTrace info and current
            AviSynth script.
 >>> (r222) Some fixes for "Join file" function. But still, it doesn`t work as good as it should..

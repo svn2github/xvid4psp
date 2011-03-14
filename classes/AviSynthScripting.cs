@@ -39,9 +39,12 @@ namespace XviD4PSP
            LanczosResize,
            Lanczos4Resize,
            BlackmanResize,
+           SplineResize,     //SplineResize.dll
            Spline16Resize,
            Spline36Resize,
            Spline64Resize,
+           Spline100Resize,  //SplineResize.dll
+           Spline144Resize,  //SplineResize.dll
            GaussResize,
            PointResize
        }
@@ -201,6 +204,9 @@ namespace XviD4PSP
 
            if (m.frameratemodifer == FramerateModifers.MSUFrameRate)
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MSU_FRC.dll\")" + Environment.NewLine;
+
+           if (m.resizefilter == Resizers.SplineResize || m.resizefilter == Resizers.Spline100Resize || m.resizefilter == Resizers.Spline144Resize)
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SplineResize.dll\")" + Environment.NewLine;
 
            m.script += Environment.NewLine;
 
