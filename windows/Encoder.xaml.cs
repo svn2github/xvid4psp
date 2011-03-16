@@ -4122,8 +4122,8 @@ namespace XviD4PSP
                 Assembly this_assembly = Assembly.GetExecutingAssembly();
                 SetLog("Version: " + this_assembly.GetName().Version.ToString());
                 SetLog("Created: " + File.GetLastWriteTime(this_assembly.GetModules()[0].FullyQualifiedName).ToString("dd.MM.yyyy HH:mm:ss"));
-                SetLog("TempPath: " + Settings.TempPath);
                 SetLog("AppPath: " + Calculate.StartupPath);
+                SetLog("TempPath: " + Settings.TempPath);
                 SetLog("");
 
                 SetLog("FILES");

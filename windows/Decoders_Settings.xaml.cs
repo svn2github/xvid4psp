@@ -81,6 +81,7 @@ namespace XviD4PSP
 
         public Decoders_Settings(Massive mass, System.Windows.Window owner, int set_focus_to)
         {
+            this.Opacity = 0;
             this.InitializeComponent();
             this.Owner = owner;
 

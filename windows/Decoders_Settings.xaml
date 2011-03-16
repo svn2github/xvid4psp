@@ -5,7 +5,7 @@
     x:Class="XviD4PSP.Decoders_Settings"
 	x:Name="Window"
 	Title="Decoding Settings"
-	Width="Auto" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight" Opacity="0" ContentRendered="Window_ContentRendered" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
+	Width="Auto" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight" ContentRendered="Window_ContentRendered" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
     <Grid x:Name="LayoutRoot">
         <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
             <TabControl x:Name="tabs" Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True">

@@ -1,5 +1,6 @@
-XviD4PSP 5.10.224.0 (14.03.2011), main changes:
+XviD4PSP 5.10.225.0 (16.03.2011), main changes:
 
+>>> (r225) Fixed a possible crash on button Encode click (rep. by DAlek01).
 >>> (r224) Added resizers: SplineResize, Spline100Resize and Spline144Resize (all 3 powered by SplineResize.dll).
 >>> (r222) Various changes for Caching window. For error messages added StackTrace info and current
            AviSynth script.

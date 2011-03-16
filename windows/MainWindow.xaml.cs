@@ -3789,8 +3789,11 @@ namespace XviD4PSP
 
         private void button_encode_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m != null && PauseAfterFirst){ action_save(m.Clone()); return; }
-            if (m != null || list_tasks.Items.Count > 0)
+            if (m != null && PauseAfterFirst)
+            {
+                action_save(m.Clone());
+            }
+            else if (m != null || list_tasks.Items.Count > 0)
             {
                 bool IsEncoding = false;
                 bool IsWaiting = false;
@@ -3808,7 +3811,10 @@ namespace XviD4PSP
                         return;
                 }
 
-                if (!IsWaiting) action_save(m.Clone());
+                if (!IsWaiting && m != null)
+                {
+                    action_save(m.Clone());
+                }
                 EncodeNextTask();
             }
         }
