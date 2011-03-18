@@ -20,11 +20,11 @@ namespace XviD4PSP
 {
 	public partial class Informer
 	{
+        private static object locker = new object();
         private BackgroundWorker worker = null;
+        private FFInfo ff = null;
+        private int num_closes = 0;
         public Massive m;
-        private int progress = 0;
-        AviSynthReader reader;
-        FFInfo ff;
 
         public Informer(Massive mass)
         {
@@ -34,40 +34,22 @@ namespace XviD4PSP
 
             //забиваем
             prCurrent.Maximum = 100;
-
             Title = Languages.Translate("Getting media info") + "...";
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
 
-            //фоновое кодирование
-            CreateBackgoundWorker();
+            //BackgroundWorker
+            CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
         }
 
-        private void CreateBackgoundWorker()
+        private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-            worker.ProgressChanged += new ProgressChangedEventHandler(worker_ProgressChanged);
             worker.WorkerSupportsCancellation = true;
-            worker.WorkerReportsProgress = true;
-        }
-
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            if (m != null)
-            {
-                string tmp_title = "(" + progress.ToString("##0") + "%)";
-                SetStatus(tmp_title, "", progress);
-                progress++;
-            }
-        }
-
-        void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
-        {
-
         }
 
         void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -81,6 +63,9 @@ namespace XviD4PSP
                     //забиваем максимум параметров файла
                     MediaInfoWrapper media = new MediaInfoWrapper();
                     media.Open(m.infilepath);
+
+                    //Выходим при отмене
+                    if (m == null || worker.CancellationPending) return;
 
                     m.invcodec = media.VCodecString;
                     m.invcodecshort = media.VCodecShort;
@@ -98,7 +83,7 @@ namespace XviD4PSP
                     m.interlace = media.Interlace;
                     m.inframes = media.Frames;
                     m.standart = media.Standart;
-                                 
+
                     //Возвращаем 29фпс для мпег2 видео с пуллдауном, т.к. MediaInfo выдает для него 23фпс, а MPEG2Source из-за пуллдауна декодирует с 29-ю..
                     //Продолжительность пересчитывается в Caching
                     if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source)
@@ -274,9 +259,13 @@ namespace XviD4PSP
                     media.Close();
                 }
 
-                //довбиваем параметры с помощью ffmpeg
+                //довбиваем параметры с помощью FFmpeg
                 ff = new FFInfo();
                 ff.Open(m.infilepath);
+
+                //Выходим при отмене
+                if (m == null || worker.CancellationPending) return;
+
                 m.invideostream_ffid = ff.FirstVideoStreamID();
 
                 if (m.inframerate == "")
@@ -348,7 +337,7 @@ namespace XviD4PSP
                         int result1 = 1280; int result2 = 720; double result3 = 1; double result4 = 1; //Значения по-умолчанию
                         using (StreamReader sr = new StreamReader(log_file, System.Text.Encoding.Default))
                             text_log = sr.ReadToEnd();
-                        
+
                         mat = r1.Match(text_log);
                         if (mat.Success)
                         {
@@ -394,9 +383,8 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            ShowMessage(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + log_file + "\r\n" +
-                                Languages.Translate("And can`t determine the source-file."), Languages.Translate("Error"), Message.MessageStyle.Ok);
-                            m = null; return;
+                            throw new Exception(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + log_file +
+                                "\r\n" + Languages.Translate("And can`t determine the source-file."));
                         }
                     }
                 }
@@ -410,8 +398,7 @@ namespace XviD4PSP
                         }
                     if (!File.Exists(m.dgdecnv_path + "DGDecodeNV.dll"))
                     {
-                        ShowMessage(Languages.Translate("Can`t find file") + ": " + m.dgdecnv_path + "DGDecodeNV.dll", Languages.Translate("Error"), Message.MessageStyle.Ok);
-                        m = null; return;
+                        throw new Exception(Languages.Translate("Can`t find file") + ": " + m.dgdecnv_path + "DGDecodeNV.dll");
                     }
 
                     //Смотрим, на месте ли log-файл
@@ -503,9 +490,8 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            ShowMessage(Languages.Translate("Can`t find DGIndexNV log-file:") + " " + log_file + "\r\n" +
-                                Languages.Translate("And can`t determine the source-file."), Languages.Translate("Error"), Message.MessageStyle.Ok);
-                            m = null; return;
+                            throw new Exception(Languages.Translate("Can`t find DGIndexNV log-file:") + " " + log_file +
+                               "\r\n" + Languages.Translate("And can`t determine the source-file."));
                         }
                     }
                 }
@@ -569,8 +555,8 @@ namespace XviD4PSP
                     }
                 }
 
-                ff.Close();
-                ff = null;
+                //Закрываем FFInfo
+                CloseFFInfo();
 
                 //подсчитываем размер
                 long sizeb = 0;
@@ -579,7 +565,7 @@ namespace XviD4PSP
                     FileInfo info = new FileInfo(f);
                     sizeb += info.Length;
                 }
-                m.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511 , 1) + " mb";
+                m.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511, 1) + " mb";
                 m.infilesizeint = (int)((double)sizeb / 1049511);
 
                 //определяем аудио декодер
@@ -592,60 +578,85 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
+                if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
+                {
+                    //Ошибка
+                    e.Result = ex;
+                }
+
                 m = null;
-                ShowMessage(ex.Message, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (ff != null)
+            bool cancel_closing = false;
+
+            if (worker != null)
             {
-                ff.Close();
-                ff = null;
+                if (worker.IsBusy && num_closes < 5)
+                {
+                    //Отмена
+                    cancel_closing = true;
+                    worker.CancelAsync();
+                    num_closes += 1;
+                    m = null;
+                }
+                else
+                {
+                    worker.Dispose();
+                    worker = null;
+                }
             }
 
-            if (worker.IsBusy)
+            //Закрываем FFInfo
+            CloseFFInfo();
+
+            //Отменяем закрытие окна
+            if (cancel_closing)
             {
-                worker.CancelAsync();
-                if (reader != null)
+                label_info.Content = Languages.Translate("Aborting... Please wait...");
+                e.Cancel = true;
+            }
+        }
+
+        private void CloseFFInfo()
+        {
+            lock (locker)
+            {
+                if (ff != null)
                 {
-                    reader.Close();
-                    reader = null;
+                    ff.Close();
+                    ff = null;
                 }
             }
         }
 
         void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
+            if (e.Error != null)
+            {
+                m = null;
+                ErrorException("Informer (Unhandled): " + ((Exception)e.Error).Message, ((Exception)e.Error).StackTrace);
+            }
+            else if (e.Result != null)
+            {
+                m = null;
+                ErrorException("Informer: " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
+            }
+
             Close();
         }
 
-        internal delegate void MessageDelegate(string data, string title, Message.MessageStyle style);
-        private void ShowMessage(string data, string title, Message.MessageStyle style)
+        internal delegate void ErrorExceptionDelegate(string data, string info);
+        private void ErrorException(string data, string info)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), data, title, style);
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
             else
             {
-                Message mes = new Message(this.Owner);
-                mes.ShowMessage(data, title, style);
-            }
-        }
-
-        internal delegate void StatusDelegate(string title, string pr_text, double pr_c);
-        private void SetStatus(string title, string pr_text, double pr_c)
-        {
-            if (m != null)
-            {
-                if (!Application.Current.Dispatcher.CheckAccess())
-                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new StatusDelegate(SetStatus), title, pr_text, pr_c);
-                else
-                {
-                    //this.Title = title;
-                    //this.tbxProgress.Text = pr_text;
-                    this.prCurrent.Value = pr_c;
-                }
+                Message mes = new Message(this.IsLoaded ? this : Owner);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
 	}

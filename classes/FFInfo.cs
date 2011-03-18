@@ -12,9 +12,11 @@ namespace XviD4PSP
 {
     public class FFInfo
     {
+        private static object locker = new object();
+        private Process encoderProcess = null;
+        private string[] global_lines = null;
+        private bool was_killed = false;
         public string info = null;
-        string[] global_lines = null;
-        Process encoderProcess;
 
         public void Open(string filepath)
         {
@@ -34,35 +36,47 @@ namespace XviD4PSP
             encoderProcess.Start();
 
             //Ждём не более 10-ти секунд (для скриптов ждем чуть дольше)
-            int time = (Path.GetExtension(filepath).ToLower() == ".avs") ? 1000 : 100;
-            for (int i = 0; i < time && !encoderProcess.HasExited; i++)
-                Thread.Sleep(100);
+            int time = (Path.GetExtension(filepath).ToLower() == ".avs") ? 100000 : 10000;
+            encoderProcess.WaitForExit(time);
 
-            if (!encoderProcess.HasExited)
+            if (encoderProcess == null) return;
+            else if (!encoderProcess.HasExited)
             {
+                was_killed = true;
                 encoderProcess.Kill();
                 encoderProcess.WaitForExit();
             }
 
             //Читаем и сразу делим на строки (чтоб не делать одну и ту же работу по 10 раз)
             info = encoderProcess.StandardError.ReadToEnd();
+            if (was_killed) info += "\r\nFFInfo: The waiting period has exceeded a given value of " + time + "ms. Aborted!";
             if (info != null) global_lines = info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
         }
 
         public void Close()
         {
-            if (encoderProcess != null)
+            lock (locker)
             {
-                try
+                if (encoderProcess != null)
                 {
-                    if (!encoderProcess.HasExited)
+                    try
                     {
-                        encoderProcess.Kill();
-                        encoderProcess.WaitForExit();
+                        if (!encoderProcess.HasExited)
+                        {
+                            encoderProcess.Kill();
+                            encoderProcess.WaitForExit();
+                        }
+                    }
+                    catch (Exception) { }
+                    finally
+                    {
+                        encoderProcess.Close();
+                        encoderProcess.Dispose();
+                        encoderProcess = null;
                     }
                 }
-                catch { }
             }
+
             info = null;
             global_lines = null;
         }

@@ -17,9 +17,12 @@ namespace XviD4PSP
 	{
         public enum InfoMode { MediaInfo = 1, MediaInfoFull, MP4BoxInfo, MKVInfo, FFmpegInfo };
 
+        private static object lock_exe = new object();
+        private static object lock_ff = new object();
+        private Process encoderProcess = null;
+        private FFInfo ff = null;
         private InfoMode infomode;
         private string infilepath;
-        FFInfo ff;
 
         public MediaInfo(string infilepath, InfoMode infomode, System.Windows.Window owner)
         {
@@ -85,7 +88,7 @@ namespace XviD4PSP
                 }
                 else if (infomode == InfoMode.MP4BoxInfo)
                 {
-                    Process encoderProcess = new Process();
+                    encoderProcess = new Process();
                     ProcessStartInfo info = new ProcessStartInfo();
 
                     info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
@@ -105,7 +108,7 @@ namespace XviD4PSP
                 }
                 else if (infomode == InfoMode.MKVInfo)
                 {
-                    Process encoderProcess = new Process();
+                    encoderProcess = new Process();
                     ProcessStartInfo info = new ProcessStartInfo();
 
                     info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvinfo.exe";
@@ -189,20 +192,16 @@ namespace XviD4PSP
                         tbxInfo.Text += "Bits                : " + ff.StreamBits(num) + Environment.NewLine;
                         a_num += 1;
                     }
-
-                    ff.Close();
-                    ff = null;
                 }
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
-
-                if (ff != null)
-                {
-                    ff.Close();
-                    ff = null;
-                }
+                ErrorException(ex);
+            }
+            finally
+            {
+                CloseEXE();
+                CloseFFInfo();
             }
         }
 
@@ -253,14 +252,14 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    ErrorExeption(ex.Message);
+                    ErrorException(ex);
                 }
             }
         }
 
-        private void ErrorExeption(string message)
+        private void ErrorException(Exception ex)
         {
-            tbxInfo.Text = (Languages.Translate("Error") + ": " + Environment.NewLine + message);
+            tbxInfo.Text = (Languages.Translate("Error") + ":\r\n   " + ex.Message + "\r\n\r\nStackTrace:\r\n" + ex.StackTrace);
         }
 
         private void combo_info_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -281,10 +280,44 @@ namespace XviD4PSP
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (ff != null)
+            CloseEXE();
+            CloseFFInfo();
+        }
+
+        private void CloseEXE()
+        {
+            lock (lock_exe)
             {
-                ff.Close();
-                ff = null;
+                if (encoderProcess != null)
+                {
+                    try
+                    {
+                        if (!encoderProcess.HasExited)
+                        {
+                            encoderProcess.Kill();
+                            encoderProcess.WaitForExit();
+                        }
+                    }
+                    catch (Exception) { }
+                    finally
+                    {
+                        encoderProcess.Close();
+                        encoderProcess.Dispose();
+                        encoderProcess = null;
+                    }
+                }
+            }
+        }
+
+        private void CloseFFInfo()
+        {
+            lock (lock_ff)
+            {
+                if (ff != null)
+                {
+                    ff.Close();
+                    ff = null;
+                }
             }
         }
 	}
