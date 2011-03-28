@@ -1,5 +1,6 @@
-XviD4PSP 5.10.227.0 (28.03.2011), main changes:
+XviD4PSP 5.10.228.0 (28.03.2011), main changes:
 
+>>> (r228) Small changes for the QTGMC3.31.
 >>> (r227) Remove "-IA=6" from the DGIndex command line (rep. by agz).
 >>> (r226) StackTrace info in error messages for Informer and MediaInfo windows.
 >>> (r225) Fixed a possible crash on button Encode click (rep. by DAlek01).

@@ -578,7 +578,7 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.QTGMC)
            {
-               m.script += "QTGMC(2, 1, 1, 4, 0, 4)" + Environment.NewLine;
+               m.script += "QTGMC(Preset=\"Slow\") #Very Slow, Slower, Slow, Medium, Fast" + Environment.NewLine;
            }
 
            //Фильтрация до ресайза
