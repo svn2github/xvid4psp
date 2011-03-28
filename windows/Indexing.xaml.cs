@@ -48,6 +48,7 @@ namespace XviD4PSP
             prCurrent.Maximum = 100;
             Title = Languages.Translate("Indexing");
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
+            label_info.ToolTip = "DGIndex";
             this.ContentRendered += new EventHandler(Window_ContentRendered);
 
             //BackgroundWorker
@@ -220,7 +221,7 @@ namespace XviD4PSP
                 //Извлекаем звук, только если он нам нужен
                 string ademux = (Settings.EnableAudio) ? "-OM=2" : "-OM=0";
 
-                info.Arguments = "-SD=\" -IA=6 -FO=0 " + ademux + " -BF=\"" + filelistpath + "\" -OF=\"" + Calculate.RemoveExtention(m.indexfile, true) + "\" -HIDE -EXIT";
+                info.Arguments = "-SD=\" -FO=0 " + ademux + " -BF=\"" + filelistpath + "\" -OF=\"" + Calculate.RemoveExtention(m.indexfile, true) + "\" -HIDE -EXIT";
 
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
