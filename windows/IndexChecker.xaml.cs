@@ -62,6 +62,7 @@ namespace XviD4PSP
                 m.invcodecshort = media.VCodecShort;
                 //Добавляем инфу, по которой потом можно будет определить, применять ли ForceFilm
                 m.inframerate = media.FrameRate;
+                bool pulldown = media.ScanOrder.Contains("Pulldown");
                 media.Close();
 
                 //Выходим при отмене
@@ -89,6 +90,13 @@ namespace XviD4PSP
                     reader = new AviSynthReader();
                     reader.ParseScript(script);
                     m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
+
+                    //Определяем, использовался ли Force Film
+                    if ((pulldown && m.inframerate == "23.976" || m.inframerate == "29.970") && Math.Abs(reader.Framerate - 23.976) < 0.001)
+                    {
+                        m.IsForcedFilm = true;
+                        m.interlace = SourceType.UNKNOWN;
+                    }
 
                     //Закрываем ридер
                     CloseReader(true);

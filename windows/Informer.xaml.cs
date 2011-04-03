@@ -96,7 +96,7 @@ namespace XviD4PSP
                         else if (m.IsForcedFilm)
                         {
                             m.inframerate = "23.976";
-                            //m.interlace = SourceType.PROGRESSIVE;//UNKNOWN
+                            m.interlace = SourceType.UNKNOWN;
                         }
                     }
 
