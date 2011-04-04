@@ -247,6 +247,15 @@ namespace XviD4PSP
             string ext = Path.GetExtension(m.infilepath).ToLower();
             AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
+            //Ошибка в пользовательском скрипте
+            if (ext == ".avs")
+            {
+                ErrorException("Caching: " + error, stacktrace);
+                m = null;
+                Close();
+                return;
+            }
+
             //Начался разбор ошибок
             if ((error == "Script doesn't contain audio" || error.StartsWith("DirectShowSource:") ||
                 error.StartsWith("FFAudioSource:") || error.Contains(" audio track")) && m.isvideo)

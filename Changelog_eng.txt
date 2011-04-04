@@ -1,5 +1,6 @@
-XviD4PSP 5.10.229.0 (04.04.2011), main changes:
+XviD4PSP 5.10.230.0 (04.04.2011), main changes:
 
+>>> (r230) Caching: do not analyze any errors that was produced by external AviSynth-scripts (rep. by Ghostlamer).
 >>> (r229) MPEG2Source: fixed incorrect handling of Force Film on files reopening (rep. by LonerD).
 >>> (r228) Small changes for the QTGMC3.31.
 >>> (r227) Remove "-IA=6" from the DGIndex command line (rep. by agz).
