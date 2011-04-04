@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace XviD4PSP
 {
-   public class Win32
+    public class Win32
     {
         //Private Declare Function EnumChildWindows Lib "USER32.DLL" (ByVal hWndParent As System.IntPtr, ByVal lpEnumFunc As EnumWindowsDelegate, ByVal lParam As Integer) As Integer
 
@@ -79,7 +79,6 @@ namespace XviD4PSP
         [DllImport("User32.dll")]
         public static extern int FindWindowEx(int hwndParent, int hwndChildAfter, string strClassName, string strWindowName);
 
-
         // The SendMessage function sends the specified message to a 
         // window or windows. It calls the window procedure for the specified 
         // window and does not return until the window procedure has processed the message. 
@@ -97,36 +96,63 @@ namespace XviD4PSP
             int wParam,             // first message parameter
             int lParam);			// second message parameter
 
-       public static int GetWindowHandle(string windowtext)
-       {
-           // start with the top window on the Desktop	
-           int window_handle = GetTopWindow(GetDesktopWindow());			
-           StringBuilder text_stringBuilder = new StringBuilder(0x20);
-           StringBuilder class_stringBuilder = new StringBuilder(0x20); 
-           //string Class_string = "WMPlayerApp";
-           try
-           {
-               while (true)
-               {
-                   //look at each Desktop window...
-                   GetWindowText(window_handle, text_stringBuilder, 0x20);
-                   if (text_stringBuilder.ToString().StartsWith(windowtext))
-                   {			// ...until you find one whose name starts with "Windows Media Player"				
-                     //RealGetWindowClass(window_handle, class_stringBuilder, 0x20);
-                     //  if (class_stringBuilder.ToString().StartsWith(Class_string))
-                       //{	// ...and has a class name that starts with "WMPlayerApp"					
-                           return window_handle;
-                       //}
-                   }
-                   if ((window_handle = GetWindow(window_handle, GW_HWNDNEXT)) == 0)
-                   {
-                       return 0;
-                   }
-               }
-           }
-           catch (Exception) { return 0; }
-       }
+        public static int GetWindowHandle(string windowtext)
+        {
+            // start with the top window on the Desktop	
+            int window_handle = GetTopWindow(GetDesktopWindow());
+            StringBuilder text_stringBuilder = new StringBuilder(0x20);
+            StringBuilder class_stringBuilder = new StringBuilder(0x20);
+            //string Class_string = "WMPlayerApp";
+            try
+            {
+                while (true)
+                {
+                    //look at each Desktop window...
+                    GetWindowText(window_handle, text_stringBuilder, 0x20);
+                    if (text_stringBuilder.ToString().StartsWith(windowtext))
+                    {
+                        return window_handle;
+                    }
+                    if ((window_handle = GetWindow(window_handle, GW_HWNDNEXT)) == 0)
+                    {
+                        return 0;
+                    }
+                }
+            }
+            catch (Exception) { return 0; }
+        }
 
+        [DllImport("user32.dll")]
+        private static extern bool OpenClipboard(IntPtr hWndNewOwner);
+        [DllImport("user32.dll")]
+        private static extern bool EmptyClipboard();
+        [DllImport("user32.dll")]
+        private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
+        [DllImport("user32.dll")]
+        private static extern bool CloseClipboard();
 
+        public static bool CopyToClipboard(string text)
+        {
+            bool ok = false;
+            if (OpenClipboard(IntPtr.Zero))
+            {
+                IntPtr pText = IntPtr.Zero;
+                try
+                {
+                    if (EmptyClipboard())
+                    {
+                        pText = Marshal.StringToHGlobalUni(text);          //StringToHGlobalAnsi
+                        ok = (SetClipboardData(13, pText) != IntPtr.Zero); //1 - CF_TEXT, 13 - CF_UNICODETEXT
+                    }
+                }
+                finally
+                {
+                    CloseClipboard();
+                    if (!ok && pText != IntPtr.Zero)
+                        Marshal.FreeHGlobal(pText);
+                }
+            }
+            return ok;
+        }
     }
 }

@@ -82,6 +82,7 @@ namespace XviD4PSP
                 btNo.Content = Languages.Translate("OK");
             }
 
+            cm_copy.Header = Languages.Translate("Copy");
             ShowDialog();
         }
 
@@ -113,6 +114,11 @@ namespace XviD4PSP
                 text_info.Visibility = Visibility.Visible;
             else
                 text_info.Visibility = Visibility.Collapsed;
+        }
+
+        private void cm_copy_Click(object sender, RoutedEventArgs e)
+        {
+            Win32.CopyToClipboard(text_message.Content + ((text_info.Content.ToString() != "Info text") ? "\r\n\r\n" + text_info.Content : ""));
         }
 
         private void LayoutRoot_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

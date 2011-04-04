@@ -90,39 +90,6 @@ namespace XviD4PSP
                 "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Stop);
         }
 
-        [DllImport("user32.dll")]
-        static extern bool OpenClipboard(IntPtr hWndNewOwner);
-        [DllImport("user32.dll")]
-        private static extern bool EmptyClipboard();
-        [DllImport("user32.dll")]
-        private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
-        [DllImport("user32.dll")]
-        private static extern bool CloseClipboard();
-
-        private bool CopyToClipboard(string text)
-        {
-            bool ok = false;
-            if (OpenClipboard(IntPtr.Zero))
-            {
-                IntPtr pText = IntPtr.Zero;
-                try
-                {
-                    if (EmptyClipboard())
-                    {
-                        pText = Marshal.StringToHGlobalUni(text);           //StringToHGlobalAnsi
-                        ok = (SetClipboardData(13, pText) != IntPtr.Zero ); //1 - CF_TEXT, 13 - CF_UNICODETEXT
-                    }
-                }
-                finally
-                {
-                    CloseClipboard();
-                    if (!ok && pText != IntPtr.Zero)
-                        Marshal.FreeHGlobal(pText);
-                }
-            }
-            return ok;
-        }
-
         private void Copy_PreviewMouseUp(object sender, RoutedEventArgs e)
         {
             try
@@ -139,7 +106,7 @@ namespace XviD4PSP
 
                 if (MyTextBox.IsFocused && !string.IsNullOrEmpty(MyTextBox.SelectedText))
                 {
-                    CopyToClipboard(MyTextBox.SelectedText);
+                    Win32.CopyToClipboard(MyTextBox.SelectedText);
                 }
             }
             catch { }
@@ -161,7 +128,7 @@ namespace XviD4PSP
 
                 if (MyTextBox.IsFocused && !string.IsNullOrEmpty(MyTextBox.SelectedText))
                 {
-                    if (CopyToClipboard(MyTextBox.SelectedText))
+                    if (Win32.CopyToClipboard(MyTextBox.SelectedText))
                     {
                         //Вырезаем текст
                         int index = MyTextBox.CaretIndex; //MyTextBox.SelectionStart
