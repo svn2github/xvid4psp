@@ -1587,7 +1587,7 @@ namespace XviD4PSP
                 m.format == ExportFormats.Mp4iPod50G ||
                 m.format == ExportFormats.Mp4iPod55G ||
                 m.format == ExportFormats.Mp4Prada ||
-                m.format == ExportFormats.Mp4PS3 ||
+                m.format == ExportFormats.Mp4PS3 && instream.codecshort != "AC3" ||
                 m.format == ExportFormats.ThreeGP)
            {
                if (instream.codecshort != "AAC" &&

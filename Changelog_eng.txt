@@ -1,5 +1,6 @@
-XviD4PSP 5.10.231.0 (04.04.2011), main changes:
+XviD4PSP 5.10.232.0 (06.04.2011), main changes:
 
+>>> (r232) For "MP4 PS3 or XBOX360" AC3 audio is now allowed in Copy mode (req. by Tyler).
 >>> (r231) In the Message window added context menu "Copy" (to clipboard).
 >>> (r230) Caching: do not analyze any errors that was produced by external AviSynth-scripts (rep. by Ghostlamer).
 >>> (r229) MPEG2Source: fixed incorrect handling of Force Film on files reopening (rep. by LonerD).
