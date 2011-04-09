@@ -118,7 +118,11 @@ namespace XviD4PSP
 
         private void cm_copy_Click(object sender, RoutedEventArgs e)
         {
-            Win32.CopyToClipboard(text_message.Content + ((text_info.Content.ToString() != "Info text") ? "\r\n\r\n" + text_info.Content : ""));
+            try
+            {
+                Win32.CopyToClipboard(text_message.Content + ((text_info.Content.ToString() != "Info text") ? "\r\n\r\n" + text_info.Content : ""));
+            }
+            catch (Exception) { }
         }
 
         private void LayoutRoot_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

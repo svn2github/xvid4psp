@@ -59,7 +59,7 @@ namespace XviD4PSP
            Normalize
        }
 
-       public enum FramerateModifers { AssumeFPS = 1, ChangeFPS, ConvertFPS, MSUFrameRate }
+       public enum FramerateModifers { AssumeFPS = 1, ChangeFPS, ConvertFPS, ConvertMFlowFPS }
        public enum SamplerateModifers { SSRC = 1, ResampleAudio, AssumeSampleRate }
 
        public static Massive CreateAutoAviSynthScript(Massive m)
@@ -182,11 +182,11 @@ namespace XviD4PSP
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RepairSSE2.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\fft3dfilter.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
+               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI3.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
-               m.script += "#loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
+               m.script += "loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\AddGrainC.dll\")" + Environment.NewLine;
            }
@@ -202,8 +202,8 @@ namespace XviD4PSP
            if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\soxfilter.dll\")" + Environment.NewLine;
 
-           if (m.frameratemodifer == FramerateModifers.MSUFrameRate)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MSU_FRC.dll\")" + Environment.NewLine;
+           if (m.frameratemodifer == FramerateModifers.ConvertMFlowFPS)
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
 
            if (m.resizefilter == Resizers.SplineResize || m.resizefilter == Resizers.Spline100Resize || m.resizefilter == Resizers.Spline144Resize)
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SplineResize.dll\")" + Environment.NewLine;
@@ -328,7 +328,7 @@ namespace XviD4PSP
 
            m.script += Environment.NewLine;
 
-           //Определяем необходимость смены частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, MSU_FRC)
+           //Определяем необходимость смены частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
            bool ApplyFramerateModifier = false, IsAssumeFramerateConvertion = false;
            if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
                m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI || m.deinterlace == DeinterlaceType.TDecimate ||
@@ -473,30 +473,30 @@ namespace XviD4PSP
 
            //Деинтерлейсинг
            int order = (m.fieldOrder == FieldOrder.TFF) ? 1 : (m.fieldOrder == FieldOrder.BFF) ? 0 : -1;
-           string txt = "#.Subtitle(\"deinterlaced frame\", align=5)";
+           string mark = (Settings.IsCombed_Mark ? "" : "#") + ".Subtitle(\"deinterlaced frame\", align=5)";
            if (m.deinterlace == DeinterlaceType.TomsMoComp)
            {
                string deinterlacer = "TomsMoComp(" + order + ", 5, 1)";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.Yadif)
            {
                string deinterlacer = "Yadif(order=" + order + ")";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.YadifModEDI)
            {
                string deinterlacer = "YadifMod(order=" + order + ", edeint=nnedi3(field=" + order + "))";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
            {
                string deinterlacer = "LeakKernelDeint(order=" + ((order < 0) ? "((GetParity) ? 1 : 0)" : order.ToString()) + ", sharp=true)";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + txt + Environment.NewLine +
-               "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=7, MI=40) ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
+               "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.TFM)
            {
@@ -510,14 +510,14 @@ namespace XviD4PSP
            else if (m.deinterlace == DeinterlaceType.TDeint)
            {
                m.script += "TDeint(order=" + order + ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ?
-                   ", full=false, cthresh=7, MI=40" : "") + ")" + Environment.NewLine;
+                   ", full=false, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI : "") + ")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.TDeintEDI)
            {
                string assume = ((order == 1) ? "AssumeTFF()." : (order == 0) ? "AssumeBFF()." : "");
                m.script += "edeintted = last." + assume + "SeparateFields().SelectEven().EEDI2(field=-1)" + Environment.NewLine;
                m.script += "TDeint(order=" + order + ", edeint=edeintted" + ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ?
-                   ", full=false, cthresh=7, MI=40" : "") + ")" + Environment.NewLine;
+                   ", full=false, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI : "") + ")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.TIVTC)
            {
@@ -578,7 +578,7 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.QTGMC)
            {
-               m.script += "QTGMC(Preset=\"Slow\") #Very Slow, Slower, Slow, Medium, Fast" + Environment.NewLine;
+               m.script += "QTGMC(Preset=\"" + Settings.QTGMC_Preset + "\", Sharpness=" + Calculate.ConvertDoubleToPointString(Settings.QTGMC_Sharpness, 1) + ")\r\n";
            }
 
            //Фильтрация до ресайза
@@ -683,31 +683,10 @@ namespace XviD4PSP
                     m.script += "TextSub(\"" + m.subtitlepath + "\")";
            }
 
-           //Смена частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, MSU_FRC)
-           if (ApplyFramerateModifier && m.frameratemodifer == FramerateModifers.MSUFrameRate)
+           //Смена частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
+           if (ApplyFramerateModifier && m.frameratemodifer == FramerateModifers.ConvertMFlowFPS)
            {
-               double outfr = Calculate.ConvertStringToDouble(m.outframerate);
-               double infr = Calculate.ConvertStringToDouble(m.inframerate);
-               int closevalue = Convert.ToInt32(outfr / infr);
-               if (closevalue > 1)
-               {
-                   int new_w = Calculate.GetValid(m.outresw, 16);
-                   int new_h = Calculate.GetValid(m.outresh, 16);
-
-                   if (new_w != m.outresw || new_h != m.outresh)
-                   {
-                       //защита mod16 вкл.
-                       m.script += Resizers.Spline36Resize + "(" + new_w + ", " + new_h + ")" + Environment.NewLine;
-                   }
-                   m.script += "MSU_FRC(" + closevalue + ", \"slow\")" + Environment.NewLine;
-                   if (new_w != m.outresw || new_h != m.outresh)
-                   {
-                       //защита mod16 выкл.
-                       m.script += Resizers.Spline36Resize + "(" + m.outresw + ", " + m.outresh + ")" + Environment.NewLine;
-                   }
-               }
-               if (closevalue * infr != outfr)
-                   m.script += FramerateModifers.ChangeFPS + "(" + m.outframerate + ")" + Environment.NewLine;
+               m.script += "ConvertMFlowFPS(" + m.outframerate.Replace(".", "") + ", 1000)\r\n";
            }
            else if (ApplyFramerateModifier)
            {

@@ -28,7 +28,7 @@
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="label_deinterlace" Content="Deinterlace:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_deinterlace" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_deinterlace_SelectionChanged"/>
+                                    <ComboBox x:Name="combo_deinterlace" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectedValuePath="Tag" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" SelectionChanged="combo_deinterlace_SelectionChanged"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="label_outinterlace" Content="Target type:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
@@ -48,7 +48,7 @@
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_framerateconvertor" Content="Convertion method:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
-                                    <ComboBox x:Name="combo_framerateconvertor" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_framerateconvertor_SelectionChanged"/>
+                                    <ComboBox x:Name="combo_framerateconvertor" Width="150" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0" DockPanel.Dock="Right" IsSynchronizedWithCurrentItem="True" SelectedValuePath="Content" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" SelectionChanged="combo_framerateconvertor_SelectionChanged"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -56,7 +56,7 @@
                 </TabItem>
                 <TabItem Header="Settings" x:Name="tab_settings">
                     <StackPanel Width="386" Height="Auto">
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_autocrop" Header="Source detector" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_detector" Header="Source detector" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_analyze_percent" Content="Analyze (% of the source lenght):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
@@ -77,6 +77,27 @@
                                 <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_fo_portions" Content="Enable selective field order analysis" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
                                     <CheckBox x:Name="check_fo_portions" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" Click="check_fo_portions_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,7,0"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_hybrid" Header="Hybrid Progressive Interlaced" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,4" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_iscombed_mark" Width="80" Height="Auto" Content="Mark" FontSize="14" Foreground="#FFFFFFFF" Click="check_iscombed_mark_Click" DockPanel.Dock="Left" Margin="6,6,0,0"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="label_iscombed_cthresh" Content="CThresh:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,10,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_iscombed_cthresh" HorizontalAlignment="Left" DockPanel.Dock="Left" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Minimum="1" Maximum="50" Value="7" ValueChanged="num_iscombed_cthresh_ValueChanged"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_iscombed_mi" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Minimum="1" Maximum="150" Value="40" ValueChanged="num_iscombed_mi_ValueChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="label_iscombed_mi" Content="MI:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,0,10,0" Height="Auto" Width="Auto" DockPanel.Dock="Right" HorizontalAlignment="Right"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_qtgmc" Header="QTGMC" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_qtgmc_preset" Content="Preset:" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,0" DockPanel.Dock="Left" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF"/>
+                                    <ComboBox x:Name="combo_qtgmc_preset" Width="100" Height="Auto" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" DockPanel.Dock="Left" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_qtgmc_preset_SelectionChanged"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_qtgmc_sharp" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,6,0" VerticalAlignment="Center" Width="60" Change="0.1" DecimalPlaces="1" Minimum="0.0" Maximum="10.0" Value="1.0" ValueChanged="num_qtgmc_sharp_ValueChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="label_qtgmc_sharp" Content="Sharpness:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,0,10,0" Height="Auto" Width="Auto" DockPanel.Dock="Right" HorizontalAlignment="Right"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>

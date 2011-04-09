@@ -50,8 +50,6 @@ namespace XviD4PSP
             text_hybrid_fo.Content = Languages.Translate("Hybrid field order threshold") + " (%):";
             text_fo_portions.Content = Languages.Translate("Enable selective field order analysis");
 
-            SetTooltips();
-
             //забиваем
             foreach (string fieldt in Enum.GetNames(typeof(FieldOrder)))
                 combo_fieldorder.Items.Add(GetFixedFieldString(fieldt));
@@ -71,48 +69,52 @@ namespace XviD4PSP
                 string cont = dtype.ToString(), tltp = "";
                 double frate = Calculate.ConvertStringToDouble(m.inframerate);
 
-                if (dtype == DeinterlaceType.TFM) tltp = "FieldMatching (for videos with ShiftedFields) using TFM";
-                else if (dtype == DeinterlaceType.Yadif) tltp = "Regular deinterlacing using Yadif";
-                else if (dtype == DeinterlaceType.YadifModEDI) tltp = "Regular deinterlacing using YadifMod+NNEDI2 (slow)";
-                else if (dtype == DeinterlaceType.TDeint) tltp = "Regular deinterlacing using TDeint";
-                else if (dtype == DeinterlaceType.TDeintEDI) tltp = "Regular deinterlacing using TDeint+EEDI2 (very slow)";
-                else if (dtype == DeinterlaceType.LeakKernelDeint) tltp = "Regular deinterlacing using LeakKernelDeint";
-                else if (dtype == DeinterlaceType.TomsMoComp) tltp = "Regular deinterlacing using TomsMoComp";
-                else if (dtype == DeinterlaceType.FieldDeinterlace) tltp = "Regular deinterlacing using FieldDeinterlace (blending)";
-                else if (dtype == DeinterlaceType.SmoothDeinterlace) { cont = "SmoothDeinterlace (x2)"; tltp = "Deinterlacing with doubling frame rate using SmoothDeinterlace"; }
-                else if (dtype == DeinterlaceType.MCBob) { cont = "MCBob (x2)"; tltp = "Deinterlacing with doubling frame rate using MCBob (very slow)"; }
-                else if (dtype == DeinterlaceType.QTGMC) { cont = "QTGMC (x2)"; tltp = "Deinterlacing with doubling frame rate and denoising using QTGMC (slow)"; }
-                else if (dtype == DeinterlaceType.NNEDI) { cont = "NNEDI (x2)"; tltp = "Deinterlacing with doubling frame rate using NNEDI2"; }
-                else if (dtype == DeinterlaceType.YadifModEDI2) { cont = "YadifModEDI (x2)"; tltp = "Deinterlacing with doubling frame rate using YadifMod+NNEDI2"; }
-                else if (dtype == DeinterlaceType.TIVTC) tltp = "Inverse Telecine (remove 3:2 pulldown) using TIVTC\r\n29.970->23.976";
-                else if (dtype == DeinterlaceType.TIVTC_TDeintEDI) { cont = "TIVTC+TDeintEDI"; tltp = "Inverse Telecine (remove 3:2 pulldown) using TIVTC+TDeint+NNEDI2\r\n29.970->23.976"; }
-                else if (dtype == DeinterlaceType.TIVTC_YadifModEDI) { cont = "TIVTC+YadifModEDI"; tltp = "Inverse Telecine (remove 3:2 pulldown) using TIVTC+YadifMod+NNEDI2\r\n29.970->23.976"; }
-                else if (dtype == DeinterlaceType.TDecimate) { cont = "TDecimate 1-in-5"; tltp = "Remove duplicate frames (remove 1 frame from every 5 frames) using TDecimate\r\n29.970->23.976"; }
+                string regular = Languages.Translate("Regular deinterlacing using");
+                string doubling = Languages.Translate("Deinterlacing with doubling frame rate using");
+                string telecine = Languages.Translate("Inverse Telecine (remove 3:2 pulldown) using");
+                string decimate1 = Languages.Translate("Auto searching and removing duplicate frames, so frame rate will be reduced to");
+                string decimate2 = Languages.Translate("it must be the original frame rate of the video BEFORE duplicates was added!");
+
+                if (dtype == DeinterlaceType.TFM) tltp = Languages.Translate("FieldMatching (for videos with ShiftedFields) using TFM");
+                else if (dtype == DeinterlaceType.Yadif) tltp = regular + " Yadif";
+                else if (dtype == DeinterlaceType.YadifModEDI) tltp = regular + " YadifMod+NNEDI2 (slow)";
+                else if (dtype == DeinterlaceType.TDeint) tltp = regular + " TDeint";
+                else if (dtype == DeinterlaceType.TDeintEDI) tltp = regular + " TDeint+EEDI2 (very slow)";
+                else if (dtype == DeinterlaceType.LeakKernelDeint) tltp = regular + " LeakKernelDeint";
+                else if (dtype == DeinterlaceType.TomsMoComp) tltp = regular + " TomsMoComp";
+                else if (dtype == DeinterlaceType.FieldDeinterlace) tltp = regular + " FieldDeinterlace (blending)";
+                else if (dtype == DeinterlaceType.SmoothDeinterlace) { cont = "SmoothDeinterlace (x2)"; tltp = doubling + " SmoothDeinterlace"; }
+                else if (dtype == DeinterlaceType.MCBob) { cont = "MCBob (x2)"; tltp = doubling + " MCBob (very slow)"; }
+                else if (dtype == DeinterlaceType.QTGMC) { cont = "QTGMC (x2)"; tltp = Languages.Translate("Deinterlacing with doubling frame rate and denoising using QTGMC (see Settings)"); }
+                else if (dtype == DeinterlaceType.NNEDI) { cont = "NNEDI (x2)"; tltp = doubling + " NNEDI2"; }
+                else if (dtype == DeinterlaceType.YadifModEDI2) { cont = "YadifModEDI (x2)"; tltp = doubling + " YadifMod+NNEDI2"; }
+                else if (dtype == DeinterlaceType.TIVTC) tltp = telecine + " TIVTC\r\n29.970->23.976";
+                else if (dtype == DeinterlaceType.TIVTC_TDeintEDI) { cont = "TIVTC+TDeintEDI"; tltp = telecine + " TIVTC+TDeint+NNEDI2\r\n29.970->23.976"; }
+                else if (dtype == DeinterlaceType.TIVTC_YadifModEDI) { cont = "TIVTC+YadifModEDI"; tltp = telecine + " TIVTC+YadifMod+NNEDI2\r\n29.970->23.976"; }
+                else if (dtype == DeinterlaceType.TDecimate) { cont = "TDecimate 1-in-5"; tltp = Languages.Translate("Remove duplicate frames (remove 1 frame from every 5 frames) using TDecimate") + "\r\n29.970->23.976"; }
                 else if (dtype == DeinterlaceType.TDecimate_23)
                 {
-                    cont = "TDecimate to 23.976"; tltp = "Auto searching and removing duplicate frames, so frame rate will be reduced to 23.976.\r\n" +
-                        "23.976 - it must be the original frame rate of the video BEFORE duplicates was added!";
+                    cont = "TDecimate to 23.976"; tltp = decimate1 + " 23.976.\r\n23.976 - " + decimate2;
                     item.IsEnabled = (frate > 23.976);
                 }
                 else if (dtype == DeinterlaceType.TDecimate_24)
                 {
-                    cont = "TDecimate to 24.000"; tltp = "Auto searching and removing duplicate frames, so frame rate will be reduced to 24.000.\r\n" +
-                        "24.000 - it must be the original frame rate of the video BEFORE duplicates was added!";
+                    cont = "TDecimate to 24.000"; tltp = decimate1 + " 24.000.\r\n24.000 - " + decimate2;
                     item.IsEnabled = (frate > 24.000);
                 }
                 else if (dtype == DeinterlaceType.TDecimate_25)
                 {
-                    cont = "TDecimate to 25.000"; tltp = "Auto searching and removing duplicate frames, so frame rate will be reduced to 25.000.\r\n" +
-                        "25.000 - it must be the original frame rate of the video BEFORE duplicates was added!";
+                    cont = "TDecimate to 25.000"; tltp = decimate1 + " 25.000.\r\n25.000 - " + decimate2;
                     item.IsEnabled = (frate > 25.000);
                 }
                 else tltp = null;
 
+                item.Tag = dtype;
                 item.Content = cont;
                 item.ToolTip = tltp;
                 combo_deinterlace.Items.Add(item);
             }
-            SetDeintSelectedItem(m.deinterlace);
+            combo_deinterlace.SelectedValue = m.deinterlace;
 
             //забиваем
             foreach (string f in Format.GetValidFrameratesList(m))
@@ -121,9 +123,9 @@ namespace XviD4PSP
                 combo_framerate.Items.Add(m.outframerate + " fps");
             combo_framerate.SelectedItem = m.outframerate + " fps";
 
-            foreach (string ratechangers in Enum.GetNames(typeof(AviSynthScripting.FramerateModifers)))
-                combo_framerateconvertor.Items.Add(ratechangers);
-            combo_framerateconvertor.SelectedItem = m.frameratemodifer.ToString();
+            foreach (AviSynthScripting.FramerateModifers ratechangers in Enum.GetValues(typeof(AviSynthScripting.FramerateModifers)))
+                combo_framerateconvertor.Items.Add(new ComboBoxItem() { Content = ratechangers });
+            combo_framerateconvertor.SelectedValue = m.frameratemodifer;
 
             //интерлейс режимы
             foreach (string interlace in Enum.GetNames(typeof(Massive.InterlaceModes)))
@@ -137,35 +139,28 @@ namespace XviD4PSP
             num_hybrid_fo.Value = (decimal)Settings.SD_Hybrid_FO;
             check_fo_portions.IsChecked = Settings.SD_Portions_FO;
 
+            check_iscombed_mark.IsChecked = Settings.IsCombed_Mark;
+            num_iscombed_cthresh.Value = Settings.IsCombed_CThresh;
+            num_iscombed_mi.Value = Settings.IsCombed_MI;
+
+            combo_qtgmc_preset.Items.Add("Draft");
+            combo_qtgmc_preset.Items.Add("Ultra Fast");
+            combo_qtgmc_preset.Items.Add("Super Fast");
+            combo_qtgmc_preset.Items.Add("Very Fast");
+            combo_qtgmc_preset.Items.Add("Faster");
+            combo_qtgmc_preset.Items.Add("Fast");
+            combo_qtgmc_preset.Items.Add("Medium");
+            combo_qtgmc_preset.Items.Add("Slow");
+            combo_qtgmc_preset.Items.Add("Slower");
+            combo_qtgmc_preset.Items.Add("Very Slow");
+            combo_qtgmc_preset.Items.Add("Placebo");
+            combo_qtgmc_preset.SelectedItem = Settings.QTGMC_Preset;
+
+            num_qtgmc_sharp.Value = (decimal)Settings.QTGMC_Sharpness;
+
+            SetTooltips();
             ShowDialog();
 		}
-
-        private void SetDeintSelectedItem(DeinterlaceType deint)
-        {
-            int index = 0;
-            foreach (DeinterlaceType dtype in Enum.GetValues(typeof(DeinterlaceType)))
-            {
-                if (dtype == deint) break;
-                else index += 1;
-            }
-
-            combo_deinterlace.SelectedIndex = index;
-            combo_deinterlace.ToolTip = ((ComboBoxItem)combo_deinterlace.Items.GetItemAt(index)).ToolTip;
-            //((ComboBoxItem)combo_deinterlace.SelectedItem).ToolTip;
-        }
-
-        private void SetComboBoxSelectedItem(ComboBox box, object value)
-        {
-            foreach (ComboBoxItem item in box.Items)
-            {
-                if (item.Content.ToString() == value.ToString())
-                { 
-                    box.SelectedItem = item;
-                    box.ToolTip = item.ToolTip;
-                    break; 
-                }
-            }
-        }
 
         public static string GetFixedFieldString(string FOrder)
         {
@@ -235,25 +230,35 @@ namespace XviD4PSP
 
         private void SetTooltips()
         {
-            if (m.frameratemodifer == AviSynthScripting.FramerateModifers.AssumeFPS)
+            ToolTipService.SetShowDuration(button_analyse, 100000);
+            ToolTipService.SetShowDuration(combo_deinterlace, 100000);
+            ToolTipService.SetShowDuration(combo_framerateconvertor, 100000);
+            ToolTipService.SetShowDuration(check_iscombed_mark, 100000);
+            ToolTipService.SetShowDuration(num_iscombed_cthresh, 100000);
+            ToolTipService.SetShowDuration(num_iscombed_mi, 100000);
+
+            foreach (ComboBoxItem item in combo_framerateconvertor.Items)
             {
-                combo_framerateconvertor.ToolTip = "The AssumeFPS filter changes the frame rate without changing the frame count." +
-                    Environment.NewLine + "(causing the video to play faster or slower)";
-            }
-            else if (m.frameratemodifer == AviSynthScripting.FramerateModifers.ChangeFPS)
-            {
-                combo_framerateconvertor.ToolTip = "ChangeFPS changes the frame rate by deleting or duplicating frames.";
-            }
-            else if (m.frameratemodifer == AviSynthScripting.FramerateModifers.ConvertFPS)
-            {
-                combo_framerateconvertor.ToolTip = "The filter attempts to convert the frame rate of clip to new_rate without" +
-                             Environment.NewLine + "dropping or inserting frames, providing a smooth conversion with results similar" +
-                             Environment.NewLine + "to those of standalone converter boxes. The output will have (almost) the same duration as clip," +
-                             Environment.NewLine + "but the number of frames will change proportional to the ratio of target and source frame rates.";
-            }
-            else if (m.frameratemodifer == AviSynthScripting.FramerateModifers.MSUFrameRate)
-            {
-                combo_framerateconvertor.ToolTip = "The filter is intended for video frame rate up-conversion. It increases the frame rate integer times.";
+                if (((AviSynthScripting.FramerateModifers)item.Content) == AviSynthScripting.FramerateModifers.AssumeFPS)
+                {
+                    item.ToolTip = Languages.Translate("AssumeFPS changes the frame rate without changing the frame count.") + "\r\n" +
+                        Languages.Translate("The video will play faster or slower.");
+                }
+                else if (((AviSynthScripting.FramerateModifers)item.Content) == AviSynthScripting.FramerateModifers.ChangeFPS)
+                {
+                    item.ToolTip = Languages.Translate("ChangeFPS changes the frame rate by deleting or duplicating frames.") + "\r\n" +
+                        Languages.Translate("The motion smoothness may be lost.");
+                }
+                else if (((AviSynthScripting.FramerateModifers)item.Content) == AviSynthScripting.FramerateModifers.ConvertFPS)
+                {
+                    item.ToolTip = Languages.Translate("ConvertFPS attempts to convert the frame rate using \"smart blending\" without deleting or duplicating frames.") + "\r\n" +
+                        Languages.Translate("The video may lose sharpness or may appear blending artifacts.");
+                }
+                else if (((AviSynthScripting.FramerateModifers)item.Content) == AviSynthScripting.FramerateModifers.ConvertMFlowFPS)
+                {
+                    item.ToolTip = Languages.Translate("Creates new frames using motion vectors between existing frames.") + "\r\n" +
+                        Languages.Translate("Based on functions MAnalyse and MFlowFps from the MVTools2 plugin.");
+                }
             }
 
             num_analyze_percent.ToolTip = "Default: 1";
@@ -261,6 +266,12 @@ namespace XviD4PSP
             num_hybrid_int.ToolTip = "Default: 5";
             num_hybrid_fo.ToolTip = "Default: 10";
             check_fo_portions.ToolTip = "Default: enabled";
+            check_iscombed_mark.ToolTip = Languages.Translate("Print \"deinterlaced frame\" on each frame that was detected as Combed.") + "\r\n" +
+                Languages.Translate("Use this option for tuning CThresh and MI, uncheck it when done!");
+            num_iscombed_cthresh.ToolTip = Languages.Translate("How strong or visible combing must be to be detected (lower values = higher sensitivity).") + "\r\nDefault: 7";
+            num_iscombed_mi.ToolTip = Languages.Translate("How many combed areas must be found to detect whole frame as Сombed.") + "\r\nDefault: 40";
+            combo_qtgmc_preset.ToolTip = "Default: Slow";
+            num_qtgmc_sharp.ToolTip = "Default: 1.0";
         }
 
         private void button_analyse_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -290,7 +301,7 @@ namespace XviD4PSP
                     combo_fieldorder.SelectedItem = GetFixedFieldString(m.fieldOrder.ToString());
                     combo_sourcetype.SelectedItem = GetFixedSTypeString(m.interlace.ToString());
 
-                    SetDeintSelectedItem(m.deinterlace);
+                    combo_deinterlace.SelectedValue = m.deinterlace;
                     combo_outinterlace.SelectedItem = Format.GetCodecOutInterlace(m);
 
                     //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
@@ -302,14 +313,13 @@ namespace XviD4PSP
                 if (sd.results != null)
                 {
                     button_analyse.ToolTip = sd.results;
-                    ToolTipService.SetShowDuration(button_analyse, 100000);
                 }
             }
         }
 
         private void combo_sourcetype_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_sourcetype.IsDropDownOpen || combo_sourcetype.IsSelectionBoxHighlighted)
+            if ((combo_sourcetype.IsDropDownOpen || combo_sourcetype.IsSelectionBoxHighlighted) && combo_sourcetype.SelectedItem != null)
             {
                 m.interlace = GetEnumFromSTypeString(combo_sourcetype.SelectedItem.ToString());
 
@@ -317,7 +327,7 @@ namespace XviD4PSP
                 m = Calculate.UpdateOutFramerate(m);
 
                 //обновляем форму
-                SetDeintSelectedItem(m.deinterlace);
+                combo_deinterlace.SelectedValue = m.deinterlace;
                 combo_framerate.SelectedItem = m.outframerate + " fps";
                 combo_outinterlace.SelectedItem = Format.GetCodecOutInterlace(m);
 
@@ -331,7 +341,7 @@ namespace XviD4PSP
 
         private void combo_fieldorder_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_fieldorder.IsDropDownOpen || combo_fieldorder.IsSelectionBoxHighlighted)
+            if ((combo_fieldorder.IsDropDownOpen || combo_fieldorder.IsSelectionBoxHighlighted) && combo_fieldorder.SelectedItem != null)
             {
                 m.fieldOrder = GetEnumFromFOrderString(combo_fieldorder.SelectedItem.ToString());
                 Refresh();
@@ -340,9 +350,8 @@ namespace XviD4PSP
 
         private void combo_deinterlace_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_deinterlace.IsDropDownOpen || combo_deinterlace.IsSelectionBoxHighlighted)
+            if ((combo_deinterlace.IsDropDownOpen || combo_deinterlace.IsSelectionBoxHighlighted) && combo_deinterlace.SelectedItem != null)
             {
-                combo_deinterlace.ToolTip = ((ComboBoxItem)combo_deinterlace.SelectedItem).ToolTip;
                 m.deinterlace = (DeinterlaceType)Enum.GetValues(typeof(DeinterlaceType)).GetValue(combo_deinterlace.SelectedIndex);
 
                 //запоминаем настройки
@@ -388,7 +397,7 @@ namespace XviD4PSP
 
         private void combo_framerate_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_framerate.IsDropDownOpen || combo_framerate.IsSelectionBoxHighlighted)
+            if ((combo_framerate.IsDropDownOpen || combo_framerate.IsSelectionBoxHighlighted) && combo_framerate.SelectedItem != null)
             {
                 m.outframerate = Calculate.GetSplittedString(combo_framerate.SelectedItem.ToString(), 0);
 
@@ -420,11 +429,9 @@ namespace XviD4PSP
 
         private void combo_framerateconvertor_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_framerateconvertor.IsDropDownOpen || combo_framerateconvertor.IsSelectionBoxHighlighted)
+            if ((combo_framerateconvertor.IsDropDownOpen || combo_framerateconvertor.IsSelectionBoxHighlighted) && combo_framerateconvertor.SelectedItem != null)
             {
-                m.frameratemodifer = (AviSynthScripting.FramerateModifers)Enum.Parse(typeof(AviSynthScripting.FramerateModifers),
-                    combo_framerateconvertor.SelectedItem.ToString());
-                Settings.FramerateModifer = m.frameratemodifer;
+                Settings.FramerateModifer = m.frameratemodifer = (AviSynthScripting.FramerateModifers)((ComboBoxItem)combo_framerateconvertor.SelectedItem).Content;
 
                 m.sampleratemodifer = Settings.SamplerateModifer;
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);
@@ -449,13 +456,12 @@ namespace XviD4PSP
 
                 p.m = m.Clone();
                 p.Refresh(m.script);
-                SetTooltips();
             }
         }
 
         private void combo_outinterlace_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_outinterlace.IsDropDownOpen || combo_outinterlace.IsSelectionBoxHighlighted)
+            if ((combo_outinterlace.IsDropDownOpen || combo_outinterlace.IsSelectionBoxHighlighted) && combo_outinterlace.SelectedItem != null)
             {
                 Massive.InterlaceModes outinterlace = (Massive.InterlaceModes)Enum.Parse(typeof(Massive.InterlaceModes),
                     combo_outinterlace.SelectedItem.ToString());
@@ -481,7 +487,7 @@ namespace XviD4PSP
                 m.outfilesize = Calculate.GetEncodingSize(m);
 
                 //обновляем форму
-                SetDeintSelectedItem(m.deinterlace);
+                combo_deinterlace.SelectedValue = m.deinterlace;
                 combo_framerate.SelectedItem = m.outframerate + " fps";
 
                 //обновляем скрипт
@@ -531,5 +537,47 @@ namespace XviD4PSP
         {
             Settings.SD_Portions_FO = check_fo_portions.IsChecked.Value;
         }
+
+        private void check_iscombed_mark_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.IsCombed_Mark = check_iscombed_mark.IsChecked.Value;
+            if (m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) Refresh();
+        }
+
+        private void num_iscombed_cthresh_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_iscombed_cthresh.IsAction)
+            {
+                Settings.IsCombed_CThresh = (int)num_iscombed_cthresh.Value;
+                if (m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) Refresh();
+            }
+        }
+
+        private void num_iscombed_mi_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_iscombed_mi.IsAction)
+            {
+                Settings.IsCombed_MI = (int)num_iscombed_mi.Value;
+                if (m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) Refresh();
+            }
+        }
+
+        private void combo_qtgmc_preset_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_qtgmc_preset.IsDropDownOpen || combo_qtgmc_preset.IsSelectionBoxHighlighted) && combo_qtgmc_preset.SelectedItem != null)
+            {
+                Settings.QTGMC_Preset = combo_qtgmc_preset.SelectedItem.ToString();
+                if (m.deinterlace == DeinterlaceType.QTGMC) Refresh();
+            }
+        }
+
+        private void num_qtgmc_sharp_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_qtgmc_sharp.IsAction)
+            {
+                Settings.QTGMC_Sharpness = (double)num_qtgmc_sharp.Value;
+                if (m.deinterlace == DeinterlaceType.QTGMC) Refresh();
+            }
+        } 
 	}
 }

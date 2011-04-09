@@ -2610,5 +2610,96 @@ namespace XviD4PSP
                 SetBool("NicDTS_DRC", value);
             }
         }
+
+        //QTGMC Preset
+        public static string QTGMC_Preset
+        {
+            get
+            {
+                object value = GetValue("QTGMC_Preset");
+                if (value == null)
+                {
+                    return "Slow";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("QTGMC_Preset", value);
+            }
+        }
+
+        //QTGMC Sharpness
+        public static double QTGMC_Sharpness
+        {
+            get
+            {
+                return GetDouble("QTGMC_Sharpness", 1.0);
+            }
+            set
+            {
+                SetDouble("QTGMC_Sharpness", value);
+            }
+        }
+
+        //Помечать интерлейсные кадры (Hybrid Progressive Interlaced)
+        public static bool IsCombed_Mark
+        {
+            get
+            {
+                object value = GetValue("IsCombed_Mark");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("IsCombed_Mark", value);
+            }
+        }
+
+        //IsCombed CThresh (Hybrid Progressive Interlaced)
+        public static int IsCombed_CThresh
+        {
+            get
+            {
+                object value = GetValue("IsCombed_CThresh");
+                if (value == null)
+                {
+                    return 7;
+                }
+                return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("IsCombed_CThresh", value);
+            }
+        }
+
+        //IsCombed MI (Hybrid Progressive Interlaced)
+        public static int IsCombed_MI
+        {
+            get
+            {
+                object value = GetValue("IsCombed_MI");
+                if (value == null)
+                {
+                    return 40;
+                }
+                return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("IsCombed_MI", value);
+            }
+        }
     }
 }
