@@ -1,5 +1,6 @@
-XviD4PSP 5.10.233.0 (09.04.2011), main changes:
+XviD4PSP 5.10.234.0 (14.04.2011), main changes:
 
+>>> (r234) x264: according to r1935 the --open-gop key was changed and the --bluray-compat key was added (Misc tab).
 >>> (r233) "Interlace/Framerate": added settings for QTGMC (Preset, Sharpness) and IsCombedTIVTC (#, CThresh, MI).
            Framerate converter MSUFrameRate was replaced by ConvertMFlowFPS (based on functions MAnalyse and MFlowFps
            from the MVTools2 plugin, can be tuned by editing the VideoFunctions.avs file).

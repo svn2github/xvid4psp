@@ -116,8 +116,7 @@ namespace XviD4PSP
                 combo_ref.Items.Add(n);
 
             combo_open_gop.Items.Add("None");
-            combo_open_gop.Items.Add("Normal");
-            combo_open_gop.Items.Add("Blu-ray");
+            combo_open_gop.Items.Add("Yes");
 
             //Прогружаем список AVC profile
             combo_avc_profile.Items.Add(new ComboBoxItem { Content = "Auto" });
@@ -302,9 +301,8 @@ namespace XviD4PSP
             else if (m.x264options.direct == "temporal") combo_bframe_mode.SelectedIndex = 2;
             else if (m.x264options.direct == "auto") combo_bframe_mode.SelectedIndex = 3;
 
-            if (m.x264options.open_gop == "none") combo_open_gop.SelectedIndex = 0;
-            else if (m.x264options.open_gop == "normal") combo_open_gop.SelectedIndex = 1;
-            else if (m.x264options.open_gop == "bluray") combo_open_gop.SelectedIndex = 2;
+            if (!m.x264options.open_gop) combo_open_gop.SelectedIndex = 0;
+            else combo_open_gop.SelectedIndex = 1;
 
             if (m.x264options.nal_hrd == "none") combo_nal_hrd.SelectedIndex = 0;
             else if (m.x264options.nal_hrd == "vbr") combo_nal_hrd.SelectedIndex = 1;
@@ -362,6 +360,7 @@ namespace XviD4PSP
             combo_transfer.SelectedItem = m.x264options.transfer;
             combo_colormatrix.SelectedItem = m.x264options.colormatrix;
             check_non_deterministic.IsChecked = m.x264options.non_deterministic;
+            check_bluray.IsChecked = m.x264options.bluray;
 
             //Кол-во потоков для x264-го
             if (m.x264options.threads == "auto") combo_threads_count.SelectedIndex = 0;
@@ -470,7 +469,7 @@ namespace XviD4PSP
             check_aud.IsEnabled = !m.x264options.extra_cli.Contains("--aud");
             num_ratio_ip.IsEnabled = !m.x264options.extra_cli.Contains("--ipratio ");
             num_ratio_pb.IsEnabled = !m.x264options.extra_cli.Contains("--pbratio ");
-            combo_open_gop.IsEnabled = !m.x264options.extra_cli.Contains("--open-gop ");
+            combo_open_gop.IsEnabled = !m.x264options.extra_cli.Contains("--open-gop");
             num_slices.IsEnabled = !m.x264options.extra_cli.Contains("--slices ");
             check_pic_struct.IsEnabled = !m.x264options.extra_cli.Contains("--pic-struct");
             check_fake_int.IsEnabled = !m.x264options.extra_cli.Contains("--fake-interlaced");
@@ -479,6 +478,7 @@ namespace XviD4PSP
             combo_transfer.IsEnabled = !m.x264options.extra_cli.Contains("--transfer ");
             combo_colormatrix.IsEnabled = !m.x264options.extra_cli.Contains("--colormatrix ");
             check_non_deterministic.IsEnabled = !m.x264options.extra_cli.Contains("--non-deterministic");
+            check_bluray.IsEnabled = !m.x264options.extra_cli.Contains("--bluray-compat");
 
             //И дополнительно на основе --profile
             /*if (m.x264options.profile == "baseline")
@@ -657,8 +657,7 @@ namespace XviD4PSP
             check_aud.ToolTip = "Use Access Unit Delimiters (--aud, default: unchecked)";
             num_ratio_ip.ToolTip = "QP factor between I and P (--ipratio, default: " + def.ratio_ip.ToString(cult_info) + ")";
             num_ratio_pb.ToolTip = "QP factor between P and B (--pbratio, default: " + def.ratio_pb.ToString(cult_info) + ")";
-            combo_open_gop.ToolTip = "Use recovery points to close GOPs, requires B-frames (--open-gop, default: " + (def.open_gop == "none" ? "None" : def.open_gop == "normal" ? "Normal" : "Blu-ray") + ")\r\n" +
-                "None - closed GOPs only\r\nNormal - standard open GOPs\r\nBlu-ray - Blu-ray-compatible open GOPs";
+            combo_open_gop.ToolTip = "Use recovery points to close GOPs, requires B-frames (--open-gop, default: " + (!def.open_gop ? "None" : "Yes") + ")";
             num_slices.ToolTip = "Number of slices per frame (--slices, default: " + def.slices + ")";
             check_pic_struct.ToolTip = "Force pic_struct in Picture Timing SEI (--pic-struct, default: unchecked)";
             check_fake_int.ToolTip = "Flag stream as interlaced but encode progressive (--fake-interlaced, default: unchecked)";
@@ -667,6 +666,7 @@ namespace XviD4PSP
             combo_transfer.ToolTip = "Specify transfer characteristics (--transfer, default: " + def.transfer + ")";
             combo_colormatrix.ToolTip = "Specify color matrix setting (--colormatrix, default: " + def.colormatrix + ")";
             check_non_deterministic.ToolTip = "Slightly improve quality when encoding with --threads > 1, at the cost of non-deterministic output encodes\r\n(--non-deterministic, default: unchecked)";
+            check_bluray.ToolTip = "Enable compatibility hacks for Blu-ray support (--bluray-compat, default: unchecked)";
         }
 
         public static Massive DecodeLine(Massive m)
@@ -918,7 +918,7 @@ namespace XviD4PSP
                     m.x264options.ratio_pb = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
 
                 else if (value == "--open-gop")
-                    m.x264options.open_gop = cli[n + 1];
+                    m.x264options.open_gop = true;
 
                 else if (value == "--slices")
                     m.x264options.slices = Convert.ToInt32(cli[n + 1]);
@@ -961,6 +961,9 @@ namespace XviD4PSP
 
                 else if (value == "--non-deterministic")
                     m.x264options.non_deterministic = true;
+
+                else if (value == "--bluray-compat")
+                    m.x264options.bluray = true;
 
                 else if (value == "--extra:")
                 {
@@ -1165,8 +1168,8 @@ namespace XviD4PSP
             if (m.x264options.ratio_pb != defaults.ratio_pb && !m.x264options.extra_cli.Contains("--pbratio "))
                 line += " --pbratio " + Calculate.ConvertDoubleToPointString((double)m.x264options.ratio_pb, 2);
 
-            if (m.x264options.open_gop != defaults.open_gop && !m.x264options.extra_cli.Contains("--open-gop "))
-                line += " --open-gop " + m.x264options.open_gop;
+            if (m.x264options.open_gop && !defaults.open_gop && !m.x264options.extra_cli.Contains("--open-gop"))
+                line += " --open-gop";
 
             if (m.x264options.slices != defaults.slices && !m.x264options.extra_cli.Contains("--slices "))
                 line += " --slices " + m.x264options.slices;
@@ -1191,6 +1194,9 @@ namespace XviD4PSP
 
             if (m.x264options.non_deterministic && !defaults.non_deterministic && !m.x264options.extra_cli.Contains("--non-deterministic"))
                 line += " --non-deterministic";
+
+            if (m.x264options.bluray && !defaults.bluray && !m.x264options.extra_cli.Contains("--bluray-compat"))
+                line += " --bluray-compat";
 
             line += " --extra:";
             if (m.x264options.extra_cli != defaults.extra_cli)
@@ -2155,10 +2161,7 @@ namespace XviD4PSP
         {
             if (combo_open_gop.IsDropDownOpen || combo_open_gop.IsSelectionBoxHighlighted)
             {
-                if (combo_open_gop.SelectedIndex == 0) m.x264options.open_gop = "none";
-                else if (combo_open_gop.SelectedIndex == 1) m.x264options.open_gop = "normal";
-                else if (combo_open_gop.SelectedIndex == 2) m.x264options.open_gop = "bluray";
-
+                m.x264options.open_gop = (combo_open_gop.SelectedIndex == 1);
                 root_window.UpdateManualProfile();
                 UpdateCLI();
             }
@@ -2228,6 +2231,13 @@ namespace XviD4PSP
         private void check_non_deterministic_Click(object sender, RoutedEventArgs e)
         {
             m.x264options.non_deterministic = check_non_deterministic.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            UpdateCLI();
+        }
+
+        private void check_bluray_Click(object sender, RoutedEventArgs e)
+        {
+            m.x264options.bluray = check_bluray.IsChecked.Value;
             root_window.UpdateManualProfile();
             UpdateCLI();
         }

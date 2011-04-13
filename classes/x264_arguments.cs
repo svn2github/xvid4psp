@@ -765,8 +765,8 @@ namespace XviD4PSP
             }
         }
 
-        private string _open_gop = "none";
-        public string open_gop
+        private bool _open_gop = false;
+        public bool open_gop
         {
             get
             {
@@ -918,6 +918,19 @@ namespace XviD4PSP
             set
             {
                 _extra_cli = value;
+            }
+        }
+
+        private bool _bluray = false;
+        public bool bluray
+        {
+            get
+            {
+                return _bluray;
+            }
+            set
+            {
+                _bluray = value;
             }
         }
     }

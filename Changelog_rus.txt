@@ -1,5 +1,6 @@
-XviD4PSP 5.10.233.0 (09.04.2011), основные изменения:
+XviD4PSP 5.10.234.0 (14.04.2011), основные изменения:
 
+>>> (r234) x264: в соответствии с r1935 изменен ключ --open-gop и добавлен ключ --bluray-compat (вкладка Misc).
 >>> (r233) "Интерлейс/Частота кадров": добавлены настройки для QTGMC (Preset, Sharpness) и IsCombedTIVTC (#,
            CThresh, MI). Конвертор частоты кадров MSUFrameRate заменен на ConvertMFlowFPS (на основе MAnalyse и
            MFlowFps из плагина MVTools2, может быть настроен путем редактирования файла VideoFunctions.avs).

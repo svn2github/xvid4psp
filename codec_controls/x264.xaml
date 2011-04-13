@@ -140,6 +140,7 @@
                         <Grid Width="Auto" Height="Auto" Margin="0,0,0,0">
                             <CheckBox x:Name="check_full_range" Width="Auto" Height="Auto" Content="Fullrange" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_full_range_Click" Margin="4,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                             <CheckBox x:Name="check_fake_int" Width="Auto" Height="Auto" Content="Fake interlaced" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_fake_int_Click" Margin="104,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <CheckBox x:Name="check_bluray" Width="Auto" Height="Auto" Content="Blu-ray" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_bluray_Click" Margin="232,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                         </Grid>
                         <Grid Width="Auto" Height="Auto" Margin="0,1,0,-2">
                             <CheckBox x:Name="check_pic_struct" Width="Auto" Height="Auto" Content="Pic__struct" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_pic_struct_Click" Margin="4,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
