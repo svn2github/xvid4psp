@@ -639,7 +639,7 @@ namespace XviD4PSP
             else
                 IsExiting = true;
 
-            //проверяем есть ли задания в работе
+            //Проверяем, есть ли задания в работе (кодируются)
             foreach (Task task in list_tasks.Items)
             {
                 if (task.Status == TaskStatus.Encoding)
@@ -662,6 +662,31 @@ namespace XviD4PSP
                     }
                     break;
                 }
+            }
+
+            //Проверяем, есть ли задания в очереди (ожидают кодирования)
+            foreach (Task task in list_tasks.Items)
+            {
+                if (task.Status == TaskStatus.Waiting)
+                {
+                    Message mes = new Message(this);
+                    mes.ShowMessage(Languages.Translate("The queue isn`t empty.") + "\r\n" + Languages.Translate("Are you sure you want to quit?"), Languages.Translate("Warning"), Message.MessageStyle.YesNo);
+                    if (mes.result == Message.Result.No)
+                    {
+                        IsExiting = false;
+                        e.Cancel = true;
+                        return;
+                    }
+                    break;
+                }
+            }
+
+            //Убиваем процесс вместо выхода, если нажат Shift
+            bool kill_me = false;
+            if (System.Windows.Input.Keyboard.Modifiers == ModifierKeys.Shift)
+            {
+                kill_me = true;
+                goto finish;
             }
 
             if (m != null) CloseFile();
@@ -696,6 +721,8 @@ namespace XviD4PSP
                 }
             }
 
+            finish:
+
             //Определяем и сохраняем размер и положение окна при выходе
             if (this.WindowState != System.Windows.WindowState.Maximized && this.WindowState != System.Windows.WindowState.Minimized) //но только если окно не развернуто на весь экран и не свернуто
             {
@@ -707,6 +734,9 @@ namespace XviD4PSP
             //Чистим трей
             TrayIcon.Visible = false;
             TrayIcon.Dispose();
+
+            //Убиваемся, если надо
+            if (kill_me) Process.GetCurrentProcess().Kill();
         }
 
         private void clear_dgindex_cache()

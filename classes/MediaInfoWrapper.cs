@@ -240,7 +240,7 @@ namespace XviD4PSP
                 if (s == "")
                     s = Get(StreamKind.General, 0, "Codec/String");
 
-                if (s == "Sorenson H263")
+                if (s == "Sorenson Spark")
                     s = "h263";
                 else if (s == "DivX 5" || s == "DivX 3 Low")
                     s = "DivX";

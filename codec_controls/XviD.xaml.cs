@@ -288,7 +288,7 @@ namespace XviD4PSP
             num_vbvsize.ToolTip = "Use VBV buffer size (-vbvsize, default: 0)";
             num_vbvmax.ToolTip = "VBV max bitrate (-vbvmax, default: 0)";
             num_vbvpeak.ToolTip = "VBV peak bitrate over 1 second (-vbvpeak, default: 0)";
-            check_xvid_new.ToolTip = "Enable this option if you want to use version 1.3.0 for encoding. By default, version 1.2.2 is used.\r\nThis is a global option.";
+            check_xvid_new.ToolTip = "Enable this option if you want to use version 1.3.x for encoding. By default, version 1.2.2 is used.\r\nThis is a global option.";
             num_firstpass_q.ToolTip = "Redefine quantizer for the 1-st pass of multi-passes encoding, default: 2.0\r\nChange it only if you know what you're doing.";
         }
 
@@ -378,9 +378,13 @@ namespace XviD4PSP
 
                 else if (value == "-qmatrix")
                 {
-                    string path = Calculate.GetRegexValue(@"\-qmatrix\s+""(.+)""", line);
-                    if (File.Exists(path))
-                        m.XviD_options.qmatrix = Path.GetFileNameWithoutExtension(path);
+                    string qm_path = Calculate.GetRegexValue(@"\-qmatrix\s+""(.+)""", line);
+                    if (qm_path != null)
+                    {
+                        string q_matrix = Path.GetFileNameWithoutExtension(qm_path);
+                        if (File.Exists(Calculate.StartupPath + "\\presets\\matrix\\cqm\\" + q_matrix + ".cqm"))
+                            m.XviD_options.qmatrix = q_matrix;
+                    }
                 }
 
                 else if (value == "-notrellis")

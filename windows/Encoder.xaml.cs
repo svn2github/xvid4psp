@@ -522,7 +522,7 @@ namespace XviD4PSP
 
             //прописываем sar
             string sar = "";
-            if (!m.vpasses[m.vpasses.Count - 1].ToString().Contains(" --sar "))
+            if (!m.vpasses[m.vpasses.Count - 1].ToString().Contains("--sar "))
             {
                 if (m.sar != null || m.IsAnamorphic) sar = " --sar " + m.sar;
                 else sar = " --sar 1:1";
@@ -1244,9 +1244,9 @@ namespace XviD4PSP
                 for (int n = 0; n < m.vpasses.Count; n++)
                 {
                     if (xvid_new)
-                        m.vpasses[n] = m.vpasses[n].ToString().Replace(" -lumimasking", " -masking 2");
+                        m.vpasses[n] = m.vpasses[n].ToString().Replace("-lumimasking", "-masking 2");
                     else
-                        m.vpasses[n] = m.vpasses[n].ToString().Replace(" -masking " + m.XviD_options.masking, " -lumimasking");
+                        m.vpasses[n] = m.vpasses[n].ToString().Replace("-masking " + m.XviD_options.masking, "-lumimasking");
                 }
             }
 
@@ -1255,6 +1255,23 @@ namespace XviD4PSP
             {
                 for (int n = 0; n < m.vpasses.Count; n++)
                     m.vpasses[n] = m.vpasses[n].ToString().Replace(" -metric " + m.XviD_options.metric, "");
+            }
+
+            //Проверяем путь к матрице
+            if (m.XviD_options.qmatrix != "H263" && m.XviD_options.qmatrix != "MPEG")
+            {
+                for (int n = 0; n < m.vpasses.Count; n++)
+                {
+                    string qm_path = Calculate.GetRegexValue(@"\-qmatrix\s+""(.+)""", m.vpasses[n].ToString());
+                    if (qm_path != null && !File.Exists(qm_path))
+                    {
+                        string new_qm_path = Calculate.StartupPath + "\\presets\\matrix\\cqm\\" + Path.GetFileNameWithoutExtension(qm_path) + ".cqm";
+                        if (File.Exists(new_qm_path))
+                        {
+                            m.vpasses[n] = m.vpasses[n].ToString().Replace("-qmatrix \"" + qm_path + "\"", "-qmatrix \"" + new_qm_path + "\"");
+                        }
+                    }
+                }
             }
 
             //прописываем интерлейс флаги
@@ -4161,7 +4178,7 @@ namespace XviD4PSP
                         SetLog("VEncodingMode: " + m.encodingmode);
 
                         string vcodec_info = (m.outvcodec == "x264") ? (Settings.Use64x264) ? " (64-bit)" : "" :
-                            (m.outvcodec == "XviD") ? (Settings.UseXviD_130) ? " (1.3.0)" : " (1.2.2)" : "";
+                            (m.outvcodec == "XviD") ? (Settings.UseXviD_130) ? " (1.3.x)" : " (1.2.2)" : "";
 
                         if (m.invcodec != m.outvcodec)
                             SetLog("VideoCodec: " + m.invcodecshort + " > " + m.outvcodec + vcodec_info);
