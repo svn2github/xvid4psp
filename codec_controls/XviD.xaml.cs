@@ -230,7 +230,7 @@ namespace XviD4PSP
 
             combo_quality.ToolTip = "Motion search quality (-quality, default: 6)";
             combo_vhqmode.ToolTip = "Level of R-D optimizations (-vhqmode, default: 1)";
-            combo_metric.ToolTip = "Distortion metric for R-D optimizations (-metric, default: 0)\r\nOnly for XviD 1.3.0";
+            combo_metric.ToolTip = "Distortion metric for R-D optimizations (-metric, default: 0)\r\nOnly for XviD 1.3.x";
             check_chroma.ToolTip = "Chroma motion estimation (-nochromame if unchecked, default: checked)";
             combo_qmatrix.ToolTip = "Use custom MPEG4 quantization matrix (-qmatrix, default: H263)";
             check_trellis.ToolTip = "Trellis quantization (-notrellis if unchecked, default: checked)";
@@ -247,7 +247,7 @@ namespace XviD4PSP
             num_bquant_offset.ToolTip = "B-frames quantizer offset (-bquant_offset, default: 100)";
             num_keyint.ToolTip = "Maximum keyframe interval (-max_key_interval, default: 300)";
             combo_masking.ToolTip = "HVS masking mode\r\n0 - None (default)\r\n1 - Lumi (-lumimasking for XviD 1.2.2," +
-                " -masking 1 for XviD 1.3.0)\r\n2 - Variance (-lumimasking for XviD 1.2.2, -masking 2 for XviD 1.3.0)";
+                " -masking 1 for XviD 1.3.x)\r\n2 - Variance (-lumimasking for XviD 1.2.2, -masking 2 for XviD 1.3.x)";
             if (m.encodingmode == Settings.EncodingModes.Quality ||
                 m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
@@ -378,7 +378,7 @@ namespace XviD4PSP
 
                 else if (value == "-qmatrix")
                 {
-                    string qm_path = Calculate.GetRegexValue(@"\-qmatrix\s+""(.+)""", line);
+                    string qm_path = Calculate.GetRegexValue(@"\-qmatrix\s""(.+)""", line);
                     if (qm_path != null)
                     {
                         string q_matrix = Path.GetFileNameWithoutExtension(qm_path);

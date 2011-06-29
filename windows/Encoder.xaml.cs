@@ -1262,7 +1262,7 @@ namespace XviD4PSP
             {
                 for (int n = 0; n < m.vpasses.Count; n++)
                 {
-                    string qm_path = Calculate.GetRegexValue(@"\-qmatrix\s+""(.+)""", m.vpasses[n].ToString());
+                    string qm_path = Calculate.GetRegexValue(@"\-qmatrix\s""(.+)""", m.vpasses[n].ToString());
                     if (qm_path != null && !File.Exists(qm_path))
                     {
                         string new_qm_path = Calculate.StartupPath + "\\presets\\matrix\\cqm\\" + Path.GetFileNameWithoutExtension(qm_path) + ".cqm";
