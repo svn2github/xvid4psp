@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.236.0 (29.06.2011), main changes:
+﻿XviD4PSP 5.10.237.0 (13.07.2011), main changes:
 
+>>> (r237) HotKeys: enabled HotKeys for MainWindow when "OwnedWindows.Count > 0"; fixed menu navigation with keyboard.
 >>> (r235-r236) Some noncritical fixes.
 >>> (r235) Shift + Exit = kill the process of XviD4PSP instead of normal closing.
 >>> (r234) x264: according to r1935 the --open-gop key was changed and the --bluray-compat key was added (Misc tab).

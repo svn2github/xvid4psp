@@ -442,6 +442,7 @@ namespace XviD4PSP
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             p.SwitchToFullScreen();
+            this.Focus();
         }
 
         //Обработка выбора режима отображения гистограммы

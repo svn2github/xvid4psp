@@ -461,7 +461,7 @@ namespace XviD4PSP
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (this.OwnedWindows.Count > 0 || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused || script_box.IsFocused) return;
+            if (FileMenu.IsKeyboardFocusWithin || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused || script_box.IsFocused) return;
             string key = new System.Windows.Input.KeyConverter().ConvertToString(e.Key);
             string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
             string PressedKeys = "=" + ((mod.Length > 0) ? mod + "+" : "") + key;

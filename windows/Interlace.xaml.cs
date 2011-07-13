@@ -507,6 +507,7 @@ namespace XviD4PSP
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             p.SwitchToFullScreen();
+            this.Focus();
         }
 
         private void num_analyze_percent_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
