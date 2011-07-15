@@ -96,9 +96,13 @@
                                     <CheckBox x:Name="check_ffms_force_fps" Width="226" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_force_fps_Click"/>
                                     <CheckBox x:Name="check_ffms_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_audio_Click"/>
                                 </DockPanel>
-                                <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_ffms_reindex" Width="226" Height="Auto" Content="Overwrite existing index file" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_reindex_Click"/>
                                     <CheckBox x:Name="check_ffms_timecodes" Width="Auto" Height="Auto" Content="Timecodes" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_timecodes_Click"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                                    <ComboBox x:Name="combo_ffms_threads" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_ffms_threads_SelectionChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="label_ffms_threads" Content="- decoding threads" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>

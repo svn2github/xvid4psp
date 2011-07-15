@@ -2701,5 +2701,26 @@ namespace XviD4PSP
                 SetInt("IsCombed_MI", value);
             }
         }
+
+        //Кол-во потоков для FFmpegSource2
+        public static int FFMS_Threads
+        {
+            get
+            {
+                object value = GetValue("FFMS_Threads");
+                if (value == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("FFMS_Threads", value);
+            }
+        }
     }
 }

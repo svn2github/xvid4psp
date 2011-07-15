@@ -120,6 +120,8 @@ namespace XviD4PSP
             button_vdec_add.Content = button_adec_add.Content = Languages.Translate("Add");
             button_vdec_delete.Content = button_adec_delete.Content = Languages.Translate("Remove");
             button_vdec_reset.Content = button_adec_reset.Content = Languages.Translate("Reset");
+            combo_ffms_threads.ToolTip = "Auto = " + Languages.Translate("logical CPU's count") + "\r\n1 = " + Languages.Translate("disable multithreading");
+            label_ffms_threads.Content = "- " + Languages.Translate("decoding threads");
 
             //DirectShowSource
             check_dss_convert_fps.IsChecked = Settings.DSS_ConvertFPS;
@@ -134,6 +136,11 @@ namespace XviD4PSP
             check_ffms_audio.IsChecked = Settings.FFMS_Enable_Audio;
             check_ffms_reindex.IsChecked = Settings.FFMS_Reindex;
             check_ffms_timecodes.IsChecked = Settings.FFMS_TimeCodes;
+
+            combo_ffms_threads.Items.Add("Auto");
+            for (int i = 1; i < 21; i++)
+                combo_ffms_threads.Items.Add(i);
+            combo_ffms_threads.SelectedIndex = Settings.FFMS_Threads;
 
             //NicAudio
             check_drc_ac3.IsChecked = Settings.NicAC3_DRC;
@@ -703,6 +710,14 @@ namespace XviD4PSP
         private void check_enable_audio_Click(object sender, RoutedEventArgs e)
         {
             Settings.EnableAudio = check_enable_audio.IsChecked.Value;
+        }
+
+        private void combo_ffms_threads_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_ffms_threads.IsDropDownOpen || combo_ffms_threads.IsSelectionBoxHighlighted)
+            {
+                Settings.FFMS_Threads = combo_ffms_threads.SelectedIndex;
+            }
         }
     }
 }

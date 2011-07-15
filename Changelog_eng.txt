@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.237.0 (13.07.2011), main changes:
+﻿XviD4PSP 5.10.238.0 (15.07.2011), main changes:
 
+>>> (r238) Added ability to specify the number of decoding threads for FFmpegSource2 (Video->Decoding).
 >>> (r237) HotKeys: enabled HotKeys for MainWindow when "OwnedWindows.Count > 0"; fixed menu navigation with keyboard.
 >>> (r235-r236) Some noncritical fixes.
 >>> (r235) Shift + Exit = kill the process of XviD4PSP instead of normal closing.

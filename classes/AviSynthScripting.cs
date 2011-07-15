@@ -278,7 +278,8 @@ namespace XviD4PSP
                        //— другой стороны, при муксинге все-равно муксер получит фпс, с которым должен будет муксить - получитс€ тот-же самый AssumeFPS, только после кодировани€.
                        //Ќу а если исходна€ частота, и частота, с которой декодирует декодер, совпадают - то AssumeFPS вообще ни на что не повли€ет..
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.FFMS_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
-                       cache_path = ", rffmode=0" + ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
+                       cache_path = ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
+                           ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
                    }
                    n++;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + cache_path + ")" + assume_fps;
@@ -899,7 +900,8 @@ namespace XviD4PSP
                    {
                        //—тоит-ли повтор€тьс€? :) 
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.FFMS_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
-                       cache_path = ", rffmode=0" + ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
+                       cache_path = ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
+                           ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
                    }
                    n += 1;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + cache_path + ")" + assume_fps;
@@ -1036,7 +1038,8 @@ namespace XviD4PSP
            {
                //≈сли FFMS_Enable_Audio, то разрешаем звук, чтоб файл сразу проиндексировалс€ вместе с ним (иначе позже произойдет переиндексаци€)
                string atrack = (m.inaudiostreams.Count > 0 && Settings.FFMS_Enable_Audio) ? ", atrack=-1, adjustdelay=-3" : ", atrack=-2";
-               string cache_path = atrack + ", rffmode=0" + ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(m.infilepath) + ".ffindex\"" : "");
+               string cache_path = atrack + ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
+                   ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(m.infilepath) + ".ffindex\"" : "");
                script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
            }
 
