@@ -135,8 +135,9 @@
                     <ComboBox x:Name="combo_transfer" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,126,4,0" SelectionChanged="combo_transfer_SelectionChanged" VerticalAlignment="Top"/>
                     <Label OpacityMask="{x:Null}" x:Name="text_colormatrix" Content="Color matrix setting:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="2,150,0,0" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                     <ComboBox x:Name="combo_colormatrix" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,154,4,0" SelectionChanged="combo_colormatrix_SelectionChanged" VerticalAlignment="Top"/>
-
-                    <StackPanel Width="Auto" Height="Auto" Margin="3,190,3,6">
+                    <Label OpacityMask="{x:Null}" x:Name="text_colorspace" Content="Output colorspace:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="2,178,0,0" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_colorspace" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,182,4,0" SelectionChanged="combo_colorspace_SelectionChanged" VerticalAlignment="Top"/>
+                    <StackPanel Width="Auto" Height="Auto" Margin="3,218,3,6">
                         <Grid Width="Auto" Height="Auto" Margin="0,0,0,0">
                             <CheckBox x:Name="check_full_range" Width="Auto" Height="Auto" Content="Fullrange" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_full_range_Click" Margin="4,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                             <CheckBox x:Name="check_fake_int" Width="Auto" Height="Auto" Content="Fake interlaced" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_fake_int_Click" Margin="104,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>

@@ -385,9 +385,19 @@ namespace XviD4PSP
 
         private void make_x264()
         {
+            //10-bit depth энкодер
+            bool _10bit = (m.x264options.profile == x264.Profiles.High10);
+
             //Убираем метку " --extra:"
             for (int n = 0; n < m.vpasses.Count; n++)
                 m.vpasses[n] = m.vpasses[n].ToString().Replace(" --extra:", "");
+
+            //Для Lossless нужно убрать ключ --profile
+            if (x264.IsLossless(m))
+            {
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = Regex.Replace(m.vpasses[n].ToString(), @"\s?--profile\s+\w+", "", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+            }
 
             //прописываем интерлейс флаги
             if (m.interlace == SourceType.FILM ||
@@ -489,14 +499,14 @@ namespace XviD4PSP
                 m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-                SetLog(m.outvcodec + " Q" + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) + " " + m.outresw + "x" + m.outresh + " " +
-                    m.outframerate + "fps (" + m.outframes + " frames)");
+                SetLog(m.outvcodec + (_10bit ? " 10-bit depth Q" : " Q") + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) +
+                    " " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
             //else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
             //    m.encodingmode == Settings.EncodingModes.ThreePassSize)
             //    SetLog(m.outvcodec + " " + m.outvbitrate + "mb " + m.outresw + "x" + m.outresh + " " +
             //        m.outframerate + "fps (" + m.outframes + " frames)");
             else
-                SetLog(m.outvcodec + " " + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
+                SetLog(m.outvcodec + (_10bit ? " 10-bit depth " : " ") + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
 
             if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
 
@@ -507,7 +517,7 @@ namespace XviD4PSP
             if (m.format == Format.ExportFormats.PmpAvc)
                 info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
             else
-                info.FileName = Calculate.StartupPath + "\\apps\\x264\\" + ((Settings.Use64x264) ? "avs4x264.exe" : "x264.exe");
+                info.FileName = Calculate.StartupPath + "\\apps\\" + (_10bit ? "x264_10b\\" : "x264\\") + ((Settings.Use64x264) ? "avs4x264.exe" : "x264.exe");
 
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
@@ -1365,17 +1375,17 @@ namespace XviD4PSP
             //info строка
             SetLog("Encoding video to: " + m.outvideofile);
             if (m.encodingmode == Settings.EncodingModes.Quality ||
-                 m.encodingmode == Settings.EncodingModes.Quantizer ||
+                m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-                SetLog(m.outvcodec + " Q" + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) + " " + m.outresw + "x" + m.outresh + " " +
-                     m.outframerate + "fps (" + m.outframes + " frames)");
+                SetLog(m.outvcodec + (xvid_new ? " (1.3.x) Q" : " (1.2.2) Q") + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) +
+                    " " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
             //else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
             //     m.encodingmode == Settings.EncodingModes.ThreePassSize)
             //    SetLog(m.outvcodec + " " + m.outvbitrate + "mb " + m.outresw + "x" + m.outresh + " " +
             //        m.outframerate + "fps (" + m.outframes + " frames)");
             else
-                SetLog(m.outvcodec + " " + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
+                SetLog(m.outvcodec + (xvid_new ? " (1.3.x) " : " (1.2.2) ") + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
 
             if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
 
@@ -4177,7 +4187,7 @@ namespace XviD4PSP
                         SetLog("VCodecPreset: " + m.vencoding);
                         SetLog("VEncodingMode: " + m.encodingmode);
 
-                        string vcodec_info = (m.outvcodec == "x264") ? (Settings.Use64x264) ? " (64-bit)" : "" :
+                        string vcodec_info = (m.outvcodec == "x264") ? (((m.x264options.profile == x264.Profiles.High10) ? " 10-bit depth" : "") + ((Settings.Use64x264) ? " (64-bit)" : "")) :
                             (m.outvcodec == "XviD") ? (Settings.UseXviD_130) ? " (1.3.x)" : " (1.2.2)" : "";
 
                         if (m.invcodec != m.outvcodec)

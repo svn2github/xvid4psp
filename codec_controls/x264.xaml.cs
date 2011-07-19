@@ -19,6 +19,7 @@ namespace XviD4PSP
         private VideoEncoding root_window;
         private MainWindow p;
         public enum CodecPresets { Ultrafast = 0, Superfast, Veryfast, Faster, Fast, Medium, Slow, Slower, Veryslow, Placebo }
+        public enum Profiles { Auto = 0, Baseline, Main, High, High10 }
         private ArrayList good_cli = null;
 
         public x264(Massive mass, VideoEncoding VideoEncWindow, MainWindow parent)
@@ -123,6 +124,7 @@ namespace XviD4PSP
             combo_avc_profile.Items.Add("Baseline Profile");
             combo_avc_profile.Items.Add("Main Profile");
             combo_avc_profile.Items.Add("High Profile");
+            combo_avc_profile.Items.Add("High 10 Profile");
 
             //Кол-во потоков для x264-го
             combo_threads_count.Items.Add("Auto");
@@ -177,6 +179,10 @@ namespace XviD4PSP
             combo_colormatrix.Items.Add("GBR");
             combo_colormatrix.Items.Add("YCgCo");
 
+            combo_colorspace.Items.Add("I420");
+            combo_colorspace.Items.Add("I444");
+            combo_colorspace.Items.Add("RGB");
+
             Apply_CLI.Content = Languages.Translate("Apply");
             Reset_CLI.Content = Languages.Translate("Reset");
             x264_help.Content = Languages.Translate("Help");
@@ -226,7 +232,7 @@ namespace XviD4PSP
             }
 
             //lossless
-            check_lossless.IsChecked = (m.outvbitrate == 0);
+            check_lossless.IsChecked = IsLossless(m);
 
             //прогружаем список AVC level
             if (m.x264options.level == "unrestricted") combo_level.SelectedIndex = 0;
@@ -359,6 +365,7 @@ namespace XviD4PSP
             combo_colorprim.SelectedItem = m.x264options.colorprim;
             combo_transfer.SelectedItem = m.x264options.transfer;
             combo_colormatrix.SelectedItem = m.x264options.colormatrix;
+            combo_colorspace.SelectedItem = m.x264options.colorspace;
             check_non_deterministic.IsChecked = m.x264options.non_deterministic;
             check_bluray.IsChecked = m.x264options.bluray;
 
@@ -477,6 +484,7 @@ namespace XviD4PSP
             combo_colorprim.IsEnabled = !m.x264options.extra_cli.Contains("--colorprim ");
             combo_transfer.IsEnabled = !m.x264options.extra_cli.Contains("--transfer ");
             combo_colormatrix.IsEnabled = !m.x264options.extra_cli.Contains("--colormatrix ");
+            combo_colorspace.IsEnabled = !m.x264options.extra_cli.Contains("--output-csp ");
             check_non_deterministic.IsEnabled = !m.x264options.extra_cli.Contains("--non-deterministic");
             check_bluray.IsEnabled = !m.x264options.extra_cli.Contains("--bluray-compat");
 
@@ -526,35 +534,33 @@ namespace XviD4PSP
 
         private void SetAVCProfile()
         {
-            /* x264.exe
-               if( sps->b_qpprime_y_zero_transform_bypass )
-                   sps->i_profile_idc  = PROFILE_HIGH444_PREDICTIVE;
-               else if( param->analyse.b_transform_8x8 || param->i_cqm_preset != X264_CQM_FLAT )
-                   sps->i_profile_idc  = PROFILE_HIGH;
-               else if( param->b_cabac || param->i_bframe > 0 || param->b_interlaced || param->analyse.i_weighted_pred > 0 )
-                   sps->i_profile_idc  = PROFILE_MAIN;
-               else
-                   sps->i_profile_idc  = PROFILE_BASELINE;
-            */
+            /* x264.exe encoder/set.c
+            if (sps->b_qpprime_y_zero_transform_bypass || sps->i_chroma_format_idc == 3)
+                sps->i_profile_idc = PROFILE_HIGH444_PREDICTIVE;
+            else if (BIT_DEPTH > 8)
+                sps->i_profile_idc = PROFILE_HIGH10;
+            else if (param->analyse.b_transform_8x8 || param->i_cqm_preset != X264_CQM_FLAT)
+                sps->i_profile_idc = PROFILE_HIGH;
+            else if (param->b_cabac || param->i_bframe > 0 || param->b_interlaced || param->b_fake_interlaced || param->analyse.i_weighted_pred > 0)
+                sps->i_profile_idc = PROFILE_MAIN;
+            else
+                sps->i_profile_idc = PROFILE_BASELINE;
+             */
 
             string avcprofile = "Baseline";
 
-            if (m.outvbitrate == 0) avcprofile = "High 4:4:4"; //Lossless
+            if (IsLossless(m) || m.x264options.colorspace != "I420")
+                avcprofile = "High 4:4:4";
             else if (m.x264options.adaptivedct ||
-                m.x264options.adaptivedct && m.x264options.cabac ||
-                m.outvbitrate == 0 ||
                 m.x264options.custommatrix != null)
                 avcprofile = "High";
             else if (m.x264options.cabac ||
-                     m.x264options.bframes > 0 ||
-                     //m.x264options.weightb ||
-                     m.x264options.weightp > 0)
+                m.x264options.bframes > 0 ||
+                m.x264options.weightp > 0 ||
+                m.x264options.fake_int)
                 avcprofile = "Main";
 
-            if (m.x264options.profile == "baseline") combo_avc_profile.SelectedIndex = 1;
-            else if (m.x264options.profile == "main") combo_avc_profile.SelectedIndex = 2;
-            else if (m.x264options.profile == "high") combo_avc_profile.SelectedIndex = 3;
-            else combo_avc_profile.SelectedIndex = 0;
+            combo_avc_profile.SelectedIndex = (int)m.x264options.profile;
 
             ((ComboBoxItem)combo_avc_profile.Items.GetItemAt(0)).Content = "Auto (" + avcprofile + ")";
         }
@@ -562,7 +568,7 @@ namespace XviD4PSP
         private void SetToolTips()
         {
             //Определяем дефолты
-            x264_arguments def = new x264_arguments(m.x264options.preset);
+            x264_arguments def = new x264_arguments(m.x264options.preset, (m.x264options.profile == Profiles.High10));
             CultureInfo cult_info = new CultureInfo("en-US");
 
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
@@ -573,14 +579,15 @@ namespace XviD4PSP
                       m.encodingmode == Settings.EncodingModes.ThreePassSize)
                 num_bitrate.ToolTip = "Set file size (Default: InFileSize)";
             else if (m.encodingmode == Settings.EncodingModes.Quantizer)
-                num_bitrate.ToolTip = "Set target quantizer (0 - 69). Lower - better quality but bigger filesize.\r\n(Default: 23)";
+                num_bitrate.ToolTip = "Set target quantizer (0 - " + ((m.x264options.profile == Profiles.High10) ? "81" : "69") + "). Lower - better quality but bigger filesize.\r\n(Default: 23)";
             else
-                num_bitrate.ToolTip = "Set target quality (0 - 51). Lower - better quality but bigger filesize.\r\n(Default: 23)";
+                num_bitrate.ToolTip = "Set target quality (" + ((m.x264options.profile == Profiles.High10) ? "-12" : "0") + " - 51). Lower - better quality but bigger filesize.\r\n(Default: 23)";
 
             combo_mode.ToolTip = "Encoding mode";
             check_lossless.ToolTip = "Lossless encoding mode. High 4:4:4 AVC profile only!";
-            combo_avc_profile.ToolTip = "Limit AVC profile (--profile, default: Auto)\r\n"+
-                "Auto - don`t set the --profile key\r\nBaseline - forced --no-8x8dct --bframes 0 --no-cabac --weightp 0\r\nMain - forced --no-8x8dct";
+            combo_avc_profile.ToolTip = "Limit AVC profile (--profile, default: " + def.profile.ToString() + ")\r\n" +
+                "Auto - don`t set the --profile key\r\nBaseline - forced --no-8x8dct --bframes 0 --no-cabac --weightp 0\r\nMain - forced --no-8x8dct\r\nHigh - no restrictions\r\n" +
+                "High 10 - switching to 10-bit depth encoding!";
             combo_level.ToolTip = "Specify level (--level, default: Unrestricted)";
             check_p8x8.ToolTip = "Enables partitions to consider: p8x8 (and also p16x8, p8x16)";
             check_p4x4.ToolTip = "Enables partitions to consider: p4x4 (and also p8x4, p4x8), requires p8x8";
@@ -665,6 +672,7 @@ namespace XviD4PSP
             combo_colorprim.ToolTip = "Specify color primaries (--colorprim, default: " + def.colorprim + ")";
             combo_transfer.ToolTip = "Specify transfer characteristics (--transfer, default: " + def.transfer + ")";
             combo_colormatrix.ToolTip = "Specify color matrix setting (--colormatrix, default: " + def.colormatrix + ")";
+            combo_colorspace.ToolTip = "Specify output colorspace (--output-csp, default: " + def.colorspace + ")\r\nDo not change it if you don't know what you`re doing!";
             check_non_deterministic.ToolTip = "Slightly improve quality when encoding with --threads > 1, at the cost of non-deterministic output encodes\r\n(--non-deterministic, default: unchecked)";
             check_bluray.ToolTip = "Enable compatibility hacks for Blu-ray support (--bluray-compat, default: unchecked)";
         }
@@ -672,13 +680,14 @@ namespace XviD4PSP
         public static Massive DecodeLine(Massive m)
         {
             int preset = 5; //Medium - дефолт
+            Profiles profile = Profiles.Auto;
             Settings.EncodingModes mode = new Settings.EncodingModes();
 
             //берём пока что за основу последнюю строку
             string line = m.vpasses[m.vpasses.Count - 1].ToString();
 
             //Определяем пресет, для этого ищем ключ --preset
-            string preset_name = Calculate.GetRegexValue(@"\-\-preset\s(\w+)", line);
+            string preset_name = Calculate.GetRegexValue(@"\-\-preset\s+(\w+)", line);
             if (!string.IsNullOrEmpty(preset_name))
             {
                 try
@@ -694,8 +703,21 @@ namespace XviD4PSP
                 }
             }
 
+            //Ищем --profile (определяем 10-битность)
+            string profile_name = Calculate.GetRegexValue(@"\-\-profile\s+(\w+)", line);
+            if (!string.IsNullOrEmpty(profile_name))
+            {
+                try
+                {
+                    //Определяем profile по его названию
+                    profile = (Profiles)Enum.Parse(typeof(Profiles), profile_name, true);
+                }
+                catch { }
+            }
+
             //Создаём свежий массив параметров x264 (изменяя дефолты с учетом --preset)
-            m.x264options = new x264_arguments(preset);
+            m.x264options = new x264_arguments(preset, (profile == Profiles.High10));
+            m.x264options.profile = profile;
             m.x264options.preset = preset;
 
             int n = 0;
@@ -757,10 +779,7 @@ namespace XviD4PSP
                     }
                 }
 
-                if (value == "--profile")
-                    m.x264options.profile = cli[n + 1];
-
-                else if (value == "--level")
+                if (value == "--level")
                     m.x264options.level = cli[n + 1];
 
                 else if (value == "--ref" || value == "-r")
@@ -959,6 +978,9 @@ namespace XviD4PSP
                         m.x264options.colormatrix = _value;
                 }
 
+                else if (value == "--output-csp")
+                    m.x264options.colorspace = cli[n + 1].ToUpper();
+
                 else if (value == "--non-deterministic")
                     m.x264options.non_deterministic = true;
 
@@ -991,7 +1013,7 @@ namespace XviD4PSP
         public static Massive EncodeLine(Massive m)
         {
             //Определяем дефолты (используя текущий --preset)
-            x264_arguments defaults = new x264_arguments(m.x264options.preset);
+            x264_arguments defaults = new x264_arguments(m.x264options.preset, (m.x264options.profile == Profiles.High10));
 
             //обнуляем старые строки
             m.vpasses.Clear();
@@ -1016,7 +1038,7 @@ namespace XviD4PSP
             line += " --preset " + Enum.GetName(typeof(CodecPresets), m.x264options.preset).ToLower();
 
             if (m.x264options.profile != defaults.profile && !m.x264options.extra_cli.Contains("--profile "))
-                line += " --profile " + m.x264options.profile;
+                line += " --profile " + m.x264options.profile.ToString().ToLower();
 
             if (m.x264options.level != defaults.level && !m.x264options.extra_cli.Contains("--level "))
                 line += " --level " + m.x264options.level;
@@ -1192,6 +1214,9 @@ namespace XviD4PSP
             if (m.x264options.colormatrix != defaults.colormatrix && !m.x264options.extra_cli.Contains("--colormatrix "))
                 line += " --colormatrix " + ((m.x264options.colormatrix == "Undefined") ? "undef" : m.x264options.colormatrix);
 
+            if (m.x264options.colorspace != defaults.colorspace && !m.x264options.extra_cli.Contains("--output-csp "))
+                line += " --output-csp " + m.x264options.colorspace.ToLower();
+
             if (m.x264options.non_deterministic && !defaults.non_deterministic && !m.x264options.extra_cli.Contains("--non-deterministic"))
                 line += " --non-deterministic";
 
@@ -1258,8 +1283,6 @@ namespace XviD4PSP
                     else if (x264mode == "2-Pass Quality") m.encodingmode = Settings.EncodingModes.TwoPassQuality;
                     else if (x264mode == "3-Pass Quality") m.encodingmode = Settings.EncodingModes.ThreePassQuality;
 
-                    check_lossless.IsChecked = false;
-
                     SetMinMaxBitrate();
 
                     //Устанавливаем дефолтный битрейт (при необходимости)
@@ -1313,6 +1336,8 @@ namespace XviD4PSP
                             m.x264options.direct = "none";
                         }
                     }
+
+                    check_lossless.IsChecked = IsLossless(m);
 
                     SetAVCProfile();
                     root_window.UpdateOutSize();
@@ -1380,8 +1405,14 @@ namespace XviD4PSP
                 m.encodingmode = Settings.EncodingModes.Quantizer;
                 text_bitrate.Content = Languages.Translate("Quantizer") + ": (Q)";
                 num_bitrate.Value = m.outvbitrate = 0;
-                combo_avc_profile.SelectedIndex = 0;
-                m.x264options.profile = "auto";
+                if (m.x264options.profile != Profiles.High10)
+                {
+                    combo_avc_profile.SelectedIndex = 0;
+                    m.x264options.profile = Profiles.Auto;
+                }
+
+                SetToolTips();
+                SetMinMaxBitrate();
             }
             else
                 num_bitrate.Value = m.outvbitrate = 23;
@@ -1737,10 +1768,39 @@ namespace XviD4PSP
                   - high:     No lossless.
                   - high10:   No lossless. Support for bit depth 8-10.*/
 
-                if (combo_avc_profile.SelectedIndex == 1) m.x264options.profile = "baseline";
-                else if (combo_avc_profile.SelectedIndex == 2) m.x264options.profile = "main";
-                else if (combo_avc_profile.SelectedIndex == 3) m.x264options.profile = "high";
-                else m.x264options.profile = "auto";
+                m.x264options.profile = (Profiles)Enum.GetValues(typeof(Profiles)).GetValue(combo_avc_profile.SelectedIndex);
+
+                SetToolTips();
+                SetMinMaxBitrate();
+
+                //Проверяем выход за лимиты 8-ми и 10-ти битных версий
+                if (m.encodingmode == Settings.EncodingModes.Quality ||
+                    m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                    m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                {
+                    //Не 0, потому-что (0..1)=Lossless
+                    if (m.x264options.profile != Profiles.High10 && m.outvbitrate < 1)
+                    {
+                        check_lossless.IsChecked = false;
+                        num_bitrate.Value = m.outvbitrate = 1;
+                    }
+                }
+                else if (m.encodingmode == Settings.EncodingModes.Quantizer)
+                {
+                    if (m.x264options.profile != Profiles.High10 && m.outvbitrate > 69)
+                        num_bitrate.Value = m.outvbitrate = 69;
+                }
+
+                if (m.x264options.profile != Profiles.High10)
+                {
+                    if (m.x264options.max_quant > 69)
+                        num_max_quant.Value = m.x264options.max_quant = 69;
+                }
+                else
+                {
+                    if (m.x264options.max_quant == 69)
+                        num_max_quant.Value = m.x264options.max_quant = 81;
+                }
 
                 root_window.UpdateManualProfile();
                 UpdateCLI();
@@ -1761,7 +1821,7 @@ namespace XviD4PSP
             {
                 //Создаем новые параметры с учетом --preset, и берем от них только те, от которых зависит пресет
                 m.x264options.preset = (int)slider_preset.Value;
-                x264_arguments defaults = new x264_arguments(m.x264options.preset);
+                x264_arguments defaults = new x264_arguments(m.x264options.preset, (m.x264options.profile == Profiles.High10));
                 m.x264options.adaptivedct = defaults.adaptivedct;
                 m.x264options.analyse = defaults.analyse;
                 m.x264options.aqmode = defaults.aqmode;
@@ -1824,13 +1884,16 @@ namespace XviD4PSP
             else if (m.encodingmode == Settings.EncodingModes.Quantizer)
             {
                 num_bitrate.Minimum = 0;
-                num_bitrate.Maximum = 69;
+                num_bitrate.Maximum = (m.x264options.profile == Profiles.High10) ? 81 : 69;
             }
             else
             {
-                num_bitrate.Minimum = 0;
+                num_bitrate.Minimum = (m.x264options.profile == Profiles.High10) ? -12 : 0;
                 num_bitrate.Maximum = 51;
             }
+
+            //Сюда же
+            num_max_quant.Maximum = (m.x264options.profile == Profiles.High10) ? 81 : 69;
         }
 
         private void num_bitrate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
@@ -1838,20 +1901,7 @@ namespace XviD4PSP
             if (num_bitrate.IsAction)
             {
                 m.outvbitrate = num_bitrate.Value;
-
-                if (m.encodingmode == Settings.EncodingModes.Quantizer)
-                {
-                    if (m.outvbitrate == 0)
-                    {
-                        if (!check_lossless.IsChecked.Value)
-                            check_lossless.IsChecked = true;
-                    }
-                    else
-                    {
-                        if (check_lossless.IsChecked.Value)
-                            check_lossless.IsChecked = false;
-                    }
-                }
+                check_lossless.IsChecked = IsLossless(m);
 
                 SetAVCProfile();
                 root_window.UpdateOutSize();
@@ -2085,14 +2135,15 @@ namespace XviD4PSP
             try
             {
                 System.Diagnostics.ProcessStartInfo help = new System.Diagnostics.ProcessStartInfo();
-                help.FileName = Calculate.StartupPath + "\\apps\\x264\\" + ((Settings.Use64x264) ? "x264_64.exe" : "x264.exe");
+                help.FileName = Calculate.StartupPath + "\\apps\\" + (m.x264options.profile == x264.Profiles.High10 ? "x264_10b\\" : "x264\\") + ((Settings.Use64x264) ? "x264_64.exe" : "x264.exe");
                 help.WorkingDirectory = Path.GetDirectoryName(help.FileName);
                 help.Arguments = " --fullhelp";
                 help.UseShellExecute = false;
                 help.CreateNoWindow = true;
                 help.RedirectStandardOutput = true;
                 System.Diagnostics.Process p = System.Diagnostics.Process.Start(help);
-                new ShowWindow(root_window, "x264 help", p.StandardOutput.ReadToEnd(), new FontFamily("Lucida Console"));
+                string title = "x264 " + (m.x264options.profile == x264.Profiles.High10 ? "10" : "8") + "-bit depth " + ((Settings.Use64x264) ? "(64-bit) " : "") + "--fullhelp";
+                new ShowWindow(root_window, title, p.StandardOutput.ReadToEnd(), new FontFamily("Lucida Console"));
             }
             catch (Exception ex)
             {
@@ -2187,6 +2238,7 @@ namespace XviD4PSP
         private void check_fake_int_Click(object sender, RoutedEventArgs e)
         {
             m.x264options.fake_int = check_fake_int.IsChecked.Value;
+            SetAVCProfile();
             root_window.UpdateManualProfile();
             UpdateCLI();
         }
@@ -2228,6 +2280,17 @@ namespace XviD4PSP
             }
         }
 
+        private void combo_colorspace_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_colorspace.IsDropDownOpen || combo_colorspace.IsSelectionBoxHighlighted)
+            {
+                m.x264options.colorspace = combo_colorspace.SelectedItem.ToString();
+                SetAVCProfile();
+                root_window.UpdateManualProfile();
+                UpdateCLI();
+            }
+        }
+
         private void check_non_deterministic_Click(object sender, RoutedEventArgs e)
         {
             m.x264options.non_deterministic = check_non_deterministic.IsChecked.Value;
@@ -2240,6 +2303,23 @@ namespace XviD4PSP
             m.x264options.bluray = check_bluray.IsChecked.Value;
             root_window.UpdateManualProfile();
             UpdateCLI();
+        }
+
+        public static bool IsLossless(Massive m)
+        {
+            if (m.encodingmode == Settings.EncodingModes.Quantizer)
+                return (m.outvbitrate == 0);
+            else if (m.encodingmode == Settings.EncodingModes.Quality ||
+                    m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                    m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+            {
+                if (m.x264options.profile == Profiles.High10)
+                    return (m.outvbitrate < -11);
+                else
+                    return (m.outvbitrate < 1);
+            }
+            else
+                return false;
         }
     }
 }

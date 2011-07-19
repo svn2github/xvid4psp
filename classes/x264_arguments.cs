@@ -11,7 +11,7 @@ namespace XviD4PSP
         {
         }
 
-        public x264_arguments(int codec_preset)
+        public x264_arguments(int codec_preset, bool _10bit)
         {
             //Выставляем значения в соответствии с пресетом
             if (codec_preset == 0)
@@ -49,7 +49,7 @@ namespace XviD4PSP
                 _reference = 1;
                 _subme = 1;
                 _trellis = 0;
-                _weightp = 0;
+                _weightp = 1;
             }
             else if (codec_preset == 2)
             {
@@ -59,7 +59,7 @@ namespace XviD4PSP
                 _reference = 1;
                 _subme = 2;
                 _trellis = 0;
-                _weightp = 0;
+                _weightp = 1;
             }
             else if (codec_preset == 3)
             {
@@ -76,6 +76,7 @@ namespace XviD4PSP
                 _reference = 2;
                 _subme = 6;
                 _lookahead = 30;
+                _weightp = 1;
             }
             else if (codec_preset == 5)
             {
@@ -134,6 +135,12 @@ namespace XviD4PSP
                 _subme = 10;
                 _trellis = 2;
             }
+
+            //10-bit depth
+            if (_10bit)
+            {
+                _max_quant = 81;
+            }
         }
 
         public x264_arguments Clone()
@@ -154,8 +161,8 @@ namespace XviD4PSP
             }
         }
 
-        private string _profile = "auto";
-        public string profile
+        private x264.Profiles _profile = x264.Profiles.Auto;
+        public x264.Profiles profile
         {
             get
             {
@@ -892,6 +899,19 @@ namespace XviD4PSP
             set
             {
                 _colormatrix = value;
+            }
+        }
+
+        private string _colorspace = "I420";
+        public string colorspace
+        {
+            get
+            {
+                return _colorspace;
+            }
+            set
+            {
+                _colorspace = value;
             }
         }
 
