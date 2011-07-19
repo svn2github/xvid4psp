@@ -2710,7 +2710,7 @@ namespace XviD4PSP
                 object value = GetValue("FFMS_Threads");
                 if (value == null)
                 {
-                    return 0;
+                    return 1;
                 }
                 else
                 {
