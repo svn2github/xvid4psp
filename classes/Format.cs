@@ -706,7 +706,10 @@ namespace XviD4PSP
                m.format == ExportFormats.Mkv ||
                m.format == ExportFormats.Mp4 ||
                m.format == ExportFormats.WMV)
-               return new string[] { "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940", "60.000", "120.000" };
+               return new string[] { "0.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940", "60.000", "120.000" };
+
+           else if (m.format == ExportFormats.Mov)
+               return new string[] { "0.000", "11.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970" };
 
            else if (m.format == ExportFormats.AviHardware ||
                m.format == ExportFormats.AviHardwareHD)

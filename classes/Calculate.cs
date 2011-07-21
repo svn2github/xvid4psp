@@ -223,17 +223,17 @@ namespace XviD4PSP
                 m.deinterlace == DeinterlaceType.TDecimate_23)
             {
                 //Для деинтерлейсеров, возвращающих 23.976fps
-                m.outframerate = Calculate.GetClosePointDouble("23.976", rates);
+                m.outframerate = Calculate.GetClosePointDoubleFPS("23.976", rates);
             }
             else if (m.deinterlace == DeinterlaceType.TDecimate_24)
             {
                 //TDecimate_24 возвращает 24.000fps
-                m.outframerate = Calculate.GetClosePointDouble("24.000", rates);
+                m.outframerate = Calculate.GetClosePointDoubleFPS("24.000", rates);
             }
             else if (m.deinterlace == DeinterlaceType.TDecimate_25)
             {
                 //TDecimate_25 возвращает 25.000fps
-                m.outframerate = Calculate.GetClosePointDouble("25.000", rates);
+                m.outframerate = Calculate.GetClosePointDoubleFPS("25.000", rates);
             }
             else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace || m.deinterlace == DeinterlaceType.NNEDI ||
                 m.deinterlace == DeinterlaceType.YadifModEDI2 || m.deinterlace == DeinterlaceType.MCBob ||
@@ -242,12 +242,12 @@ namespace XviD4PSP
                 //Для деинтерлейсеров, удваивающих fps
                 double inframerate = Calculate.ConvertStringToDouble(m.inframerate);
                 string rate = Calculate.ConvertDoubleToPointString(inframerate * 2.0);
-                m.outframerate = Calculate.GetClosePointDouble(rate, rates);
+                m.outframerate = Calculate.GetClosePointDoubleFPS(rate, rates);
             }
             else
             {
                 //Во всех остальных случаях
-                m.outframerate = Calculate.GetClosePointDouble(m.inframerate, rates);
+                m.outframerate = Calculate.GetClosePointDoubleFPS(m.inframerate, rates);
             }
 
             return m;
@@ -415,23 +415,15 @@ namespace XviD4PSP
             string closeaspect = GetClosePointDouble(aspect, aspects);
             int closeaspectindex = aspectslist.IndexOf(closeaspect);
             if (closeaspect.Contains(" "))
-            {
-                string[] separator = new string[] { " " };
-                string[] a = closeaspect.Split(separator, StringSplitOptions.None);
-                closeaspect = a[0];
-            }
+                closeaspect = closeaspect.Split(new string[] { " " }, StringSplitOptions.None)[0];
 
-            double _closeaspect = ConvertStringToDouble(closeaspect);
             double _aspect = ConvertStringToDouble(aspect);
-
+            double _closeaspect = ConvertStringToDouble(closeaspect);
             if (_aspect < _closeaspect)
             {
-                //if (closeaspectindex == 0)
                 aspectslist.Insert(closeaspectindex, aspect);
-                //else
-                //    aspectslist.Insert(closeaspectindex - 1, aspect);
             }
-            if (_aspect > _closeaspect)
+            else if (_aspect > _closeaspect)
             {
                 if (closeaspectindex == aspectslist.Count)
                     aspectslist.Insert(closeaspectindex, aspect);
@@ -444,116 +436,126 @@ namespace XviD4PSP
 
         public static string GetClosePointDouble(string CompareValue, string[] ValuesList)
         {
-            string closevalue = ValuesList[0];
-            double closedouble = ConvertStringToDouble(ValuesList[0]);
-            double comparedouble = ConvertStringToDouble(CompareValue);
-            double bestdiff;
-            if (comparedouble > closedouble)
-                bestdiff = comparedouble - closedouble;
-            else
-                bestdiff = closedouble - comparedouble;
-
-            ArrayList values = new ArrayList();
-            values.AddRange(ValuesList);
-
-            foreach (string value in values)
+            double min = double.MaxValue;
+            string closest = ValuesList[0];
+            double compare = ConvertStringToDouble(CompareValue);
+            foreach (string value in ValuesList)
             {
-                double currentvalue = ConvertStringToDouble(value);
-                double diff;
-                if (comparedouble > currentvalue)
-                    diff = comparedouble - currentvalue;
-                else
-                    diff = currentvalue - comparedouble;
-                if (diff < bestdiff)
+                double diff = Math.Abs(compare - ConvertStringToDouble(value));
+                if (diff < min)
                 {
-                    bestdiff = diff;
-                    int index = values.IndexOf(value);
-                    closevalue = values[index].ToString();
+                    min = diff;
+                    closest = value;
                 }
             }
-            return closevalue;
+
+            return closest;
+        }
+
+        public static string GetClosePointDoubleFPS(string CompareValue, string[] ValuesList)
+        {
+            //Фильтруем
+            bool any = false;
+            ArrayList values = new ArrayList();
+            foreach (string value in ValuesList)
+            {
+                if (value == "0.000") any = true;
+                else values.Add(value);
+            }
+
+            //Если разрешены любые значения fps
+            if (any && Settings.Nonstandard_fps)
+            {
+                if (!string.IsNullOrEmpty(CompareValue))
+                {
+                    //На всякий случай приводим к нужному формату
+                    return Calculate.ConvertDoubleToPointString(ConvertStringToDouble(CompareValue), 3);
+                }
+                else if (values.Count > 1)
+                    return values[0].ToString();
+                else
+                    return "25.000";
+            }
+
+            //Защита от пустого списка (если в нем было только "0.000")
+            if (values.Count == 0)
+            {
+                if (!string.IsNullOrEmpty(CompareValue))
+                {
+                    //На всякий случай приводим к нужному формату
+                    return Calculate.ConvertDoubleToPointString(ConvertStringToDouble(CompareValue), 3);
+                }
+                else
+                    return "25.000";
+            }
+
+            double min = double.MaxValue;
+            string closest = values[0].ToString();
+            double compare = ConvertStringToDouble(CompareValue);
+            foreach (string value in values)
+            {
+                double diff = Math.Abs(compare - ConvertStringToDouble(value));
+                if (diff < min)
+                {
+                    min = diff;
+                    closest = value;
+                }
+            }
+
+            return closest;
         }
 
         public static double GetCloseDouble(double CompareValue, string[] ValuesList)
         {
-            double closedouble = ConvertStringToDouble(ValuesList[0]);
-            double comparedouble = CompareValue;
-            double bestdiff;
-            if (comparedouble > closedouble)
-                bestdiff = comparedouble - closedouble;
-            else
-                bestdiff = closedouble - comparedouble;
-
+            double min = double.MaxValue;
+            double closest = ConvertStringToDouble(ValuesList[0]);
             foreach (string value in ValuesList)
             {
-                double currentvalue = ConvertStringToDouble(value);
-                double diff;
-                if (comparedouble > currentvalue)
-                    diff = comparedouble - currentvalue;
-                else
-                    diff = currentvalue - comparedouble;
-                if (diff < bestdiff)
+                double dvalue = ConvertStringToDouble(value);
+                double diff = Math.Abs(CompareValue - dvalue);
+                if (diff < min)
                 {
-                    bestdiff = diff;
-                    closedouble = currentvalue;
+                    min = diff;
+                    closest = dvalue;
                 }
             }
-            return closedouble;
+
+            return closest;
         }
 
         public static string GetCloseInteger(string CompareValue, string[] ValuesList)
         {
-            string closevalue = ValuesList[0];
-            int closeint = Convert.ToInt32(ValuesList[0]);
-            int compareint = Convert.ToInt32(CompareValue);
-            int bestdiff;
-            if (compareint > closeint)
-                bestdiff = compareint - closeint;
-            else
-                bestdiff = closeint - compareint;
-
+            int min = int.MaxValue;
+            string closest = ValuesList[0];
+            int compare = Convert.ToInt32(CompareValue);
             foreach (string value in ValuesList)
             {
-                int currentvalue = Convert.ToInt32(value);
-                int diff;
-                if (compareint > currentvalue)
-                    diff = compareint - currentvalue;
-                else
-                    diff = currentvalue - compareint;
-                if (diff < bestdiff)
+                int diff = Math.Abs(compare - Convert.ToInt32(value));
+                if (diff < min)
                 {
-                    bestdiff = diff;
-                    closevalue = currentvalue.ToString();
+                    min = diff;
+                    closest = value;
                 }
             }
-            return closevalue;
+
+            return closest;
         }
 
         public static int GetCloseIntegerAL(int CompareValue, ArrayList ValuesList)
         {
-            int closevalue = Convert.ToInt32(ValuesList[0]);
-            int closeint = Convert.ToInt32(ValuesList[0]);
-            int compareint = Convert.ToInt32(CompareValue);
-            int bestdiff;
-            if (compareint > closeint)
-                bestdiff = compareint - closeint;
-            else
-                bestdiff = closeint - compareint;
-
+            int min = int.MaxValue;
+            int closest = Convert.ToInt32(ValuesList[0]);
             foreach (int value in ValuesList)
             {
-                int diff;
-                if (compareint > value)
-                    diff = compareint - value;
-                else
-                    diff = value - compareint;
-                if (diff < bestdiff)
+                int diff = Math.Abs(CompareValue - value);
+                if (diff < min)
                 {
-                    bestdiff = diff;
-                    closevalue = value;
+                    min = diff;
+                    closest = value;
                 }
             }
-            return closevalue;
+
+            return closest;
         }
 
         public static string GetEncodingSize(Massive m)

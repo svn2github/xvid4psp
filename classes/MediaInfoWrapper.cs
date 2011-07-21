@@ -395,7 +395,15 @@ namespace XviD4PSP
         {
             get
             {
-                string x = Get(StreamKind.Video, 0, "FrameRate");
+                string x = "";
+                if (Settings.MI_Original_fps)
+                {
+                    x = Get(StreamKind.Video, 0, "FrameRate_Original");     //Из потока (если доступно)
+                    if (x == "") x = Get(StreamKind.Video, 0, "FrameRate"); //Из контейнера или общее
+                }
+                else
+                    x = Get(StreamKind.Video, 0, "FrameRate");
+
                 if (x == "")
                 {
                     string s = Standart;
@@ -407,8 +415,7 @@ namespace XviD4PSP
                             x = "29.970";
                     }
                 }
-                if (x == "23.980")
-                    x = "23.976"; //скорее всего это просто кривой файл
+
                 return x;
             }
         }

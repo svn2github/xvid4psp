@@ -1,5 +1,12 @@
-﻿XviD4PSP 5.10.240.0 (19.07.2011), main changes:
+﻿XviD4PSP 5.10.241.0 (21.07.2011), main changes:
 
+>>> (r241) Resolution/Aspect window: on the "Settings" tab added an options "Use the original fps of the stream" and
+           "Allow non-standard fps on output". If the first one is checked, then "Original frame rate" field from
+           the MediaInfo log will be used to determine the framerate of the input file (this field contains fps of
+           the raw video stream if it doesn`t match fps of the container). The second option is only works with AVI,
+           MP4, MOV, MKV and Custom formats. If checked, all non-standard fps will be passed on output without rounding
+           to the nearest standard value. For these formats it`s now also possible to enter any arbitrary fps into
+           "Output framerate" combobox.
 >>> (r240) x264: added an --output-csp option (r2019+); added High10 AVC Profile, which is used as a switcher between
            8-bit depth and 10-bit depth versions of x264 (the latter one must be placed into \apps\x264_10b folder).
 >>> (r239) By default the number of decoding threads for FFmpegSource2 is set to 1, i.e. multithreaded decoding

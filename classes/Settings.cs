@@ -2722,5 +2722,47 @@ namespace XviD4PSP
                 SetInt("FFMS_Threads", value);
             }
         }
+
+        //Использовать fps из потока (Original fps в MediaInfo)
+        public static bool MI_Original_fps
+        {
+            get
+            {
+                object value = GetValue("MI_Original_fps");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("MI_Original_fps", value);
+            }
+        }
+
+        //Разрешить нестандартные fps на выход (отключает автоподгонку fps до ближайшего стандартного значения)
+        public static bool Nonstandard_fps
+        {
+            get
+            {
+                object value = GetValue("Nonstandard_fps");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("Nonstandard_fps", value);
+            }
+        }
     }
 }

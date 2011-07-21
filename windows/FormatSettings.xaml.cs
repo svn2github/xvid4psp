@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Collections;
 
 namespace XviD4PSP
 {
@@ -32,7 +33,7 @@ namespace XviD4PSP
         private string default_vcodecs = "x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy";
         private string default_acodecs = "PCM, FLAC, AAC, MP2, MP3, AC3, Disabled, Copy";
         private string default_aspects = "1.3333 (4:3), 1.6667, 1.7778 (16:9), 1.8500, 2.0000, 2.2100, 2.3529";
-        private string default_framerates = "20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000";
+        private string default_framerates = "0.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000";
         private string default_samplerates = "22050, 32000, 44100, 48000";
 
         public FormatSettings(Massive mass, MainWindow parent)
@@ -312,7 +313,7 @@ namespace XviD4PSP
         {
             button_reset.ToolTip = Languages.Translate("Reset all settings");
             textbox_vcodecs.ToolTip = Languages.Translate("Codecs, that will be selectable in the video-codecs settings window.") + Environment.NewLine + Languages.Translate("Valid values:") + " x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV, Copy\r\n" + Languages.Translate("Separate by comma.");
-            textbox_framerates.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000, ...\r\n" + Languages.Translate("Separate by comma.");
+            textbox_framerates.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + Environment.NewLine + Languages.Translate("Valid values:") + " 0.000 (means \"any\"), 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000, ...\r\n" + Languages.Translate("Separate by comma.");
             combo_MinResolutionH.ToolTip = combo_MaxResolutionH.ToolTip = combo_thm_H.ToolTip = Languages.Translate("Height");
             combo_MinResolutionW.ToolTip = combo_MaxResolutionW.ToolTip = combo_thm_W.ToolTip = Languages.Translate("Width");
             combo_ValidModW.ToolTip = Languages.Translate("Width") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "4, 8");
@@ -618,6 +619,7 @@ namespace XviD4PSP
         private void fps_ok_Click(object sender, RoutedEventArgs e)
         {
             string output = "";
+            ArrayList _output = new ArrayList();
             string[] values = textbox_framerates.Text.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string value in values)
             {
@@ -626,7 +628,11 @@ namespace XviD4PSP
                 if (double.TryParse(ss, out dd))
                 {
                     ss = Calculate.ConvertDoubleToPointString(dd, 3);
-                    if (dd > 5 && dd < 200 && !output.Contains(ss)) output += ss + ", ";
+                    if ((dd == 0 || dd > 5 && dd < 200) && !_output.Contains(ss))
+                    {
+                        _output.Add(ss);
+                        output += ss + ", ";
+                    }
                 }
             }
             if (output.Length == 0) output = default_framerates;

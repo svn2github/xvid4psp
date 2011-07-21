@@ -7,6 +7,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
+using System.Windows.Input;
 
 namespace XviD4PSP
 {
@@ -49,6 +50,8 @@ namespace XviD4PSP
             text_hybrid_int.Content = Languages.Translate("Hybrid interlace threshold") + " (%):";
             text_hybrid_fo.Content = Languages.Translate("Hybrid field order threshold") + " (%):";
             text_fo_portions.Content = Languages.Translate("Enable selective field order analysis");
+            check_original_fps.Content = Languages.Translate("Use the original fps of the stream (if available)");
+            check_nonstandard_fps.Content = Languages.Translate("Allow non-standard fps on output");
 
             //забиваем
             foreach (string fieldt in Enum.GetNames(typeof(FieldOrder)))
@@ -117,10 +120,21 @@ namespace XviD4PSP
             combo_deinterlace.SelectedValue = m.deinterlace;
 
             //забиваем
+            bool any = false, infr = false, outfr = false;
             foreach (string f in Format.GetValidFrameratesList(m))
-                combo_framerate.Items.Add(f + " fps");
-            if (!combo_framerate.Items.Contains(m.outframerate + " fps"))
-                combo_framerate.Items.Add(m.outframerate + " fps");
+            {
+                if (f != "0.000")
+                {
+                    if (!infr && f == m.inframerate) infr = true;
+                    if (!outfr && f == m.outframerate) outfr = true;
+                    combo_framerate.Items.Add(f + " fps");
+                }
+                else
+                    any = true;
+            }
+            if (any) combo_framerate.Items.Insert(0, ""); else check_nonstandard_fps.IsEnabled = false;
+            if (!infr && any && m.inframerate != m.outframerate) combo_framerate.Items.Add(m.inframerate + " fps");
+            if (!outfr) combo_framerate.Items.Add(m.outframerate + " fps");
             combo_framerate.SelectedItem = m.outframerate + " fps";
 
             foreach (AviSynthScripting.FramerateModifers ratechangers in Enum.GetValues(typeof(AviSynthScripting.FramerateModifers)))
@@ -157,6 +171,9 @@ namespace XviD4PSP
             combo_qtgmc_preset.SelectedItem = Settings.QTGMC_Preset;
 
             num_qtgmc_sharp.Value = (decimal)Settings.QTGMC_Sharpness;
+
+            check_original_fps.IsChecked = Settings.MI_Original_fps;
+            check_nonstandard_fps.IsChecked = Settings.Nonstandard_fps;
 
             SetTooltips();
             ShowDialog();
@@ -236,6 +253,8 @@ namespace XviD4PSP
             ToolTipService.SetShowDuration(check_iscombed_mark, 100000);
             ToolTipService.SetShowDuration(num_iscombed_cthresh, 100000);
             ToolTipService.SetShowDuration(num_iscombed_mi, 100000);
+            ToolTipService.SetShowDuration(check_original_fps, 100000);
+            ToolTipService.SetShowDuration(check_nonstandard_fps, 100000);
 
             foreach (ComboBoxItem item in combo_framerateconvertor.Items)
             {
@@ -272,6 +291,9 @@ namespace XviD4PSP
             num_iscombed_mi.ToolTip = Languages.Translate("How many combed areas must be found to detect whole frame as Сombed.") + "\r\nDefault: 40";
             combo_qtgmc_preset.ToolTip = "Default: Slow";
             num_qtgmc_sharp.ToolTip = "Default: 1.0";
+            check_original_fps.ToolTip = Languages.Translate("If checked, use the framerate of the raw video stream instead of the framerate of the container.") + "\r\n" +
+                Languages.Translate("This option is meaningful only when a file is opening.");
+            check_nonstandard_fps.ToolTip = Languages.Translate("If checked, all non-standard fps will be passed on output without rounding to the nearest standard value");
         }
 
         private void button_analyse_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -293,7 +315,7 @@ namespace XviD4PSP
                 {
                     m = Format.GetOutInterlace(m);
                     m = Calculate.UpdateOutFramerate(m);
-                    combo_framerate.SelectedItem = m.outframerate + " fps";
+                    SetFramerateCombo(m.outframerate);
 
                     Refresh();
 
@@ -328,8 +350,8 @@ namespace XviD4PSP
 
                 //обновляем форму
                 combo_deinterlace.SelectedValue = m.deinterlace;
-                combo_framerate.SelectedItem = m.outframerate + " fps";
                 combo_outinterlace.SelectedItem = Format.GetCodecOutInterlace(m);
+                SetFramerateCombo(m.outframerate);
 
                 //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
                 m = Calculate.UpdateOutFrames(m);
@@ -384,7 +406,7 @@ namespace XviD4PSP
 
                 m = Calculate.UpdateOutFramerate(m);
 
-                combo_framerate.SelectedItem = m.outframerate + " fps";
+                SetFramerateCombo(m.outframerate);
                 combo_outinterlace.SelectedItem = Format.GetCodecOutInterlace(m);
 
                 //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
@@ -397,33 +419,51 @@ namespace XviD4PSP
 
         private void combo_framerate_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if ((combo_framerate.IsDropDownOpen || combo_framerate.IsSelectionBoxHighlighted) && combo_framerate.SelectedItem != null)
+            if ((combo_framerate.IsDropDownOpen || combo_framerate.IsSelectionBoxHighlighted || combo_framerate.IsEditable) && combo_framerate.SelectedItem != null)
             {
-                m.outframerate = Calculate.GetSplittedString(combo_framerate.SelectedItem.ToString(), 0);
-
-                m.sampleratemodifer = Settings.SamplerateModifer;
-                m = AviSynthScripting.CreateAutoAviSynthScript(m);
-
-                //механизм обхода ошибок SSRC
-                if (m.sampleratemodifer == AviSynthScripting.SamplerateModifers.SSRC &&
-                    m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
+                if (combo_framerate.SelectedItem.ToString() == "")
                 {
-                    AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                    if (instream.samplerate != outstream.samplerate && outstream.samplerate != null &&
-                        Calculate.CheckScriptErrors(m) == "SSRC: could not resample between the two samplerates.")
+                    //Включаем редактирование
+                    combo_framerate.IsEditable = true;
+                    combo_framerate.ToolTip = Languages.Translate("Enter - apply, Esc - cancel.");
+                    combo_framerate.ApplyTemplate();
+                    return;
+                }
+                else
+                {
+                    m.outframerate = Calculate.GetSplittedString(combo_framerate.SelectedItem.ToString(), 0);
+
+                    m.sampleratemodifer = Settings.SamplerateModifer;
+                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
+
+                    //механизм обхода ошибок SSRC
+                    if (m.sampleratemodifer == AviSynthScripting.SamplerateModifers.SSRC &&
+                        m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
                     {
-                        m.sampleratemodifer = AviSynthScripting.SamplerateModifers.ResampleAudio;
-                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                        AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                        if (instream.samplerate != outstream.samplerate && outstream.samplerate != null &&
+                            Calculate.CheckScriptErrors(m) == "SSRC: could not resample between the two samplerates.")
+                        {
+                            m.sampleratemodifer = AviSynthScripting.SamplerateModifers.ResampleAudio;
+                            m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        }
                     }
+
+                    //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
+                    m = Calculate.UpdateOutFrames(m);
+                    m.outfilesize = Calculate.GetEncodingSize(m);
+
+                    p.m = m.Clone();
+                    p.Refresh(m.script);
                 }
 
-                //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
-                m = Calculate.UpdateOutFrames(m);
-                m.outfilesize = Calculate.GetEncodingSize(m);
-
-                p.m = m.Clone();
-                p.Refresh(m.script);
+                if (combo_framerate.IsEditable)
+                {
+                    //Выключаем редактирование
+                    combo_framerate.IsEditable = false;
+                    combo_framerate.ToolTip = null;
+                }
             }
         }
 
@@ -488,7 +528,7 @@ namespace XviD4PSP
 
                 //обновляем форму
                 combo_deinterlace.SelectedValue = m.deinterlace;
-                combo_framerate.SelectedItem = m.outframerate + " fps";
+                SetFramerateCombo(m.outframerate);
 
                 //обновляем скрипт
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);
@@ -579,6 +619,67 @@ namespace XviD4PSP
                 Settings.QTGMC_Sharpness = (double)num_qtgmc_sharp.Value;
                 if (m.deinterlace == DeinterlaceType.QTGMC) Refresh();
             }
-        } 
+        }
+
+        private void check_original_fps_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.MI_Original_fps = check_original_fps.IsChecked.Value;
+        }
+
+        private void check_nonstandard_fps_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Nonstandard_fps = check_nonstandard_fps.IsChecked.Value;
+
+            m = Format.GetOutInterlace(m);
+            m = Calculate.UpdateOutFramerate(m);
+            m = Calculate.UpdateOutFrames(m);
+            m.outfilesize = Calculate.GetEncodingSize(m);
+
+            combo_deinterlace.SelectedValue = m.deinterlace;
+            SetFramerateCombo(m.outframerate);
+
+            Refresh();
+        }
+
+        private void combo_framerate_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                //Проверяем введённый текст
+                double d_value = 0;
+                string s_value = combo_framerate.Text.Trim().Replace(".", Calculate.DecimalSeparator);
+                if (s_value.Contains(" ")) s_value = s_value.Split(new string[] { " " }, StringSplitOptions.None)[0]; //" fps"
+                if (!double.TryParse(s_value, out d_value) || d_value < 5 || d_value > 200)
+                {
+                    //Возвращаем исходное значение
+                    SetFramerateCombo(m.outframerate);
+                }
+                else
+                {
+                    //Добавляем и выбираем Item
+                    SetFramerateCombo(Calculate.ConvertDoubleToPointString(d_value, 3));
+                }
+            }
+            else if (e.Key == Key.Escape)
+            {
+                //Возвращаем исходное значение
+                SetFramerateCombo(m.outframerate);
+            }
+        }
+
+        private void combo_framerate_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox box = (ComboBox)sender;
+            if (box.IsEditable && box.SelectedItem != null && !box.IsDropDownOpen && !box.IsMouseCaptured)
+                combo_framerate_KeyDown(sender, new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter));
+        }
+
+        private void SetFramerateCombo(string framerate)
+        {
+            framerate = framerate + " fps";
+            if (!combo_framerate.Items.Contains(framerate))
+                combo_framerate.Items.Add(framerate);
+            combo_framerate.SelectedItem = framerate;
+        }
 	}
 }
