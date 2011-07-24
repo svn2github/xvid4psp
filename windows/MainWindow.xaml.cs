@@ -1291,8 +1291,7 @@ namespace XviD4PSP
                 //похоже что к нам идёт звковой файл
                 if (x.format != Format.ExportFormats.Audio && !x.isvideo)
                 {
-                    x.format = Format.ExportFormats.Audio;
-                    Settings.FormatOut = Format.ExportFormats.Audio;
+                    Settings.FormatOut = x.format = Format.ExportFormats.Audio;
                     combo_format.SelectedItem = Format.EnumToString(Format.ExportFormats.Audio);
                     LoadAudioPresets();
                     SetAudioPreset();
@@ -2695,8 +2694,8 @@ namespace XviD4PSP
 
         private void AspectResolution_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null) return;
-            if (m.format == Format.ExportFormats.Audio)
+            if (m == null) new AspectResolution(null, this);
+            else if (m.format == Format.ExportFormats.Audio)
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
@@ -5132,8 +5131,8 @@ namespace XviD4PSP
 
         private void menu_interlace_Click(object sender, System.Windows.RoutedEventArgs e)       
         {
-            if (m == null) return;
-            if (m.format == Format.ExportFormats.Audio)
+            if (m == null) new Interlace(null, this);
+            else if (m.format == Format.ExportFormats.Audio)
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
@@ -6181,8 +6180,6 @@ namespace XviD4PSP
             menu_autocrop.IsEnabled = ShowItems;
             menu_detect_interlace.IsEnabled = ShowItems;
             menu_saturation_brightness.IsEnabled = ShowItems;
-            mnAspectResolution.IsEnabled = ShowItems;
-            menu_interlace.IsEnabled = ShowItems;
             menu_venc_settings.IsEnabled = ShowItems;
             menu_demux.IsEnabled = ShowItems;
             menu_save_wav.IsEnabled = ShowItems;

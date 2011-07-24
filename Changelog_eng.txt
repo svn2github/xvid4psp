@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.242.0 (24.07.2011), main changes:
+﻿XviD4PSP 5.10.243.0 (24.07.2011), main changes:
 
+>>> (r243) "Aspect/Resolution" and "Interlace/Framerate" windows is now accessible even if there is no input file
+           opened. But in this case only the "Settings" tab will be active.
 >>> (r242) "Aspect/Resolution" window: on the "Settings" tab added an option "Use the original AR of the stream",
            which is enabled by default. It works the same way as "Use the original fps of the stream" does, but
            instead of framerate it affects the AR. "Input aspect" and "Output aspect" comboboxes is editable now

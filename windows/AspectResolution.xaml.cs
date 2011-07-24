@@ -17,6 +17,7 @@ namespace XviD4PSP
         public Massive m;
         private Massive oldm;
         private MainWindow p;
+        private Format.ExportFormats format;
 
         public enum AspectFixes { Disabled = 1, SAR, Crop, Black }
         public enum GetResolutionModes { Maximum = 1, Optimal }
@@ -25,8 +26,15 @@ namespace XviD4PSP
         {
             this.InitializeComponent();
 
-            m = mass.Clone();
-            oldm = mass.Clone();
+            if (mass != null)
+            {
+                m = mass.Clone();
+                oldm = mass.Clone();
+                format = mass.format;
+            }
+            else
+                format = Settings.FormatOut;
+
             p = parent;
             Owner = p;
 
@@ -36,7 +44,7 @@ namespace XviD4PSP
             button_refresh.Content = button_manual_apply.Content = text_manual_apply.Content = Languages.Translate("Apply");
             button_refresh.ToolTip = Languages.Translate("Refresh preview");
 
-            text_resolution.Content = m.inresw + "x" + m.inresh;
+            if (m != null) text_resolution.Content = m.inresw + "x" + m.inresh;
             text_source_res.Content = Languages.Translate("Input resolution:");
             text_final_res.Content = text_manual_res.Content = Languages.Translate("Output resolution:");
             text_resizer.Content = Languages.Translate("Resize filter:");
@@ -84,11 +92,6 @@ namespace XviD4PSP
             check_original_ar.ToolTip = text_original_ar.ToolTip = Languages.Translate("If checked, use the AR of the raw video stream instead of the AR of the container.") +
                 "\r\n" + Languages.Translate("This option is meaningful only when a file is opening.");
 
-            //ресайзеры
-            foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
-                combo_resizer.Items.Add(resizer);
-            combo_resizer.SelectedItem = m.resizefilter.ToString();
-
             for (int n = 0; n < 101; n++)
                 combo_autocropsens.Items.Add(n);
             combo_autocropsens.SelectedItem = Settings.AutocropSensivity;
@@ -109,6 +112,10 @@ namespace XviD4PSP
             combo_visualcrop_frame.Items.Add("1-st frame");
             combo_visualcrop_frame.SelectedItem = Settings.VCropFrame;
 
+            check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
+            check_original_ar.IsChecked = Settings.MI_Original_AR;
+            check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
+
             //ModW-ограничение
             for (int n = 4; n <= 16; n *= 2) combo_modw.Items.Add(n);
             combo_modw.SelectedItem = Settings.LimitModW;
@@ -117,48 +124,58 @@ namespace XviD4PSP
             for (int n = 2; n <= 16; n *= 2) combo_modh.Items.Add(n);
             combo_modh.SelectedItem = Settings.LimitModH;
 
-            if (m.format == Format.ExportFormats.Avi || m.format == Format.ExportFormats.Mkv || m.format == Format.ExportFormats.Mov
-                || m.format == Format.ExportFormats.Mp4)
+            if (format == Format.ExportFormats.Avi || format == Format.ExportFormats.Mkv || format == Format.ExportFormats.Mov
+                || format == Format.ExportFormats.Mp4)
             {
                 combo_modw.IsEnabled = combo_modh.IsEnabled = true;
             }
 
-            check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
-            check_original_ar.IsChecked = Settings.MI_Original_AR;
-            check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
+            if (m != null)
+            {
+                //ресайзеры
+                foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
+                    combo_resizer.Items.Add(resizer);
+                combo_resizer.SelectedItem = m.resizefilter.ToString();
 
-            //аспект фиксы
-            foreach (string afix in Enum.GetNames(typeof(AspectFixes)))
-                combo_aspectfix.Items.Add(afix);
-            combo_aspectfix.SelectedItem = m.aspectfix.ToString();
+                //аспект фиксы
+                foreach (string afix in Enum.GetNames(typeof(AspectFixes)))
+                    combo_aspectfix.Items.Add(afix);
+                combo_aspectfix.SelectedItem = m.aspectfix.ToString();
 
-            //Разрешения
-            LoadResolutions();
+                //Разрешения
+                LoadResolutions();
 
-            //входной аспект
-            LoadInAspect();
+                //входной аспект
+                LoadInAspect();
 
-            //обрезка
-            LoadCrop();
+                //обрезка
+                LoadCrop();
 
-            //поля
-            LoadBlack();
+                //поля
+                LoadBlack();
 
-            //загружаем выходной аспект
-            LoadOutAspect();
+                //загружаем выходной аспект
+                LoadOutAspect();
 
-            //Кратность сторон
-            CalculateMod();
+                //Кратность сторон
+                CalculateMod();
 
-            //Вкладка Manual
-            FillManualBox();
+                //Вкладка Manual
+                FillManualBox();
+            }
+            else
+            {
+                tab_main.IsEnabled = tab_manual.IsEnabled = false;
+                tab_settings.IsSelected = true;
+            }
 
             ShowDialog();
         }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (p.m.inaspect != m.inaspect ||
+            if (m != null && (
+                p.m.inaspect != m.inaspect ||
                 p.m.outaspect != m.outaspect ||
                 p.m.outresw != m.outresw ||
                 p.m.outresh != m.outresh ||
@@ -168,22 +185,25 @@ namespace XviD4PSP
                 p.m.cropt != m.cropt ||
                 p.m.blackw != m.blackw ||
                 p.m.blackh != m.blackh ||
-                p.m.aspectfix != m.aspectfix)
+                p.m.aspectfix != m.aspectfix))
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);
             Close();
         }
 
         private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m = oldm.Clone();
+            if (m != null) m = oldm.Clone();
             Close();
         }
 
         private void button_refresh_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m = AviSynthScripting.CreateAutoAviSynthScript(m);
-            p.m = m.Clone();
-            p.Refresh(m.script);
+            if (m != null)
+            {
+                m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                p.m = m.Clone();
+                p.Refresh(m.script);
+            }
         }
 
         private void combo_resizer_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -511,8 +531,11 @@ namespace XviD4PSP
 
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            p.SwitchToFullScreen();
-            this.Focus();
+            if (m != null)
+            {
+                p.SwitchToFullScreen();
+                this.Focus();
+            }
         }
 
         public static Massive FixInputAspect(Massive mass)
@@ -744,7 +767,7 @@ namespace XviD4PSP
             if (combo_modw.IsDropDownOpen || combo_modw.IsSelectionBoxHighlighted)
             {
                 Settings.LimitModW = Convert.ToInt32(combo_modw.SelectedItem);
-                ApplyCrop();
+                if (m != null) ApplyCrop();
             }
         }
 
@@ -753,7 +776,7 @@ namespace XviD4PSP
             if (combo_modh.IsDropDownOpen || combo_modh.IsSelectionBoxHighlighted)
             {
                 Settings.LimitModH = Convert.ToInt32(combo_modh.SelectedItem);
-                ApplyCrop();
+                if (m != null) ApplyCrop();
             }
         }
 
