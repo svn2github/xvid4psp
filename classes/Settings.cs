@@ -2723,6 +2723,27 @@ namespace XviD4PSP
             }
         }
 
+        //Использовать AR из потока (Original AR в MediaInfo)
+        public static bool MI_Original_AR
+        {
+            get
+            {
+                object value = GetValue("MI_Original_AR");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("MI_Original_AR", value);
+            }
+        }
+
         //Использовать fps из потока (Original fps в MediaInfo)
         public static bool MI_Original_fps
         {

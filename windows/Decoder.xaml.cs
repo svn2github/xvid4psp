@@ -121,8 +121,8 @@ namespace XviD4PSP
                 {
                     _vcodec = "-vcodec ffvhuff";//ffvhuff, ffv1
                     yv12 = " -pix_fmt yuv420p";
-                    string dar = ff.StreamDAR(ff.FirstVideoStreamID());
-                    aspect = (dar != "" && dar != "Unknown") ? " -aspect " + dar : "";
+                    string dar = ff.StreamDARSelected(ff.FirstVideoStreamID());
+                    aspect = (dar != "") ? " -aspect " + dar : "";
                 }
                 else if (mode == DecoderModes.DecodeAudio)
                 {
@@ -136,8 +136,8 @@ namespace XviD4PSP
                     m.inframerate = ff.StreamFramerate(ff.FirstVideoStreamID());
                     m.format = Settings.FormatOut;
                     _framerate = " -r " + Format.GetValidFramerate(m).outframerate;
-                    string dar = ff.StreamDAR(ff.FirstVideoStreamID());
-                    aspect = (dar != "" && dar != "Unknown") ? " -aspect " + dar : "";
+                    string dar = ff.StreamDARSelected(ff.FirstVideoStreamID());
+                    aspect = (dar != "") ? " -aspect " + dar : "";
                 }
 
                 //закрываем фф

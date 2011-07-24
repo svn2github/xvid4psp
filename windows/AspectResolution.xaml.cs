@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
 using System.Collections;
+using System.Windows.Input;
 
 namespace XviD4PSP
 {
@@ -67,7 +68,8 @@ namespace XviD4PSP
             Title = Languages.Translate("Resolution/Aspect");
             textbox_error.Text = "";
             text_ffmpeg_ar.Content = Languages.Translate("Use FFmpeg AR info:");
-            text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg");
+            text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg") +
+                ".\r\n" + Languages.Translate("This option is meaningful only when a file is opening.");
             text_visualcrop_opacity.Content = Languages.Translate("Background opacity:");
             text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
@@ -77,7 +79,10 @@ namespace XviD4PSP
             manual_outsar.ToolTip = Languages.Translate("Leave it empty for non-anamorphic encoding.") +
                 "\r\n" + Languages.Translate("For anamorphic encoding you must specify SAR.");
             button_calc_sar.ToolTip = Languages.Translate("Calculate SAR for specified output resolution and aspect.") +
-                "\r\n" + Languages.Translate("It must be used for anamorphic encoding only!"); ;
+                "\r\n" + Languages.Translate("It must be used for anamorphic encoding only!");
+            text_original_ar.Content = Languages.Translate("Use the original AR of the stream (if available)") + ":";
+            check_original_ar.ToolTip = text_original_ar.ToolTip = Languages.Translate("If checked, use the AR of the raw video stream instead of the AR of the container.") +
+                "\r\n" + Languages.Translate("This option is meaningful only when a file is opening.");
 
             //ресайзеры
             foreach (string resizer in Enum.GetNames(typeof(AviSynthScripting.Resizers)))
@@ -119,6 +124,7 @@ namespace XviD4PSP
             }
 
             check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
+            check_original_ar.IsChecked = Settings.MI_Original_AR;
             check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
 
             //аспект фиксы
@@ -210,8 +216,11 @@ namespace XviD4PSP
 
         private void combo_outaspect_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_outaspect.IsDropDownOpen || combo_outaspect.IsSelectionBoxHighlighted)
+            if ((combo_outaspect.IsDropDownOpen || combo_outaspect.IsSelectionBoxHighlighted ||combo_outaspect.IsEditable) && combo_outaspect.SelectedItem != null)
             {
+                if (EnableEditing(combo_outaspect)) return;
+                else DisableEditing(combo_outaspect);
+
                 string outasp = combo_outaspect.SelectedItem.ToString();
 
                 if (m.aspectfix == AspectFixes.SAR)
@@ -258,8 +267,11 @@ namespace XviD4PSP
 
         private void combo_inaspect_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_inaspect.IsDropDownOpen || combo_inaspect.IsSelectionBoxHighlighted)
+            if ((combo_inaspect.IsDropDownOpen || combo_inaspect.IsSelectionBoxHighlighted || combo_inaspect.IsEditable) && combo_inaspect.SelectedItem != null)
             {
+                if (EnableEditing(combo_inaspect)) return;
+                else DisableEditing(combo_inaspect);
+
                 double new_asp;
                 if (combo_inaspect.SelectedItem.ToString().StartsWith("1.3333")) new_asp = 4.0 / 3.0;
                 else if (combo_inaspect.SelectedItem.ToString().StartsWith("1.7778")) new_asp = 16.0 / 9.0;
@@ -337,6 +349,7 @@ namespace XviD4PSP
             string inaspect = Calculate.ConvertDoubleToPointString(m.inaspect, 4);
 
             combo_inaspect.Items.Clear();
+            combo_inaspect.Items.Add("");
 
             //подбираем наиболее подходящий аспект из стандартных аспектов
             string[] aspects = Calculate.InsertAspect(new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.0000", "2.2100", "2.3529" }, inaspect);
@@ -359,7 +372,10 @@ namespace XviD4PSP
 
                 //только для форматов со свободным аспектом
                 if (!Format.IsLockedOutAspect(m))
+                {
+                    combo_outaspect.Items.Add("");
                     aspects = Calculate.InsertAspect(aspects, inaspect);
+                }
                 else
                     aspects = Format.GetValidOutAspects(m);
 
@@ -689,6 +705,11 @@ namespace XviD4PSP
             Refresh();
         }
 
+        private void check_original_ar_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.MI_Original_AR = check_original_ar.IsChecked.Value;
+        }
+
         private void check_use_ffmpeg_ar_Click(object sender, RoutedEventArgs e)
         {
             Settings.UseFFmpegAR = check_use_ffmpeg_ar.IsChecked.Value;
@@ -826,16 +847,7 @@ namespace XviD4PSP
             double asp = 0;
 
             //Определяем требуемый аспект
-            if (manual_outaspect.Text.Length > 2 && (manual_outaspect.Text.Contains(":") || manual_outaspect.Text.Contains("/")))
-            {
-                int n, d;
-                string out_ar = manual_outaspect.Text.Replace("/", ":");
-                string[] a = out_ar.Split(new string[] { ":" }, StringSplitOptions.None);
-                if (a.Length == 2 && int.TryParse(a[0], out n) && int.TryParse(a[1], out d))
-                    asp = (double)n / (double)d;
-            }
-            else
-                asp = Calculate.ConvertStringToDouble(manual_outaspect.Text);
+            asp = ParseAR(manual_outaspect.Text);
 
             if (asp <= 0)
             {
@@ -845,6 +857,89 @@ namespace XviD4PSP
             {
                 manual_outsar.Text = Calculate.CalculateSAR(w, h, asp);
             }
+        }
+
+        private double ParseAR(string input)
+        {
+            double aspect = 0;
+
+            //Определяем введённый аспект
+            if (input.Length > 2 && (input.Contains(":") || input.Contains("/")))
+            {
+                int n, d;
+                string out_ar = input.Replace("/", ":");
+                string[] a = out_ar.Split(new string[] { ":" }, StringSplitOptions.None);
+                if (a.Length == 2 && int.TryParse(a[0], out n) && int.TryParse(a[1], out d))
+                    aspect = (double)n / (double)d;
+            }
+            else
+                aspect = Calculate.ConvertStringToDouble(input);
+
+            return aspect;
+        }
+
+        private bool EnableEditing(ComboBox box)
+        {
+            //Включаем редактирование
+            if (!box.IsEditable && box.SelectedItem.ToString().Length == 0)
+            {
+                box.IsEditable = true;
+                box.ToolTip = Languages.Translate("Enter - apply, Esc - cancel.");
+                box.ApplyTemplate();
+                return true;
+            }
+            return false;
+        }
+
+        private void DisableEditing(ComboBox box)
+        {
+            //Выключаем редактирование
+            if (box.IsEditable)
+            {
+                box.IsEditable = false;
+                box.ToolTip = null;
+            }
+        }
+
+        private void UndoEdit(ComboBox box)
+        {
+            //Возвращаем исходное значение
+            if (box == combo_inaspect) LoadInAspect();
+            else if (box == combo_outaspect) LoadOutAspect();
+        }
+
+        private void ComboBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                //Проверяем введённый текст
+                ComboBox box = (ComboBox)sender;
+                string text = box.Text.Trim();
+                if (text.Length > 7) text = text.Substring(0, 7); //Удаляем лишнее
+
+                double ar = ParseAR(text);
+                if (ar < 0.5 || ar > 5) { UndoEdit(box); return; }
+
+                text = Calculate.ConvertDoubleToPointString(ar, 4);
+                if (Math.Abs(ar - 1.33) <= 0.01) text += " (4:3)";
+                else if (Math.Abs(ar - 1.77) <= 0.01) text += " (16:9)";
+
+                //Добавляем и выбираем Item
+                if (!box.Items.Contains(text)) box.Items.Add(text);
+                box.SelectedItem = text;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                //Возвращаем исходное значение
+                UndoEdit((ComboBox)sender);
+            }
+        }
+
+        private void ComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox box = (ComboBox)sender;
+            if (box.IsEditable && box.SelectedItem != null && !box.IsDropDownOpen && !box.IsMouseCaptured)
+                ComboBox_KeyDown(sender, new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter));
         }
     }
 }

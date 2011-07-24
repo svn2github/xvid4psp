@@ -359,7 +359,13 @@ namespace XviD4PSP
         public string StreamPAR(int stream)
         {
             //Stream #0.0: Video: h264, yuv420p, 704x416 [PAR 963:907 DAR 21186:11791], PAR 26:33 DAR 4:3, 25 fps,
-            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+PAR\s(\d+:\d+)\s", "Unknown");
+            string raw = SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\[PAR\s(\d+:\d+)\s", "");
+            string main = SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+PAR\s(\d+:\d+)\s", "");
+
+            if (raw != "" && main != "" && raw != main) return main + " (" + raw + " original)";
+            else if (main != "") return main;
+            else if (raw != "") return raw;
+            else return "Unknown";
         }
 
         public double CalculatePAR(int stream)
@@ -367,7 +373,7 @@ namespace XviD4PSP
             if (info != null)
             {
                 string value = "";
-                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\[PAR\s(\d+:\d+)\s", out value)) //В скобках [] - значение из потока
+                if (Settings.MI_Original_AR && SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\[PAR\s(\d+:\d+)\s", out value)) //В скобках [] - значение из потока
                 {
                     string[] results = value.Split(':');
                     return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);
@@ -384,7 +390,22 @@ namespace XviD4PSP
         public string StreamDAR(int stream)
         {
             //Stream #0.0: Video: h264, yuv420p, 704x416 [PAR 963:907 DAR 21186:11791], PAR 26:33 DAR 4:3, 25 fps, 25 tbr, 1k tbn, 50 tbc
-            return SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)", "Unknown");
+            string raw = SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)\]", "");
+            string main = SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)", "");
+
+            if (raw != "" && main != "" && raw != main) return main + " (" + raw + " original)";
+            else if (main != "") return main;
+            else if (raw != "") return raw;
+            else return "Unknown";
+        }
+
+        public string StreamDARSelected(int stream)
+        {
+            //Stream #0.0: Video: h264, yuv420p, 704x416 [PAR 963:907 DAR 21186:11791], PAR 26:33 DAR 4:3, 25 fps, 25 tbr, 1k tbn, 50 tbc
+            string dar = "";
+            if (Settings.MI_Original_AR && SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)\]", out dar)) return dar;
+            if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)", out dar)) return dar;
+            return dar;
         }
 
         public double CalculateDAR(int stream)
@@ -392,7 +413,7 @@ namespace XviD4PSP
             if (info != null)
             {
                 string value = "";
-                if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)\]", out value)) //В скобках [] - значение из потока
+                if (Settings.MI_Original_AR && SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)\]", out value)) //В скобках [] - значение из потока
                 {
                     string[] results = value.Split(':');
                     return Convert.ToDouble(results[0]) / Convert.ToDouble(results[1]);

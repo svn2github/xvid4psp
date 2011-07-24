@@ -673,7 +673,7 @@ namespace XviD4PSP
                 if (double.TryParse(ss, out dd))
                 {
                     ss = Calculate.ConvertDoubleToPointString(dd, 4);
-                    if (dd > 0.5 && dd < 3 && !output.Contains(ss))
+                    if (dd > 0.5 && dd <= 5 && !output.Contains(ss))
                     {
                         if (Math.Abs(dd - 1.33) <= 0.01) ss += " (4:3)";
                         else if (Math.Abs(dd - 1.77) <= 0.01) ss += " (16:9)";

@@ -107,7 +107,7 @@
                                     <CheckBox x:Name="check_original_fps" Width="Auto" Height="Auto" Content="Use the original fps of the stream (if available)" FontSize="14" Foreground="#FFFFFFFF" Click="check_original_fps_Click" DockPanel.Dock="Left" Margin="6,0,0,0"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,4" Width="Auto" Height="Auto">
-                                    <CheckBox x:Name="check_nonstandard_fps" Width="Auto" Height="Auto" Content="Allow nonstandard fps" FontSize="14" Foreground="#FFFFFFFF" Click="check_nonstandard_fps_Click" DockPanel.Dock="Left" Margin="6,0,0,0"/>
+                                    <CheckBox x:Name="check_nonstandard_fps" Width="Auto" Height="Auto" Content="Allow non-standard fps on output" FontSize="14" Foreground="#FFFFFFFF" Click="check_nonstandard_fps_Click" DockPanel.Dock="Left" Margin="6,0,0,0"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>

@@ -35,11 +35,11 @@
 				</DockPanel>
 				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="text_inaspect" Content="Input aspect:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
-					<ComboBox x:Name="combo_inaspect" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_inaspect_SelectionChanged" Width="132" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+					<ComboBox x:Name="combo_inaspect" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_inaspect_SelectionChanged" Width="132" HorizontalAlignment="Right" VerticalAlignment="Center" IsTextSearchEnabled="False" KeyDown="ComboBox_KeyDown" LostFocus="ComboBox_LostFocus"/>
 				</DockPanel>
 				<DockPanel HorizontalAlignment="Stretch" Margin="16,0,16,0" Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="text_outaspect" Content="Output aspect:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Right"/>
-                    <ComboBox x:Name="combo_outaspect" Width="132" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_outaspect_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0" DockPanel.Dock="Right"/>
+                    <ComboBox x:Name="combo_outaspect" Width="132" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_outaspect_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0" DockPanel.Dock="Right" IsTextSearchEnabled="False" KeyDown="ComboBox_KeyDown" LostFocus="ComboBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel HorizontalAlignment="Stretch" Margin="16,0,16,0" Width="Auto" Height="Auto">
                     <Label OpacityMask="{x:Null}" x:Name="text_aspecterror" Content="Aspect error:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Right"/>
@@ -105,13 +105,17 @@
                         </GroupBox>
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
-                                <DockPanel Margin="4,0,6,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate aspect when crop is using:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,2,0"/>
+                                <DockPanel Margin="4,2,6,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate aspect when crop is using:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="2,0,0,0" Padding="2.5"/>
+                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
                                 </DockPanel>
                                 <DockPanel Margin="4,0,6,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_ffmpeg_ar" Content="Use FFmpeg AR info:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="0,0,0,0"/>
-                                    <CheckBox x:Name="check_use_ffmpeg_ar" Width="Auto" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_use_ffmpeg_ar_Click" DockPanel.Dock="Right" FlowDirection="RightToLeft" Margin="0,6,2,0"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="text_original_ar" Content="Use the original AR of the stream (if available):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="2,0,0,0" Padding="2.5"/>
+                                    <CheckBox x:Name="check_original_ar" Width="Auto" Height="Auto" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_original_ar_Click" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                                </DockPanel>
+                                <DockPanel Margin="4,0,6,0" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_ffmpeg_ar" Content="Use FFmpeg AR info:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="2,0,0,0" Padding="2.5"/>
+                                    <CheckBox x:Name="check_use_ffmpeg_ar" Width="Auto" Height="Auto" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_use_ffmpeg_ar_Click" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
                                 </DockPanel>
                                 <DockPanel Margin="4,0,6,3" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_mod" Content="Allow resolutions divisible by:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto"/>
@@ -172,9 +176,9 @@
         </Grid>
         <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
 			    <Button x:Name="button_cancel" Height="25" Content="Cancel" Click="button_cancel_Click" d:LayoutOverrides="Height" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="120,0,4,0"/>
-		    	<Button x:Name="button_ok" Width="80" Height="25" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="290,0,4,0"/>				
+		    	<Button x:Name="button_ok" Width="80" Height="25" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="290,0,4,0"/>
 				<Button x:Name="button_refresh" Width="80" Height="25" Content="Apply" Click="button_refresh_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="-290,0,4,0"/>
 				<Button x:Name="button_fullscreen" Width="80" Height="25" Content="Fullscreen" Click="button_fullscreen_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Margin="-120,0,4,0"/>
-          </Grid>		
+          </Grid>
        </Grid>
 </Window>

@@ -421,7 +421,7 @@ namespace XviD4PSP
         {
             if ((combo_framerate.IsDropDownOpen || combo_framerate.IsSelectionBoxHighlighted || combo_framerate.IsEditable) && combo_framerate.SelectedItem != null)
             {
-                if (combo_framerate.SelectedItem.ToString() == "")
+                if (combo_framerate.SelectedItem.ToString().Length == 0)
                 {
                     //Включаем редактирование
                     combo_framerate.IsEditable = true;

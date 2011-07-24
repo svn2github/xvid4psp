@@ -354,7 +354,14 @@ namespace XviD4PSP
         {
             get
             {
-                string s = Get(StreamKind.Video, 0, "DisplayAspectRatio");
+                string s = "";
+                if (Settings.MI_Original_AR)
+                {
+                    s = Get(StreamKind.Video, 0, "DisplayAspectRatio_Original");     //Из потока (если доступно)
+                    if (s == "") s = Get(StreamKind.Video, 0, "DisplayAspectRatio"); //Из контейнера или общее
+                }
+                else
+                    s = Get(StreamKind.Video, 0, "DisplayAspectRatio");
 
                 //Подправляем DAR
                 if (s == "" || s == "1.333") return 4.0 / 3.0;
@@ -367,15 +374,35 @@ namespace XviD4PSP
         {
             get
             {
-                string s = Get(StreamKind.Video, 0, "PixelAspectRatio");
+                string s = "";
+                if (Settings.MI_Original_AR)
+                {
+                    s = Get(StreamKind.Video, 0, "PixelAspectRatio_Original");     //Из потока (если доступно)
+                    if (s == "") s = Get(StreamKind.Video, 0, "PixelAspectRatio"); //Из контейнера или общее
+                }
+                else
+                    s = Get(StreamKind.Video, 0, "PixelAspectRatio");
+
                 if (s == "") return 1.0;
 
                 double ar = Aspect;
                 double we_get = Calculate.ConvertStringToDouble(s);
                 if (we_get != 1.0 && (ar == 16.0 / 9.0 || ar == 4.0 / 3.0 || ar == 2.0 || ar == 2.210))
                 {
+                    int w = 0, h = 0;
+                    if (Settings.MI_Original_AR)
+                    {
+                        //Из потока (если доступно)
+                        string ow = Get(StreamKind.Video, 0, "Width_Original");
+                        Int32.TryParse(ow, NumberStyles.Integer, null, out w);
+                        string oh = Get(StreamKind.Video, 0, "Height_Original");
+                        Int32.TryParse(oh, NumberStyles.Integer, null, out  h);
+                    }
+                    if (w == 0) w = Width;
+                    if (h == 0) h = Height;
+
                     //Подправляем PAR (в дополнение к DAR)
-                    double we_calc = Aspect / ((double)Width / (double)Height);
+                    double we_calc = Aspect / ((double)w / (double)h);
                     if (Math.Abs(we_get - we_calc) < 0.0006) return we_calc;
                 }
 

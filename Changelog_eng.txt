@@ -1,6 +1,10 @@
-﻿XviD4PSP 5.10.241.0 (21.07.2011), main changes:
+﻿XviD4PSP 5.10.242.0 (24.07.2011), main changes:
 
->>> (r241) Resolution/Aspect window: on the "Settings" tab added an options "Use the original fps of the stream" and
+>>> (r242) "Aspect/Resolution" window: on the "Settings" tab added an option "Use the original AR of the stream",
+           which is enabled by default. It works the same way as "Use the original fps of the stream" does, but
+           instead of framerate it affects the AR. "Input aspect" and "Output aspect" comboboxes is editable now
+           (the 2nd one - only if selected format allows non-fixed aspects).
+>>> (r241) "Interlace/Framerate" window: on the "Settings" tab added an options "Use the original fps of the stream" and
            "Allow non-standard fps on output". If the first one is checked, then "Original frame rate" field from
            the MediaInfo log will be used to determine the framerate of the input file (this field contains fps of
            the raw video stream if it doesn`t match fps of the container). The second option is only works with AVI,
