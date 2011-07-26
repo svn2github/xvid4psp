@@ -74,6 +74,7 @@ namespace XviD4PSP
         private void button_refresh_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             p.Refresh(script_box.Text);
+            this.Focus();
         }
 
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)

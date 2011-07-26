@@ -16,13 +16,30 @@ namespace XviD4PSP
         public Massive m;
         private Massive oldm;
         private MainWindow p;
+        private string old_sbc;
+        private bool slider_moved = false;
 
         public ColorCorrection(Massive mass, MainWindow parent)
         {
             this.InitializeComponent();
 
-            this.m = mass.Clone();
-            this.oldm = mass.Clone();
+            if (mass != null)
+            {
+                this.m = mass.Clone();
+                this.oldm = mass.Clone();
+            }
+            else
+            {
+                //Заполняем массив
+                m = new Massive();
+                m.format = Settings.FormatOut;
+                m.sbc = old_sbc = Settings.SBC;
+                m = ColorCorrection.DecodeProfile(m);
+
+                //Настройки гистограммы не хранятся в пресете
+                combo_histogram.IsEnabled = false;
+            }
+
             this.Owner = this.p = parent;
 
             //переводим
@@ -77,7 +94,7 @@ namespace XviD4PSP
                 combo_hue.Items.Add(n);
             slider_hue.Minimum = -180;
             slider_hue.Maximum = 180;
-            slider_saturation.SmallChange = 1;
+            slider_hue.SmallChange = 1;
 
             //Яркость
             for (int n = -255; n <= 255; n++)
@@ -96,11 +113,10 @@ namespace XviD4PSP
             combo_histogram.Items.Add("Stereo");
             combo_histogram.Items.Add("StereoOverlay");
             combo_histogram.Items.Add("AudioLevels");
-            combo_histogram.SelectedItem = oldm.levels;
+            combo_histogram.SelectedItem = (oldm != null) ? oldm.levels : "Disabled";
 
             LoadProfiles();    //загружает список профилей в форму, название текущего профиля выбирается = m.sbc
-            DecodeProfile(m);  //читает и передает массиву mass значения параметров из файла профиля = m.sbc
-            LoadFromProfile(); //загружает эти параметры в форму (из массива m)
+            LoadFromProfile(); //загружает параметры в форму (из массива m)
 
             ShowDialog();
         }
@@ -112,7 +128,11 @@ namespace XviD4PSP
 
         private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m = oldm.Clone();
+            if (oldm != null)
+                m = oldm.Clone();
+            else
+                m.sbc = old_sbc;
+
             Close();
         }
 
@@ -327,9 +347,10 @@ namespace XviD4PSP
         {
             if (slider_saturation.IsFocused)
             {
-                m.saturation = slider_saturation.Value;
-                combo_saturation.SelectedItem = m.saturation.ToString("0.0").Replace(",", ".");
+                combo_saturation.SelectedItem = slider_saturation.Value.ToString("0.0").Replace(",", ".");
+                m.saturation = Calculate.ConvertStringToDouble(combo_saturation.SelectedItem.ToString());
                 UpdateManualProfile();
+                slider_moved = true;
             }
         }
 
@@ -351,6 +372,7 @@ namespace XviD4PSP
                 m.hue = Convert.ToInt32(slider_hue.Value);
                 combo_hue.SelectedItem = m.hue;
                 UpdateManualProfile();
+                slider_moved = true;
             }
         }
 
@@ -369,9 +391,10 @@ namespace XviD4PSP
         {
             if (slider_contrast.IsFocused)
             {
-                m.contrast = slider_contrast.Value;
-                combo_contrast.SelectedItem = m.contrast.ToString("0.00").Replace(",", ".");
+                combo_contrast.SelectedItem = slider_contrast.Value.ToString("0.00").Replace(",", ".");
+                m.contrast = Calculate.ConvertStringToDouble(combo_contrast.SelectedItem.ToString());
                 UpdateManualProfile();
+                slider_moved = true;
             }
         }
 
@@ -393,6 +416,7 @@ namespace XviD4PSP
                 m.brightness = Convert.ToInt32(slider_brightness.Value);
                 combo_brightness.SelectedItem = m.brightness;
                 UpdateManualProfile();
+                slider_moved = true;
             }
         }
 
@@ -429,9 +453,13 @@ namespace XviD4PSP
 
         private void Refresh()
         {
-            m = AviSynthScripting.CreateAutoAviSynthScript(m);
-            p.m = m.Clone();
-            p.Refresh(m.script);
+            if (oldm != null)
+            {
+                m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                p.m = m.Clone();
+                p.Refresh(m.script);
+                this.Focus();
+            }
         }
 
         private void button_apply_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -441,8 +469,11 @@ namespace XviD4PSP
 
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            p.SwitchToFullScreen();
-            this.Focus();
+            if (oldm != null)
+            {
+                p.SwitchToFullScreen();
+                this.Focus();
+            }
         }
 
         //Обработка выбора режима отображения гистограммы
@@ -451,6 +482,16 @@ namespace XviD4PSP
             if (combo_histogram.IsDropDownOpen || combo_histogram.IsSelectionBoxHighlighted)
             {
                 m.levels = Convert.ToString(combo_histogram.SelectedItem);
+                Refresh();
+            }
+        }
+
+        private void SliderUp(object sender, object e)
+        {
+            if (slider_moved)
+            {
+                //Обновление превью после перемещения слайдеров
+                slider_moved = false;
                 Refresh();
             }
         }

@@ -15,6 +15,7 @@ namespace XviD4PSP
         public Massive m;
         private Massive oldm;
         private bool profile_was_changed = false;
+        private string old_vencoding;
 
         x264 x264c;
         XviD xvid;
@@ -34,8 +35,37 @@ namespace XviD4PSP
 		{
 			this.InitializeComponent();
 
-            this.m = mass.Clone();
-            this.oldm = mass.Clone();
+            if (mass != null)
+            {
+                this.m = mass.Clone();
+                this.oldm = mass.Clone();
+            }
+            else
+            {
+                //Заполняем массив
+                m = new Massive();
+                m.format = Settings.FormatOut;
+                m.vencoding = old_vencoding = Settings.GetVEncodingPreset(m.format);
+                m.outvcodec = PresetLoader.GetVCodec(m);
+                m.vpasses = PresetLoader.GetVCodecPasses(m);
+                m = PresetLoader.DecodePresets(m);
+                m.infilepath = "C:\\file.mkv";
+                m.invcodecshort = "NOINPUT";
+                m.inresw = m.outresw = 640;
+                m.inresh = m.outresh = 480;
+                m.induration = m.outduration = TimeSpan.FromMinutes(1); 
+                m.inframerate = m.outframerate = "25.000";
+                m.inframes = m.outframes = 1000;
+                m.infilesizeint = 1000;
+                m.invbitrate = 1000;
+
+                //Убираем лишнее, т.к. всё-равно показывать там нечего
+                text_insize_value.Visibility = text_outsize_value.Visibility = Visibility.Collapsed;
+                text_inquality_value.Visibility = text_outquality_value.Visibility = Visibility.Collapsed;
+                text_codec.Margin = text_incodec_value.Margin = combo_codec.Margin = new Thickness(16, 8, 16, 8);
+                row2.Height = row3.Height = new GridLength(0);
+            }
+
             this.Owner = this.p = parent;
 
             //загружаем список кодеков соответвующий формату
@@ -195,13 +225,17 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (x264c == null && xvid == null) UpdateMassive(); //CustomCLI
+            if (oldm != null && x264c == null && xvid == null) UpdateMassive(); //CustomCLI
             Close();
         }
 
         private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m = oldm.Clone();
+            if (oldm != null)
+                m = oldm.Clone();
+            else
+                m.vencoding = old_vencoding;
+
             Close();
         }
 

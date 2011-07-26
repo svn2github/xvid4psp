@@ -203,6 +203,7 @@ namespace XviD4PSP
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);
                 p.m = m.Clone();
                 p.Refresh(m.script);
+                this.Focus();
             }
         }
 
@@ -550,6 +551,7 @@ namespace XviD4PSP
             m = AviSynthScripting.CreateAutoAviSynthScript(m);
             p.m = m.Clone();
             p.Refresh(m.script);
+            this.Focus();
 
             CalculateMod();
             FillManualBox();

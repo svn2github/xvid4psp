@@ -4224,7 +4224,7 @@ namespace XviD4PSP
                         if (m.inframerate != m.outframerate)
                         {
                             SetLog("Framerate: " + m.inframerate + " > " + m.outframerate);
-                            SetLog("FramerateModifer: " + m.frameratemodifer);
+                            SetLog("FramerateModifier: " + m.frameratemodifer);
                         }
                         else
                             SetLog("Framerate: " + m.inframerate);
@@ -4266,7 +4266,7 @@ namespace XviD4PSP
                         if (instream.samplerate != outstream.samplerate)
                         {
                             SetLog("Samplerate: " + instream.samplerate + " > " + outstream.samplerate);
-                            SetLog("SamplerateModifer: " + m.sampleratemodifer);
+                            SetLog("SamplerateModifier: " + m.sampleratemodifer);
                         }
                         else
                         {

@@ -303,12 +303,8 @@ namespace XviD4PSP
                         combo_filtering.SelectedItem = Settings.Filtering = "Disabled";
 
                     //загружаем списки профилей цвето коррекции
-                    combo_sbc.Items.Clear();
-                    combo_sbc.Items.Add("Disabled");
-                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
-                    {
-                        combo_sbc.Items.Add(Path.GetFileNameWithoutExtension(file));
-                    }
+                    LoadSBCPresets();
+
                     //прописываем текущий профиль
                     if (combo_sbc.Items.Contains(Settings.SBC))
                         combo_sbc.SelectedItem = Settings.SBC;
@@ -3382,89 +3378,111 @@ namespace XviD4PSP
 
         private void VideoEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null) return;
-            else if (m.format == Format.ExportFormats.Audio)
+            if (m != null && m.format == Format.ExportFormats.Audio)
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
             }
-            else
+            else if (!(m == null && Settings.FormatOut == Format.ExportFormats.Audio))
             {
                 VideoEncoding enc = new VideoEncoding(m, this);
-                m = enc.m.Clone();
+
+                if (m != null) m = enc.m.Clone();
+                Format.ExportFormats format = enc.m.format;
+                string vencoding = enc.m.vencoding;
+
                 LoadVideoPresets();
 
                 //защита от удаления профиля
-                if (!combo_vencoding.Items.Contains(m.vencoding))
-                    m.vencoding = ChooseVideoPreset(m.format);
+                if (!combo_vencoding.Items.Contains(vencoding))
+                    vencoding = ChooseVideoPreset(format);
 
-                combo_vencoding.SelectedItem = m.vencoding;
-                Settings.SetVEncodingPreset(m.format, m.vencoding);
+                combo_vencoding.SelectedItem = vencoding;
+                Settings.SetVEncodingPreset(format, vencoding);
 
-                //проверка на размер
-                //m.outfilesize = Calculate.GetEncodingSize(m);
+                if (m != null)
+                {
+                    //проверка на размер
+                    //m.outfilesize = Calculate.GetEncodingSize(m);
 
-                UpdateTaskMassive(m);
-                ValidateTrimAndCopy(m);
+                    UpdateTaskMassive(m);
+                    ValidateTrimAndCopy(m);
+                }
             }
         }
 
         private void AudioEncodingSettings_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null) return;
-            if (m.inaudiostreams.Count == 0 || m.outaudiostreams.Count == 0)
+            if (m != null && (m.inaudiostreams.Count == 0 || m.outaudiostreams.Count == 0))
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("File doesn`t have audio streams!"), Languages.Translate("Error"));
             }
             else
             {
-                //определяем аудио потоки
-                AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-
-                //Запоминаем старый кодер
-                string old_codec = outstream.codec;
-
-                AudioEncoding enc = new AudioEncoding(m, this);
-                m = enc.m.Clone();
-                LoadAudioPresets();
-
-                //защита от удаления профиля
-                if (!combo_aencoding.Items.Contains(outstream.encoding))
-                    outstream.encoding = ChooseAudioPreset(m.format);
-
-                combo_aencoding.SelectedItem = outstream.encoding;
-
-                if (combo_aencoding.SelectedItem.ToString() != "Disabled")
+                if (m == null)
                 {
-                    Settings.SetAEncodingPreset(m.format, outstream.encoding);
+                    AudioEncoding enc = new AudioEncoding(null, this);
+                    LoadAudioPresets();
+
+                    string aencoding = ((AudioStream)enc.m.outaudiostreams[enc.m.outaudiostream]).encoding;
+
+                    //защита от удаления профиля
+                    if (!combo_aencoding.Items.Contains(aencoding))
+                        aencoding = ChooseAudioPreset(enc.m.format);
+                    combo_aencoding.SelectedItem = aencoding;
+
+                    if (aencoding != "Disabled")
+                        Settings.SetAEncodingPreset(enc.m.format, aencoding);
                 }
                 else
                 {
-                    m.outaudiostreams.Clear();
-                    old_codec = ".";
+                    //определяем аудио потоки
+                    AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+
+                    //Запоминаем старый кодер
+                    string old_codec = outstream.codec;
+
+                    AudioEncoding enc = new AudioEncoding(m, this);
+                    m = enc.m.Clone();
+                    LoadAudioPresets();
+
+                    //защита от удаления профиля
+                    if (!combo_aencoding.Items.Contains(outstream.encoding))
+                        outstream.encoding = ChooseAudioPreset(m.format);
+                    combo_aencoding.SelectedItem = outstream.encoding;
+
+                    if (outstream.encoding != "Disabled")
+                    {
+                        Settings.SetAEncodingPreset(m.format, outstream.encoding);
+                    }
+                    else
+                    {
+                        m.outaudiostreams.Clear();
+                        old_codec = ".";
+                    }
+
+                    //Пересоздаем скрипт при изменении кодера. audio encoding settings
+                    if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
+                        old_codec == ".")
+                    {
+                        //Меняем расширение
+                        if (m.format == Format.ExportFormats.Audio && m.outfilepath != null)
+                            m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
+
+                        string old_script = m.script;
+                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        if (old_script != m.script) LoadVideo(MediaLoad.update);
+                    }
+
+                    //проверка на размер
+                    //m.outfilesize = Calculate.GetEncodingSize(m);
+
+                    UpdateTaskMassive(m);
+                    ReloadChildWindows();
+                    ValidateTrimAndCopy(m);
                 }
-
-                //Пересоздаем скрипт при изменении кодера. audio encoding settings
-                if (m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec != old_codec ||
-                    old_codec == ".")
-                {
-                    //Меняем расширение
-                    if (m.format == Format.ExportFormats.Audio && m.outfilepath != null)
-                        m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
-                    
-                    string old_script = m.script;
-                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                    if (old_script != m.script) LoadVideo(MediaLoad.update);
-                }
-
-                //проверка на размер
-                //m.outfilesize = Calculate.GetEncodingSize(m);
-
-                UpdateTaskMassive(m);
-                ReloadChildWindows();
-                ValidateTrimAndCopy(m);
             }
         }
 
@@ -3932,62 +3950,88 @@ namespace XviD4PSP
 
         private void ColorCorrection_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m == null) return;
-            if (m.outvcodec == "Copy")
+            if (m != null && m.outvcodec == "Copy")
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("Can`t change parameters in COPY mode!"), Languages.Translate("Error"));
             }
-            else if (m.format == Format.ExportFormats.Audio)
+            else if (m != null && m.format == Format.ExportFormats.Audio)
             {
                 Message mess = new Message(this);
                 mess.ShowMessage(Languages.Translate("File doesn`t have video streams!"), Languages.Translate("Error"));
             }
             else
             {
-                bool old_colormatrix = m.iscolormatrix;
-                double old_saturation = m.saturation;
-                double old_contrast = m.contrast;
-                int old_brightness = m.brightness;
-                int old_hue = m.hue;
-
-                ColorCorrection col = new ColorCorrection(m, this);
-                m = col.m.Clone();
-
-                //загружаем списки профилей цвето коррекции
-                combo_sbc.Items.Clear();
-                combo_sbc.Items.Add("Disabled");
-                try
+                if (m == null)
                 {
-                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
-                        combo_sbc.Items.Add(Path.GetFileNameWithoutExtension(file));
-                }
-                catch { }
+                    ColorCorrection col = new ColorCorrection(null, this);
+                    LoadSBCPresets();
 
-                //прописываем текущий профиль
-                if (combo_sbc.Items.Contains(m.sbc))
-                    combo_sbc.SelectedItem = m.sbc;
+                    //прописываем текущий профиль
+                    if (combo_sbc.Items.Contains(col.m.sbc))
+                        combo_sbc.SelectedItem = col.m.sbc;
+                    else
+                    {
+                        //Видимо профиль был удален, сбрасываем всё на дефолты
+                        combo_sbc.SelectedItem = col.m.sbc = "Disabled";
+                    }
+
+                    Settings.SBC = col.m.sbc;
+                }
                 else
                 {
-                    //Видимо профиль был удален, сбрасываем всё на дефолты
-                    combo_sbc.SelectedItem = m.sbc = "Disabled";
-                    m = ColorCorrection.DecodeProfile(m);
-                }
+                    
+                    ColorCorrection col = new ColorCorrection(m, this);
 
-                Settings.SBC = m.sbc; //сохраняет название текущего профиля в реестре
+                    bool old_colormatrix = m.iscolormatrix;
+                    double old_saturation = m.saturation;
+                    double old_contrast = m.contrast;
+                    int old_brightness = m.brightness;
+                    int old_hue = m.hue;
+                    string old_levels = m.levels;
 
-                //обновление при необходимости
-                if (old_colormatrix != m.iscolormatrix ||
-                    old_saturation != m.saturation ||
-                    old_contrast != m.contrast ||
-                    old_brightness != m.brightness ||
-                    old_hue != m.hue)
-                {
-                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                    LoadVideo(MediaLoad.update);
-                    UpdateTaskMassive(m);
+                    m = col.m.Clone();
+                    LoadSBCPresets();
+
+                    //прописываем текущий профиль
+                    if (combo_sbc.Items.Contains(m.sbc))
+                        combo_sbc.SelectedItem = m.sbc;
+                    else
+                    {
+                        //Видимо профиль был удален, сбрасываем всё на дефолты
+                        combo_sbc.SelectedItem = m.sbc = "Disabled";
+                        m = ColorCorrection.DecodeProfile(m);
+                    }
+
+                    Settings.SBC = m.sbc;
+
+                    //обновление при необходимости
+                    if (old_colormatrix != m.iscolormatrix ||
+                        old_saturation != m.saturation ||
+                        old_contrast != m.contrast ||
+                        old_brightness != m.brightness ||
+                        old_hue != m.hue ||
+                        old_levels != m.levels)
+                    {
+                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        LoadVideo(MediaLoad.update);
+                        UpdateTaskMassive(m);
+                    }
                 }
             }
+        }
+
+        private void LoadSBCPresets()
+        {
+            //загружаем списки профилей цвето коррекции
+            combo_sbc.Items.Clear();
+            combo_sbc.Items.Add("Disabled");
+            try
+            {
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                    combo_sbc.Items.Add(Path.GetFileNameWithoutExtension(file));
+            }
+            catch { }
         }
 
         private void menu_save_wav_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -6179,12 +6223,9 @@ namespace XviD4PSP
             menu_demux_video.IsEnabled = ShowItems;
             menu_autocrop.IsEnabled = ShowItems;
             menu_detect_interlace.IsEnabled = ShowItems;
-            menu_saturation_brightness.IsEnabled = ShowItems;
-            menu_venc_settings.IsEnabled = ShowItems;
             menu_demux.IsEnabled = ShowItems;
             menu_save_wav.IsEnabled = ShowItems;
             menu_audiooptions.IsEnabled = ShowItems;
-            menu_aenc_settings.IsEnabled = ShowItems;
             mnAddSubtitles.IsEnabled = ShowItems;
             mnRemoveSubtitles.IsEnabled = ShowItems;
             menu_editscript.IsEnabled = ShowItems;

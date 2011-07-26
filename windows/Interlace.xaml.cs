@@ -256,6 +256,7 @@ namespace XviD4PSP
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);
                 p.m = m.Clone();
                 p.Refresh(m.script);
+                this.Focus();
             }
         }
 
@@ -470,6 +471,7 @@ namespace XviD4PSP
 
                     p.m = m.Clone();
                     p.Refresh(m.script);
+                    this.Focus();
                 }
 
                 if (combo_framerate.IsEditable)
@@ -510,6 +512,7 @@ namespace XviD4PSP
 
                 p.m = m.Clone();
                 p.Refresh(m.script);
+                this.Focus();
             }
         }
 
@@ -549,6 +552,7 @@ namespace XviD4PSP
 
                 p.m = m.Clone();
                 p.Refresh(m.script);
+                this.Focus();
             }
         }
 

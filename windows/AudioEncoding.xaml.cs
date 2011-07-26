@@ -14,6 +14,7 @@ namespace XviD4PSP
 	{
         public Massive m;
         private Massive oldm;
+        private string old_aencoding;
 
         LameMP3 mp3;
         NeroAAC aac;
@@ -28,16 +29,54 @@ namespace XviD4PSP
 		{
 			this.InitializeComponent();
 
-            this.m = mass.Clone();
-            this.oldm = mass.Clone();
+            if (mass != null)
+            {
+                this.m = mass.Clone();
+                this.oldm = mass.Clone();
+            }
+            else
+            {
+                //Заполняем массив
+                m = new Massive();
+                m.format = Settings.FormatOut;
+                m.infilepath = "C:\\file.mkv";
+
+                //Добавляем звук
+                m.inaudiostreams.Add(new AudioStream());
+                m.outaudiostreams.Add(new AudioStream());
+                m.inaudiostream = m.outaudiostream = 0;
+
+                //Убираем лишнее, т.к. всё-равно показывать там нечего
+                text_insize_value.Visibility = text_outsize_value.Visibility = Visibility.Collapsed;
+                text_codec.Margin = text_incodec_value.Margin = combo_codec.Margin = new Thickness(16, 8, 16, 8);
+                row2.Height = new GridLength(0);
+            }
+
             this.Owner = parent;
 
             //определяем аудио потоки
             AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
             AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
+            if (oldm == null)
+            {
+                //Заполняем параметры треков
+                outstream.encoding = old_aencoding = Settings.GetAEncodingPreset(m.format);
+                outstream.codec = PresetLoader.GetACodec(m.format, outstream.encoding);
+                outstream.passes = PresetLoader.GetACodecPasses(m);
+                instream.audiopath = "C:\\file.mp3";
+                instream.codecshort = "NOINPUT";
+                instream.bitrate = 128;
+                instream.bits = outstream.bits = 16;
+                instream.channels = outstream.channels = 2;
+                instream.samplerate = outstream.samplerate = "44100";
+
+                m = PresetLoader.DecodePresets(m);
+            }
+
             //загружаем список кодеков соответвующий формату
-            foreach (string codec in Format.GetACodecsList(m.format)) combo_codec.Items.Add(codec);
+            foreach (string codec in Format.GetACodecsList(m.format))
+                if (!(oldm == null && codec == "Disabled")) combo_codec.Items.Add(codec);
             if (!combo_codec.Items.Contains(outstream.codec)) combo_codec.Items.Add(outstream.codec);
             combo_codec.SelectedItem = outstream.codec;
             text_incodec_value.Content = instream.codecshort;
@@ -170,13 +209,17 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            UpdateMassive();
+            if (oldm != null) UpdateMassive();
             Close();
         }
 
         private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m = oldm.Clone();
+            if (oldm != null)
+                m = oldm.Clone();
+            else
+                ((AudioStream)m.outaudiostreams[m.outaudiostream]).encoding = old_aencoding;
+
             Close();
         }
 
@@ -369,7 +412,7 @@ namespace XviD4PSP
                     combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
-            combo_profile.Items.Add("Disabled");
+            if (oldm != null) combo_profile.Items.Add("Disabled");
             combo_profile.Items.Add("Copy");
 
             //прописываем текущий пресет кодирования

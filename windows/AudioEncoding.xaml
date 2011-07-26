@@ -21,8 +21,8 @@
 					<ColumnDefinition Width="0.326*"/>
 				</Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
-					<RowDefinition Height="0.347*"/>
-					<RowDefinition Height="0.653*"/>
+					<RowDefinition x:Name="row1" Height="0.347*"/>
+					<RowDefinition x:Name="row2" Height="0.653*"/>
 				</Grid.RowDefinitions>
 				<ComboBox IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" x:Name="combo_codec" VerticalAlignment="Center" Grid.Column="2" SelectionChanged="combo_codec_SelectionChanged" HorizontalAlignment="Center" Width="Auto" Margin="8,6,16,0"/>
 				<Label OpacityMask="{x:Null}" x:Name="text_size" Content="Size:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="16,0,8,8" VerticalAlignment="Center" Grid.Row="1"/>
