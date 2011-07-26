@@ -3564,9 +3564,10 @@ namespace XviD4PSP
                         //Копирование exe-файлов
                         if (Path.GetFileName(drop_data[0]).ToLower().EndsWith(".exe"))
                         {
+                            bool _10bit = (m != null && m.outvcodec == "x264" && m.x264options.profile == x264.Profiles.High10);
                             string file_c = "", path_c = "", file_d = Path.GetFileName(drop_data[0]).ToLower();
-                            if (file_d == "x264.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264.exe"; }
-                            else if (file_d == "x264_64.exe") { path_c = Calculate.StartupPath + "\\apps\\x264\\"; file_c = "x264_64.exe"; }
+                            if (file_d == "x264.exe") { path_c = Calculate.StartupPath + ((_10bit) ? "\\apps\\x264_10b\\" : "\\apps\\x264\\"); file_c = "x264.exe"; }
+                            else if (file_d == "x264_64.exe") { path_c = Calculate.StartupPath + ((_10bit) ? "\\apps\\x264_10b\\" : "\\apps\\x264\\"); file_c = "x264_64.exe"; }
                             else if (file_d == "ffmpeg.exe") { path_c = Calculate.StartupPath + "\\apps\\ffmpeg\\"; file_c = "ffmpeg.exe"; }
 
                             if (!string.IsNullOrEmpty(file_c))

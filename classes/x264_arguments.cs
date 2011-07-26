@@ -9,14 +9,14 @@ namespace XviD4PSP
     {
         public x264_arguments()
         {
+            //(defaults)
         }
 
-        public x264_arguments(int codec_preset, bool _10bit)
+        public x264_arguments(x264.Presets preset, x264.Tunes tune, x264.Profiles profile)
         {
             //Выставляем значения в соответствии с пресетом
-            if (codec_preset == 0)
+            if (preset == x264.Presets.Ultrafast)
             {
-                //Ultrafast
                 _adaptivedct = false;
                 _analyse = "none";
                 _aqmode = 0;
@@ -38,9 +38,8 @@ namespace XviD4PSP
                 _weightp = 0;
                 //--scenecut 0
             }
-            else if (codec_preset == 1)
+            else if (preset == x264.Presets.Superfast)
             {
-                //Superfast
                 _analyse = "i8x8,i4x4";
                 _lookahead = 0;
                 _me = "dia";
@@ -51,9 +50,8 @@ namespace XviD4PSP
                 _trellis = 0;
                 _weightp = 1;
             }
-            else if (codec_preset == 2)
+            else if (preset == x264.Presets.Veryfast)
             {
-                //Veryfast
                 _lookahead = 10;
                 _mixedrefs = false;
                 _reference = 1;
@@ -61,31 +59,27 @@ namespace XviD4PSP
                 _trellis = 0;
                 _weightp = 1;
             }
-            else if (codec_preset == 3)
+            else if (preset == x264.Presets.Faster)
             {
-                //Faster
                 _lookahead = 20;
                 _mixedrefs = false;
                 _reference = 2;
                 _subme = 4;
                 _weightp = 1;
             }
-            else if (codec_preset == 4)
+            else if (preset == x264.Presets.Fast)
             {
-                //Fast
                 _reference = 2;
                 _subme = 6;
                 _lookahead = 30;
                 _weightp = 1;
             }
-            else if (codec_preset == 5)
+            else if (preset == x264.Presets.Medium)
             {
-                //Medium
                 //(defaults)
             }
-            else if (codec_preset == 6)
+            else if (preset == x264.Presets.Slow)
             {
-                //Slow
                 _b_adapt = 2;
                 _direct = "auto";
                 _lookahead = 50;
@@ -93,9 +87,8 @@ namespace XviD4PSP
                 _reference = 5;
                 _subme = 8;
             }
-            else if (codec_preset == 7)
+            else if (preset == x264.Presets.Slower)
             {
-                //Slower
                 _analyse = "all";
                 _b_adapt = 2;
                 _direct = "auto";
@@ -105,9 +98,8 @@ namespace XviD4PSP
                 _subme = 9;
                 _trellis = 2;
             }
-            else if (codec_preset == 8)
+            else if (preset == x264.Presets.Veryslow)
             {
-                //Veryslow
                 _analyse = "all";
                 _b_adapt = 2;
                 _bframes = 8;
@@ -119,9 +111,8 @@ namespace XviD4PSP
                 _subme = 10;
                 _trellis = 2;
             }
-            else if (codec_preset == 9)
+            else if (preset == x264.Presets.Placebo)
             {
-                //Placebo
                 _analyse = "all";
                 _b_adapt = 2;
                 _bframes = 16;
@@ -132,13 +123,82 @@ namespace XviD4PSP
                 _no_fastpskip = true;
                 _reference = 16;
                 _slow_frstpass = true;
-                _subme = 10;
+                _subme = 11;
                 _trellis = 2;
             }
 
-            //10-bit depth
-            if (_10bit)
+            //Изменения под Tune
+            if (tune == x264.Tunes.None)
             {
+                //(defaults)
+            }
+            else if (tune == x264.Tunes.Film)
+            {
+                _deblocks = -1;
+                _deblockt = -1;
+                _psytrellis = 0.15m;
+            }
+            else if (tune == x264.Tunes.Animation)
+            {
+                _bframes += 2;
+                _deblocks = 1;
+                _deblockt = 1;
+                _psyrdo = 0.4m;
+                _aqstrength = "0.6";
+                _reference = (_reference > 1) ? _reference * 2 : 1;
+            }
+            else if (tune == x264.Tunes.Grain)
+            {
+                _aqstrength = "0.5";
+                _no_dctdecimate = true;
+                _deblocks = -2;
+                _deblockt = -2;
+                _ratio_ip = 1.1m;
+                _ratio_pb = 1.1m;
+                _psytrellis = 0.25m;
+                _qcomp = 0.8m;
+            }
+            else if (tune == x264.Tunes.StillImage)
+            {
+                _aqstrength = "1.2";
+                _deblocks = -3;
+                _deblockt = -3;
+                _psyrdo = 2.0m;
+                _psytrellis = 0.7m;
+            }
+            else if (tune == x264.Tunes.PSNR)
+            {
+                _aqmode = 0;
+                _no_psy = true;
+            }
+            else if (tune == x264.Tunes.SSIM)
+            {
+                _aqmode = 2;
+                _no_psy = true;
+            }
+            else if (tune == x264.Tunes.FastDecode)
+            {
+                _cabac = false;
+                _deblocking = false;
+                _weightb = false;
+                _weightp = 0;
+            }
+
+            //Ограничения Profile
+            /*if (profile == x264.Profiles.Baseline)
+            {
+                _adaptivedct = false;
+                _bframes = 0;
+                _cabac = false;
+                _weightp = 0;
+            }
+            else if (profile == x264.Profiles.Main)
+            {
+                _adaptivedct = false;
+            }
+            else*/ if (profile == x264.Profiles.High10)
+            {
+                //10-bit depth
                 _max_quant = 81;
             }
         }
@@ -148,8 +208,8 @@ namespace XviD4PSP
             return (x264_arguments)this.MemberwiseClone();
         }
 
-        private int _preset = 5;
-        public int preset
+        private x264.Presets _preset = x264.Presets.Medium;
+        public x264.Presets preset
         {
             get
             {
@@ -171,6 +231,19 @@ namespace XviD4PSP
             set
             {
                 _profile = value;
+            }
+        }
+
+        private x264.Tunes _tune = x264.Tunes.None;
+        public x264.Tunes tune
+        {
+            get
+            {
+                return _tune;
+            }
+            set
+            {
+                _tune = value;
             }
         }
 
