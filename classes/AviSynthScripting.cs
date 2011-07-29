@@ -910,7 +910,7 @@ namespace XviD4PSP
            }
 
            //импорт звука и объединение
-           if (m.inaudiostreams.Count > 0 && instream.audiopath != null)
+           if (m.inaudiostreams.Count > 0 && instream.audiopath != null && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
            {
                //прописываем импорт видео
                script += "video = " + invideostring + Environment.NewLine;
@@ -1113,8 +1113,8 @@ global clip = c
 c = WriteFile(c, file, ""a"", ""sep"", ""b"")
 c = FrameEvaluate(c, ""global a = IsCombedTIVTC(clip, cthresh=9)"")
 c = FrameEvaluate(c, ""global b = ((0.50*YDifference{5}(clip) + 0.25*UDifference{5}(clip) + 0.25*VDifference{5}(clip)) < 1.0) ? false : true"")
-SelectRangeEvery(c,{3},{4},0)
-crop(0,0,16,16)";
+SelectRangeEvery(c, {3}, {4}, 0)
+crop(0, 0, 16, 16)";
 
        private const string FieldOrderScript =
 @"{0}
@@ -1128,8 +1128,8 @@ c = abff
 c = WriteFile(c, file, ""diffa"", ""sep"", ""diffb"")
 c = FrameEvaluate(c,""global diffa = 0.50*YDifference{5}(abff) + 0.25*UDifference{5}(abff) + 0.25*VDifference{5}(abff)"")
 c = FrameEvaluate(c,""global diffb = 0.50*YDifference{5}(atff) + 0.25*UDifference{5}(atff) + 0.25*VDifference{5}(atff)"")
-SelectRangeEvery(c,{3},{4},0)
-crop(0,0,16,16)";
+SelectRangeEvery(c, {3}, {4}, 0)
+crop(0, 0, 16, 16)";
 
        public static string GetSourceDetectionScript(Detecting det, string originalScript, string trimLine, string logFileName, int selectEvery, int selectLength)
        {

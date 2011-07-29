@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.245.0 (26.07.2011), main changes:
+﻿XviD4PSP 5.10.246.0 (29.07.2011), main changes:
 
+>>> (r246) The scripts for source detector and for autocrop must be without audio (rep. by Brainel).
+>>> (r246) Source detector: for error messages added StackTrace info and current AviSynth script.
 >>> (r245) x264: added --tune option; added --subme 11 mode (x264 r2036+); all the tooltips now will show the "raw"
            defaults of the encoder (without --profile and --tune affection); some other changes.
 >>> (r244) Audio\Video encoders settings windows and "Color correction" window is now accessible even if there is no

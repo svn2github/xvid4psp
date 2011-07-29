@@ -229,19 +229,7 @@ namespace XviD4PSP
             if (!string.IsNullOrEmpty(((Exception)e.Result).HelpLink))
             {
                 //Добавляем скрипт в StackTrace
-                stacktrace += "\r\n\r\n   -------\r\n";
-                string[] lines = ((Exception)e.Result).HelpLink.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-                foreach (string line in lines)
-                {
-                    int index = 0;
-                    while (index <= line.Length)
-                    {
-                        //С переносом длинных строчек
-                        int length = Math.Min(150, line.Length - index);
-                        stacktrace += "\r\n   " + line.Substring(index, length);
-                        index += 150;
-                    }
-                }
+                stacktrace += Calculate.WrapScript(((Exception)e.Result).HelpLink, 150);
             }
 
             string ext = Path.GetExtension(m.infilepath).ToLower();

@@ -1038,5 +1038,23 @@ namespace XviD4PSP
             }
             return true;
         }
+
+        public static string WrapScript(string script, int max_length)
+        {
+            //Перенос длинных строчек
+            string result = "\r\n\r\n   -------\r\n";
+            string[] lines = (script.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
+            foreach (string line in lines)
+            {
+                int index = 0;
+                while (index <= line.Length)
+                {
+                    int length = Math.Min(max_length, line.Length - index);
+                    result += "\r\n   " + line.Substring(index, length);
+                    index += max_length;
+                }
+            }
+            return result;
+        }
     }
 }

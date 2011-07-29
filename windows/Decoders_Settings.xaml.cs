@@ -120,7 +120,8 @@ namespace XviD4PSP
             button_vdec_add.Content = button_adec_add.Content = Languages.Translate("Add");
             button_vdec_delete.Content = button_adec_delete.Content = Languages.Translate("Remove");
             button_vdec_reset.Content = button_adec_reset.Content = Languages.Translate("Reset");
-            combo_ffms_threads.ToolTip = "1 = " + Languages.Translate("disable multithreading") + "\r\nAuto = " + Languages.Translate("logical CPU's count");
+            combo_ffms_threads.ToolTip = label_ffms_threads.ToolTip = "1 = " + Languages.Translate("disable multithreading (recommended)") + "\r\nAuto = " +
+                Languages.Translate("logical CPU's count") + "\r\n\r\n" + Languages.Translate("Attention! Multithreaded decoding can be unstable!");
             label_ffms_threads.Content = "- " + Languages.Translate("decoding threads");
 
             //DirectShowSource

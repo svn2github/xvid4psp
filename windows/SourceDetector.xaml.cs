@@ -13,6 +13,7 @@ using System.Windows.Threading;
 using System.ComponentModel;
 using System.Collections;
 using System.Globalization;
+using System.Windows.Interop;
 
 namespace XviD4PSP
 {
@@ -40,13 +41,18 @@ namespace XviD4PSP
     //Описание алгоритма http://avisynth.org/mediawiki/Interlace_detection
     public partial class SourceDetector
     {
-        public Massive m;
+        private static object locker = new object();
         private BackgroundWorker worker = null;
         private AviSynthReader reader = null;
+        private IntPtr Handle = IntPtr.Zero;
         private bool IsErrors = false;
         private bool IsAborted = false;
         private string ErrorText = null;
+        private string StackTrace = null;
+        private string Script = null;
+        private int num_closes = 0;
         public string results = null;
+        public Massive m;
 
         SourceType source_type = SourceType.UNKNOWN;
         FieldOrder field_order = FieldOrder.UNKNOWN;
@@ -71,14 +77,22 @@ namespace XviD4PSP
             this.Owner = App.Current.MainWindow;
             this.m = mass.Clone();
 
+            progress_total.Maximum = 100;
             Title = Languages.Translate("Detecting interlace") + "...";
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
-            progress_total.Maximum = 100;
+            this.ContentRendered += new EventHandler(Window_ContentRendered);
 
+            //BackgroundWorker
             CreateBackgroundWorker();
             worker.RunWorkerAsync();
 
             ShowDialog();
+        }
+
+        void Window_ContentRendered(object sender, EventArgs e)
+        {
+            if (Handle == IntPtr.Zero)
+                Win7Taskbar.SetProgressIndeterminate(this, ref Handle);
         }
 
         private void CreateBackgroundWorker()
@@ -119,8 +133,12 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                IsErrors = true;
-                ErrorText = "SourceDetector: " + ex.Message;
+                if (!IsAborted && num_closes == 0)
+                {
+                    IsErrors = true;
+                    ErrorText = "SourceDetector: " + ex.Message;
+                    StackTrace = ex.StackTrace;
+                }
             }
         }
 
@@ -141,16 +159,17 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    IsErrors = true;
-                    ErrorText = "SourceDetector (RunAnalyzer): " + ex.Message;
+                    if (!IsAborted && num_closes == 0)
+                    {
+                        IsErrors = true;
+                        ErrorText = "SourceDetector (RunAnalyzer): " + ex.Message;
+                        StackTrace = ex.StackTrace;
+                        Script = script;
+                    }
                 }
                 finally
                 {
-                    if (reader != null)
-                    {
-                        reader.Close();
-                        reader = null;
-                    }
+                    CloseReader(true);
                 }
             }
 
@@ -195,7 +214,7 @@ namespace XviD4PSP
 
             //Имя лог-файла
             string logFileName = Settings.TempPath + "\\detecting_" + detecting.ToString().ToLower() + ".log";
-            SafeDelete(logFileName);
+            File.Delete(logFileName);
 
             //Прогон скрипта
             if (detecting == Detecting.Fields) SetFieldPhase();
@@ -214,7 +233,6 @@ namespace XviD4PSP
         {
             try
             {
-                //File.WriteAllText(Settings.TempPath + "\\script.avs", script, System.Text.Encoding.Default);
                 reader = new AviSynthReader();
                 reader.ParseScript(script);
                 int total = reader.FrameCount;
@@ -227,16 +245,17 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                IsErrors = true;
-                ErrorText = "SourceDetector (PlayScript): " + ex.Message;
+                if (!IsAborted && num_closes == 0)
+                {
+                    IsErrors = true;
+                    ErrorText = "SourceDetector (PlayScript): " + ex.Message;
+                    StackTrace = ex.StackTrace;
+                    Script = script;
+                }
             }
             finally
             {
-                if (reader != null)
-                {
-                    reader.Close();
-                    reader = null;
-                }
+                CloseReader(true);
             }
         }
 
@@ -602,14 +621,21 @@ namespace XviD4PSP
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            if (progress_total.IsIndeterminate)
+            if (((BackgroundWorker)sender).WorkerReportsProgress)
             {
-                progress_total.IsIndeterminate = false;
-                label_info.Content = Languages.Translate("Detecting interlace") + "...";
-            }
+                if (progress_total.IsIndeterminate)
+                {
+                    progress_total.IsIndeterminate = false;
+                    label_info.Content = Languages.Translate("Detecting interlace") + "...";
+                }
 
-            progress_total.Value = e.ProgressPercentage;
-            Title = "(" + e.ProgressPercentage.ToString("0") + "%)";
+                progress_total.Value = e.ProgressPercentage;
+                Title = "(" + e.ProgressPercentage.ToString("0") + "%)";
+
+                //Прогресс в Taskbar
+                //if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressValue(Handle, Convert.ToUInt64(e.ProgressPercentage), 100);
+            }
         }
 
         internal delegate void FieldPhaseDelegate();
@@ -626,17 +652,29 @@ namespace XviD4PSP
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (IsErrors && !IsAborted)
-                ErrorException(ErrorText);
-
-            if (IsErrors)
-                m = null;
-
-            if (!IsErrors || IsAborted)
+            if (e.Error != null)
             {
-                //удаляем мусор
-                SafeDelete(Settings.TempPath + "\\detecting_interlace.log");
-                SafeDelete(Settings.TempPath + "\\detecting_fields.log");
+                ErrorException("SourceDetector (Unhandled): " + ((Exception)e.Error).Message, ((Exception)e.Error).StackTrace);
+                m = null;
+            }
+            else
+            {
+                //Добавляем скрипт в StackTrace
+                if (!string.IsNullOrEmpty(Script))
+                    StackTrace += Calculate.WrapScript(Script, 150);
+
+                if (IsErrors && !IsAborted)
+                    ErrorException(ErrorText, StackTrace);
+
+                if (IsErrors)
+                    m = null;
+
+                if (!IsErrors || IsAborted)
+                {
+                    //удаляем мусор
+                    SafeDelete(Settings.TempPath + "\\detecting_interlace.log");
+                    SafeDelete(Settings.TempPath + "\\detecting_fields.log");
+                }
             }
 
             Close();
@@ -651,57 +689,72 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException("SafeDelete: " + ex.Message);
+                ErrorException("SafeDelete: " + ex.Message, ex.StackTrace);
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (reader != null)
+            bool cancel_closing = false;
+
+            if (worker != null)
             {
-                IsAborted = true;
-                for (int i = 0; i <= 50 && reader != null; i++)
+                if (worker.IsBusy && num_closes < 5)
                 {
-                    Thread.Sleep(100);
-                    if (i == 50 && reader != null)
-                    {
-                        try
-                        {
-                            reader.Close();
-                            reader = null;
-                        }
-                        catch { }
-                    }
+                    //Отмена
+                    IsAborted = true;
+                    cancel_closing = true;
+                    worker.CancelAsync();
+                    num_closes += 1;
+                    m = null;
                 }
-                e.Cancel = true;
+                else
+                {
+                    worker.Dispose();
+                    worker = null;
+                }
             }
 
-            if (worker.IsBusy)
+            //Отменяем закрытие окна
+            if (cancel_closing)
             {
-                IsAborted = true;
-                worker.CancelAsync();
-                worker.Dispose();
+                //CloseReader(false);
+
+                worker.WorkerReportsProgress = false;
+                label_info.Content = Languages.Translate("Aborting... Please wait...");
+                Win7Taskbar.SetProgressState(Handle, TBPF.INDETERMINATE);
+                progress_total.IsIndeterminate = true;
                 e.Cancel = true;
             }
-
-            foreach (Window win in this.OwnedWindows)
-                win.Close();
+            else
+                CloseReader(true);
         }
 
-        private void ErrorException(string message)
+        private void CloseReader(bool _null)
         {
-            ShowMessage(this, message);
+            lock (locker)
+            {
+                if (reader != null)
+                {
+                    reader.Close();
+                    if (_null) reader = null;
+                }
+            }
         }
 
-        internal delegate void MessageDelegate(object sender, string data);
-        private void ShowMessage(object sender, string data)
+        internal delegate void ErrorExceptionDelegate(string data, string info);
+        private void ErrorException(string data, string info)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MessageDelegate(ShowMessage), sender, data);
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
             else
             {
-                Message mes = new Message(this);
-                mes.ShowMessage(data, Languages.Translate("Error"));
+                if (worker != null) worker.WorkerReportsProgress = false;
+                if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressTaskComplete(Handle, TBPF.ERROR);
+
+                Message mes = new Message(this.IsLoaded ? this : Owner);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
     }
