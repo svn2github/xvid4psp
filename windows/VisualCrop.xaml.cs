@@ -347,12 +347,15 @@ namespace XviD4PSP
         private void button_AutoCrop_Click(object sender, RoutedEventArgs e)
         {
             Autocrop acrop = new Autocrop(m, this);
-            m = acrop.m.Clone();
-            numl.Value = left = m.cropl;
-            numr.Value = right = m.cropr;
-            numt.Value = top = m.cropt;
-            numb.Value = bottom = m.cropb;
-            PutBorders();
+            if (acrop.m != null)
+            {
+                m = acrop.m.Clone();
+                numl.Value = left = m.cropl;
+                numr.Value = right = m.cropr;
+                numt.Value = top = m.cropt;
+                numb.Value = bottom = m.cropb;
+                PutBorders();
+            }
         }
 
         private void button_fullscreen_Click(object sender, RoutedEventArgs e)

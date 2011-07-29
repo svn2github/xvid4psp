@@ -697,8 +697,11 @@ namespace XviD4PSP
         private void button_analyse_Click(object sender, RoutedEventArgs e)
         {
             Autocrop acrop = new Autocrop(m, this);
-            m = acrop.m.Clone();
-            ApplyCrop();
+            if (acrop.m != null)
+            {
+                m = acrop.m.Clone();
+                ApplyCrop();
+            }
         }
 
         private void button_vcrop_Click(object sender, RoutedEventArgs e)

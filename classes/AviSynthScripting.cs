@@ -970,7 +970,7 @@ namespace XviD4PSP
 
                    //прописываем смену частоты
                    if (instream.samplerate != outstream.samplerate && outstream.samplerate != null)
-                       script += m.sampleratemodifer + "(" + outstream.samplerate + ")" + Environment.NewLine;         
+                       script += m.sampleratemodifer + "(" + outstream.samplerate + ")" + Environment.NewLine;
 
                    //нормализация звука
                    if (mode != ScriptMode.Normalize && instream.gain != "0.0")
@@ -981,9 +981,9 @@ namespace XviD4PSP
            //автокроп
            if (mode == ScriptMode.Autocrop)
            {
-               script += "ConvertToYV12()" + Environment.NewLine;
-               script += "autocrop(mode=2,wmultof=4,hmultof=4,samples=" + Settings.AutocropFrames + ",Aspect=0,threshold=" + Settings.AutocropSensivity +
-                   ",samplestartframe=0,leftadd=0,rightadd=0,topadd=0,bottomadd=0, file=\"" + Settings.TempPath + "\\AutoCrop.log\")" + Environment.NewLine;
+               script += "ConvertToYV12()" + Environment.NewLine + Environment.NewLine;
+               script += "AutoCrop(mode=2, wMultOf=4, hMultOf=4, samples=" + Settings.AutocropFrames + ", threshold=" + Settings.AutocropSensivity +
+                   ", file=\"" + Settings.TempPath + "\\AutoCrop.log\")" + Environment.NewLine;
            }
 
            if (mode == ScriptMode.Interlace)

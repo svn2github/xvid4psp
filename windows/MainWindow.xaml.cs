@@ -1487,8 +1487,7 @@ namespace XviD4PSP
                             if (x.format != Format.ExportFormats.BluRay)
                             {
                                 Autocrop acrop = new Autocrop(x, this);
-                                if (acrop.m == null) return;
-                                x = acrop.m.Clone();
+                                if (acrop.m != null) x = acrop.m.Clone();
                             }
                         }
 
@@ -4212,19 +4211,21 @@ namespace XviD4PSP
                 else
                 {
                     Autocrop acrop = new Autocrop(m, this);
-                    if (acrop.m == null) return;
-                    m = acrop.m.Clone();
+                    if (acrop.m != null)
+                    {
+                        m = acrop.m.Clone();
 
-                    //подправляем входной аспект
-                    m = AspectResolution.FixInputAspect(m);
+                        //подправляем входной аспект
+                        m = AspectResolution.FixInputAspect(m);
 
-                    m = Format.GetValidResolution(m);
-                    m = Format.GetValidOutAspect(m);
-                    m = AspectResolution.FixAspectDifference(m);
+                        m = Format.GetValidResolution(m);
+                        m = Format.GetValidOutAspect(m);
+                        m = AspectResolution.FixAspectDifference(m);
 
-                    m = AviSynthScripting.CreateAutoAviSynthScript(m);
-                    LoadVideo(MediaLoad.update);
-                    UpdateTaskMassive(m);
+                        m = AviSynthScripting.CreateAutoAviSynthScript(m);
+                        LoadVideo(MediaLoad.update);
+                        UpdateTaskMassive(m);
+                    }
                 }
             }
         }
