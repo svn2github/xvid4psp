@@ -15,9 +15,10 @@ namespace XviD4PSP
 
         public string encoderPath = null;
         public int frame;
+        public double gain = 0;
         public string args = null, error_text = "";
         public bool IsAborted = false, IsErrors = false, IsGainDetecting = false;
-        public double gain = 0;
+        public Exception exception_raw;
 
         private Massive m;
         private string script;
@@ -221,6 +222,7 @@ namespace XviD4PSP
                 if (!IsAborted)
                 {
                     IsErrors = true;
+                    exception_raw = ex;
                     error_text = ((IsGainDetecting) ? "Gain Detector Error: " : "AviSynth Encoder Error: ") + ex.Message;
                     try
                     {
@@ -328,7 +330,7 @@ namespace XviD4PSP
         {
             const uint FAAD_MAGIC_VALUE = 0xFFFFFF00;
             const uint WAV_HEADER_SIZE = 36;
-            bool useFaadTrick = a.AudioSizeInBytes >= (uint.MaxValue - WAV_HEADER_SIZE);
+            bool useFaadTrick = a.AudioSizeInBytes >= ((long)uint.MaxValue - WAV_HEADER_SIZE);
             target.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"), 0, 4);
             target.Write(BitConverter.GetBytes(useFaadTrick ? FAAD_MAGIC_VALUE : (uint)(a.AudioSizeInBytes + WAV_HEADER_SIZE)), 0, 4);
             target.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "), 0, 8);
@@ -336,11 +338,8 @@ namespace XviD4PSP
             target.Write(BitConverter.GetBytes((short)0x01), 0, 2);
             target.Write(BitConverter.GetBytes(a.ChannelsCount), 0, 2);
             target.Write(BitConverter.GetBytes(a.AudioSampleRate), 0, 4);
-
-            //MEGUI
             target.Write(BitConverter.GetBytes(a.AvgBytesPerSec), 0, 4);
             target.Write(BitConverter.GetBytes(a.BytesPerSample * a.ChannelsCount), 0, 2);
-
             target.Write(BitConverter.GetBytes(a.BitsPerSample), 0, 2);
             target.Write(System.Text.Encoding.ASCII.GetBytes("data"), 0, 4);
             target.Write(BitConverter.GetBytes(useFaadTrick ? (FAAD_MAGIC_VALUE - WAV_HEADER_SIZE) : (uint)a.AudioSizeInBytes), 0, 4);
@@ -358,27 +357,37 @@ namespace XviD4PSP
             IsAborted = true;
             locker.Set();
             if (_encoderThread != null)
-             _encoderThread.Abort();
-             _encoderThread = null;
-
-            if (_encoderProcess != null && !_encoderProcess.HasExited)
             {
-                _encoderProcess.Kill();
-                _encoderProcess.WaitForExit();
+                _encoderThread.Abort();
+                _encoderThread.Join();
+                _encoderThread = null;
+            }
+
+            if (_encoderProcess != null)
+            {
+                try
+                {
+                    if (!_encoderProcess.HasExited)
+                    {
+                        _encoderProcess.Kill();
+                        _encoderProcess.WaitForExit();
+                    }
+                }
+                catch { }
+                _encoderProcess.Close();
+                _encoderProcess.Dispose();
+                _encoderProcess = null;
             }
         }
 
         public bool IsBusy()
         {
-            if (_encoderThread != null)
-                return true;
-            else
-                return false;
+            return (_encoderThread != null);
         }
 
         public void start()
         {
-                this.Start();
+            this.Start();
         }
 
         public void stop()

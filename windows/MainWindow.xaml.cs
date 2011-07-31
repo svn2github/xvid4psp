@@ -1561,9 +1561,11 @@ namespace XviD4PSP
                         Settings.AutoVolumeMode == Settings.AutoVolumeModes.OnImport)
                     {
                         Normalize norm = new Normalize(x);
-                        if (norm.m == null) return;
-                        x = norm.m.Clone();
-                        x = AviSynthScripting.CreateAutoAviSynthScript(x);
+                        if (norm.m != null)
+                        {
+                            x = norm.m.Clone();
+                            x = AviSynthScripting.CreateAutoAviSynthScript(x);
+                        }
                     }
                 }
 
@@ -1765,7 +1767,7 @@ namespace XviD4PSP
                     {
                         mass.volume = Settings.Volume;
                         Normalize norm = new Normalize(mass);
-                        mass = norm.m.Clone();
+                        if (norm.m != null) mass = norm.m.Clone();
                     }
 
                     mass = AviSynthScripting.SetGain(mass);

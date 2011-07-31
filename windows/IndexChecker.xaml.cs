@@ -23,6 +23,7 @@ namespace XviD4PSP
         private BackgroundWorker worker = null;
         private AviSynthReader reader = null;
         private int num_closes = 0;
+        private string script;
         public Massive m;
 
         public IndexChecker(Massive mass)
@@ -86,7 +87,7 @@ namespace XviD4PSP
                 if (File.Exists(m.indexfile) && !worker.CancellationPending)
                 {
                     //проверяем папки
-                    string script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
+                    script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
                     reader = new AviSynthReader();
                     reader.ParseScript(script);
                     m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
@@ -124,6 +125,7 @@ namespace XviD4PSP
                 if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
                 {
                     //Ошибка
+                    ex.HelpLink = script;
                     e.Result = ex;
                 }
             }
@@ -197,7 +199,13 @@ namespace XviD4PSP
                 else
                 {
                     m = null;
-                    ErrorException("IndexChecker: " + ex.Message, ex.StackTrace);
+
+                    //Добавляем в StackTrace текущий скрипт
+                    string stacktrace = ex.StackTrace;
+                    if (!string.IsNullOrEmpty(ex.HelpLink))
+                        stacktrace += Calculate.WrapScript(ex.HelpLink, 150);
+
+                    ErrorException("IndexChecker: " + ex.Message, stacktrace);
                 }
             }
 

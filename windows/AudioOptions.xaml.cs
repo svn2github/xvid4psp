@@ -770,8 +770,16 @@ namespace XviD4PSP
                 else
                 {
                     Normalize norm = new Normalize(m);
-                    m = norm.m.Clone();
-                    instream.gaindetected = true;
+                    if (norm.m != null)
+                    {
+                        m = norm.m.Clone();
+                        instream.gaindetected = true;
+                    }
+                    else
+                    {
+                        instream.gain = "0.0";
+                        instream.gaindetected = false;
+                    }
                 }
             }
         }
