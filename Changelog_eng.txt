@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.248.0 (31.07.2011), main changes:
+﻿XviD4PSP 5.10.249.0 (03.08.2011), main changes:
 
+>>> (r249) Added a few new hotkeys: Ctrl+Up/Down - 100 frames forward/backward; Shift+Right/Left - 30 sec.
+           forward/backward; Shift+Up/Down - 3 min. forward/backward (req. by BBDragon).
 >>> (r248) Normalizer: for error messages added StackTrace info and current AviSynth script.
 >>> (r247) Auto crop: for error messages added StackTrace info and current AviSynth script.
 >>> (r246) The scripts for source detector and for autocrop must be without audio (rep. by Brainel).

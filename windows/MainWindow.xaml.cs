@@ -524,13 +524,21 @@ namespace XviD4PSP
                 case ("Frame forward"): Frame_Shift(1); break;
                 case ("Frame back"): Frame_Shift(-1); break;
                 case ("10 frames forward"): Frame_Shift(10); break;
-                case ("10 frames backward"): Frame_Shift(-10); ; break;
+                case ("10 frames backward"): Frame_Shift(-10); break;
+                case ("100 frames forward"): Frame_Shift(100); break;
+                case ("100 frames backward"): Frame_Shift(-100); break;
+                case ("30 sec. forward"): Frame_Shift(Convert.ToInt32(fps * 30)); break;
+                case ("30 sec. backward"): Frame_Shift(-Convert.ToInt32(fps * 30)); break;
+                case ("3 min. forward"): Frame_Shift(Convert.ToInt32(fps * 180)); break;
+                case ("3 min. backward"): Frame_Shift(-Convert.ToInt32(fps * 180)); break;
                 case ("Play-Pause"): PauseClip(); break;
                 case ("Fullscreen"): SwitchToFullScreen(); break;
                 case ("Volume+"): VolumePlus(); break;
                 case ("Volume-"): VolumeMinus(); break;
                 case ("Set Start"): button_set_trim_value_Click(button_set_start, null); break;
                 case ("Set End"): button_set_trim_value_Click(button_set_end, null); break;
+                case ("Next/New region"): button_trim_plus_Click(null, null); break;
+                case ("Previous region"): button_trim_minus_Click(null, null); break;
                 case ("Apply Trim"): button_apply_trim_Click(null, null); break;
                 case ("Add/Remove bookmark"): AddToBookmarks_Click(null, null); break;
             }
