@@ -239,8 +239,8 @@ namespace XviD4PSP
 
                 for (int i = 0; i < total && !IsAborted; i++)
                 {
-                    reader.ReadFrameBitmap(i);
-                    worker.ReportProgress((i * 100) / total);
+                    reader.ReadFrameDummy(i);
+                    worker.ReportProgress(((i + 1) * 100) / total);
                 }
             }
             catch (Exception ex)

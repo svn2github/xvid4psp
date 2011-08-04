@@ -1,6 +1,11 @@
 ----
 
-This version have some modifications to be used with XviD4PSP (5.0.37.3+). New parameter was added: file (string) - to specify where to create a log-file. For example, file="c:\MyFolder\this_is_the_log_file.log". Source code available in the XviD4PSP 5.0.37.3+ Source Codes package.
+This version has some modifications to be used with XviD4PSP v5. Two new parameters were added:
+
+file (string) - to specify where to create a log-file in mode=2/3. For example: file="c:\MyFolder\this_is_the_log_file.log".
+overwrite (bool) - overwrite existing file (true, default) or append to existing file (false).
+
+Source code available at http://code.google.com/p/xvid4psp/source/browse/#svn%2Ftrunk%2FAutoCrop
 
 ----
 

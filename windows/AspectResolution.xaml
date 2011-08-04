@@ -81,9 +81,13 @@
                                     <Label OpacityMask="{x:Null}" x:Name="text_autocropframes" Content="Frames to analyze:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
                                     <ComboBox x:Name="combo_autocropframes" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_autocropframes_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </DockPanel>
-                                <DockPanel Margin="4,0,6,3" Width="Auto" Height="Auto">
+                                <DockPanel Margin="4,0,6,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_autocropsens" Content="Autocrop sensivity:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
                                     <ComboBox x:Name="combo_autocropsens" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_autocropsens_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                                <DockPanel Margin="4,1,6,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_autocrop_new_mode" Content="Crop using the most common values:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="2,0,0,0" Padding="2.5"/>
+                                    <CheckBox x:Name="check_autocrop_new_mode" Width="Auto" Height="Auto" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_autocrop_new_mode_Click" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>

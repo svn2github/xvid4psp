@@ -641,14 +641,16 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="pictures\Delete.png" />
+    <Resource Include="pictures\Expand.png" />
     <Resource Include="pictures\folder_magnify.png" />
     <Resource Include="main.ico" />
     <Resource Include="pictures\logo_FF_FLAC.png" />
     <Resource Include="pictures\vc_background.PNG" />
-    <Resource Include="pictures\Bottom.ico" />
-    <Resource Include="pictures\Left.ico" />
-    <Resource Include="pictures\Right.ico" />
-    <Resource Include="pictures\Top.ico" />
+    <Resource Include="pictures\Bottom.png" />
+    <Resource Include="pictures\Left.png" />
+    <Resource Include="pictures\Right.png" />
+    <Resource Include="pictures\Top.png" />
     <Resource Include="pictures\volume2.png" />
     <Resource Include="pictures\volume.png" />
     <Resource Include="pictures\settings13.png" />

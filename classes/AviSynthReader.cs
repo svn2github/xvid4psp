@@ -157,5 +157,10 @@ namespace XviD4PSP
                 throw;
             }
         }
+
+        public void ReadFrameDummy(int position)
+        {
+            clip.ReadFrame(IntPtr.Zero, 0, position);
+        }
     }
 }

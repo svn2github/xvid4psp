@@ -7,13 +7,14 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
-
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Timers;
 using System.Text.RegularExpressions;
+using System.Windows.Interop;
+using System.Collections;
 
 namespace XviD4PSP
 {
@@ -22,7 +23,9 @@ namespace XviD4PSP
         private static object locker = new object();
         private BackgroundWorker worker = null;
         private AviSynthReader reader = null;
+        private IntPtr Handle = IntPtr.Zero;
         private int num_closes = 0;
+        private int frame = -1;
         private string script;
         public Massive m;
 
@@ -33,16 +36,18 @@ namespace XviD4PSP
             this.InitializeComponent();
         }
 
-        public Autocrop(Massive mass, System.Windows.Window owner)
+        public Autocrop(Massive mass, System.Windows.Window owner, int frame)
         {
             this.InitializeComponent();
             this.Owner = owner;
             this.m = mass.Clone();
+            this.frame = frame;
 
             //забиваем
             prCurrent.Maximum = 100;
             Title = Languages.Translate("Detecting black borders") + "...";
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
+            this.ContentRendered += new EventHandler(Window_ContentRendered);
 
             //BackgroundWorker
             CreateBackgroundWorker();
@@ -51,48 +56,120 @@ namespace XviD4PSP
             ShowDialog();
         }
 
+        void Window_ContentRendered(object sender, EventArgs e)
+        {
+            if (Handle == IntPtr.Zero)
+                Win7Taskbar.SetProgressIndeterminate(this, ref Handle);
+        }
+
         private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+            worker.ProgressChanged += new ProgressChangedEventHandler(worker_ProgressChanged);
             worker.WorkerSupportsCancellation = true;
+            worker.WorkerReportsProgress = true;
+        }
+
+        private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            if (((BackgroundWorker)sender).WorkerReportsProgress)
+            {
+                if (prCurrent.IsIndeterminate)
+                {
+                    prCurrent.IsIndeterminate = false;
+                    label_info.Content = Languages.Translate("Detecting black borders") + "...";
+                }
+
+                prCurrent.Value = e.ProgressPercentage;
+                Title = "(" + e.ProgressPercentage.ToString("0") + "%)";
+
+                //Прогресс в Taskbar
+                //if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressValue(Handle, Convert.ToUInt64(e.ProgressPercentage), 100);
+            }
         }
 
         private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try
             {
-                //получаем автокроп инфу
-                script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Autocrop);
+                //Удаляем старый лог-файл
+                File.Delete(Settings.TempPath + "\\AutoCrop.log");
 
+                //Готовим скрипт
+                script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Autocrop);
+                script = AviSynthScripting.GetAutoCropScript(script, frame);
+
+                //Открываем скрипт
                 reader = new AviSynthReader();
                 reader.ParseScript(script);
+
+                int width = m.inresw;
+                int height = m.inresh;
+                int frames = reader.FrameCount;
+
+                //Проигрываем все кадры
+                for (int i = 0; i < frames && !worker.CancellationPending; i++)
+                {
+                    reader.ReadFrameDummy(i);
+                    worker.ReportProgress(((i + 1) * 100) / frames);
+                }
+
+                ArrayList ll = new ArrayList();
+                ArrayList tt = new ArrayList();
+                ArrayList rr = new ArrayList();
+                ArrayList bb = new ArrayList();
 
                 //Чтение и анализ лог-файла
                 if (!worker.CancellationPending)
                 {
-                    int result1 = 0, result2 = 0, result3 = m.inresw, result4 = m.inresh;
                     using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AutoCrop.log", System.Text.Encoding.Default))
                     {
                         Match mat;
                         Regex r = new Regex(@"Crop.(\d+),(\d+),(\d+),(\d+).", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        mat = r.Match(sr.ReadToEnd());
-                        if (mat.Success)
+
+                        while (!sr.EndOfStream)
                         {
-                            result1 = Convert.ToInt32(mat.Groups[1].Value);
-                            result2 = Convert.ToInt32(mat.Groups[2].Value);
-                            result3 = Convert.ToInt32(mat.Groups[3].Value);
-                            result4 = Convert.ToInt32(mat.Groups[4].Value);
+                            mat = r.Match(sr.ReadLine());
+                            if (mat.Success)
+                            {
+                                //Фильтрация недопустимых значений
+                                int left = Math.Max(Convert.ToInt32(mat.Groups[1].Value), 0);
+                                int top = Math.Max(Convert.ToInt32(mat.Groups[2].Value), 0);
+                                int right = Math.Min(Convert.ToInt32(mat.Groups[3].Value), width);
+                                int bottom = Math.Min(Convert.ToInt32(mat.Groups[4].Value), height);
+
+                                ll.Add(left);
+                                tt.Add(top);
+                                rr.Add(width - left - right);
+                                bb.Add(height - top - bottom);
+                            }
                         }
                     }
 
-                    //в массив //дубликаты
-                    m.cropl = m.cropl_copy = result1;                       //слева
-                    m.cropr = m.cropr_copy = m.inresw - result1 - result3;  //справа
-                    m.cropb = m.cropb_copy = m.inresh - result2 - result4;  //низ
-                    m.cropt = m.cropt_copy = result2;                       //верх
+                    if (ll.Count > 0)
+                    {
+                        bool new_mode = Settings.AutocropMostCommon;
+
+                        //Ищем наиболее часто встречающиеся значения ("усредняем") или берём минимальные значения
+                        m.cropl = m.cropl_copy = (ll.Count > 4 && new_mode) ? FindMostCommon(ll) : FindMinimum(ll);  //Слева
+                        m.cropt = m.cropt_copy = (tt.Count > 4 && new_mode) ? FindMostCommon(tt) : FindMinimum(tt);  //Сверху
+                        m.cropr = m.cropr_copy = (rr.Count > 4 && new_mode) ? FindMostCommon(rr) : FindMinimum(rr);  //Справа
+                        m.cropb = m.cropb_copy = (bb.Count > 4 && new_mode) ? FindMostCommon(bb) : FindMinimum(bb);  //Снизу
+                    }
+                    else
+                    {
+                        m.cropl = m.cropl_copy = 0;  //Слева
+                        m.cropt = m.cropt_copy = 0;  //Сверху
+                        m.cropr = m.cropr_copy = 0;  //Справа
+                        m.cropb = m.cropb_copy = 0;  //Снизу
+                    }
                 }
+
+                //Удаляем лог-файл
+                File.Delete(Settings.TempPath + "\\AutoCrop.log");
             }
             catch (Exception ex)
             {
@@ -101,19 +178,64 @@ namespace XviD4PSP
                     //Ошибка
                     ex.HelpLink = script;
                     e.Result = ex;
-
-                    try
-                    {
-                        //записываем скрипт с ошибкой в файл
-                        AviSynthScripting.WriteScriptToFile(script, "error");
-                    }
-                    catch { }
                 }
             }
             finally
             {
                 CloseReader(true);
             }
+        }
+
+        private int FindMostCommon(ArrayList values)
+        {
+            //Перебираем все значения в ArrayList..
+            int[] counts = new int[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                //..и считаем,..
+                int count = 0;
+                foreach (int value in values)
+                {
+                    //..сколько раз каждое из них там встречается
+                    if (value == (int)values[i])
+                        count += 1;
+                }
+                counts[i] = count;
+            }
+
+            //Определяем индекс значения, которое встречается чаще всего
+            int index = 0, max = 0;
+            for (int i = 0; i < counts.Length; i++)
+            {
+                if (counts[i] > max)
+                {
+                    max = counts[i];
+                    index = i;
+                }
+            }
+
+            //Если этих значений больше 50% от общего числа..
+            if ((max * 100) / values.Count > 50)
+            {
+                //..то выдаем само это значение
+                return (int)values[index];
+            }
+            else
+            {
+                //..иначе выдаем наименьшее значение (т.к. видимо много мусора)
+                return FindMinimum(values);
+            }
+        }
+
+        private int FindMinimum(ArrayList list)
+        {
+            int min = int.MaxValue;
+            foreach (int value in list)
+            {
+                if (value < min)
+                    min = value;
+            }
+            return min;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -142,7 +264,10 @@ namespace XviD4PSP
             {
                 //CloseReader(false);
 
+                worker.WorkerReportsProgress = false;
                 label_info.Content = Languages.Translate("Aborting... Please wait...");
+                Win7Taskbar.SetProgressState(Handle, TBPF.INDETERMINATE);
+                prCurrent.IsIndeterminate = true;
                 e.Cancel = true;
             }
             else
@@ -190,6 +315,10 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
             else
             {
+                if (worker != null) worker.WorkerReportsProgress = false;
+                if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
+                Win7Taskbar.SetProgressTaskComplete(Handle, TBPF.ERROR);
+
                 Message mes = new Message(this.IsLoaded ? this : Owner);
                 mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }

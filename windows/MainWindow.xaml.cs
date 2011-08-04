@@ -1494,7 +1494,7 @@ namespace XviD4PSP
                         {
                             if (x.format != Format.ExportFormats.BluRay)
                             {
-                                Autocrop acrop = new Autocrop(x, this);
+                                Autocrop acrop = new Autocrop(x, this, -1);
                                 if (acrop.m != null) x = acrop.m.Clone();
                             }
                         }
@@ -1833,7 +1833,6 @@ namespace XviD4PSP
 
             SafeDelete(Settings.TempPath + "\\preview.avs");
             SafeDelete(Settings.TempPath + "\\AvsP.avs");
-            SafeDelete(Settings.TempPath + "\\AutoCrop.log");
 
             m = null;
             ResetTrim();      //Обнуляем всё что связано с тримом
@@ -4220,7 +4219,7 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    Autocrop acrop = new Autocrop(m, this);
+                    Autocrop acrop = new Autocrop(m, this, -1);
                     if (acrop.m != null)
                     {
                         m = acrop.m.Clone();

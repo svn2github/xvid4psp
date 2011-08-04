@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -12,12 +11,20 @@ using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-
+using System.Windows.Input;
 
 namespace XviD4PSP
 {
     public partial class VisualCrop
     {
+        private static object locker = new object();
+        private AviSynthReader reader = null;
+        private ImageSource picture = null;
+        private Image image = null;
+        private Bitmap bmp = null;
+        private Massive oldm;
+        public Massive m;
+
         private int width;
         private int height;
         private int left = 0;
@@ -25,19 +32,12 @@ namespace XviD4PSP
         private int right = 0;
         private int bottom = 0;
         private int brightness = 0;
+        private double fps = 0;
 
         private string script = "";
         private bool WindowLoaded = false;
         private bool GreenLight = false;
-
-        private Bitmap bmp;
-        private ImageSource picture;
-        private System.Drawing.Image image;
-
-        public Massive m;
-        private Massive oldm;
-
-        private bool OldSeeking = false;// Settings.OldSeeking;
+        private bool OldSeeking = false; //Settings.OldSeeking;
 
         public VisualCrop(Massive mass, System.Windows.Window owner)
         {
@@ -57,8 +57,15 @@ namespace XviD4PSP
             PicBack.Opacity = Settings.VCropOpacity / 10.0;
             brightness = Settings.VCropBrightness * 10;
 
-            ShowTitle();
+            numl.ToolTip = Languages.Translate("Left");
+            numt.ToolTip = Languages.Translate("Top");
+            numr.ToolTip = Languages.Translate("Right");
+            numb.ToolTip = Languages.Translate("Bottom");
             button_autocrop.Content = Languages.Translate("Analyse");
+            button_autocrop.ToolTip = Languages.Translate("Autocrop black borders");
+            button_autocrop_current.ToolTip = Languages.Translate("Autocrop on current frame");
+            button_uncrop.ToolTip = Languages.Translate("Remove crop");
+            button_fullscreen.ToolTip = Languages.Translate("Fullscreen mode");
             button_cancel.Content = Languages.Translate("Cancel");
 
             slider_pos.Maximum = m.inframes;
@@ -66,6 +73,7 @@ namespace XviD4PSP
 
             ShowFrame((int)slider_pos.Value);
             if (left != 0 || right != 0 || top != 0 || bottom != 0) PutBorders();
+            else if (image != null) ShowTitle();
 
             WindowLoaded = true;
 
@@ -78,12 +86,19 @@ namespace XviD4PSP
 
         private void ShowFrame(int frame)
         {
-            AviSynthReader reader = new AviSynthReader();
             IntPtr hObject = IntPtr.Zero;
             try
             {
-                reader.ParseScript(script); //Читаем скрипт
-                image = reader.ReadFrameBitmap(frame); //Получаем картинку
+                if (reader == null)
+                {
+                    //Открываем скрипт
+                    reader = new AviSynthReader();
+                    reader.ParseScript(script);
+                    fps = reader.Framerate;
+                }
+
+                //Получаем картинку
+                image = reader.ReadFrameBitmap(frame);
                 bmp = new System.Drawing.Bitmap(image);
                 hObject = bmp.GetHbitmap();
                 picture = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hObject, IntPtr.Zero, Int32Rect.Empty,
@@ -97,11 +112,11 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException("VisualCrop (ShowFrame): " + ex.Message, ex.StackTrace);
+                CloseReader();
             }
             finally
             {
-                reader.Close();
                 if (bmp != null) bmp.Dispose();
                 DeleteObject(hObject);
                 GC.Collect();
@@ -125,7 +140,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorExeption(ex.Message);
+                ErrorException("VisualCrop (PutBorders): " + ex.Message, ex.StackTrace);
             }
             finally
             {
@@ -195,24 +210,25 @@ namespace XviD4PSP
             //Проверка на четность
             if (left % 2 != 0 || right % 2 != 0 || top % 2 != 0 || bottom % 2 != 0)
             {
-                ErrorExeption("Resolution must be mod2 on each side!");
+                ErrorException("VisualCrop: Resolution must be mod2 on each side!", null);
                 return;
             }
+
             m.cropl = m.cropl_copy = left;
             m.cropr = m.cropr_copy = right;
             m.cropt = m.cropt_copy = top;
             m.cropb = m.cropb_copy = bottom;
-           /* m = AspectResolution.FixInputAspect(m);
-            m = Format.GetValidResolution(m);
-            m = Format.GetValidOutAspect(m);
-            m = AspectResolution.FixAspectDifference(m);
-            m = AviSynthScripting.CreateAutoAviSynthScript(m); */
+
             Close();
         }
 
-        private void ErrorExeption(string message)
+        private void ErrorException(string message, string info)
         {
-            new Message((Window.IsLoaded) ? this : Owner).ShowMessage(message, Languages.Translate("Error"));
+            //Добавляем скрипт в StackTrace
+            if (!string.IsNullOrEmpty(script))
+                info += Calculate.WrapScript(script, 150);
+
+            new Message((this.IsLoaded) ? this : Owner).ShowMessage(message, info, Languages.Translate("Error"));
         }
 
         private void changedl(object sender, RoutedPropertyChangedEventArgs<decimal> e)
@@ -283,10 +299,15 @@ namespace XviD4PSP
 
         private void slider_pos_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (slider_pos.IsMouseOver && OldSeeking)
+            if (slider_pos.IsMouseOver && slider_pos.Tag == null)
             {
-                ShowFrame((int)(slider_pos.Value));
-                PutBorders();
+                if (OldSeeking)
+                {
+                    ShowFrame((int)(slider_pos.Value));
+                    PutBorders();
+                }
+                else
+                    ShowTitle(); //Пересчет номера кадра
             }
         }
 
@@ -346,16 +367,40 @@ namespace XviD4PSP
 
         private void button_AutoCrop_Click(object sender, RoutedEventArgs e)
         {
-            Autocrop acrop = new Autocrop(m, this);
+            Autocrop acrop = new Autocrop(m, this, -1);
             if (acrop.m != null)
             {
                 m = acrop.m.Clone();
-                numl.Value = left = m.cropl;
-                numr.Value = right = m.cropr;
-                numt.Value = top = m.cropt;
-                numb.Value = bottom = m.cropb;
+                SetValues(m.cropl, m.cropt, m.cropr, m.cropb);
                 PutBorders();
             }
+        }
+
+        private void button_AutoCrop_current_Click(object sender, RoutedEventArgs e)
+        {
+            Autocrop acrop = new Autocrop(m, this, (int)slider_pos.Value);
+            if (acrop.m != null)
+            {
+                m = acrop.m.Clone();
+                SetValues(m.cropl, m.cropt, m.cropr, m.cropb);
+                PutBorders();
+            }
+        }
+
+        private void button_uncrop_Click(object sender, RoutedEventArgs e)
+        {
+            SetValues(0, 0, 0, 0);
+            PutBorders();
+        }
+
+        private void SetValues(int _left, int _top, int _right, int _bottom)
+        {
+            WindowLoaded = false;
+            numl.Value = left = m.cropl = _left;
+            numt.Value = top = m.cropt = _top;
+            numr.Value = right = m.cropr = _right;
+            numb.Value = bottom = m.cropb = _bottom;
+            WindowLoaded = true;
         }
 
         private void button_fullscreen_Click(object sender, RoutedEventArgs e)
@@ -397,7 +442,65 @@ namespace XviD4PSP
             else if (ch % 2 == 0) modh = "2";
             else modh = "1";
 
-            Title = m.inresw + "x" + m.inresh + " -> " + cw + "x" + ch + " (" + modw + "x" + modh + ", cropped size)";
+            Title = m.inresw + "x" + m.inresh + " -> " + cw + "x" + ch + " (" + modw + "x" + modh + ", cropped size) | frame " +
+                (int)slider_pos.Value + " of " + (int)slider_pos.Maximum;
+        }
+
+        private void WindowKeyDown(object sender, KeyEventArgs e)
+        {
+            if (numl.txt_box.IsFocused || numt.txt_box.IsFocused || numr.txt_box.IsFocused || numb.txt_box.IsFocused) return;
+            string key = new System.Windows.Input.KeyConverter().ConvertToString(e.Key);
+            string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
+            string PressedKeys = "=" + ((mod.Length > 0) ? mod + "+" : "") + key;
+
+            string Action = HotKeys.GetAction(PressedKeys);
+            e.Handled = (Action.Length > 0);
+
+            switch (Action)
+            {
+                case ("Frame forward"): Frame_Shift(1); break;
+                case ("Frame back"): Frame_Shift(-1); break;
+                case ("10 frames forward"): Frame_Shift(10); break;
+                case ("10 frames backward"): Frame_Shift(-10); break;
+                case ("100 frames forward"): Frame_Shift(100); break;
+                case ("100 frames backward"): Frame_Shift(-100); break;
+                case ("30 sec. forward"): Frame_Shift(Convert.ToInt32(fps * 30)); break;
+                case ("30 sec. backward"): Frame_Shift(-Convert.ToInt32(fps * 30)); break;
+                case ("3 min. forward"): Frame_Shift(Convert.ToInt32(fps * 180)); break;
+                case ("3 min. backward"): Frame_Shift(-Convert.ToInt32(fps * 180)); break;
+                case ("Fullscreen"): button_fullscreen_Click(null, null); break;
+            }
+        }
+
+        private void Frame_Shift(int step)
+        {
+            int new_frame = (int)slider_pos.Value + step;
+            new_frame = (new_frame < 0) ? 0 : (new_frame > (int)slider_pos.Maximum) ? (int)slider_pos.Maximum : new_frame;
+            if (new_frame != (int)slider_pos.Value)
+            {
+                slider_pos.Tag = new object();
+                slider_pos.Value = new_frame;
+                slider_pos.Tag = null;
+                ShowFrame(new_frame);
+                PutBorders();
+            }
+        }
+
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            CloseReader();
+        }
+
+        private void CloseReader()
+        {
+            lock (locker)
+            {
+                if (reader != null)
+                {
+                    reader.Close();
+                    reader = null;
+                }
+            }
         }
     }
 }

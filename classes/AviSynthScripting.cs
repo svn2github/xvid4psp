@@ -982,8 +982,9 @@ namespace XviD4PSP
            if (mode == ScriptMode.Autocrop)
            {
                script += "ConvertToYV12()" + Environment.NewLine + Environment.NewLine;
-               script += "AutoCrop(mode=2, wMultOf=4, hMultOf=4, samples=" + Settings.AutocropFrames + ", threshold=" + Settings.AutocropSensivity +
-                   ", file=\"" + Settings.TempPath + "\\AutoCrop.log\")" + Environment.NewLine;
+               script += "log_file = \"" + Settings.TempPath + "\\AutoCrop.log\"" + Environment.NewLine;
+               script += "FrameEvaluate(last, \"AutoCrop(mode=2, wMultOf=4, hMultOf=4, samples=1, samplestartframe=current_frame, " +
+                   "sampleendframe=current_frame, threshold=" + Settings.AutocropSensivity + ", file=log_file, overwrite=false)\")" + Environment.NewLine;
            }
 
            if (mode == ScriptMode.Interlace)
@@ -1106,30 +1107,30 @@ namespace XviD4PSP
        private const string InterlaceScript =
 @"{0}
 {1}
-file=""{2}""
+log_file=""{2}""
 global sep=""-""
 c = last
 global clip = c
-c = WriteFile(c, file, ""a"", ""sep"", ""b"")
+c = WriteFile(c, log_file, ""a"", ""sep"", ""b"")
 c = FrameEvaluate(c, ""global a = IsCombedTIVTC(clip, cthresh=9)"")
 c = FrameEvaluate(c, ""global b = ((0.50*YDifference{5}(clip) + 0.25*UDifference{5}(clip) + 0.25*VDifference{5}(clip)) < 1.0) ? false : true"")
 SelectRangeEvery(c, {3}, {4}, 0)
-crop(0, 0, 16, 16)";
+Crop(0, 0, 16, 16)";
 
        private const string FieldOrderScript =
 @"{0}
 {1}
-file=""{2}""
+log_file=""{2}""
 global sep=""-""
 d = last
 global abff = d.assumebff.separatefields
 global atff = d.assumetff.separatefields
 c = abff
-c = WriteFile(c, file, ""diffa"", ""sep"", ""diffb"")
+c = WriteFile(c, log_file, ""diffa"", ""sep"", ""diffb"")
 c = FrameEvaluate(c,""global diffa = 0.50*YDifference{5}(abff) + 0.25*UDifference{5}(abff) + 0.25*VDifference{5}(abff)"")
 c = FrameEvaluate(c,""global diffb = 0.50*YDifference{5}(atff) + 0.25*UDifference{5}(atff) + 0.25*VDifference{5}(atff)"")
 SelectRangeEvery(c, {3}, {4}, 0)
-crop(0, 0, 16, 16)";
+Crop(0, 0, 16, 16)";
 
        public static string GetSourceDetectionScript(Detecting det, string originalScript, string trimLine, string logFileName, int selectEvery, int selectLength)
        {
@@ -1144,6 +1145,18 @@ crop(0, 0, 16, 16)";
                return string.Format(FieldOrderScript, originalScript, trimLine, logFileName, selectEvery, selectLength, "ToNext");
            else
                return null;
+       }
+
+       public static string GetAutoCropScript(string script, int frame)
+       {
+           script += Environment.NewLine;
+
+           //¬ыборка кадров или только один требуемый кадр
+           if (frame < 0) script += "SelectRangeEvery(FrameCount()/" + (Settings.AutocropFrames - 1) + ", 1)" + Environment.NewLine;
+           else script += "Trim(" + frame + ", 1)" + Environment.NewLine;
+
+           script += "Crop(0, 0, 16, 16)" + Environment.NewLine;
+           return script;
        }
     }
 }

@@ -61,8 +61,13 @@ namespace XviD4PSP
             combo_crop_r.ToolTip = manual_crop_r.ToolTip = Languages.Translate("Right");
             combo_black_h.ToolTip = manual_black_h.ToolTip = Languages.Translate("Height");
             combo_black_w.ToolTip = manual_black_w.ToolTip = Languages.Translate("Width");
-            text_autocropsens.Content = Languages.Translate("Autocrop sensivity:");
             text_autocropframes.Content = Languages.Translate("Frames to analyze:");
+            combo_autocropframes.ToolTip = "Default: 11";
+            text_autocropsens.Content = Languages.Translate("Autocrop sensivity:");
+            combo_autocropsens.ToolTip = "Default: 27";
+            text_autocrop_new_mode.Content = Languages.Translate("Crop using the most common values") + ":";
+            text_autocrop_new_mode.ToolTip = check_autocrop_new_mode.ToolTip = Languages.Translate("If checked, find the most common values for all the frames that`s being analyzed.") +
+                "\r\n" + Languages.Translate("Otherwise find a minimum values only.");
             text_aspecterror.Content = Languages.Translate("Aspect error:");
             text_recalculate.Content = Languages.Translate("Recalculate aspect when crop is using:");
             button_analyse.ToolTip = Languages.Translate("Autocrop black borders");
@@ -79,8 +84,11 @@ namespace XviD4PSP
             text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg") +
                 ".\r\n" + Languages.Translate("This option is meaningful only when a file is opening.");
             text_visualcrop_opacity.Content = Languages.Translate("Background opacity:");
+            combo_visualcrop_opacity.ToolTip = "Default: 2";
             text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
+            combo_visualcrop_brightness.ToolTip = "Default: 25";
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
+            combo_visualcrop_frame.ToolTip = "Default: THM-frame";
             text_mod.Content = Languages.Translate("Allow resolutions divisible by:");
             manual_outaspect.ToolTip = Languages.Translate("In case of non-anamorphic encoding: Aspect = Width/Height.") +
                 "\r\n" + Languages.Translate("In case of anamorphic encoding: Aspect = (Width/Height)*SAR.");
@@ -96,9 +104,11 @@ namespace XviD4PSP
                 combo_autocropsens.Items.Add(n);
             combo_autocropsens.SelectedItem = Settings.AutocropSensivity;
 
-            for (int n = 5; n < 31; n++)
+            for (int n = 5; n < 51; n++)
                 combo_autocropframes.Items.Add(n);
             combo_autocropframes.SelectedItem = Settings.AutocropFrames;
+
+            check_autocrop_new_mode.IsChecked = Settings.AutocropMostCommon;
 
             for (int n = 0; n < 10; n++)
                 combo_visualcrop_opacity.Items.Add(n);
@@ -696,7 +706,7 @@ namespace XviD4PSP
 
         private void button_analyse_Click(object sender, RoutedEventArgs e)
         {
-            Autocrop acrop = new Autocrop(m, this);
+            Autocrop acrop = new Autocrop(m, this, -1);
             if (acrop.m != null)
             {
                 m = acrop.m.Clone();
@@ -968,6 +978,11 @@ namespace XviD4PSP
             ComboBox box = (ComboBox)sender;
             if (box.IsEditable && box.SelectedItem != null && !box.IsDropDownOpen && !box.IsMouseCaptured)
                 ComboBox_KeyDown(sender, new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter));
+        }
+
+        private void check_autocrop_new_mode_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.AutocropMostCommon = check_autocrop_new_mode.IsChecked.Value;
         }
     }
 }

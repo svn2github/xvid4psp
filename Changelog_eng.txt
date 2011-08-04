@@ -1,5 +1,12 @@
-﻿XviD4PSP 5.10.249.0 (03.08.2011), main changes:
+﻿XviD4PSP 5.10.250.0 (04.08.2011), main changes:
 
+>>> (r250) Manual crop: added "Autocrop on current frame" and "Remove crop" buttons; added support for global HotKeys
+           for preview (xxx frames\min.\sec. backward\forward and Fullscreen); AviSynth now is not unloaded after
+           recieving the frame, it keeps loaded untill the window will be closed (for more faster navigation on the
+           video); for error messages added StackTrace information and current AviSynth script.
+>>> (r250) Auto crop: added progress determination; added an option "Crop using the most common values" ("Resolution/
+           Aspect->Settings", disabled by default) which is switching the autocrop from cropping using a minimum values
+           to cropping using the most common values for all the frames that`s being analyzed.
 >>> (r249) Added a few new hotkeys: Ctrl+Up/Down - 100 frames forward/backward; Shift+Right/Left - 30 sec.
            forward/backward; Shift+Up/Down - 3 min. forward/backward (req. by BBDragon).
 >>> (r248) Normalizer: for error messages added StackTrace info and current AviSynth script.

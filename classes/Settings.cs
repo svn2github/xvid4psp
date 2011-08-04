@@ -2786,5 +2786,27 @@ namespace XviD4PSP
                 SetBool("Nonstandard_fps", value);
             }
         }
+
+        //Переключает автокроп из режима обрезки по наименьшим значениям в режим
+        //обрезки по наиболее часто встречающимся значениям (при анализе от 5-ти кадров)
+        public static bool AutocropMostCommon
+        {
+            get
+            {
+                object value = GetValue("AutocropMostCommon");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("AutocropMostCommon", value);
+            }
+        }
     }
 }

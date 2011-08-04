@@ -3,34 +3,36 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	x:Class="XviD4PSP.VisualCrop"
 	x:Name="Window"
-	Title="Crop"
-	Width="700" Height="400" MinWidth="700" MinHeight="380" ResizeMode="CanResize" SizeChanged="WindowSizeChanged" SizeToContent="Height" WindowStartupLocation="CenterOwner" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+	Title="VisualCrop"
+	Width="730" Height="400" MinWidth="730" MinHeight="380" ResizeMode="CanResize" SizeChanged="WindowSizeChanged" SizeToContent="Height" WindowStartupLocation="CenterOwner" PreviewKeyDown="WindowKeyDown" Closing="WindowClosing" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
     <Grid x:Name="LayoutRoot" Width="Auto" Height="Auto" Background="{x:Null}">
         <Grid Margin="0,0,0,74" x:Name="Picture" Width="Auto" Height="Auto" MouseLeftButtonDown="MouseClick" MouseRightButtonDown="MouseClick" MouseMove="MoveMouse" MouseWheel="WheelMouse" Background="{DynamicResource black_gradient_2}">
             <Image x:Name="Pic" Margin="0,0,0,0" Width="Auto" Height="Auto" Stretch="Uniform" Source="..\pictures\vc_background.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <Image x:Name="PicBack" Margin="0,0,0,0" Opacity="0.25" Width="Auto" Height="Auto" Stretch="Uniform"  Source="..\pictures\vc_background.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>        
+            <Image x:Name="PicBack" Margin="0,0,0,0" Opacity="0.25" Width="Auto" Height="Auto" Stretch="Uniform"  Source="..\pictures\vc_background.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Grid>
         <Grid x:Name="grid_slider" VerticalAlignment="Bottom" Margin="0,0,0,38" Height="36" Background="{DynamicResource black_gradient}">
              <Slider x:Name="slider_pos" ValueChanged="slider_pos_ValueChanged" PreviewMouseLeftButtonUp="slider_pos_PreviewMouseLeftButtonUp" MouseRightButtonDown="slider_pos_MouseRightButtonDown" d:LayoutOverrides="VerticalAlignment" Margin="8,8,8,8" Style="{DynamicResource GlassSlider}"/>
         </Grid>
         <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38" Background="{DynamicResource black_gradient}">
-            <Button x:Name="button_ok" Content="Ok" Click="button_ok_Click" HorizontalAlignment="Right" Margin="0,8,8,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+            <Image Width="18" Source="..\pictures\left.png" Stretch="None" HorizontalAlignment="Left" Margin="2,6,0,6"/>
+            <Image Width="18" Source="..\pictures\top.png" Stretch="None" HorizontalAlignment="Left" Margin="76,6,0,6"/>
+            <Image Width="18" Source="..\pictures\right.png" Stretch="None" HorizontalAlignment="Left" Margin="150,6,0,6"/>
+            <Image Width="18" Source="..\pictures\bottom.png" Stretch="None" HorizontalAlignment="Left" Margin="224,6,0,6"/>
+            <MyUserControl:NumericUpDown x:Name="numl" Margin="18,6,0,7.6" FontSize="11" ValueChanged="changedl" Change="2" HorizontalAlignment="Left" Width="52"/>
+            <MyUserControl:NumericUpDown x:Name="numt" Margin="92,6,0,7.6" FontSize="11" ValueChanged="changedt" Change="2" HorizontalAlignment="Left" Width="52"/>
+            <MyUserControl:NumericUpDown x:Name="numr" Margin="166,6,0,7.2" FontSize="11" ValueChanged="changedr" Change="2" HorizontalAlignment="Left" Width="52"/>
+            <MyUserControl:NumericUpDown x:Name="numb" Margin="240,6,0,7.2" FontSize="11" ValueChanged="changedb" Change="2" HorizontalAlignment="Left" Width="52"/>
+            <Button x:Name="button_autocrop" Content="Analyse" Click="button_AutoCrop_Click" HorizontalAlignment="Left" Margin="300,8,0,8" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
+            <Button x:Name="button_autocrop_current" Click="button_AutoCrop_current_Click" HorizontalAlignment="Left" Margin="404,8,0,8" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}">
+                <Image Source="..\pictures\expand.png" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="None" FlowDirection="RightToLeft"/>
+            </Button>
+            <Button x:Name="button_uncrop" Click="button_uncrop_Click" HorizontalAlignment="Left" Margin="434,8,0,8" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}">
+                <Image Source="..\pictures\delete.png" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="None" FlowDirection="LeftToRight"/>
+            </Button>
+            <TextBlock x:Name="txt_info" FontFamily="Tahoma" FontSize="15" Opacity="0.9" Foreground="#FFFFFFFF" Text="{Binding Path=Title, ElementName=Window}" TextWrapping="NoWrap" Margin="546,7,170,7" VerticalAlignment="Center" Visibility="Collapsed" HorizontalAlignment="Left" Width="Auto"/>
+            <Button x:Name="button_fullscreen" Content="Fullscreen" Click="button_fullscreen_Click" HorizontalAlignment="Left" Margin="464,8,0,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
             <Button x:Name="button_cancel" Content="Cancel" Click="button_cancel_Click" HorizontalAlignment="Right" Margin="8,8,88,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-            <Button x:Name="button_autocrop" Content="Analyse" Click="button_AutoCrop_Click" HorizontalAlignment="Left" Margin="324,8,0,8" Width="100" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-            <Button x:Name="button_fullscreen" Content="Fullscreen" Click="button_fullscreen_Click" HorizontalAlignment="Left" Margin="428,8,0,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-            
-            <Image Width="18" Source="..\pictures\left.ico" Stretch="None" HorizontalAlignment="Left" Margin="1,6,032,6"/>
-            <Image Width="18" Source="..\pictures\top.ico" Stretch="None" HorizontalAlignment="Left" Margin="81,6,032,6"/>
-            <Image Width="18" Source="..\pictures\right.ico" Stretch="None" HorizontalAlignment="Left" Margin="162,6,032,6"/>
-            <Image Width="18" Source="..\pictures\bottom.ico" Stretch="None" HorizontalAlignment="Left" Margin="243,6,032,6"/>
-            
-            <Label OpacityMask="{x:Null}" x:Name="text_resolution" Content="" Opacity="0.8" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="16" Foreground="#FFFFFFFF" d:LayoutOverrides="Width" HorizontalAlignment="Left" Margin="350.4,2.362,0,4.838" Width="76" />         
-            <MyUserControl:NumericUpDown Margin="178,6,0,7.2" x:Name="numr" ValueChanged="changedr" Change="2" HorizontalAlignment="Left" Width="58" />
-            <MyUserControl:NumericUpDown Margin="97,6,0,7.6" Change="2" x:Name="numt" ValueChanged="changedt" HorizontalAlignment="Left" Width="58" />
-            <MyUserControl:NumericUpDown Margin="259,6,0,7.2" x:Name="numb" ValueChanged="changedb" Change="2" HorizontalAlignment="Left" Width="58" />
-            <MyUserControl:NumericUpDown HorizontalAlignment="Left" Margin="17,6,0,7.6" Change="2" Width="58" x:Name="numl" ValueChanged="changedl" />
-            
-            <TextBlock FontFamily="Segoe" FontSize="19" FontWeight="Light" Foreground="#FFFFFFFF" Text="{Binding Path=Title, ElementName=Window}" TextWrapping="Wrap" x:Name="txt_info" OpacityMask="{DynamicResource opasity_1}" Margin="510,7,0,7" Visibility="Collapsed" HorizontalAlignment="Left" Width="Auto" />
+            <Button x:Name="button_ok" Content="Ok" Click="button_ok_Click" HorizontalAlignment="Right" Margin="0,8,8,8" Width="75" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
         </Grid>
     </Grid>
 </Window>
