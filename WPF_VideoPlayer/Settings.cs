@@ -6,12 +6,9 @@ namespace WPF_VideoPlayer
 {
     public static class Settings
     {
-        public enum PlayerEngines
-        {
-            DirectShow = 1,
-            MediaBridge = 2
-        }
-                
+        public enum PlayerEngines { DirectShow = 1, MediaBridge = 2 }
+        public enum VRenderers { Auto = 0, Overlay, VMR7, VMR9, EVR } 
+
         private static object GetValue(string Key)
         {
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Winnydows\XviD4PSP5", true))
@@ -117,7 +114,7 @@ namespace WPF_VideoPlayer
                     {
                         return PlayerEngines.DirectShow;
                     }
-                    return (PlayerEngines)Enum.Parse(typeof(PlayerEngines), value.ToString());
+                    return (PlayerEngines)Enum.Parse(typeof(PlayerEngines), value.ToString(), true);
                 }
                 catch
                 {
@@ -131,23 +128,23 @@ namespace WPF_VideoPlayer
         }
 
         //Рендерер для DirectShow превью
-        public static int VideoRenderer
+        public static VRenderers VideoRenderer
         {
             get
             {
-                object value = GetValue("WPFPlayer_VideoRenderer");
+                object value = GetValue("WPFPlayer_VRenderer");
                 if (value == null)
                 {
-                    return 0;
+                    return VRenderers.Auto;
                 }
                 else
                 {
-                    return Convert.ToInt32(value);
+                    return (VRenderers)Enum.Parse(typeof(VRenderers), value.ToString(), true);
                 }
             }
             set
             {
-                SetInt("WPFPlayer_VideoRenderer", value);
+                SetString("WPFPlayer_VRenderer", value.ToString());
             }
         }
 

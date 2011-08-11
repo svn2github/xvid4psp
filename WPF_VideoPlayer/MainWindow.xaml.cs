@@ -29,14 +29,16 @@ namespace WPF_VideoPlayer
     {
         private IBasicAudio basicAudio;
         private IBasicVideo basicVideo;
-        private PlayState currentState;
+        private PlayState currentState = PlayState.Init;
+        private PlayState oldplaystate = PlayState.Init;
+        private TimeSpan oldpos = TimeSpan.Zero;
         private string filepath = string.Empty;
-        private IVideoFrameStep frameStep;
         private IFilterGraph graph;
         private IGraphBuilder graphBuilder;
-        private IntPtr hDrain = IntPtr.Zero;
-        private bool isAudioOnly;
-        private bool isFullScreen;
+        private IntPtr Handle = IntPtr.Zero;
+        private IntPtr VHandle = IntPtr.Zero;
+        private bool isAudioOnly = false;
+        private bool isFullScreen = false;
         private IMediaControl mediaControl;
         private IMediaEventEx mediaEventEx;
         private IMediaPosition mediaPosition;
@@ -45,6 +47,8 @@ namespace WPF_VideoPlayer
         private HwndSource source;
         private System.Timers.Timer timer;
         private IVideoWindow videoWindow;
+        private IMFVideoDisplayControl EVRControl;
+        private VideoHwndHost VHost;
         private int VolumeSet;
         private const int WMGraphNotify = 0x40d;
         private BackgroundWorker worker;
@@ -52,14 +56,10 @@ namespace WPF_VideoPlayer
         private bool IsRendererARFixed = false;
         private bool OldSeeking = false;
         private double dpi = 1.0;
+        private MediaLoad mediaload;
 
-        internal enum PlayState
-        {
-            Stopped,
-            Paused,
-            Running,
-            Init
-        }
+        private enum PlayState { Stopped, Paused, Running, Init }
+        private enum MediaLoad { Load, Update }
 
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
         public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
@@ -104,11 +104,12 @@ namespace WPF_VideoPlayer
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) check_engine_directshow.IsChecked = true;
                 else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge) check_engine_mediabridge.IsChecked = true;
 
-                int vr = Settings.VideoRenderer;
-                if (vr == 0) vr_default.IsChecked = true;
-                else if (vr == 1) vr_overlay.IsChecked = true;
-                else if (vr == 2) vr_vmr7.IsChecked = true;
-                else if (vr == 3) vr_vmr9.IsChecked = true;
+                Settings.VRenderers vr = Settings.VideoRenderer;
+                if (vr == Settings.VRenderers.Auto) vr_default.IsChecked = true;
+                else if (vr == Settings.VRenderers.Overlay) vr_overlay.IsChecked = true;
+                else if (vr == Settings.VRenderers.VMR7) vr_vmr7.IsChecked = true;
+                else if (vr == Settings.VRenderers.VMR9) vr_vmr9.IsChecked = true;
+                else if (vr == Settings.VRenderers.EVR) vr_evr.IsChecked = true;
 
                 check_old_seeking.IsChecked = OldSeeking = Settings.OldSeeking;
 
@@ -123,30 +124,15 @@ namespace WPF_VideoPlayer
                 if (_dpi != 0) dpi = _dpi;
                 ReleaseDC(IntPtr.Zero, ScreenDC);
             }
-            catch (Exception) { }
-
-            base.Loaded += new RoutedEventHandler(this.MainWindow_Loaded);
-            base.Closing += new CancelEventHandler(this.MainWindow_Closing);
-            base.PreviewKeyDown += new System.Windows.Input.KeyEventHandler(this.MainWindow_KeyDown);
-        }
-
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            this.MainFormLoader();
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("LoadSettings: " + ex.Message);
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            string[] commandLineArgs = Environment.GetCommandLineArgs();
-            if (commandLineArgs.Length > 1 && File.Exists(commandLineArgs[1]))
-            {
-                this.Title = Languages.Translate("loading") + "...";
-            }
-            else
-            {
-                this.Title = "WPF Video Player";
-            }
-            if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
+            if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
             {
                 base.LocationChanged += new EventHandler(this.MainWindow_LocationChanged);
                 base.SizeChanged += new SizeChangedEventHandler(this.MainWindow_SizeChanged);
@@ -170,6 +156,11 @@ namespace WPF_VideoPlayer
             this.worker.RunWorkerAsync();
         }
 
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            this.MainFormLoader();
+        }
+
         internal delegate void MainFormLoaderDelegate();
         private void MainFormLoader()
         {
@@ -177,20 +168,17 @@ namespace WPF_VideoPlayer
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new MainFormLoaderDelegate(MainFormLoader));
             else
             {
-                string[] commandLineArgs = Environment.GetCommandLineArgs();
-                if (commandLineArgs.Length > 1 && File.Exists(commandLineArgs[1]))
+                try
                 {
-                    try
+                    string[] commandLineArgs = Environment.GetCommandLineArgs();
+                    if (commandLineArgs.Length > 1 && File.Exists(commandLineArgs[1]))
                     {
-                        this.filepath = commandLineArgs[1];
-                        PlayVideo(this.filepath);
+                        PlayVideo(commandLineArgs[1], MediaLoad.Load);
                     }
-                    catch (Exception exception)
-                    {
-                        this.CloseClip();
-                        this.filepath = string.Empty;
-                        System.Windows.MessageBox.Show(exception.Message);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("MainFormLoader: " + ex.Message);
                 }
             }
         }
@@ -199,17 +187,17 @@ namespace WPF_VideoPlayer
         {
             try
             {
-                IBaseFilter filter;
                 this.graph = (IFilterGraph) Marshal.GetObjectForIUnknown(GraphInfo.FilterGraph);
                 this.graphBuilder = (IGraphBuilder) this.graph;
-                DsError.ThrowExceptionForHR(this.graphBuilder.FindFilterByName("Enhanced Video Renderer", out filter));
                 DsError.ThrowExceptionForHR(this.graphBuilder.RenderFile(this.filepath, null));
 
                 ShowFilters();
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(exception.Message);
+                this.CloseClip();
+                this.filepath = string.Empty;
+                System.Windows.MessageBox.Show("BridgeCallback: " + ex.Message);
             }
         }
 
@@ -219,13 +207,14 @@ namespace WPF_VideoPlayer
             {
                 this.CloseClip();
                 this.filepath = string.Empty;
-                SetPlayIcon();
             }
         }
 
         private void button_exit_Click(object sender, RoutedEventArgs e)
         {
-            this.CloseClip();
+            if (this.currentState != PlayState.Init)
+                this.CloseClip();
+
             base.Close();
         }
 
@@ -241,9 +230,9 @@ namespace WPF_VideoPlayer
                     TimeSpan span = Position + TimeSpan.FromSeconds(n);
                     if (span >= TimeSpan.Zero && span <= NaturalDuration) Position = span;
                 }
-                catch (Exception exception)
+                catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show(exception.Message);
+                    System.Windows.MessageBox.Show("ShiftFrame: " + ex.Message);
                 }
             }
         }
@@ -269,25 +258,24 @@ namespace WPF_VideoPlayer
             {
                 string str = Languages.Translate("files");
                 System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
-                dialog.Filter = Languages.Translate("All media files") + "|*.avi;*.divx;*.wmv;*.mpg;*.mpe;*.mpeg;*.mod;*.asf;*.mkv;*.mov;*.qt;*.3gp;*.hdmov;*.mp4;*.ogm;*.avs;*.vob;*.dvr-ms;*.ts;*.m2p;*.m2t;*.m2v;*.d2v;*.m2ts;*.rm;*.ram;*.rmvb;*.rpx;*.smi;*.smil;*.flv;*.pmp;*.mp3;*.wma;*.ogg;*.aac;*.m4a;*.dts;*.ac3;*.wav;*.vro|AVI " + str + " (AVI DIVX ASF)|*.avi;*.divx;*.asf|MPEG " + str + " (MPG MPE MPEG VOB MOD TS M2P M2T M2TS VRO)|*.mpg;*.mpe;*.mpeg;*.vob;*.ts;*.m2p;*.m2t;*.mod;*.m2ts;*.vro|DGIndex " + str + " (D2V)|*.d2v|QuickTime " + str + " (MOV QT 3GP HDMOV)|*.mov;*.qt;*.3gp;*.hdmov|RealVideo " + str + " (RM RAM RMVB RPX SMI SMIL)|*.rm;*.ram;*.rmvb;*.rpx;*.smi;*.smil|Matroska " + str + " (MKV)|*.mkv|OGG Media (Vorbis) " + str + " (OGM)|*.ogm|Windows Media " + str + " (WMV)|*.wmv|Media Center " + str + " (DVR-MS)|*.dvr-ms|PMP " + str + " (PMP)|*.pmp|Flash Video " + str + " (FLV)|*.flv|MP3 " + str + " (MP3)|*.mp3|OGG Vorbis " + str + " (OGG)|*.ogg|Windows media audio " + str + " (WMA)|*.wma|DTS " + str + " (DTS)|*.dts|AC3 " + str + " (AC3)|*.ac3|AAC " + str + " (AAC)|*.aac;*.m4a|Windows PCM " + str + " (WAV)|*.wav|" + Languages.Translate("All files") + " (*.*)|*.*";
+                dialog.Filter = Languages.Translate("All media files") + "|*.avi;*.divx;*.wmv;*.mpg;*.mpe;*.mpeg;*.mod;*.asf;*.mkv;*.mov;*.qt;*.3gp;*.hdmov;*.mp4;" +
+                    "*.ogm;*.avs;*.vob;*.dvr-ms;*.ts;*.m2p;*.m2t;*.m2v;*.d2v;*.m2ts;*.rm;*.ram;*.rmvb;*.rpx;*.smi;*.smil;*.flv;*.pmp;*.mp3;*.wma;*.ogg;*.aac;*.m4a;" +
+                    "*.dts;*.ac3;*.wav;*.vro|AVI " + str + " (AVI DIVX ASF)|*.avi;*.divx;*.asf|MPEG " + str + " (MPG MPE MPEG VOB MOD TS M2P M2T M2TS VRO)|*.mpg;*.mpe;" +
+                    "*.mpeg;*.vob;*.ts;*.m2p;*.m2t;*.mod;*.m2ts;*.vro|DGIndex " + str + " (D2V)|*.d2v|QuickTime " + str + " (MOV QT 3GP HDMOV)|*.mov;*.qt;*.3gp;" +
+                    "*.hdmov|RealVideo " + str + " (RM RAM RMVB RPX SMI SMIL)|*.rm;*.ram;*.rmvb;*.rpx;*.smi;*.smil|Matroska " + str + " (MKV)|*.mkv|OGG Media (Vorbis) " +
+                    str + " (OGM)|*.ogm|Windows Media " + str + " (WMV)|*.wmv|Media Center " + str + " (DVR-MS)|*.dvr-ms|PMP " + str + " (PMP)|*.pmp|Flash Video " + str +
+                    " (FLV)|*.flv|MP3 " + str + " (MP3)|*.mp3|OGG Vorbis " + str + " (OGG)|*.ogg|Windows media audio " + str + " (WMA)|*.wma|DTS " + str + " (DTS)|*.dts|AC3 " +
+                    str + " (AC3)|*.ac3|AAC " + str + " (AAC)|*.aac;*.m4a|Windows PCM " + str + " (WAV)|*.wav|" + Languages.Translate("All files") + " (*.*)|*.*";
                 dialog.Multiselect = false;
                 dialog.Title = Languages.Translate("Select media file") + ":";
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    this.Title = Languages.Translate("loading") + "...";
-                    if (this.currentState != PlayState.Init)
-                    {
-                        this.CloseClip();
-                    }
-                    this.filepath = dialog.FileName;
-                    PlayVideo(filepath);
+                    PlayVideo(dialog.FileName, MediaLoad.Load);
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                this.CloseClip();
-                this.filepath = string.Empty;
-                System.Windows.MessageBox.Show(exception.Message);
+                System.Windows.MessageBox.Show("ButtonOpen: " + ex.Message);
             }
         }
 
@@ -300,15 +288,19 @@ namespace WPF_VideoPlayer
         private void button_stop_Click(object sender, RoutedEventArgs e)
         {
             if (this.graphBuilder != null)
-            {
                 this.StopClip();
-            }
         }
 
-        private void CheckVisibility()
+        private void CheckIsAudioOnly()
         {
             int hr = 0;
-            if ((this.videoWindow == null) || (this.basicVideo == null))
+            if (EVRControl != null)
+            {
+                System.Drawing.Size size, size_ar;
+                hr = EVRControl.GetNativeVideoSize(out size, out size_ar);
+                this.isAudioOnly = (hr < 0 || size.Width == 0 || size.Height == 0);
+            }
+            else if ((this.videoWindow == null) || (this.basicVideo == null))
             {
                 this.isAudioOnly = true;
             }
@@ -336,50 +328,70 @@ namespace WPF_VideoPlayer
             }
         }
 
+        internal delegate void CloseClipDelegate();
         private void CloseClip()
         {
-            //Останавливаем таймер обновления позиции
-            if (timer != null) timer.Stop();
-
-            if ((this.graphBuilder != null) && (this.VideoElement.Source == null))
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new CloseClipDelegate(CloseClip));
+            else
             {
-                if (this.mediaControl != null)
-                    this.mediaControl.Stop();
-
-                this.currentState = PlayState.Stopped;
-                this.CloseInterfaces();
-                this.isAudioOnly = true;
-            }
-            if (this.VideoElement.Source != null)
-            {
-                VideoElement.Stop();
-                VideoElement.Close();
-                VideoElement.Source = null;
-                VideoElement.Visibility = Visibility.Collapsed;
-                if (this.graphBuilder != null)
+                try
                 {
-                    while (Marshal.ReleaseComObject(this.graphBuilder) > 0) ;
-                    this.graphBuilder = null;
+                    //Останавливаем таймер обновления позиции
+                    if (timer != null) timer.Stop();
 
-                    if (this.graph != null)
+                    if ((this.graphBuilder != null) && (this.VideoElement.Source == null))
                     {
-                        while (Marshal.ReleaseComObject(this.graph) > 0) ;
-                        this.graph = null;
+                        if (this.mediaControl != null)
+                            this.mediaControl.Stop();
+
+                        this.CloseInterfaces();
+                        this.isAudioOnly = true;
+
+                        if (VHost != null)
+                        {
+                            VHost.Dispose();
+                            VHost = null;
+                            VHandle = IntPtr.Zero;
+                            VHostElement.Child = null;
+                        }
                     }
-                    GC.Collect();
+                    if (this.VideoElement.Source != null)
+                    {
+                        VideoElement.Stop();
+                        VideoElement.Close();
+                        VideoElement.Source = null;
+                        VideoElement.Visibility = Visibility.Collapsed;
+                        if (this.graphBuilder != null)
+                        {
+                            while (Marshal.ReleaseComObject(this.graphBuilder) > 0) ;
+                            this.graphBuilder = null;
+
+                            if (this.graph != null)
+                            {
+                                while (Marshal.ReleaseComObject(this.graph) > 0) ;
+                                this.graph = null;
+                            }
+                            GC.Collect();
+                        }
+                        string mediaUrl = "MediaBridge://MyDataString";
+                        MediaBridgeManager.UnregisterCallback(mediaUrl);
+                    }
                 }
-                string mediaUrl = "MediaBridge://MyDataString";
-                MediaBridgeManager.UnregisterCallback(mediaUrl);
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("CloseClip: " + ex.Message);
+                }
+
+                SetPlayIcon();
+                this.Title = "WPF Video Player";
+                this.currentState = PlayState.Init;
+                this.textbox_time.Text = textbox_duration.Text = "00:00:00";
+                this.slider_pos.Value = 0.0;
+
+                menu_filters.Items.Clear();
+                menu_filters.IsEnabled = false;
             }
-
-            SetPlayIcon();
-            this.Title = "WPF Video Player";
-            this.currentState = PlayState.Init;
-            this.textbox_time.Text = textbox_duration.Text = "00:00:00";
-            this.slider_pos.Value = 0.0;
-
-            menu_filters.Items.Clear();
-            menu_filters.IsEnabled = false;
         }
 
         private void CloseInterfaces()
@@ -400,14 +412,19 @@ namespace WPF_VideoPlayer
                         DsError.ThrowExceptionForHR(hr);
                     }
 
+                    if (EVRControl != null)
+                    {
+                        Marshal.ReleaseComObject(EVRControl);
+                        EVRControl = null;
+                    }
+
                     if (this.mediaEventEx != null)
                     {
                         hr = this.mediaEventEx.SetNotifyWindow(IntPtr.Zero, 0, IntPtr.Zero);
                         DsError.ThrowExceptionForHR(hr);
+                        this.mediaEventEx = null;
                     }
 
-                    if (this.mediaEventEx != null)
-                        this.mediaEventEx = null;
                     if (this.mediaSeeking != null)
                         this.mediaSeeking = null;
                     if (this.mediaPosition != null)
@@ -420,8 +437,6 @@ namespace WPF_VideoPlayer
                         this.basicVideo = null;
                     if (this.videoWindow != null)
                         this.videoWindow = null;
-                    if (this.frameStep != null)
-                        this.frameStep = null;
                     if (this.graphBuilder != null)
                     {
                         while (Marshal.ReleaseComObject(this.graphBuilder) > 0) ;
@@ -430,23 +445,10 @@ namespace WPF_VideoPlayer
                     GC.Collect();
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(exception.Message);
+                System.Windows.MessageBox.Show("CloseInterfaces: " + ex.Message);
             }
-        }
-
-        private bool GetFrameStepInterface()
-        {
-            IVideoFrameStep graphBuilder = null;
-            graphBuilder = (IVideoFrameStep) this.graphBuilder;
-            if (graphBuilder.CanStep(0, null) == 0)
-            {
-                this.frameStep = graphBuilder;
-                return true;
-            }
-            this.frameStep = null;
-            return false;
         }
 
         private void HandleGraphEvent()
@@ -478,44 +480,35 @@ namespace WPF_VideoPlayer
         {
             if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
             {
-                e.Effects = System.Windows.DragDropEffects.Move | System.Windows.DragDropEffects.Copy | System.Windows.DragDropEffects.Scroll;
+                e.Effects = DragDropEffects.All;
+                e.Handled = true;
             }
         }
 
         private void LayoutRoot_Drop(object sender, System.Windows.DragEventArgs e)
         {
-            string[] data = (string[]) e.Data.GetData(System.Windows.DataFormats.FileDrop);
-            int index = 0;
-            while (index < data.Length)
-            {
-                string str = data[index];
-                this.filepath = str;
-                break;
-            }
-            if (this.filepath != null)
+            string[] data = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+            if (data != null && data.Length > 0)
             {
                 try
                 {
-                    this.Title = Languages.Translate("loading") + "...";
-                    if (this.currentState != PlayState.Init)
+                    if (File.Exists(data[0]))
                     {
-                        this.CloseClip();
+                        PlayVideo(data[0], MediaLoad.Load);
+                        this.Activate();
                     }
-
-                    PlayVideo(filepath);
                 }
-                catch (Exception exception)
+                catch (Exception ex)
                 {
-                    this.CloseClip();
-                    this.filepath = string.Empty;
-                    System.Windows.MessageBox.Show(exception.Message);
+                    System.Windows.MessageBox.Show("Drag&Drop: " + ex.Message);
                 }
             }
         }
-        
+
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-            this.CloseClip();
+            if (this.currentState != PlayState.Init)
+                this.CloseClip();
 
             //Определяем и сохраняем размер и положение окна при выходе
             if (this.WindowState != System.Windows.WindowState.Maximized && this.WindowState != System.Windows.WindowState.Minimized)
@@ -530,8 +523,8 @@ namespace WPF_VideoPlayer
             if (e.Key == Key.Enter || e.SystemKey == Key.Return) { e.Handled = true; SwitchToFullScreen(); }
             else if (e.Key == Key.Escape && isFullScreen) { e.Handled = true; SwitchToFullScreen(); }
             else if (e.Key == Key.Space) { e.Handled = true; PauseClip(); }
-            else if (e.Key == Key.Left) { e.Handled = true; Shift_Frame(-1); }
-            else if (e.Key == Key.Right) { e.Handled = true; Shift_Frame(1); }
+            else if (e.Key == Key.Left) { e.Handled = true; if (Keyboard.Modifiers == ModifierKeys.Control) Shift_Frame(-10); else Shift_Frame(-1); }
+            else if (e.Key == Key.Right) { e.Handled = true; if (Keyboard.Modifiers == ModifierKeys.Control) Shift_Frame(10); else Shift_Frame(1); }
             else if (e.Key == Key.Up) { e.Handled = true; VolumePlus(); }
             else if (e.Key == Key.Down) { e.Handled = true; VolumeMinus(); }
             else e.Handled = false;
@@ -555,42 +548,61 @@ namespace WPF_VideoPlayer
 
         private void MoveVideoWindow()
         {
-            if (this.videoWindow != null)
+            try
             {
-                double left = 0, top = 0;
-                int hr, actualWidth, actualHeight;
-                DsError.ThrowExceptionForHR(this.basicVideo.get_SourceWidth(out actualWidth));
-                DsError.ThrowExceptionForHR(this.basicVideo.get_VideoHeight(out actualHeight)); //get_SourceHeight ?
-                double asp = ((double)actualWidth) / ((double)actualHeight);
+                if (this.videoWindow != null)
+                {
+                    double left = 0, top = 0;
+                    int width, height;
+                    DsError.ThrowExceptionForHR(this.basicVideo.get_SourceWidth(out width));
+                    DsError.ThrowExceptionForHR(this.basicVideo.get_VideoHeight(out height)); //get_SourceHeight ?
+                    double asp = ((double)width) / ((double)height);
 
-                if (IsRendererARFixed) //Просто задаем рендереру место под окно, он сам исправит аспект (добавит бордюры)
-                {
-                    left = 0;
-                    top = toolbar_top.ActualHeight;
-                    actualWidth = (int)LayoutRoot.ActualWidth;
-                    actualHeight = (int)(LayoutRoot.ActualHeight - toolbar_top.ActualHeight - toolbar_bottom.ActualHeight - grid_slider.ActualHeight);
-                }
-                else
-                {
-                    top = toolbar_top.ActualHeight;
-                    actualHeight = (int)(LayoutRoot.ActualHeight - toolbar_top.ActualHeight - toolbar_bottom.ActualHeight - slider_pos.ActualHeight);
-                    actualWidth = (int)(asp * actualHeight);
-                    left = (LayoutRoot.ActualWidth - actualWidth) / 2.0;
-                    if (actualWidth > (int)LayoutRoot.ActualWidth)
+                    if (IsRendererARFixed) //Просто задаем рендереру место под окно, он сам исправит аспект (добавит бордюры)
                     {
-                        actualWidth = (int)LayoutRoot.ActualWidth;
-                        actualHeight = (int)(((double)actualWidth) / asp);
                         left = 0;
-                        top = (LayoutRoot.ActualHeight - actualHeight - grid_slider.ActualHeight) / 2.0;
+                        top = toolbar_top.ActualHeight;
+                        width = (int)LayoutRoot.ActualWidth;
+                        height = (int)(LayoutRoot.ActualHeight - toolbar_top.ActualHeight - toolbar_bottom.ActualHeight - grid_slider.ActualHeight);
                     }
-                }
+                    else
+                    {
+                        top = toolbar_top.ActualHeight;
+                        height = (int)(LayoutRoot.ActualHeight - toolbar_top.ActualHeight - toolbar_bottom.ActualHeight - grid_slider.ActualHeight);
+                        width = (int)(asp * height);
+                        left = (LayoutRoot.ActualWidth - width) / 2.0;
+                        if (width > (int)LayoutRoot.ActualWidth)
+                        {
+                            width = (int)LayoutRoot.ActualWidth;
+                            height = (int)(((double)width) / asp);
+                            left = 0;
+                            top = (LayoutRoot.ActualHeight - height - grid_slider.ActualHeight) / 2.0;
+                        }
+                    }
 
-                //Масштабируем и вводим
-                hr = this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(actualWidth * dpi), (int)(actualHeight * dpi));
-                DsError.ThrowExceptionForHR(hr);
-                hr = this.videoWindow.put_BorderColor(1);
-                DsError.ThrowExceptionForHR(hr);
+                    //Масштабируем и вводим
+                    DsError.ThrowExceptionForHR(this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(width * dpi), (int)(height * dpi)));
+                    DsError.ThrowExceptionForHR(this.videoWindow.put_BorderColor(1));
+                }
+                else if (EVRControl != null)
+                {
+                    //Масштабируем и вводим
+                    int hr = EVRControl.SetVideoPosition(null, new MFRect(0, 0, (int)(dpi * VHostElement.ActualWidth), (int)(dpi * VHostElement.ActualHeight)));
+                    MFError.ThrowExceptionForHR(hr);
+                }
             }
+            catch (Exception ex)
+            {
+                //this.CloseClip();
+                //this.filepath = string.Empty;
+                System.Windows.MessageBox.Show("MoveVideoWindow: " + ex.Message);
+            }
+        }
+
+        private void VHost_RepaintRequired(object sender, EventArgs e)
+        {
+            if (!isAudioOnly && EVRControl != null)
+                EVRControl.RepaintVideo();
         }
 
         private void PauseClip()
@@ -627,52 +639,106 @@ namespace WPF_VideoPlayer
             }
         }
 
-        void PlayVideo(string file)
+        void PlayVideo(string file, MediaLoad mediaload)
         {
-            this.Title = System.IO.Path.GetFileName(file) + " - WPF Video Player";
-            this.currentState = PlayState.Stopped;
+            try
+            {
+                this.mediaload = mediaload;
 
-            if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
-                this.PlayMovieInWindow(file);
-            else
-                this.PlayWithMediaBridge(file);
+                if (this.currentState != PlayState.Init)
+                    this.CloseClip();
 
-            this.slider_pos.Focus();
+                this.filepath = file;
+                this.Title = Path.GetFileName(file) + " - " + Languages.Translate("loading") + "...";
 
-            //Запускаем таймер обновления позиции
-            if (timer != null) timer.Start();
+                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
+                    this.PlayMovieInWindow();
+                else
+                    this.PlayWithMediaBridge();
+
+                this.slider_pos.Focus();
+                this.Title = Path.GetFileName(file) + " - WPF Video Player";
+
+                //Запускаем таймер обновления позиции
+                if (timer != null) timer.Start();
+            }
+            catch (Exception ex)
+            {
+                this.CloseClip();
+                this.filepath = string.Empty;
+                System.Windows.MessageBox.Show("PlayVideo: " + ex.Message);
+            }
         }
 
-        private void PlayMovieInWindow(string filename)
+        private void PlayMovieInWindow()
         {
-            if (filename != string.Empty)
+            int hr = 0;
+            this.graphBuilder = (IGraphBuilder)new FilterGraph();
+
+            //Добавляем в граф нужный рендерер (Auto - graphBuilder сам выберет рендерер)
+            Settings.VRenderers renderer = Settings.VideoRenderer;
+            if (renderer == Settings.VRenderers.Overlay)
             {
-                int hr = 0;
-                this.graphBuilder = (IGraphBuilder) new FilterGraph();
+                IBaseFilter add_vr = (IBaseFilter)new VideoRenderer();
+                hr = graphBuilder.AddFilter(add_vr, "Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
+            }
+            else if (renderer == Settings.VRenderers.VMR7)
+            {
+                IBaseFilter add_vmr = (IBaseFilter)new VideoMixingRenderer();
+                hr = graphBuilder.AddFilter(add_vmr, "Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
+            }
+            else if (renderer == Settings.VRenderers.VMR9)
+            {
+                IBaseFilter add_vmr9 = (IBaseFilter)new VideoMixingRenderer9();
+                hr = graphBuilder.AddFilter(add_vmr9, "Video Mixing Renderer 9");
+                DsError.ThrowExceptionForHR(hr);
+            }
+            else if (renderer == Settings.VRenderers.EVR)
+            {
+                //Создаём Win32-окно, т.к. использовать WPF-поверхность не получится
+                VHost = new VideoHwndHost();
+                VHost.RepaintRequired += new EventHandler(VHost_RepaintRequired);
+                VHostElement.Child = VHost;
+                VHandle = VHost.Handle;
 
-                //Добавляем в граф нужный рендерер (0 - graphBuilder сам выберет рендерер)
-                int renderer = Settings.VideoRenderer;
-                if (renderer == 1)
-                {
-                    IBaseFilter add_vr = (IBaseFilter)new VideoRenderer();
-                    hr = graphBuilder.AddFilter(add_vr, "Video Renderer");
-                }
-                else if (renderer == 2)
-                {
-                    IBaseFilter add_vmr = (IBaseFilter)new VideoMixingRenderer();
-                    hr = graphBuilder.AddFilter(add_vmr, "Video Renderer");
-                }
-                else if (renderer == 3)
-                {
-                    IBaseFilter add_vmr9 = (IBaseFilter)new VideoMixingRenderer9();
-                    hr = graphBuilder.AddFilter(add_vmr9, "Video Mixing Renderer 9");
-                }
+                //Добавляем и настраиваем EVR
+                IBaseFilter add_evr = (IBaseFilter)new EnhancedVideoRenderer();
+                hr = graphBuilder.AddFilter(add_evr, "Enhanced Video Renderer");
                 DsError.ThrowExceptionForHR(hr);
 
-                // Have the graph builder construct its the appropriate graph automatically
-                hr = this.graphBuilder.RenderFile(filename, null);
-                DsError.ThrowExceptionForHR(hr);
+                object obj;
+                IMFGetService pGetService = null;
+                pGetService = (IMFGetService)add_evr;
+                hr = pGetService.GetService(MFServices.MR_VIDEO_RENDER_SERVICE, typeof(IMFVideoDisplayControl).GUID, out obj);
+                MFError.ThrowExceptionForHR(hr);
 
+                try
+                {
+                    EVRControl = (IMFVideoDisplayControl)obj;
+                }
+                catch
+                {
+                    Marshal.ReleaseComObject(obj);
+                    throw;
+                }
+
+                //Указываем поверхность
+                hr = EVRControl.SetVideoWindow(VHandle);
+                MFError.ThrowExceptionForHR(hr);
+
+                //Сохраняем аспект
+                hr = EVRControl.SetAspectRatioMode(MFVideoAspectRatioMode.PreservePicture);
+                MFError.ThrowExceptionForHR(hr);
+            }
+
+            // Have the graph builder construct its the appropriate graph automatically
+            hr = this.graphBuilder.RenderFile(this.filepath, null);
+            DsError.ThrowExceptionForHR(hr);
+
+            if (EVRControl == null)
+            {
                 //Ищем рендерер и ВКЛЮЧАЕМ соблюдение аспекта (рендерер сам подгонит картинку под размер окна, с учетом аспекта)
                 IsRendererARFixed = false;
                 IBaseFilter filter = null;
@@ -699,43 +765,98 @@ namespace WPF_VideoPlayer
                         }
                     }
                 }
+            }
+            else
+                IsRendererARFixed = true;
 
-                this.mediaControl = (IMediaControl) this.graphBuilder;
-                this.mediaEventEx = (IMediaEventEx) this.graphBuilder;
-                this.mediaSeeking = (IMediaSeeking) this.graphBuilder;
-                this.mediaPosition = (IMediaPosition) this.graphBuilder;
-                this.videoWindow = this.graphBuilder as IVideoWindow;
-                this.basicVideo = this.graphBuilder as IBasicVideo;
-                this.basicAudio = this.graphBuilder as IBasicAudio;
-                this.basicAudio.put_Volume(VolumeSet);
-                this.CheckVisibility();
-                DsError.ThrowExceptionForHR(this.mediaEventEx.SetNotifyWindow(this.source.Handle, 0x40d, IntPtr.Zero));
-                if (!this.isAudioOnly)
+            this.mediaControl = (IMediaControl)this.graphBuilder;
+            this.mediaEventEx = (IMediaEventEx)this.graphBuilder;
+            this.mediaSeeking = (IMediaSeeking)this.graphBuilder;
+            this.mediaPosition = (IMediaPosition)this.graphBuilder;
+            this.videoWindow = (EVRControl == null) ? this.graphBuilder as IVideoWindow : null;
+            this.basicVideo = (EVRControl == null) ? this.graphBuilder as IBasicVideo : null;
+            this.basicAudio = this.graphBuilder as IBasicAudio;
+            this.basicAudio.put_Volume(VolumeSet);
+            this.CheckIsAudioOnly();
+            if (!this.isAudioOnly)
+            {
+                if (videoWindow != null)
                 {
-                    DsError.ThrowExceptionForHR(this.videoWindow.put_Owner(this.source.Handle));
-                    DsError.ThrowExceptionForHR(this.videoWindow.put_MessageDrain(this.source.Handle));
-                    DsError.ThrowExceptionForHR(this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings | DirectShowLib.WindowStyle.ClipChildren));
-                    this.MoveVideoWindow();
-                    this.GetFrameStepInterface();
+                    hr = this.videoWindow.put_Owner(this.source.Handle);
+                    DsError.ThrowExceptionForHR(hr);
+
+                    hr = this.videoWindow.put_MessageDrain(this.source.Handle);
+                    DsError.ThrowExceptionForHR(hr);
+
+                    hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings | DirectShowLib.WindowStyle.ClipChildren);
+                    DsError.ThrowExceptionForHR(hr);
                 }
-                DsError.ThrowExceptionForHR(this.mediaControl.Run());
+
+                this.MoveVideoWindow();
+            }
+            else
+            {
+                if (VHost != null)
+                {
+                    VHost.Dispose();
+                    VHost = null;
+                    VHandle = IntPtr.Zero;
+                    VHostElement.Child = null;
+                }
+            }
+
+            hr = this.mediaEventEx.SetNotifyWindow(this.source.Handle, WMGraphNotify, IntPtr.Zero);
+            DsError.ThrowExceptionForHR(hr);
+
+            //Восстанавливаем старую позицию
+            if (mediaload == MediaLoad.Update && oldpos != TimeSpan.Zero)
+            {
+                if (NaturalDuration >= oldpos)
+                {
+                    hr = mediaPosition.put_CurrentPosition(oldpos.TotalSeconds);
+                    DsError.ThrowExceptionForHR(hr);
+                }
+            }
+
+            //Восстанавливаем старый PlayState
+            if (mediaload == MediaLoad.Update && (oldplaystate == PlayState.Paused || oldplaystate == PlayState.Stopped))
+            {
+                hr = this.mediaControl.Pause();
+                DsError.ThrowExceptionForHR(hr);
+                this.currentState = PlayState.Paused;
+                this.SetPlayIcon();
+            }
+            else
+            {
+                hr = this.mediaControl.Run();
+                DsError.ThrowExceptionForHR(hr);
                 this.currentState = PlayState.Running;
                 this.SetPauseIcon();
-
-                ShowFilters();
             }
+
+            ShowFilters();
         }
 
-        private void PlayWithMediaBridge(string filepath)
+        private void PlayWithMediaBridge()
         {
-            this.filepath = filepath;
             string mediaUrl = "MediaBridge://MyDataString";
             MediaBridgeManager.RegisterCallback(mediaUrl, new MediaBridgeManager.NewMediaGraphInfo(this.BridgeCallback));
             this.VideoElement.Source = new Uri(mediaUrl);
             this.VideoElement.Visibility = Visibility.Visible;
-            this.VideoElement.Play();
-            this.currentState = PlayState.Running;
-            this.SetPauseIcon();
+
+            //Восстанавливаем старый PlayState
+            if (mediaload == MediaLoad.Update && (oldplaystate == PlayState.Paused || oldplaystate == PlayState.Stopped))
+            {
+                this.VideoElement.Play();
+                this.VideoElement.Pause();
+                this.currentState = PlayState.Paused;
+            }
+            else
+            {
+                this.VideoElement.Play();
+                this.currentState = PlayState.Running;
+                this.SetPauseIcon();
+            }
         }
 
         internal delegate void ClearFiltersDelegate();
@@ -770,7 +891,7 @@ namespace WPF_VideoPlayer
         {
             ClearFiltersMenu();
             if (this.graphBuilder == null) return;
-            
+
             IEnumFilters pEnum = null;
             IBaseFilter[] pFilter = null;
             try
@@ -870,7 +991,7 @@ namespace WPF_VideoPlayer
                 base.WindowState = System.Windows.WindowState.Maximized;
                 this.oldmargin = this.VideoElement.Margin;
 
-                if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
+                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                     this.MoveVideoWindow();
                 else
                     this.VideoElement.Margin = new Thickness(0, toolbar_top.ActualHeight, 0, toolbar_bottom.ActualHeight + grid_slider.ActualHeight);
@@ -881,7 +1002,7 @@ namespace WPF_VideoPlayer
                 base.WindowStyle = System.Windows.WindowStyle.SingleBorderWindow;
                 this.isFullScreen = false;
 
-                if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
+                if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                     this.MoveVideoWindow();
                 else
                     this.VideoElement.Margin = this.oldmargin;
@@ -925,6 +1046,13 @@ namespace WPF_VideoPlayer
                 this.slider_pos.Maximum = this.VideoElement.NaturalDuration.TimeSpan.TotalSeconds;
                 TimeSpan tCode = TimeSpan.Parse(TimeSpan.FromSeconds(NaturalDuration.TotalSeconds).ToString().Split('.')[0]);
                 textbox_duration.Text = tCode.ToString();
+
+                //Восстанавливаем старую позицию
+                if (mediaload == MediaLoad.Update && oldpos != TimeSpan.Zero)
+                {
+                    if (NaturalDuration >= oldpos)
+                        Position = oldpos;
+                }
             }
         }
 
@@ -947,11 +1075,11 @@ namespace WPF_VideoPlayer
                     {
                         HandleGraphEvent(); break;
                     }
-                case 0x0203: //0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP, 0x0203 WM_LBUTTONDBLCLK
+                case 0x0203: //0x0203 WM_LBUTTONDBLCLK (0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP)
                     {
                         SwitchToFullScreen(); break;
                     }
-                case 0x0205: //0x0204 WM_RBUTTONDOWN, 0x0205 WM_RBUTTONUP, 0x0206 WM_RBUTTONDBLCLK
+                case 0x0205: //0x0205 WM_RBUTTONUP (0x0204 WM_RBUTTONDOWN, 0x0206 WM_RBUTTONDBLCLK)
                     {
                         //Мышь должна быть над окном рендерера, иначе правый клик будет срабатывать повсюду!
                         //Для 0x0203 и 0x0206 это условие каким-то образом выполняется само по себе :)
@@ -1113,8 +1241,13 @@ namespace WPF_VideoPlayer
         {
             if (Settings.PlayerEngine.ToString() == ((MenuItem)sender).Header.ToString()) return;
 
-            if (!string.IsNullOrEmpty(filepath))
+            PlayState old_state = this.currentState;
+            if (this.currentState != PlayState.Init)
+            {
+                oldplaystate = old_state;
+                oldpos = Position;
                 CloseClip();
+            }
 
             //Удаляем старое
             if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
@@ -1160,40 +1293,50 @@ namespace WPF_VideoPlayer
             }
 
             //Обновляем превью
-            if (!string.IsNullOrEmpty(filepath))
-                PlayVideo(filepath);
+            if (old_state != PlayState.Init)
+            {
+                PlayVideo(this.filepath, MediaLoad.Update);
+            }
         }
 
         private void Change_renderer_Click(object sender, RoutedEventArgs e)
         {
-            int new_value = 0;
-            int old_value = Settings.VideoRenderer;
+            Settings.VRenderers new_renderer = 0;
+            Settings.VRenderers old_renderer = Settings.VideoRenderer;
 
             if (vr_Default.IsFocused)
             {
                 vr_default.IsChecked = true;
-                Settings.VideoRenderer = new_value = 0;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.Auto;
             }
             else if (vr_Overlay.IsFocused)
             {
                 vr_overlay.IsChecked = true;
-                Settings.VideoRenderer = new_value = 1;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.Overlay;
             }
             else if (vr_VMR7.IsFocused)
             {
                 vr_vmr7.IsChecked = true;
-                Settings.VideoRenderer = new_value = 2;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.VMR7;
             }
             else if (vr_VMR9.IsFocused)
             {
                 vr_vmr9.IsChecked = true;
-                Settings.VideoRenderer = new_value = 3;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.VMR9;
+            }
+            else if (vr_EVR.IsFocused)
+            {
+                vr_evr.IsChecked = true;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.EVR;
             }
 
-            if (old_value != new_value && !string.IsNullOrEmpty(filepath) && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
+            if (old_renderer != new_renderer && this.currentState != PlayState.Init && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
             {
+                oldpos = Position;
+                oldplaystate = currentState;
+
                 CloseClip();
-                PlayVideo(filepath);
+                PlayVideo(this.filepath, MediaLoad.Update);
             }
         }
 
