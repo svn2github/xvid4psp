@@ -101,6 +101,7 @@ namespace WPF_VideoPlayer
                 this.menu_player_engine.Header = Languages.Translate("Player engine");
                 this.check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
+                this.check_win7_taskbar.ToolTip = Languages.Translate("Enable Windows 7 taskbar progress indication");
 
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) check_engine_directshow.IsChecked = true;
                 else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge) check_engine_mediabridge.IsChecked = true;
@@ -113,6 +114,7 @@ namespace WPF_VideoPlayer
                 else if (vr == Settings.VRenderers.EVR) vr_evr.IsChecked = true;
 
                 check_old_seeking.IsChecked = OldSeeking = Settings.OldSeeking;
+                check_win7_taskbar.IsChecked = Settings.Win7TaskbarIsEnabled;
 
                 //Установка значения громкости из реестра
                 slider_Volume.Value = Settings.VolumeLevel;
@@ -127,13 +129,20 @@ namespace WPF_VideoPlayer
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("LoadSettings: " + ex.Message);
+                System.Windows.MessageBox.Show("LoadSettings: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             this.Handle = new WindowInteropHelper(this).Handle;
+
+            if (Settings.Win7TaskbarIsEnabled && !Win7Taskbar.InitializeWin7Taskbar())
+            {
+                System.Windows.MessageBox.Show(Languages.Translate("Failed to initialize Windows 7 taskbar interface.") +
+                   " " + Languages.Translate("This feature will be disabled!"), Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+                check_win7_taskbar.IsChecked = Settings.Win7TaskbarIsEnabled = false;
+            }
 
             if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
             {
@@ -181,7 +190,7 @@ namespace WPF_VideoPlayer
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("MainFormLoader: " + ex.Message);
+                    System.Windows.MessageBox.Show("MainFormLoader: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -200,7 +209,8 @@ namespace WPF_VideoPlayer
             {
                 this.CloseClip();
                 this.filepath = string.Empty;
-                System.Windows.MessageBox.Show("BridgeCallback: " + ex.Message);
+                Win7Taskbar.SetProgressTaskComplete(this.Handle, TBPF.ERROR);
+                System.Windows.MessageBox.Show("BridgeCallback: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -235,7 +245,7 @@ namespace WPF_VideoPlayer
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("ShiftFrame: " + ex.Message);
+                    System.Windows.MessageBox.Show("ShiftFrame: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -282,7 +292,7 @@ namespace WPF_VideoPlayer
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("ButtonOpen: " + ex.Message);
+                System.Windows.MessageBox.Show("ButtonOpen: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -387,7 +397,7 @@ namespace WPF_VideoPlayer
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("CloseClip: " + ex.Message);
+                    System.Windows.MessageBox.Show("CloseClip: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 SetPlayIcon();
@@ -397,6 +407,8 @@ namespace WPF_VideoPlayer
                 this.currentState = PlayState.Init;
                 this.textbox_time.Text = textbox_duration.Text = "00:00:00";
                 this.slider_pos.Value = 0.0;
+
+                Win7Taskbar.SetProgressState(this.Handle, TBPF.NOPROGRESS);
             }
         }
 
@@ -453,7 +465,7 @@ namespace WPF_VideoPlayer
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("CloseInterfaces: " + ex.Message);
+                System.Windows.MessageBox.Show("CloseInterfaces: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -506,7 +518,7 @@ namespace WPF_VideoPlayer
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Drag&Drop: " + ex.Message);
+                    System.Windows.MessageBox.Show("Drag&Drop: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -602,7 +614,7 @@ namespace WPF_VideoPlayer
             {
                 //this.CloseClip();
                 //this.filepath = string.Empty;
-                System.Windows.MessageBox.Show("MoveVideoWindow: " + ex.Message);
+                System.Windows.MessageBox.Show("MoveVideoWindow: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -673,7 +685,8 @@ namespace WPF_VideoPlayer
             {
                 this.CloseClip();
                 this.filepath = string.Empty;
-                System.Windows.MessageBox.Show("PlayVideo: " + ex.Message);
+                Win7Taskbar.SetProgressTaskComplete(this.Handle, TBPF.ERROR);
+                System.Windows.MessageBox.Show("PlayVideo: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1037,7 +1050,7 @@ namespace WPF_VideoPlayer
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("ShowFilterPropertyPage: " + ex.Message);
+                System.Windows.MessageBox.Show("ShowFilterPropertyPage: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -1067,11 +1080,13 @@ namespace WPF_VideoPlayer
         private void SetPauseIcon()
         {
             image_play.Source = new BitmapImage(new Uri(@"../pictures/pause_new.png", UriKind.RelativeOrAbsolute));
+            Win7Taskbar.SetProgressState(this.Handle, TBPF.NORMAL);
         }
 
         private void SetPlayIcon()
         {
             image_play.Source = new BitmapImage(new Uri(@"../pictures/play_new.png", UriKind.RelativeOrAbsolute));
+            Win7Taskbar.SetProgressState(this.Handle, TBPF.PAUSED);
         }
 
         //Позиционирование при перемещении ползунка (старый способ)
@@ -1164,6 +1179,7 @@ namespace WPF_VideoPlayer
                 if (visual == null || !visual.IsDescendantOf(slider_pos))
                 {
                     this.slider_pos.Value = this.Position.TotalSeconds;
+                    Win7Taskbar.SetProgressValue(this.Handle, (ulong)slider_pos.Value, (ulong)slider_pos.Maximum);
                 }
             }
         }
@@ -1252,7 +1268,7 @@ namespace WPF_VideoPlayer
                 {
                     //this.CloseClip();
                     //this.filepath = string.Empty;
-                    //System.Windows.MessageBox.Show(ex.Message);
+                    //System.Windows.MessageBox.Show(ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return TimeSpan.Zero;
                 }
             }
@@ -1281,7 +1297,7 @@ namespace WPF_VideoPlayer
                 {
                     //this.CloseClip();
                     //this.filepath = string.Empty;
-                    //System.Windows.MessageBox.Show(ex.Message);
+                    //System.Windows.MessageBox.Show(ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return TimeSpan.Zero;
                 }
             }
@@ -1482,6 +1498,23 @@ namespace WPF_VideoPlayer
         private void menu_mediainfo_Click(object sender, RoutedEventArgs e)
         {
             new MediaInfo(filepath, this);
+        }
+
+        private void check_win7_taskbar_Clicked(object sender, RoutedEventArgs e)
+        {
+            if ((Settings.Win7TaskbarIsEnabled = check_win7_taskbar.IsChecked))
+            {
+                if (!Win7Taskbar.InitializeWin7Taskbar())
+                {
+                    System.Windows.MessageBox.Show(Languages.Translate("Failed to initialize Windows 7 taskbar interface.") +
+                    " " + Languages.Translate("This feature will be disabled!"), Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+                    check_win7_taskbar.IsChecked = Settings.Win7TaskbarIsEnabled = false;
+                }
+            }
+            else
+            {
+                Win7Taskbar.UninitializeWin7Taskbar();
+            }
         }
     }
 }

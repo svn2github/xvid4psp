@@ -223,5 +223,27 @@ namespace WPF_VideoPlayer
                 SetBool("WPFPlayer_MI_WrapText", value);
             }
         }
+
+        //Прогресс в панели задач Win7
+        public static bool Win7TaskbarIsEnabled
+        {
+            get
+            {
+                object value = GetValue("WPFPlayer_Win7TaskbarIsEnabled");
+                if (value == null)
+                {
+                    OperatingSystem osInfo = Environment.OSVersion;
+                    return ((osInfo.Version.Major == 6 && osInfo.Version.Minor >= 1) || (osInfo.Version.Major > 6));
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("WPFPlayer_Win7TaskbarIsEnabled", value);
+            }
+        }
     }
 }

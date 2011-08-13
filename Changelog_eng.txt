@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.252.0 (13.08.2011), main changes:
+﻿XviD4PSP 5.10.253.0 (13.08.2011), main changes:
 
+>>> (r253) WPF Video Player: Added support for Windows 7 taskbar progress indication (enabled by default for Windows 7);
+           added a catcher for unhandled exceptions.
 >>> (r252) For MediaInfo window added checkbox "Wrap text".
 >>> (r252) WPF Video Player: for DS-filters that used in the Graph added ability to show their PropertyPage; added
            a MediaInfo window.
