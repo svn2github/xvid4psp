@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.251.0 (11.08.2011), main changes:
+﻿XviD4PSP 5.10.252.0 (13.08.2011), main changes:
 
+>>> (r252) For MediaInfo window added checkbox "Wrap text".
+>>> (r252) WPF Video Player: for DS-filters that used in the Graph added ability to show their PropertyPage; added
+           a MediaInfo window.
 >>> (r251) WPF Video Player: EVR (Enhanced Video Renderer) now can be choosen as DirectShow output;
            some other changes.
 >>> (r250) Manual crop: added "Autocrop on current frame" and "Remove crop" buttons; added support for global HotKeys

@@ -106,8 +106,8 @@
                             <Separator/>
                             <MenuItem Header="Old seeking" x:Name="check_old_seeking" Click="check_Old_Seeking_Clicked" IsCheckable="True" StaysOpenOnClick="True"/>
                         </MenuItem>
-                        <MenuItem x:Name="menu_filters" Header="DShow filters" Width="Auto" Height="Auto" IsEnabled="False">
-                        </MenuItem>
+                        <MenuItem x:Name="menu_filters" Header="DShow filters" Width="Auto" Height="Auto" IsEnabled="False"/>
+                        <MenuItem x:Name="menu_mediainfo" Header="MediaInfo" Width="Auto" Height="Auto" Click="menu_mediainfo_Click"/>
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>

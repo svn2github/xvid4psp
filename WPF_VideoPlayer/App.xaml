@@ -571,7 +571,13 @@
         <LinearGradientBrush x:Key="opasity_1" EndPoint="0.744,1.208" StartPoint="0.742,-0.014">
             <GradientStop Color="#FF000000" Offset="0" />
             <GradientStop Color="#01FFFFFF" Offset="1" />
-        </LinearGradientBrush>        
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="black_gradient" EndPoint="0.5,0.0" StartPoint="0.5,1.0">
+            <GradientStop Color="#FF545454" Offset="0"/>
+            <GradientStop Color="#FFFFFFFF" Offset="1"/>
+            <GradientStop Color="#FF232323" Offset="0.155"/>
+            <GradientStop Color="#FF797878" Offset="0.845"/>
+        </LinearGradientBrush>
         <LinearGradientBrush x:Key="black_gradient_2" EndPoint="0.5,0" StartPoint="0.5,1">
             <GradientStop Color="#FF545454" Offset="0" />
             <GradientStop Color="#FF545454" Offset="1" />
@@ -642,5 +648,53 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
+        <SolidColorBrush x:Key="CheckBoxFillNormal" Color="#F4F4F4"/>
+        <SolidColorBrush x:Key="CheckBoxStroke" Color="#8E8F8F"/>
+        <Style x:Key="EmptyCheckBoxFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle SnapsToDevicePixels="true" Stroke="Black" StrokeDashArray="1 2" StrokeThickness="1" Margin="1"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CheckRadioFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle SnapsToDevicePixels="true" Stroke="Black" StrokeDashArray="1 2" StrokeThickness="1" Margin="14,0,0,0"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="{StaticResource CheckBoxFillNormal}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CheckBoxStroke}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource EmptyCheckBoxFocusVisual}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <BulletDecorator SnapsToDevicePixels="true" Background="Transparent">
+                            <BulletDecorator.Bullet>
+                                <Microsoft_Windows_Themes:BulletChrome Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" IsChecked="{TemplateBinding IsChecked}" RenderMouseOver="{TemplateBinding IsMouseOver}" RenderPressed="{TemplateBinding IsPressed}"/>
+                            </BulletDecorator.Bullet>
+                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+                        </BulletDecorator>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasContent" Value="true">
+                                <Setter Property="FocusVisualStyle" Value="{StaticResource CheckRadioFocusVisual}"/>
+                                <Setter Property="Padding" Value="4,0,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>

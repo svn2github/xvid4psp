@@ -181,6 +181,47 @@ namespace WPF_VideoPlayer
                 SetBool("WPFPlayer_OldSeeking", value);
             }
         }
+
+        //Полная инфа для MediaInfo
+        public static bool MI_Full
+        {
+            get
+            {
+                object value = GetValue("WPFPlayer_MI_Full");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("WPFPlayer_MI_Full", value);
+            }
+        }
+
+        //Перенос строк в окне MediaInfo
+        public static bool MI_WrapText
+        {
+            get
+            {
+                object value = GetValue("WPFPlayer_MI_WrapText");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("WPFPlayer_MI_WrapText", value);
+            }
+        }
     }
 }
-

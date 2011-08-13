@@ -105,6 +105,9 @@
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MediaInfo.xaml.cs">
+      <DependentUpon>MediaInfo.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +169,10 @@
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MediaInfo.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

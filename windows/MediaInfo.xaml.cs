@@ -33,9 +33,21 @@ namespace XviD4PSP
 
             Title = "Info (" + infomode.ToString() + ")";
             button_open.Content = Languages.Translate("Open");
-            button_close.Content = Languages.Translate("Close");
             button_save.Content = Languages.Translate("Save");
-            tbxInfo.ToolTip = "Drag and Drop your files here";
+            button_close.Content = Languages.Translate("Close");
+            tbxInfo.ToolTip = Languages.Translate("Drag and Drop your files here");
+            check_wrap.Content = Languages.Translate("Wrap text");
+
+            if (Settings.MI_WrapText)
+            {
+                check_wrap.IsChecked = true;
+                tbxInfo.TextWrapping = TextWrapping.Wrap;
+            }
+            else
+            {
+                check_wrap.IsChecked = false;
+                tbxInfo.TextWrapping = TextWrapping.NoWrap;
+            }
 
             foreach (string info in Enum.GetNames(typeof(InfoMode)))
                 combo_info.Items.Add(info);
@@ -319,6 +331,16 @@ namespace XviD4PSP
                     ff = null;
                 }
             }
+        }
+
+        private void check_wrap_Click(object sender, RoutedEventArgs e)
+        {
+            if ((Settings.MI_WrapText = check_wrap.IsChecked.Value))
+            {
+                tbxInfo.TextWrapping = TextWrapping.Wrap;
+            }
+            else
+                tbxInfo.TextWrapping = TextWrapping.NoWrap;
         }
 	}
 }

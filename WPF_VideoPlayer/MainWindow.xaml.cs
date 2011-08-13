@@ -27,6 +27,7 @@ namespace WPF_VideoPlayer
 {
     public partial class MainWindow
     {
+        private static object locker = new object();
         private IBasicAudio basicAudio;
         private IBasicVideo basicVideo;
         private PlayState currentState = PlayState.Init;
@@ -132,11 +133,13 @@ namespace WPF_VideoPlayer
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Handle = new WindowInteropHelper(this).Handle;
+
             if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
             {
                 base.LocationChanged += new EventHandler(this.MainWindow_LocationChanged);
                 base.SizeChanged += new SizeChangedEventHandler(this.MainWindow_SizeChanged);
-                this.source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+                this.source = HwndSource.FromHwnd(this.Handle);
                 this.source.AddHook(new HwndSourceHook(this.WndProc));
             }
             else
@@ -191,7 +194,7 @@ namespace WPF_VideoPlayer
                 this.graphBuilder = (IGraphBuilder) this.graph;
                 DsError.ThrowExceptionForHR(this.graphBuilder.RenderFile(this.filepath, null));
 
-                ShowFilters();
+                AddFiltersToMenu();
             }
             catch (Exception ex)
             {
@@ -270,6 +273,10 @@ namespace WPF_VideoPlayer
                 dialog.Title = Languages.Translate("Select media file") + ":";
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
+                    //Чтоб убрать остатки от окна выбора файлов
+                    this.Height = this.Window.Height + 1;
+                    this.Height = this.Window.Height - 1;
+
                     PlayVideo(dialog.FileName, MediaLoad.Load);
                 }
             }
@@ -384,13 +391,12 @@ namespace WPF_VideoPlayer
                 }
 
                 SetPlayIcon();
+                ClearFiltersMenu();
+
                 this.Title = "WPF Video Player";
                 this.currentState = PlayState.Init;
                 this.textbox_time.Text = textbox_duration.Text = "00:00:00";
                 this.slider_pos.Value = 0.0;
-
-                menu_filters.Items.Clear();
-                menu_filters.IsEnabled = false;
             }
         }
 
@@ -399,7 +405,7 @@ namespace WPF_VideoPlayer
             int hr = 0;
             try
             {
-                lock (this)
+                lock (locker)
                 {
                     // Relinquish ownership (IMPORTANT!) after hiding video window
                     if (!this.isAudioOnly && this.videoWindow != null)
@@ -527,6 +533,7 @@ namespace WPF_VideoPlayer
             else if (e.Key == Key.Right) { e.Handled = true; if (Keyboard.Modifiers == ModifierKeys.Control) Shift_Frame(10); else Shift_Frame(1); }
             else if (e.Key == Key.Up) { e.Handled = true; VolumePlus(); }
             else if (e.Key == Key.Down) { e.Handled = true; VolumeMinus(); }
+            else if (e.Key == Key.F1) { e.Handled = true; menu_mediainfo_Click(null, null); }
             else e.Handled = false;
         }
 
@@ -834,7 +841,7 @@ namespace WPF_VideoPlayer
                 this.SetPauseIcon();
             }
 
-            ShowFilters();
+            AddFiltersToMenu();
         }
 
         private void PlayWithMediaBridge()
@@ -871,23 +878,32 @@ namespace WPF_VideoPlayer
             }
         }
 
-        internal delegate void AddFilterDelegate(string filter);
-        private void AddFilterToMenu(string filter)
+        internal delegate void AddFilterDelegate(string filter_name, bool has_properties);
+        private void AddFilterToMenu(string filter_name, bool has_properties)
         {
             if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new AddFilterDelegate(AddFilterToMenu), filter);
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new AddFilterDelegate(AddFilterToMenu), filter_name, has_properties);
             else
             {
                 MenuItem item = new MenuItem();
-                item.Header = filter;
-                item.StaysOpenOnClick = true;
+                item.Header = filter_name;
+                if (has_properties)
+                {
+                    item.Click += new RoutedEventHandler(ShowFilterPropertyPage);
+                }
+                else
+                {
+                    item.IsEnabled = false;
+                    //item.Foreground = Brushes.Gray;
+                    //item.StaysOpenOnClick = true;
+                }
                 menu_filters.Items.Add(item);
                 menu_filters.IsEnabled = true;
             }
         }
 
         //Список задействованных в графе фильтров
-        private void ShowFilters()
+        private void AddFiltersToMenu()
         {
             ClearFiltersMenu();
             if (this.graphBuilder == null) return;
@@ -909,12 +925,17 @@ namespace WPF_VideoPlayer
                             if (filterInfo.pGraph != null)
                                 Marshal.ReleaseComObject(filterInfo.pGraph);
 
-                            AddFilterToMenu(filterInfo.achName);
+                            AddFilterToMenu(filterInfo.achName, ((pFilter[0] as ISpecifyPropertyPages) != null));
                         }
+
+                        Marshal.ReleaseComObject(pFilter[0]);
                     }
                 }
             }
-            catch { }
+            catch (Exception)
+            {
+                AddFilterToMenu("An error has occurred..", false);
+            }
             finally
             {
                 if (pFilter[0] != null)
@@ -929,6 +950,119 @@ namespace WPF_VideoPlayer
                 }
             }
         }
+
+        //Вывод окна с параметрами фильтра
+        private void ShowFilterPropertyPage(object sender, RoutedEventArgs e)
+        {
+            int hr = 0;
+            DsCAUUID caGuid;
+            FilterInfo filterInfo;
+            IBaseFilter filter = null;
+
+            try
+            {
+                hr = this.graphBuilder.FindFilterByName(((MenuItem)sender).Header.ToString(), out filter);
+                DsError.ThrowExceptionForHR(hr);
+
+                hr = filter.QueryFilterInfo(out filterInfo);
+                DsError.ThrowExceptionForHR(hr);
+
+                if (filterInfo.pGraph != null)
+                    Marshal.ReleaseComObject(filterInfo.pGraph);
+
+                if ((filter as ISpecifyPropertyPages) != null)
+                {
+                    hr = (filter as ISpecifyPropertyPages).GetPages(out caGuid);
+                    DsError.ThrowExceptionForHR(hr);
+
+                    //OleCreatePropertyFrame игнорирует параметры x и y, всегда размещая
+                    //своё окно в левом верхнем углу родительского окна. Поэтому единственный
+                    //способ задать ему позицию - создать своё (невидимое) окно в нужном месте,
+                    //и использовать его в качестве родительского для OleCreatePropertyFrame.
+                    System.Drawing.Point point = System.Windows.Forms.Cursor.Position;
+                    Window wnd = new Window()
+                    {
+                        Owner = this,
+                        WindowStyle = System.Windows.WindowStyle.None,
+                        ShowInTaskbar = false,
+                        //ShowActivated = false, //Требуется 3.0 SP1, иначе будет MissingMethodException
+                        AllowsTransparency = true,
+                        Opacity = 0,
+                        Width = 0,
+                        Height = 0,
+                        Left = (point.X / dpi - 25),
+                        Top = (point.Y / dpi - 25)
+                    };
+
+                    //Но нужно сохранить модальность окна PropertyFrame..
+                    DispatcherTimer timer = new DispatcherTimer();
+                    timer.Interval = new TimeSpan(0, 0, 0, 0, 10);
+                    timer.Tick += (a, b) =>
+                    {
+                        //Крутимся тут, пока наше невидмое окно не отрисуется (а отрисовывается
+                        //оно только после подачи ему команды ShowDialog() - и оно модально).
+                        IntPtr hwndOwner = new WindowInteropHelper(wnd).Handle;
+                        if (hwndOwner != IntPtr.Zero)
+                        {
+                            try
+                            {
+                                object[] objs = new object[1];
+                                objs[0] = filter;
+
+                                OleCreatePropertyFrame(hwndOwner, 0, 0, filterInfo.achName, objs.Length,
+                                    objs, caGuid.cElems, caGuid.pElems, 0, 0, IntPtr.Zero);
+                            }
+                            finally
+                            {
+                                Marshal.FreeCoTaskMem(caGuid.pElems);
+
+                                if (wnd != null)
+                                {
+                                    wnd.Close();
+                                    wnd = null;
+                                    this.Activate();
+                                }
+
+                                timer.Stop();
+                                timer = null;
+                            }
+                        }
+                    };
+                    timer.Start();
+
+                    //Из-за этого и был нужен таймер, т.к. код после этой
+                    //строчки был бы недоступен, пока окно не будет закрыто..
+                    wnd.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("ShowFilterPropertyPage: " + ex.Message);
+            }
+            finally
+            {
+                if (filter != null)
+                {
+                    Marshal.ReleaseComObject(filter);
+                    filter = null;
+                }
+            }
+        }
+
+        [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        public static extern int OleCreatePropertyFrame(
+            [In] IntPtr hwndOwner,
+            [In] int x,
+            [In] int y,
+            [In, MarshalAs(UnmanagedType.LPWStr)] string lpszCaption,
+            [In] int cObjects,
+            [In, MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.IUnknown)] object[] ppUnk,
+            [In] int cPages,
+            [In] IntPtr pPageClsID,
+            [In] int lcid,
+            [In] int dwReserved,
+            [In] IntPtr pvReserved
+            );
 
         private void SetPauseIcon()
         {
@@ -1270,7 +1404,7 @@ namespace WPF_VideoPlayer
                 this.LocationChanged += new EventHandler(MainWindow_LocationChanged);
                 this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
 
-                source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+                source = HwndSource.FromHwnd(this.Handle);
                 source.AddHook(new HwndSourceHook(WndProc));
 
                 check_engine_directshow.IsChecked = true;
@@ -1344,6 +1478,10 @@ namespace WPF_VideoPlayer
         {
             Settings.OldSeeking = OldSeeking = check_old_seeking.IsChecked; 
         }
+
+        private void menu_mediainfo_Click(object sender, RoutedEventArgs e)
+        {
+            new MediaInfo(filepath, this);
+        }
     }
 }
-

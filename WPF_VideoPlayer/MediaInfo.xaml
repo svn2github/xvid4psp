@@ -1,20 +1,22 @@
 ﻿<Window
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	x:Class="XviD4PSP.MediaInfo"
+	x:Class="WPF_VideoPlayer.MediaInfo"
 	x:Name="Window"
-	Title="Info"
-	Width="500" Height="500" MinWidth="490" MinHeight="150" SizeToContent="Manual" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	Title="MediaInfo"
+	Width="500" Height="500" MinWidth="474" MinHeight="150" SizeToContent="Manual" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
 			<TextBox x:Name="tbxInfo" Text="" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="8,8,8,8" AllowDrop="True" PreviewDragEnter="grid_main_DragEnter" PreviewDragOver="grid_main_DragEnter" PreviewDrop="grid_main_Drop" IsReadOnly="True" FontFamily="Lucida Console" FontSize="11"/>
 		</Grid>
 		<Grid x:Name="grid_buttons" Height="38" Background="{DynamicResource black_gradient}" VerticalAlignment="Bottom">
-			<Button x:Name="button_open" Width="75" Content="Open" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_open_Click"/>
+            <Button x:Name="button_open" Width="75" Content="Open" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Center" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_open_Click"/>
             <Button x:Name="button_save" Width="75" Content="Save" HorizontalAlignment="Left" Margin="88,0,0,0" VerticalAlignment="Center" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_save_Click"/>
-		    <ComboBox Width="90" Height="22" IsSynchronizedWithCurrentItem="True" x:Name="combo_info"  Margin="168,0,0,0" VerticalAlignment="Center" SelectionChanged="combo_info_SelectionChanged" HorizontalAlignment="Left"/>
-            <CheckBox x:Name="check_wrap" Content="Wrap text" FontSize="14" Foreground="#FFFFFFFF" Margin="264,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Click="check_wrap_Click"/>
+            <StackPanel Orientation="Horizontal" Margin="170,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <CheckBox x:Name="check_mi_full" Content="Full info" FontSize="14" Foreground="#FFFFFFFF" Margin="2,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Click="check_mi_full_Click"/>
+                <CheckBox x:Name="check_wrap" Content="Wrap text" FontSize="14" Foreground="#FFFFFFFF" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Click="check_wrap_Click"/>
+            </StackPanel>
             <Button x:Name="button_close" Width="75" Content="Close" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" Height="22" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_close_Click"/>
         </Grid>
 	</Grid>

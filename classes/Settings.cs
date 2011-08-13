@@ -2808,5 +2808,26 @@ namespace XviD4PSP
                 SetBool("AutocropMostCommon", value);
             }
         }
+
+        //Перенос строк в окне MediaInfo
+        public static bool MI_WrapText
+        {
+            get
+            {
+                object value = GetValue("MI_WrapText");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("MI_WrapText", value);
+            }
+        }
     }
 }
