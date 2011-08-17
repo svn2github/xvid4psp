@@ -572,10 +572,7 @@ namespace WPF_VideoPlayer
                 if (this.videoWindow != null)
                 {
                     double left = 0, top = 0;
-                    int width, height;
-                    DsError.ThrowExceptionForHR(this.basicVideo.get_SourceWidth(out width));
-                    DsError.ThrowExceptionForHR(this.basicVideo.get_VideoHeight(out height)); //get_SourceHeight ?
-                    double asp = ((double)width) / ((double)height);
+                    int width = 0, height = 0;
 
                     if (IsRendererARFixed) //Просто задаем рендереру место под окно, он сам исправит аспект (добавит бордюры)
                     {
@@ -586,6 +583,10 @@ namespace WPF_VideoPlayer
                     }
                     else
                     {
+                        DsError.ThrowExceptionForHR(this.basicVideo.get_SourceWidth(out width));
+                        DsError.ThrowExceptionForHR(this.basicVideo.get_VideoHeight(out height)); //get_SourceHeight ?
+                        double asp = ((double)width) / ((double)height);
+
                         top = toolbar_top.ActualHeight;
                         height = (int)(LayoutRoot.ActualHeight - toolbar_top.ActualHeight - toolbar_bottom.ActualHeight - grid_slider.ActualHeight);
                         width = (int)(asp * height);
@@ -600,14 +601,17 @@ namespace WPF_VideoPlayer
                     }
 
                     //Масштабируем и вводим
-                    DsError.ThrowExceptionForHR(this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(width * dpi), (int)(height * dpi)));
+                    DsError.ThrowExceptionForHR(this.videoWindow.SetWindowPosition(Convert.ToInt32(left * dpi), Convert.ToInt32(top * dpi),
+                       Convert.ToInt32(width * dpi), Convert.ToInt32(height * dpi)));
+
+                    //Заставляем перерисовать окно
                     DsError.ThrowExceptionForHR(this.videoWindow.put_BorderColor(1));
                 }
                 else if (EVRControl != null)
                 {
                     //Масштабируем и вводим
-                    int hr = EVRControl.SetVideoPosition(null, new MFRect(0, 0, (int)(dpi * VHostElement.ActualWidth), (int)(dpi * VHostElement.ActualHeight)));
-                    MFError.ThrowExceptionForHR(hr);
+                    MFError.ThrowExceptionForHR(EVRControl.SetVideoPosition(null, new MFRect(0, 0, Convert.ToInt32(dpi * VHostElement.ActualWidth),
+                        Convert.ToInt32(dpi * VHostElement.ActualHeight))));
                 }
             }
             catch (Exception ex)

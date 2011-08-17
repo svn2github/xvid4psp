@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.253.0 (13.08.2011), main changes:
+﻿XviD4PSP 5.10.254.0 (17.08.2011), main changes:
 
+>>> (r254) For MediaBridge-preview was increased the accuracy of the frame counter.
+>>> (r254) For DirectShow-preview added ability to use EVR for the output ("Settings->Player engine->DirectShow output").
 >>> (r253) WPF Video Player: Added support for Windows 7 taskbar progress indication (enabled by default for Windows 7);
            added a catcher for unhandled exceptions.
 >>> (r252) For MediaInfo window added checkbox "Wrap text".

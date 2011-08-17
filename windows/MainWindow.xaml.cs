@@ -33,7 +33,8 @@ namespace XviD4PSP
         public ArrayList deletefiles = new ArrayList();
         private ArrayList ffcache = new ArrayList();
         private ArrayList dgcache = new ArrayList();
-        private object backup_lock = new object();
+        private static object backup_lock = new object();
+        private static object locker = new object();
 
         //player
         private string total_frames = "";
@@ -47,7 +48,7 @@ namespace XviD4PSP
         private MediaLoad mediaload;
         private int VolumeSet; //Громкость DirectShow плейера
 
-        private IFilterGraph graph;
+        private IFilterGraph graph = null;
         private IGraphBuilder graphBuilder = null;
         private IMediaControl mediaControl = null;
         private IMediaEventEx mediaEventEx = null;
@@ -56,7 +57,8 @@ namespace XviD4PSP
         private IBasicVideo basicVideo = null;
         private IMediaSeeking mediaSeeking = null;
         private IMediaPosition mediaPosition = null;
-        private IVideoFrameStep frameStep = null;
+        private IMFVideoDisplayControl EVRControl = null;
+        private VideoHwndHost VHost = null;
 
         //PictureView
         private int pic_frame = 0;
@@ -68,6 +70,7 @@ namespace XviD4PSP
         private bool IsAviSynthError = false;
 
         public IntPtr Handle = IntPtr.Zero;
+        private IntPtr VHandle = IntPtr.Zero;
         private HwndSource source;
         private System.Timers.Timer timer;
         private BackgroundWorker worker = null;
@@ -83,7 +86,7 @@ namespace XviD4PSP
         private bool IsInsertAction = false;  //true, когда в list_tasks перемещаются задания
         private string path_to_save;          //Путь для конечных файлов при перекодировании папки
         private int opened_files = 0;         //Кол-во открытых файлов при открытии папки
-        private double fps = 0;               //Значение fps для текущего клипа; будет вычисляться один раз, при загрузке (обновлении) превью
+        private double fps = 0;               //Значение fps для текущего клипа; будет определяться каждый раз при загрузке (обновлении) превью
         private bool OldSeeking = false;      //Способ позиционирования, old - непрерывное, new - только при отпускании кнопки мыши
         private double dpi = 1.0;             //Для масштабирования окна ДиректШоу-превью
         private bool IsBatchOpening = false;  //true при пакетном открытии
@@ -259,12 +262,14 @@ namespace XviD4PSP
         {
             TrayIcon.Visible = Settings.TrayIconIsEnabled;
             Handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+
             if (Settings.Win7TaskbarIsEnabled && !Win7Taskbar.InitializeWin7Taskbar())
             {
                 ErrorException(Languages.Translate("Failed to initialize Windows 7 taskbar interface.") +
                     " " + Languages.Translate("This feature will be disabled!"));
                 Settings.Win7TaskbarIsEnabled = false;
             }
+
             worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerAsync();
@@ -383,7 +388,7 @@ namespace XviD4PSP
                         this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
                         this.grid_tasks.SizeChanged += new SizeChangedEventHandler(grid_tasks_SizeChanged);
 
-                        source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+                        source = HwndSource.FromHwnd(this.Handle);
                         source.AddHook(new HwndSourceHook(WndProc));
                     }
                     else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
@@ -546,7 +551,7 @@ namespace XviD4PSP
 
         private void grid_tasks_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if(!IsFullScreen) MoveVideoWindow();
+            if (!IsFullScreen) MoveVideoWindow();
         }
 
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -2280,12 +2285,13 @@ namespace XviD4PSP
             else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge) check_engine_mediabridge.IsChecked = true;
             else check_engine_pictureview.IsChecked = true;
 
-            int vr = Settings.VideoRenderer;
-            if (vr == 0) vr_default.IsChecked = true;
-            else if (vr == 1) vr_overlay.IsChecked = true;
-            else if (vr == 2) vr_vmr7.IsChecked = true;
-            else if (vr == 3) vr_vmr9.IsChecked = true;
-            
+            Settings.VRenderers vr = Settings.VideoRenderer;
+            if (vr == Settings.VRenderers.Auto) vr_default.IsChecked = true;
+            else if (vr == Settings.VRenderers.Overlay) vr_overlay.IsChecked = true;
+            else if (vr == Settings.VRenderers.VMR7) vr_vmr7.IsChecked = true;
+            else if (vr == Settings.VRenderers.VMR9) vr_vmr9.IsChecked = true;
+            else if (vr == Settings.VRenderers.EVR) vr_evr.IsChecked = true;
+
             if (Settings.ScriptView)
             {
                 mn_scriptview.IsChecked = cmn_scriptview.IsChecked = true;
@@ -2550,7 +2556,7 @@ namespace XviD4PSP
                 this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
                 this.grid_tasks.SizeChanged += new SizeChangedEventHandler(grid_tasks_SizeChanged);
 
-                source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+                source = HwndSource.FromHwnd(this.Handle);
                 source.AddHook(new HwndSourceHook(WndProc));
 
                 check_engine_directshow.IsChecked = true;
@@ -4296,66 +4302,81 @@ namespace XviD4PSP
 
         private void CloseClip()
         {
-            //Останавливаем таймер обновления позиции
-            if (timer != null) timer.Stop();
-
-            if (this.graphBuilder != null && this.VideoElement.Source == null)
+            try
             {
-                int hr = 0;
+                //Останавливаем таймер обновления позиции
+                if (timer != null) timer.Stop();
 
-                // Stop media playback
-                if (this.mediaControl != null)
-                    hr = this.mediaControl.Stop();
-
-                // Free DirectShow interfaces
-                CloseInterfaces();
-
-                this.IsAudioOnly = true; //Перенесено сюда
-
-                // No current media state
-                if (mediaload != MediaLoad.update)
-                    this.currentState = PlayState.Init;
-            }
-            else if (this.VideoElement.Source != null)
-            {
-                VideoElement.Stop();
-                VideoElement.Close();
-                VideoElement.Source = null;
-                VideoElement.Visibility = Visibility.Collapsed;
-                if (mediaload != MediaLoad.update)
-                    this.currentState = PlayState.Init;
-                if (this.graphBuilder != null)
+                if (this.graphBuilder != null && this.VideoElement.Source == null)
                 {
-                    while (Marshal.ReleaseComObject(this.graphBuilder) > 0) ;
-                    this.graphBuilder = null;
-                    if (this.graph != null)
-                    {
-                        while (Marshal.ReleaseComObject(this.graph) > 0) ;
-                        this.graph = null;
-                    }
-                    //Marshal.ReleaseComObject(this.graphBuilder);
-                    //this.graphBuilder = null;
-                    //Marshal.ReleaseComObject(this.graph);
-                    //this.graph = null;
-                    GC.Collect();
-                }
+                    int hr = 0;
 
-                Thread.Sleep(100);
-                string url = "MediaBridge://MyDataString";
-                MediaBridge.MediaBridgeManager.UnregisterCallback(url);
+                    // Stop media playback
+                    if (this.mediaControl != null)
+                        hr = this.mediaControl.Stop();
+
+                    // Free DirectShow interfaces
+                    CloseInterfaces();
+
+                    this.IsAudioOnly = true; //Перенесено сюда
+
+                    if (VHost != null)
+                    {
+                        VHost.Dispose();
+                        VHost = null;
+                        VHandle = IntPtr.Zero;
+                        VHostElement.Child = null;
+                    }
+
+                    // No current media state
+                    if (mediaload != MediaLoad.update)
+                        this.currentState = PlayState.Init;
+                }
+                else if (this.VideoElement.Source != null)
+                {
+                    VideoElement.Stop();
+                    VideoElement.Close();
+                    VideoElement.Source = null;
+                    VideoElement.Visibility = Visibility.Collapsed;
+                    if (mediaload != MediaLoad.update)
+                        this.currentState = PlayState.Init;
+                    if (this.graphBuilder != null)
+                    {
+                        while (Marshal.ReleaseComObject(this.graphBuilder) > 0) ;
+                        this.graphBuilder = null;
+                        if (this.graph != null)
+                        {
+                            while (Marshal.ReleaseComObject(this.graph) > 0) ;
+                            this.graph = null;
+                        }
+                        //Marshal.ReleaseComObject(this.graphBuilder);
+                        //this.graphBuilder = null;
+                        //Marshal.ReleaseComObject(this.graph);
+                        //this.graph = null;
+                        GC.Collect();
+                    }
+
+                    Thread.Sleep(100);
+                    string url = "MediaBridge://MyDataString";
+                    MediaBridge.MediaBridgeManager.UnregisterCallback(url);
+                }
+                else if (script_box.Visibility == Visibility.Visible)
+                {
+                    script_box.Clear();
+                    script_box.Visibility = Visibility.Collapsed;
+                    this.currentState = PlayState.Init;
+                }
+                else if (Pic.Visibility == Visibility.Visible)
+                {
+                    Pic.Visibility = Visibility.Collapsed;
+                    pic_duration = TimeSpan.Zero;
+                    pic_total_frames = 0;
+                    this.currentState = PlayState.Init;
+                }
             }
-            else if (script_box.Visibility == Visibility.Visible)
+            catch (Exception ex) 
             {
-                script_box.Clear();
-                script_box.Visibility = Visibility.Collapsed;
-                this.currentState = PlayState.Init;
-            }
-            else if (Pic.Visibility == Visibility.Visible)
-            {
-                Pic.Visibility = Visibility.Collapsed;
-                pic_duration = TimeSpan.Zero;
-                pic_total_frames = 0;
-                this.currentState = PlayState.Init;
+                ErrorException("CloseClip: " + ex.Message, ex.StackTrace);
             }
 
             //update titles
@@ -4369,7 +4390,7 @@ namespace XviD4PSP
             int hr = 0;
             try
             {
-                lock (this)
+                lock (locker)
                 {
                     // Relinquish ownership (IMPORTANT!) after hiding video window
                     if (!this.IsAudioOnly && this.videoWindow != null)
@@ -4382,15 +4403,20 @@ namespace XviD4PSP
                         DsError.ThrowExceptionForHR(hr);
                     }
 
+                    if (EVRControl != null)
+                    {
+                        Marshal.ReleaseComObject(EVRControl);
+                        EVRControl = null;
+                    }
+
                     if (this.mediaEventEx != null)
                     {
                         hr = this.mediaEventEx.SetNotifyWindow(IntPtr.Zero, 0, IntPtr.Zero);
                         DsError.ThrowExceptionForHR(hr);
+                        this.mediaEventEx = null;
                     }
 
                     // Release and zero DirectShow interfaces
-                    if (this.mediaEventEx != null)
-                        this.mediaEventEx = null;
                     if (this.mediaSeeking != null)
                         this.mediaSeeking = null;
                     if (this.mediaPosition != null)
@@ -4403,8 +4429,6 @@ namespace XviD4PSP
                         this.basicVideo = null;
                     if (this.videoWindow != null)
                         this.videoWindow = null;
-                    if (this.frameStep != null)
-                        this.frameStep = null;
                     if (this.graphBuilder != null)
                     {
                         while (Marshal.ReleaseComObject(this.graphBuilder) > 0) ;
@@ -4544,47 +4568,90 @@ namespace XviD4PSP
 
         private void PlayMovieInWindow(string filename)
         {
+            fps = 0;
             int hr = 0;
             this.graphBuilder = (IGraphBuilder)new FilterGraph();
 
-            //Добавляем в граф нужный рендерер (0 - graphBuilder сам выберет рендерер)
-            int renderer = Settings.VideoRenderer;
-            if (renderer == 1)
+            //Добавляем в граф нужный рендерер (Auto - graphBuilder сам выберет рендерер)
+            Settings.VRenderers renderer = Settings.VideoRenderer;
+            if (renderer == Settings.VRenderers.Overlay)
             {
                 IBaseFilter add_vr = (IBaseFilter)new VideoRenderer();
                 hr = graphBuilder.AddFilter(add_vr, "Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
             }
-            else if (renderer == 2)
+            else if (renderer == Settings.VRenderers.VMR7)
             {
                 IBaseFilter add_vmr = (IBaseFilter)new VideoMixingRenderer();
                 hr = graphBuilder.AddFilter(add_vmr, "Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
             }
-            else if (renderer == 3)
+            else if (renderer == Settings.VRenderers.VMR9)
             {
                 IBaseFilter add_vmr9 = (IBaseFilter)new VideoMixingRenderer9();
                 hr = graphBuilder.AddFilter(add_vmr9, "Video Mixing Renderer 9");
+                DsError.ThrowExceptionForHR(hr);
             }
-            DsError.ThrowExceptionForHR(hr);
+            else if (renderer == Settings.VRenderers.EVR)
+            {
+                //Создаём Win32-окно, т.к. использовать WPF-поверхность не получится
+                VHost = new VideoHwndHost();
+                VHost.RepaintRequired += new EventHandler(VHost_RepaintRequired);
+                VHostElement.Child = VHost;
+                VHandle = VHost.Handle;
+
+                //Добавляем и настраиваем EVR
+                IBaseFilter add_evr = (IBaseFilter)new EnhancedVideoRenderer();
+                hr = graphBuilder.AddFilter(add_evr, "Enhanced Video Renderer");
+                DsError.ThrowExceptionForHR(hr);
+
+                object obj;
+                IMFGetService pGetService = null;
+                pGetService = (IMFGetService)add_evr;
+                hr = pGetService.GetService(MFServices.MR_VIDEO_RENDER_SERVICE, typeof(IMFVideoDisplayControl).GUID, out obj);
+                MFError.ThrowExceptionForHR(hr);
+
+                try
+                {
+                    EVRControl = (IMFVideoDisplayControl)obj;
+                }
+                catch
+                {
+                    Marshal.ReleaseComObject(obj);
+                    throw;
+                }
+
+                //Указываем поверхность
+                hr = EVRControl.SetVideoWindow(VHandle);
+                MFError.ThrowExceptionForHR(hr);
+
+                //Отключаем сохранение аспекта
+                hr = EVRControl.SetAspectRatioMode(MFVideoAspectRatioMode.None);
+                MFError.ThrowExceptionForHR(hr);
+            }
 
             // Have the graph builder construct its the appropriate graph automatically
             hr = this.graphBuilder.RenderFile(filename, null);
             DsError.ThrowExceptionForHR(hr);
 
-            //Ищем рендерер и отключаем соблюдение аспекта (аспект будет определяться размерами видео-окна)
-            IBaseFilter filter = null;
-            graphBuilder.FindFilterByName("Video Renderer", out filter);
-            if (filter != null)
+            if (EVRControl == null)
             {
-                IVMRAspectRatioControl vmr = filter as IVMRAspectRatioControl;
-                if (vmr != null) DsError.ThrowExceptionForHR(vmr.SetAspectRatioMode(VMRAspectRatioMode.None));
-            }
-            else
-            {
-                graphBuilder.FindFilterByName("Video Mixing Renderer 9", out filter);
+                //Ищем рендерер и отключаем соблюдение аспекта (аспект будет определяться размерами видео-окна)
+                IBaseFilter filter = null;
+                graphBuilder.FindFilterByName("Video Renderer", out filter);
                 if (filter != null)
                 {
-                    IVMRAspectRatioControl9 vmr9 = filter as IVMRAspectRatioControl9;
-                    if (vmr9 != null) DsError.ThrowExceptionForHR(vmr9.SetAspectRatioMode(VMRAspectRatioMode.None));
+                    IVMRAspectRatioControl vmr = filter as IVMRAspectRatioControl;
+                    if (vmr != null) DsError.ThrowExceptionForHR(vmr.SetAspectRatioMode(VMRAspectRatioMode.None));
+                }
+                else
+                {
+                    graphBuilder.FindFilterByName("Video Mixing Renderer 9", out filter);
+                    if (filter != null)
+                    {
+                        IVMRAspectRatioControl9 vmr9 = filter as IVMRAspectRatioControl9;
+                        if (vmr9 != null) DsError.ThrowExceptionForHR(vmr9.SetAspectRatioMode(VMRAspectRatioMode.None));
+                    }
                 }
             }
 
@@ -4595,50 +4662,72 @@ namespace XviD4PSP
             this.mediaPosition = (IMediaPosition)this.graphBuilder;
 
             // Query for video interfaces, which may not be relevant for audio files
-            this.videoWindow = this.graphBuilder as IVideoWindow;
-            this.basicVideo = this.graphBuilder as IBasicVideo;
+            this.videoWindow = (EVRControl == null) ? this.graphBuilder as IVideoWindow : null;
+            this.basicVideo = (EVRControl == null) ? this.graphBuilder as IBasicVideo : null;
 
             // Query for audio interfaces, which may not be relevant for video-only files
             this.basicAudio = this.graphBuilder as IBasicAudio;
             basicAudio.put_Volume(VolumeSet); //Ввод в ДиректШоу значения VolumeSet для установки громкости
 
             // Is this an audio-only file (no video component)?
-            CheckVisibility();
-
-            // Have the graph signal event via window callbacks for performance
-            hr = this.mediaEventEx.SetNotifyWindow(this.source.Handle, WMGraphNotify, IntPtr.Zero);
-            DsError.ThrowExceptionForHR(hr);
-
+            CheckIsAudioOnly();
             if (!this.IsAudioOnly)
             {
-                // Setup the video window
-                hr = this.videoWindow.put_Owner(this.source.Handle);
-                DsError.ThrowExceptionForHR(hr);
+                if (videoWindow != null)
+                {
+                    // Setup the video window
+                    hr = this.videoWindow.put_Owner(this.source.Handle);
+                    DsError.ThrowExceptionForHR(hr);
 
-                hr = this.videoWindow.put_MessageDrain(this.source.Handle);
-                DsError.ThrowExceptionForHR(hr);
+                    hr = this.videoWindow.put_MessageDrain(this.source.Handle);
+                    DsError.ThrowExceptionForHR(hr);
 
-                hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings
-                    | DirectShowLib.WindowStyle.ClipChildren);
-                DsError.ThrowExceptionForHR(hr);
+                    hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings
+                        | DirectShowLib.WindowStyle.ClipChildren);
+                    DsError.ThrowExceptionForHR(hr);
+
+                    //Определяем fps
+                    double AvgTimePerFrame;
+                    hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
+                    DsError.ThrowExceptionForHR(hr);
+                    fps = (1.0 / AvgTimePerFrame);
+                }
+                else if (EVRControl != null)
+                {
+                    //Определяем fps
+                    DetermineEVRFPS();
+                }
 
                 //Ловим ошибку Ависинта
                 IsAviSynthError = false;
                 if (NaturalDuration.TotalMilliseconds == 10000.0)
                 {
-                    double time; //Признаки ошибки: duration=10000.0 и fps=24 (округлённо)
-                    if (basicVideo.get_AvgTimePerFrame(out time) != 0 || (int)(1 / time) == 24)
-                        IsAviSynthError = true;
+                    //Признаки ошибки: duration=10000.0 и fps=24 (округлённо)
+                    if ((int)fps == 24 || fps == 0) IsAviSynthError = true;
                 }
 
                 MoveVideoWindow();
-                GetFrameStepInterface();
             }
-            else 
+            else
             {
+                if (VHost != null)
+                {
+                    VHost.Dispose();
+                    VHost = null;
+                    VHandle = IntPtr.Zero;
+                    VHostElement.Child = null;
+                }
+
                 //Ловим ошибку Ависинта 2 (когда нет видео окна)
                 IsAviSynthError = (NaturalDuration.TotalMilliseconds == 10000.0);
             }
+
+            //Если выше не удалось определить fps - берём значение из массива
+            if (fps == 0) fps = Calculate.ConvertStringToDouble(m.outframerate);
+
+            // Have the graph signal event via window callbacks for performance
+            hr = this.mediaEventEx.SetNotifyWindow(this.source.Handle, WMGraphNotify, IntPtr.Zero);
+            DsError.ThrowExceptionForHR(hr);
 
             if (mediaload == MediaLoad.update) //Перенесено из HandleGraphEvent, теперь позиция устанавливается до начала воспроизведения, т.е. за один заход, а не за два
             {
@@ -4666,124 +4755,175 @@ namespace XviD4PSP
 
         private void MoveVideoWindow()
         {
-            //Track the movement of the container window and resize as needed
-            if (this.videoWindow != null)
+            try
             {
-                double left = 0, top = 0, w = 0, h = 0, aspect = m.outaspect;
+                if (this.videoWindow == null && this.EVRControl == null)
+                    return;
+
+                double left = 0, top = 0;
+                double width = 0, height = 0;
+                double aspect = m.outaspect;
+
+                //Аспект сообщения об ошибке
                 if (IsAviSynthError)
                 {
-                    int w_err, h_err;
-                    DsError.ThrowExceptionForHR(basicVideo.get_VideoWidth(out w_err));
-                    DsError.ThrowExceptionForHR(basicVideo.get_VideoHeight(out h_err));
-                    aspect = ((double)w_err / (double)h_err);
+                    if (basicVideo != null)
+                    {
+                        int w_err, h_err;
+                        DsError.ThrowExceptionForHR(basicVideo.get_VideoWidth(out w_err));
+                        DsError.ThrowExceptionForHR(basicVideo.get_VideoHeight(out h_err));
+                        aspect = ((double)w_err / (double)h_err);
+                    }
+                    else if (EVRControl != null)
+                    {
+                        System.Drawing.Size size, size_ar;
+                        MFError.ThrowExceptionForHR(EVRControl.GetNativeVideoSize(out size, out size_ar));
+                        aspect = ((double)size.Width / (double)size.Height);
+                    }
                 }
 
                 if (!IsFullScreen)
                 {
-                    top = (grid_menu.ActualHeight + grid_top.ActualHeight + splitter_tasks_preview.ActualHeight +
-                        grid_tasks.ActualHeight + grid_player_info.ActualHeight + 10);
-                    h = (grid_player_window.ActualHeight - grid_player_info.ActualHeight - 12);
-                    w = (aspect * h);
-                    left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
-                    if (w > progress_back.ActualWidth)
+                    top = (grid_top.Margin.Top + grid_top.ActualHeight + splitter_tasks_preview.ActualHeight +
+                        grid_tasks.ActualHeight + grid_player_info.ActualHeight + 8);
+                    height = (grid_player_window.ActualHeight - grid_player_info.ActualHeight - 12);
+                    width = (aspect * height);
+                    left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - width) / 2));
+                    if (width > progress_back.ActualWidth)
                     {
-                        w = progress_back.ActualWidth;
-                        h = (w / aspect);
-                        left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - w) / 2));
-                        top += ((this.grid_player_window.ActualHeight - h) / 2.0) - (grid_player_info.ActualHeight) + 14;
+                        width = progress_back.ActualWidth;
+                        height = (width / aspect);
+                        left = ((grid_left_panel_paper.ActualWidth + (this.grid_player_window.ActualWidth - width) / 2));
+                        top += ((this.grid_player_window.ActualHeight - height) / 2.0) - (grid_player_info.ActualHeight) + 14;
                     }
                 }
                 else
                 {
                     //Для ФуллСкрина
-                    h = this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight; //высота экрана минус высота панели
-                    w = (aspect * h);
-                    left = ((this.LayoutRoot.ActualWidth - w) / 2);
-                    if (w > this.LayoutRoot.ActualWidth)
+                    height = this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight; //высота экрана минус высота панели
+                    width = (aspect * height);
+                    left = ((this.LayoutRoot.ActualWidth - width) / 2);
+                    if (width > this.LayoutRoot.ActualWidth)
                     {
-                        w = this.LayoutRoot.ActualWidth;
-                        h = (w / aspect);
+                        width = this.LayoutRoot.ActualWidth;
+                        height = (width / aspect);
                         left = 0;
-                        top = ((this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight - h) / 2.0);
+                        top = ((this.LayoutRoot.ActualHeight - this.grid_player_buttons.ActualHeight - height) / 2.0);
                     }
                 }
 
-                //Масштабируем и вводим
-                DsError.ThrowExceptionForHR(this.videoWindow.SetWindowPosition((int)(left * dpi), (int)(top * dpi), (int)(w * dpi), (int)(h * dpi)));
-                //Заставляем перерисовать окно
-                DsError.ThrowExceptionForHR(this.videoWindow.put_BorderColor(1));
+                if (this.videoWindow != null)
+                {
+                    //Масштабируем и вводим
+                    DsError.ThrowExceptionForHR(this.videoWindow.SetWindowPosition(Convert.ToInt32(left * dpi), Convert.ToInt32(top * dpi),
+                        Convert.ToInt32(width * dpi), Convert.ToInt32(height * dpi)));
+
+                    //Заставляем перерисовать окно
+                    DsError.ThrowExceptionForHR(this.videoWindow.put_BorderColor(1));
+                }
+                else if (this.EVRControl != null)
+                {
+                    //Идем на небольшую хитрость для указания позиции EVR-окна :)
+                    //Её смысл в том, что элемент VHostElement располагается на макете страницы
+                    //не там, где превью, а в левом верхнем углу окна - теперь можно использовать
+                    //уже имеющиеся формулы для расчета требуемой позиции и размера EVR-окна.
+                    VHostElement.Margin = new Thickness(Convert.ToInt32(left), Convert.ToInt32(top), 0, 0);
+                    VHostElement.Width = Convert.ToInt32(width);
+                    VHostElement.Height = Convert.ToInt32(height);
+                    VHostElement.UpdateLayout();
+
+                    //Т.к. MFRect принимает всё в int, то double приходится округлять - чтоб размеры окна и размеры фактической картинки
+                    //совпадали, выше для VHostElement было проделано точно такое-же округление (иначе могла вылазить полоса в ~1 пиксель).
+                    MFError.ThrowExceptionForHR(EVRControl.SetVideoPosition(null, new MFRect(0, 0, Convert.ToInt32(dpi * VHostElement.ActualWidth),
+                        Convert.ToInt32(dpi * VHostElement.ActualHeight))));
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorException("MoveVideoWindow: " + ex.Message, ex.StackTrace);
             }
         }
 
-        private void CheckVisibility()
+        private void VHost_RepaintRequired(object sender, EventArgs e)
+        {
+            if (!IsAudioOnly && EVRControl != null)
+                EVRControl.RepaintVideo();
+        }
+
+        private void CheckIsAudioOnly()
         {
             int hr = 0;
-            OABool lVisible;
-
-            if ((this.videoWindow == null) || (this.basicVideo == null))
+            if (EVRControl != null)
+            {
+                System.Drawing.Size size, size_ar;
+                hr = EVRControl.GetNativeVideoSize(out size, out size_ar);
+                this.IsAudioOnly = (hr < 0 || size.Width == 0 || size.Height == 0);
+            }
+            else if ((this.videoWindow == null) || (this.basicVideo == null))
             {
                 // Audio-only files have no video interfaces.  This might also
                 // be a file whose video component uses an unknown video codec.
                 this.IsAudioOnly = true;
-                return;
             }
             else
             {
-                // Clear the global flag
+                OABool lVisible;
                 this.IsAudioOnly = false;
-            }
-
-            hr = this.videoWindow.get_Visible(out lVisible);
-            if (hr < 0)
-            {
-                // If this is an audio-only clip, get_Visible() won't work.
-                //
-                // Also, if this video is encoded with an unsupported codec,
-                // we won't see any video, although the audio will work if it is
-                // of a supported format.
-                if (hr == unchecked((int)0x80004002))      //E_NOINTERFACE
+                hr = this.videoWindow.get_Visible(out lVisible);
+                if (hr < 0)
                 {
-                    this.IsAudioOnly = true;
-                }
-                else if (hr == unchecked((int)0x80040209)) //VFW_E_NOT_CONNECTED 
-                {
-                    this.IsAudioOnly = true;
-                }
-                else
-                {
-                    this.IsAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
-                    DsError.ThrowExceptionForHR(hr);
+                    // If this is an audio-only clip, get_Visible() won't work.
+                    //
+                    // Also, if this video is encoded with an unsupported codec,
+                    // we won't see any video, although the audio will work if it is
+                    // of a supported format.
+                    if (hr == unchecked((int)0x80004002))      //E_NOINTERFACE
+                    {
+                        this.IsAudioOnly = true;
+                    }
+                    else if (hr == unchecked((int)0x80040209)) //VFW_E_NOT_CONNECTED 
+                    {
+                        this.IsAudioOnly = true;
+                    }
+                    else
+                    {
+                        this.IsAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
+                        DsError.ThrowExceptionForHR(hr);
+                    }
                 }
             }
         }
 
-        //
-        // Some video renderers support stepping media frame by frame with the
-        // IVideoFrameStep interface.  See the interface documentation for more
-        // details on frame stepping.
-        //
-        private bool GetFrameStepInterface()
+        //Определяем fps при использовании EVR
+        private void DetermineEVRFPS()
         {
-            int hr = 0;
-
-            IVideoFrameStep frameStepTest = null;
-
-            // Get the frame step interface, if supported
-            frameStepTest = (IVideoFrameStep)this.graphBuilder;
-
-            // Check if this decoder can step
-            hr = frameStepTest.CanStep(0, null);
-            if (hr == 0)
+            int hr;
+            IBaseFilter filter = null;
+            graphBuilder.FindFilterByName("Enhanced Video Renderer", out filter);
+            if (filter != null)
             {
-                this.frameStep = frameStepTest;
-                return true;
-            }
-            else
-            {
-                // BUG 1560263 found by husakm (thanks)...
-                // Marshal.ReleaseComObject(frameStepTest);
-                this.frameStep = null;
-                return false;
+                IPin pin;
+                hr = filter.FindPin("EVR Input0", out pin);
+                DsError.ThrowExceptionForHR(hr);
+                if (pin != null)
+                {
+                    AMMediaType mtype = new AMMediaType();
+                    try
+                    {
+                        hr = pin.ConnectionMediaType(mtype);
+                        DsError.ThrowExceptionForHR(hr);
+                        if (mtype != null)
+                        {
+                            VideoInfoHeader vheader = (VideoInfoHeader)Marshal.PtrToStructure(mtype.formatPtr, typeof(VideoInfoHeader));
+                            if (vheader != null) fps = (10000000.0 / vheader.AvgTimePerFrame);
+                        }
+                    }
+                    finally
+                    {
+                        DsUtils.FreeAMMediaType(mtype);
+                        mtype = null;
+                    }
+                }
             }
         }
 
@@ -4864,11 +5004,11 @@ namespace XviD4PSP
                     {
                         HandleGraphEvent(); break;
                     }
-                case 0x0203: //0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP, 0x0203 WM_LBUTTONDBLCLK
+                case 0x0203: //0x0203 WM_LBUTTONDBLCLK (0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP)
                     {
                         SwitchToFullScreen(); break;
                     }
-                case 0x0205: //0x0204 WM_RBUTTONDOWN, 0x0205 WM_RBUTTONUP, 0x0206 WM_RBUTTONDBLCLK
+                case 0x0205: //0x0205 WM_RBUTTONUP (0x0204 WM_RBUTTONDOWN, 0x0206 WM_RBUTTONDBLCLK)
                     {
                         //Мышь должна быть над окном рендерера, иначе правый клик будет срабатывать повсюду!
                         //Для 0x0203 и 0x0206 это условие каким-то образом выполняется само по себе :)
@@ -4920,17 +5060,6 @@ namespace XviD4PSP
                         else if (Settings.AfterImportAction == Settings.AfterImportActions.Middle)
                             Position = TimeSpan.FromSeconds(NaturalDuration.TotalSeconds / 2.0);
                     }
-
-                    //Считаем fps
-                    if (!IsAudioOnly)
-                    {
-                        double AvgTimePerFrame;
-                        hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
-                        DsError.ThrowExceptionForHR(hr);
-                        fps = (1.0 / AvgTimePerFrame);
-                    }
-                    else
-                        fps = Calculate.ConvertStringToDouble(m.outframerate);
 
                     //Обновляем счетчик кадров
                     total_frames = Convert.ToString(Math.Round(NaturalDuration.TotalSeconds * fps));
@@ -5053,37 +5182,54 @@ namespace XviD4PSP
 
         private void VideoElement_MediaOpened(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (VideoElement.HasVideo || VideoElement.HasAudio)
+            try
             {
-                slider_pos.Maximum = VideoElement.NaturalDuration.TimeSpan.TotalSeconds;
-
-                fps = Calculate.ConvertStringToDouble(m.outframerate); //Получаем fps
-
-                //Обновляем счетчик кадров
-                total_frames = Convert.ToString(Math.Round(VideoElement.NaturalDuration.TimeSpan.TotalSeconds * fps));
-                textbox_frame.Text = Convert.ToString(Math.Round(VideoElement.Position.TotalSeconds * fps)) + "/" + total_frames;
-
-                //Общая продолжительность клипа (для МедиаБридж)
-                TimeSpan tCode2 = TimeSpan.Parse(VideoElement.NaturalDuration.ToString().Split('.')[0]);
-                textbox_duration.Text = tCode2.ToString();
-
-                if (mediaload == MediaLoad.update)
+                if (VideoElement.HasVideo || VideoElement.HasAudio)
                 {
-                    if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
+                    slider_pos.Maximum = VideoElement.NaturalDuration.TimeSpan.TotalSeconds;
+
+                    fps = 0;
+
+                    //Определяем fps
+                    if (VideoElement.HasVideo)
+                        DetermineEVRFPS();
+
+                    //Ловим ошибку Ависинта
+                    IsAviSynthError = false;
+                    if (NaturalDuration.TotalMilliseconds == 10000.0)
                     {
-                        IsAviSynthError = false;
-                        Position = oldpos;
+                        //Признаки ошибки: duration=10000.0 и fps=24 (округлённо)
+                        if ((int)fps == 24 || fps == 0) IsAviSynthError = true;
                     }
-                    else if (NaturalDuration.TotalMilliseconds == 10000.0) IsAviSynthError = true;
-                    else IsAviSynthError = false;
+
+                    //Если выше не удалось определить fps - берём значение из массива
+                    if (fps == 0) fps = Calculate.ConvertStringToDouble(m.outframerate);
+
+                    if (mediaload == MediaLoad.update)
+                    {
+                        if (NaturalDuration >= oldpos) //Позиционируем только если нужная позиция укладывается в допустимый диапазон
+                            Position = oldpos;
+                    }
+                    else if (mediaload == MediaLoad.load)
+                    {
+                        if (Settings.AfterImportAction == Settings.AfterImportActions.Play)
+                            PauseClip();
+                        else if (Settings.AfterImportAction == Settings.AfterImportActions.Middle)
+                            Position = TimeSpan.FromSeconds(NaturalDuration.TotalSeconds / 2.0);
+                    }
+
+                    //Обновляем счетчик кадров
+                    total_frames = Convert.ToString(Math.Round(VideoElement.NaturalDuration.TimeSpan.TotalSeconds * fps));
+                    textbox_frame.Text = Convert.ToString(Math.Round(VideoElement.Position.TotalSeconds * fps)) + "/" + total_frames;
+
+                    //Общая продолжительность клипа (для МедиаБридж)
+                    TimeSpan tCode2 = TimeSpan.Parse(VideoElement.NaturalDuration.ToString().Split('.')[0]);
+                    textbox_duration.Text = tCode2.ToString();
                 }
-                else if (mediaload == MediaLoad.load)
-                {
-                    if (Settings.AfterImportAction == Settings.AfterImportActions.Play)
-                        PauseClip();
-                    else if (Settings.AfterImportAction == Settings.AfterImportActions.Middle)
-                        Position = TimeSpan.FromSeconds(NaturalDuration.TotalSeconds / 2.0);
-                }
+            }
+            catch (Exception ex)
+            {
+                ErrorException("VideoElement_MediaOpened: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -5124,16 +5270,6 @@ namespace XviD4PSP
                 //Convert pointer of filter graph to an object we can use
                 graph = (IFilterGraph)Marshal.GetObjectForIUnknown(GraphInfo.FilterGraph);
                 graphBuilder = (IGraphBuilder)graph;
-               
-                //IBaseFilter videoRenderer;
-                ///Find WPF renderer.  It's always named the same thing
-                //hr = graphBuilder.FindFilterByName("Avalon EVR", out videoRenderer);//
-                //hr = graphBuilder.FindFilterByName("Video Renderer", out videoRenderer);//
-                //hr = graphBuilder.FindFilterByName("Enhanced Video Renderer", out videoRenderer);                
-                //DsError.ThrowExceptionForHR(hr);
-
-                //hr = this.graphBuilder.AddFilter(videoRenderer, "Enhanced Video Renderer");//
-                //DsError.ThrowExceptionForHR(hr);
 
                 hr = graphBuilder.RenderFile(filepath, null);
                 DsError.ThrowExceptionForHR(hr);
@@ -5806,10 +5942,13 @@ namespace XviD4PSP
         //Меняем громкость колесиком мышки
         private void Volume_Wheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta > 0)
-                VolumePlus();
-            else
-                VolumeMinus();
+            if (sender != VideoElement || IsFullScreen)
+            {
+                if (e.Delta > 0)
+                    VolumePlus();
+                else
+                    VolumeMinus();
+            }
         }
 
         //Обработка двойного щелчка мыши для плейера
@@ -6481,31 +6620,36 @@ namespace XviD4PSP
 
         private void Change_renderer_Click(object sender, RoutedEventArgs e)
         {
-            int new_value = 0;
-            int old_value = Settings.VideoRenderer;
-            
+            Settings.VRenderers new_renderer = 0;
+            Settings.VRenderers old_renderer = Settings.VideoRenderer;
+
             if (vr_Default.IsFocused)
             {
                 vr_default.IsChecked = true;
-                Settings.VideoRenderer = new_value = 0;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.Auto;
             }
             else if (vr_Overlay.IsFocused)
             {
                 vr_overlay.IsChecked = true;
-                Settings.VideoRenderer = new_value = 1;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.Overlay;
             }
             else if (vr_VMR7.IsFocused)
             {
                 vr_vmr7.IsChecked = true;
-                Settings.VideoRenderer = new_value = 2;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.VMR7;
             }
             else if (vr_VMR9.IsFocused)
             {
                 vr_vmr9.IsChecked = true;
-                Settings.VideoRenderer = new_value = 3;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.VMR9;
+            }
+            else if (vr_EVR.IsFocused)
+            {
+                vr_evr.IsChecked = true;
+                Settings.VideoRenderer = new_renderer = Settings.VRenderers.EVR;
             }
 
-            if (old_value != new_value && m != null && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
+            if (old_renderer != new_renderer && m != null && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
                 LoadVideo(MediaLoad.update);
         }
 

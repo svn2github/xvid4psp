@@ -8,11 +8,11 @@ namespace XviD4PSP
 {
     public static class Settings
     {
-
         public enum AutoVolumeModes { Disabled = 1, OnImport, OnExport }
         public enum AutoJoinModes { Disabled = 1, Enabled, DVDonly }
         public enum EncodingModes { OnePass = 1, TwoPass, ThreePass, Quality, Quantizer, OnePassSize, TwoPassSize, ThreePassSize, TwoPassQuality, ThreePassQuality }
         public enum PlayerEngines { DirectShow = 1, MediaBridge, PictureView }
+        public enum VRenderers { Auto = 0, Overlay, VMR7, VMR9, EVR }
         public enum AfterImportActions { Nothing = 1, Middle, Play }
         public enum AudioEncodingModes { CBR = 1, VBR, ABR, TwoPass }
         public enum AutoDeinterlaceModes { AllFiles = 1, MPEGs, Disabled }
@@ -580,7 +580,7 @@ namespace XviD4PSP
                 if (value == null)
                     return PlayerEngines.DirectShow;
                 else
-                    return (PlayerEngines)Enum.Parse(typeof(PlayerEngines), value.ToString());
+                    return (PlayerEngines)Enum.Parse(typeof(PlayerEngines), value.ToString(), true);
             }
             set
             {
@@ -2165,23 +2165,23 @@ namespace XviD4PSP
         }
 
         //Рендерер для DirectShow движка превью
-        public static int VideoRenderer
+        public static VRenderers VideoRenderer
         {
             get
             {
-                object value = GetValue("VideoRenderer");
+                object value = GetValue("VRenderer");
                 if (value == null)
                 {
-                    return 0;
+                    return VRenderers.Auto;
                 }
                 else
                 {
-                    return Convert.ToInt32(value);
+                    return (VRenderers)Enum.Parse(typeof(VRenderers), value.ToString(), true);
                 }
             }
             set
             {
-                SetInt("VideoRenderer", value);
+                SetString("VRenderer", value.ToString());
             }
         }
 

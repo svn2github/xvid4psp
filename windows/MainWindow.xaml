@@ -184,6 +184,11 @@
                                     <RadioButton GroupName="vr" x:Name="vr_vmr9"/>
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem x:Name="vr_EVR" Header="EVR" StaysOpenOnClick="True" Click="Change_renderer_Click">
+                                <MenuItem.Icon>
+                                    <RadioButton GroupName="vr" x:Name="vr_evr"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </MenuItem>
                         <MenuItem x:Name="engine_directshow" Header="DirectShow" StaysOpenOnClick="True" Click="player_engine_Click">
                             <MenuItem.Icon>
@@ -493,7 +498,7 @@
                 <TextBlock Opacity="0.4" x:Name="textbox_duration" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,-0.7,0,13.5" Visibility="Collapsed"/>
                 <TextBlock Opacity="1" FontFamily="Segoe" FontSize="24" FontWeight="Light" Foreground="#FFFFFFFF" Text="video_name" TextWrapping="Wrap" x:Name="textbox_name" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" Margin="0,0,2,15.2" Padding="0,0,100,0" TextTrimming="CharacterEllipsis"/>
             </Grid>
-            <MediaElement Margin="8,56,8,8" Visibility="Collapsed" x:Name="VideoElement" Focusable="True" Volume="{Binding Path=Value, ElementName=slider_Volume}" />
+            <MediaElement Margin="8,56,8,8" Visibility="Collapsed" x:Name="VideoElement" Focusable="True" Volume="{Binding Path=Value, ElementName=slider_Volume}" MouseWheel="Volume_Wheel"/>
             <TextBox x:Name="script_box" Visibility="Collapsed" Text="" TextWrapping="Wrap" Margin="8,56,8,8" Background="#00FFFFFF" Foreground="#FFFFFFFF" BorderThickness="2" BorderBrush="Black" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" AllowDrop="True" PreviewDragOver="grid_player_window_DragEnter" Drop="grid_player_window_Drop"/>
             <Image x:Name="Pic" RenderOptions.BitmapScalingMode="HighQuality" Margin="8,56,8,8" Width="Auto" Height="Auto" Stretch="Uniform" Source="..\pictures\vc_background.png" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
             <Grid.ContextMenu>
@@ -542,5 +547,6 @@
             <Button x:Name="button_avsp" Content="AvsP - Editor" Visibility="Collapsed" Foreground="#FFFFFFFF" Click="button_avsp_Click" Template="{DynamicResource GlassButton}" Margin="196,9,0,9" HorizontalAlignment="Left" Width="90"/>
             <Button x:Name="button_play_script" Content="Play" Visibility="Collapsed" Foreground="#FFFFFFFF" Click="button_play_script_Click" Template="{DynamicResource GlassButton}" Margin="290,9,8,9" HorizontalAlignment="Left" Width="90"/>
         </Grid>
+        <Border Name="VHostElement" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Transparent" Opacity="0"/>
     </Grid>
 </Window>
