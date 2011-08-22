@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Timers;
 using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Reflection;
@@ -35,18 +36,22 @@ namespace XviD4PSP
         private bool IsErrors = false;
         private bool CopyDelay = false;
         private bool Splitting = false;
+        private bool IsAutoAborted = false;
+        private bool IsNoProgressStage = false;
         private bool AudioFirst = Settings.EncodeAudioFirst;
-        private string estimated = Languages.Translate("estimated");
+        private string unknown = Languages.Translate("Unknown");
 
         private System.Timers.Timer timer;
-        private int of = 0;
-        private int cf = 0;
-        private DateTime ot;
-        private double et = 0.0;
+        private int old_frame = 0;
+        private int frame = 0;
+        private DateTime old_time;
         private int step = 0;
         private int steps = 0;
         private double fps = 0.0;
         private double encoder_fps = 0.0;
+        private List<double> fps_averages = new List<double>();
+        private TimeSpan last_update = TimeSpan.Zero;
+        private double last_update_threshold = 10; //Мин.
         private string busyfile;
         private DateTime start_time;
         private Shutdown.ShutdownMode ending = Settings.FinalAction;
@@ -207,7 +212,7 @@ namespace XviD4PSP
         {
             try
             {
-                //AbortAction();
+                //AbortAction(false);
                 Close();
             }
             catch (Exception ex)
@@ -216,9 +221,16 @@ namespace XviD4PSP
             }
         }
 
-        private void AbortAction()
+        private void AbortAction(bool is_auto_aborted)
         {
-            IsAborted = true;
+            if (is_auto_aborted)
+            {
+                IsErrors = true;
+                IsAutoAborted = true;
+            }
+            else
+                IsAborted = true;
+
             locker.Set();
 
             if (encoderProcess != null)
@@ -241,11 +253,6 @@ namespace XviD4PSP
             }
 
             p.outfiles.Remove(m.outfilepath);
-
-            //if (IsAborted)
-            //    p.UpdateTaskStatus(m.key, TaskStatus.Waiting);
-
-            //Close();
         }
 
         private void button_pause_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -268,6 +275,8 @@ namespace XviD4PSP
                 button_pause.ToolTip = Languages.Translate("Pause encoding");
                 Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NORMAL);
             }
+
+            last_update = TimeSpan.Zero;
         }
 
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
@@ -295,7 +304,7 @@ namespace XviD4PSP
                 this.IsVisibleChanged -= new DependencyPropertyChangedEventHandler(Encoder_IsVisibleChanged);
                 Win7Taskbar.SetProgressState(p.Handle, TBPF.NOPROGRESS);
 
-                AbortAction();
+                AbortAction(false);
             }
             catch (Exception ex)
             {
@@ -688,7 +697,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
                         encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
@@ -701,8 +710,8 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            if (encodertext != null) encodertext += Environment.NewLine;
-                            encodertext += line;
+                            //if (encodertext != null) encodertext += Environment.NewLine;
+                            //encodertext += line;
                             SetLog(line);
                         }
                     }
@@ -715,13 +724,19 @@ namespace XviD4PSP
             SetLog("");
 
             //обнуляем прогресс
-            encoder_fps = of = cf = 0;
+            ResetProgress();
 
             //Отлавливаем ошибку по ErrorLevel
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorException(encodertext);
+
+                //Незачем дважды повторять текст ошибки (всё, что есть в encodertext - уже
+                //есть в логе, к тому-же в encodertext может не оказаться того, что было
+                //считано в "Дочитываем остатки лога")
+                //ErrorException(encodertext);
+
+                SetLog(Languages.Translate("Error") + "!");
             }
 
             encodertext = null;
@@ -950,49 +965,8 @@ namespace XviD4PSP
                 SetLog("");
             }
 
-            encoderProcess.StartInfo = info;
-            encoderProcess.Start();
-            SetPriority(Settings.ProcessPriority);
-
-            string line;
-            double fps = Calculate.ConvertStringToDouble(m.outframerate);
-            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match mat;            
-
-            //первый проход
-            while (!encoderProcess.HasExited)
-            {
-                locker.WaitOne();
-                line = encoderProcess.StandardError.ReadLine();
-                
-                if (line != null)
-                {
-                    //SetLog(line);
-                    mat = r.Match(line);
-                    if (mat.Success == true)
-                    {
-                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
-                    }
-                    else
-                    {
-                        if (encodertext != null)
-                            encodertext += Environment.NewLine;
-                        encodertext += line;
-                    }
-                }
-            }
-
-            //обнуляем прогресс
-            of = cf = 0;
-
-            //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.HasExited &&  encoderProcess.ExitCode != 0 && !IsAborted)
-            {
-                IsErrors = true;
-                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
-            }
-
-            encodertext = null;
+            //Кодируем первый проход
+            Do_FFmpeg_Encoding_Cycle(info);
 
             //второй проход
             if (m.vpasses.Count > 1 && !IsAborted && !IsErrors)
@@ -1051,41 +1025,8 @@ namespace XviD4PSP
                     SetLog("");
                 }
 
-                encoderProcess.StartInfo = info;
-                encoderProcess.Start();
-                SetPriority(Settings.ProcessPriority);
-
-                while (!encoderProcess.HasExited)
-                {
-                    locker.WaitOne();
-                    line = encoderProcess.StandardError.ReadLine();
-                    if (line != null)
-                    {
-                        mat = r.Match(line);
-                        if (mat.Success == true)
-                        {
-                            worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
-                        }
-                        else
-                        {
-                            if (encodertext != null)
-                                encodertext += Environment.NewLine;
-                            encodertext += line;
-                        }
-                    }
-                }
-
-                //обнуляем прогресс
-                of = cf = 0;
-
-                //Отлавливаем ошибку по ErrorLevel
-                if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-                {
-                    IsErrors = true;
-                    ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
-                }
-
-                encodertext = null;
+                //Кодируем второй проход
+                Do_FFmpeg_Encoding_Cycle(info);
             }
 
             //третий проход
@@ -1110,41 +1051,8 @@ namespace XviD4PSP
                     SetLog("");
                 }
 
-                encoderProcess.StartInfo = info;
-                encoderProcess.Start();
-                SetPriority(Settings.ProcessPriority);
-
-                while (!encoderProcess.HasExited)
-                {
-                    locker.WaitOne();
-                    line = encoderProcess.StandardError.ReadLine();
-                    if (line != null)
-                    {
-                        mat = r.Match(line);
-                        if (mat.Success == true)
-                        {
-                            worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
-                        }
-                        else
-                        {
-                            if (encodertext != null)
-                                encodertext += Environment.NewLine;
-                            encodertext += line;
-                        }
-                    }
-                }
-
-                //обнуляем прогресс
-                of = cf = 0;
-
-                //Отлавливаем ошибку по ErrorLevel
-                if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-                {
-                    IsErrors = true;
-                    ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
-                }
-
-                encodertext = null;
+                //Кодируем третий проход
+                Do_FFmpeg_Encoding_Cycle(info);
             }
 
             //чистим ресурсы
@@ -1167,7 +1075,52 @@ namespace XviD4PSP
             SafeDelete(passlog1 + "-0.log");
             SafeDelete(passlog2 + "-0.log");
 
+            encodertext = null;
             SetLog("");
+        }
+
+        private void Do_FFmpeg_Encoding_Cycle(ProcessStartInfo info)
+        {
+            encoderProcess.StartInfo = info;
+            encoderProcess.Start();
+            SetPriority(Settings.ProcessPriority);
+
+            string line;
+            double fps = Calculate.ConvertStringToDouble(m.outframerate);
+            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match mat;
+
+            //первый проход
+            while (!encoderProcess.HasExited)
+            {
+                locker.WaitOne();
+                line = encoderProcess.StandardError.ReadLine();
+
+                if (line != null)
+                {
+                    mat = r.Match(line);
+                    if (mat.Success)
+                    {
+                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
+                    }
+                    else
+                    {
+                        if (encodertext != null)
+                            encodertext += Environment.NewLine;
+                        encodertext += line;
+                    }
+                }
+            }
+
+            //обнуляем прогресс
+            ResetProgress();
+
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
+            {
+                IsErrors = true;
+                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
+            }
         }
 
         private Thread readFromStdErrThread = null;
@@ -1216,7 +1169,8 @@ namespace XviD4PSP
             if (!string.IsNullOrEmpty(line)) SetFilteredLog(r, line);
             SetLog("");
 
-            of = cf = 0;
+            //обнуляем прогресс
+            ResetProgress();
 
             //Отлавливаем ошибку по ErrorLevel
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
@@ -1585,9 +1539,12 @@ namespace XviD4PSP
             {
                 if (m.dontmuxstreams)
                 {
+                    IsNoProgressStage = true;
+
                     //Копируем существующий файл в нужное место
                     SetLog(Languages.Translate("Using already created file") + ": " + instream.audiopath);
                     SetLog(Languages.Translate("Copying it to") + ": " + outstream.audiopath + "\r\n");
+                    SetLog(Languages.Translate("Please wait") + "...");
                     File.Copy(instream.audiopath, outstream.audiopath);
                     return;
                 }
@@ -1696,7 +1653,7 @@ namespace XviD4PSP
                 }
 
                 //обнуляем прогресс
-                of = cf = 0;
+                ResetProgress();
 
                 //чистим ресурсы
                 avs = null;
@@ -1709,7 +1666,6 @@ namespace XviD4PSP
             //проверка на удачное завершение
             if (!File.Exists(outstream.audiopath) || new FileInfo(outstream.audiopath).Length == 0)
             {
-                IsErrors = true;
                 throw new Exception(Languages.Translate("Can`t find output audio file!"));
             }
 
@@ -1764,7 +1720,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         if (oldpass == 0 && mat.Groups[1].Value == "First")
                         {
@@ -1774,7 +1730,7 @@ namespace XviD4PSP
                         else if (oldpass == 1 && mat.Groups[1].Value == "Second")
                         {
                             SetLog("...last pass...");
-                            of = cf = 0;
+                            ResetProgress();
                             oldpass = 2;
                             step++;
                         }
@@ -1789,7 +1745,7 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = cf = 0;
+            ResetProgress();
 
             //Удаляем временный WAV-файл
             if (outstream.nerotemp != m.infilepath && Path.GetDirectoryName(outstream.nerotemp) == Settings.TempPath)
@@ -1863,7 +1819,6 @@ namespace XviD4PSP
             encodertext = null;
 
             string format = "";
-
             string outfile = "";
 
             if (dmode == Demuxer.DemuxerMode.ExtractAudio)
@@ -1943,49 +1898,15 @@ namespace XviD4PSP
             //удаляем старый файл
             SafeDelete(outfile);
 
-            encoderProcess.StartInfo = info;
-            encoderProcess.Start();
-
-            string line;
-            string pat = @"time=(\d+.\d+)";
-            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match mat;
-            int procent = 0;
-
             int outframes = m.outframes;
             m.outframes = m.inframes;
             SetMaximum(m.outframes);
-            //первый проход
-            while (!encoderProcess.HasExited)
-            {
-                line = encoderProcess.StandardError.ReadLine();
 
-                if (line != null)
-                {
-                    mat = r.Match(line);
-                    if (mat.Success == true)
-                    {
-                        double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                        procent = (int)(ctime * Calculate.ConvertStringToDouble(m.inframerate));
-                        worker.ReportProgress(procent);
-                    }
-                    else
-                    {
-                        if (encodertext != null)
-                            encodertext += Environment.NewLine;
-                        encodertext += line;
-                    }
-                }
-            }
+            //Демуксим
+            Do_FFmpeg_Encoding_Cycle(info);
+
             m.outframes = outframes;
             SetMaximum(m.outframes);
-
-            //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-            {
-                IsErrors = true;
-                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
-            }
 
             //чистим ресурсы
             encoderProcess.Close();
@@ -2102,7 +2023,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         procent = Convert.ToInt32(mat.Groups[1].Value);
                         worker.ReportProgress(Convert.ToInt32((procent / 100.0) * m.outframes));
@@ -2198,7 +2119,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
                     }
@@ -2360,7 +2281,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         procent = Convert.ToInt32(mat.Groups[1].Value);
                         worker.ReportProgress(Convert.ToInt32((procent / 100.0) * m.outframes));
@@ -2514,7 +2435,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         procent = Convert.ToInt32(mat.Groups[1].Value);
                         worker.ReportProgress(Convert.ToInt32((procent / 100.0) * m.outframes));
@@ -2529,7 +2450,7 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = cf = 0;
+            ResetProgress();
 
             //Отлавливаем ошибку по ErrorLevel
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
@@ -2626,7 +2547,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         procent = Convert.ToInt32(mat.Groups[1].Value);
                         worker.ReportProgress(Convert.ToInt32((procent / 100.0) * m.outframes));
@@ -2642,8 +2563,7 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = 0;
-            cf = 0;
+            ResetProgress();
 
             //чистим ресурсы
             encoderProcess.Close();
@@ -2712,8 +2632,8 @@ namespace XviD4PSP
 
         private void muxer_ProgressChanged(double progress)
         {
-            //получаем текущий фрейм 
-            cf = (int)((progress / 100.0) * (double)m.outframes);
+            //получаем текущий фрейм
+            frame = (int)((progress / 100.0) * (double)m.outframes);
         }
 
         private void make_ffmpeg_mux()
@@ -2757,7 +2677,7 @@ namespace XviD4PSP
                 else
                     rate = "";
             }
-    
+
             string aformat = "";
             string addaudio = "";
             if (m.outaudiostreams.Count > 0)
@@ -2795,52 +2715,14 @@ namespace XviD4PSP
                 SetLog("");
             }
 
-            encoderProcess.StartInfo = info;
-            encoderProcess.Start();
-            SetPriority(Settings.ProcessPriority);
+            //Муксим
+            Do_FFmpeg_Encoding_Cycle(info);
 
-            string line;
-            double fps = Calculate.ConvertStringToDouble(m.outframerate);
-            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match mat;
-            
-            while (!encoderProcess.HasExited)
-            {
-                locker.WaitOne();
-                                
-                line = encoderProcess.StandardError.ReadLine();
-                
-                if (line != null)
-                {
-                    mat = r.Match(line);
-                    if (mat.Success == true)
-                    {
-                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
-                    }
-                    else
-                    {
-                         if (encodertext != null)
-                             encodertext += Environment.NewLine;
-                         encodertext += line;
-                    }
-                }
-            }
-
-            //обнуляем прогресс
-            of = cf = 0;
-            
-            //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-            {
-                IsErrors = true;
-                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
-            }
-            
             //чистим ресурсы
             encoderProcess.Close();
             encoderProcess.Dispose();
             encoderProcess = null;
-            
+
             if (IsAborted || IsErrors) return;
 
             //проверка на удачное завершение
@@ -2852,7 +2734,6 @@ namespace XviD4PSP
             }
 
             encodertext = null;
-
             SetLog("");
         }
 
@@ -2880,45 +2761,9 @@ namespace XviD4PSP
                 SetLog("ffmpeg.exe:" + " " + info.Arguments);
                 SetLog("");
             }
-            encoderProcess.StartInfo = info;
-            encoderProcess.Start();
-            SetPriority(Settings.ProcessPriority);
 
-            string line;
-            double fps = Calculate.ConvertStringToDouble(m.outframerate);
-            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match mat;
-
-            while (!encoderProcess.HasExited)
-            {
-                locker.WaitOne();
-                line = encoderProcess.StandardError.ReadLine();
-
-                if (line != null)
-                {
-                    mat = r.Match(line);
-                    if (mat.Success == true)
-                    {
-                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
-                    }
-                    else
-                    {
-                        if (encodertext != null)
-                            encodertext += Environment.NewLine;
-                        encodertext += line;
-                    }
-                }
-            }
-
-            //обнуляем прогресс
-            of = cf = 0;
-
-            //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
-            {
-                IsErrors = true;
-                ErrorException(encodertext += encoderProcess.StandardError.ReadToEnd());
-            }
+            //Кодируем
+            Do_FFmpeg_Encoding_Cycle(info);
 
             //чистим ресурсы
             encoderProcess.Close();
@@ -2930,7 +2775,6 @@ namespace XviD4PSP
             //проверка на удачное завершение
             if (!File.Exists(outstream.audiopath) || new FileInfo(outstream.audiopath).Length == 0)
             {
-                IsErrors = true;
                 throw new Exception(Languages.Translate("Can`t find output audio file!"));
             }
 
@@ -3003,7 +2847,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
                     }
@@ -3022,8 +2866,7 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = 0;
-            cf = 0;
+            ResetProgress();
 
             //чистим ресурсы
             encoderProcess.Close();
@@ -3237,7 +3080,7 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = cf = 0;
+            ResetProgress();
 
             //Отлавливаем ошибку по ErrorLevel
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
@@ -3284,23 +3127,26 @@ namespace XviD4PSP
             SafeDelete(metapath);
 
             //правим BluRay структуру для флешек и FAT32 дисков
-            if (m.format == Format.ExportFormats.BluRay &&
-                m.bluray_type == "FAT32 HDD/MS")
+            if (m.format == Format.ExportFormats.BluRay && m.bluray_type == "FAT32 HDD/MS")
+            {
+                IsNoProgressStage = true;
                 Calculate.MakeFAT32BluRay(m.outfilepath);
+            }
 
             SetLog("");
         }
 
         private void make_avc2avi()
         {
+            IsNoProgressStage = true;
 
             string aviout = Calculate.RemoveExtention(m.outvideofile, true) + ".avi";
-
             busyfile = Path.GetFileName(aviout);
 
             //info строка
             SetLog("Video file: " + m.outvideofile);
             SetLog("Rebuild to: " + aviout);
+            SetLog(Languages.Translate("Please wait") + "...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -3320,7 +3166,7 @@ namespace XviD4PSP
                 else
                     rate = "";
             }
-           
+
             //поправка fps для avc2avi, который занижает значение для 23.976 и 29.970 фпс на 0.001
             if (rate != "")
             {
@@ -3331,7 +3177,7 @@ namespace XviD4PSP
                 rate = " -f " + rate;
             }
             info.Arguments = "-i \"" + m.outvideofile + "\" -o \"" + aviout + "\"" + rate;
-            
+
             //прописываем аргументы команндной строки
             SetLog("");
             if (Settings.ArgumentsToLog)
@@ -3371,6 +3217,7 @@ namespace XviD4PSP
 
         private void make_pulldown()
         {
+            IsNoProgressStage = true;
             busyfile = Path.GetFileName(m.outvideofile);
 
             //info строка
@@ -3378,6 +3225,7 @@ namespace XviD4PSP
                 SetLog("DGPulldown: " + m.outframerate + " > 25.000");
             if (m.format == Format.ExportFormats.Mpeg2NTSC)
                 SetLog("DGPulldown: " + m.outframerate + " > 29.970");
+            SetLog(Languages.Translate("Please wait") + "...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -3465,101 +3313,10 @@ namespace XviD4PSP
             SetLog("");
         }
 
-        private void make_divxmux()
-        {
-
-            SafeDelete(m.outfilepath);
-
-            busyfile = Path.GetFileName(m.outfilepath);
-            step++;
-
-            //info строка
-            SetLog("Video file: " + m.outvideofile);
-            if (m.outaudiostreams.Count > 0)
-            {
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                SetLog("Audio file: " + outstream.audiopath);
-            }
-            SetLog("Muxing to: " + m.outfilepath);
-
-            encoderProcess = new Process();
-            ProcessStartInfo info = new ProcessStartInfo();
-
-            info.FileName = Calculate.StartupPath + "\\apps\\DivXMux\\DivXMux.exe";
-            info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-            info.UseShellExecute = false;
-            //info.RedirectStandardOutput = true;
-            //info.RedirectStandardError = true;
-            info.CreateNoWindow = true;
-
-            string addaudio = "";
-            if (m.inaudiostreams.Count > 0)
-            {
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                addaudio = " -a \"" + outstream.audiopath + "\"";
-            }
-
-            info.Arguments = "-v \"" + m.outvideofile + "\"" + addaudio + " -o \"" + m.outfilepath + "\"";
-
-            //узнаём какой примерно должен полчиться файл
-            long asize = 0;
-            if (m.outaudiostreams.Count > 0)
-            {
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                asize = new FileInfo(outstream.audiopath).Length;
-            }
-            long totalsize = new FileInfo(m.outvideofile).Length + asize;
-
-            encoderProcess.StartInfo = info;
-
-            //прописываем аргументы команндной строки
-            if (Settings.ArgumentsToLog)
-                SetLog(info.Arguments);
-
-            encoderProcess.Start();
-            SetPriority(Settings.ProcessPriority);
-
-            encoderProcess.WaitForExit();
-            //while (!encoderProcess.HasExited)
-            //{
-            //    Thread.Sleep(100);
-            //    //locker.WaitOne();
-            //    try
-            //    {
-            //        if (File.Exists(m.outfilepath))
-            //        {
-            //            FileInfo csize = new FileInfo(m.outfilepath);
-            //            worker.ReportProgress(Convert.ToInt32((csize.Length / totalsize) * m.outframes));
-            //        }
-            //    }
-            //    catch
-            //    {
-            //    }
-            //}
-
-            //чистим ресурсы
-            encoderProcess.Close();
-            encoderProcess.Dispose();
-            encoderProcess = null;
-
-            if (IsAborted || IsErrors) return;
-
-            //проверка на удачное завершение
-            if (!File.Exists(m.outfilepath) ||
-                new FileInfo(m.outfilepath).Length == 0)
-            {
-                IsErrors = true;
-                ErrorException(encodertext);
-                //throw new Exception(Languages.Translate("Can`t find output video file!"));
-            }
-
-            encodertext = null;
-
-            SetLog("");
-        }
-
         private void make_vdubmod()
         {
+            IsNoProgressStage = true;
+
             SafeDelete(m.outfilepath);
 
             busyfile = Path.GetFileName(m.outfilepath);
@@ -3574,7 +3331,7 @@ namespace XviD4PSP
                     SetLog("Audio file: " + outstream.audiopath);
             }
             SetLog("Muxing to: " + m.outfilepath);
-            SetLog("Please wait...");
+            SetLog(Languages.Translate("Please wait") + "...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -3597,7 +3354,6 @@ namespace XviD4PSP
             //создаём скрипт
             VirtualDubModWrapper.CreateMuxingScript(m, CopyDelay);
 
-            
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
             //SetPriority(Settings.ProcessPriority);
@@ -3791,7 +3547,7 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         procent = Convert.ToInt32(mat.Groups[1].Value);
                         worker.ReportProgress(Convert.ToInt32((procent / 100.0) * m.outframes));
@@ -3815,8 +3571,7 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = 0;
-            cf = 0;
+            ResetProgress();
 
             //чистим ресурсы
             encoderProcess.Close();
@@ -3843,6 +3598,8 @@ namespace XviD4PSP
 
         private void make_pmp()
         {
+            IsNoProgressStage = true;
+
             if (m.outaudiostreams.Count == 0)
             {
                 AudioStream stream = new AudioStream();
@@ -3871,6 +3628,7 @@ namespace XviD4PSP
             SetLog("Video file: " + m.outvideofile);
             SetLog("Audio file: " + outstream.audiopath);
             SetLog("Muxing to: " + m.outfilepath);
+            SetLog(Languages.Translate("Please wait") + "...");
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
@@ -3974,7 +3732,7 @@ namespace XviD4PSP
                         SetLog("...writing...");
                     }
 
-                    if (mat.Success == true && IsNum)
+                    if (mat.Success && IsNum)
                     {
                         if (line.Contains(" / ") && !line.Contains("unused_bytes"))
                         {
@@ -4003,8 +3761,7 @@ namespace XviD4PSP
             }
 
             //обнуляем прогресс
-            of = 0;
-            cf = 0;
+            ResetProgress();
 
             //чистим ресурсы
             encoderProcess.Close();
@@ -4038,69 +3795,128 @@ namespace XviD4PSP
             }
         }
 
+        //Обнуляем прогресс
+        private void ResetProgress()
+        {
+            timer.Enabled = false;
+
+            fps_averages.Clear();
+            encoder_fps = fps = 0;
+            old_frame = frame = 0;
+            old_time = DateTime.Now;
+            last_update = TimeSpan.Zero;
+            IsNoProgressStage = false;
+
+            timer.Enabled = true;
+        }
+
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             try
             {
-                if (worker != null && worker.IsBusy && !IsPaused)
+                if (worker != null && worker.IsBusy && !IsPaused && ((System.Timers.Timer)source).Enabled)
                 {
                     //получаем текущее время и текущий фрейм
-                    DateTime ct = DateTime.Now;
-                    int cframe = cf;
+                    DateTime current_time = DateTime.Now;
+                    int current_frame = frame;
+                    double estimated = 0;
 
-                    double pr = 0.0;
-                    double pr_t = 0.0;
-
-                    //вычисляем проценты прогресса
-                    pr = ((double)cframe / m.outframes) * 100.0;
-                    pr_t = cframe + (step * m.outframes);
-
-                    //вычисляем fps
-                    if (of != cframe)
+                    //Определяем зависание
+                    if (current_frame != old_frame)
                     {
-                        //берем значение fps от энкодеров, если они не равны нулю
-                        if (encoder_fps != 0.0) fps = encoder_fps;
-                        else
-                        {
-                            double tinterval = TimeSpan.FromTicks(ct.Ticks - ot.Ticks).TotalSeconds;
-                            fps = (double)(cframe - of) / tinterval; //фэпээс
-                        }
+                        //Сбрасываем счетчик "простоя"
+                        last_update = TimeSpan.Zero;
+                    }
+                    else if (!IsNoProgressStage)
+                    {
+                        //Увеличиваем счетчик "простоя"
+                        last_update += TimeSpan.FromMilliseconds(timer.Interval);
 
-                        //запоминаем сравнительные значения
-                        of = cframe;
-                        ot = ct;
-                       
-                        //вычисляем сколько времени осталось кодировать
-                        if (cframe < m.outframes) et = (double)(m.outframes - cframe) / fps;
+                        //Похоже, что кодирование зависло..
+                        if (last_update.TotalMinutes > last_update_threshold && Settings.AutoAbortEncoding)
+                        {
+                            timer.Enabled = false;
+                            timer.Elapsed -= new ElapsedEventHandler(OnTimedEvent);
+                            last_update = TimeSpan.Zero;
+                            AbortFreezedTask();
+                            return;
+                        }
                     }
 
-                    string e_s = "";
-                    string new_fps = "";
-                   
-                    //убираем десятые и сотые от фпс, если значения получены не от энкодеров
-                    if (encoder_fps != 0.0)
-                        new_fps = fps.ToString("####0.00");
-                    else
-                        new_fps = fps.ToString("####0");
+                    //вычисляем проценты прогресса
+                    double percent = ((double)current_frame / m.outframes) * 100.0;
+                    double percent_total = current_frame + (step * m.outframes);
 
-                    if (fps > 0.0000001)
+                    //Определяем fps и оставшееся время
+                    if (current_frame > 0)
                     {
-                        TimeSpan elapsed = TimeSpan.FromSeconds(et);
-                        if (elapsed.Days > 0) e_s += elapsed.Days + "day ";
-                        if (elapsed.Hours > 0) e_s += elapsed.Hours + "hour ";
-                        if (elapsed.Minutes > 0) e_s += elapsed.Minutes + "min ";
-                        if (elapsed.Seconds > 0) e_s += elapsed.Seconds + "sec";
+                        if (encoder_fps != 0.0)
+                        {
+                            //Берём fps от энкодеров
+                            fps = encoder_fps;
 
-                        //fps = 123.1234;
-                        string pr_text = cframe + "frames " + new_fps + "fps " + e_s;
-                        string title = pr.ToString("##0.00") + "% encoding to: " + busyfile;
-                        //Текст не должен превышать 64-х символов, иначе будет вылет.
-                        //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + "\r\nDone: " + pr.ToString("##0.00") + "%\r\nTime left: " + e_s;
-                        //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + "\r\nEncoded: " + pr.ToString("##0.00") + "%\r\n" + e_s;
-                        //p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + pr.ToString("##0.00") + "%)\r\nTime left: " + e_s;
-                        p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + pr.ToString("##0.00") + "%)\r\n" + e_s;
-                        Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(pr_t), total_pr_max);
-                        SetStatus(title, pr_text, cframe, pr_t);
+                            //запоминаем сравнительные значения
+                            old_frame = current_frame;
+                        }
+                        else
+                        {
+                            //Или считаем сами
+                            double interval = (current_time - old_time).TotalSeconds;
+
+                            //Определяем fps с минимальным интервалом в 1 сек.
+                            //"old_frame == 0" - самое первое определение прогресса, кодирование
+                            //только началось и желательно выдать хоть что-то для наглядности процесса.
+                            if (interval >= 1 || (old_frame == 0 && interval > 0))
+                            {
+                                //Возможно скорость очень низкая и за одну секунду прогресса не произошло,
+                                //но ждать слишком долго (в зависимости от текущей скорости) точно бесполезно
+                                if (current_frame != old_frame || (fps > 10 ? interval >= 5 : fps > 5 ? interval >= 10 : interval >= 15))
+                                {
+                                    //Считаем и усредняем fps (за 10 последних замеров)
+                                    fps_averages.Add(Math.Max(((current_frame - old_frame) / interval), 0));
+                                    if (fps_averages.Count >= 11) fps_averages.RemoveAt(0);
+
+                                    double temp = 0;
+                                    fps_averages.ForEach(n => temp += n);
+                                    fps = temp / fps_averages.Count;
+
+                                    //запоминаем сравнительные значения
+                                    old_frame = current_frame;
+                                    old_time = current_time;
+                                }
+                            }
+                        }
+
+                        //вычисляем сколько времени осталось кодировать
+                        if (current_frame < m.outframes) estimated = (double)(m.outframes - current_frame) / fps;
+
+                        string estimated_string = "";
+                        if (!double.IsInfinity(estimated))
+                        {
+                            TimeSpan est = TimeSpan.FromSeconds(estimated);
+                            if (est.Days > 0) estimated_string += est.Days + "day ";
+                            if (est.Hours > 0) estimated_string += est.Hours + "hour ";
+                            if (est.Minutes > 0) estimated_string += est.Minutes + "min ";
+                            if (est.Seconds > 0) estimated_string += est.Seconds + "sec";
+                        }
+                        else
+                            estimated_string = unknown;
+
+                        if (((System.Timers.Timer)source).Enabled)
+                        {
+                            string title = percent.ToString("##0.00") + "% encoding to: " + busyfile;
+                            string statistics = current_frame + "frames " + fps.ToString((encoder_fps != 0.0) ? "####0.00" : "####0") + "fps " + estimated_string;
+                            p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + percent.ToString("##0.00") + "%)\r\n" + estimated_string;
+                            Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(percent_total), total_pr_max);
+                            SetStatus(title, statistics, current_frame, percent_total);
+                        }
+                    }
+                    else if (((System.Timers.Timer)source).Enabled)
+                    {
+                        //Кодирование только началось - прогресса еще нет (или его нет и не ожидается)
+                        p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (0.00%)\r\n" + unknown;
+                        Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(percent_total), total_pr_max);
+                        SetStatus("0.00% encoding to: " + busyfile, ((IsNoProgressStage) ? unknown : ""), current_frame, percent_total);
                     }
                 }
             }
@@ -4110,12 +3926,35 @@ namespace XviD4PSP
             }
         }
 
+        internal delegate void AbortFreezedTaskDelegate();
+        private void AbortFreezedTask()
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new AbortFreezedTaskDelegate(AbortFreezedTask));
+            else
+            {
+                try
+                {
+                    SetLog("\r\n\r\n" + Languages.Translate("No progress for xx minutes, aborting encoding!").Replace("xx", last_update_threshold.ToString()));
+                    AbortAction(true);
+
+                    //Т.к. AbortAction не всегда может приводить к отмене зависшего кодирования, то нельзя
+                    //расчитывать на запуск следующего задания в RunWorkerCompleted - запускаем его тут
+                    p.EncodeNextTask();
+                }
+                catch (Exception ex)
+                {
+                    ErrorException(ex.Message);
+                }
+            }
+        }
+
         private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try
             {
                 //запоминаем когда это началось
-                start_time = DateTime.Now;
+                start_time = old_time = DateTime.Now;
 
                 //запускаем таймер
                 timer = new System.Timers.Timer();
@@ -4166,7 +4005,7 @@ namespace XviD4PSP
                 SetLog("TASK");
                 SetLog("------------------------------");
                 SetLog("Format: " + Format.EnumToString(m.format));
-                SetLog("Duration: " + Calculate.GetTimeline(m.outduration.TotalSeconds) + " (" + m.outframes  + ")");
+                SetLog("Duration: " + Calculate.GetTimeline(m.outduration.TotalSeconds) + " (" + m.outframes + ")");
 
                 if (m.vencoding != "Disabled")
                 {
@@ -4346,6 +4185,9 @@ namespace XviD4PSP
                     }
 
                     if (IsAborted || IsErrors) return;
+
+                    //обнуляем прогресс
+                    ResetProgress();
                 }
 
                 //кодирование видео
@@ -4389,7 +4231,7 @@ namespace XviD4PSP
                     else
                     {
                         if (m.dontmuxstreams) m.outvideofile = Calculate.RemoveExtention(m.outfilepath) + Format.GetValidRAWVideoEXT(m);
-                        
+
                         Format.Demuxers dem = Format.GetDemuxer(m);
                         if (dem == Format.Demuxers.mkvextract) demux_mkv(Demuxer.DemuxerMode.ExtractVideo);
                         else if (dem == Format.Demuxers.pmpdemuxer) demux_pmp(Demuxer.DemuxerMode.ExtractVideo);
@@ -4399,6 +4241,9 @@ namespace XviD4PSP
                 }
 
                 if (IsAborted || IsErrors) return;
+
+                //обнуляем прогресс
+                ResetProgress();
 
                 //кодирование звука (после кодирования видео)
                 if (!AudioFirst)
@@ -4427,6 +4272,9 @@ namespace XviD4PSP
                     }
 
                     if (IsAborted || IsErrors) return;
+
+                    //обнуляем прогресс
+                    ResetProgress();
                 }
 
                 //pulldown
@@ -4439,6 +4287,9 @@ namespace XviD4PSP
                 }
 
                 if (IsAborted || IsErrors) return;
+
+                //обнуляем прогресс
+                ResetProgress();
 
                 if (m.dontmuxstreams) muxer = Format.Muxers.Disabled;
 
@@ -4456,7 +4307,12 @@ namespace XviD4PSP
                     {
                         //делаем ави из avc
                         string vext = Path.GetExtension(m.outvideofile);
-                        if (vext != ".avi") make_avc2avi();
+                        if (vext != ".avi")
+                        {
+                            make_avc2avi();
+                            if (IsAborted || IsErrors) return;
+                        }
+
                         make_vdubmod();
                     }
                     else if (muxer == Format.Muxers.mp4box) make_mp4();
@@ -4465,6 +4321,12 @@ namespace XviD4PSP
                 }
 
                 if (IsAborted || IsErrors) return;
+
+                //обнуляем прогресс
+                ResetProgress();
+
+                //Прогресса уже точно не будет
+                IsNoProgressStage = true;
 
                 //THM
                 if (m.format == Format.ExportFormats.Mp4PSPAVC || m.format == Format.ExportFormats.Mp4PSPAVCTV)
@@ -4521,7 +4383,7 @@ namespace XviD4PSP
                     files = Directory.GetFiles(Path.GetDirectoryName(m.outfilepath),
                        Path.GetFileNameWithoutExtension(m.outfilepath).Replace(pat1, pat2) +
                        Path.GetExtension(m.outfilepath).ToLower());
-                   
+
                     //если получился только 1 файл
                     if (files.Length == 1)
                     {
@@ -4572,7 +4434,11 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                if (!IsAborted && !IsErrors)
+                {
+                    IsErrors = true;
+                    ErrorException(ex.Message);
+                }
             }
         }
 
@@ -4581,7 +4447,7 @@ namespace XviD4PSP
             try
             {
                 //получаем текущий фрейм
-                cf = e.ProgressPercentage; 
+                frame = e.ProgressPercentage;
             } 
             catch (Exception ex)
             {
@@ -4592,9 +4458,9 @@ namespace XviD4PSP
        private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             //закрываем таймер
-            timer.Close();
             timer.Enabled = false;
             timer.Elapsed -= new ElapsedEventHandler(OnTimedEvent);
+            timer.Close();
 
             button_pause.Visibility = Visibility.Hidden;
             cbxPriority.Visibility = Visibility.Hidden;
@@ -4776,7 +4642,7 @@ namespace XviD4PSP
                 }
 
                 //Смотрим, есть ли что ещё скодировать
-                if (!IsAborted && p.EncodeNextTask())
+                if (!IsAborted && !IsAutoAborted && p.EncodeNextTask())
                 {
                     //Если нет заданий со статусами Waiting, Encoding и Errors, то можно выходить 
                     if (ending == Shutdown.ShutdownMode.Exit)

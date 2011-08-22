@@ -46,7 +46,7 @@ namespace XviD4PSP
             check_logfile_tempfolder.Content = Languages.Translate("in Temp folder");
             label_extensions.Content = Languages.Translate("Only files with this extensions will be opened:");
             check_batch_autoencoding.Content = Languages.Translate("Start encoding after opening all files");
-            cmenu_is_always_close_encoding.Content = Languages.Translate("Autoclose encoding window if task was successfully accomplished");
+            check_is_always_close_encoding.Content = Languages.Translate("Autoclose encoding window if task was successfully accomplished");
             check_dgindex_cache_in_temp.Content = Languages.Translate("Create DGIndex cache in Temp folder");
             label_clone.Content = Languages.Translate("Clone from the already opened file to each other:");
             check_clone_ar.Content = Languages.Translate("Aspect/Resolution info (crop, aspect, etc)");
@@ -58,7 +58,7 @@ namespace XviD4PSP
             check_use_64bit.Content = Languages.Translate("Use 64-bit x264");
             check_dont_delete_caches.Content = Languages.Translate("Don`t delete any caches and temporal files");
             check_use_trayicon.Content = Languages.Translate("Enable system tray icon");
-            cmenu_audio_first.Content = Languages.Translate("Encode audio first, then video");
+            check_audio_first.Content = Languages.Translate("Encode audio first, then video");
 
             check_use_64bit.ToolTip = Languages.Translate("Your OS must be 64-bit also!");
             check_batch_pause.ToolTip = Languages.Translate("So you can tune all encoding settings as needed, and then continue opening");
@@ -76,6 +76,7 @@ namespace XviD4PSP
             check_use_win7taskbar.Content = Languages.Translate("Enable Windows 7 taskbar progress indication");
             check_enable_backup.Content = Languages.Translate("Create a backups of the tasks list");
             check_validate_pathes.Content = Languages.Translate("Check for illegal characters in pathes");
+            check_auto_abort.Content = Languages.Translate("Cancel encoding if there is no progress for a long time");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -117,14 +118,15 @@ namespace XviD4PSP
             check_clone_audio.IsChecked = Settings.BatchCloneAudio;                               //Ну а это для звуковых параметров
             check_batch_pause.IsChecked = Settings.BatchPause;                                    //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
             check_use_64bit.IsChecked = Settings.Use64x264;                                       //Использовать 64-битную версию x264.exe
-            cmenu_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
+            check_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
             check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled
                  = check_delete_dgindex_cache.IsEnabled = Settings.DeleteTempFiles);              //Удалять кэши и временные файлы
             check_use_trayicon.IsChecked = Settings.TrayIconIsEnabled;                            //Иконка в трее вкл\выкл
-            cmenu_audio_first.IsChecked = Settings.EncodeAudioFirst;                              //Кодировать сначала звук, потом видео
+            check_audio_first.IsChecked = Settings.EncodeAudioFirst;                              //Кодировать сначала звук, потом видео
             check_use_win7taskbar.IsChecked = Settings.Win7TaskbarIsEnabled;                      //Поддержка таскбара в Win7 вкл\выкл
             check_enable_backup.IsChecked = Settings.EnableBackup;                                //Разрешаем сохранять резервную копию списка заданий
             check_validate_pathes.IsChecked = Settings.ValidatePathes;                            //Проверять пути на "нехорошие" символы
+            check_auto_abort.IsChecked = Settings.AutoAbortEncoding;                              //Автоматически прерывать зависшие задания
 
             //Загружаем HotKeys (плюс перевод к действиям)
             foreach (string line in HotKeys.Data)
@@ -326,9 +328,9 @@ namespace XviD4PSP
             Settings.AutoBatchEncoding = check_batch_autoencoding.IsChecked.Value;
         }
 
-        private void cmenu_is_always_close_encoding_Click(object sender, RoutedEventArgs e)
+        private void check_is_always_close_encoding_Click(object sender, RoutedEventArgs e)
         {
-            Settings.AutoClose = cmenu_is_always_close_encoding.IsChecked.Value;
+            Settings.AutoClose = check_is_always_close_encoding.IsChecked.Value;
         }
 
         private void check_dgindex_cache_in_temp_Click(object sender, RoutedEventArgs e)
@@ -496,9 +498,9 @@ namespace XviD4PSP
             p.TrayIcon.Visible = Settings.TrayIconIsEnabled = check_use_trayicon.IsChecked.Value;
         }
 
-        private void cmenu_audio_first_Click(object sender, RoutedEventArgs e)
+        private void check_audio_first_Click(object sender, RoutedEventArgs e)
         {
-            Settings.EncodeAudioFirst = cmenu_audio_first.IsChecked.Value;
+            Settings.EncodeAudioFirst = check_audio_first.IsChecked.Value;
         }
 
         private void check_use_win7taskbar_Click(object sender, RoutedEventArgs e)
@@ -534,6 +536,11 @@ namespace XviD4PSP
         private void check_validate_pathes_Click(object sender, RoutedEventArgs e)
         {
             Settings.ValidatePathes = check_validate_pathes.IsChecked.Value;
+        }
+
+        private void check_auto_abort_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.AutoAbortEncoding = check_auto_abort.IsChecked.Value;
         }
 	}
 }

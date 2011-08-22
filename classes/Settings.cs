@@ -2829,5 +2829,26 @@ namespace XviD4PSP
                 SetBool("MI_WrapText", value);
             }
         }
+
+        //Отмена кодирования зависших заданий
+        public static bool AutoAbortEncoding
+        {
+            get
+            {
+                object value = GetValue("AutoAbortEncoding");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("AutoAbortEncoding", value);
+            }
+        }
     }
 }

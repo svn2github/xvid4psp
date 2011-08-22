@@ -356,12 +356,6 @@ namespace XviD4PSP
         {
             IsAborted = true;
             locker.Set();
-            if (_encoderThread != null)
-            {
-                _encoderThread.Abort();
-                _encoderThread.Join();
-                _encoderThread = null;
-            }
 
             if (_encoderProcess != null)
             {
@@ -377,6 +371,13 @@ namespace XviD4PSP
                 _encoderProcess.Close();
                 _encoderProcess.Dispose();
                 _encoderProcess = null;
+            }
+
+            if (_encoderThread != null)
+            {
+                _encoderThread.Abort();
+                _encoderThread.Join();
+                _encoderThread = null;
             }
         }
 
