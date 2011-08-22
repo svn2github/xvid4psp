@@ -54,10 +54,12 @@ namespace XviD4PSP
             "\r\n" + Languages.Translate("Frame accurate seeking is not guaranteed!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_dss2 = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame accurate seeking when it`s possible.") +
-            Environment.NewLine + Languages.Translate("Path to the source file must not contain any non-Latin characters!") +
+            "\r\n" + Languages.Translate("Path to the source file must not contain any non-Latin characters!") +
+            "\r\n" + Languages.Translate("May hang when processing the last frames!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_ffms = Languages.Translate("This decoder (based on FFmpeg) uses their own splitters and decoders, but requires some extra time for indexing your file.") +
             "\r\n" + Languages.Translate("However, Haali Media Splitter is still required if you want to open MPEG-PS/TS or OGM files with this decoder.") +
+            "\r\n" + Languages.Translate("Decoding of interlaced H.264 may be broken (due to limitations of FFmpeg)!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_qts = Languages.Translate("This decoder uses QuickTime environment for decoding, so QuickTime is required!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": mov";
@@ -236,6 +238,12 @@ namespace XviD4PSP
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_dss2, ToolTip = tltp_dss2 });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_ffms, ToolTip = tltp_ffms });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_qts, ToolTip = tltp_qts });
+
+            //Продляем действие тултипов
+            ToolTipService.SetShowDuration(vcombo, 100000);
+            foreach (ComboBoxItem item in vcombo.Items)
+                ToolTipService.SetShowDuration(item, 100000);
+
             vcombo.SelectedIndex = (int)vcombo.Tag;
             vdecoders_loaded = true;
         }
@@ -256,6 +264,12 @@ namespace XviD4PSP
             acombo.Items.Add(new ComboBoxItem() { Content = dec_bass, ToolTip = tltp_bass });
             acombo.Items.Add(new ComboBoxItem() { Content = dec_ffas, ToolTip = tltp_ffas });
             acombo.Items.Add(new ComboBoxItem() { Content = dec_dss, ToolTip = tltp_dss });
+
+            //Продляем действие тултипов
+            ToolTipService.SetShowDuration(acombo, 100000);
+            foreach (ComboBoxItem item in acombo.Items)
+                ToolTipService.SetShowDuration(item, 100000);
+
             acombo.SelectedIndex = (int)acombo.Tag;
             adecoders_loaded = true;
         }
