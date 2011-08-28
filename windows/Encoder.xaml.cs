@@ -744,6 +744,15 @@ namespace XviD4PSP
 
         private void make_ffmpeg()
         {
+            //FOURCC
+            string fourcc = "";
+            if (m.outvcodec == "HUFF" && m.ffmpeg_options.fourcc_huff != "FFVH")
+            {
+                fourcc = m.ffmpeg_options.fourcc_huff;
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace(" -vtag " + fourcc, "");
+            }
+
             //прописываем интерлейс флаги
             if (m.interlace == SourceType.FILM ||
                 m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
@@ -907,7 +916,7 @@ namespace XviD4PSP
                         SetLog(outstream.codec + " Q" + m.flac_options.level + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz");
                     else
                         SetLog(outstream.codec + " " + outstream.bitrate + "kbps " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz");
-                }            
+                }
             }
 
             if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
@@ -1077,6 +1086,29 @@ namespace XviD4PSP
 
             encodertext = null;
             SetLog("");
+
+            if (IsAborted || IsErrors) return;
+
+            //FOURCC
+            if (!string.IsNullOrEmpty(fourcc) && fourcc.Length == 4 && Path.GetExtension(m.outvideofile).ToLower() == ".avi")
+            {
+                SetLog("FOURCC");
+                SetLog("------------------------------");
+                SetLog("FOURCC: FFVH > " + fourcc);
+                SetLog("");
+                
+                //Не знаю, насколько корректно "вслепую" менять значения, но в "AVI FOURCC Code Changer" сделано именно так
+                using (FileStream fs = new FileStream(m.outvideofile, FileMode.Open, FileAccess.Write))
+                {
+                    fs.Position = 112; //Description code
+                    fs.Write(Encoding.ASCII.GetBytes(fourcc), 0, 4);
+                    fs.Position = 188; //Used codec
+                    fs.Write(Encoding.ASCII.GetBytes(fourcc), 0, 4);
+                    fs.Flush();
+                }
+
+                SetLog("");
+            }
         }
 
         private void Do_FFmpeg_Encoding_Cycle(ProcessStartInfo info)
