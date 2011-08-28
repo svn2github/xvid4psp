@@ -28,7 +28,8 @@
                                         </Style.Triggers>
                                     </Style>
                                     <Style TargetType="{x:Type ComboBoxItem}">
-                                        <Setter Property="Background" Value="#FF202020"/>
+                                        <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"/>
+                                        <Setter Property="ToolTipService.ShowDuration" Value="100000"/>
                                     </Style>
                                     <Style TargetType="{x:Type ListViewItem}">
                                         <Setter Property="Template" Value="{DynamicResource ListViewItemNoAero}"/>
@@ -60,7 +61,7 @@
                                             <GridViewColumn x:Name="vdecoder" Width="150">
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="vcombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
+                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" ToolTipService.ShowDuration="100000" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="vcombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
                                             </GridViewColumn>
@@ -128,6 +129,7 @@
                                     </Style>
                                     <Style TargetType="{x:Type ComboBoxItem}">
                                         <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"/>
+                                        <Setter Property="ToolTipService.ShowDuration" Value="100000"/>
                                     </Style>
                                     <Style TargetType="{x:Type ListViewItem}">
                                         <Setter Property="Template" Value="{DynamicResource ListViewItemNoAero}"/>
@@ -159,7 +161,7 @@
                                             <GridViewColumn x:Name="adecoder" Width="150">
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="acombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
+                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" ToolTipService.ShowDuration="100000" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="acombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
                                             </GridViewColumn>

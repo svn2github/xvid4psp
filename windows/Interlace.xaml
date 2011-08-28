@@ -9,6 +9,11 @@
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
+            <Grid.Resources>
+                <Style TargetType="{x:Type ComboBoxItem}">
+                    <Setter Property="ToolTipService.ShowDuration" Value="100000"/>
+                </Style>
+            </Grid.Resources>
 		   <TabControl Width="Auto" Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs">
                 <TabItem Header="Main" x:Name="tab_main">
                     <StackPanel Width="386" Height="Auto">

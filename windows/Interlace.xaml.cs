@@ -89,14 +89,15 @@ namespace XviD4PSP
                     else if (dtype == DeinterlaceType.YadifModEDI) tltp = regular + " YadifMod+NNEDI2 (slow)";
                     else if (dtype == DeinterlaceType.TDeint) tltp = regular + " TDeint";
                     else if (dtype == DeinterlaceType.TDeintEDI) tltp = regular + " TDeint+EEDI2 (very slow)";
-                    else if (dtype == DeinterlaceType.LeakKernelDeint) tltp = regular + " LeakKernelDeint";
                     else if (dtype == DeinterlaceType.TomsMoComp) tltp = regular + " TomsMoComp";
+                    else if (dtype == DeinterlaceType.LeakKernelDeint) tltp = regular + " LeakKernelDeint";
                     else if (dtype == DeinterlaceType.FieldDeinterlace) tltp = regular + " FieldDeinterlace (blending)";
-                    else if (dtype == DeinterlaceType.SmoothDeinterlace) { cont = "SmoothDeinterlace (x2)"; tltp = doubling + " SmoothDeinterlace"; }
+                    else if (dtype == DeinterlaceType.QTGMC) { tltp = Languages.Translate("Deinterlacing with denoising using QTGMC (see Settings)"); }
+                    else if (dtype == DeinterlaceType.QTGMC_2) { cont = "QTGMC (x2)"; tltp = Languages.Translate("Deinterlacing with doubling frame rate and denoising using QTGMC (see Settings)"); }
                     else if (dtype == DeinterlaceType.MCBob) { cont = "MCBob (x2)"; tltp = doubling + " MCBob (very slow)"; }
-                    else if (dtype == DeinterlaceType.QTGMC) { cont = "QTGMC (x2)"; tltp = Languages.Translate("Deinterlacing with doubling frame rate and denoising using QTGMC (see Settings)"); }
                     else if (dtype == DeinterlaceType.NNEDI) { cont = "NNEDI (x2)"; tltp = doubling + " NNEDI2"; }
                     else if (dtype == DeinterlaceType.YadifModEDI2) { cont = "YadifModEDI (x2)"; tltp = doubling + " YadifMod+NNEDI2"; }
+                    else if (dtype == DeinterlaceType.SmoothDeinterlace) { cont = "SmoothDeinterlace (x2)"; tltp = doubling + " SmoothDeinterlace"; }
                     else if (dtype == DeinterlaceType.TIVTC) tltp = telecine + " TIVTC\r\n29.970->23.976";
                     else if (dtype == DeinterlaceType.TIVTC_TDeintEDI) { cont = "TIVTC+TDeintEDI"; tltp = telecine + " TIVTC+TDeint+NNEDI2\r\n29.970->23.976"; }
                     else if (dtype == DeinterlaceType.TIVTC_YadifModEDI) { cont = "TIVTC+YadifModEDI"; tltp = telecine + " TIVTC+YadifMod+NNEDI2\r\n29.970->23.976"; }
@@ -150,6 +151,7 @@ namespace XviD4PSP
                 foreach (AviSynthScripting.FramerateModifers ratechangers in Enum.GetValues(typeof(AviSynthScripting.FramerateModifers)))
                     combo_framerateconvertor.Items.Add(new ComboBoxItem() { Content = ratechangers });
                 combo_framerateconvertor.SelectedValue = m.frameratemodifer;
+                CheckFramerateModifierIsApplied();
             }
             else
             {
@@ -253,6 +255,8 @@ namespace XviD4PSP
         {
             if (m != null)
             {
+                CheckFramerateModifierIsApplied();
+
                 m = AviSynthScripting.CreateAutoAviSynthScript(m);
                 p.m = m.Clone();
                 p.Refresh(m.script);
@@ -332,8 +336,6 @@ namespace XviD4PSP
                     m = Calculate.UpdateOutFramerate(m);
                     SetFramerateCombo(m.outframerate);
 
-                    Refresh();
-
                     //обновляем форму
                     combo_fieldorder.SelectedItem = GetFixedFieldString(m.fieldOrder.ToString());
                     combo_sourcetype.SelectedItem = GetFixedSTypeString(m.interlace.ToString());
@@ -344,6 +346,8 @@ namespace XviD4PSP
                     //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
                     m = Calculate.UpdateOutFrames(m);
                     m.outfilesize = Calculate.GetEncodingSize(m);
+
+                    Refresh();
                 }
 
                 //Выводим результаты
@@ -407,6 +411,7 @@ namespace XviD4PSP
                         m.deinterlace == DeinterlaceType.NNEDI ||
                         m.deinterlace == DeinterlaceType.MCBob ||
                         m.deinterlace == DeinterlaceType.QTGMC ||
+                        m.deinterlace == DeinterlaceType.QTGMC_2 ||
                         m.deinterlace == DeinterlaceType.TFM)
                         Settings.Deint_Interlaced = m.deinterlace;
                 }
@@ -468,6 +473,8 @@ namespace XviD4PSP
                     //обновляем конечное колличество фреймов, с учётом режима деинтерелейса
                     m = Calculate.UpdateOutFrames(m);
                     m.outfilesize = Calculate.GetEncodingSize(m);
+
+                    CheckFramerateModifierIsApplied();
 
                     p.m = m.Clone();
                     p.Refresh(m.script);
@@ -547,19 +554,8 @@ namespace XviD4PSP
                 combo_deinterlace.SelectedValue = m.deinterlace;
                 SetFramerateCombo(m.outframerate);
 
-                //обновляем скрипт
-                m = AviSynthScripting.CreateAutoAviSynthScript(m);
-
-                p.m = m.Clone();
-                p.Refresh(m.script);
-                this.Focus();
+                Refresh();
             }
-        }
-
-        private void ErrorExeption(string message)
-        {
-            Message mes = new Message(this);
-            mes.ShowMessage(message, Languages.Translate("Error"));
         }
 
         private void button_fullscreen_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -629,7 +625,8 @@ namespace XviD4PSP
             if ((combo_qtgmc_preset.IsDropDownOpen || combo_qtgmc_preset.IsSelectionBoxHighlighted) && combo_qtgmc_preset.SelectedItem != null)
             {
                 Settings.QTGMC_Preset = combo_qtgmc_preset.SelectedItem.ToString();
-                if (m != null && m.deinterlace == DeinterlaceType.QTGMC) Refresh();
+                if (m != null && (m.deinterlace == DeinterlaceType.QTGMC || m.deinterlace == DeinterlaceType.QTGMC_2))
+                    Refresh();
             }
         }
 
@@ -638,7 +635,8 @@ namespace XviD4PSP
             if (num_qtgmc_sharp.IsAction)
             {
                 Settings.QTGMC_Sharpness = (double)num_qtgmc_sharp.Value;
-                if (m != null && m.deinterlace == DeinterlaceType.QTGMC) Refresh();
+                if (m != null && (m.deinterlace == DeinterlaceType.QTGMC || m.deinterlace == DeinterlaceType.QTGMC_2))
+                    Refresh();
             }
         }
 
@@ -704,6 +702,18 @@ namespace XviD4PSP
             if (!combo_framerate.Items.Contains(framerate))
                 combo_framerate.Items.Add(framerate);
             combo_framerate.SelectedItem = framerate;
+        }
+
+        private void CheckFramerateModifierIsApplied()
+        {
+            if (m.outframerate != Calculate.GetRawOutFramerate(m))
+            {
+                combo_framerateconvertor.Tag = null;
+            }
+            else
+            {
+                combo_framerateconvertor.Tag = "Inactive";
+            }
         }
 	}
 }

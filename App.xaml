@@ -50,7 +50,11 @@
 									<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
 									<Setter Property="Background" Value="#FFF4F4F4"/>
 								</Trigger>
-								<Trigger Property="IsGrouping" Value="true">
+                                <Trigger Property="Tag" Value="Inactive">
+                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                    <Setter Property="Background" Value="#FFF4F4F4"/>
+                                </Trigger>
+                                <Trigger Property="IsGrouping" Value="true">
 									<Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
 								</Trigger>
 							</ControlTemplate.Triggers>

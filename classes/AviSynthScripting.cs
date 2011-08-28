@@ -174,7 +174,7 @@ namespace XviD4PSP
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
            }
-           else if (m.deinterlace == DeinterlaceType.QTGMC)
+           else if (m.deinterlace == DeinterlaceType.QTGMC || m.deinterlace == DeinterlaceType.QTGMC_2)
            {
                m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\QTGMC.avs\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
@@ -331,44 +331,7 @@ namespace XviD4PSP
 
            //Определяем необходимость смены частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
            bool ApplyFramerateModifier = false, IsAssumeFramerateConvertion = false;
-           if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
-               m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI || m.deinterlace == DeinterlaceType.TDecimate ||
-               m.deinterlace == DeinterlaceType.TDecimate_23)
-           {
-               if (m.outframerate != "23.976")
-               {
-                   ApplyFramerateModifier = true;
-                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
-               }
-           }
-           else if (m.deinterlace == DeinterlaceType.TDecimate_24)
-           {
-               if (m.outframerate != "24.000")
-               {
-                   ApplyFramerateModifier = true;
-                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
-               }
-           }
-           else if (m.deinterlace == DeinterlaceType.TDecimate_25)
-           {
-               if (m.outframerate != "25.000")
-               {
-                   ApplyFramerateModifier = true;
-                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
-               }
-           }
-           else if (m.deinterlace == DeinterlaceType.MCBob || m.deinterlace == DeinterlaceType.NNEDI ||
-           m.deinterlace == DeinterlaceType.YadifModEDI2 || m.deinterlace == DeinterlaceType.QTGMC ||
-           m.deinterlace == DeinterlaceType.SmoothDeinterlace)
-           {
-               double outframerate = Calculate.ConvertStringToDouble(m.outframerate);
-               if (outframerate != Calculate.ConvertStringToDouble(m.inframerate) * 2.0)
-               {
-                   ApplyFramerateModifier = true;
-                   IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
-               }
-           }
-           else if (m.inframerate != m.outframerate)
+           if (m.outframerate != Calculate.GetRawOutFramerate(m))
            {
                ApplyFramerateModifier = true;
                IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
@@ -510,7 +473,7 @@ namespace XviD4PSP
            }
            else if (m.deinterlace == DeinterlaceType.TDeint)
            {
-               m.script += "TDeint(order=" + order + ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ?
+               m.script += "TDeint(order=" + order + ", slow=2, mthreshL=5, mthreshC=5" + ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ?
                    ", full=false, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI : "") + ")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.TDeintEDI)
@@ -578,6 +541,10 @@ namespace XviD4PSP
                m.script += "YadifMod(order=" + order + ", mode=1, edeint=nnedi3(field=" + field + "))" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.QTGMC)
+           {
+               m.script += "QTGMC(Preset=\"" + Settings.QTGMC_Preset + "\", Sharpness=" + Calculate.ConvertDoubleToPointString(Settings.QTGMC_Sharpness, 1) + ", FPSDivisor=2)\r\n";
+           }
+           else if (m.deinterlace == DeinterlaceType.QTGMC_2)
            {
                m.script += "QTGMC(Preset=\"" + Settings.QTGMC_Preset + "\", Sharpness=" + Calculate.ConvertDoubleToPointString(Settings.QTGMC_Sharpness, 1) + ")\r\n";
            }

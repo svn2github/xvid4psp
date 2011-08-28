@@ -31,8 +31,8 @@ namespace XviD4PSP
 
     public enum DeinterlaceType
     {
-        Disabled, TFM, Yadif, YadifModEDI, TDeint, TDeintEDI, TomsMoComp, LeakKernelDeint, FieldDeinterlace, QTGMC, MCBob, NNEDI, YadifModEDI2,
-        SmoothDeinterlace, TIVTC, TIVTC_TDeintEDI, TIVTC_YadifModEDI, TDecimate, TDecimate_23, TDecimate_24, TDecimate_25
+        Disabled, TFM, Yadif, YadifModEDI, TDeint, TDeintEDI, TomsMoComp, LeakKernelDeint, FieldDeinterlace, QTGMC, QTGMC_2, MCBob, NNEDI,
+        YadifModEDI2, SmoothDeinterlace, TIVTC, TIVTC_TDeintEDI, TIVTC_YadifModEDI, TDecimate, TDecimate_23, TDecimate_24, TDecimate_25
     };
 
     public enum Detecting { Interlace, Fields };

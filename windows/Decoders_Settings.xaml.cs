@@ -238,12 +238,6 @@ namespace XviD4PSP
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_dss2, ToolTip = tltp_dss2 });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_ffms, ToolTip = tltp_ffms });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_qts, ToolTip = tltp_qts });
-
-            //Продляем действие тултипов
-            ToolTipService.SetShowDuration(vcombo, 100000);
-            foreach (ComboBoxItem item in vcombo.Items)
-                ToolTipService.SetShowDuration(item, 100000);
-
             vcombo.SelectedIndex = (int)vcombo.Tag;
             vdecoders_loaded = true;
         }
@@ -264,12 +258,6 @@ namespace XviD4PSP
             acombo.Items.Add(new ComboBoxItem() { Content = dec_bass, ToolTip = tltp_bass });
             acombo.Items.Add(new ComboBoxItem() { Content = dec_ffas, ToolTip = tltp_ffas });
             acombo.Items.Add(new ComboBoxItem() { Content = dec_dss, ToolTip = tltp_dss });
-
-            //Продляем действие тултипов
-            ToolTipService.SetShowDuration(acombo, 100000);
-            foreach (ComboBoxItem item in acombo.Items)
-                ToolTipService.SetShowDuration(item, 100000);
-
             acombo.SelectedIndex = (int)acombo.Tag;
             adecoders_loaded = true;
         }
