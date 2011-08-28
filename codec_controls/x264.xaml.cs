@@ -23,11 +23,6 @@ namespace XviD4PSP
         public enum Profiles { Auto = 0, Baseline, Main, High, High10 }
         private ArrayList good_cli = null;
 
-        //Затемнения
-        private double disabled_numeric = 0.7;
-        private double disabled_combobox = 0.6;
-        private double disabled_checkbox = 0.6;
-
         public x264(Massive mass, VideoEncoding VideoEncWindow, MainWindow parent)
         {
             this.InitializeComponent();
@@ -506,7 +501,7 @@ namespace XviD4PSP
             num_max_quant.IsEnabled = !m.x264options.extra_cli.Contains("--qpmax ");
             num_step_quant.IsEnabled = !m.x264options.extra_cli.Contains("--qpstep ");
             num_qcomp.IsEnabled = !m.x264options.extra_cli.Contains("--qcomp ");
-            num_chroma_qp.IsEnabled = !m.x264options.extra_cli.Contains("--qp-chroma-offset ");
+            num_chroma_qp.IsEnabled = !m.x264options.extra_cli.Contains("--chroma-qp-offset ");
             combo_nal_hrd.IsEnabled = !m.x264options.extra_cli.Contains("--nal-hrd ");
             check_aud.IsEnabled = !m.x264options.extra_cli.Contains("--aud");
             num_ratio_ip.IsEnabled = !m.x264options.extra_cli.Contains("--ipratio ");
@@ -691,7 +686,7 @@ namespace XviD4PSP
             num_vbv_buf.ToolTip = "Set size of the VBV buffer, kbit (--vbv-bufsize, default: " + def.vbv_bufsize + ")";
             num_vbv_init.ToolTip = "Initial VBV buffer occupancy (--vbv-init, default: " + def.vbv_init.ToString(cult_info) + ")";
             num_qcomp.ToolTip = "QP curve compression (--qcomp, default: " + def.qcomp.ToString(cult_info) + ")\r\n0.00 => CBR, 1.00 => CQP";
-            num_chroma_qp.ToolTip = "QP difference between chroma and luma (--qp-chroma-offset, default: " + def.qp_offset + ")";
+            num_chroma_qp.ToolTip = "QP difference between chroma and luma (--chroma-qp-offset, default: " + def.qp_offset + ")";
             combo_threads_count.ToolTip = "Set number of threads for encoding (--threads, default: Auto)\r\n" +
                 "Auto = 1.5 * logical_processors\r\n1+1 = --threads 1 --thread-input";
             check_slow_first.ToolTip = "Enable slow 1-st pass for multipassing encoding (off by default)" + Environment.NewLine + "(--slow-firstpass if checked)";
@@ -1513,9 +1508,9 @@ namespace XviD4PSP
             }
 
             if (m.x264options.subme < 6)
-                num_psyrdo.Opacity = disabled_numeric;
+                num_psyrdo.Tag = "Inactive";
             else
-                num_psyrdo.Opacity = 1;
+                num_psyrdo.Tag = null;
         }
 
         private void combo_me_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1563,19 +1558,19 @@ namespace XviD4PSP
 
             if (m.x264options.bframes > 0)
             {
-                combo_bpyramid_mode.Opacity = (m.x264options.bframes > 1) ? 1 : disabled_combobox;
-                combo_bframe_mode.Opacity = 1;
-                combo_badapt_mode.Opacity = 1;
-                combo_open_gop.Opacity = 1;
-                check_weightedb.Opacity = 1;
+                combo_bpyramid_mode.Tag = (m.x264options.bframes > 1) ? null : "Inactive";
+                combo_bframe_mode.Tag = null;
+                combo_badapt_mode.Tag = null;
+                combo_open_gop.Tag = null;
+                check_weightedb.Tag = null;
             }
             else
             {
-                combo_bpyramid_mode.Opacity = disabled_combobox;
-                combo_bframe_mode.Opacity = disabled_combobox;
-                combo_badapt_mode.Opacity = disabled_combobox;
-                combo_open_gop.Opacity = disabled_combobox;
-                check_weightedb.Opacity = disabled_checkbox;
+                combo_bpyramid_mode.Tag = "Inactive";
+                combo_bframe_mode.Tag = "Inactive";
+                combo_badapt_mode.Tag = "Inactive";
+                combo_open_gop.Tag = "Inactive";
+                check_weightedb.Tag = "Inactive";
             }
         }
 
@@ -1689,9 +1684,9 @@ namespace XviD4PSP
             }
 
             if (m.x264options.trellis > 0)
-                num_psytrellis.Opacity = 1;
+                num_psytrellis.Tag = null;
             else
-                num_psytrellis.Opacity = disabled_numeric;
+                num_psytrellis.Tag = "Inactive";
         }
 
         private void combo_ref_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -1704,9 +1699,9 @@ namespace XviD4PSP
             }
 
             if (m.x264options.reference < 2)
-                check_mixed_ref.Opacity = disabled_checkbox;
+                check_mixed_ref.Tag = "Inactive";
             else
-                check_mixed_ref.Opacity = 1;
+                check_mixed_ref.Tag = null;
         }
 
         private void num_min_quant_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)

@@ -13,7 +13,18 @@
         </Grid.ColumnDefinitions>
         <Border BorderThickness="1,1,1,1" BorderBrush="Gray" Margin="0,0,14.75,0" Grid.RowSpan="2" HorizontalAlignment="Stretch" d:LayoutOverrides="HorizontalAlignment">
             <!--Bind the TextBlock to the Value property-->
-            <TextBox x:Name="txt_box" Width="Auto" Height="Auto" VerticalContentAlignment="Center" Text="{Binding Path=Value, ElementName=userControl, Mode=Default}" TextWrapping="Wrap" TextChanged="TextBox_TextChanged" KeyUp="TextBox_KeyUp" MouseWheel="TextBox_MouseWheel"/>
+            <TextBox x:Name="txt_box" Tag="{Binding Path=Tag, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:NumericUpDown}}}" Width="Auto" Height="Auto" VerticalContentAlignment="Center" Text="{Binding Path=Value, ElementName=userControl, Mode=Default}" TextWrapping="Wrap" TextChanged="TextBox_TextChanged" KeyUp="TextBox_KeyUp" MouseWheel="TextBox_MouseWheel">
+                <TextBox.Style>
+                    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="{x:Type TextBox}">
+                        <Style.Triggers>
+                            <Trigger Property="Tag" Value="Inactive">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                <Setter Property="Background" Value="#FFEAEAEA"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
         </Border>
         <RepeatButton x:Name="upButton" Focusable="False" Click="upButton_Click" Grid.Row="0" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Right" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient}">
             <Path Height="4" Fill="#FFFFFFFF" Stretch="Fill" Stroke="{x:Null}" Data="M175.49994,160.88001 C227.12474,220.02856 227.12474,220.03166 227.12474,220.03166 L278.74953,160.92" Width="8" RenderTransformOrigin="0.5,0.5">

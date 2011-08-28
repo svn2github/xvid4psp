@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.258.0 (28.08.2011), main changes:
+﻿XviD4PSP 5.10.259.0 (28.08.2011), main changes:
 
+>>> (r259) x264 settings window: highlighting as "inactive" for some user controls instead of changing
+           theirs opacity (that was added in r245).
 >>> (r258) Fixed FOURCC for HUFF.
 >>> (r257) Settings for TDeint was changed (req. by Tempter57).
 >>> (r257) Added QTGMC without doubling the framerate (req. by buffometer).

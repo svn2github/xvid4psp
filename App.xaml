@@ -123,7 +123,7 @@
 						<ControlTemplate TargetType="{x:Type CheckBox}">
 							<BulletDecorator SnapsToDevicePixels="true" Background="Transparent">
 								<BulletDecorator.Bullet>
-									<Microsoft_Windows_Themes:BulletChrome Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" IsChecked="{TemplateBinding IsChecked}" RenderMouseOver="{TemplateBinding IsMouseOver}" RenderPressed="{TemplateBinding IsPressed}"/>
+									<Microsoft_Windows_Themes:BulletChrome x:Name="Bullet" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" IsChecked="{TemplateBinding IsChecked}" RenderMouseOver="{TemplateBinding IsMouseOver}" RenderPressed="{TemplateBinding IsPressed}"/>
 								</BulletDecorator.Bullet>
 								<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
 							</BulletDecorator>
@@ -135,7 +135,10 @@
 								<Trigger Property="IsEnabled" Value="false">
 									<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
 								</Trigger>
-							</ControlTemplate.Triggers>
+                                <Trigger Property="Tag" Value="Inactive">
+                                    <Setter Property="IsEnabled" TargetName="Bullet" Value="false"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
 						</ControlTemplate>
 					</Setter.Value>
 				</Setter>
