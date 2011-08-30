@@ -27,9 +27,8 @@
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
-                                    <Style TargetType="{x:Type ComboBoxItem}">
+                                    <Style BasedOn="{StaticResource {x:Type ComboBoxItem}}" TargetType="{x:Type ComboBoxItem}">
                                         <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"/>
-                                        <Setter Property="ToolTipService.ShowDuration" Value="100000"/>
                                     </Style>
                                     <Style TargetType="{x:Type ListViewItem}">
                                         <Setter Property="Template" Value="{DynamicResource ListViewItemNoAero}"/>
@@ -61,7 +60,7 @@
                                             <GridViewColumn x:Name="vdecoder" Width="150">
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" ToolTipService.ShowDuration="100000" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="vcombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
+                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="vcombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
                                             </GridViewColumn>
@@ -127,9 +126,8 @@
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
-                                    <Style TargetType="{x:Type ComboBoxItem}">
+                                    <Style BasedOn="{StaticResource {x:Type ComboBoxItem}}" TargetType="{x:Type ComboBoxItem}">
                                         <Setter Property="Background" Value="{Binding Path=Background, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListView}}}"/>
-                                        <Setter Property="ToolTipService.ShowDuration" Value="100000"/>
                                     </Style>
                                     <Style TargetType="{x:Type ListViewItem}">
                                         <Setter Property="Template" Value="{DynamicResource ListViewItemNoAero}"/>
@@ -161,7 +159,7 @@
                                             <GridViewColumn x:Name="adecoder" Width="150">
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" ToolTipService.ShowDuration="100000" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="acombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
+                                                        <ComboBox Style="{DynamicResource ComboBoxBlack}" Tag="{Binding Path=Index}" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" Background="#00000000" Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" IsHitTestVisible="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" Margin="-6, 0, -6, 0" Initialized="acombo_Initialized" SelectionChanged="combo_decoder_SelectionChanged" DropDownClosed="combo_Closed"/>
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
                                             </GridViewColumn>
@@ -180,6 +178,17 @@
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
                                     <CheckBox x:Name="check_drc_ac3" Width="190" Height="Auto" Content="NicAC3Source +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_ac3_Click"/>
                                     <CheckBox x:Name="check_drc_dts" Width="Auto" Height="Auto" Content="NicDTSSource +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_dts_Click"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_tracks" Header="Track selection" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_tracks_manual" Width="Auto" Height="Auto" Content="Manual" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,10,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_tracks_Click"/>
+                                    <CheckBox x:Name="check_tracks_language" Width="Auto" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="16,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_tracks_Click"/>
+                                    <ComboBox x:Name="combo_tracks_language" Width="110" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="3,0,10,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_tracks_language_SelectionChanged" IsTextSearchEnabled="False" KeyDown="combo_tracks_language_KeyDown" LostFocus="combo_tracks_language_LostFocus"/>
+                                    <CheckBox x:Name="check_tracks_number" Width="Auto" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="16,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_tracks_Click"/>
+                                    <ComboBox x:Name="combo_tracks_number" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="3,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_tracks_number_SelectionChanged"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>

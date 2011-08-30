@@ -16,6 +16,7 @@ namespace XviD4PSP
         public enum AfterImportActions { Nothing = 1, Middle, Play }
         public enum AudioEncodingModes { CBR = 1, VBR, ABR, TwoPass }
         public enum AutoDeinterlaceModes { AllFiles = 1, MPEGs, Disabled }
+        public enum ATrackModes { Manual = 0, Language, Number }
 
         private static void SetString(string Key, string Value)
         {
@@ -2848,6 +2849,65 @@ namespace XviD4PSP
             set
             {
                 SetBool("AutoAbortEncoding", value);
+            }
+        }
+
+        //Режим автовыбора звуковой дорожки
+        public static ATrackModes DefaultATrackMode
+        {
+            get
+            {
+                object value = GetValue("DefaultATrackMode");
+                if (value == null)
+                    return ATrackModes.Manual;
+                else
+                    return (ATrackModes)Enum.Parse(typeof(ATrackModes), value.ToString(), true);
+            }
+            set
+            {
+                SetString("DefaultATrackMode", value.ToString());
+            }
+        }
+
+        //Язык дорожки для автовыбора
+        public static string DefaultATrackLang
+        {
+            get
+            {
+                object value = GetValue("DefaultATrackLang");
+                if (value == null)
+                {
+                    return "English";
+                }
+                else
+                {
+                    return Convert.ToString(value);
+                }
+            }
+            set
+            {
+                SetString("DefaultATrackLang", value);
+            }
+        }
+
+        //Номер дорожки для автовыбора (отсчет с 1)
+        public static int DefaultATrackNum
+        {
+            get
+            {
+                object value = GetValue("DefaultATrackNum");
+                if (value == null)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("DefaultATrackNum", value);
             }
         }
     }

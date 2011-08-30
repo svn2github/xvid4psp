@@ -1324,38 +1324,78 @@ namespace XviD4PSP
                     if (ffindex.m == null) return;
                 }
 
-                //Извлечение звука (1-й трек) для FFmpegSource2 и DirectShowSource, для DirectShowSource2 звук будет извлечен в Caching
-                if (x.inaudiostreams.Count > 0 && Settings.EnableAudio && (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 &&
-                    !Settings.FFMS_Enable_Audio || x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio))
+                if (x.inaudiostreams.Count > 0 && Settings.EnableAudio)
                 {
-                    AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
-                    if (instream.audiopath == null)
+                    //Автовыбор трека
+                    if (x.inaudiostreams.Count > 1)
                     {
-                        string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
-                        string outpath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
-
-                        //удаляем старый файл
-                        SafeDelete(outpath);
-
-                        //извлекаем новый файл
-                        if (outext == ".wav")
+                        if (Settings.DefaultATrackMode == Settings.ATrackModes.Language)
                         {
-                            Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
-                            if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
+                            //По языку
+                            for (int i = 0; i < x.inaudiostreams.Count; i++)
+                            {
+                                if (((AudioStream)x.inaudiostreams[i]).language.ToLower() == Settings.DefaultATrackLang.ToLower())
+                                {
+                                    x.inaudiostream = i;
+                                    break;
+                                }
+                            }
                         }
-                        else
+                        else if (Settings.DefaultATrackMode == Settings.ATrackModes.Number)
                         {
-                            Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, outpath);
-                            if (dem.IsErrors) throw new Exception(dem.error_message);
+                            //По номеру
+                            x.inaudiostream = Settings.DefaultATrackNum - 1;
+                            if (x.inaudiostream >= x.inaudiostreams.Count)
+                                x.inaudiostream = 0;
                         }
 
-                        //проверка на удачное завершение
-                        if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                        AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
+
+                        //Только FFmpegSource2 умеет переключать треки, для него их можно не извлекать
+                        if (instream.audiopath == null && instream.decoder == 0 && x.inaudiostream > 0 &&
+                            !(x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && Settings.FFMS_Enable_Audio))
                         {
-                            instream.audiopath = outpath;
-                            instream.audiofiles = new string[] { outpath };
+                            string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
+                            instream.audiopath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
+                            instream.audiofiles = new string[] { instream.audiopath };
                             instream = Format.GetValidADecoder(instream);
-                            deletefiles.Add(outpath);
+                        }
+                    }
+
+                    //Извлечение звука для FFmpegSource2 и DirectShowSource, для DirectShowSource2 звук будет извлечен в Caching (тут, если это автовыбор)
+                    if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && !Settings.FFMS_Enable_Audio ||
+                        x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio||
+                        ((AudioStream)x.inaudiostreams[x.inaudiostream]).audiopath != null)
+                    {
+                        AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
+                        if (instream.audiopath == null || !File.Exists(instream.audiopath))
+                        {
+                            string outpath = (instream.audiopath == null) ? Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream +
+                                Format.GetValidRAWAudioEXT(instream.codecshort) : instream.audiopath;
+
+                            //удаляем старый файл
+                            SafeDelete(outpath);
+
+                            //извлекаем новый файл
+                            if (Path.GetExtension(outpath) == ".wav")
+                            {
+                                Decoder dec = new Decoder(x, Decoder.DecoderModes.DecodeAudio, outpath);
+                                if (dec.IsErrors) throw new Exception("Decode to WAV: " + dec.error_message);
+                            }
+                            else
+                            {
+                                Demuxer dem = new Demuxer(x, Demuxer.DemuxerMode.ExtractAudio, outpath);
+                                if (dem.IsErrors) throw new Exception(dem.error_message);
+                            }
+
+                            //проверка на удачное завершение
+                            if (File.Exists(outpath) && new FileInfo(outpath).Length != 0)
+                            {
+                                instream.audiopath = outpath;
+                                instream.audiofiles = new string[] { outpath };
+                                instream = Format.GetValidADecoder(instream);
+                                deletefiles.Add(outpath);
+                            }
                         }
                     }
                 }
@@ -1373,7 +1413,7 @@ namespace XviD4PSP
                 x = FillAudio(x);
 
                 //выбираем трек
-                if (x.inaudiostreams.Count > 1 && Settings.EnableAudio)
+                if (x.inaudiostreams.Count > 1 && Settings.EnableAudio && Settings.DefaultATrackMode == Settings.ATrackModes.Manual)
                 {
                     AudioOptions ao = new AudioOptions(x, this, AudioOptions.AudioOptionsModes.TracksOnly);
                     if (ao.m == null) return;
@@ -2241,6 +2281,7 @@ namespace XviD4PSP
                     button_set_end.Content = Languages.Translate("Set End");
                     button_apply_trim.Content = Languages.Translate("Apply Trim");
                 }
+                ToolTipService.SetShowDuration(button_apply_trim, 100000);
                 textbox_start.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", Languages.Translate("Set Start")) +
                     "\r\n" + Languages.Translate("If you leave this field empty, then current frame number will be entered automatically.");
                 textbox_end.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", Languages.Translate("Set End")) +

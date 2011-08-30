@@ -266,15 +266,6 @@ namespace XviD4PSP
 
         private void SetTooltips()
         {
-            ToolTipService.SetShowDuration(button_analyse, 100000);
-            ToolTipService.SetShowDuration(combo_deinterlace, 100000);
-            ToolTipService.SetShowDuration(combo_framerateconvertor, 100000);
-            ToolTipService.SetShowDuration(check_iscombed_mark, 100000);
-            ToolTipService.SetShowDuration(num_iscombed_cthresh, 100000);
-            ToolTipService.SetShowDuration(num_iscombed_mi, 100000);
-            ToolTipService.SetShowDuration(check_original_fps, 100000);
-            ToolTipService.SetShowDuration(check_nonstandard_fps, 100000);
-
             foreach (ComboBoxItem item in combo_framerateconvertor.Items)
             {
                 if (((AviSynthScripting.FramerateModifers)item.Content) == AviSynthScripting.FramerateModifers.AssumeFPS)
@@ -353,6 +344,7 @@ namespace XviD4PSP
                 //Выводим результаты
                 if (sd.results != null)
                 {
+                    ToolTipService.SetShowDuration(button_analyse, 100000);
                     button_analyse.ToolTip = sd.results;
                 }
             }

@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.259.0 (28.08.2011), main changes:
+﻿XviD4PSP 5.10.260.0 (30.08.2011), main changes:
 
+>>> (r260) Tooltip`s the "time of a life" prolonged for mostly all user controls.
+>>> (r260) Added ability to auto select the audio track during the opening of the file (based on its
+           language or ordinal number). "Audio->Decoding->Track selection", disabled by default (req. by Tyler).
 >>> (r259) x264 settings window: highlighting as "inactive" for some user controls instead of changing
            theirs opacity (that was added in r245).
 >>> (r258) Fixed FOURCC for HUFF.

@@ -75,7 +75,10 @@
 			</Border>
 		</Grid>
 		<ControlTemplate.Triggers>
-			<Trigger Property="IsPressed" Value="True">
+            <Trigger Property="IsEnabled" Value="True">
+                <Setter Property="ToolTipService.ShowDuration" Value="10000"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
 				<Setter Property="Opacity" TargetName="shine" Value="0.4"/>
 				<Setter Property="Background" TargetName="border" Value="#CC000000"/>
 				<Setter Property="Visibility" TargetName="glow" Value="Hidden"/>
@@ -827,6 +830,9 @@
 			</Border>
 		</Grid>
 		<ControlTemplate.Triggers>
+            <Trigger Property="IsEnabled" Value="True">
+                <Setter Property="ToolTipService.ShowDuration" Value="10000"/>
+            </Trigger>
 			<Trigger Property="IsPressed" Value="True">
 				<Setter Property="Opacity" TargetName="shine" Value="0.4"/>
 				<Setter Property="Background" TargetName="border" Value="#CC000000"/>
@@ -844,6 +850,7 @@
 	</ControlTemplate>
 
     <Style x:Key="ComboBoxBlack" TargetType="{x:Type ComboBox}">
+        <Setter Property="ToolTipService.ShowDuration" Value="20000"/>
         <Setter Property="FocusVisualStyle" Value="{StaticResource ComboBoxFocusVisual}"/>
         <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>
         <Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
@@ -940,6 +947,7 @@
     </Style>
 
     <Style x:Key="ComboBoxGlass" TargetType="{x:Type ComboBox}">
+        <Setter Property="ToolTipService.ShowDuration" Value="20000"/>
 		<Setter Property="FocusVisualStyle" Value="{StaticResource ComboBoxFocusVisual}"/>
 		<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>
 		<Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
@@ -1119,6 +1127,7 @@
     </LinearGradientBrush>
 
     <Style x:Key="ComboBoxItemBlack" TargetType="ComboBoxItem">
+        <Setter Property="ToolTipService.ShowDuration" Value="100000"/>
         <Setter Property="SnapsToDevicePixels" Value="true"/>
         <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="Template">

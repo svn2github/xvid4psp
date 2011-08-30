@@ -135,8 +135,8 @@ namespace XviD4PSP
                     combo_samplerate.Items.Add(f);
 
                 combo_converter.Items.Clear();
-                foreach (string ratechangers in Enum.GetNames(typeof(AviSynthScripting.SamplerateModifers)))
-                    combo_converter.Items.Add(ratechangers);
+                foreach (AviSynthScripting.SamplerateModifers ratechangers in Enum.GetValues(typeof(AviSynthScripting.SamplerateModifers)))
+                    combo_converter.Items.Add(new ComboBoxItem() { Content = ratechangers });
 
                 //прописываем громкость
                 combo_volume.Items.Clear();
@@ -216,7 +216,7 @@ namespace XviD4PSP
 
             num_delay.Value = (decimal)outstream.delay;
             combo_samplerate.SelectedItem = outstream.samplerate;
-            combo_converter.SelectedItem = m.sampleratemodifer.ToString();
+            combo_converter.SelectedValue = m.sampleratemodifer;
             combo_volume.SelectedItem = m.volume;
             combo_accurate.SelectedItem = m.volumeaccurate;
             combo_mixing.SelectedItem = EnumMixingToString(instream.channelconverter);
@@ -264,20 +264,23 @@ namespace XviD4PSP
 
         private void SetTooltips()
         {
-            if (m.sampleratemodifer == AviSynthScripting.SamplerateModifers.AssumeSampleRate)
+            foreach (ComboBoxItem item in combo_converter.Items)
             {
-                combo_converter.ToolTip = Languages.Translate("AssumeSampleRate changes the sample rate (playback speed) of the current sample.") + 
+                if (((AviSynthScripting.SamplerateModifers)item.Content) == AviSynthScripting.SamplerateModifers.AssumeSampleRate)
+                {
+                    item.ToolTip = Languages.Translate("AssumeSampleRate changes the sample rate (playback speed) of the current sample.") +
                     Environment.NewLine + Languages.Translate("If used without AssumeFPS, it will cause desync with the video.");
-            }
-            if (m.sampleratemodifer == AviSynthScripting.SamplerateModifers.SSRC)
-            {
-                combo_converter.ToolTip = Languages.Translate("SSRC resampling. Audio is always converted to float.") +
+                }
+                else if (((AviSynthScripting.SamplerateModifers)item.Content) == AviSynthScripting.SamplerateModifers.SSRC)
+                {
+                    item.ToolTip = Languages.Translate("SSRC resampling. Audio is always converted to float.") +
                     Environment.NewLine + Languages.Translate("This filter will result in better audio quality than ResampleAudio.") +
                     Environment.NewLine + Languages.Translate("It uses SSRC by Naoki Shibata, which offers the best resample quality available.");
-            }
-            if (m.sampleratemodifer == AviSynthScripting.SamplerateModifers.ResampleAudio)
-            {
-                combo_converter.ToolTip = Languages.Translate("ResampleAudio performs a high-quality change of audio sample rate.");
+                }
+                else if (((AviSynthScripting.SamplerateModifers)item.Content) == AviSynthScripting.SamplerateModifers.ResampleAudio)
+                {
+                    item.ToolTip = Languages.Translate("ResampleAudio performs a high-quality change of audio sample rate.");
+                }
             }
 
             textbox_apath.ToolTip = Languages.Translate("Path for external audio file");
@@ -301,7 +304,7 @@ namespace XviD4PSP
                 //передаём активный трек на выход
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
-                //Только FFmpegSource умеет переключать треки
+                //Только FFmpegSource2 умеет переключать треки, для него их можно не извлекать
                 if (instream.audiopath == null && instream.decoder == 0 && m.inaudiostream > 0 &&
                     !(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && Settings.FFMS_Enable_Audio))
                 {
@@ -704,7 +707,7 @@ namespace XviD4PSP
                     Message message = new Message(this);
                     message.ShowMessage(Languages.Translate("SSRC can`t convert") + ": " + instream.samplerate + " > " + outstream.samplerate + "!",
                         Languages.Translate("Warning"), Message.MessageStyle.Ok);
-                    combo_converter.SelectedItem = m.sampleratemodifer.ToString();
+                    combo_converter.SelectedValue = m.sampleratemodifer;
                 }
 
                 SetInfo();
@@ -718,8 +721,7 @@ namespace XviD4PSP
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-                m.sampleratemodifer = (AviSynthScripting.SamplerateModifers)Enum.Parse(typeof(AviSynthScripting.SamplerateModifers),
-                                       combo_converter.SelectedItem.ToString());
+                m.sampleratemodifer = (AviSynthScripting.SamplerateModifers)((ComboBoxItem)combo_converter.SelectedItem).Content;
 
                 AviSynthScripting.SamplerateModifers oldс = m.sampleratemodifer;
                 m = Format.GetValidSamplerateModifer(m);
@@ -728,10 +730,8 @@ namespace XviD4PSP
                     Message message = new Message(this);
                     message.ShowMessage(Languages.Translate("SSRC can`t convert") + ": " + instream.samplerate + " > " + outstream.samplerate + "!",
                         Languages.Translate("Warning"), Message.MessageStyle.Ok);
-                    combo_converter.SelectedItem = m.sampleratemodifer.ToString();
+                    combo_converter.SelectedValue = m.sampleratemodifer;
                 }
-
-                SetTooltips();
             }
         }
 

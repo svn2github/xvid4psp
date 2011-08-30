@@ -105,7 +105,7 @@
 					<Label OpacityMask="{x:Null}" x:Name="label_outsamplerate" Content="Output:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="0,8,142,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height" HorizontalAlignment="Right"/>
 					<ComboBox x:Name="combo_samplerate" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_samplerate_SelectionChanged" HorizontalAlignment="Right" Margin="0,11.66,34,0" Width="104" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
 					<Label OpacityMask="{x:Null}" x:Name="label_converter" Content="Converter:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,36.62,0,0" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
-					<ComboBox x:Name="combo_converter" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="130" HorizontalAlignment="Right" Margin="0,40.62,8,0" VerticalAlignment="Top" SelectionChanged="combo_converter_SelectionChanged" d:LayoutOverrides="Height"/>
+					<ComboBox x:Name="combo_converter" Height="Auto" IsSynchronizedWithCurrentItem="True" Width="130" HorizontalAlignment="Right" Margin="0,40.62,8,0" VerticalAlignment="Top" SelectedValuePath="Content" ToolTip="{Binding Path=SelectedItem.ToolTip, RelativeSource={RelativeSource Self}}" SelectionChanged="combo_converter_SelectionChanged" d:LayoutOverrides="Height"/>
 					<Label OpacityMask="{x:Null}" x:Name="label_hz" Content="Hz" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Right" Margin="0,8,8,0" d:LayoutOverrides="Height" VerticalAlignment="Top"/>
 				</Grid>
 			</GroupBox>

@@ -199,39 +199,17 @@ namespace XviD4PSP
             if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @".*\((\D+)\):", out value))
             {
                 value = value.ToLower();
-                if (value == "ara") return "Arabic";
-                else if (value == "arm" || value == "hye") return "Armenian";
-                else if (value == "aus") return "Australian";
-                else if (value == "bel") return "Belarusian";
-                else if (value == "bul") return "Bulgarian";
-                else if (value == "cze" || value == "ces") return "Czech";
-                else if (value == "chi" || value == "zho") return "Chinese";
-                else if (value == "dan") return "Danish";
-                else if (value == "dut" || value == "nld") return "Dutch";
-                else if (value == "ger" || value == "deu") return "German";
-                else if (value == "eng" || value == "ang") return "English";
-                else if (value == "est") return "Estonian";
-                else if (value == "fin") return "Finnish";
-                else if (value == "fre" || value == "fra") return "French";
-                else if (value == "heb") return "Hebrew";
-                else if (value == "hun") return "Hungarian";
-                else if (value == "ita") return "Italian";
-                else if (value == "jpn") return "Japanese";
-                else if (value == "kor") return "Korean";
-                else if (value == "lat") return "Latin";
-                else if (value == "lav") return "Latvian";
-                else if (value == "lit") return "Lithuanian";
-                else if (value == "mul") return "Multiple";
-                else if (value == "pol") return "Polish";
-                else if (value == "por") return "Portuguese";
-                else if (value == "rum" || value == "ron") return "Romanian";
-                else if (value == "rus") return "Russian";
-                else if (value == "spa") return "Spanish";
-                else if (value == "swe") return "Swedish";
-                else if (value == "tur") return "Turkish";
-                else if (value == "ukr") return "Ukrainian";
+                if (value == "mul") return "Multiple";
                 else if (value == "und") return "Unknown";
-                else return value;
+                else
+                {
+                    foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.AllCultures))
+                    {
+                        if (value.Length == 2 && ci.TwoLetterISOLanguageName == value ||
+                            value.Length == 3 && ci.ThreeLetterISOLanguageName == value)
+                            return ci.EnglishName.Split(new char[] { ' ' })[0];
+                    }
+                }
             }
             return "Unknown";
         }

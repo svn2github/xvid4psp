@@ -2,14 +2,16 @@
 using System.IO;
 using System.Net;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
+using System.Windows.Controls;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Threading;
 
 namespace XviD4PSP
@@ -125,6 +127,13 @@ namespace XviD4PSP
             combo_ffms_threads.ToolTip = label_ffms_threads.ToolTip = "1 = " + Languages.Translate("disable multithreading (recommended)") + "\r\nAuto = " +
                 Languages.Translate("logical CPU's count") + "\r\n\r\n" + Languages.Translate("Attention! Multithreaded decoding can be unstable!");
             label_ffms_threads.Content = "- " + Languages.Translate("decoding threads");
+            group_tracks.Header = Languages.Translate("Track selection");
+            check_tracks_manual.Content = Languages.Translate("Manual");
+            check_tracks_manual.ToolTip = Languages.Translate("During the opening of the file you will be prompted to select the track.");
+            check_tracks_language.ToolTip = combo_tracks_language.ToolTip = Languages.Translate("The first track in this language will be automatically selected during the opening of the file.") +
+                "\r\n" + Languages.Translate("If none of the tracks are matches, the very first track will be choosen.");
+            check_tracks_number.ToolTip = combo_tracks_number.ToolTip = Languages.Translate("The track with this ordinal number will be automatically selected during the opening of the file.") +
+                "\r\n" + Languages.Translate("If specified value exceeds the amount of the tracks in the file, the very first track will be choosen.");
 
             //DirectShowSource
             check_dss_convert_fps.IsChecked = Settings.DSS_ConvertFPS;
@@ -144,6 +153,34 @@ namespace XviD4PSP
             for (int i = 1; i < 21; i++)
                 combo_ffms_threads.Items.Add(i);
             combo_ffms_threads.SelectedIndex = Settings.FFMS_Threads;
+
+            //Режим автовыбора треков
+            if (Settings.DefaultATrackMode == Settings.ATrackModes.Language)
+                check_tracks_language.IsChecked = true;
+            else if (Settings.DefaultATrackMode == Settings.ATrackModes.Number)
+                check_tracks_number.IsChecked = true;
+            else
+                check_tracks_manual.IsChecked = true;
+
+            //Языки треков
+            ArrayList languages = new ArrayList();
+            languages.Add(Settings.DefaultATrackLang);
+            foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.AllCultures))
+            {
+                string name = ci.EnglishName.Split(new char[] { ' ' })[0];
+                if (!languages.Contains(name))
+                    languages.Add(name);
+            }
+            languages.Sort();
+            combo_tracks_language.Items.Add("");
+            combo_tracks_language.Items.Add("Unknown");
+            foreach (string name in languages) combo_tracks_language.Items.Add(name);
+            combo_tracks_language.SelectedItem = Settings.DefaultATrackLang;
+
+            //Номера треков
+            for (int i = 1; i < 21; i++)
+                combo_tracks_number.Items.Add(i);
+            combo_tracks_number.SelectedIndex = Settings.DefaultATrackNum - 1;
 
             //NicAudio
             check_drc_ac3.IsChecked = Settings.NicAC3_DRC;
@@ -720,6 +757,96 @@ namespace XviD4PSP
             if (combo_ffms_threads.IsDropDownOpen || combo_ffms_threads.IsSelectionBoxHighlighted)
             {
                 Settings.FFMS_Threads = combo_ffms_threads.SelectedIndex;
+            }
+        }
+
+        private void check_tracks_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender == check_tracks_manual)
+            {
+                check_tracks_language.IsChecked = check_tracks_number.IsChecked = false;
+                Settings.DefaultATrackMode = Settings.ATrackModes.Manual;
+            }
+            else if (sender == check_tracks_language)
+            {
+                check_tracks_manual.IsChecked = check_tracks_number.IsChecked = false;
+                Settings.DefaultATrackMode = Settings.ATrackModes.Language;
+            }
+            else if (sender == check_tracks_number)
+            {
+                check_tracks_manual.IsChecked = check_tracks_language.IsChecked = false;
+                Settings.DefaultATrackMode = Settings.ATrackModes.Number;
+            }
+        }
+
+        private void combo_tracks_language_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_tracks_language.IsDropDownOpen || combo_tracks_language.IsSelectionBoxHighlighted || combo_tracks_language.IsEditable) &&
+                combo_tracks_language.SelectedItem != null)
+            {
+                if (combo_tracks_language.SelectedIndex == 0)
+                {
+                    //Включаем редактирование
+                    combo_tracks_language.IsEditable = true;
+                    combo_tracks_language.ToolTip = Languages.Translate("Enter - apply, Esc - cancel.");
+                    combo_tracks_language.ApplyTemplate();
+                    return;
+                }
+                else
+                {
+                    Settings.DefaultATrackLang = combo_tracks_language.SelectedItem.ToString();
+                }
+
+                if (combo_tracks_language.IsEditable)
+                {
+                    //Выключаем редактирование
+                    combo_tracks_language.IsEditable = false;
+                    combo_tracks_language.ToolTip = null;
+                }
+            }
+        }
+
+        private void combo_tracks_language_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                //Проверяем введённый текст
+                string text = combo_tracks_language.Text.Trim();
+                if (text.Length < 4 || Calculate.GetRegexValue(@"^([a-zA-Z\s]+)$", text) == null)
+                {
+                    //Возвращаем исходное значение
+                    combo_tracks_language.SelectedItem = Settings.DefaultATrackLang;
+                }
+                else
+                {
+                    //Форматируем текст
+                    text = text.Substring(0, 1).ToUpper() + text.Substring(1, text.Length - 1).ToLower();
+
+                    //Добавляем и выбираем Item
+                    if (!combo_tracks_language.Items.Contains(text))
+                        combo_tracks_language.Items.Add(text);
+                    combo_tracks_language.SelectedItem = text;
+                }
+            }
+            else if (e.Key == Key.Escape)
+            {
+                //Возвращаем исходное значение
+                combo_tracks_language.SelectedItem = Settings.DefaultATrackLang;
+            }
+        }
+
+        private void combo_tracks_language_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox box = (ComboBox)sender;
+            if (box.IsEditable && box.SelectedItem != null && !box.IsDropDownOpen && !box.IsMouseCaptured)
+                combo_tracks_language_KeyDown(sender, new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, Key.Enter));
+        }
+
+        private void combo_tracks_number_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_tracks_number.IsDropDownOpen || combo_tracks_number.IsSelectionBoxHighlighted)
+            {
+                Settings.DefaultATrackNum = combo_tracks_number.SelectedIndex + 1;
             }
         }
     }
