@@ -462,90 +462,100 @@ namespace XviD4PSP
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (FileMenu.IsKeyboardFocusWithin || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused || script_box.IsFocused) return;
+            e.Handled = false;
+
+            if (FileMenu.IsKeyboardFocusWithin || textbox_frame_goto.Visibility != Visibility.Hidden || textbox_start.IsFocused || textbox_end.IsFocused || script_box.IsFocused)
+            {
+                return;
+            }
+            else if (e.Key == Key.Delete && list_tasks.IsKeyboardFocusWithin)
+            {
+                RemoveSelectedTask();
+                e.Handled = true;
+                return;
+            }
+
             string key = new System.Windows.Input.KeyConverter().ConvertToString(e.Key);
             string mod = new System.Windows.Input.ModifierKeysConverter().ConvertToString(System.Windows.Input.Keyboard.Modifiers);
-            string PressedKeys = "=" + ((mod.Length > 0) ? mod + "+" : "") + key;
-            //textbox_frame.Text = PressedKeys;
-
-            string Action = HotKeys.GetAction(PressedKeys);
-            e.Handled = (Action.Length > 0);
-            //textbox_frame.Text = Action;
-
-            switch (Action)
+            string Action = HotKeys.GetAction("=" + ((mod.Length > 0) ? mod + "+" : "") + key);
+            if (Action.Length > 0)
             {
-                //File
-                case ("Open file(s)"): OpenFile_Click(null, null); break;
-                case ("Open folder"): menu_open_folder_Click(null, null); break;
-                case ("Open DVD folder"): OpenDVD_Click(null, null); break;
-                case ("Decode file"): menu_decode_file_Click(null, null); break;
-                case ("Join file"): menu_join_Click(null, null); break;
-                case ("Close file"): button_close_Click(null, null); break;
-                case ("Save task"): button_save_Click(null, null); break;
-                case ("Save frame"): menu_save_frame_Click(null, null); break;
-                case ("Save THM frame"): menu_savethm_Click(null, null); break;
-                //Video
-                case ("Refresh preview"): mnUpdateVideo_Click(null, null); break;
-                case ("VDemux"): menu_demux_video_Click(null, null); break;
-                case ("Decoding"): mnDecoding_Click(mnVideoDecoding, null); break;
-                case ("Detect black borders"): menu_autocrop_Click(null, null); break;
-                case ("Detect interlace"): menu_detect_interlace_Click(null, null); break;
-                case ("Color correction"): ColorCorrection_Click(null, null); break;
-                case ("Resolution/Aspect"): AspectResolution_Click(null, null); break;
-                case ("Interlace/Framerate"): menu_interlace_Click(null, null); break;
-                case ("VEncoding settings"): VideoEncodingSettings_Click(null, null); break;
-                //Audio
-                case ("ADemux"): menu_demux_Click(null, null); break;
-                case ("Save to WAV"): menu_save_wav_Click(null, null); break;
-                case ("Editing options"): AudioOptions_Click(null, null); break;
-                case ("AEncoding settings"): AudioEncodingSettings_Click(null, null); break;
-                //Subtitles
-                case ("Add subtitles"): mnAddSubtitles_Click(null, null); break;
-                case ("Remove subtitles"): mnRemoveSubtitles_Click(null, null); break;
-                //AviSynth
-                case ("AvsP editor"): button_avsp_Click(null, null); break;
-                case ("Edit filtering script"): EditScript(null, null); break;
-                case ("Test script"): if (m != null) { ApplyTestScript(null, null); menu_createtestscript.IsChecked = m.testscript; }; break;
-                case ("Save script"): SaveScript(null, null); break;
-                case ("Windows Media Player"): menu_play_in_Click(menu_playinwmp, null); break;
-                case ("Media Player Classic"): menu_play_in_Click(menu_playinmpc, null); break;
-                case ("WPF Video Player"): menu_play_in_Click(menu_playinwpf, null); break;
-                //Settings
-                case ("Global settings"): menu_settings_Click(null, null); break;
-                //Tools
-                case ("Media Info"): menu_info_media_Click(menu_info_media, null); break;
-                case ("FFRebuilder"): menu_ffrebuilder_Click(null, null); break;
-                case ("MKVRebuilder"): menu_mkvrebuilder_Click(null, null); break;
-                case ("DGIndex"): mn_apps_Click(mnDGIndex, null); break;
-                case ("DGPulldown"): mn_apps_Click(menu_dgpulldown, null); break;
-                case ("DGAVCIndex"): mn_apps_Click(mnDGAVCIndex, null); break;
-                case ("VirtualDubMod"): mn_apps_Click(menu_virtualdubmod, null); break;
-                case ("AVI-Mux"): mn_apps_Click(menu_avimux, null); break;
-                case ("tsMuxeR"): mn_apps_Click(menu_tsmuxer, null); break;
-                case ("MKVExtract"): mn_apps_Click(menu_mkvextract, null); break;
-                case ("MKVMerge"): mn_apps_Click(menu_mkvmerge, null); break;
-                case ("Yamb"): mn_apps_Click(menu_yamb, null); break;
-                //Other
-                case ("Frame forward"): Frame_Shift(1); break;
-                case ("Frame back"): Frame_Shift(-1); break;
-                case ("10 frames forward"): Frame_Shift(10); break;
-                case ("10 frames backward"): Frame_Shift(-10); break;
-                case ("100 frames forward"): Frame_Shift(100); break;
-                case ("100 frames backward"): Frame_Shift(-100); break;
-                case ("30 sec. forward"): Frame_Shift(Convert.ToInt32(fps * 30)); break;
-                case ("30 sec. backward"): Frame_Shift(-Convert.ToInt32(fps * 30)); break;
-                case ("3 min. forward"): Frame_Shift(Convert.ToInt32(fps * 180)); break;
-                case ("3 min. backward"): Frame_Shift(-Convert.ToInt32(fps * 180)); break;
-                case ("Play-Pause"): PauseClip(); break;
-                case ("Fullscreen"): SwitchToFullScreen(); break;
-                case ("Volume+"): VolumePlus(); break;
-                case ("Volume-"): VolumeMinus(); break;
-                case ("Set Start"): button_set_trim_value_Click(button_set_start, null); break;
-                case ("Set End"): button_set_trim_value_Click(button_set_end, null); break;
-                case ("Next/New region"): button_trim_plus_Click(null, null); break;
-                case ("Previous region"): button_trim_minus_Click(null, null); break;
-                case ("Apply Trim"): button_apply_trim_Click(null, null); break;
-                case ("Add/Remove bookmark"): AddToBookmarks_Click(null, null); break;
+                e.Handled = true;
+                switch (Action)
+                {
+                    //File
+                    case ("Open file(s)"): OpenFile_Click(null, null); break;
+                    case ("Open folder"): menu_open_folder_Click(null, null); break;
+                    case ("Open DVD folder"): OpenDVD_Click(null, null); break;
+                    case ("Decode file"): menu_decode_file_Click(null, null); break;
+                    case ("Join file"): menu_join_Click(null, null); break;
+                    case ("Close file"): button_close_Click(null, null); break;
+                    case ("Save task"): button_save_Click(null, null); break;
+                    case ("Save frame"): menu_save_frame_Click(null, null); break;
+                    case ("Save THM frame"): menu_savethm_Click(null, null); break;
+                    //Video
+                    case ("Refresh preview"): mnUpdateVideo_Click(null, null); break;
+                    case ("VDemux"): menu_demux_video_Click(null, null); break;
+                    case ("Decoding"): mnDecoding_Click(mnVideoDecoding, null); break;
+                    case ("Detect black borders"): menu_autocrop_Click(null, null); break;
+                    case ("Detect interlace"): menu_detect_interlace_Click(null, null); break;
+                    case ("Color correction"): ColorCorrection_Click(null, null); break;
+                    case ("Resolution/Aspect"): AspectResolution_Click(null, null); break;
+                    case ("Interlace/Framerate"): menu_interlace_Click(null, null); break;
+                    case ("VEncoding settings"): VideoEncodingSettings_Click(null, null); break;
+                    //Audio
+                    case ("ADemux"): menu_demux_Click(null, null); break;
+                    case ("Save to WAV"): menu_save_wav_Click(null, null); break;
+                    case ("Editing options"): AudioOptions_Click(null, null); break;
+                    case ("AEncoding settings"): AudioEncodingSettings_Click(null, null); break;
+                    //Subtitles
+                    case ("Add subtitles"): mnAddSubtitles_Click(null, null); break;
+                    case ("Remove subtitles"): mnRemoveSubtitles_Click(null, null); break;
+                    //AviSynth
+                    case ("AvsP editor"): button_avsp_Click(null, null); break;
+                    case ("Edit filtering script"): EditScript(null, null); break;
+                    case ("Test script"): if (m != null) { ApplyTestScript(null, null); menu_createtestscript.IsChecked = m.testscript; }; break;
+                    case ("Save script"): SaveScript(null, null); break;
+                    case ("Windows Media Player"): menu_play_in_Click(menu_playinwmp, null); break;
+                    case ("Media Player Classic"): menu_play_in_Click(menu_playinmpc, null); break;
+                    case ("WPF Video Player"): menu_play_in_Click(menu_playinwpf, null); break;
+                    //Settings
+                    case ("Global settings"): menu_settings_Click(null, null); break;
+                    //Tools
+                    case ("Media Info"): menu_info_media_Click(menu_info_media, null); break;
+                    case ("FFRebuilder"): menu_ffrebuilder_Click(null, null); break;
+                    case ("MKVRebuilder"): menu_mkvrebuilder_Click(null, null); break;
+                    case ("DGIndex"): mn_apps_Click(mnDGIndex, null); break;
+                    case ("DGPulldown"): mn_apps_Click(menu_dgpulldown, null); break;
+                    case ("DGAVCIndex"): mn_apps_Click(mnDGAVCIndex, null); break;
+                    case ("VirtualDubMod"): mn_apps_Click(menu_virtualdubmod, null); break;
+                    case ("AVI-Mux"): mn_apps_Click(menu_avimux, null); break;
+                    case ("tsMuxeR"): mn_apps_Click(menu_tsmuxer, null); break;
+                    case ("MKVExtract"): mn_apps_Click(menu_mkvextract, null); break;
+                    case ("MKVMerge"): mn_apps_Click(menu_mkvmerge, null); break;
+                    case ("Yamb"): mn_apps_Click(menu_yamb, null); break;
+                    //Other
+                    case ("Frame forward"): Frame_Shift(1); break;
+                    case ("Frame back"): Frame_Shift(-1); break;
+                    case ("10 frames forward"): Frame_Shift(10); break;
+                    case ("10 frames backward"): Frame_Shift(-10); break;
+                    case ("100 frames forward"): Frame_Shift(100); break;
+                    case ("100 frames backward"): Frame_Shift(-100); break;
+                    case ("30 sec. forward"): Frame_Shift(Convert.ToInt32(fps * 30)); break;
+                    case ("30 sec. backward"): Frame_Shift(-Convert.ToInt32(fps * 30)); break;
+                    case ("3 min. forward"): Frame_Shift(Convert.ToInt32(fps * 180)); break;
+                    case ("3 min. backward"): Frame_Shift(-Convert.ToInt32(fps * 180)); break;
+                    case ("Play-Pause"): PauseClip(); break;
+                    case ("Fullscreen"): SwitchToFullScreen(); break;
+                    case ("Volume+"): VolumePlus(); break;
+                    case ("Volume-"): VolumeMinus(); break;
+                    case ("Set Start"): button_set_trim_value_Click(button_set_start, null); break;
+                    case ("Set End"): button_set_trim_value_Click(button_set_end, null); break;
+                    case ("Next/New region"): button_trim_plus_Click(null, null); break;
+                    case ("Previous region"): button_trim_minus_Click(null, null); break;
+                    case ("Apply Trim"): button_apply_trim_Click(null, null); break;
+                    case ("Add/Remove bookmark"): AddToBookmarks_Click(null, null); break;
+                }
             }
         }
 
@@ -4237,15 +4247,6 @@ namespace XviD4PSP
             catch (Exception ex)
             {
                 ErrorException("EditPlayerPath: " + ex.Message, ex.StackTrace);
-            }
-        }
-
-        private void list_tasks_KeyUp(object sender, System.Windows.Input.KeyEventArgs e) //keyup
-        {
-            if (e.Key == System.Windows.Input.Key.Delete)
-            {
-                if (list_tasks.HasItems)
-                    RemoveSelectedTask();
             }
         }
 
