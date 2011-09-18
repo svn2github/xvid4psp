@@ -8,14 +8,17 @@ using System.Diagnostics;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using System.Runtime.InteropServices;
 
 namespace XviD4PSP
 {
 	public partial class Filtering
 	{
-        public Massive m;
+        private static object locker = new object();
+        private Process avsp = null;
         private MainWindow p;
+        public Massive m;
 
         public Filtering(Massive mass, MainWindow parent)
 		{
@@ -45,7 +48,9 @@ namespace XviD4PSP
         }
 
         [DllImport("user32.dll")]
-        static extern short GetAsyncKeyState(int vKey); //GetKeyState
+        private static extern short GetAsyncKeyState(int vKey); //GetKeyState
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -83,27 +88,84 @@ namespace XviD4PSP
            this.Focus();
         }
 
-        //Обработка вызова редактора скрипта AvsP
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            CloseAvsP();
+        }
+
+        private void CloseAvsP()
+        {
+            lock (locker)
+            {
+                if (avsp != null)
+                {
+                    avsp.Close();
+                    avsp.Dispose();
+                    avsp = null;
+                }
+            }
+        }
+
+        //Вызов редактора скрипта AvsP
         private void button_avsp_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                Process pr = new Process();
-                ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
-                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-                info.Arguments = Settings.TempPath + "\\AvsP.avs";
-                pr.StartInfo = info;
-                pr.Start();
-                pr.WaitForExit(); //Ждать завершения
+                if (avsp == null && p.avsp == null)
+                {
+                    //Пишем в файл текущий скрипт
+                    string path = Settings.TempPath + "\\AvsP_" + m.key + ".avs";
+                    File.WriteAllText(path, m.script, System.Text.Encoding.Default); ;
 
-                //После завершения работы AvsP перечитываем измененный им файл AvsP.avs и вводим его содержимое в окно Фильтрация
-                using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AvsP.avs", System.Text.Encoding.Default))
-                    script_box.Text = sr.ReadToEnd();
+                    avsp = new Process();
+                    ProcessStartInfo info = new ProcessStartInfo();
+                    info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
+                    info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+                    info.Arguments = "\"" + path + "\"";
+                    avsp.Exited += new EventHandler(AvsPExited);
+                    avsp.EnableRaisingEvents = true;
+                    avsp.StartInfo = info;
+                    avsp.Start();
+                }
+                else
+                {
+                    IntPtr wnd = (avsp != null) ? avsp.MainWindowHandle : p.avsp.MainWindowHandle;
+                    SetForegroundWindow(wnd);
+                }
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage("AvsP editor: " + ex.Message, Languages.Translate("Error"));
+                new Message(this).ShowMessage("AvsP editor: " + ex.Message, ex.StackTrace, Languages.Translate("Error"));
+                CloseAvsP();
+            }
+        }
+
+        //Обработка завершения работы AvsP
+        internal delegate void AvsPExitedDelegate(object sender, EventArgs e);
+        private void AvsPExited(object sender, EventArgs e)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new AvsPExitedDelegate(AvsPExited), sender, e);
+            }
+            else
+            {
+                try
+                {
+                    string path = ((Process)sender).StartInfo.Arguments.Trim(new char[] { '"' });
+                    CloseAvsP();
+
+                    //После завершения работы AvsP перечитываем измененный им файл скрипта и вводим его содержимое в окно Фильтрация
+                    using (StreamReader sr = new StreamReader(path, System.Text.Encoding.Default))
+                        script_box.Text = sr.ReadToEnd();
+
+                    //Удаляем файл скрипта
+                    File.Delete(path);
+                }
+                catch (Exception ex)
+                {
+                    new Message(this).ShowMessage("AvsP editor: " + ex.Message, ex.StackTrace, Languages.Translate("Error"));
+                }
             }
         }
 	}

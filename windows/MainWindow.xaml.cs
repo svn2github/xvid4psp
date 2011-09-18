@@ -34,7 +34,9 @@ namespace XviD4PSP
         private ArrayList ffcache = new ArrayList();
         private ArrayList dgcache = new ArrayList();
         private static object backup_lock = new object();
+        private static object avsp_lock = new object();
         private static object locker = new object();
+        public Process avsp = null;
 
         //player
         private string total_frames = "";
@@ -100,13 +102,15 @@ namespace XviD4PSP
         private enum PlayState { Stopped, Paused, Running, Init }
 
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
-        public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+        private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
         [DllImport("user32.dll", EntryPoint = "GetDC")]
-        public static extern IntPtr GetDC(IntPtr ptr);
+        private static extern IntPtr GetDC(IntPtr ptr);
         [DllImport("user32.dll", EntryPoint = "ReleaseDC")]
-        public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDc);
+        private static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDc);
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        public static extern bool DeleteObject(IntPtr hObject);
+        private static extern bool DeleteObject(IntPtr hObject);
+        [DllImport("user32.dll", EntryPoint = "SetForegroundWindow")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public MainWindow()
         {
@@ -1887,7 +1891,6 @@ namespace XviD4PSP
             }
 
             SafeDelete(Settings.TempPath + "\\preview.avs");
-            SafeDelete(Settings.TempPath + "\\AvsP.avs");
 
             m = null;
             ResetTrim();      //Обнуляем всё что связано с тримом
@@ -1999,7 +2002,6 @@ namespace XviD4PSP
             {
                 //Пишем скрипт в файл
                 AviSynthScripting.WriteScriptToFile(m.script, "preview");
-                AviSynthScripting.WriteScriptToFile(m.script, "AvsP"); //скрипт для AvsP
 
                 // Start playing the media file
                 if (Settings.ScriptView)
@@ -4214,8 +4216,9 @@ namespace XviD4PSP
                 info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
                 if (m != null)
                 {
-                    if (!File.Exists(m.scriptpath)) AviSynthScripting.WriteScriptToFile(m);
-                    info.Arguments = Settings.TempPath + "\\preview.avs";
+                    string script_path = Settings.TempPath + "\\preview.avs";
+                    if (!File.Exists(script_path)) AviSynthScripting.WriteScriptToFile(m.script, "preview");
+                    info.Arguments = "\"" + script_path + "\"";
                 }
                 Process pr = new Process();
                 pr.StartInfo = info;
@@ -6568,7 +6571,6 @@ namespace XviD4PSP
             if (m == null) return;
             m.script = script_box.Text;
             AviSynthScripting.WriteScriptToFile(m.script, "preview");
-            AviSynthScripting.WriteScriptToFile(m.script, "AvsP");
             UpdateTaskMassive(m);
         }
 
@@ -6576,61 +6578,139 @@ namespace XviD4PSP
         {
             try
             {
-                Process pr = new Process();
-                ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
-                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-
-                if (m == null)
+                if (avsp == null)
                 {
-                    Massive x = new Massive();
-                    x.taskname = "Untitled";
-                    x.outfilepath = OpenDialogs.SaveDialog(x);
-                    if (x.outfilepath != null)
+                    string path = "";
+                    if (m != null)
                     {
-                        //Создаем и открываем скрипт
-                        File.WriteAllText(x.outfilepath, "#Write your script here, then Save it and Exit.\r\n#Note: this script will" +
-                            " be opened using Import(), so you can`t change it later!\r\n\r\n\r\n", Encoding.Default);
-                        info.Arguments = x.outfilepath;
+                        //Пишем в файл текущий скрипт
+                        path = Settings.TempPath + "\\AvsP_" + m.key + ".avs";
+                        File.WriteAllText(path, m.script, System.Text.Encoding.Default);
                     }
-                    pr.StartInfo = info;
-                    pr.Start();
-
-                    if (x.outfilepath == null) return;
-                    pr.WaitForExit(); //Ждать завершения
-
-                    if (File.Exists(x.outfilepath) && new FileInfo(x.outfilepath).Length > 0)
+                    else
                     {
-                        x.infilepath = x.outfilepath;
-                        x.infileslist = new string[] { x.outfilepath };
-                        x.outfilepath = x.taskname = null;
-                        action_open(x);
+                        //Путь к создаваемому скрипту
+                        System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
+                        s.Title = Languages.Translate("Select unique name for output file:");
+                        s.Filter = "AVS " + Languages.Translate("files") + "|*.avs";
+                        s.SupportMultiDottedExtensions = true;
+                        s.AddExtension = true;
+                        s.DefaultExt = ".avs";
+                        s.FileName = "Untitled.avs";
+
+                        if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        {
+                            string ext = (s.DefaultExt.StartsWith(".")) ? s.DefaultExt : "." + s.DefaultExt;
+                            path = (Path.GetExtension(s.FileName).ToLower() != ext) ? s.FileName += ext : s.FileName;
+
+                            //Пишем в файл начальный скрипт
+                            File.WriteAllText(path, "#Write your script here, then Save it (Ctrl+S) and Exit (Alt+X).\r\n" +
+                                "#Note: this script will be opened using Import(), so you can`t change it later!\r\n\r\n" +
+                                "ColorBars() #just for example\r\n\r\n", Encoding.Default);
+                        }
                     }
+
+                    avsp = new Process();
+                    ProcessStartInfo info = new ProcessStartInfo();
+                    info.FileName = Calculate.StartupPath + "\\apps\\AvsP\\AvsP.exe";
+                    info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        info.Arguments = "\"" + path + "\"";
+                        avsp.Exited += new EventHandler(AvsPExited);
+                        avsp.EnableRaisingEvents = true;
+                    }
+                    avsp.StartInfo = info;
+                    avsp.Start();
+
+                    //Если не требуется ждать завершения работы AvsP
+                    if (string.IsNullOrEmpty(path))
+                        CloseAvsP();
                 }
                 else
                 {
-                    //Открываем текущий скрипт
-                    info.Arguments = Settings.TempPath + "\\AvsP.avs";
-                    pr.StartInfo = info;
-                    pr.Start();
-                    pr.WaitForExit(); //Ждать завершения
-                    string oldscript = m.script;
-
-                    //После завершения работы AvsP перечитываем измененный им файл AvsP.avs и вводим его содержимое в окно Фильтрация
-                    using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AvsP.avs", System.Text.Encoding.Default))
-                        script_box.Text = m.script = sr.ReadToEnd();
-
-                    //обновление при необходимости
-                    if (m.script.Trim() != oldscript.Trim())
-                    {
-                        LoadVideo(MediaLoad.update);
-                        UpdateTaskMassive(m);
-                    }
+                    SetForegroundWindow(avsp.MainWindowHandle);
                 }
             }
             catch (Exception ex)
             {
                 ErrorException("AvsP editor: " + ex.Message, ex.StackTrace);
+                CloseAvsP();
+            }
+        }
+
+        internal delegate void AvsPExitedDelegate(object sender, EventArgs e);
+        private void AvsPExited(object sender, EventArgs e)
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, new AvsPExitedDelegate(AvsPExited), sender, e);
+            }
+            else
+            {
+                try
+                {
+                    string path = ((Process)sender).StartInfo.Arguments.Trim(new char[] { '"' });
+                    CloseAvsP();
+
+                    if (File.Exists(path) && new FileInfo(path).Length > 0)
+                    {
+                        if (m != null && path == Settings.TempPath + "\\AvsP_" + m.key + ".avs")
+                        {
+                            //Изменения в текущем задании
+                            string oldscript = m.script;
+
+                            //После завершения работы AvsP перечитываем измененный им файл скрипта и вводим его содержимое в массив
+                            using (StreamReader sr = new StreamReader(path, System.Text.Encoding.Default))
+                            {
+                                m.script = sr.ReadToEnd();
+
+                                if (script_box.Visibility == Visibility.Visible)
+                                    script_box.Text = m.script;
+                            }
+
+                            //обновление при необходимости
+                            if (m.script.Trim() != oldscript.Trim())
+                            {
+                                LoadVideo(MediaLoad.update);
+                                UpdateTaskMassive(m);
+                            }
+
+                            //Удаляем файл скрипта
+                            File.Delete(path);
+                        }
+                        else if (m == null && !path.StartsWith(Settings.TempPath + "\\AvsP_"))
+                        {
+                            //Создаём новое задание
+                            Massive x = new Massive();
+                            x.infilepath = path;
+                            x.infileslist = new string[] { path };
+                            action_open(x);
+                        }
+                        else
+                        {
+                            //Видимо сменился номер задания или файл был закрыт.
+                            //Ничего не делаем; скрипт не удаляем.
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    new Message(this).ShowMessage("AvsP editor: " + ex.Message, Languages.Translate("Error"));
+                }
+            }
+        }
+
+        private void CloseAvsP()
+        {
+            lock (avsp_lock)
+            {
+                if (avsp != null)
+                {
+                    avsp.Close();
+                    avsp.Dispose();
+                    avsp = null;
+                }
             }
         }
 

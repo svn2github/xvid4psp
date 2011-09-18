@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.261.0 (09.09.2011), main changes:
+﻿XviD4PSP 5.10.262.0 (18.09.2011), main changes:
 
+>>> (r262) Reworked the way how XviD4PSP interact with AvsP. Removed blocking of XviD4PSP when AvsP is running,
+           because this blocking also blocks the encoding progress determination, so after 10 minutes current
+           encoding will be aborted as "freezed" (rep. by LonerD).
 >>> (r261) Fixed the reaction on pressing the Delete key when the tasks list is focused (bug since r94).
 >>> (r260) Tooltip`s the "time of a life" prolonged for mostly all user controls.
 >>> (r260) Added ability to auto select the audio track during the opening of the file (based on its
