@@ -55,8 +55,7 @@ namespace XviD4PSP
             Title = Languages.Translate("Filtering");
             button_ok.Content = Languages.Translate("OK");
             button_ok.ToolTip = Languages.Translate("Save changes");
-            button_cancel.Content = Languages.Translate("Cancel");
-            button_cancel.ToolTip = Languages.Translate("Cancel");
+            button_cancel.Content = button_cancel.ToolTip = Languages.Translate("Cancel");
 
             //Ограничиваем максимальную ширину окна до его открытия
             this.MaxWidth = Math.Min(((MainWindow)parent).ActualWidth * 1.25, SystemParameters.WorkArea.Width);

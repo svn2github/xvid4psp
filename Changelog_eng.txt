@@ -1,5 +1,9 @@
-﻿XviD4PSP 5.10.264.0 (22.09.2011), main changes:
+﻿XviD4PSP 5.10.265.0 (22.09.2011), main changes:
 
+>>> (r265) MediaInfo: changed the column size for MediaInfo log. In previous versions of MediaInfo the size was
+           32, in current versions the size is 40. XviD4PSP will customize this value to 35 (it can be changed in
+           the registry: HKCU\Software\Winnydows\XviD4PSP5, the key MI_ColumnSize - is for XviD4PSP and the key
+           WPFPlayer_MI_ColumnSize - is for WPF_VideoPlayer).
 >>> (r264) x264 settings window: added "I422" to "Output colorspace" combobox (x264 r2081+).
 >>> (r263) If there is no file opened, the "Filtering" window now can be used to edit the filtering presets.
 >>> (r262) Reworked the way how XviD4PSP interact with AvsP. Removed blocking of XviD4PSP when AvsP is running,

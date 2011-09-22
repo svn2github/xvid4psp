@@ -245,5 +245,27 @@ namespace WPF_VideoPlayer
                 SetBool("WPFPlayer_Win7TaskbarIsEnabled", value);
             }
         }
+
+        //Ширина первой (левой) колонки в логе MediaInfo
+        public static string MI_ColumnSize
+        {
+            get
+            {
+                object value = GetValue("WPFPlayer_MI_ColumnSize");
+                if (value == null)
+                {
+                    SetString("WPFPlayer_MI_ColumnSize", "35");
+                    return "35";
+                }
+                else
+                {
+                    return value.ToString();
+                }
+            }
+            set
+            {
+                SetString("WPFPlayer_MI_ColumnSize", value);
+            }
+        }
     }
 }

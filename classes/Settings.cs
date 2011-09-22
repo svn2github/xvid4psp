@@ -2910,5 +2910,27 @@ namespace XviD4PSP
                 SetInt("DefaultATrackNum", value);
             }
         }
+
+        //Ширина первой (левой) колонки в логе MediaInfo
+        public static string MI_ColumnSize
+        {
+            get
+            {
+                object value = GetValue("MI_ColumnSize");
+                if (value == null)
+                {
+                    SetString("MI_ColumnSize", "35");
+                    return "35";
+                }
+                else
+                {
+                    return value.ToString();
+                }
+            }
+            set
+            {
+                SetString("MI_ColumnSize", value);
+            }
+        }
     }
 }
