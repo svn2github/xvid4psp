@@ -193,6 +193,7 @@ namespace XviD4PSP
             combo_colormatrix.Items.Add("YCgCo");
 
             combo_colorspace.Items.Add("I420");
+            combo_colorspace.Items.Add("I422");
             combo_colorspace.Items.Add("I444");
             combo_colorspace.Items.Add("RGB");
 
@@ -565,8 +566,11 @@ namespace XviD4PSP
         private void SetAVCProfile()
         {
             /* x264.exe encoder/set.c
-            if (sps->b_qpprime_y_zero_transform_bypass || sps->i_chroma_format_idc == 3)
+            sps->b_qpprime_y_zero_transform_bypass = param->rc.i_rc_method == X264_RC_CQP && param->rc.i_qp_constant == 0;
+            if (sps->b_qpprime_y_zero_transform_bypass || sps->i_chroma_format_idc == CHROMA_444)
                 sps->i_profile_idc = PROFILE_HIGH444_PREDICTIVE;
+            else if (sps->i_chroma_format_idc == CHROMA_422)
+                sps->i_profile_idc = PROFILE_HIGH422;
             else if (BIT_DEPTH > 8)
                 sps->i_profile_idc = PROFILE_HIGH10;
             else if (param->analyse.b_transform_8x8 || param->i_cqm_preset != X264_CQM_FLAT)
@@ -575,12 +579,14 @@ namespace XviD4PSP
                 sps->i_profile_idc = PROFILE_MAIN;
             else
                 sps->i_profile_idc = PROFILE_BASELINE;
-             */
+            */
 
             string avcprofile = "Baseline";
 
-            if (IsLossless(m) || m.x264options.colorspace != "I420")
+            if (IsLossless(m) || m.x264options.colorspace == "I444" || m.x264options.colorspace == "RGB")
                 avcprofile = "High 4:4:4";
+            else if (m.x264options.colorspace == "I422")
+                avcprofile = "High 4:2:2";
             else if (m.x264options.adaptivedct ||
                 m.x264options.custommatrix != null)
                 avcprofile = "High";
