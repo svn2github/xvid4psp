@@ -15,7 +15,7 @@ namespace XviD4PSP
        private string format;
        private ProfileType ptype;
        public string profile = null;
-       public enum ProfileType { SBC = 1, VEncoding, AEncoding, FFRebuilder }
+       public enum ProfileType { SBC = 1, VEncoding, AEncoding, FFRebuilder, Filtering }
 
 		public NewProfile(string auto_name, string format, ProfileType ptype, System.Windows.Window owner)
 		{
@@ -42,7 +42,7 @@ namespace XviD4PSP
 
             //Проверка на недопустимые имена
             if (name == "") return;
-            if (name.ToLower() == "disabled" && (ptype == ProfileType.SBC || ptype == ProfileType.AEncoding || ptype == ProfileType.VEncoding) ||
+            if (name.ToLower() == "disabled" && (ptype == ProfileType.SBC || ptype == ProfileType.AEncoding || ptype == ProfileType.VEncoding || ptype == ProfileType.Filtering) ||
                 name.ToLower() == "default" && ptype == ProfileType.FFRebuilder)
             {
                 new Message(this).ShowMessage(Languages.Translate("Profile with same name already exists."), Languages.Translate("Error"));
@@ -56,6 +56,8 @@ namespace XviD4PSP
                 profile_path = Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\audio\\" + name + ".txt";
             else if (ptype == ProfileType.SBC)
                 profile_path = Calculate.StartupPath + "\\presets\\sbc\\" + name + ".avs";
+            else if (ptype == ProfileType.Filtering)
+                profile_path = Calculate.StartupPath + "\\presets\\filtering\\" + name + ".avs";
             else if (ptype == ProfileType.FFRebuilder)
                 profile_path = Calculate.StartupPath + "\\presets\\ffrebuilder\\" + name + ".txt";
 

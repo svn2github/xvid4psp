@@ -299,17 +299,7 @@ namespace XviD4PSP
                     combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut);
 
                     //загружаем список фильтров
-                    combo_filtering.Items.Clear();
-                    combo_filtering.Items.Add("Disabled");
-                    foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering"))
-                    {
-                        combo_filtering.Items.Add(Path.GetFileNameWithoutExtension(file));
-                    }
-                    //прописываем текущий фильтр
-                    if (combo_filtering.Items.Contains(Settings.Filtering))
-                        combo_filtering.SelectedItem = Settings.Filtering;
-                    else
-                        combo_filtering.SelectedItem = Settings.Filtering = "Disabled";
+                    LoadFilteringPresets();
 
                     //загружаем списки профилей цвето коррекции
                     LoadSBCPresets();
@@ -2735,24 +2725,53 @@ namespace XviD4PSP
 
         public void EditScript(object sender, RoutedEventArgs e)
         {
-            if (m == null) return;
             try
             {
-                Filtering f = new Filtering(m, this);
-                string oldscript = m.script;
-                m.script = f.m.script;
-
-                //обновление при необходимости
-                if (m.script.Trim() != oldscript.Trim())
+                if (m != null)
                 {
-                    LoadVideo(MediaLoad.update);
-                    UpdateTaskMassive(m);
+                    Filtering f = new Filtering(m, this);
+                    string oldscript = m.script;
+                    m.script = f.m.script;
+
+                    //обновление при необходимости
+                    if (m.script.Trim() != oldscript.Trim())
+                    {
+                        LoadVideo(MediaLoad.update);
+                        UpdateTaskMassive(m);
+                    }
+                }
+                else
+                {
+                    new Filtering(null, this);
+                    LoadFilteringPresets();
                 }
             }
             catch (Exception ex)
             {
                 ErrorException("EditScript: " + ex.Message, ex.StackTrace);
             }
+        }
+
+        private void LoadFilteringPresets()
+        {
+            //загружаем список фильтров
+            combo_filtering.Items.Clear();
+            combo_filtering.Items.Add("Disabled");
+            try
+            {
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering"))
+                {
+                    combo_filtering.Items.Add(Path.GetFileNameWithoutExtension(file));
+                }
+            }
+            catch (Exception) { }
+
+            //прописываем текущий фильтр
+            string preset = Settings.Filtering;
+            if (combo_filtering.Items.Contains(preset))
+                combo_filtering.SelectedItem = preset;
+            else
+                combo_filtering.SelectedItem = Settings.Filtering = "Disabled";
         }
 
         private void AspectResolution_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -6423,7 +6442,6 @@ namespace XviD4PSP
             menu_audiooptions.IsEnabled = ShowItems;
             mnAddSubtitles.IsEnabled = ShowItems;
             mnRemoveSubtitles.IsEnabled = ShowItems;
-            menu_editscript.IsEnabled = ShowItems;
             menu_createautoscript.IsEnabled = ShowItems;
             menu_save_script.IsEnabled = ShowItems;
             target_goto.IsEnabled = ShowItems;

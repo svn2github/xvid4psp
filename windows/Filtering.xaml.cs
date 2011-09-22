@@ -16,6 +16,8 @@ namespace XviD4PSP
 	public partial class Filtering
 	{
         private static object locker = new object();
+        private string old_filtering = "";
+        private string old_script = "";
         private Process avsp = null;
         private MainWindow p;
         public Massive m;
@@ -23,22 +25,38 @@ namespace XviD4PSP
         public Filtering(Massive mass, MainWindow parent)
 		{
 			this.InitializeComponent();
+            this.Owner = this.p = parent;
 
-            m = mass.Clone();
-            p = parent;
-            Owner = p;
+            if (mass != null)
+            {
+                m = mass.Clone();
+                script_box.Text = m.script;
 
-            script_box.Text = m.script;
-            script_box.AcceptsReturn = true; //Разрешаем Enter
-            script_box.AcceptsTab = true;    //Разрешаем Tab
+                button_refresh.Content = Languages.Translate("Apply");
+                button_refresh.ToolTip = Languages.Translate("Refresh preview");
+                button_fullscreen.ToolTip = Languages.Translate("Fullscreen mode");
+                button_Avsp.ToolTip = Languages.Translate("AvsP editor");
+            }
+            else
+            {
+                old_filtering = Settings.Filtering;
+
+                grid_profiles.Visibility = Visibility.Visible;
+                button_refresh.Visibility = button_fullscreen.Visibility = button_Avsp.Visibility = Visibility.Collapsed;
+                text_profile.Content = Languages.Translate("Profile:");
+                button_add.ToolTip = Languages.Translate("Add profile");
+                button_remove.ToolTip = Languages.Translate("Remove profile");
+
+                LoadProfiles();
+                LoadPreset();
+            }
 
             //переводим
-            Title = Languages.Translate("Filtering") + " " + m.scriptpath;
-            button_cancel.Content = Languages.Translate("Cancel");
+            Title = Languages.Translate("Filtering");
             button_ok.Content = Languages.Translate("OK");
-            button_refresh.Content = Languages.Translate("Apply");
-            button_refresh.ToolTip = Languages.Translate("Refresh preview");
-            //button_fullscreen.Content = Languages.Translate("Fullscreen");
+            button_ok.ToolTip = Languages.Translate("Save changes");
+            button_cancel.Content = Languages.Translate("Cancel");
+            button_cancel.ToolTip = Languages.Translate("Cancel");
 
             //Ограничиваем максимальную ширину окна до его открытия
             this.MaxWidth = Math.Min(((MainWindow)parent).ActualWidth * 1.25, SystemParameters.WorkArea.Width);
@@ -67,12 +85,19 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            m.script = script_box.Text;
+            if (m != null)
+                m.script = script_box.Text;
+            else if (old_script != script_box.Text)
+                SavePreset(Settings.Filtering);
+
             Close();
         }
 
         private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            if (m == null)
+                Settings.Filtering = old_filtering;
+
             Close();
         }
 
@@ -135,7 +160,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                new Message(this).ShowMessage("AvsP editor: " + ex.Message, ex.StackTrace, Languages.Translate("Error"));
+                ErrorException("AvsP editor: " + ex.Message, ex.StackTrace);
                 CloseAvsP();
             }
         }
@@ -164,8 +189,157 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    new Message(this).ShowMessage("AvsP editor: " + ex.Message, ex.StackTrace, Languages.Translate("Error"));
+                    ErrorException("AvsP editor: " + ex.Message, ex.StackTrace);
                 }
+            }
+        }
+
+        private void LoadProfiles()
+        {
+            //Загружаем список фильтров
+            combo_profile.Items.Clear();
+            combo_profile.Items.Add("Disabled");
+            try
+            {
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering"))
+                    combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
+            }
+            catch (Exception) { }
+
+            combo_profile.SelectedItem = Settings.Filtering;
+        }
+
+        private void LoadPreset()
+        {
+            try
+            {
+                string preset = Settings.Filtering;
+                if (preset != "Disabled")
+                {
+                    string path = Calculate.StartupPath + "\\presets\\filtering\\" + preset + ".avs";
+                    using (StreamReader sr = new StreamReader(path, System.Text.Encoding.Default))
+                        script_box.Text = old_script = sr.ReadToEnd();
+                }
+                else
+                {
+                    old_script = "";
+                    script_box.Clear();
+                }
+            }
+            catch (Exception) { }
+        }
+
+        private void SavePreset(string preset)
+        {
+            string old_preset = "";
+            try
+            {
+                old_preset = Settings.Filtering;
+                if (preset == "Disabled")
+                {
+                    button_add_Click(null, null);
+                    return;
+                }
+
+                Settings.Filtering = preset;
+                File.WriteAllText(Calculate.StartupPath + "\\presets\\filtering\\" + preset + ".avs", script_box.Text, System.Text.Encoding.Default);
+                old_script = script_box.Text;
+            }
+            catch (Exception ex)
+            {
+                ErrorException(Languages.Translate("Can`t save profile") + ": " + ex.Message, ex.StackTrace);
+                Settings.Filtering = old_preset;
+            }
+        }
+
+        private void combo_profile_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_profile.IsDropDownOpen || combo_profile.IsSelectionBoxHighlighted) && combo_profile.SelectedItem != null)
+            {
+                Settings.Filtering = combo_profile.SelectedItem.ToString();
+                LoadPreset();
+            }
+        }
+
+        private void button_add_Click(object sender, RoutedEventArgs e)
+        {
+            NewProfile newp = new NewProfile("Custom", "", NewProfile.ProfileType.Filtering, this);
+            if (newp.profile != null)
+            {
+                SavePreset(newp.profile);
+                LoadProfiles();
+            }
+        }
+
+        private void button_remove_Click(object sender, RoutedEventArgs e)
+        {
+            string preset = Settings.Filtering;
+            if (preset == "Disabled")
+                return;
+
+            if (combo_profile.Items.Count > 1)
+            {
+                Message mess = new Message(this);
+                mess.ShowMessage(Languages.Translate("Do you realy want to remove profile") + " \"" + preset + "\"?",
+                    Languages.Translate("Question"), Message.MessageStyle.YesNo);
+
+                if (mess.result == Message.Result.Yes)
+                {
+                    int last_num = combo_profile.SelectedIndex;
+                    string profile_path = Calculate.StartupPath + "\\presets\\filtering\\" + preset + ".avs";
+
+                    try
+                    {
+                        File.Delete(profile_path);
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorException(Languages.Translate("Can`t delete profile") + ": " + ex.Message, ex.StackTrace);
+                        return;
+                    }
+
+                    //загружаем список пресетов
+                    combo_profile.Items.Clear();
+                    combo_profile.Items.Add("Disabled");
+                    try
+                    {
+                        foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering"))
+                            combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
+                    }
+                    catch (Exception) { }
+
+                    //прописываем текущий пресет
+                    if (last_num == 0)
+                    {
+                        //Самый первый пресет
+                        Settings.Filtering = combo_profile.Items[0].ToString();
+                    }
+                    else
+                    {
+                        //Предыдущий (перед удалённым) пресет
+                        Settings.Filtering = combo_profile.Items[last_num - 1].ToString();
+                    }
+                    combo_profile.SelectedItem = Settings.Filtering;
+                    combo_profile.UpdateLayout();
+
+                    LoadPreset();
+                }
+            }
+            else
+            {
+                new Message(this).ShowMessage(Languages.Translate("Not allowed removing the last profile!"), Languages.Translate("Warning"), Message.MessageStyle.Ok);
+            }
+        }
+
+        internal delegate void ErrorExceptionDelegate(string data, string info);
+        private void ErrorException(string data, string info)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
+            else
+            {
+                Message mes = new Message(this.IsLoaded ? this : Owner);
+                mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
         }
 	}
