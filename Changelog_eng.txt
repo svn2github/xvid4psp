@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.265.0 (22.09.2011), main changes:
+﻿XviD4PSP 5.10.266.0 (20.10.2011), main changes:
 
+>>> (r266) FFInfo: fixed a potential stderr buffer overflow.
 >>> (r265) MediaInfo: changed the column size for MediaInfo log. In previous versions of MediaInfo the size was
            32, in current versions the size is 40. XviD4PSP will customize this value to 35 (it can be changed in
            the registry: HKCU\Software\Winnydows\XviD4PSP5, the key MI_ColumnSize - is for XviD4PSP and the key

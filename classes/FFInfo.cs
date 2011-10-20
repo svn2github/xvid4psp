@@ -15,7 +15,6 @@ namespace XviD4PSP
         private static object locker = new object();
         private Process encoderProcess = null;
         private string[] global_lines = null;
-        private bool was_killed = false;
         public string info = null;
 
         public void Open(string filepath)
@@ -35,22 +34,18 @@ namespace XviD4PSP
             encoderProcess.StartInfo = pinfo;
             encoderProcess.Start();
 
-            //Ждём не более 10-ти секунд (для скриптов ждем чуть дольше)
-            int time = (Path.GetExtension(filepath).ToLower() == ".avs") ? 100000 : 10000;
-            encoderProcess.WaitForExit(time);
-
-            if (encoderProcess == null) return;
-            else if (!encoderProcess.HasExited)
+            //Читаем лог
+            while (encoderProcess != null && !encoderProcess.HasExited)
             {
-                was_killed = true;
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
+                info += encoderProcess.StandardError.ReadLine() + Environment.NewLine;
             }
 
-            //Читаем и сразу делим на строки (чтоб не делать одну и ту же работу по 10 раз)
-            info = encoderProcess.StandardError.ReadToEnd();
-            if (was_killed) info += "\r\nFFInfo: The waiting period has exceeded a given value of " + time + "ms. Aborted!";
-            if (info != null) global_lines = info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            //Дочитываем и сразу делим на строки
+            if (encoderProcess != null)
+            {
+                info += encoderProcess.StandardError.ReadToEnd();
+                if (info != null) global_lines = info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            }
         }
 
         public void Close()

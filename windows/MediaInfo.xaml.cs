@@ -148,19 +148,25 @@ namespace XviD4PSP
                     ff = new FFInfo();
                     ff.Open(infilepath);
 
-                    string sortedinfo = "";
-                    string[] lines = ff.info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-                    foreach (string line in lines)
+                    if (ff.info != null)
                     {
-                        if (!line.StartsWith("  configuration:") &&
-                            !line.StartsWith("  lib") &&
-                            !line.StartsWith("  built on") &&
-                            !line.StartsWith("At least one output") &&
-                            line != "")
-                            sortedinfo += line + Environment.NewLine;
-                    }
+                        string sortedinfo = "";
+                        string[] lines = ff.info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                        foreach (string line in lines)
+                        {
+                            if (!line.StartsWith("  configuration:") &&
+                                !line.StartsWith("  lib") &&
+                                !line.StartsWith("  built on") &&
+                                !line.StartsWith("At least one output") &&
+                                !line.StartsWith("This program is not") &&
+                                line != "")
+                                sortedinfo += line + Environment.NewLine;
+                        }
 
-                    tbxInfo.Text = sortedinfo;
+                        tbxInfo.Text = sortedinfo + "\r\n\r\n";
+                    }
+                    else
+                        tbxInfo.Clear();
 
                     //Размер файла
                     string size_s = "";
@@ -169,7 +175,7 @@ namespace XviD4PSP
                     else size_s = size.ToString("0.##", new System.Globalization.CultureInfo("en-US")) + " Mb\r\n";
 
                     //Общая инфа
-                    tbxInfo.Text += "\r\n\r\nGeneral:\r\n";
+                    tbxInfo.Text += "General:\r\n";
                     tbxInfo.Text += "Total streams       : " + ff.StreamsCount() + " (Video: " + ff.VideoStreams().Count + ", Audio: " + ff.AudioStreams().Count + ")\r\n";
                     tbxInfo.Text += "Total duration      : " + ff.Timeline() + " (" + ff.Duration().TotalSeconds.ToString("0.##", new System.Globalization.CultureInfo("en-US")) + " seconds)\r\n";
                     tbxInfo.Text += "Total bitrate       : " + ff.TotalBitrate() + " Kbps\r\n";

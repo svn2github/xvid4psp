@@ -350,17 +350,26 @@ namespace XviD4PSP
                 ff = new FFInfo();
                 ff.Open(filepath);
 
-                string sortedinfo = "";
-                string[] lines = ff.info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-                foreach (string line in lines)
+                if (ff.info != null)
                 {
-                    if (!line.StartsWith("  configuration:") &&
-                        !line.StartsWith("  lib") &&
-                        !line.StartsWith("  built on") &&
-                        !line.StartsWith("At least one output file") &&
-                        line != "")
-                        sortedinfo += line + Environment.NewLine;
+                    string sortedinfo = "";
+                    string[] lines = ff.info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                    foreach (string line in lines)
+                    {
+                        if (!line.StartsWith("  configuration:") &&
+                            !line.StartsWith("  lib") &&
+                            !line.StartsWith("  built on") &&
+                            !line.StartsWith("At least one output") &&
+                            !line.StartsWith("This program is not") &&
+                            line != "")
+                            sortedinfo += line + Environment.NewLine;
+                    }
+
+                    text_info.Text = sortedinfo;
+                    text_info.ScrollToEnd();
                 }
+                else
+                    text_info.Clear();
 
                 //Видео и аудио треки
                 vtracks = ff.VideoStreams(); //Все видео
@@ -379,9 +388,6 @@ namespace XviD4PSP
                     }
                 }
                 combo_atrack.SelectedIndex = 0;
-
-                text_info.Text = sortedinfo;
-                text_info.ScrollToEnd();
             }
             catch (Exception ex)
             {
