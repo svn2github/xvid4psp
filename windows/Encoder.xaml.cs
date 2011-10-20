@@ -276,6 +276,7 @@ namespace XviD4PSP
                 Win7Taskbar.SetProgressState(ActiveHandle, TBPF.NORMAL);
             }
 
+            encoder_fps = -1;
             last_update = TimeSpan.Zero;
         }
 
@@ -700,7 +701,7 @@ namespace XviD4PSP
                     if (mat.Success)
                     {
                         worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                        encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
+                        if (encoder_fps >= 0) encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
                     }
                     else
                     {
@@ -3808,6 +3809,11 @@ namespace XviD4PSP
                 IsErrors = true;
                 ErrorException(encodertext);
             }
+            else
+            {
+                //Удаление лога муксера
+                File.Delete(m.outfilepath + ".log");
+            }
 
             encodertext = null;
 
@@ -3882,7 +3888,7 @@ namespace XviD4PSP
                     //Определяем fps и оставшееся время
                     if (current_frame > 0)
                     {
-                        if (encoder_fps != 0.0)
+                        if (encoder_fps > 0)
                         {
                             //Берём fps от энкодеров
                             fps = encoder_fps;
@@ -3937,7 +3943,7 @@ namespace XviD4PSP
                         if (((System.Timers.Timer)source).Enabled)
                         {
                             string title = percent.ToString("##0.00") + "% encoding to: " + busyfile;
-                            string statistics = current_frame + "frames " + fps.ToString((encoder_fps != 0.0) ? "####0.00" : "####0") + "fps " + estimated_string;
+                            string statistics = current_frame + "frames " + fps.ToString((encoder_fps > 0) ? "####0.00" : "####0") + "fps " + estimated_string;
                             p.TrayIcon.Text = "Step: " + (step + 1).ToString() + " of " + steps.ToString() + " (" + percent.ToString("##0.00") + "%)\r\n" + estimated_string;
                             Win7Taskbar.SetProgressValue(ActiveHandle, Convert.ToUInt64(percent_total), total_pr_max);
                             SetStatus(title, statistics, current_frame, percent_total);
