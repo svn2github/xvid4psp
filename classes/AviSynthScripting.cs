@@ -51,12 +51,12 @@ namespace XviD4PSP
 
        public enum ScriptMode
        {
-           Info = 1,
-           Autocrop,
-           AudioOnly,
-           Interlace,
-           FastPreview,
-           Normalize
+           Info = 1,    //Video+Audio, без какой-либо обработки
+           VCrop,       //Video без звука и какой-либо обработки
+           Autocrop,    //Video без звука, LoadPlugin(AutoCrop.dll)+ConvertToYV12()+AutoCrop()
+           Interlace,   //Video без звука, LoadPlugin(TIVTC.dll)+ConvertToYV12()
+           FastPreview, //Video+Audio, включая обработку звука
+           Normalize,   //Video+Audio, включая обработку звука, но без AmplifydB()
        }
 
        public enum FramerateModifers { AssumeFPS = 1, ChangeFPS, ConvertFPS, ConvertMFlowFPS }
@@ -77,16 +77,23 @@ namespace XviD4PSP
                {
                    if (!ok && line.StartsWith("###[FILTERING]###"))
                    {
+                       //Нашли начало
                        ok = true;
-                       continue;
                    }
-                   else if (ok && line.StartsWith("###[FILTERING]###"))
+                   else if (ok)
                    {
-                       old_filtering = temp_filtering;
-                       break;
+                       if (line.StartsWith("###[FILTERING]###"))
+                       {
+                           //Нашли конец
+                           old_filtering = temp_filtering;
+                           break;
+                       }
+                       else
+                       {
+                           //Всё, что в промежутке между ними
+                           temp_filtering += line + Environment.NewLine;
+                       }
                    }
-
-                   if (ok) temp_filtering += line + Environment.NewLine;
                }
            }
 
@@ -815,14 +822,14 @@ namespace XviD4PSP
 
            //выбор аудио трека
            string audio = "";
-           if (m.vdecoder == Decoders.DirectShowSource && (mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace || instream.audiopath != null ||
-               !Settings.DSS_Enable_Audio || !Settings.EnableAudio))
+           if (m.vdecoder == Decoders.DirectShowSource && (mode == ScriptMode.VCrop || mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace ||
+               instream.audiopath != null || !Settings.DSS_Enable_Audio || !Settings.EnableAudio))
                audio = ", audio=false";
-           else if (m.vdecoder == Decoders.AVISource && (mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace || instream.audiopath != null ||
-               !Settings.EnableAudio))
+           else if (m.vdecoder == Decoders.AVISource && (mode == ScriptMode.VCrop || mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace ||
+               instream.audiopath != null || !Settings.EnableAudio))
                audio = ", audio=false";
            else if (m.vdecoder == Decoders.FFmpegSource2 && m.inaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio &&
-               Settings.EnableAudio && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
+               Settings.EnableAudio && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
                audio = ", atrack=" + (instream.ffid) + ", adjustdelay=-3";
 
            //ипортируем видео
@@ -877,7 +884,7 @@ namespace XviD4PSP
            }
 
            //импорт звука и объединение
-           if (m.inaudiostreams.Count > 0 && instream.audiopath != null && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
+           if (m.inaudiostreams.Count > 0 && instream.audiopath != null && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
            {
                //прописываем импорт видео
                script += "video = " + invideostring + Environment.NewLine;

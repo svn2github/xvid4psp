@@ -47,7 +47,7 @@ namespace XviD4PSP
             this.Owner = owner;
 
             //Создаем скрипт (т.к. текущий с кропом и ресайзом не годится)
-            script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
+            script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.VCrop);
 
             numl.Value = left = m.cropl;
             numr.Value = right = m.cropr;
