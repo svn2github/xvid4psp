@@ -14,12 +14,10 @@ using System.Timers;
 using System.Windows.Threading;
 using System.ComponentModel;
 
-
-
 namespace XviD4PSP
 {
-	public partial class Shutdown
-	{
+    public partial class Shutdown
+    {
         //[DllImport("Powrprof.dll")]
         //public static extern bool SetSuspendState(bool Hibernate, bool ForceCritical, bool DisableWakeEvent);
 
@@ -33,7 +31,9 @@ namespace XviD4PSP
         public Shutdown(System.Windows.Window owner, ShutdownMode mode)
         {
             this.InitializeComponent();
-            this.Owner = owner;
+            if (owner.IsVisible) this.Owner = owner;
+            else if (App.Current.MainWindow.IsVisible) this.Owner = App.Current.MainWindow;
+            else this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             this.mode = mode;
 
             button_cancel.Content = Languages.Translate("Cancel");
@@ -71,7 +71,7 @@ namespace XviD4PSP
             {
                 if (mode == ShutdownMode.Shutdown)
                 {
-                    ((MainWindow)Owner.Owner).IsExiting = true;
+                    ((MainWindow)App.Current.MainWindow).IsExiting = true;
                     PowerManager powerManager = new PowerManager();
                     powerManager.PowerOffComputer(false);
                 }
@@ -106,5 +106,5 @@ namespace XviD4PSP
         {
             IsCanceled = true;
         }
-	}
+    }
 }
