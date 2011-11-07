@@ -56,7 +56,7 @@ namespace XviD4PSP
             "\r\n" + Languages.Translate("Frame accurate seeking is not guaranteed!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_dss2 = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame accurate seeking when it`s possible.") +
-            "\r\n" + Languages.Translate("Path to the source file must not contain any non-Latin characters!") +
+            "\r\n" + Languages.Translate("Haali Media Splitter must be installed.") +
             "\r\n" + Languages.Translate("May hang when processing the last frames!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_ffms = Languages.Translate("This decoder (based on FFmpeg) uses their own splitters and decoders, but requires some extra time for indexing your file.") +
