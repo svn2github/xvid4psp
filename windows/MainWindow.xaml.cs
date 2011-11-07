@@ -2295,7 +2295,7 @@ namespace XviD4PSP
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
                 target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.") +
-                    "\r\n" + Languages.Translate("Enter - apply, Esc - cancel.");
+                    "\r\n" + Languages.Translate("You can also enter a time (HH:MM:SS.ms).") + "\r\n\r\n" + Languages.Translate("Enter - apply, Esc - cancel.");
 
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
@@ -6487,8 +6487,10 @@ namespace XviD4PSP
                 int frame;
                 if (int.TryParse(textbox_frame_goto.Text, out frame))
                 {
+                    //Введён номер кадра
                     if (graphBuilder != null)
                     {
+                        //Пересчет во время
                         TimeSpan newpos = TimeSpan.FromSeconds(frame / fps);
                         newpos = (newpos < TimeSpan.Zero) ? TimeSpan.Zero : (newpos > NaturalDuration) ? NaturalDuration : newpos;
                         if (Position != newpos) Position = newpos;
@@ -6500,9 +6502,24 @@ namespace XviD4PSP
                         if (pic_frame != frame) ShowWithPictureView(m.script, frame);
                     }
                 }
+                else if (textbox_frame_goto.Text.Contains(":"))
+                {
+                    //Введено время
+                    TimeSpan newpos;
+                    if (TimeSpan.TryParse(textbox_frame_goto.Text, out newpos))
+                    {
+                        if (graphBuilder != null || Pic.Visibility == Visibility.Visible)
+                        {
+                            newpos = (newpos < TimeSpan.Zero) ? TimeSpan.Zero : (newpos > NaturalDuration) ? NaturalDuration : newpos;
+                            if (Position != newpos) Position = newpos;
+                        }
+                    }
+                }
+
                 GoTo_Click(null, null);
             }
-            else if (e.Key == Key.Escape) GoTo_Click(null, null);
+            else if (e.Key == Key.Escape)
+                GoTo_Click(null, null);
         }
 
         private void GoTo_Click(object sender, MouseButtonEventArgs e)
