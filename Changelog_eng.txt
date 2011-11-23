@@ -1,5 +1,11 @@
-﻿XviD4PSP 5.10.271.0 (07.11.2011), main changes:
+﻿XviD4PSP 5.10.272.0 (23.11.2011), main changes:
 
+>>> (r272) Unlocked (and fixed) the code for determining the muxing progress when VirtualDubMod is used.
+>>> (r272) Changed the stdout encoding for MKVMerge (MKVInfo and MKVExtract) to UTF-8; removed "MKVRebuilder" window.
+>>> (r272) "Maintain anamorphic aspect" and "Always encode to progressive video" was removed from the "Global settings"
+           window, and from the "Resolution/Aspect->Settings" window was removed an option "Allow resolutions divisible by" - 
+           all of this is individual format settings from now.
+>>> (r272) Custom-format settings window is now available for other (mostly all) formats. A few new options was added.
 >>> (r271) Removed a warning for DirectShowSource2 about unacceptability of non-Latin characters in
            the pathes (an updated version of avss.dll does not suffer from this bug anymore).
 >>> (r270) Added ability to enter a time in frame counter (req. by Koks).

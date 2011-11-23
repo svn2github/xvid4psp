@@ -5,21 +5,22 @@
 	x:Class="XviD4PSP.Options_BluRay"
 	x:Name="Window"
 	Title="BluRay options:"
-	Width="420" Height="180" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	Width="420" Height="220" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
 			<GroupBox Foreground="#FFFFFFFF" x:Name="group_muxing" Header="Muxing" Margin="8,8,8,8" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
 				<Grid Width="Auto" Height="Auto">
-					<Label OpacityMask="{x:Null}" x:Name="label_type" Content="BluRay type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Top"/>
-					<ComboBox Margin="0,6.06,8,6.06" x:Name="combo_type" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="Auto" VerticalAlignment="Top" SelectionChanged="combo_type_SelectionChanged"/>
-					<CheckBox x:Name="check_direct_remux" Width="Auto" Height="Auto" Content="Use direct remuxing if possible" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="8,0,0,8" VerticalAlignment="Bottom" d:LayoutOverrides="Width" HorizontalAlignment="Left" Checked="check_direct_remux_Checked" Unchecked="check_direct_remux_Unchecked"/>
+					<Label OpacityMask="{x:Null}" x:Name="label_type" Content="BluRay type:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="4,2,0,0" VerticalAlignment="Top"/>
+					<ComboBox Margin="0,6,8,6" x:Name="combo_type" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Width="Auto" VerticalAlignment="Top" SelectionChanged="combo_type_SelectionChanged"/>
+					<CheckBox x:Name="check_direct_remux" Width="Auto" Height="Auto" Content="Use direct remuxing if possible" FontSize="14" Foreground="#FFFFFFFF" Margin="8,0,0,44" VerticalAlignment="Bottom" d:LayoutOverrides="Width" HorizontalAlignment="Left" Click="check_direct_remux_Click"/>
+                    <CheckBox x:Name="check_dont_mux" Width="Auto" Height="Auto" Content="Don`t multiplex video and audio" FontSize="14" Foreground="#FFFFFFFF" Margin="8,0,0,26" VerticalAlignment="Bottom" d:LayoutOverrides="Width" HorizontalAlignment="Left" Click="check_dont_mux_Click"/>
+                    <CheckBox x:Name="check_interlace" Width="Auto" Height="Auto" Content="Interlace is allowed" FontSize="14" Foreground="#FFFFFFFF" Margin="8,0,0,8" VerticalAlignment="Bottom" d:LayoutOverrides="Width" HorizontalAlignment="Left" Click="check_interlace_Click"/>
 				</Grid>
 			</GroupBox>
 		</Grid>
 		<Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.96" Background="{DynamicResource black_gradient}">
-			<Button x:Name="button_cancel" Height="Auto" Content="Cancel" BorderThickness="1,1,1,1" Click="button_cancel_Click" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,8,8,8" Width="80" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
-			<Button x:Name="button_ok" Height="Auto" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Margin="0,8,92,8" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Width="80"/>
+			<Button x:Name="button_ok" Height="Auto" Content="Ok" Template="{DynamicResource GlassButton}" Foreground="#FFFFFFFF" Margin="0,8,8,8" HorizontalAlignment="Right" Width="80" Click="button_ok_Click"/>
 		</Grid>
 	</Grid>
 </Window>

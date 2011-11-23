@@ -11,7 +11,7 @@ namespace XviD4PSP
 
        public enum ExportFormats
        {
-           Audio,
+           Audio = 0,
            Avi,
            AviHardware,
            AviHardwareHD,
@@ -20,9 +20,9 @@ namespace XviD4PSP
            AviDVNTSC,
            AviDVPAL,
            Flv,
-           Mov,
-           ThreeGP,
            Mkv,
+           ThreeGP,
+           Mov,
            Mp4,
            Mp4Archos5G,
            Mp4ToshibaG900,
@@ -39,8 +39,8 @@ namespace XviD4PSP
            Mp4AppleTV,
            Mp4Prada,
            Mp4PS3,
-           Mp4PSPAVC,
            Mp4PSPAVCTV,
+           Mp4PSPAVC,
            Mp4PSPASP,
            Mpeg1PS,
            Mpeg2PS,
@@ -48,15 +48,14 @@ namespace XviD4PSP
            Mpeg2PAL,
            TS,
            M2TS,
+           BluRay,
            PmpAvc,
            DpgNintendoDS,
-           WMV,
-           BluRay,
            Custom
        }
 
-       public enum Muxers { ffmpeg = 1, mplex, mp4box, divxmux, mkvmerge, pmpavc, virtualdubmod, tsmuxer, dpgmuxer, Disabled };
-       public enum Demuxers { ffmpeg, mp4box, pmpdemuxer, mkvextract, tsmuxer, dpgmuxer, h264tsto };
+       public enum Muxers { ffmpeg = 1, mp4box, mkvmerge, pmpavc, virtualdubmod, tsmuxer, dpgmuxer, Disabled };
+       public enum Demuxers { ffmpeg, mp4box, pmpdemuxer, mkvextract, tsmuxer, dpgmuxer };
 
        public static string EnumToString(ExportFormats formatenum)
        {
@@ -99,7 +98,6 @@ namespace XviD4PSP
            if (formatenum == ExportFormats.M2TS) return "M2TS";
            if (formatenum == ExportFormats.TS) return "TS";
            if (formatenum == ExportFormats.DpgNintendoDS) return "DPG Nintendo DS";
-           if (formatenum == ExportFormats.WMV) return "WMV";
            if (formatenum == ExportFormats.BluRay) return "BluRay";
            if (formatenum == ExportFormats.Custom) return "Custom";
 
@@ -147,7 +145,6 @@ namespace XviD4PSP
            if (stringformat == "M2TS") return ExportFormats.M2TS;
            if (stringformat == "TS") return ExportFormats.TS;
            if (stringformat == "DPG Nintendo DS") return ExportFormats.DpgNintendoDS;
-           if (stringformat == "WMV") return ExportFormats.WMV;
            if (stringformat == "BluRay") return ExportFormats.BluRay;
            if (stringformat == "Custom") return ExportFormats.Custom;
 
@@ -157,11 +154,9 @@ namespace XviD4PSP
        public static string[] GetFormatList()
        {
            ArrayList formatlist = new ArrayList();
-           foreach (string cformats in Enum.GetNames(typeof(ExportFormats)))
+           foreach (ExportFormats cformat in Enum.GetValues(typeof(ExportFormats)))
            {
-               ExportFormats cformat = (ExportFormats)Enum.Parse(typeof(ExportFormats), cformats);
-               if (cformat != ExportFormats.WMV)
-                   formatlist.Add(EnumToString(cformat));
+               formatlist.Add(EnumToString(cformat));
            }
            return Calculate.ConvertArrayListToStringArray(formatlist);
        }
@@ -172,79 +167,28 @@ namespace XviD4PSP
 
            switch (format)
            {
-               case ExportFormats.PmpAvc:
-               case ExportFormats.Mp4iPod50G:
-               case ExportFormats.Mp4iPod55G:
-               case ExportFormats.Mp4iPhone:
-               case ExportFormats.Mp4AppleTV:
-               case ExportFormats.Mkv:
-               case ExportFormats.Mp4:
-               case ExportFormats.Mov:
-               case ExportFormats.ThreeGP:
-               case ExportFormats.Mp4Archos5G:
-               case ExportFormats.Mp4ToshibaG900:
-               case ExportFormats.Mp4Nokia5700:
-                   return new string[] { "x264", "MPEG4", "XviD", "Copy" };
-
-               case ExportFormats.Mp4PSPAVC:
-               case ExportFormats.Mp4PSPAVCTV:
-               case ExportFormats.Mp4PS3:
-                   return new string[] { "x264", "Copy" };
-
-               case ExportFormats.Mp4PSPASP:
-                   return new string[] { "MPEG4", "XviD", "Copy" };
-
-               case ExportFormats.Avi:
-                   return new string[] { "x264", "MPEG4", "FLV1", "MJPEG", "HUFF", "FFV1", "XviD", "Copy" };
-
-               case ExportFormats.AviHardware:
-               case ExportFormats.AviHardwareHD:
-                   return new string[] { "MPEG4", "XviD", "Copy" };
-
-               case ExportFormats.AviDVPAL:
-               case ExportFormats.AviDVNTSC:
-                   return new string[] { "DV", "Copy" };
-
-               case ExportFormats.Flv:
-                   return new string[] { "FLV1", "x264", "Copy" };
-
-               case ExportFormats.AviiRiverClix2:
-               case ExportFormats.Mp4Prada:
-               case ExportFormats.Mp4BlackBerry8100:
-               case ExportFormats.Mp4BlackBerry8800:
-               case ExportFormats.Mp4BlackBerry8830:
-               case ExportFormats.Mp4MotorolaK1:
-               case ExportFormats.Mp4SonyEricssonK800:
-               case ExportFormats.Mp4SonyEricssonK610:
-               case ExportFormats.AviMeizuM6:
-                   return new string[] { "MPEG4", "XviD", "Copy" };
-
-               case ExportFormats.Mpeg2PAL:
-               case ExportFormats.Mpeg2NTSC:
-                   return new string[] { "MPEG2", "Copy" };
-
-               case ExportFormats.Mpeg2PS:
-                   return new string[] { "MPEG2", "Copy" };
-
-               case ExportFormats.DpgNintendoDS:
                case ExportFormats.Mpeg1PS:
-                   return new string[] { "MPEG1", "Copy" };
+               case ExportFormats.DpgNintendoDS:
+                   return new string[] { "MPEG1" };
 
-               case ExportFormats.M2TS:
-               case ExportFormats.TS:
                case ExportFormats.BluRay:
-                   return new string[] { "MPEG2", "x264", "Copy" };
+                   return new string[] { "MPEG2", "x264" };
 
-               case ExportFormats.WMV:
-                   return new string[] { "WMV3", "Copy" };
-
-               case ExportFormats.Custom:
-                   return FormatReader.GetFormatInfo("Custom", "GetVCodecs", new string[] { "x264", "MPEG1", "MPEG2",
-                       "MPEG4", "FLV1", "MJPEG", "HUFF", "FFV1", "XviD", "DV", "Copy" });
-
-               default:
-                   return null;
+               case ExportFormats.PmpAvc:
+                   return new string[] { "x264", "MPEG4", "XviD" };
            }
+
+           if (Formats.GetDefaults(format).IsEditable)
+           {
+               if (Formats.GetDefaults(format).VCodecs_IsEditable)
+               {
+                   return Formats.GetSettings(format, "VCodecs", Formats.GetDefaults(format).VCodecs);
+               }
+
+               return Formats.GetDefaults(format).VCodecs;
+           }
+
+           return new string[] { "x264", "MPEG4", "FLV1", "MJPEG", "HUFF", "FFV1", "XviD" };
        }
 
        public static string[] GetACodecsList(ExportFormats format)
@@ -254,85 +198,28 @@ namespace XviD4PSP
                case ExportFormats.Audio:
                    return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC" };
 
-               case ExportFormats.PmpAvc:
-               case ExportFormats.Mp4Archos5G:
-               case ExportFormats.Mp4BlackBerry8100:
-               case ExportFormats.Mp4BlackBerry8800:
-               case ExportFormats.Mp4BlackBerry8830:
-               case ExportFormats.Mp4MotorolaK1:
-               case ExportFormats.Mp4ToshibaG900:
-               case ExportFormats.Mp4SonyEricssonK800:
-               case ExportFormats.Mp4SonyEricssonK610:
-                   return new string[] { "MP3", "AAC", "Disabled", "Copy" };
-
-               case ExportFormats.Flv:
-                   return new string[] { "MP3", "AAC", "Disabled", "Copy" };
-
-               case ExportFormats.Mp4iPod50G:
-               case ExportFormats.Mp4iPod55G:
-               case ExportFormats.Mp4iPhone:
-               case ExportFormats.Mp4Prada:
-               case ExportFormats.Mp4Nokia5700:
-                   return new string[] { "AAC", "Disabled", "Copy" };
-
-               case ExportFormats.AviiRiverClix2:
-               case ExportFormats.AviMeizuM6:
-                   return new string[] { "MP3", "MP2", "Disabled", "Copy" };
-
-               case ExportFormats.Mp4PSPAVC:
-               case ExportFormats.Mp4PSPAVCTV:
-               case ExportFormats.Mp4PSPASP:
-               case ExportFormats.Mp4PS3:
-               case ExportFormats.Mp4AppleTV:
-                   return new string[] { "AAC", "Disabled", "Copy" };
-
-               case ExportFormats.Mp4:
-               case ExportFormats.Mov:
-                   return new string[] { "MP3", "MP2", "AC3", "AAC", "Disabled", "Copy" };
-
-               case ExportFormats.ThreeGP:
-                   return new string[] { "MP3", "MP2", "AAC", "Disabled", "Copy" };
-
-               case ExportFormats.Mkv:
-                   return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC", "Disabled", "Copy" };
-
-               case ExportFormats.DpgNintendoDS:
                case ExportFormats.Mpeg1PS:
-                   return new string[] { "MP2", "Disabled", "Copy" };
-
-               case ExportFormats.Mpeg2PS:
-                   return new string[] { "MP2", "AC3", "Disabled", "Copy" };
-
-               case ExportFormats.M2TS:
-               case ExportFormats.TS:
-                   return new string[] { "PCM", "AAC", "MP2", "MP3", "AC3", "Disabled", "Copy" };
+               case ExportFormats.DpgNintendoDS:
+                   return new string[] { "MP2" };
 
                case ExportFormats.BluRay:
-                   return new string[] { "PCM", "AC3", "Disabled", "Copy" };
+                   return new string[] { "PCM", "AC3" };
 
-               case ExportFormats.Mpeg2PAL:
-               case ExportFormats.Mpeg2NTSC:
-                   return new string[] { "MP2", "AC3", "Disabled", "Copy" };
-
-               case ExportFormats.AviDVPAL:
-               case ExportFormats.AviDVNTSC:
-                   return new string[] { "PCM", "Disabled", "Copy" };
-
-               case ExportFormats.AviHardware:
-               case ExportFormats.AviHardwareHD:
-               case ExportFormats.Avi:
-                   return new string[] { "PCM", "AC3", "MP3", "MP2", "Disabled", "Copy" };
-
-               case ExportFormats.WMV:
-                   return new string[] { "WMA3", "Disabled", "Copy" };
-
-               case ExportFormats.Custom:
-                   return FormatReader.GetFormatInfo("Custom", "GetACodecs", new string[] { "PCM", "FLAC", "AAC",
-                       "MP2", "MP3", "AC3", "Disabled", "Copy" });
-               
-               default:
-                   return null;
+               case ExportFormats.PmpAvc:
+                   return new string[] { "MP3", "AAC" };
            }
+
+           if (Formats.GetDefaults(format).IsEditable)
+           {
+               if (Formats.GetDefaults(format).ACodecs_IsEditable)
+               {
+                   return Formats.GetSettings(format, "ACodecs", Formats.GetDefaults(format).ACodecs);
+               }
+
+               return Formats.GetDefaults(format).ACodecs;
+           }
+
+           return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC" };
        }
 
        public static AviSynthScripting.Decoders GetValidVDecoder(Massive m)
@@ -420,21 +307,32 @@ namespace XviD4PSP
            if (m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
                m.interlace == SourceType.INTERLACED)
            {
-               if (m.outvcodec == "MPEG2" ||
-                   m.outvcodec == "MPEG1" && m.format != ExportFormats.DpgNintendoDS ||
-                   m.outvcodec == "DV" ||
-                   m.outvcodec == "HUFF" ||
-                   m.outvcodec == "FFV1" ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.Avi ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.AviHardware ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.AviHardwareHD ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.BluRay ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.M2TS ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.Mkv ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.TS ||
-                   m.outvcodec == "x264" && m.format == ExportFormats.Custom)
+               if (Formats.GetDefaults(m.format).IsEditable)
                {
-                   if (Settings.AlwaysProgressive)
+                   bool interlace_allowed = false;
+                   if (Formats.GetDefaults(m.format).Interlaced_IsEditable)
+                       interlace_allowed = Formats.GetSettings(m.format, "Interlaced", Formats.GetDefaults(m.format).Interlaced);
+                   else
+                       interlace_allowed = Formats.GetDefaults(m.format).Interlaced;
+
+                   if (m.outvcodec == "MPEG2" ||
+                       m.outvcodec == "DV" ||
+                       m.outvcodec == "HUFF" ||
+                       m.outvcodec == "FFV1" ||
+                       m.outvcodec == "x264" ||
+                       m.outvcodec == "XviD")
+                   {
+                       if (interlace_allowed)
+                           m.deinterlace = DeinterlaceType.Disabled;
+                       else
+                           m.deinterlace = Settings.Deint_Interlaced;
+                   }
+                   else
+                       m.deinterlace = Settings.Deint_Interlaced;
+               }
+               else if (m.format == ExportFormats.BluRay)
+               {
+                   if (!Convert.ToBoolean(Settings.GetFormatPreset(Format.ExportFormats.BluRay, "interlaced")))
                        m.deinterlace = Settings.Deint_Interlaced;
                    else
                        m.deinterlace = DeinterlaceType.Disabled;
@@ -515,7 +413,8 @@ namespace XviD4PSP
                return 1;
            else if (ch == "ConvertToStereo" || ch == "ConvertToDolbyProLogic" || ch == "ConvertToDolbyProLogicII" || ch == "ConvertToDolbyProLogicIILFE")
                return 2;
-           else return 6;
+           else
+               return 6;
        }
 
        public static Massive GetValidChannelsConverter(Massive m)
@@ -528,6 +427,15 @@ namespace XviD4PSP
                instream.channelconverter = (AudioOptions.ChannelConverters)Enum.Parse(typeof(AudioOptions.ChannelConverters), Settings.ChannelsConverter, true); //AudioOptions.ChannelConverters.KeepOriginalChannels;
                int n = GetSettingsChannels();
 
+               bool limited_to_stereo = false;
+               if (Formats.GetDefaults(m.format).IsEditable)
+               {
+                   if (Formats.GetDefaults(m.format).LimitedToStereo_IsEditable)
+                       limited_to_stereo = Formats.GetSettings(m.format, "LimitedToStereo", Formats.GetDefaults(m.format).LimitedToStereo);
+                   else
+                       limited_to_stereo = Formats.GetDefaults(m.format).LimitedToStereo;
+               }
+
                if (m.format == ExportFormats.PmpAvc)
                {
                    if (instream.channels != 2 && n != 2)
@@ -535,31 +443,7 @@ namespace XviD4PSP
                    if (instream.channels == 2 && n != 0)
                        instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
                }
-               else if (m.format == ExportFormats.AviDVNTSC ||
-                       m.format == ExportFormats.AviDVPAL ||
-                       m.format == ExportFormats.AviiRiverClix2 ||
-                       m.format == ExportFormats.Flv ||
-                       m.format == ExportFormats.Mp4BlackBerry8100 ||
-                       m.format == ExportFormats.Mp4BlackBerry8800 ||
-                       m.format == ExportFormats.Mp4BlackBerry8830 ||
-                       m.format == ExportFormats.Mp4SonyEricssonK800 ||
-                       m.format == ExportFormats.Mp4SonyEricssonK610 ||
-                       m.format == ExportFormats.Mp4MotorolaK1 ||
-                       m.format == ExportFormats.Mp4iPhone ||
-                       m.format == ExportFormats.Mp4iPod50G ||
-                       m.format == ExportFormats.Mp4iPod55G ||
-                       m.format == ExportFormats.Mp4Prada ||
-                       m.format == ExportFormats.ThreeGP ||
-                       m.format == ExportFormats.Mp4PSPAVC ||
-                       m.format == ExportFormats.Mp4PSPAVCTV ||
-                       m.format == ExportFormats.Mp4PSPASP ||
-                       m.format == ExportFormats.Mp4Archos5G ||
-                       m.format == ExportFormats.Mp4ToshibaG900 ||
-                       m.format == ExportFormats.Mp4Nokia5700 ||
-                       m.format == ExportFormats.AviMeizuM6 ||
-                       outstream.codec == "MP2" ||
-                       outstream.codec == "MP3" ||
-                       m.format == ExportFormats.Custom && FormatReader.GetFormatInfo("Custom", "IsLimitedToStereo", false))
+               else if (outstream.codec == "MP2" || outstream.codec == "MP3" || limited_to_stereo)
                {
                    if (instream.channels == 1 && n == 6 || instream.channels == 1 && n == 1)
                        instream.channelconverter = AudioOptions.ChannelConverters.KeepOriginalChannels;
@@ -638,42 +522,63 @@ namespace XviD4PSP
        {
            if (m.format == ExportFormats.PmpAvc)
                return new string[] { "44100" };
-           else if (m.format == ExportFormats.Flv)
-               return new string[] { "44100" };
-           else if (m.format == ExportFormats.AviDVPAL ||
-               m.format == ExportFormats.AviDVNTSC)
-               return new string[] { "32000", "48000" };
            else if (m.format == ExportFormats.DpgNintendoDS)
                return new string[] { "32000", "48000" }; //"32768"
-           else if (m.format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "GetValidSamplerates", new string[] { "22050", "32000", "44100", "48000" });
+           else if (Formats.GetDefaults(m.format).IsEditable)
+           {
+               string[] rates;
+               if (Formats.GetDefaults(m.format).Samplerates_IsEditable)
+               {
+                   rates = Formats.GetSettings(m.format, "Samplerates", Formats.GetDefaults(m.format).Samplerates);
+               }
+               else
+                   rates = Formats.GetDefaults(m.format).Samplerates;
+
+               bool auto = false;
+               foreach (string rate in rates)
+               {
+                   if (rate.ToLower() == "auto") auto = true;
+               }
+               if (!auto) return rates;
+           }
+
+           AudioStream outstream;
+           if (m.outaudiostreams.Count > 0)
+               outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
            else
            {
-               AudioStream outstream;
-               if (m.outaudiostreams.Count > 0)
-                   outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-               else
-               {
-                   outstream = new AudioStream();
-                   outstream.encoding = Settings.GetAEncodingPreset(Settings.FormatOut);
-                   outstream.codec = PresetLoader.GetACodec(m.format, outstream.encoding);
-               }
-
-               if (outstream.codec == "MP3" || outstream.codec == "MP2")
-                   return new string[] { "32000", "44100", "48000" };
-               else if (m.format == ExportFormats.TS && outstream.codec == "PCM" ||
-                   m.format == ExportFormats.M2TS && outstream.codec == "PCM" ||
-                   m.format == ExportFormats.BluRay && outstream.codec == "PCM")
-                   return new string[] { "48000", "96000", "192000" };
-               else if (outstream.codec == "PCM" || outstream.codec == "LPCM")
-                   return new string[] { "22050", "32000", "44100", "48000", "96000", "192000" };
-               else if (outstream.codec == "AC3")
-                   return new string[] { "48000" };
-               else if (outstream.codec == "WMA3")
-                   return new string[] { "22050", "32000", "44100", "48000" };
-               else
-                   return new string[] { "22050", "32000", "44100", "48000" };
+               outstream = new AudioStream();
+               outstream.encoding = Settings.GetAEncodingPreset(Settings.FormatOut);
+               outstream.codec = PresetLoader.GetACodec(m.format, outstream.encoding);
            }
+
+           if (m.format == ExportFormats.Flv)
+               return new string[] { "44100" };
+           else if (m.format == ExportFormats.AviDVPAL || m.format == ExportFormats.AviDVNTSC)
+               return new string[] { "32000", "48000" };
+           else if (outstream.codec == "MP3" || outstream.codec == "MP2")
+               return new string[] { "32000", "44100", "48000" };
+           else if (outstream.codec == "AC3")
+           {
+               if (m.format == ExportFormats.AviHardware || m.format == ExportFormats.AviHardwareHD ||
+                   m.format == ExportFormats.Mpeg2PS || m.format == ExportFormats.Mpeg2PAL ||
+                   m.format == ExportFormats.Mpeg2NTSC || m.format == ExportFormats.TS ||
+                   m.format == ExportFormats.M2TS || m.format == ExportFormats.BluRay) //Audio mp4 mov mkv
+                   return new string[] { "48000" };
+               else
+                   return new string[] { "32000", "44100", "48000" };
+           }
+           else if (outstream.codec == "PCM" || outstream.codec == "LPCM")
+           {
+               if (m.format == ExportFormats.TS || m.format == ExportFormats.M2TS || m.format == ExportFormats.BluRay)
+                   return new string[] { "48000", "96000", "192000" };
+               else if (m.format == ExportFormats.Mpeg2PS || m.format == ExportFormats.Mpeg2PAL || m.format == ExportFormats.Mpeg2NTSC)
+                   return new string[] { "48000" };
+               else
+                   return new string[] { "22050", "32000", "44100", "48000", "96000", "192000" };
+           }
+           else
+               return new string[] { "22050", "32000", "44100", "48000" };
        }
 
        public static Massive GetValidFramerate(Massive m)
@@ -696,133 +601,40 @@ namespace XviD4PSP
 
        public static string[] GetValidFrameratesList(Massive m)
        {
-           if (m.format == ExportFormats.AviDVPAL)
-               return new string[] { "25.000" };
-
-           else if (m.format == ExportFormats.AviDVNTSC)
-               return new string[] { "29.970" };
-
-           else if (m.format == ExportFormats.Avi ||
-               m.format == ExportFormats.Mkv ||
-               m.format == ExportFormats.Mp4 ||
-               m.format == ExportFormats.WMV)
-               return new string[] { "0.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940", "60.000", "120.000" };
-
-           else if (m.format == ExportFormats.Mov)
-               return new string[] { "0.000", "11.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970" };
-
-           else if (m.format == ExportFormats.AviHardware ||
-               m.format == ExportFormats.AviHardwareHD)
-               return new string[] { "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940" };
-
-           else if (m.format == ExportFormats.Mp4SonyEricssonK610 ||
-               m.format == ExportFormats.AviMeizuM6)
-               return new string[] { "15.000", "18.000", "20.000" };
-
-           else if (m.format == ExportFormats.Mp4Nokia5700)
-               return new string[] { "15.000" };
-
-           else if (m.format == ExportFormats.Mp4SonyEricssonK800)
-               return new string[] { "15.000", "18.000", "20.000", "23.976", "24.000", "25.000" };
-
-           else if (m.format == ExportFormats.Mpeg2PAL)
-               return new string[] { "23.976", "24.000", "25.000" };
-
-           else if (m.format == ExportFormats.Mpeg2NTSC)
-               return new string[] { "23.976", "24.000", "25.000", "29.970" };
-
-           else if (m.format == ExportFormats.Mp4PS3)
-               return new string[] { "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940" };
-
-           else if (m.format == ExportFormats.DpgNintendoDS)
+           if (m.format == ExportFormats.DpgNintendoDS)
                return new string[] { "20.000", "22.000", "24.000", "25.000" };
 
-           else if (m.format == ExportFormats.M2TS ||
-           m.format == ExportFormats.TS ||
-           m.format == ExportFormats.BluRay ||
-           m.format == ExportFormats.Mpeg2PS ||
-           m.format == ExportFormats.Mpeg1PS)
+           else if (m.format == ExportFormats.Mpeg1PS || m.format == ExportFormats.BluRay)
                return new string[] { "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940" };
 
-           else if (m.format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "GetValidFramerates", new string[] { "20.000", "23.976", "24.000",
-                   "25.000", "29.970", "30.000", "50.000", "59.940", "60.000" });
+           else if (Formats.GetDefaults(m.format).IsEditable)
+           {
+               if (Formats.GetDefaults(m.format).Framerates_IsEditable)
+               {
+                   return Formats.GetSettings(m.format, "Framerates", Formats.GetDefaults(m.format).Framerates);
+               }
 
-           else
-               return new string[] { "11.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970" };
+               return Formats.GetDefaults(m.format).Framerates;
+           }
+
+           return new string[] { "11.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970" };
        }
 
        public static string GetValidExtension(Massive m)
        {
            switch (m.format)
            {
-               default:
-               case ExportFormats.Mp4:
-               case ExportFormats.Mp4PSPAVC:
-               case ExportFormats.Mp4PSPAVCTV:
-               case ExportFormats.Mp4PSPASP:
-               case ExportFormats.Mp4PS3:
-               case ExportFormats.Mp4iPod50G:
-               case ExportFormats.Mp4iPod55G:
-               case ExportFormats.Mp4iPhone:
-               case ExportFormats.Mp4Prada:
-               case ExportFormats.Mp4BlackBerry8100:
-               case ExportFormats.Mp4BlackBerry8800:
-               case ExportFormats.Mp4BlackBerry8830:
-               case ExportFormats.Mp4SonyEricssonK800:
-               case ExportFormats.Mp4SonyEricssonK610:
-               case ExportFormats.Mp4MotorolaK1:
-               case ExportFormats.Mp4AppleTV:
-               case ExportFormats.Mp4Archos5G:
-               case ExportFormats.Mp4ToshibaG900:
-               case ExportFormats.Mp4Nokia5700:
-                   return ".mp4";
-
-               case ExportFormats.Mkv:
-                   return ".mkv";
-
-               case ExportFormats.ThreeGP:
-                   return ".3gp";
-
-               case ExportFormats.Mov:
-                   return ".mov";
-
                case ExportFormats.PmpAvc:
                    return ".pmp";
 
-               case ExportFormats.Flv:
-                   return ".flv";
-
-               case ExportFormats.Avi:
-               case ExportFormats.AviHardware:
-               case ExportFormats.AviHardwareHD:
-               case ExportFormats.AviDVPAL:
-               case ExportFormats.AviDVNTSC:
-               case ExportFormats.AviiRiverClix2:
-               case ExportFormats.AviMeizuM6:
-                   return ".avi";
-
-               case ExportFormats.Mpeg2PAL:
-               case ExportFormats.Mpeg2NTSC:
-               case ExportFormats.Mpeg2PS:
                case ExportFormats.Mpeg1PS:
                    return ".mpg";
 
-               case ExportFormats.TS:
-                   return ".ts";
-
-               case ExportFormats.M2TS:
                case ExportFormats.BluRay:
                    return ".m2ts";
 
                case ExportFormats.DpgNintendoDS:
                    return ".dpg";
-
-               case ExportFormats.WMV:
-                   return ".wmv";
-
-               case ExportFormats.Custom:
-                   return "." + FormatReader.GetFormatInfo("Custom", "GetValidExtension", "mkv");
 
                case ExportFormats.Audio:
                    {
@@ -833,8 +645,42 @@ namespace XviD4PSP
                            else if (outstream.codec == "PCM") return ".wav";
                            else return "." + outstream.codec.ToLower();
                        }
-                       return ".avs";
+                       return ".nope";
                    }
+           }
+
+           if (Formats.GetDefaults(m.format).IsEditable)
+           {
+               if (Formats.GetDefaults(m.format).Extensions.Length > 1)
+               {
+                   string ext = Formats.GetSettings(m.format, "Extension", Formats.GetDefaults(m.format).Extension).ToLower();
+                   foreach (string exts in Formats.GetDefaults(m.format).Extensions)
+                   {
+                       if (exts == "*" || exts == ext) return "." + ext;
+                   }
+               }
+
+               return "." + Formats.GetDefaults(m.format).Extension;
+           }
+
+           return ".mp4";
+       }
+
+       public static void GetLimitedRes(Format.ExportFormats format, ref int MaxW, ref int MaxH)
+       {
+           //Максимальное разрешение, устанавливаемое в Авто-режиме
+           if (Formats.GetDefaults(format).IsEditable)
+           {
+               if (Formats.GetDefaults(format).Resolution_IsEditable)
+               {
+                   MaxW = Formats.GetSettings(format, "MidW", Formats.GetDefaults(format).MidW);
+                   MaxH = Formats.GetSettings(format, "MidH", Formats.GetDefaults(format).MidH);
+               }
+               else
+               {
+                   MaxW = Formats.GetDefaults(format).MidW;
+                   MaxH = Formats.GetDefaults(format).MidH;
+               }
            }
        }
 
@@ -843,74 +689,44 @@ namespace XviD4PSP
            ArrayList wlist = GetResWList(m);
            ArrayList hlist = GetResHList(m);
 
-           //блок для форматов с анаморфом
-           if (Settings.SaveAnamorph || m.aspectfix == AspectResolution.AspectFixes.SAR)
+           //Определяем лимиты
+           int MaxW = (int)wlist[wlist.Count - 1];
+           int MaxH = (int)hlist[hlist.Count - 1];
+           GetLimitedRes(m.format, ref MaxW, ref MaxH);
+
+           bool anamorph_allowed = false;
+           if (Formats.GetDefaults(m.format).IsEditable)
            {
-               if (m.format == ExportFormats.TS ||
-                   m.format == ExportFormats.M2TS ||
-                   m.format == ExportFormats.Mkv ||
-                   m.format == ExportFormats.Mp4 ||
-                   m.format == ExportFormats.Mp4PS3 ||
-                   m.format == ExportFormats.Mov ||
-                   m.format == ExportFormats.Avi ||
-                   m.format == ExportFormats.AviHardware ||
-                   m.format == ExportFormats.AviHardwareHD ||
-                   m.format == ExportFormats.Custom && FormatReader.GetFormatInfo("Custom", "CanBeAnamorphic", false))
+               if (Formats.GetDefaults(m.format).Anamorphic_IsEditable)
+                   anamorph_allowed = Formats.GetSettings(m.format, "Anamorphic", Formats.GetDefaults(m.format).Anamorphic);
+               else
+                   anamorph_allowed = Formats.GetDefaults(m.format).Anamorphic;
+           }
+
+           //Обработка анаморфа
+           if (anamorph_allowed || m.aspectfix == AspectResolution.AspectFixes.SAR)
+           {
+               if (m.blackh == 0 && m.blackw == 0)
                {
-                   if (m.blackh == 0 && m.blackw == 0)
+                   //Накладываем лимиты
+                   int w = Math.Min(m.inresw, MaxW);
+                   int h = Math.Min(m.inresh, MaxH);
+
+                   //Если у нас анаморф на входе или сработали лимиты
+                   if ((double)m.inresw / (double)m.inresh != m.inaspect ||
+                       m.inresw != w || m.inresh != h)
                    {
-                       if (wlist.Contains(m.inresw) && hlist.Contains(m.inresh))
-                       {
-                           m.outresw = m.inresw;
-                           m.outresh = m.inresh;
-                           //m.inaspect = m.outaspect;
-                           //Если у нас анаморф на входе
-                           if ((double)m.inresw / (double)m.inresh != m.inaspect)
-                           {
-                               m.aspectfix = AspectResolution.AspectFixes.SAR;
-                               m.outresw = Calculate.GetCloseIntegerAL(m.outresw - m.cropl - m.cropr, wlist); //Пересчет ширины с учетом откропленного
-                               m.outresh = Calculate.GetCloseIntegerAL(m.inresh - m.cropb - m.cropt, hlist); //Пересчет высоты с учётом откропленного
-                           }
-                           return m;
-                       }
+                       //Пересчет разрешения с учетом откропленного и лимитов
+                       w = Math.Min(m.inresw - m.cropl - m.cropr, MaxW);
+                       h = Math.Min(m.inresh - m.cropt - m.cropb, MaxH);
+                       m.aspectfix = AspectResolution.AspectFixes.SAR;
                    }
+
+                   //Еще раз перепроверяем
+                   m.outresw = Calculate.GetCloseIntegerAL(w, wlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(h, hlist);
+                   return m;
                }
-           }
-
-           int MaxW = 0;
-           int MaxH = 0;
-
-           if (m.format == ExportFormats.AviHardware)
-           {
-               MaxW = 640;
-               MaxH = 480;
-           }
-           else if (m.format == ExportFormats.Mp4Archos5G)
-           {
-               MaxW = 720;
-               MaxH = 480;
-           }
-           else if (m.format == ExportFormats.Mp4ToshibaG900)
-           {
-               MaxW = 640;
-               MaxH = 480;
-           }
-           else if (m.format == ExportFormats.Mp4iPhone)
-           {
-               MaxW = 480;
-               MaxH = 320;
-           }
-           else if (m.format == ExportFormats.Custom)
-           {
-               //MaxW = FormatReader.GetFormatInfo("Custom", "MaxResolutionW", 1920);
-               //MaxH = FormatReader.GetFormatInfo("Custom", "MaxResolutionH", 1088);
-               MaxW = (int)wlist[wlist.Count - 1];
-               MaxH = (int)hlist[hlist.Count - 1];
-           }
-           else
-           {
-               MaxW = (int)wlist[wlist.Count - 1];
-               MaxH = (int)hlist[hlist.Count - 1];
            }
 
            //ограничение W*H
@@ -939,7 +755,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
-                   m.outresh = Calculate.GetCloseIntegerAL(m.outresh - GetValidModH(m), hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(m.outresh - GetValidModH(m.format), hlist);
                    m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
                }
            }
@@ -948,7 +764,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
-                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m), wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m.format), wlist);
                    m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
                }
            }
@@ -976,10 +792,16 @@ namespace XviD4PSP
            //При кодировании с сохранением анаморфа, высота равна исходной высоте минус всё что откроплено. 
            if (m.aspectfix == AspectResolution.AspectFixes.SAR)
            {
-               m.outresh = Calculate.GetCloseIntegerAL(m.inresh - m.cropb - m.cropt, hlist);
+               //Определяем лимит
+               int MaxW = 0;
+               int MaxH = (int)hlist[hlist.Count - 1];
+               GetLimitedRes(m.format, ref MaxW, ref MaxH);
+
+               //Пересчет высоты с учетом откропленного и лимита
+               m.outresh = Calculate.GetCloseIntegerAL(Math.Min(m.inresh - m.cropt - m.cropb, MaxH), hlist);
                return m;
            }
-           
+
            //ограничение W*H
            int limit = (int)wlist[wlist.Count - 1] * (int)hlist[hlist.Count - 1];
            if (m.format == ExportFormats.Mp4PSPASP)
@@ -997,7 +819,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
-                   m.outresh = Calculate.GetCloseIntegerAL(m.inresh - GetValidModH(m), hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(m.inresh - GetValidModH(m.format), hlist);
                    m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
                }
            }
@@ -1008,7 +830,7 @@ namespace XviD4PSP
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
-                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m), wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m.format), wlist);
                    m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
                }
            }
@@ -1016,57 +838,39 @@ namespace XviD4PSP
            return m;
        }
 
-       public static int GetValidModW(Massive m)
+       public static int GetValidModW(ExportFormats format)
        {
-           int modw = 16;
-           if (m.format == ExportFormats.Avi || m.format == ExportFormats.Mkv ||
-               m.format == ExportFormats.Mov || m.format == ExportFormats.Mp4)
-               modw = Settings.LimitModW;
-           else if (m.format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "LimitModW", 16);
-           return modw;
+           if (Formats.GetDefaults(format).IsEditable)
+           {
+               if (Formats.GetDefaults(format).Resolution_IsEditable)
+                   return Formats.GetSettings(format, "ModW", Formats.GetDefaults(format).ModW);
+               else
+                   return Formats.GetDefaults(format).ModW;
+           }
+
+           return 16;
        }
 
-       public static int GetValidModH(Massive m)
+       public static int GetValidModH(ExportFormats format)
        {
-           int modh = 8;
-           if (m.format == ExportFormats.Avi || m.format == ExportFormats.Mkv ||
-               m.format == ExportFormats.Mov || m.format == ExportFormats.Mp4)
-               modh = Settings.LimitModH;
-           else if (m.format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "LimitModH", 8);
-           return modh;
+           if (Formats.GetDefaults(format).IsEditable)
+           {
+               if (Formats.GetDefaults(format).Resolution_IsEditable)
+                   return Formats.GetSettings(format, "ModH", Formats.GetDefaults(format).ModH);
+               else
+                   return Formats.GetDefaults(format).ModH;
+           }
+
+           return 8;
        }
 
        public static ArrayList GetResWList(Massive m)
        {
+           int n = 16, step = 16;
            ArrayList reswlist = new ArrayList();
-           int n = 16;
-           int step = 16;
 
-           if (m.format == ExportFormats.AviHardware ||
-               m.format == ExportFormats.AviHardwareHD ||
-               m.format == ExportFormats.Mp4PS3 ||
-               m.format == ExportFormats.Mpeg2PS ||
-               m.format == ExportFormats.Mpeg1PS ||
-               m.format == ExportFormats.M2TS ||
-               m.format == ExportFormats.TS ||
-               m.format == ExportFormats.WMV ||
-               m.format == ExportFormats.Flv)
-                
+           if (m.format == ExportFormats.Mpeg1PS)
            {
-               while (n < 1920 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Avi ||
-               m.format == ExportFormats.Mkv ||
-               m.format == ExportFormats.Mp4 ||
-               m.format == ExportFormats.Mov)
-           {
-               step = Settings.LimitModW;
                while (n < 1920 + step)
                {
                    reswlist.Add(n);
@@ -1080,50 +884,7 @@ namespace XviD4PSP
                reswlist.Add(1440);
                reswlist.Add(1920);
            }
-           else if (m.format == ExportFormats.Mpeg2PAL ||
-               m.format == ExportFormats.AviDVPAL)
-           {
-                   reswlist.Add(720);
-           }
-           else if (m.format == ExportFormats.Mpeg2NTSC ||
-               m.format == ExportFormats.AviDVNTSC ||
-               m.format == ExportFormats.Mp4PSPAVCTV)
-           {
-                   reswlist.Add(720);
-           }
-           else if (m.format == ExportFormats.Mp4Archos5G)
-           {
-               while (n < 720 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4ToshibaG900)
-           {
-               while (n < 800 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4PSPAVC)
-           {
-               while (n < 480 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
            else if (m.format == ExportFormats.PmpAvc)
-           {
-               while (n < 480 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4PSPASP)
            {
                while (n < 480 + step)
                {
@@ -1139,93 +900,29 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-           else if (m.format == ExportFormats.Mp4BlackBerry8100)
+           else if (Formats.GetDefaults(m.format).IsEditable)
            {
-               while (n < 240 + step)
+               step = GetValidModW(m.format);
+               int min = Formats.GetDefaults(m.format).MinW;
+               int max = Formats.GetDefaults(m.format).MaxW;
+               if (Formats.GetDefaults(m.format).Resolution_IsEditable)
                {
-                   reswlist.Add(n);
-                   n = n + step;
+                   min = Formats.GetSettings(m.format, "MinW", min);
+                   max = Formats.GetSettings(m.format, "MaxW", max);
                }
-           }
-           else if (m.format == ExportFormats.Mp4BlackBerry8800 ||
-               m.format == ExportFormats.Mp4BlackBerry8830 ||
-               m.format == ExportFormats.Mp4SonyEricssonK800 ||
-               m.format == ExportFormats.Mp4Nokia5700 ||
-               m.format == ExportFormats.AviMeizuM6)
-           {
-               while (n < 320 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4SonyEricssonK610)
-           {
-               while (n < 176 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4MotorolaK1)
-           {
-               while (n < 352 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4iPod50G ||
-               m.format == ExportFormats.AviiRiverClix2 ||
-               m.format == ExportFormats.ThreeGP)
-           {
-               while (n < 320 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4iPod55G)
-           {
-               while (n < 640 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4Prada)
-           {
-               while (n < 400 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4iPhone)
-           {
-               while (n < 720 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4AppleTV)
-           {
-               while (n < 1280 + step)
-               {
-                   reswlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Custom)
-           {
-               step = Format.GetValidModW(m);
-               int min = FormatReader.GetFormatInfo("Custom", "MinResolutionW", 16);
-               int max = FormatReader.GetFormatInfo("Custom", "MaxResolutionW", 1920);
+
                while (min < max + step)
                {
                    reswlist.Add(min);
                    min += step;
+               }
+           }
+           else
+           {
+               while (n < 1920 + step)
+               {
+                   reswlist.Add(n);
+                   n = n + step;
                }
            }
 
@@ -1234,32 +931,11 @@ namespace XviD4PSP
 
        public static ArrayList GetResHList(Massive m)
        {
+           int n = 16, step = 8;
            ArrayList reshlist = new ArrayList();
-           int n = 16;
-           int step = 8;
 
-           if (m.format == ExportFormats.AviHardware ||
-               m.format == ExportFormats.AviHardwareHD ||
-               m.format == ExportFormats.Mp4PS3 ||
-               m.format == ExportFormats.Mpeg2PS ||
-               m.format == ExportFormats.Mpeg1PS ||
-               m.format == ExportFormats.M2TS ||
-               m.format == ExportFormats.TS ||
-               m.format == ExportFormats.WMV ||
-               m.format == ExportFormats.Flv)
+           if (m.format == ExportFormats.Mpeg1PS)
            {
-               while (n < 1088 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else  if (m.format == ExportFormats.Avi ||
-               m.format == ExportFormats.Mkv ||
-               m.format == ExportFormats.Mp4 ||
-               m.format == ExportFormats.Mov)
-           {
-               step = Settings.LimitModH;
                while (n < 1088 + step)
                {
                    reshlist.Add(n);
@@ -1273,52 +949,9 @@ namespace XviD4PSP
                reshlist.Add(720);
                reshlist.Add(1080);
            }
-           else if (m.format == ExportFormats.Mpeg2PAL ||
-               m.format == ExportFormats.AviDVPAL)
-           {
-               reshlist.Add(576);
-           }
-           else if (m.format == ExportFormats.Mpeg2NTSC ||
-               m.format == ExportFormats.AviDVNTSC ||
-               m.format == ExportFormats.Mp4PSPAVCTV)
-           {
-               reshlist.Add(480);
-           }
-           else if (m.format == ExportFormats.Mp4Archos5G)
-           {
-               while (n < 576 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4ToshibaG900)
-           {
-               while (n < 480 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4PSPAVC)
-           {
-               while (n < 272 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
            else if (m.format == ExportFormats.PmpAvc)
            {
                step = 16;
-               while (n < 272 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4PSPASP)
-           {
                while (n < 272 + step)
                {
                    reshlist.Add(n);
@@ -1333,103 +966,32 @@ namespace XviD4PSP
                    n = n + step;
                }
            }
-           else if (m.format == ExportFormats.Mp4BlackBerry8100)
+           else if (Formats.GetDefaults(m.format).IsEditable)
            {
-               while (n < 180 + step)
+               step = GetValidModH(m.format);
+               int min = Formats.GetDefaults(m.format).MinH;
+               int max = Formats.GetDefaults(m.format).MaxH;
+               if (Formats.GetDefaults(m.format).Resolution_IsEditable)
                {
-                   reshlist.Add(n);
-                   n = n + step;
+                   min = Formats.GetSettings(m.format, "MinH", min);
+                   max = Formats.GetSettings(m.format, "MaxH", max);
                }
-           }
-           else if (m.format == ExportFormats.Mp4BlackBerry8800)
-           {
-               while (n < 180 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4BlackBerry8830 ||
-               m.format == ExportFormats.Mp4SonyEricssonK800 ||
-               m.format == ExportFormats.Mp4Nokia5700 ||
-               m.format == ExportFormats.AviMeizuM6)
-           {
-               while (n < 240 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4MotorolaK1)
-           {
-               while (n < 288 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4SonyEricssonK610)
-           {
-               while (n < 144 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4iPod50G ||
-               m.format == ExportFormats.AviiRiverClix2 ||
-               m.format == ExportFormats.ThreeGP)
-           {
-               while (n < 240 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4iPod55G)
-           {
-               while (n < 480 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4Prada)
-           {
-               while (n < 240 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4iPhone)
-           {
-               while (n < 576 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Mp4AppleTV)
-           {
-               while (n < 720 + step)
-               {
-                   reshlist.Add(n);
-                   n = n + step;
-               }
-           }
-           else if (m.format == ExportFormats.Custom)
-           {
-               step = Format.GetValidModH(m);
-               int min = FormatReader.GetFormatInfo("Custom", "MinResolutionH", 16);
-               int max = FormatReader.GetFormatInfo("Custom", "MaxResolutionH", 1088);
+
                while (min < max + step)
                {
                    reshlist.Add(min);
                    min += step;
                }
            }
-                              
+           else
+           {
+               while (n < 1088 + step)
+               {
+                   reshlist.Add(n);
+                   n = n + step;
+               }
+           }
+
            return reshlist;
        }
 
@@ -1450,7 +1012,7 @@ namespace XviD4PSP
                m.format == ExportFormats.Mp4SonyEricssonK610 ||
                m.format == ExportFormats.Mp4Nokia5700 ||
                m.format == ExportFormats.AviiRiverClix2 ||
-               m.format == ExportFormats.AviMeizuM6)  //Custom
+               m.format == ExportFormats.AviMeizuM6)
                return 800;
 
            else if (m.format == ExportFormats.DpgNintendoDS)
@@ -1508,31 +1070,17 @@ namespace XviD4PSP
        public static bool Is4GBlimitedFormat(Massive m)
        {
            //Просто выводит предупреждение, если ожидаемый размер файла > 4Gb
-           if (m.format == ExportFormats.Mp4PS3 ||
-               m.format == ExportFormats.Mp4PSPAVC ||
-               m.format == ExportFormats.Mp4PSPAVCTV ||
-               m.format == ExportFormats.Mp4BlackBerry8100 ||
-               m.format == ExportFormats.Mp4BlackBerry8800 ||
-               m.format == ExportFormats.Mp4BlackBerry8830 ||
-               m.format == ExportFormats.Mp4MotorolaK1 ||
-               m.format == ExportFormats.AviiRiverClix2 ||
-               m.format == ExportFormats.Mp4iPhone ||
-               m.format == ExportFormats.Mp4iPod50G ||
-               m.format == ExportFormats.Mp4iPod55G ||
-               m.format == ExportFormats.Mp4Prada ||
-               m.format == ExportFormats.ThreeGP ||
-               m.format == ExportFormats.Mp4Archos5G ||
-               m.format == ExportFormats.Mp4ToshibaG900 ||
-               m.format == ExportFormats.Mp4SonyEricssonK800 ||
-               m.format == ExportFormats.Mp4SonyEricssonK610 ||
-               m.format == ExportFormats.Mp4Nokia5700 ||
-               m.format == ExportFormats.AviMeizuM6 ||
-               m.format == ExportFormats.DpgNintendoDS) 
+           if (m.format == ExportFormats.DpgNintendoDS)
                return true;
-           else if (m.format == ExportFormats.Custom && FormatReader.GetFormatInfo("Custom", "Is4GBlimitedFormat", false))
-               return true;
+           else if (Formats.GetDefaults(m.format).IsEditable)
+           {
+               if (Formats.GetDefaults(m.format).LimitedTo4Gb_IsEditable)
+                   return Formats.GetSettings(m.format, "LimitedTo4Gb", Formats.GetDefaults(m.format).LimitedTo4Gb);
+               else
+                   return Formats.GetDefaults(m.format).LimitedTo4Gb;
+           }
            else
-           return false;
+               return false;
        }
 
        public static string ValidateCopyAudio(Massive m)
@@ -1687,78 +1235,72 @@ namespace XviD4PSP
        public static bool IsDirectRemuxingPossible(Massive m)
        {
            string ext = Path.GetExtension(m.infilepath).ToLower();
-           
-           if (m.format == ExportFormats.Custom)
+
+           if (Formats.GetDefaults(m.format).IsEditable)
            {
-               if (!FormatReader.GetFormatInfo("Custom", "UseDirectRemux", false)) return false;
+               //Точно выкл.
+               if (Formats.GetDefaults(m.format).DirectRemuxing_IsEditable)
+               {
+                   if (!Formats.GetSettings(m.format, "DirectRemuxing", Formats.GetDefaults(m.format).DirectRemuxing))
+                       return false;
+               }
+               else if (!Formats.GetDefaults(m.format).DirectRemuxing)
+                   return false;
 
                Muxers muxer = GetMuxer(m);
                if (muxer == Muxers.mkvmerge)
                {
                    if (m.outvcodec == "Copy" && m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "Copy")
                        return false;
-                   if (ext == ".mkv" || ext == ".webm" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".rm" || ext == ".ogm")
+                   if (ext == ".mkv" || ext == ".webm" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" ||
+                       ext == ".rm" || ext == ".ogm" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts")
                        return true;
                    else
                        return false;
                }
                else if (muxer == Muxers.tsmuxer)
                {
-                   if (ext == ".mkv" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".evo" || ext == ".mts" || ext == ".mpg" || ext == ".mp4" || ext == ".mov")
+                   if (ext == ".mkv" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".ts" ||
+                       ext == ".m2ts" || ext == ".m2t" || ext == ".mts" || ext == ".evo")
                        return true;
                    else
                        return false;
                }
                else if (muxer == Muxers.ffmpeg)
                {
-                   if (m.inaudiostreams.Count > 1 && m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "Copy")
+                   if (m.format == ExportFormats.Flv)
+                   {
+                       if (ext == ".flv")
+                       {
+                           if (m.outaudiostreams.Count == 0)
+                               return true;
+                           else
+                           {
+                               AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                               if (outstream.codec == "Copy" && !File.Exists(outstream.audiopath))
+                                   return true;
+                               else
+                                   return false;
+                           }
+                       }
+                       else
+                           return false;
+                   }
+                   else if (m.inaudiostreams.Count > 1 && m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "Copy")
                        return false;
                    else
                        return true;
                }
-               else return false;
-           }
-           else if (Settings.GetFormatPreset(m.format, "direct_remux") == "False") return false;
-
-           if (m.format == ExportFormats.Mkv && m.outvcodec == "Copy")
-           {
-               if (m.outaudiostreams.Count > 0)
-               {
-                   AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                   if (outstream.codec == "Copy") return false;
-               }
-           }
-
-           if (m.format == ExportFormats.TS || m.format == ExportFormats.M2TS || m.format == ExportFormats.BluRay)
-           {
-               if (ext == ".mkv" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".evo" || ext == ".mts" || ext == ".mpg" || ext == ".mp4" || ext == ".mov")
-                   return true;
                else
                    return false;
            }
-           else if (m.format == ExportFormats.Mkv)
+           else if (m.format == ExportFormats.BluRay)
            {
-               if (ext == ".mkv" || ext == ".webm" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".rm" || ext == ".ogm")
-                   return true;
-               else
+               if (Settings.GetFormatPreset(m.format, "direct_remux") == "False")
                    return false;
-           }
-           else if (m.format == ExportFormats.Flv)
-           {
-               if (ext == ".flv")
-               {
-                   if (m.outaudiostreams.Count == 0)
-                       return true;
-                   else
-                   {
-                       AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                       if (outstream.codec == "Copy" &&
-                           !File.Exists(outstream.audiopath))
-                           return true;
-                       else
-                           return false;
-                   }
-               }
+               if (ext == ".mkv" || ext == ".mpg" || ext == ".vob" || ext == ".mp4" || ext == ".mov" || ext == ".ts" ||
+                   ext == ".m2ts" || ext == ".m2t" || ext == ".mts" || ext == ".evo")
+                   return true;
                else
                    return false;
            }
@@ -1838,8 +1380,6 @@ namespace XviD4PSP
                return "MPEG4 HQ Ultra";
            else if (format == ExportFormats.Flv)
                return "FLV1 HQ Ultra";
-           else if (format == ExportFormats.WMV)
-               return "WMV3 HQ Ultra";
            else if (format == ExportFormats.BluRay ||
                format == ExportFormats.M2TS ||
                format == ExportFormats.TS ||
@@ -1888,8 +1428,6 @@ namespace XviD4PSP
                return "AAC-LC ABR 96k";
            else if (format == ExportFormats.Mp4BlackBerry8830)
                return "AAC-HE CBR 64k";
-           else if (format == ExportFormats.WMV)
-               return "WMA3 CBR 128k";
            else if (format == ExportFormats.Mp4Archos5G ||
                format == ExportFormats.Mp4BlackBerry8100 ||
                format == ExportFormats.Mp4BlackBerry8800 ||
@@ -1903,114 +1441,88 @@ namespace XviD4PSP
 
        public static Muxers GetMuxer(Massive m)
        {
-           if (m.format == Format.ExportFormats.PmpAvc)
+           if (m.format == ExportFormats.Audio)
+               return Muxers.Disabled;
+           else if (m.format == Format.ExportFormats.PmpAvc)
                return Muxers.pmpavc;
-           else if (m.format == Format.ExportFormats.Mkv)
-           {
-               //Кодирование сразу в MKV
-               if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
-               else return Muxers.mkvmerge;
-           }
-           else if (m.format == Format.ExportFormats.Mpeg2PS ||
-                    m.format == ExportFormats.Mpeg1PS)
+           else if (m.format == ExportFormats.Mpeg1PS)
                return Muxers.ffmpeg;
-           else if (m.format == Format.ExportFormats.Flv)
-           {
-               //Кодирование сразу в FLV
-               if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
-               else return Muxers.ffmpeg;
-           }
-           else if (m.format == ExportFormats.M2TS ||
-                    m.format == ExportFormats.TS ||
-                    m.format == ExportFormats.BluRay)
+           else if (m.format == ExportFormats.BluRay)
                return Muxers.tsmuxer;
-           else if (m.format == Format.ExportFormats.Mpeg2NTSC ||
-                    m.format == Format.ExportFormats.Mpeg2PAL)
-           {
-               return Muxers.ffmpeg;
-           }
            else if (m.format == ExportFormats.DpgNintendoDS)
                return Muxers.dpgmuxer;
-           else if (m.format == Format.ExportFormats.Avi ||
-                    m.format == Format.ExportFormats.AviHardware ||
-                    m.format == ExportFormats.AviHardwareHD ||
-                    m.format == ExportFormats.AviiRiverClix2 ||
-                    m.format == ExportFormats.AviMeizuM6)
+           else if (m.format == ExportFormats.Mp4iPod50G)
+               return Muxers.mp4box;
+           else if (m.format == Format.ExportFormats.Mp4iPod55G)
            {
-               if (m.outaudiostreams.Count == 0)
-               {
-                   if (m.outvcodec == "HUFF" ||
-                       m.outvcodec == "FFV1" ||
-                       m.outvcodec == "MJPEG" ||
-                       m.outvcodec == "MPEG4" ||
-                       m.outvcodec == "MPEG2" ||
-                       m.outvcodec == "MPEG1" ||
-                       m.outvcodec == "FLV1")
-                       return Muxers.Disabled;
-                   else return Muxers.ffmpeg;
-               }
-               else
-               {
-                   AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                   AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-
-                   if (m.outvcodec == "HUFF" ||
-                       m.outvcodec == "FFV1" ||
-                       m.outvcodec == "MJPEG" ||
-                       m.outvcodec == "MPEG4" ||
-                       m.outvcodec == "MPEG2" ||
-                       m.outvcodec == "MPEG1" ||
-                       m.outvcodec == "FLV1")
-                   {
-                       if (outstream.codec == "PCM" || outstream.codec == "LPCM")
-                           return Muxers.Disabled;
-                       else
-                       {
-                           if (outstream.codec == "Copy" && instream.codecshort == "PCM" ||
-                               outstream.codec == "Copy" && instream.codecshort == "LPCM")
-                               return Muxers.ffmpeg;
-                           else
-                               return Muxers.virtualdubmod;
-                       }
-                   }
-                   //outstream.codec == "MP3" ||
-                   //outstream.codec == "PCM" ||
-                   //outstream.codec == "LPCM" ||
-                   else if (outstream.codec == "Copy" && instream.codecshort == "PCM" ||
-                            outstream.codec == "Copy" && instream.codecshort == "LPCM")
-                       return Muxers.ffmpeg;
-                   else
-                       return Muxers.virtualdubmod;
-               }
-           }
-           else if (m.format == Format.ExportFormats.AviDVNTSC ||
-                    m.format == Format.ExportFormats.AviDVPAL)
-               return Muxers.Disabled;
-           else if (m.format == ExportFormats.Audio)
-               return Muxers.Disabled;
-           else if (m.format == ExportFormats.Custom)
-           {
-               string CustomMuxer = FormatReader.GetFormatInfo("Custom", "GetMuxer", "mkvmerge").ToLower();
-               //return (Muxers)Enum.Parse(typeof(Muxers), FormatReader.GetFormatInfo("Custom", "GetMuxer"), true);
-               if (CustomMuxer == "pmpavc") return Muxers.pmpavc;
-               else if (CustomMuxer == "mkvmerge") return Muxers.mkvmerge;
-               else if (CustomMuxer == "ffmpeg") return Muxers.ffmpeg;
-               else if (CustomMuxer == "tsmuxer") return Muxers.tsmuxer;
-               else if (CustomMuxer == "dpgmuxer") return Muxers.dpgmuxer;
-               else if (CustomMuxer == "virtualdubmod") return Muxers.virtualdubmod;
-               else if (CustomMuxer == "disabled") return Muxers.Disabled;
-               else if (CustomMuxer == "mp4box") return Muxers.mp4box;
-               else return Muxers.ffmpeg;
-           }
-           else if (m.format == Format.ExportFormats.Mp4)
-           {
-               //Кодирование сразу в MP4
-               if (m.outaudiostreams.Count == 0 && m.outvcodec == "x264") return Muxers.Disabled;
+               if (m.outvcodec == "x264") return Muxers.ffmpeg; //ipod atom
                else return Muxers.mp4box;
            }
-           else if (m.format == Format.ExportFormats.Mp4iPod55G && m.outvcodec == "x264")
-               return Muxers.ffmpeg; //ipod atom
-           else return Muxers.mp4box;
+           else if (Formats.GetDefaults(m.format).IsEditable)
+           {
+               //Кодирование сразу в контейнер
+               bool direct_encoding = false;
+               if (Formats.GetDefaults(m.format).DirectEncoding_IsEditable)
+               {
+                   direct_encoding = Formats.GetSettings(m.format, "DirectEncoding", Formats.GetDefaults(m.format).DirectEncoding);
+               }
+               else
+                   direct_encoding = Formats.GetDefaults(m.format).DirectEncoding;
+
+               if (direct_encoding)
+               {
+                   string ext = GetValidExtension(m);
+                   if (m.outaudiostreams.Count == 0)
+                   {
+                       //Звука нет и видеокодер может кодировать сразу в нужный контейнер
+                       if (m.outvcodec == "x264" && (ext == ".mkv" || ext == ".mp4" || ext == ".flv" || ext == ".264" || ext == ".h264") ||
+                           m.outvcodec == "XviD" && (ext == ".avi") ||
+                           m.outvcodec == "HUFF" ||
+                           m.outvcodec == "FFV1" ||
+                           m.outvcodec == "MJPEG" ||
+                           m.outvcodec == "MPEG4" ||
+                           m.outvcodec == "MPEG2" ||
+                           m.outvcodec == "MPEG1" ||
+                           m.outvcodec == "FLV1" ||
+                           m.outvcodec == "DV")
+                           return Muxers.Disabled;
+                   }
+                   else
+                   {
+                       //Видео и звук кодируются через FFmpeg
+                       if (m.outvcodec == "HUFF" ||
+                           m.outvcodec == "FFV1" ||
+                           m.outvcodec == "MJPEG" ||
+                           m.outvcodec == "MPEG4" ||
+                           m.outvcodec == "MPEG2" ||
+                           m.outvcodec == "MPEG1" ||
+                           m.outvcodec == "FLV1" ||
+                           m.outvcodec == "DV")
+                       {
+                           AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                           if (outstream.codec == "PCM" ||
+                               outstream.codec == "LPCM" ||
+                               outstream.codec == "FLAC" ||
+                               outstream.codec == "MP2")
+                               return Muxers.Disabled;
+                       }
+                   }
+               }
+
+               if (Formats.GetDefaults(m.format).Muxers.Length > 1)
+               {
+                   string muxer = Formats.GetSettings(m.format, "Muxer", Formats.GetDefaults(m.format).Muxer).ToLower();
+                   foreach (string muxers in Formats.GetDefaults(m.format).Muxers)
+                   {
+                       if (muxers == muxer)
+                           return (Muxers)Enum.Parse(typeof(Muxers), muxer, true);
+                   }
+               }
+
+               return (Muxers)Enum.Parse(typeof(Muxers), Formats.GetDefaults(m.format).Muxer, true);
+           }
+           else
+               return Muxers.mp4box;
        }
 
       public static Demuxers GetDemuxer(Massive m)
@@ -2060,26 +1572,46 @@ namespace XviD4PSP
                m.outaspect = Calculate.GetCloseDouble(m.inaspect, outaspects);
                m.aspectfix = AspectResolution.AspectFixes.Black;
 
-               if (m.format == ExportFormats.Custom)
+               if (Formats.GetDefaults(m.format).IsEditable)
                {
-                   if (!FormatReader.GetFormatInfo("Custom", "CanBeAnamorphic", false))
-                       m.sar = null;
+                   //Анаморф
+                   bool anamorphic = false;
+                   if (Formats.GetDefaults(m.format).Anamorphic_IsEditable)
+                       anamorphic = Formats.GetSettings(m.format, "Anamorphic", Formats.GetDefaults(m.format).Anamorphic);
                    else
-                       m = Calculate.CalculateSAR(m);
+                       anamorphic = Formats.GetDefaults(m.format).Anamorphic;
 
-                   if (FormatReader.GetFormatInfo("Custom", "AspectAdjustingMethod", "Black") == "Crop")
-                       m.aspectfix = AspectResolution.AspectFixes.Crop;
+                   if (!anamorphic) m.sar = null;
+                   else m = Calculate.CalculateSAR(m);
+
+                   //Метод изменения аспекта
+                   if (Formats.GetDefaults(m.format).LockedAR_Methods.Length > 1)
+                   {
+                       string method = Formats.GetSettings(m.format, "LockedAR_Method", Formats.GetDefaults(m.format).LockedAR_Method);
+                       foreach (string methods in Formats.GetDefaults(m.format).LockedAR_Methods)
+                       {
+                           if (methods == method)
+                           {
+                               m.aspectfix = (AspectResolution.AspectFixes)Enum.Parse(typeof(AspectResolution.AspectFixes), method);
+                               if (m.aspectfix == AspectResolution.AspectFixes.SAR && !anamorphic)
+                               {
+                                   //Но анаморф не был разрешен..
+                                   m.aspectfix = AspectResolution.AspectFixes.Disabled;
+                                   m.outaspect = (double)m.outresw / (double)m.outresh;
+                               }
+                           }
+                       }
+                   }
+                   else
+                       m.aspectfix = (AspectResolution.AspectFixes)Enum.Parse(typeof(AspectResolution.AspectFixes), Formats.GetDefaults(m.format).LockedAR_Method);
                }
-               else if (m.format == ExportFormats.Mp4PSPAVCTV)
-                   m.sar = null;
                else
                    m = Calculate.CalculateSAR(m);
            }
            else
            {
                //методы для остальных форматов
-               if ((double)m.inresw / (double)m.inresh != m.inaspect &&
-                   m.aspectfix == AspectResolution.AspectFixes.SAR)
+               if (m.aspectfix == AspectResolution.AspectFixes.SAR)
                {
                    m.outaspect = m.inaspect;
                    m = Calculate.CalculateSAR(m);
@@ -2087,8 +1619,8 @@ namespace XviD4PSP
                else
                {
                    m.outaspect = (double)m.outresw / (double)m.outresh;
-                   m.sar = null;
                    m.aspectfix = AspectResolution.AspectFixes.Disabled;
+                   m.sar = null;
                }
            }
            return m;
@@ -2096,68 +1628,75 @@ namespace XviD4PSP
 
        public static bool IsLockedOutAspect(Massive m)
        {
-           if (m.format == ExportFormats.AviDVNTSC ||
-               m.format == ExportFormats.AviDVPAL ||
-               m.format == ExportFormats.Mpeg2NTSC ||
-               m.format == ExportFormats.Mpeg2PAL ||
-               m.format == ExportFormats.Mp4PSPAVCTV ||
-               m.format == ExportFormats.BluRay ||
-               m.format == ExportFormats.Custom && FormatReader.GetFormatInfo("Custom", "IsLockedOutAspect", false))
+           if (m.format == ExportFormats.BluRay)
                return true;
-           else
-               return false;
+           else if (Formats.GetDefaults(m.format).IsEditable)
+           {
+               if (Formats.GetDefaults(m.format).LockedAR_Methods.Length > 1)
+               {
+                   string method = Formats.GetSettings(m.format, "LockedAR_Method", Formats.GetDefaults(m.format).LockedAR_Method);
+                   foreach (string methods in Formats.GetDefaults(m.format).LockedAR_Methods)
+                   {
+                       if (methods == method)
+                           return (method != "Disabled");
+                   }
+               }
+
+               return (Formats.GetDefaults(m.format).LockedAR_Method != "Disabled");
+           }
+
+           return false;
        }
 
        public static string[] GetValidOutAspects(Massive m)
        {
-           if (m.format == ExportFormats.AviDVNTSC ||
-               m.format == ExportFormats.AviDVPAL)
-               return new string[] { "1.3333 (4:3)", "1.7778 (16:9)" };
-
-           else if (m.format == ExportFormats.Mpeg2NTSC ||
-               m.format == ExportFormats.Mpeg2PAL)
-               return new string[] { "1.3333 (4:3)", "1.7778 (16:9)" };
-
-           else if (m.format == ExportFormats.Mp4PSPAVCTV)
-               return new string[] { "1.3333 (4:3)" };
-
-           else if (m.format == ExportFormats.BluRay)
+           if (m.format == ExportFormats.BluRay)
                return new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };
 
-           else if (m.format == ExportFormats.Mp4PSPAVC ||
-               m.format == ExportFormats.Mp4PSPASP ||
-               m.format == ExportFormats.PmpAvc)
+           else if (m.format == ExportFormats.PmpAvc)
                return new string[] { "1.3333 (4:3)", "1.7647 (16:9)", "1.8500", "2.3529" };
 
-           else if (m.format == ExportFormats.Mp4iPhone)
-               return new string[] { "1.3333 (4:3)", "1.5000", "1.7778 (16:9)", "1.8500", "2.3529" };
+           else if (Formats.GetDefaults(m.format).IsEditable)
+           {
+               if (Formats.GetDefaults(m.format).Aspects_IsEditable)
+               {
+                   return Formats.GetSettings(m.format, "Aspects", Formats.GetDefaults(m.format).Aspects);
+               }
 
-           else if (m.format == ExportFormats.Mp4ToshibaG900)
-               return new string[] { "1.3333 (4:3)", "1.6667", "1.7778 (16:9)", "1.8500", "2.3529" };
+               return Formats.GetDefaults(m.format).Aspects;
+           }
 
-           else if (m.format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "GetValidOutAspects", new string[] { "1.3333 (4:3)", "1.6667", "1.7778 (16:9)", "1.8500", "2.0000", "2.1000", "2.3529" });
-
-           else
-               return new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };
+           return new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };
        }
 
        public static bool GetMultiplexing(ExportFormats format)
        {
-           if (format == Format.ExportFormats.Mpeg2PAL || format == Format.ExportFormats.Mpeg2NTSC)
-               return Settings.Mpeg2MultiplexDisabled;
-           else if (format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "DontMuxStreams", false);
-           else
-               return false;
+           if (Formats.GetDefaults(format).IsEditable)
+           {
+               if (Formats.GetDefaults(format).DontMuxStreams_IsEditable)
+                   return Formats.GetSettings(format, "DontMuxStreams", Formats.GetDefaults(format).DontMuxStreams);
+               else
+                   return Formats.GetDefaults(format).DontMuxStreams;
+           }
+           else if (format == ExportFormats.BluRay)
+               return Convert.ToBoolean(Settings.GetFormatPreset(Format.ExportFormats.BluRay, "dont_mux_streams"));
+
+           return false; //DontMuxStreams = false
        }
 
        public static string GetSplitting(ExportFormats format)
        {
-           if (format == ExportFormats.Custom)
-               return FormatReader.GetFormatInfo("Custom", "SplitOutputFile", "Disabled");
-           else
+           if (Formats.GetDefaults(format).IsEditable)
+           {
+               if (Formats.GetDefaults(format).Splitting != "None")
+                   return Formats.GetSettings(format, "Splitting", Formats.GetDefaults(format).Splitting);
+               else
+                   return "Disabled";
+           }
+           else if (format == ExportFormats.BluRay)
                return Settings.GetFormatPreset(format, "split");
+
+           return "Disabled";
        }
 
        public static int GetMaxBFrames(Massive m)
@@ -2187,8 +1726,7 @@ namespace XviD4PSP
            }
 
            else if (m.format == ExportFormats.AviHardware ||
-               m.format == ExportFormats.AviHardwareHD ||
-               m.format == ExportFormats.WMV)
+               m.format == ExportFormats.AviHardwareHD)
                return 1;
 
            else if (m.format == ExportFormats.Mpeg2NTSC ||
@@ -2451,6 +1989,5 @@ namespace XviD4PSP
            //m.encodingmode = Settings.EncodingModes.OnePass;
            return m;
        }
-
     }
 }

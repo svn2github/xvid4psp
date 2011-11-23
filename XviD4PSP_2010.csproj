@@ -115,7 +115,7 @@
     <Compile Include="classes\AviSynthEncoder.cs" />
     <Compile Include="classes\ac3_arguments.cs" />
     <Compile Include="classes\EVRHelper.cs" />
-    <Compile Include="classes\FormatReader.cs" />
+    <Compile Include="classes\Formats.cs" />
     <Compile Include="classes\HotKeys.cs" />
     <Compile Include="classes\flac_arguments.cs" />
     <Compile Include="classes\Trim.cs" />
@@ -123,7 +123,6 @@
     <Compile Include="classes\wmv_arguments.cs" />
     <Compile Include="classes\FFInfo.cs" />
     <Compile Include="classes\ffmpeg_arguments.cs" />
-    <Compile Include="classes\HeaderWriter.cs" />
     <Compile Include="classes\muxers\dpgmuxer.cs" />
     <Compile Include="classes\PowerManagement\PowerManagement.cs">
       <SubType>Component</SubType>
@@ -231,17 +230,11 @@
     <Compile Include="windows\FormatSettings.xaml.cs">
       <DependentUpon>FormatSettings.xaml</DependentUpon>
     </Compile>
-    <Compile Include="windows\Options_MPEG2DVD.xaml.cs">
-      <DependentUpon>Options_MPEG2DVD.xaml</DependentUpon>
-    </Compile>
     <Compile Include="windows\Settings_Window.xaml.cs">
       <DependentUpon>Settings_Window.xaml</DependentUpon>
     </Compile>
     <Compile Include="windows\Options_BluRay.xaml.cs">
       <DependentUpon>Options_BluRay.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="windows\Options_M2TS.xaml.cs">
-      <DependentUpon>Options_M2TS.xaml</DependentUpon>
     </Compile>
     <Compile Include="windows\IndexChecker.xaml.cs">
       <DependentUpon>IndexChecker.xaml</DependentUpon>
@@ -257,9 +250,6 @@
     </Compile>
     <Compile Include="windows\Donate.xaml.cs">
       <DependentUpon>Donate.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="windows\MKVRebuilder.xaml.cs">
-      <DependentUpon>MKVRebuilder.xaml</DependentUpon>
     </Compile>
     <Compile Include="windows\FFRebuilder.xaml.cs">
       <DependentUpon>FFRebuilder.xaml</DependentUpon>
@@ -443,12 +433,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="windows\Options_MPEG2DVD.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="windows\Settings_Window.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -456,12 +440,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="windows\Options_BluRay.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="windows\Options_M2TS.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -484,10 +462,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="windows\Donate.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="windows\MKVRebuilder.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

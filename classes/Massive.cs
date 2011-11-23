@@ -1217,45 +1217,6 @@ namespace XviD4PSP
             }
         }
 
-        private bool _dontmuxstreams = false;
-        public bool dontmuxstreams
-        {
-            get
-            {
-                return _dontmuxstreams;
-            }
-            set
-            {
-                _dontmuxstreams = value;
-            }
-        }
-
-        private string _split;
-        public string split
-        {
-            get
-            {
-                return _split;
-            }
-            set
-            {
-                _split = value;
-            }
-        }
-
-        private string _bluray_type = Settings.BluRayType;
-        public string bluray_type
-        {
-            get
-            {
-                return _bluray_type;
-            }
-            set
-            {
-                _bluray_type = value;
-            }
-        }
-
         //По умолчанию Гистограмма отключена
         private string _levels = "Disabled";
         public string levels
@@ -1268,21 +1229,6 @@ namespace XviD4PSP
             {
                 _levels = value;
             }
-        }
-
-        //Пользовательская строчка для mkvmerge
-        private string _mkvstring;
-        public string mkvstring
-        {   
-            get
-            {
-              return _mkvstring;
-           }
-           set
-           {
-              _mkvstring = value;
-           }
-
         }
 
         private ArrayList _trims;

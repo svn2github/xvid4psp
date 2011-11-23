@@ -381,7 +381,7 @@ namespace XviD4PSP
            //Mod protection
            string mod2 = null;
            //Для высоты можно и mod8 (когда в настройках стоит mod16)
-           int modw = Format.GetValidModW(m), modh = Math.Min(Format.GetValidModH(m), 8);
+           int modw = Format.GetValidModW(m.format), modh = Math.Min(Format.GetValidModH(m.format), 8);
            if (m.inresw % modw != 0 || m.inresh % modh != 0)
            {
                //Для интерлейсных исходников в этом месте будет проблема!

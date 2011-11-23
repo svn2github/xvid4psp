@@ -318,7 +318,6 @@
                     <MenuItem x:Name="mnApps_Folder" Header="Open XviD4PSP folder" Click="mn_apps_Click"/>
                     <Separator/>
                     <MenuItem Header="FFRebuilder" x:Name="menu_ffrebuilder" Click="menu_ffrebuilder_Click"/>
-                    <MenuItem x:Name="menu_mkvrebuilder" Header="MKVRebuilder" Click="menu_mkvrebuilder_Click"/>
                     <Separator/>
                     <MenuItem x:Name="mnDGIndex" Header="DGIndex" Click="mn_apps_Click" Width="Auto" Height="Auto"/>
                     <MenuItem x:Name="menu_dgpulldown" Header="DGPulldown" Click="mn_apps_Click"/>
@@ -357,7 +356,7 @@
             <Button x:Name="button_configure" Content="Configure" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="AudioOptions_Click" Margin="290,9,0,9" HorizontalAlignment="Left" Width="90"/>
             <Button x:Name="button_save" Content="Save" Width="90" Foreground="#FFFFFFFF" Click="button_save_Click" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="384,9,0,9"/>
             <Button x:Name="button_encode" Content="Encode" Foreground="#FFFFFFFF" Click="button_encode_Click" Template="{DynamicResource GlassButton}" Margin="478,9,0,9" HorizontalAlignment="Left" Width="90"/>
-            <Slider x:Name="slider_Volume" ValueChanged="Volume_ValueChanged" d:LayoutOverrides="VerticalAlignment" Margin="600,8,4,8" Style="{DynamicResource GlassSlider}" ClipToBounds="False" MouseWheel="Volume_Wheel" FlowDirection="LeftToRight" HorizontalAlignment="Left" Width="Auto" MinWidth="120" MaxWidth="120" IsMoveToPointEnabled="False" Maximum="1" SmallChange="0.05" LargeChange="0.1" />
+            <Slider x:Name="slider_Volume" d:LayoutOverrides="VerticalAlignment" Margin="600,8,4,8" Style="{DynamicResource GlassSlider}" ClipToBounds="False" MouseWheel="Volume_Wheel" FlowDirection="LeftToRight" HorizontalAlignment="Left" Width="Auto" MinWidth="120" MaxWidth="120" IsMoveToPointEnabled="False" Maximum="1" SmallChange="0.05" LargeChange="0.1" />
             <Image Width="Auto" Source="..\pictures\Volume.png" Stretch="None" HorizontalAlignment="Left" Margin="584,6,032,6" x:Name="image_volume"/>
         </Grid>
         <Grid x:Name="grid_tasks" Background="{DynamicResource black_gradient_2}" Margin="0,60.96,0,0">

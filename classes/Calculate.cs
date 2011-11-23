@@ -603,6 +603,14 @@ namespace XviD4PSP
                         }
                     }
                 }
+
+                if (Format.Is4GBlimitedFormat(m) && m.outvbitrate > 4000)
+                {
+                    Message mess = new Message(App.Current.MainWindow);
+                    mess.ShowMessage(m.outvbitrate + "Mb - " + Languages.Translate("exceed maximum file size for format") + " " + Format.EnumToString(m.format) + "!",
+                        Languages.Translate("Warning"), Message.MessageStyle.Ok);
+                }
+
                 return m.outvbitrate + " mb";
             }
             else if (m.format == Format.ExportFormats.Audio && m.outaudiostreams.Count > 0)
@@ -639,14 +647,16 @@ namespace XviD4PSP
                     if (m.format == Format.ExportFormats.BluRay)
                         outsize *= 1.05;
 
-                    ssize = Calculate.ConvertDoubleToPointString(outsize, 1) + " mb";
+                    ssize = Calculate.ConvertDoubleToPointString(outsize, 1);
 
                     if (Format.Is4GBlimitedFormat(m) && outsize > 4000)
                     {
                         Message mess = new Message(App.Current.MainWindow);
-                        mess.ShowMessage(ssize + " - " + Languages.Translate("exceed maximum file size for format") + " " + Format.EnumToString(m.format) + "!",
+                        mess.ShowMessage(ssize + "Mb - " + Languages.Translate("exceed maximum file size for format") + " " + Format.EnumToString(m.format) + "!",
                             Languages.Translate("Warning"), Message.MessageStyle.Ok);
                     }
+
+                    ssize += " mb";
                 }
             }
             return ssize;
@@ -1070,6 +1080,31 @@ namespace XviD4PSP
                 }
             }
             return result;
+        }
+
+        public static string FilterLogMessage(Regex reg, string text)
+        {
+            string output = "";
+            string[] lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            foreach (string line in lines)
+            {
+                if (!string.IsNullOrEmpty(line) && !reg.IsMatch(line))
+                    output += line + "\r\n";
+            }
+            return output;
+        }
+
+        public static string ExpandVariables(Massive m, string input)
+        {
+            string infile = (!string.IsNullOrEmpty(m.infilepath_source)) ? m.infilepath_source : m.infilepath;
+            string lang = (m.inaudiostreams.Count > 0) ? ((AudioStream)m.inaudiostreams[m.inaudiostream]).language : "Undetermined";
+            if (string.IsNullOrEmpty(lang) || lang == "Unknown") lang = "Undetermined";
+
+            //task, temp, in_path, in_name, in_ext, out_path, out_name, out_ext, lang
+            return input.Replace("%task%", m.key).Replace("%temp%", Settings.TempPath).Replace("%in_path%",
+                Path.GetDirectoryName(infile)).Replace("%in_name%", Path.GetFileNameWithoutExtension(infile)).Replace("%in_ext%",
+                Path.GetExtension(infile)).Replace("%out_path%", Path.GetDirectoryName(m.outfilepath)).Replace("%out_name%",
+                Path.GetFileNameWithoutExtension(m.outfilepath)).Replace("%out_ext%", Path.GetExtension(m.outfilepath)).Replace("%lang%", lang);
         }
     }
 }

@@ -75,8 +75,9 @@ namespace XviD4PSP
             }
 
             //загружаем список кодеков соответвующий формату
-            foreach (string codec in Format.GetACodecsList(m.format))
-                if (!(oldm == null && codec == "Disabled")) combo_codec.Items.Add(codec);
+            foreach (string codec in Format.GetACodecsList(m.format)) combo_codec.Items.Add(codec);
+            if (oldm != null) combo_codec.Items.Add("Disabled");
+            combo_codec.Items.Add("Copy");
             if (!combo_codec.Items.Contains(outstream.codec)) combo_codec.Items.Add(outstream.codec);
             combo_codec.SelectedItem = outstream.codec;
             text_incodec_value.Content = instream.codecshort;
@@ -610,7 +611,7 @@ namespace XviD4PSP
                             combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
                     catch { }
-                    combo_profile.Items.Add("Disabled");
+                    if (oldm != null) combo_profile.Items.Add("Disabled");
                     combo_profile.Items.Add("Copy");
 
                     //прописываем текущий пресет кодирования

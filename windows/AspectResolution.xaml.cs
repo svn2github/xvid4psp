@@ -74,8 +74,6 @@ namespace XviD4PSP
             button_vcrop.ToolTip = Languages.Translate("Crop black borders manually");
             button_analyse.Content = group_autocrop.Header = Languages.Translate("Auto crop");
             button_vcrop.Content = group_visualcrop.Header = Languages.Translate("Manual crop");
-            combo_modw.ToolTip = Languages.Translate("Width") + "\r\n" + Languages.Translate("Default: 16") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "4, 8");
-            combo_modh.ToolTip = Languages.Translate("Height") + "\r\n" + Languages.Translate("Default: 8") + "\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "2, 4");
             tab_main.Header = Languages.Translate("Main");
             tab_settings.Header = Languages.Translate("Settings");
             Title = Languages.Translate("Resolution/Aspect");
@@ -89,7 +87,6 @@ namespace XviD4PSP
             combo_visualcrop_brightness.ToolTip = "Default: 25";
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
             combo_visualcrop_frame.ToolTip = "Default: THM-frame";
-            text_mod.Content = Languages.Translate("Allow resolutions divisible by:");
             manual_outaspect.ToolTip = Languages.Translate("In case of non-anamorphic encoding: Aspect = Width/Height.") +
                 "\r\n" + Languages.Translate("In case of anamorphic encoding: Aspect = (Width/Height)*SAR.");
             manual_outsar.ToolTip = Languages.Translate("Leave it empty for non-anamorphic encoding.") +
@@ -125,20 +122,6 @@ namespace XviD4PSP
             check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
             check_original_ar.IsChecked = Settings.MI_Original_AR;
             check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
-
-            //ModW-ограничение
-            for (int n = 4; n <= 16; n *= 2) combo_modw.Items.Add(n);
-            combo_modw.SelectedItem = Settings.LimitModW;
-
-            //ModH-ограничение
-            for (int n = 2; n <= 16; n *= 2) combo_modh.Items.Add(n);
-            combo_modh.SelectedItem = Settings.LimitModH;
-
-            if (format == Format.ExportFormats.Avi || format == Format.ExportFormats.Mkv || format == Format.ExportFormats.Mov
-                || format == Format.ExportFormats.Mp4)
-            {
-                combo_modw.IsEnabled = combo_modh.IsEnabled = true;
-            }
 
             if (m != null)
             {
@@ -736,6 +719,8 @@ namespace XviD4PSP
             m = Format.GetValidOutAspect(m);
             m = FixAspectDifference(m);
 
+            combo_aspectfix.SelectedItem = m.aspectfix.ToString();
+
             LoadResolutions();
             LoadInAspect();
             LoadOutAspect();
@@ -774,24 +759,6 @@ namespace XviD4PSP
             if (combo_visualcrop_frame.IsDropDownOpen || combo_visualcrop_frame.IsSelectionBoxHighlighted)
             {
                 Settings.VCropFrame = combo_visualcrop_frame.SelectedItem.ToString();
-            }
-        }
-
-        private void combo_modw_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_modw.IsDropDownOpen || combo_modw.IsSelectionBoxHighlighted)
-            {
-                Settings.LimitModW = Convert.ToInt32(combo_modw.SelectedItem);
-                if (m != null) ApplyCrop();
-            }
-        }
-
-        private void combo_modh_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (combo_modh.IsDropDownOpen || combo_modh.IsSelectionBoxHighlighted)
-            {
-                Settings.LimitModH = Convert.ToInt32(combo_modh.SelectedItem);
-                if (m != null) ApplyCrop();
             }
         }
 

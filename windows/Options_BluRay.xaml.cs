@@ -10,91 +10,66 @@ using System.Windows.Navigation;
 
 namespace XviD4PSP
 {
-	public partial class Options_BluRay
-	{
-        public Massive m;
-        private Massive oldm;
-        private MainWindow p;
-
-        public Options_BluRay(Massive mass, MainWindow parent)
-		{
-			this.InitializeComponent();
-
-            m = mass.Clone();
-            oldm = mass.Clone();
-            p = parent;
-            Owner = p;
+    public partial class Options_BluRay
+    {
+        public Options_BluRay(Window parent)
+        {
+            this.InitializeComponent();
+            this.Owner = parent;
 
             //переводим
-            button_cancel.Content = Languages.Translate("Cancel");
-            button_ok.Content = Languages.Translate("OK");
-            Title = Format.EnumToString(m.format) + " " + Languages.Translate("Options").ToLower() + ":";
+            Title = "BluRay " + Languages.Translate("Options").ToLower() + ":";
             label_type.Content = "BluRay " + Languages.Translate("type") + ":";
-
             check_direct_remux.Content = Languages.Translate("Use direct remuxing if possible");
+            check_direct_remux.ToolTip = Languages.Translate("If possible, copy the streams directly from the source file without demuxing them (Copy mode)");
+            check_dont_mux.Content = Languages.Translate("Don`t multiplex video and audio streams");
+            check_dont_mux.ToolTip = Languages.Translate("Encode video and audio streams in a separate files (without muxing)");
+            check_interlace.Content = Languages.Translate("Interlace is allowed");
+            check_interlace.ToolTip = Languages.Translate("Enable this option if you want to allow interlaced encoding for this format");
+            button_ok.Content = Languages.Translate("OK");
 
             combo_type.Items.Add("UDF 2.50 DVD/BD");
             combo_type.Items.Add("FAT32 HDD/MS");
+            combo_type.SelectedItem = Settings.BluRayType;
 
-            combo_type.SelectedItem = m.bluray_type;
-
-            string sdirect_remux = Settings.GetFormatPreset(m.format, "direct_remux");
+            string sdirect_remux = Settings.GetFormatPreset(Format.ExportFormats.BluRay, "direct_remux");
             if (sdirect_remux != null)
                 check_direct_remux.IsChecked = Convert.ToBoolean(sdirect_remux);
             else
                 check_direct_remux.IsChecked = true;
 
-            SetTooltips();
+            check_dont_mux.IsChecked = Convert.ToBoolean(Settings.GetFormatPreset(Format.ExportFormats.BluRay, "dont_mux_streams"));
+            check_interlace.IsChecked = Convert.ToBoolean(Settings.GetFormatPreset(Format.ExportFormats.BluRay, "interlaced"));
 
             ShowDialog();
-		}
+        }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             Close();
         }
 
-        private void button_cancel_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            m = oldm.Clone();
-            Close();
-        }
-
-        private void SetTooltips()
-        {
-      
-        }
-
-        private void ErrorExeption(string message)
-        {
-            Message mes = new Message(this);
-            mes.ShowMessage(message, Languages.Translate("Error"));
-        }
-
         private void combo_type_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (combo_type.IsDropDownOpen || combo_type.IsSelectionBoxHighlighted)
             {
-                m.bluray_type = combo_type.SelectedItem.ToString();
-                Settings.BluRayType = m.bluray_type;
+                Settings.BluRayType = combo_type.SelectedItem.ToString();
             }
         }
 
-        private void check_direct_remux_Checked(object sender, RoutedEventArgs e)
+        private void check_direct_remux_Click(object sender, RoutedEventArgs e)
         {
-            if (check_direct_remux.IsFocused)
-            {
-                Settings.SetFormatPreset(m.format, "direct_remux", check_direct_remux.IsChecked.Value.ToString());
-            }
+            Settings.SetFormatPreset(Format.ExportFormats.BluRay, "direct_remux", check_direct_remux.IsChecked.Value.ToString());
         }
 
-        private void check_direct_remux_Unchecked(object sender, RoutedEventArgs e)
+        private void check_dont_mux_Click(object sender, RoutedEventArgs e)
         {
-            if (check_direct_remux.IsFocused)
-            {
-                Settings.SetFormatPreset(m.format, "direct_remux", check_direct_remux.IsChecked.Value.ToString());
-            }
+            Settings.SetFormatPreset(Format.ExportFormats.BluRay, "dont_mux_streams", check_dont_mux.IsChecked.Value.ToString());
         }
 
-	}
+        private void check_interlace_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.SetFormatPreset(Format.ExportFormats.BluRay, "interlaced", check_interlace.IsChecked.Value.ToString());
+        }
+    }
 }

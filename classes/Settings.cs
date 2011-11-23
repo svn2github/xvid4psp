@@ -218,47 +218,6 @@ namespace XviD4PSP
             }
         }
 
-        public static bool AlwaysProgressive
-        {
-            get
-            {
-                object value = GetValue("AlwaysProgressive");
-                if (value == null)
-                {
-                    SetBool("AlwaysProgressive", true);
-                    return true;
-                }
-                else
-                {
-                    return Convert.ToBoolean(value);
-                }
-            }
-            set
-            {
-                SetBool("AlwaysProgressive", value);
-            }
-        }
-
-        public static bool WasDonate
-        {
-            get
-            {
-                object value = GetValue("WasDonate");
-                if (value == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return Convert.ToBoolean(value);
-                }
-            }
-            set
-            {
-                SetBool("WasDonate", value);
-            }
-        }
-
         public static bool AutoDeleteTasks
         {
             get
@@ -931,26 +890,6 @@ namespace XviD4PSP
             }
         }
 
-        public static bool SaveAnamorph
-        {
-            get
-            {
-                object value = GetValue("SaveAnamorph");
-                if (value == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return Convert.ToBoolean(value);
-                }
-            }
-            set
-            {
-                SetBool("SaveAnamorph", value);
-            }
-        }
-
         public static int AutocropSensivity
         {
             get
@@ -1108,26 +1047,6 @@ namespace XviD4PSP
             set
             {
                 SetBool("PrintAviSynth", value);
-            }
-        }
-
-        public static bool Mpeg2MultiplexDisabled
-        {
-            get
-            {
-                object value = GetValue("Mpeg2Multiplex");
-                if (value == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return Convert.ToBoolean(value);
-                }
-            }
-            set
-            {
-                SetBool("Mpeg2Multiplex", value);
             }
         }
 
@@ -1886,10 +1805,10 @@ namespace XviD4PSP
                 {
                     return "Open file(s)=Ctrl+O; Open folder=Ctrl+Alt+O; Open DVD folder=Ctrl+D; Decode file=Ctrl+Alt+D; Join file=Ctrl+J; Close file=Ctrl+C; Save task=Ctrl+S; Save frame=Ctrl+F; Save THM frame=Ctrl+Alt+F; Refresh preview=Shift+R; VDemux=Shift+V; " +
                         "Decoding=D; Detect black borders=Shift+B; Detect interlace=Shift+I; Color correction=C; Resolution/Aspect=R; Interlace/Framerate=I; VEncoding settings=V; ADemux=Shift+A; Save to WAV=W; Editing options=Ctrl+A; AEncoding settings=A; Add subtitles=Insert; " +
-                        "Remove subtitles=Delete; AvsP editor=E; Edit filtering script=S; Test script=Ctrl+T; Save script=Shift+S; Windows Media Player=Shift+M; Media Player Classic=M; WPF Video Player=Ctrl+M; Global settings=G; Media Info=F1; FFRebuilder=F2; MKVRebuilder=F3;" +
-                        "DGIndex=F4; DGPulldown=F5; DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; 100 frames forward=Ctrl+Up;" +
-                        "100 frames backward=Ctrl+Down; 30 sec. forward=Shift+Right; 30 sec. backward=Shift+Left; 3 min. forward=Shift+Up; 3 min. backward=Shift+Down; Play-Pause=Space; Fullscreen=Esc; Volume+=Up; Volume-=Down; Set Start=Home; Set End=End; Next/New region=PageUp;" +
-                        "Previous region=Next; Apply Trim=T; Add/Remove bookmark=Ctrl+B";
+                        "Remove subtitles=Delete; AvsP editor=E; Edit filtering script=S; Test script=Ctrl+T; Save script=Shift+S; Windows Media Player=Shift+M; Media Player Classic=M; WPF Video Player=Ctrl+M; Global settings=G; Media Info=F1; FFRebuilder=F2; " +
+                        "DGIndex=F4; DGPulldown=F5; DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; 100 frames forward=Ctrl+Up; " +
+                        "100 frames backward=Ctrl+Down; 30 sec. forward=Shift+Right; 30 sec. backward=Shift+Left; 3 min. forward=Shift+Up; 3 min. backward=Shift+Down; Play-Pause=Space; Fullscreen=Esc; Volume+=Up; Volume-=Down; Set Start=Home; Set End=End; Next/New region=PageUp; " +
+                        "Previous region=Next; Apply Trim=T; Add/Remove bookmark=Ctrl+B; Edit format=F;";
                 }
                 else
                 {
@@ -2227,37 +2146,15 @@ namespace XviD4PSP
             }
         }
 
-        //Header compression для mkvmerge
-        public static string MKVMerge_Compression
-        {
-            get
-            {
-                object value = GetValue("MKVMerge_Compression");
-                if (value == null)
-                {
-                    SetString("MKVMerge_Compression", "None");
-                    return "None";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("MKVMerge_Compression", value);
-            }
-        }
-
         //Charset для сообщений mkvmerge, mkvextract, mkvinfo
-        public static string MKVMerge_Charset
+        public static string MKVToolnix_Charset
         {
             get
             {
-                object value = GetValue("MKVMerge_Charset");
+                object value = GetValue("MKVToolnix_Charset");
                 if (value == null)
                 {
-                    SetString("MKVMerge_Charset", "");
+                    SetString("MKVToolnix_Charset", "");
                     return "";
                 }
                 else
@@ -2267,7 +2164,7 @@ namespace XviD4PSP
             }
             set
             {
-                SetString("MKVMerge_Charset", value);
+                SetString("MKVToolnix_Charset", value);
             }
         }
 

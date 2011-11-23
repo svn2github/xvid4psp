@@ -518,7 +518,6 @@ namespace XviD4PSP
                     //Tools
                     case ("Media Info"): menu_info_media_Click(menu_info_media, null); break;
                     case ("FFRebuilder"): menu_ffrebuilder_Click(null, null); break;
-                    case ("MKVRebuilder"): menu_mkvrebuilder_Click(null, null); break;
                     case ("DGIndex"): mn_apps_Click(mnDGIndex, null); break;
                     case ("DGPulldown"): mn_apps_Click(menu_dgpulldown, null); break;
                     case ("DGAVCIndex"): mn_apps_Click(mnDGAVCIndex, null); break;
@@ -549,6 +548,7 @@ namespace XviD4PSP
                     case ("Previous region"): button_trim_minus_Click(null, null); break;
                     case ("Apply Trim"): button_apply_trim_Click(null, null); break;
                     case ("Add/Remove bookmark"): AddToBookmarks_Click(null, null); break;
+                    case ("Edit format"): button_edit_format_Click(null, null); break;
                 }
             }
         }
@@ -1653,10 +1653,6 @@ namespace XviD4PSP
                     }
                 }
 
-                //настройки форматов
-                x.dontmuxstreams = Format.GetMultiplexing(x.format);
-                x.split = Format.GetSplitting(x.format);
-
                 //передаём массив
                 m = x.Clone();
                 x = null;
@@ -2109,7 +2105,6 @@ namespace XviD4PSP
                 //Tools
                 menu_info_media.InputGestureText = HotKeys.GetKeys("Media Info");
                 menu_ffrebuilder.InputGestureText = HotKeys.GetKeys("FFRebuilder");
-                menu_mkvrebuilder.InputGestureText = HotKeys.GetKeys("MKVRebuilder");
                 mnDGIndex.InputGestureText = HotKeys.GetKeys("DGIndex");
                 menu_dgpulldown.InputGestureText = HotKeys.GetKeys("DGPulldown");
                 mnDGAVCIndex.InputGestureText = HotKeys.GetKeys("DGAVCIndex");
@@ -2386,6 +2381,7 @@ namespace XviD4PSP
             slider_Volume.Value = Settings.VolumeLevel; //Установка значения громкости из реестра..
             VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //.. и пересчет его для ДиректШоу
             if (slider_Volume.Value == 0) image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume2.png", UriKind.RelativeOrAbsolute));
+            slider_Volume.ValueChanged += new RoutedPropertyChangedEventHandler<double>(Volume_ValueChanged); //Не в xaml, чтоб не срабатывал до загрузки
 
             check_old_seeking.IsChecked = OldSeeking = Settings.OldSeeking;
         }
@@ -3202,10 +3198,7 @@ namespace XviD4PSP
                         }
                     }
 
-                    //перезабиваем настройки форматов
-                    m.split = Format.GetSplitting(m.format);
                     m.outfilesize = Calculate.GetEncodingSize(m);
-                    m.dontmuxstreams = Format.GetMultiplexing(m.format);
                     if (m.outfilepath != null) m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
 
                     //создаём новый AviSynth скрипт
@@ -5428,11 +5421,6 @@ namespace XviD4PSP
             FFRebuilder ff = new FFRebuilder(this);
         }
 
-        private void menu_mkvrebuilder_Click(object sender, RoutedEventArgs e)
-        {
-            MKVRebuilder mkv = new MKVRebuilder(this);
-        }
-
         private void menu_donate_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -5635,9 +5623,6 @@ namespace XviD4PSP
             }
             else
             {
-                AviSynthReader reader = null;
-                System.Drawing.Bitmap bmp = null;
-
                 try
                 {
                     System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
@@ -5646,40 +5631,20 @@ namespace XviD4PSP
                     s.AddExtension = true;
                     s.Title = Languages.Translate("Select unique name for output file:");
                     s.Filter = "PNG " + Languages.Translate("files") + "|*.png" +
-                        "|JPEG " + Languages.Translate("files") + "|*.jpg" + "|BMP " + Languages.Translate("files") + "|*.bmp";
+                        "|JPEG " + Languages.Translate("files") + "|*.jpg" +
+                        "|BMP " + Languages.Translate("files") + "|*.bmp";
 
-                    int frame = (int)Math.Round(Position.TotalSeconds * fps);
+                    int frame = Convert.ToInt32(Math.Round(Position.TotalSeconds * fps));
                     s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + " - [" + frame + "]";
 
                     if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        string ext = Path.GetExtension(s.FileName).ToLower();
-
-                        reader = new AviSynthReader();
-                        reader.ParseScript(m.script);
-
-                        bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
-                        if (ext == ".jpg")
-                        {
-                            System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
-                            System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
-                            encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
-
-                            bmp.Save(s.FileName, info[1], encoderParameters);
-                        }
-                        else if (ext == ".png") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                        else if (ext == ".bmp") bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+                        SavePicture(s.FileName, 0, 0, false, frame);
                     }
                 }
                 catch (Exception ex)
                 {
                     ErrorException("SaveFrame: " + ex.Message, ex.StackTrace);
-                }
-                finally
-                {
-                    //завершение
-                    if (bmp != null) bmp.Dispose();
-                    if (reader != null) reader.Close();
                 }
             }
         }
@@ -5694,120 +5659,139 @@ namespace XviD4PSP
             }
             else
             {
-                AviSynthReader reader = null;
-                System.Drawing.Bitmap bmp = null;
-                System.Drawing.Graphics g = null;
-
                 try
                 {
                     System.Windows.Forms.SaveFileDialog s = new System.Windows.Forms.SaveFileDialog();
                     s.AddExtension = true;
                     //s.SupportMultiDottedExtensions = true;
                     s.Title = Languages.Translate("Select unique name for output file:");
-                    //s.DefaultExt = ".png";
 
-                    if (m.format == Format.ExportFormats.Mp4PSPAVC ||
-                        m.format == Format.ExportFormats.Mp4PSPAVCTV ||
-                        m.format == Format.ExportFormats.Mp4PSPASP)
+                    int thm_w = 0, thm_h = 0; bool fix_ar = false;
+                    if (m.format == Format.ExportFormats.PmpAvc)
                     {
-                        s.Filter = "JPEG " + Languages.Translate("files") + "|*.jpg";
-                        s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + ".jpg";
-                    }
-                    else if (m.format == Format.ExportFormats.PmpAvc)
-                    {
+                        thm_w = 144; thm_h = 80; fix_ar = true;
                         s.Filter = "PNG " + Languages.Translate("files") + "|*.png";
                         s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + ".png";
                     }
+                    else if (Formats.GetDefaults(m.format).IsEditable)
+                    {
+                        string thm_def = Formats.GetDefaults(m.format).THM_Format;
+                        string thm_format = Formats.GetSettings(m.format, "THM_Format", thm_def);
+                        if (thm_format != "JPG" && thm_format != "PNG" && thm_format != "BMP" && thm_format != "None") thm_format = thm_def;
+                        if (thm_format != "None")
+                        {
+                            s.Filter = thm_format.Replace("JPG", "JPEG") + " " + Languages.Translate("files") + "|*." + thm_format.ToLower();
+                            s.FileName = Path.GetFileNameWithoutExtension(m.infilepath) + "." + thm_format.ToLower();
+                        }
+                        else
+                        {
+                            s.FileName = Path.GetFileNameWithoutExtension(m.infilepath);
+                            s.Filter = "PNG " + Languages.Translate("files") + "|*.png" +
+                                "|JPEG " + Languages.Translate("files") + "|*.jpg" +
+                                "|BMP " + Languages.Translate("files") + "|*.bmp";
+                        }
+
+                        fix_ar = Formats.GetSettings(m.format, "THM_FixAR", Formats.GetDefaults(m.format).THM_FixAR);
+                        thm_w = Formats.GetSettings(m.format, "THM_Width", Formats.GetDefaults(m.format).THM_Width);
+                        thm_h = Formats.GetSettings(m.format, "THM_Height", Formats.GetDefaults(m.format).THM_Height);
+                        if (thm_w == 0) thm_w = m.outresw; if (thm_h == 0) thm_h = m.outresh;
+                    }
                     else
-                        s.Filter = "JPEG " + Languages.Translate("files") + "|*.jpg" +
-                            "|PNG " + Languages.Translate("files") + "|*.png";
+                    {
+                        thm_w = 0; thm_h = 0; fix_ar = false;
+                        s.FileName = Path.GetFileNameWithoutExtension(m.infilepath);
+                        s.Filter = "PNG " + Languages.Translate("files") + "|*.png" +
+                            "|JPEG " + Languages.Translate("files") + "|*.jpg" +
+                            "|BMP " + Languages.Translate("files") + "|*.bmp";
+                    }
 
                     if (s.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        string ext = Path.GetExtension(s.FileName).ToLower();
-                        int frame = (int)Math.Round(Position.TotalSeconds * fps);
-
-                        reader = new AviSynthReader();
-                        reader.ParseScript(m.script);
-
-                        if (ext == ".png")
-                        {
-                            if (m.format == Format.ExportFormats.PmpAvc)
-                            {
-                                bmp = new System.Drawing.Bitmap(144, 80);
-                                g = System.Drawing.Graphics.FromImage(bmp);
-                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                                g.DrawImage(reader.ReadFrameBitmap(frame), 0, 0, 144, 80);
-                                bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                            }
-                            else
-                            {
-                                bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
-                                bmp.Save(s.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                            }
-                        }
-                        else if (ext == ".jpg")
-                        {
-
-                            if (m.format == Format.ExportFormats.Mp4PSPAVC ||
-                               m.format == Format.ExportFormats.Mp4PSPAVCTV ||
-                               m.format == Format.ExportFormats.Mp4PSPASP)
-                            {
-                                //масштабируем изображение
-                                int sideHeight, sideWidth;
-                                //выбираем большую сторону, по которой изменяем изображение
-                                if (reader.Height < reader.Width)
-                                {
-                                    //если ширина больше высоты                                    
-                                    sideHeight = 121;
-                                    sideWidth = (int)((float)reader.Width * ((float)sideHeight / (float)reader.Height));
-                                }
-                                else
-                                {
-                                    //если высота больше ширины
-                                    sideWidth = 161;
-                                    sideHeight = (int)((float)reader.Height * ((float)sideWidth / (float)reader.Width));
-                                }
-
-                                bmp = new System.Drawing.Bitmap(160, 120);
-                                g = System.Drawing.Graphics.FromImage(bmp);
-
-                                //метод интерполяции при ресайзе
-                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-
-                                //процент cжатия jpg
-                                System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
-                                System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
-                                encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 92L);
-
-                                //вывод и запись изображения в файл
-                                g.DrawImage(reader.ReadFrameBitmap(frame), (int)(0.5 * (160 - (float)sideWidth)), (int)(0.5 * (120 - (float)sideHeight)), sideWidth, sideHeight);
-                                bmp.Save(s.FileName, info[1], encoderParameters);
-                            }
-                            else
-                            {
-                                bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
-                                //сжатие jpg
-                                System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
-                                System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
-                                encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
-
-                                bmp.Save(s.FileName, info[1], encoderParameters);
-                            }
-                        }
+                        SavePicture(s.FileName, thm_w, thm_h, fix_ar, Convert.ToInt32(Math.Round(Position.TotalSeconds * fps)));
                     }
                 }
                 catch (Exception ex)
                 {
                     ErrorException("SaveTHM: " + ex.Message, ex.StackTrace);
                 }
-                finally
+            }
+        }
+
+        private void SavePicture(string path, int width, int height, bool fix_ar, int frame)
+        {
+            System.Drawing.Bitmap bmp = null;
+            System.Drawing.Graphics g = null;
+            AviSynthReader reader = null;
+            string new_script = m.script;
+
+            try
+            {
+                if (fix_ar && width != 0 && height != 0)
                 {
-                    //завершение
-                    if (g != null) g.Dispose();
-                    if (bmp != null) bmp.Dispose();
-                    if (reader != null) reader.Close();
+                    int crop_w = 0, crop_h = 0;
+                    double old_asp = m.outaspect;
+                    double new_asp = (double)width / (double)height;
+
+                    if (old_asp < new_asp)
+                    {
+                        crop_h = Math.Max(Convert.ToInt32((m.outresh - ((m.outresh * old_asp) / new_asp)) / 2), 0);
+                    }
+                    else if (old_asp > new_asp)
+                    {
+                        crop_w = Math.Max(Convert.ToInt32((m.outresw - (m.outresw / old_asp) * new_asp) / 2), 0);
+                    }
+
+                    new_script += ("Lanczos4Resize(" + width + ", " + height + ", " + crop_w + ", " + crop_h + ", -" + crop_w + ", -" + crop_h + ")\r\n");
                 }
+
+                reader = new AviSynthReader();
+                reader.ParseScript(new_script);
+                if (width == 0 || height == 0 || (width == reader.Width && height == reader.Height))
+                {
+                    bmp = new System.Drawing.Bitmap(reader.ReadFrameBitmap(frame));
+                }
+                else
+                {
+                    bmp = new System.Drawing.Bitmap(width, height);
+                    g = System.Drawing.Graphics.FromImage(bmp);
+
+                    //метод интерполяции при ресайзе
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(reader.ReadFrameBitmap(frame), 0, 0, width, height);
+                }
+
+                string ext = Path.GetExtension(path).ToLower();
+                if (ext == ".jpg")
+                {
+                    //процент cжатия jpg
+                    System.Drawing.Imaging.ImageCodecInfo[] info = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
+                    System.Drawing.Imaging.EncoderParameters encoderParameters = new System.Drawing.Imaging.EncoderParameters(1);
+                    encoderParameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 95L);
+
+                    //jpg
+                    bmp.Save(path, info[1], encoderParameters);
+                }
+                else if (ext == ".png")
+                {
+                    //png
+                    bmp.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                else
+                {
+                    //bmp
+                    bmp.Save(path, System.Drawing.Imaging.ImageFormat.Bmp);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorException("SavePicture: " + ex.Message, ex.StackTrace);
+            }
+            finally
+            {
+                //завершение
+                if (g != null) { g.Dispose(); g = null; }
+                if (bmp != null) { bmp.Dispose(); bmp = null; }
+                if (reader != null) { reader.Close(); reader = null; }
             }
         }
 
@@ -5885,82 +5869,74 @@ namespace XviD4PSP
         {
             if (m != null)
             {
-                if (m.format == Format.ExportFormats.M2TS ||
-                    m.format == Format.ExportFormats.TS ||
-                    m.format == Format.ExportFormats.Mkv)
+                if (m.format == Format.ExportFormats.BluRay)
                 {
-                    Options_M2TS m2ts = new Options_M2TS(m, this);
-                    m = m2ts.m.Clone();
-                    UpdateTaskMassive(m);
+                    new Options_BluRay(this);
                 }
-                else if (m.format == Format.ExportFormats.Mpeg2PAL ||
-                    m.format == Format.ExportFormats.Mpeg2NTSC)
+                else if (Formats.GetDefaults(m.format).IsEditable)
                 {
-                    Options_MPEG2DVD dvd = new Options_MPEG2DVD(m, this);
-                    m = dvd.m.Clone();
-                    UpdateTaskMassive(m);
-                }
-                else if (m.format == Format.ExportFormats.BluRay)
-                {
-                    Options_BluRay blu = new Options_BluRay(m, this);
-                    m = blu.m.Clone();
-                    UpdateTaskMassive(m);
-                }
-                else if (m.format == Format.ExportFormats.Custom)
-                {
-                    FormatSettings custom = new FormatSettings(m, this);
-                    if (custom.update_massive && !custom.update_audio && !custom.update_framerate && !custom.update_resolution)
+                    FormatSettings fs = new FormatSettings(m.format, this);
+                    if (fs.update_massive && !fs.update_audio && !fs.update_framerate && !fs.update_resolution)
                     {
-                        m.split = Format.GetSplitting(m.format);
                         m.outfilesize = Calculate.GetEncodingSize(m);
-                        m.dontmuxstreams = Format.GetMultiplexing(m.format);
                         if (m.outfilepath != null) m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
-                        
+
                         UpdateTaskMassive(m);
                     }
-                    else if (custom.update_audio || custom.update_framerate || custom.update_resolution)
+                    else if (fs.update_audio || fs.update_framerate || fs.update_resolution)
                     {
                         string old_script = m.script;
-                        
+
                         //забиваем-обновляем аудио массивы
-                        if (custom.update_audio) m = FillAudio(m);
-                                               
+                        if (fs.update_audio) m = FillAudio(m);
+
                         //перезабиваем специфику формата
-                        if (custom.update_framerate)
+                        if (fs.update_framerate)
                         {
                             m = Format.GetOutInterlace(m);
                             m = Format.GetValidFramerate(m);
                             m = Calculate.UpdateOutFrames(m);
                         }
-                        if (custom.update_resolution)
+                        if (fs.update_resolution)
                         {
                             m = Format.GetValidResolution(m);
                             m = Format.GetValidOutAspect(m);
                             m = AspectResolution.FixAspectDifference(m);
                         }
-                       
-                        //перезабиваем настройки форматов
-                        m.split = Format.GetSplitting(m.format);
+
                         m.outfilesize = Calculate.GetEncodingSize(m);
-                        m.dontmuxstreams = Format.GetMultiplexing(m.format);
                         if (m.outfilepath != null) m.outfilepath = Calculate.RemoveExtention(m.outfilepath, true) + Format.GetValidExtension(m);
-                        
+
                         //создаём новый AviSynth скрипт
                         m = AviSynthScripting.CreateAutoAviSynthScript(m);
 
                         //загружаем обновлённый скрипт
                         if (old_script != m.script) LoadVideo(MediaLoad.update);
-                        
+
                         UpdateTaskMassive(m);
-                    }                    
+                    }
                 }
                 else
                 {
-                    Message mess = new Message(this);
-                    mess.ShowMessage(Languages.Translate("This format doesn`t have any settings."), Languages.Translate("Format"));
+                    new Message(this).ShowMessage(Languages.Translate("This format doesn`t have any settings."), Languages.Translate("Format"));
                 }
             }
-            else if (combo_format.SelectedItem.ToString() == "Custom") new FormatSettings(null, this);
+            else if (combo_format.SelectedItem != null)
+            {
+                Format.ExportFormats format = Format.StringToEnum(combo_format.SelectedItem.ToString());
+                if (format == Format.ExportFormats.BluRay)
+                {
+                    new Options_BluRay(this);
+                }
+                else if (Formats.GetDefaults(format).IsEditable)
+                {
+                    new FormatSettings(format, this);
+                }
+                else
+                {
+                    new Message(this).ShowMessage(Languages.Translate("This format doesn`t have any settings."), Languages.Translate("Format"));
+                }
+            }
         }
 
         private void menu_settings_Click(object sender, RoutedEventArgs e)

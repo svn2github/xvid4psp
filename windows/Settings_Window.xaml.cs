@@ -34,8 +34,6 @@ namespace XviD4PSP
             check_delete_ff_cache.Content = Languages.Translate("Auto delete FFmpegSource2 cache");
             check_delete_dgindex_cache.Content = Languages.Translate("Auto delete DGIndex cache");
             check_search_temp.Content = Languages.Translate("Search the best temp folder place on program start");
-            check_save_anamorph.Content = Languages.Translate("Maintain anamorphic aspect");
-            check_alwaysprogressive.Content = Languages.Translate("Always encode to progressive video");
             check_auto_colormatrix.Content = Languages.Translate("Auto apply ColorMatrix for MPEG2 files");
             label_temppath.Content = Languages.Translate("Temp folder path:");
             check_window_dim.Content = Languages.Translate("Remember last window location");
@@ -98,8 +96,6 @@ namespace XviD4PSP
             check_delete_dgindex_cache.IsChecked = Settings.DeleteDGIndexCache;
             check_search_temp.IsChecked = Settings.SearchTempPath;
             textbox_temp.Text = Settings.TempPath;
-            check_save_anamorph.IsChecked = Settings.SaveAnamorph;
-            check_alwaysprogressive.IsChecked = Settings.AlwaysProgressive;
             check_auto_colormatrix.IsChecked = Settings.AutoColorMatrix;
             check_window_dim.IsChecked = Settings.WindowResize;                                   //Запоминать параметры окна
             check_hide_comments.IsChecked = Settings.HideComments;                                //Удалять комментарии из скрипта
@@ -257,16 +253,6 @@ namespace XviD4PSP
                 Settings.TempPath = textbox_temp.Text = folder.SelectedPath;
             }
             p.TempFolderFiles();
-        }
-
-        private void check_save_anamorph_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.SaveAnamorph = check_save_anamorph.IsChecked.Value;
-        }
-
-        private void check_alwaysprogressive_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.AlwaysProgressive = check_alwaysprogressive.IsChecked.Value;
         }
  
         private void check_auto_colormatrix_Click(object sender, RoutedEventArgs e)

@@ -458,8 +458,32 @@ namespace XviD4PSP
             info.CreateNoWindow = true;
             encodertext = null;
 
-            string charset = ((Settings.MKVMerge_Charset != "") ? (" --output-charset " + ((Settings.MKVMerge_Charset.ToLower() == "auto") ?
-                        System.Text.Encoding.Default.HeaderName : Settings.MKVMerge_Charset)) : "");
+            string charset = "";
+            string _charset = Settings.MKVToolnix_Charset;
+
+            try
+            {
+                if (_charset == "")
+                {
+                    info.StandardOutputEncoding = System.Text.Encoding.UTF8;
+                    charset = " --output-charset UTF-8";
+                }
+                else if (_charset.ToLower() == "auto")
+                {
+                    info.StandardOutputEncoding = System.Text.Encoding.Default;
+                    charset = " --output-charset " + System.Text.Encoding.Default.HeaderName;
+                }
+                else
+                {
+                    int page = 0;
+                    if (int.TryParse(_charset, out page))
+                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(page);
+                    else
+                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(_charset);
+                    charset = " --output-charset " + _charset;
+                }
+            }
+            catch (Exception) { }
 
             if (mode == DemuxerMode.ExtractAudio)
             {
@@ -491,12 +515,12 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         procent = Convert.ToInt32(mat.Groups[1].Value);
                         worker.ReportProgress(procent);
                     }
-                    else
+                    else if (line != "")
                     {
                         if (encodertext != null)
                             encodertext += Environment.NewLine;
@@ -504,6 +528,10 @@ namespace XviD4PSP
                     }
                 }
             }
+
+            //Дочитываем остатки лога, если что-то не успело считаться
+            line = encoderProcess.StandardOutput.ReadToEnd();
+            if (!string.IsNullOrEmpty(line)) encodertext += Calculate.FilterLogMessage(r, line.Replace("\r\r\n", "\r\n"));
 
             //чистим ресурсы
             exit_code = encoderProcess.ExitCode;
@@ -514,7 +542,7 @@ namespace XviD4PSP
             if (IsAborted) return;
 
             //проверка на удачное завершение
-            if (exit_code != 0)
+            if (exit_code < 0 || exit_code > 1) //1 - Warning, 2 - Error
             {
                 throw new Exception(encodertext);
             }

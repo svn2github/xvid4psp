@@ -132,8 +132,32 @@ namespace XviD4PSP
                     info.RedirectStandardError = false;
                     info.CreateNoWindow = true;
 
-                    string charset = ((Settings.MKVMerge_Charset != "") ? (" --output-charset " + ((Settings.MKVMerge_Charset.ToLower() == "auto") ?
-                        System.Text.Encoding.Default.HeaderName : Settings.MKVMerge_Charset)) : "");
+                    string charset = "";
+                    string _charset = Settings.MKVToolnix_Charset;
+
+                    try
+                    {
+                        if (_charset == "")
+                        {
+                            info.StandardOutputEncoding = System.Text.Encoding.UTF8;
+                            charset = " --output-charset UTF-8";
+                        }
+                        else if (_charset.ToLower() == "auto")
+                        {
+                            info.StandardOutputEncoding = System.Text.Encoding.Default;
+                            charset = " --output-charset " + System.Text.Encoding.Default.HeaderName;
+                        }
+                        else
+                        {
+                            int page = 0;
+                            if (int.TryParse(_charset, out page))
+                                info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(page);
+                            else
+                                info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(_charset);
+                            charset = " --output-charset " + _charset;
+                        }
+                    }
+                    catch (Exception) { }
 
                     info.Arguments = "\"" + infilepath + "\"" + charset;
 
