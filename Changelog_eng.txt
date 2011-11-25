@@ -1,5 +1,9 @@
-﻿XviD4PSP 5.10.273.0 (25.11.2011), main changes:
+﻿XviD4PSP 5.10.274.0 (25.11.2011), main changes:
 
+>>> (r274) Advanced time parsing for "GoTo" and "SetStart"/"SetEnd" fields. In addition to the standard form
+           (HH:MM:SS.ms), now you can also use another form: ####x, where #### - is a digit(s) (fractional values
+           also allowed) and x - h(ours), or m(inutes), or s(econds), or ms(milliseconds). All of this will be
+           valid: 1.25h | 1H 20m | 10.5m | 0.2h 30M 500,1s | ,5H .5M | 15000ms | 2000,55S and so on.
 >>> (r273) In the menu "AviSynth" added an option for sequential reading all the frames from the script ("Run script").
            For example, it may be used to perform a 1-st pass of a 2-pass mode vfr-conversion using TDecimate. Or for
            something similar, that requires the script to be runned to get the result(s).

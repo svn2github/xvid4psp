@@ -2281,9 +2281,10 @@ namespace XviD4PSP
                     button_apply_trim.Content = Languages.Translate("Apply Trim");
                 }
                 ToolTipService.SetShowDuration(button_apply_trim, 100000);
-                textbox_start.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", Languages.Translate("Set Start")) +
+                ToolTipService.SetShowDuration(target_goto, 10000);
+                textbox_start.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms or #h #m #s #ms), then press \"BUTTON\" button.").Replace("BUTTON", Languages.Translate("Set Start")) +
                     "\r\n" + Languages.Translate("If you leave this field empty, then current frame number will be entered automatically.");
-                textbox_end.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms), then press \"XXXXX\" button.").Replace("XXXXX", Languages.Translate("Set End")) +
+                textbox_end.ToolTip = Languages.Translate("Enter frame number or time position (HH:MM:SS.ms or #h #m #s #ms), then press \"BUTTON\" button.").Replace("BUTTON", Languages.Translate("Set End")) +
                     "\r\n" + Languages.Translate("If you leave this field empty, then current frame number will be entered automatically.");
                 button_trim_plus.ToolTip = Languages.Translate("Next/New region");
                 button_trim_minus.ToolTip = Languages.Translate("Previous region");
@@ -2292,7 +2293,7 @@ namespace XviD4PSP
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too");
                 target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.") +
-                    "\r\n" + Languages.Translate("You can also enter a time (HH:MM:SS.ms).") + "\r\n\r\n" + Languages.Translate("Enter - apply, Esc - cancel.");
+                    "\r\n" + Languages.Translate("You can also enter a time (HH:MM:SS.ms or #h #m #s #ms).") + "\r\n\r\n" + Languages.Translate("Enter - apply, Esc - cancel.");
 
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
@@ -6134,24 +6135,35 @@ namespace XviD4PSP
                 value = Convert.ToInt32(Position.TotalSeconds * fps);
                 textbox.Text = Convert.ToString(value);
             }
-            else if (textbox.Text.Contains(":")) //Вписано время - пересчитываем в кадр
+            else if (int.TryParse(textbox.Text, out value)) //Вписан номер кадра
+            {
+                if (value < 0)
+                {
+                    textbox.Text = "";
+                    return;
+                }
+            }
+            else
             {
                 TimeSpan result = TimeSpan.Zero;
-                if (TimeSpan.TryParse(textbox.Text, out result))
+                if (Calculate.ParseTimeString(textbox.Text, out result)) //Вписано время - пересчитываем в кадр
                 {
-                    value = Convert.ToInt32(result.TotalSeconds * fps);
-                    textbox.Text = Convert.ToString(value);
+                    if (result > TimeSpan.Zero)
+                    {
+                        value = Convert.ToInt32(result.TotalSeconds * fps);
+                        textbox.Text = Convert.ToString(value);
+                    }
+                    else
+                    {
+                        textbox.Text = "";
+                        return;
+                    }
                 }
                 else
                 {
                     textbox.Text = "";
                     return;
                 }
-            }
-            else if (!int.TryParse(textbox.Text, out value) || value < 0) //Вписан номер кадра
-            {
-                textbox.Text = "";
-                return;
             }
 
             //Добавляем новый Trim
@@ -6212,6 +6224,17 @@ namespace XviD4PSP
                 ValidateTrimAndCopy(m);
 
             SetTrimsButtons();
+        }
+
+        private void textbox_trim_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                if (sender == textbox_start && !textbox_start.IsReadOnly)
+                    button_set_trim_value_Click(button_set_start, null);
+                else if (sender == textbox_end && !textbox_end.IsReadOnly)
+                    button_set_trim_value_Click(button_set_end, null);
+            }
         }
 
         private void UpdateScriptAndDuration()
@@ -6486,11 +6509,11 @@ namespace XviD4PSP
                         if (pic_frame != frame) ShowWithPictureView(m.script, frame);
                     }
                 }
-                else if (textbox_frame_goto.Text.Contains(":"))
+                else
                 {
                     //Введено время
-                    TimeSpan newpos;
-                    if (TimeSpan.TryParse(textbox_frame_goto.Text, out newpos))
+                    TimeSpan newpos = TimeSpan.Zero;
+                    if (Calculate.ParseTimeString(textbox_frame_goto.Text, out newpos))
                     {
                         if (graphBuilder != null || Pic.Visibility == Visibility.Visible)
                         {

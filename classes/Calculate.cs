@@ -1106,5 +1106,24 @@ namespace XviD4PSP
                 Path.GetExtension(infile)).Replace("%out_path%", Path.GetDirectoryName(m.outfilepath)).Replace("%out_name%",
                 Path.GetFileNameWithoutExtension(m.outfilepath)).Replace("%out_ext%", Path.GetExtension(m.outfilepath)).Replace("%lang%", lang);
         }
+
+        public static bool ParseTimeString(string value, out TimeSpan time)
+        {
+            if (value.Contains(":") && TimeSpan.TryParse(value, out time))
+            {
+                return true;
+            }
+            else
+            {
+                time = TimeSpan.Zero;
+                time += TimeSpan.FromHours(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)h", value)));
+                time += TimeSpan.FromMinutes(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)m([^s]|$)+", value)));
+                time += TimeSpan.FromSeconds(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)s", value)));
+                time += TimeSpan.FromMilliseconds(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)ms", value)));
+                if (time != TimeSpan.Zero) return true;
+            }
+
+            return false;
+        }
     }
 }
