@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.272.0 (23.11.2011), main changes:
+﻿XviD4PSP 5.10.273.0 (25.11.2011), main changes:
 
+>>> (r273) In the menu "AviSynth" added an option for sequential reading all the frames from the script ("Run script").
+           For example, it may be used to perform a 1-st pass of a 2-pass mode vfr-conversion using TDecimate. Or for
+           something similar, that requires the script to be runned to get the result(s).
 >>> (r272) Unlocked (and fixed) the code for determining the muxing progress when VirtualDubMod is used.
 >>> (r272) Changed the stdout encoding for MKVMerge (MKVInfo and MKVExtract) to UTF-8; removed "MKVRebuilder" window.
 >>> (r272) "Maintain anamorphic aspect" and "Always encode to progressive video" was removed from the "Global settings"

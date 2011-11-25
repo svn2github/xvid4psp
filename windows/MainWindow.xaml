@@ -81,6 +81,7 @@
                     <MenuItem x:Name="menu_createautoscript" Header="Create auto script" Width="Auto" Height="Auto" Click="CreateAutoScript"/>
                     <MenuItem x:Name="menu_createtestscript" Header="Test script" Width="Auto" Height="Auto" IsCheckable="True"  Click="ApplyTestScript"/>
                     <MenuItem x:Name="menu_save_script" Header="Save script" Click="SaveScript" Width="Auto" Height="Auto"/>
+                    <MenuItem x:Name="menu_run_script" Header="Run script" Click="menu_run_script_Click" Width="Auto" Height="Auto"/>
                     <Separator/>
                     <MenuItem x:Name="menu_playinwmp" Header="Play in Windows Media Player" Click="menu_play_in_Click">
                         <MenuItem.Icon>

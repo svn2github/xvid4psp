@@ -508,8 +508,9 @@ namespace XviD4PSP
                     //AviSynth
                     case ("AvsP editor"): button_avsp_Click(null, null); break;
                     case ("Edit filtering script"): EditScript(null, null); break;
-                    case ("Test script"): if (m != null) { ApplyTestScript(null, null); menu_createtestscript.IsChecked = m.testscript; }; break;
+                    case ("Apply test script"): if (m != null) { ApplyTestScript(null, null); menu_createtestscript.IsChecked = m.testscript; }; break;
                     case ("Save script"): SaveScript(null, null); break;
+                    case ("Run script"): menu_run_script_Click(null, null); break;
                     case ("Windows Media Player"): menu_play_in_Click(menu_playinwmp, null); break;
                     case ("Media Player Classic"): menu_play_in_Click(menu_playinmpc, null); break;
                     case ("WPF Video Player"): menu_play_in_Click(menu_playinwpf, null); break;
@@ -2095,8 +2096,9 @@ namespace XviD4PSP
                 //AviSynth
                 menu_avsp.InputGestureText = HotKeys.GetKeys("AvsP editor");
                 menu_editscript.InputGestureText = HotKeys.GetKeys("Edit filtering script");
-                menu_createtestscript.InputGestureText = HotKeys.GetKeys("Test script");
+                menu_createtestscript.InputGestureText = HotKeys.GetKeys("Apply test script");
                 menu_save_script.InputGestureText = HotKeys.GetKeys("Save script");
+                menu_run_script.InputGestureText = HotKeys.GetKeys("Run script");
                 menu_playinwmp.InputGestureText = HotKeys.GetKeys("Windows Media Player");
                 menu_playinmpc.InputGestureText = HotKeys.GetKeys("Media Player Classic");
                 menu_playinwpf.InputGestureText = HotKeys.GetKeys("WPF Video Player");
@@ -2152,19 +2154,19 @@ namespace XviD4PSP
                 //menu_demux.Header = Languages.Translate("Save to");
                 //menu_demux_video.Header = Languages.Translate("Save to");
 
-                mnUpdateVideo.Header = cmn_refresh.Header = Languages.Translate("Refresh preview");
-                menu_createautoscript.Header = Languages.Translate("Create auto script");
-                menu_createtestscript.Header = Languages.Translate("Test script");
-                menu_editscript.Header = Languages.Translate("Edit filtering script");
                 menu_avsp.Header = Languages.Translate("AvsP editor");
+                menu_editscript.Header = Languages.Translate("Edit filtering script");
+                menu_createautoscript.Header = Languages.Translate("Create auto script");
+                mnUpdateVideo.Header = cmn_refresh.Header = Languages.Translate("Refresh preview");
+                menu_createtestscript.Header = Languages.Translate("Apply test script");
+                menu_save_script.Header = Languages.Translate("Save script");
+                menu_run_script.Header = Languages.Translate("Run script");
 
                 mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
                 menu_interlace.Header = Languages.Translate("Interlace/Framerate") + "...";
 
                 mnAddSubtitles.Header = Languages.Translate("Add");
                 mnRemoveSubtitles.Header = Languages.Translate("Remove");
-
-                menu_save_script.Header = Languages.Translate("Save script");
 
                 edit_wmp.ToolTip = edit_mpc.ToolTip = edit_wpf.ToolTip = Languages.Translate("Edit path");
                 menu_playinwmp.Header = Languages.Translate("Play in") + " Windows Media Player";
@@ -4214,6 +4216,11 @@ namespace XviD4PSP
         private void menu_info_media_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             MediaInfo media = new MediaInfo(((m != null) ? m.infilepath : null), MediaInfo.InfoMode.MediaInfo, this);
+        }
+
+        private void menu_run_script_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (m != null) { ScriptRunner sr = new ScriptRunner(m.script); }
         }
 
         private void menu_play_in_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -6420,6 +6427,7 @@ namespace XviD4PSP
             mnRemoveSubtitles.IsEnabled = ShowItems;
             menu_createautoscript.IsEnabled = ShowItems;
             menu_save_script.IsEnabled = ShowItems;
+            menu_run_script.IsEnabled = ShowItems;
             target_goto.IsEnabled = ShowItems;
             menu_createtestscript.IsEnabled = ShowItems;
             cmn_addtobookmarks.IsEnabled = cmn_deletebookmarks.IsEnabled = ShowItems;

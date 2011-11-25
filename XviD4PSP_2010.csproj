@@ -221,6 +221,9 @@
     <Compile Include="windows\Decoders_Settings.xaml.cs">
       <DependentUpon>Decoders_Settings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="windows\ScriptRunner.xaml.cs">
+      <DependentUpon>ScriptRunner.xaml</DependentUpon>
+    </Compile>
     <Compile Include="windows\ShowWindow.xaml.cs">
       <DependentUpon>ShowWindow.xaml</DependentUpon>
     </Compile>
@@ -412,6 +415,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="windows\Decoders_Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="windows\ScriptRunner.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

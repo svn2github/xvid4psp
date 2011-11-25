@@ -162,7 +162,7 @@ namespace XviD4PSP
                     {
                         string line = str.ReadLine();
                         if (line == null) break;
-                        if (line == "[" + key + "]") //Ключ
+                        if (!ok && line == "[" + key + "]") //Ключ
                         {
                             ok = true;
                             output += line + "\r\n" + value + "\r\n\r\n";
