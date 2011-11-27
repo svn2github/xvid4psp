@@ -10,6 +10,6 @@ using System.Reflection;
 [assembly: AssemblyCompanyAttribute("Winnydows Inc. & FCP Team")]
 [assembly: AssemblyProductAttribute("XviD4PSP 5")]
 [assembly: AssemblyCopyrightAttribute("Copyright © 2007-2008 Winnydows,  2009-2011 fcp team")]
-[assembly: AssemblyVersionAttribute("5.10.274.0")]
-[assembly: AssemblyFileVersionAttribute("5.10.274.0")]
+[assembly: AssemblyVersionAttribute("5.10.275.0")]
+[assembly: AssemblyFileVersionAttribute("5.10.275.0")]
 [assembly: AssemblyTrademarkAttribute("")]

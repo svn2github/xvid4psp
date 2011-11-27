@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.274.0 (25.11.2011), main changes:
+﻿XviD4PSP 5.10.275.0 (27.11.2011), main changes:
 
+>>> (r275) "Resolution/Aspect" window: added ability to flip vertical/horizontal.
+>>> (r275) Fixed(?) aspect adjusting method "Black" (incorrect calculation of horizontal black borders for anamorphic
+           encoding).
 >>> (r274) Advanced time parsing for "GoTo" and "SetStart"/"SetEnd" fields. In addition to the standard form
            (HH:MM:SS.ms), now you can also use another form: ####x, where #### - is a digit(s) (fractional values
            also allowed) and x - h(ours), or m(inutes), or s(econds), or ms(milliseconds). All of this will be

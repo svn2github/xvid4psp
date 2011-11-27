@@ -37,11 +37,11 @@
 					<Label OpacityMask="{x:Null}" x:Name="text_inaspect" Content="Input aspect:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
 					<ComboBox x:Name="combo_inaspect" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_inaspect_SelectionChanged" Width="132" HorizontalAlignment="Right" VerticalAlignment="Center" IsTextSearchEnabled="False" KeyDown="ComboBox_KeyDown" LostFocus="ComboBox_LostFocus"/>
 				</DockPanel>
-				<DockPanel HorizontalAlignment="Stretch" Margin="16,0,16,0" Width="Auto" Height="Auto">
+				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="text_outaspect" Content="Output aspect:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Right"/>
                     <ComboBox x:Name="combo_outaspect" Width="132" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_outaspect_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0" DockPanel.Dock="Right" IsTextSearchEnabled="False" KeyDown="ComboBox_KeyDown" LostFocus="ComboBox_LostFocus"/>
                 </DockPanel>
-                <DockPanel HorizontalAlignment="Stretch" Margin="16,0,16,0" Width="Auto" Height="Auto">
+                <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
                     <Label OpacityMask="{x:Null}" x:Name="text_aspecterror" Content="Aspect error:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Right"/>
                 <TextBox x:Name="textbox_error" VerticalAlignment="Center" HorizontalAlignment="Right" Text="" TextWrapping="Wrap" Width="132" Height="Auto" DockPanel.Dock="Right" Opacity="0.95" IsReadOnly="True"/>
                 </DockPanel>
@@ -59,11 +59,16 @@
 					<ComboBox x:Name="combo_crop_r" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_r_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
 					<ComboBox x:Name="combo_crop_l" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_l_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
 				</DockPanel>
-				<DockPanel Width="Auto" Height="Auto" Margin="16,0,16,0">
+				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="text_black" Content="Black width, height:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
 					<ComboBox x:Name="combo_black_h" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_black_h_SelectionChanged" HorizontalAlignment="Right" DockPanel.Dock="Right" VerticalAlignment="Center"/>
 					<ComboBox x:Name="combo_black_w" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_black_w_SelectionChanged" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"/>
 				</DockPanel>
+                <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
+                    <Label OpacityMask="{x:Null}" x:Name="text_flip" Content="Flip vertical, horizontal:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                    <ComboBox x:Name="combo_flip_h" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_flip_h_SelectionChanged" HorizontalAlignment="Right" DockPanel.Dock="Right" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="combo_flip_v" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_flip_v_SelectionChanged" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                </DockPanel>
                 <DockPanel Margin="16,0,16,6" Width="Auto" Height="Auto">
                     <Button x:Name="button_analyse" Content="Auto" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_analyse_Click" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Width="132" Height="22" FontSize="12" />
                     <Label OpacityMask="{x:Null}" x:Name="text_runautocrop" Content="- Crop -" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="14,0,0,0" Width="Auto" HorizontalAlignment="Center"/>

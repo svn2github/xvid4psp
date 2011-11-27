@@ -1519,7 +1519,7 @@ namespace XviD4PSP
                 //автокроп
                 if (x.format != Format.ExportFormats.Audio)
                 {
-                    //Клонируем АР от предыдущего файла
+                    //Клонируем разрешение от предыдущего файла
                     if (IsBatchOpening && m != null && Settings.BatchCloneAR)
                     {
                         x.outresw = m.outresw;
@@ -1530,9 +1530,11 @@ namespace XviD4PSP
                         x.cropb = x.cropb_copy = m.cropb;
                         x.blackw = m.blackw;
                         x.blackh = m.blackh;
-                        x.sar = m.sar;
+                        x.flipv = m.flipv;
+                        x.fliph = m.fliph;
                         x.outaspect = m.outaspect;
                         x.aspectfix = m.aspectfix;
+                        x.sar = m.sar;
                     }
                     else
                     {

@@ -35,6 +35,8 @@ namespace XviD4PSP
         private double fps = 0;
 
         private string script = "";
+        private string frame_of = "";
+        private string cropped_s = "";
         private bool WindowLoaded = false;
         private bool GreenLight = false;
         private bool OldSeeking = false; //Settings.OldSeeking;
@@ -67,6 +69,8 @@ namespace XviD4PSP
             button_uncrop.ToolTip = Languages.Translate("Remove crop");
             button_fullscreen.ToolTip = Languages.Translate("Fullscreen mode");
             button_cancel.Content = Languages.Translate("Cancel");
+            frame_of = Languages.Translate("Frame XX of YY").ToLower();
+            cropped_s = Languages.Translate("cropped size");
 
             slider_pos.Maximum = m.inframes;
             slider_pos.Value = (Settings.VCropFrame == "THM-frame") ? m.thmframe : 0;
@@ -210,7 +214,7 @@ namespace XviD4PSP
             //Проверка на четность
             if (left % 2 != 0 || right % 2 != 0 || top % 2 != 0 || bottom % 2 != 0)
             {
-                ErrorException("VisualCrop: Resolution must be mod2 on each side!", null);
+                ErrorException("VisualCrop: " + Languages.Translate("Resolution must be mod2 on each side!"), null);
                 return;
             }
 
@@ -442,8 +446,8 @@ namespace XviD4PSP
             else if (ch % 2 == 0) modh = "2";
             else modh = "1";
 
-            Title = m.inresw + "x" + m.inresh + " -> " + cw + "x" + ch + " (" + modw + "x" + modh + ", cropped size) | frame " +
-                (int)slider_pos.Value + " of " + (int)slider_pos.Maximum;
+            Title = m.inresw + "x" + m.inresh + " -> " + cw + "x" + ch + " (" + modw + "x" + modh + ", " + cropped_s + ") | " +
+                frame_of.Replace("xx", ((int)slider_pos.Value).ToString()).Replace("yy", ((int)slider_pos.Maximum).ToString());
         }
 
         private void WindowKeyDown(object sender, KeyEventArgs e)

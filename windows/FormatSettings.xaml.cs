@@ -485,7 +485,7 @@ namespace XviD4PSP
 
             vcodecslist.Content = Languages.Translate("Valid video codecs:");
             framerateslist.Content = Languages.Translate("Valid framerates:");
-            fixed_ar.Content = Languages.Translate("Fixed AR") + ":";
+            fixed_ar.Content = Languages.Translate("Fix AR") + ":";
             check_anamorphic.Content = Languages.Translate("Anamorph is allowed");
             check_interlaced.Content = Languages.Translate("Interlace is allowed");
             acodecslist.Content = Languages.Translate("Valid audio codecs:");
@@ -533,8 +533,10 @@ namespace XviD4PSP
             if (textbox_aspects.IsEnabled) textbox_aspects.ToolTip = Languages.Translate("Aspect ratios.") + "\r\n" + Languages.Translate("Valid values:") + " 1.3333 (4:3), 1.5000, 1.6667, 1.7647 (16:9), 1.7778 (16:9), 1.8500, 2.3529, ...\r\n" +
                 Languages.Translate("Separate by comma.") + _def + StringArrayToString(def.Aspects);
             if (combo_fix_ar_method.IsEnabled) combo_fix_ar_method.ToolTip = Languages.Translate("Use this option if you want to limit AR by values, specified above") + ":\r\n\r\n" +
-                "Disabled - " + Languages.Translate("do not limit") + "\r\nSAR - " + Languages.Translate("limit AR using anamorphic encoding (which must be allowed!)") + "\r\nCrop - " + Languages.Translate("limit AR by cropping the picture") +
-                "\r\nBlack - " + Languages.Translate("limit AR by adding a black borders") + _def + def.LockedAR_Method;
+                "Disabled - " + Languages.Translate("do not fix") + "\r\nSAR - " + Languages.Translate("fix AR using anamorphic encoding") + " " + Languages.Translate("(which must be allowed!)") + "\r\nCrop - " +
+                Languages.Translate("fix AR by cropping the picture") + "\r\nBlack - " + Languages.Translate("fix AR by adding a black borders") + "\r\n\r\n" +
+                Languages.Translate("Note: for non-anamorphic encoding you must also limit the resolution (min, limit and max) with a single value,") + "\r\n" +
+                Languages.Translate("the quotient from which is as close as possible to the desired AR (for example, 640x480 for 1.3333).") + _def + def.LockedAR_Method;
             if (check_anamorphic.IsEnabled) check_anamorphic.ToolTip = Languages.Translate("Enable this option if you want to allow anamorphic encoding for this format") + _def + " " + (def.Anamorphic ? _on : _off);
             if (check_interlaced.IsEnabled) check_interlaced.ToolTip = Languages.Translate("Enable this option if you want to allow interlaced encoding for this format") + _def + " " + (def.Interlaced ? _on : _off);
             if (textbox_acodecs.IsEnabled) textbox_acodecs.ToolTip = Languages.Translate("Codecs, that will be selectable in the audio-codecs settings window.") + "\r\n" + Languages.Translate("Valid values:") +
@@ -762,7 +764,6 @@ namespace XviD4PSP
             {
                 string value = combo_fix_ar_method.SelectedItem.ToString();
                 StoreValue(format, "LockedAR_Method", value);
-                combo_fix_ar_method.ToolTip = Languages.Translate("Aspect adjusting method:") + " " + value;
                 update_resolution = true;
             }
         }

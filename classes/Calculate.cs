@@ -1117,7 +1117,7 @@ namespace XviD4PSP
             {
                 time = TimeSpan.Zero;
                 time += TimeSpan.FromHours(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)h", value)));
-                time += TimeSpan.FromMinutes(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)m([^s]|$)+", value)));
+                time += TimeSpan.FromMinutes(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)m([^s]|$)", value)));
                 time += TimeSpan.FromSeconds(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)s", value)));
                 time += TimeSpan.FromMilliseconds(Calculate.ConvertStringToDouble(Calculate.GetRegexValue(@"([\-\d\.\,]*)ms", value)));
                 if (time != TimeSpan.Zero) return true;

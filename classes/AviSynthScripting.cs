@@ -556,6 +556,14 @@ namespace XviD4PSP
                m.script += "QTGMC(Preset=\"" + Settings.QTGMC_Preset + "\", Sharpness=" + Calculate.ConvertDoubleToPointString(Settings.QTGMC_Sharpness, 1) + ")\r\n";
            }
 
+           //Flip
+           if (m.fliph || m.flipv)
+           {
+               m.script += Environment.NewLine;
+               if (m.flipv) m.script += "FlipVertical()" + Environment.NewLine;
+               if (m.fliph) m.script += "FlipHorizontal()" + Environment.NewLine;
+           }
+
            //Фильтрация до ресайза
            if (!Settings.ResizeFirst)
            {
@@ -955,10 +963,26 @@ namespace XviD4PSP
            //автокроп
            if (mode == ScriptMode.Autocrop)
            {
+               //Flip
+               if (m.fliph || m.flipv)
+               {
+                   script += Environment.NewLine;
+                   if (m.flipv) script += "FlipVertical()" + Environment.NewLine;
+                   if (m.fliph) script += "FlipHorizontal()" + Environment.NewLine;
+                   script += Environment.NewLine;
+               }
+
                script += "ConvertToYV12()" + Environment.NewLine + Environment.NewLine;
                script += "log_file = \"" + Settings.TempPath + "\\AutoCrop.log\"" + Environment.NewLine;
                script += "FrameEvaluate(last, \"AutoCrop(mode=2, wMultOf=4, hMultOf=4, samples=1, samplestartframe=current_frame, " +
                    "sampleendframe=current_frame, threshold=" + Settings.AutocropSensivity + ", file=log_file, overwrite=false)\")" + Environment.NewLine;
+           }
+
+           if (mode == ScriptMode.VCrop)
+           {
+               //Flip
+               if (m.flipv) script += "FlipVertical()" + Environment.NewLine;
+               if (m.fliph) script += "FlipHorizontal()" + Environment.NewLine;
            }
 
            if (mode == ScriptMode.Interlace)

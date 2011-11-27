@@ -731,22 +731,21 @@ namespace XviD4PSP
 
            //ограничение W*H
            int limit = (int)wlist[wlist.Count - 1] * (int)hlist[hlist.Count - 1];
-           if (m.format == ExportFormats.Mp4PSPASP)
-               limit = 100100;
+           if (m.format == ExportFormats.Mp4PSPASP) limit = 100100;
 
            //первичное получение разрешений
            m.outresw = Calculate.GetCloseIntegerAL(m.inresw, wlist);
-           m.outresh = (int)((double)m.outresw / m.inaspect); //Высота
+           m.outresh = Convert.ToInt32(m.outresw / m.inaspect); //Высота
 
            if (m.outresh > MaxH)
            {
                m.outresh = Calculate.GetCloseIntegerAL(m.inresh, hlist);
-               m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
+               m.outresw = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresh * m.inaspect), wlist);
            }
            else
            {
                //m.outresw = Calculate.GetCloseIntegerAL(m.inresw, wlist);
-               m.outresh = Calculate.GetCloseIntegerAL(m.outresh, hlist); //(int)(m.outresw / m.inaspect), hlist);
+               m.outresh = Calculate.GetCloseIntegerAL(m.outresh, hlist); //Convert.ToInt32(m.outresw / m.inaspect), hlist);
            }
 
            //выбираем по какой стороне подбирать
@@ -756,7 +755,7 @@ namespace XviD4PSP
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
                    m.outresh = Calculate.GetCloseIntegerAL(m.outresh - GetValidModH(m.format), hlist);
-                   m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresh * m.inaspect), wlist);
                }
            }
            else
@@ -765,7 +764,7 @@ namespace XviD4PSP
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
                    m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m.format), wlist);
-                   m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresw / m.inaspect), hlist);
                }
            }
 
@@ -804,34 +803,33 @@ namespace XviD4PSP
 
            //ограничение W*H
            int limit = (int)wlist[wlist.Count - 1] * (int)hlist[hlist.Count - 1];
-           if (m.format == ExportFormats.Mp4PSPASP)
-               limit = 100100;
+           if (m.format == ExportFormats.Mp4PSPASP) limit = 100100;
 
            //первичное получение разрешений
-           m.outresh = (int)((double)w / m.inaspect);
+           m.outresh = Convert.ToInt32(w / m.inaspect);
 
            //выбираем по какой стороне подбирать
            if (m.outresh > (int)hlist[hlist.Count - 1])
            {
                m.outresh = Calculate.GetCloseIntegerAL(m.outresh, hlist);
-               m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
+               m.outresw = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresh * m.inaspect), wlist);
 
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
                    m.outresh = Calculate.GetCloseIntegerAL(m.inresh - GetValidModH(m.format), hlist);
-                   m.outresw = Calculate.GetCloseIntegerAL((int)(m.outresh * m.inaspect), wlist);
+                   m.outresw = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresh * m.inaspect), wlist);
                }
            }
            else
            {
-               m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
+               m.outresh = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresw / m.inaspect), hlist);
 
                //перебираем пока разрешение не будет в норме
                while ((m.outresw * m.outresh) > limit)
                {
                    m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m.format), wlist);
-                   m.outresh = Calculate.GetCloseIntegerAL((int)(m.outresw / m.inaspect), hlist);
+                   m.outresh = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresw / m.inaspect), hlist);
                }
            }
 

@@ -865,6 +865,32 @@ namespace XviD4PSP
             }
         }
 
+        private bool _flipw = false;
+        public bool fliph
+        {
+            get
+            {
+                return _flipw;
+            }
+            set
+            {
+                _flipw = value;
+            }
+        }
+
+        private bool _fliph = false;
+        public bool flipv
+        {
+            get
+            {
+                return _fliph;
+            }
+            set
+            {
+                _fliph = value;
+            }
+        }
+
         private AviSynthScripting.Resizers _resizefilter;
         public AviSynthScripting.Resizers resizefilter
         {
