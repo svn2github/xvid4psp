@@ -231,12 +231,13 @@ namespace XviD4PSP
 
            string ext = Path.GetExtension(m.infilepath).ToLower().TrimStart(new char[] { '.' });
            if (ext == "avs") return AviSynthScripting.Decoders.Import;
+           if (ext == "grf") return AviSynthScripting.Decoders.DirectShowSource;
 
            if (m.indexfile != null)
            {
                if (ext == "d2v") return AviSynthScripting.Decoders.MPEG2Source;
-               else if (ext == "dga") return AviSynthScripting.Decoders.AVCSource;
-               else if (ext == "dgi") return AviSynthScripting.Decoders.DGMultiSource;
+               if (ext == "dga") return AviSynthScripting.Decoders.AVCSource;
+               if (ext == "dgi") return AviSynthScripting.Decoders.DGMultiSource;
            }
 
            string mpeg_dec = "", other_dec = AviSynthScripting.Decoders.DirectShowSource.ToString(); //Дефолты
@@ -265,10 +266,11 @@ namespace XviD4PSP
            }
 
            if (ext == "pmp") return AviSynthScripting.Decoders.DirectShowSource;
-           else if (ext == "vdr") return AviSynthScripting.Decoders.AVISource;
-           else if (ext == "y4m" || ext == "yuv") return AviSynthScripting.Decoders.RawSource;
-           else if (other_dec.Length > 0) return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), other_dec, true);
-           else return AviSynthScripting.Decoders.DirectShowSource;
+           if (ext == "vdr") return AviSynthScripting.Decoders.AVISource;
+           if (ext == "y4m" || ext == "yuv") return AviSynthScripting.Decoders.RawSource;
+           if (other_dec.Length > 0) return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), other_dec, true);
+
+           return AviSynthScripting.Decoders.DirectShowSource;
        }
 
        public static AudioStream GetValidADecoder(AudioStream instream)
@@ -276,6 +278,18 @@ namespace XviD4PSP
            if (instream.audiopath != null)
            {
                string ext = Path.GetExtension(instream.audiopath).ToLower().TrimStart(new char[] { '.' });
+
+               if (ext == "avs")
+               {
+                   instream.decoder = AviSynthScripting.Decoders.WAVSource; //Нет, не Import
+                   return instream;
+               }
+               if (ext == "grf")
+               {
+                   instream.decoder = AviSynthScripting.Decoders.DirectShowSource;
+                   return instream;
+               }
+
                string other_dec = AviSynthScripting.Decoders.bassAudioSource.ToString(); //Дефолт
                foreach (string line in (Settings.ADecoders.ToLower().Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)))
                {
@@ -1084,9 +1098,11 @@ namespace XviD4PSP
        public static string ValidateCopyAudio(Massive m)
        {
            AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
+           string aext = (instream.audiopath != null) ? Path.GetExtension(instream.audiopath).ToLower() : "";
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           if (ext == ".avs" && instream.audiopath == null) return "Source - AVS-script";
+           if (instream.audiopath == null && ext == ".avs" || aext == ".avs") return "Source - AVS-script";
+           else if (instream.audiopath == null && ext == ".grf" || aext == ".grf") return "Source - GRF-file";
            else if (m.format == ExportFormats.PmpAvc)
            {
                if (instream.codecshort != "AAC" && instream.codecshort != "MP3")
@@ -1186,6 +1202,7 @@ namespace XviD4PSP
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
            if (ext == ".avs") return "Source - AVS-script";
+           else if (ext == ".grf") return "Source - GRF-file";
            else if (ext == ".d2v") return "Source - DGIndex-project";
            else if (ext == ".dga") return "Source - DGAVCIndex-project";
            else if (ext == ".dgi") return "Source - DGIndexNV-project";

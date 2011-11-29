@@ -1237,7 +1237,7 @@ namespace XviD4PSP
                         stream.audiopath = apath;
                         stream.audiofiles = new string[] { apath };
                         stream = Format.GetValidADecoder(stream);
-                        x.inaudiostreams.Add(stream);
+                        x.inaudiostreams.Add(stream.Clone());
                         x.inaudiostream = 0;
                         deletefiles.Add(apath);
                     }
@@ -1314,11 +1314,12 @@ namespace XviD4PSP
                 //пытаемся точно узнать фреймрейт (если до этого не вышло)
                 if (x.format != Format.ExportFormats.Audio && x.isvideo)
                 {
+                    //"" - уже были попытки определить fps через MediaInfo\FFmpeg
+                    //null - никаких попыток определить fps пока-что не было (т.к. бесполезно)
                     if (x.inframerate == "" && ext != ".vdr" && ext != ".y4m" && ext != ".yuv")
                     {
                         FramerateDetector frd = new FramerateDetector(x);
-                        if (frd.m != null)
-                            x = frd.m.Clone();
+                        if (frd.m != null) x = frd.m.Clone();
                     }
                 }
 
@@ -1369,8 +1370,8 @@ namespace XviD4PSP
 
                     //Извлечение звука для FFmpegSource2 и DirectShowSource, для DirectShowSource2 звук будет извлечен в Caching (тут, если это автовыбор)
                     if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && !Settings.FFMS_Enable_Audio ||
-                        x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio||
-                        ((AudioStream)x.inaudiostreams[x.inaudiostream]).audiopath != null)
+                        x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio ||
+                        ((AudioStream)x.inaudiostreams[x.inaudiostream]).audiopath != null && x.isvideo)
                     {
                         AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
                         if (instream.audiopath == null || !File.Exists(instream.audiopath))

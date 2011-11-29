@@ -39,6 +39,10 @@ namespace XviD4PSP
             Owner = p;
 
             //переводим
+            string on = Languages.Translate("On");
+            string off = Languages.Translate("Off");
+            string _def = Languages.Translate("Default") + ": ";
+
             button_cancel.Content = Languages.Translate("Cancel");
             button_ok.Content = Languages.Translate("OK");
             button_refresh.Content = button_manual_apply.Content = text_manual_apply.Content = Languages.Translate("Apply");
@@ -66,14 +70,15 @@ namespace XviD4PSP
             combo_flip_v.ToolTip = Languages.Translate("Vertical");
             combo_flip_h.ToolTip = Languages.Translate("Horizontal");
             text_autocropframes.Content = Languages.Translate("Frames to analyze:");
-            combo_autocropframes.ToolTip = "Default: 11";
+            combo_autocropframes.ToolTip = _def + "11";
             text_autocropsens.Content = Languages.Translate("Autocrop sensivity:");
-            combo_autocropsens.ToolTip = "Default: 27";
+            combo_autocropsens.ToolTip = _def + "27";
             text_autocrop_new_mode.Content = Languages.Translate("Crop using the most common values") + ":";
             text_autocrop_new_mode.ToolTip = check_autocrop_new_mode.ToolTip = Languages.Translate("If checked, find the most common values for all the frames that`s being analyzed.") +
-                "\r\n" + Languages.Translate("Otherwise find a minimum values only.");
+                "\r\n" + Languages.Translate("Otherwise find a minimum values only.") + "\r\n\r\n" + _def + off;
             text_aspecterror.Content = Languages.Translate("Aspect error:");
             text_recalculate.Content = Languages.Translate("Recalculate aspect when crop is using:");
+            text_recalculate.ToolTip = check_recalculate_aspect.ToolTip = _def + on;
             button_analyse.ToolTip = Languages.Translate("Autocrop black borders");
             button_vcrop.ToolTip = Languages.Translate("Crop black borders manually");
             button_analyse.Content = group_autocrop.Header = Languages.Translate("Auto crop");
@@ -84,13 +89,13 @@ namespace XviD4PSP
             textbox_error.Text = "";
             text_ffmpeg_ar.Content = Languages.Translate("Use FFmpeg AR info:");
             text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg") +
-                ".\r\n" + Languages.Translate("This option is meaningful only when a file is opening.");
+                ".\r\n" + Languages.Translate("This option is meaningful only when a file is opening.") + "\r\n\r\n" + _def + on;
             text_visualcrop_opacity.Content = Languages.Translate("Background opacity:");
-            combo_visualcrop_opacity.ToolTip = "Default: 2";
+            combo_visualcrop_opacity.ToolTip = _def + "2";
             text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
-            combo_visualcrop_brightness.ToolTip = "Default: 25";
+            combo_visualcrop_brightness.ToolTip = _def + "25";
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
-            combo_visualcrop_frame.ToolTip = "Default: THM-frame";
+            combo_visualcrop_frame.ToolTip = _def + "THM-frame";
             manual_outaspect.ToolTip = Languages.Translate("In case of non-anamorphic encoding: Aspect = Width/Height.") +
                 "\r\n" + Languages.Translate("In case of anamorphic encoding: Aspect = (Width/Height)*SAR.");
             manual_outsar.ToolTip = Languages.Translate("Leave it empty for non-anamorphic encoding.") +
@@ -99,7 +104,7 @@ namespace XviD4PSP
                 "\r\n" + Languages.Translate("It must be used for anamorphic encoding only!");
             text_original_ar.Content = Languages.Translate("Use the original AR of the stream (if available)") + ":";
             check_original_ar.ToolTip = text_original_ar.ToolTip = Languages.Translate("If checked, use the AR of the raw video stream instead of the AR of the container.") +
-                "\r\n" + Languages.Translate("This option is meaningful only when a file is opening.");
+                "\r\n" + Languages.Translate("This option is meaningful only when a file is opening.") + "\r\n\r\n" + _def + on;
 
             for (int n = 0; n < 101; n++)
                 combo_autocropsens.Items.Add(n);

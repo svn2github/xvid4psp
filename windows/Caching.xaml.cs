@@ -86,12 +86,15 @@ namespace XviD4PSP
                 {
                     m.inresw = reader.Width;
                     m.inresh = reader.Height;
-                }
 
-                if (ext == ".avs")
-                {
-                    //Считываем аспект из скрипта
-                    m.pixelaspect = (double)reader.GetIntVariable("OUT_SAR_X", 1) / (double)reader.GetIntVariable("OUT_SAR_Y", 1);
+                    if (m.inaspect == 0 || double.IsNaN(m.inaspect))
+                        m.inaspect = (double)m.inresw / (double)m.inresh;
+
+                    if (ext == ".avs")
+                    {
+                        //Считываем SAR из скрипта
+                        m.pixelaspect = (double)reader.GetIntVariable("OUT_SAR_X", 1) / (double)reader.GetIntVariable("OUT_SAR_Y", 1);
+                    }
                 }
 
                 int samplerate = reader.Samplerate;
@@ -103,14 +106,19 @@ namespace XviD4PSP
 
                 if (samplerate != 0 && (m.inaudiostreams.Count > 0 || instream.samplerate == null))
                 {
-                    //вероятно аудио декодер меняет количество каналов
-                    if (instream.channels != reader.Channels && instream.channels > 0)
-                        instream.badmixing = true;
+                    if (instream.channels > 0)
+                    {
+                        //вероятно аудио декодер меняет количество каналов
+                        if (instream.channels != reader.Channels)
+                            instream.badmixing = true;
+                    }
+                    else
+                        instream.channels = reader.Channels;
 
                     instream.samplerate = samplerate.ToString();
                     instream.bits = reader.BitsPerSample;
 
-                    //Определение продолжительности и числа кадров только для звука (например если исходник - RAW ААС)
+                    //Определение продолжительности и числа кадров только для звука (например, если исходник - RAW ААС)
                     if (!m.isvideo && m.inframes == 0 && m.induration == TimeSpan.Zero)
                     {
                         m.induration = m.outduration = TimeSpan.FromSeconds(reader.SamplesCount / (double)reader.Samplerate);
@@ -124,9 +132,8 @@ namespace XviD4PSP
                     if (m.inaudiostreams.Count == 0 && ext == ".avs" && samplerate != 0)
                     {
                         instream.bitrate = (reader.BitsPerSample * reader.Samplerate * reader.Channels) / 1000; //kbps
-                        instream.codec = "PCM";
-                        instream.codecshort = "PCM";
-                        instream.language = "English";
+                        instream.codec = instream.codecshort = "PCM";
+                        instream.language = "Unknown";
                         m.inaudiostreams.Add(instream.Clone());
                     }
                 }
@@ -235,8 +242,8 @@ namespace XviD4PSP
             string ext = Path.GetExtension(m.infilepath).ToLower();
             AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
-            //Ошибка в пользовательском скрипте
-            if (ext == ".avs")
+            //Ошибка в пользовательском скрипте или в графе
+            if (ext == ".avs" || ext == ".grf")
             {
                 ErrorException("Caching: " + error, stacktrace);
                 m = null;

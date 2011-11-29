@@ -221,7 +221,7 @@ namespace XviD4PSP
 
            //принудительная установка fps
            string fps = "";
-           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DirectShowSource2) && m.inframerate != "")
+           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DirectShowSource2) && !string.IsNullOrEmpty(m.inframerate))
                fps = ", fps=" + m.inframerate;
 
            //принудительная конвертация частоты
@@ -231,7 +231,7 @@ namespace XviD4PSP
 
            //выбор аудио трека
            string audio = "";
-           if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio || !Settings.EnableAudio))
+           if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio || !Settings.EnableAudio || ext == ".grf"))
                audio = ", audio=false";
            else if (m.vdecoder == Decoders.AVISource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.EnableAudio))
                audio = ", audio=false";
@@ -243,7 +243,7 @@ namespace XviD4PSP
 
            if (m.vdecoder == Decoders.BlankClip) //пустой клип (черный экран)
            {
-               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + m.inframerate + ", color=$000000)";
+               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + ((!string.IsNullOrEmpty(m.inframerate) ? m.inframerate : "25.000")) + ", color=$000000)";
            }
            else if (ext == ".d2v") //d2v и MPEG2Source
            {
@@ -557,7 +557,7 @@ namespace XviD4PSP
            }
 
            //Flip
-           if (m.fliph || m.flipv)
+           if (m.flipv || m.fliph)
            {
                m.script += Environment.NewLine;
                if (m.flipv) m.script += "FlipVertical()" + Environment.NewLine;
@@ -820,7 +820,7 @@ namespace XviD4PSP
 
            //принудительная установка fps
            string fps = "";
-           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DirectShowSource2) && m.inframerate != "")
+           if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DirectShowSource2) && !string.IsNullOrEmpty(m.inframerate))
                fps = ", fps=" + m.inframerate;
 
            //принудительная конвертация частоты
@@ -831,7 +831,7 @@ namespace XviD4PSP
            //выбор аудио трека
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource && (mode == ScriptMode.VCrop || mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace ||
-               instream.audiopath != null || !Settings.DSS_Enable_Audio || !Settings.EnableAudio))
+               instream.audiopath != null || !Settings.DSS_Enable_Audio || !Settings.EnableAudio || ext == ".grf"))
                audio = ", audio=false";
            else if (m.vdecoder == Decoders.AVISource && (mode == ScriptMode.VCrop || mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace ||
                instream.audiopath != null || !Settings.EnableAudio))
@@ -844,7 +844,7 @@ namespace XviD4PSP
            string invideostring = "";
            if (m.vdecoder == Decoders.BlankClip)
            {
-               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + m.inframerate + ", color=$000000)";
+               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + ((!string.IsNullOrEmpty(m.inframerate) ? m.inframerate : "25.000")) + ", color=$000000)";
            }
            else if (ext == ".d2v")
            {
@@ -964,7 +964,7 @@ namespace XviD4PSP
            if (mode == ScriptMode.Autocrop)
            {
                //Flip
-               if (m.fliph || m.flipv)
+               if (m.flipv || m.fliph)
                {
                    script += Environment.NewLine;
                    if (m.flipv) script += "FlipVertical()" + Environment.NewLine;

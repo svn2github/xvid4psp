@@ -391,7 +391,7 @@ namespace XviD4PSP
                 int vid = -1, vnum = 0;
                 string vext = Path.GetExtension(m.infilepath).ToLower().TrimStart(new char[] { '.' });
                 tab_video_Header.ToolTip = Languages.Translate("File extension:") + " " + vext + "\r\n" + Languages.Translate("Current decoder") + ": " + m.vdecoder.ToString();
-                if (m.isvideo && vext != "d2v" && vext != "dga" && vext != "dgi" && vext != "avs")
+                if (m.isvideo && vext != "d2v" && vext != "dga" && vext != "dgi" && vext != "grf" && vext != "avs")
                 {
                     foreach (MyObj obj in listview_vdecoders.Items)
                     {
@@ -427,23 +427,26 @@ namespace XviD4PSP
                     int aud = -1, anum = 0;
                     string aext = Path.GetExtension(stream.audiopath).ToLower().TrimStart(new char[] { '.' });
                     tab_audio_Header.ToolTip = Languages.Translate("File extension:") + " " + aext + "\r\n" + Languages.Translate("Current decoder") + ": " + stream.decoder.ToString();
-                    foreach (MyObj obj in listview_adecoders.Items)
+                    if (aext != "avs" && aext != "grf")
                     {
-                        if (obj.Extension == aext)
+                        foreach (MyObj obj in listview_adecoders.Items)
                         {
-                            aud = anum; break;
+                            if (obj.Extension == aext)
+                            {
+                                aud = anum; break;
+                            }
+                            anum += 1;
                         }
-                        anum += 1;
-                    }
 
-                    if (aud < 0)
-                        listview_adecoders.SelectedIndex = listview_adecoders.Items.Count - 1;
+                        if (aud < 0)
+                            listview_adecoders.SelectedIndex = listview_adecoders.Items.Count - 1;
 
-                    if (aud >= 0)
-                    {
-                        listview_adecoders.SelectedIndex = aud;
-                        if (listview_adecoders.IsVisible)
-                            listview_adecoders.ScrollIntoView(listview_adecoders.SelectedItem);
+                        if (aud >= 0)
+                        {
+                            listview_adecoders.SelectedIndex = aud;
+                            if (listview_adecoders.IsVisible)
+                                listview_adecoders.ScrollIntoView(listview_adecoders.SelectedItem);
+                        }
                     }
                 }
             }

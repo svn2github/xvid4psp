@@ -58,7 +58,7 @@ namespace XviD4PSP
             {
                 string ext = Path.GetExtension((m.infilepath_source != null) ? m.infilepath_source : m.infilepath).ToLower();
 
-                if (ext != ".d2v" && ext != ".avs" && ext != ".dga" && ext != ".dgi")
+                if (ext != ".avs" && ext != ".grf" && ext != ".d2v" && ext != ".dga" && ext != ".dgi")
                 {
                     //забиваем максимум параметров файла
                     MediaInfoWrapper media = new MediaInfoWrapper();
@@ -173,7 +173,7 @@ namespace XviD4PSP
 
                             stream.mkvid = media.AudioID(n);
 
-                            m.inaudiostreams.Add(stream);
+                            m.inaudiostreams.Add(stream.Clone());
                             n++;
                         }
                         m.inaudiostream = 0;
@@ -268,6 +268,8 @@ namespace XviD4PSP
 
                 m.invideostream_ffid = ff.FirstVideoStreamID();
 
+                //null - MediaInfo для этого файла не запускалась (avs, grf..)
+                //"" - MediaInfo запускалась, но нужной инфы получить не удалось
                 if (m.inframerate == "")
                 {
                     m.inframerate = ff.StreamFramerate(m.invideostream_ffid);
@@ -288,6 +290,65 @@ namespace XviD4PSP
                     m.inresw = ff.StreamW(m.invideostream_ffid);
                     m.inresh = ff.StreamH(m.invideostream_ffid);
                     m.inaspect = (double)m.inresw / (double)m.inresh;
+                }
+                else if (ext == ".grf")
+                {
+                    string infile = Path.GetFileNameWithoutExtension(m.infilepath).ToLower();
+                    if (infile.StartsWith("audio"))
+                    {
+                        //Это аудио-граф
+                        m.isvideo = false;
+                        m.inframerate = m.outframerate = "25.000";
+                        m.vdecoder = AviSynthScripting.Decoders.BlankClip;
+
+                        AudioStream stream = new AudioStream();
+                        stream.audiopath = m.infilepath;
+                        stream.audiofiles = new string[] { stream.audiopath };
+                        stream.codec = stream.codecshort = "PCM";
+                        stream.language = "Unknown";
+                        stream = Format.GetValidADecoder(stream);
+                        m.inaudiostreams.Add(stream.Clone());
+                    }
+                    else
+                    {
+                        //Это видео-граф
+                        m.invcodec = "RAWVIDEO";
+                        m.invcodecshort = "RAWVIDEO";
+
+                        //Если DirectShowSource не сможет определить fps, то требуемое значение можно будет указать в имени файла..
+                        Regex r = new Regex(@"(fps\s?=\s?([\d\.\,]*))", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        Match mat = r.Match(infile);
+                        if (mat.Success)
+                        {
+                            double fps = Calculate.ConvertStringToDouble(mat.Groups[2].Value);
+                            if (fps > 0) m.inframerate = Calculate.ConvertDoubleToPointString(fps);
+
+                            //"Очищаем" имя файла
+                            infile = infile.Replace(mat.Groups[1].Value, "").Trim(new char[] { ' ', '_', '-', '(', ')', '.', ',' });
+                        }
+
+                        //Ищем звук к нему
+                        if (Settings.EnableAudio)
+                        {
+                            //Почему на шаблон "audio*.grf" находятся и файлы типа "Копия audio file.grf"?!
+                            string[] afiles = Directory.GetFiles(Path.GetDirectoryName(m.infilepath), "audio*.grf");
+                            foreach (string afile in afiles)
+                            {
+                                string aname = Path.GetFileNameWithoutExtension(afile).ToLower();
+                                if (aname.StartsWith("audio") && aname.Contains(infile))
+                                {
+                                    AudioStream stream = new AudioStream();
+                                    stream.audiopath = afile;
+                                    stream.audiofiles = new string[] { stream.audiopath };
+                                    stream.codec = stream.codecshort = "PCM";
+                                    stream.language = "Unknown";
+                                    stream = Format.GetValidADecoder(stream);
+                                    m.inaudiostreams.Add(stream.Clone());
+                                    break; //Только один трек
+                                }
+                            }
+                        }
+                    }
                 }
                 else if (ext == ".d2v")
                 {

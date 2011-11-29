@@ -290,20 +290,24 @@ namespace XviD4PSP
                 }
             }
 
-            num_analyze_percent.ToolTip = "Default: 1";
-            num_min_sections.ToolTip = "Default: 150 (1 section = 5 frames, 150 sections = 750 frames)";
-            num_hybrid_int.ToolTip = "Default: 5";
-            num_hybrid_fo.ToolTip = "Default: 10";
-            check_fo_portions.ToolTip = "Default: enabled";
+            string on = Languages.Translate("On");
+            string off = Languages.Translate("Off");
+            string _def = Languages.Translate("Default") + ": ";
+
+            num_analyze_percent.ToolTip = _def + "1";
+            num_min_sections.ToolTip = _def +  "150 (1 section = 5 frames, 150 sections = 750 frames)";
+            num_hybrid_int.ToolTip = _def + "5";
+            num_hybrid_fo.ToolTip = _def + "10";
+            check_fo_portions.ToolTip = _def + on;
             check_iscombed_mark.ToolTip = Languages.Translate("Print \"deinterlaced frame\" on each frame that was detected as Combed.") + "\r\n" +
-                Languages.Translate("Use this option for tuning CThresh and MI, uncheck it when done!");
-            num_iscombed_cthresh.ToolTip = Languages.Translate("How strong or visible combing must be to be detected (lower values = higher sensitivity).") + "\r\nDefault: 7";
-            num_iscombed_mi.ToolTip = Languages.Translate("How many combed areas must be found to detect whole frame as Сombed.") + "\r\nDefault: 40";
-            combo_qtgmc_preset.ToolTip = "Default: Slow";
-            num_qtgmc_sharp.ToolTip = "Default: 1.0";
+                Languages.Translate("Use this option for tuning CThresh and MI, uncheck it when done!") + "\r\n\r\n" + _def + off;
+            num_iscombed_cthresh.ToolTip = Languages.Translate("How strong or visible combing must be to be detected (lower values = higher sensitivity).") + "\r\n\r\n" + _def + "7";
+            num_iscombed_mi.ToolTip = Languages.Translate("How many combed areas must be found to detect whole frame as Сombed.") + "\r\n\r\n" + _def + "40";
+            combo_qtgmc_preset.ToolTip = _def + "Slow";
+            num_qtgmc_sharp.ToolTip = _def + "1.0";
             check_original_fps.ToolTip = Languages.Translate("If checked, use the framerate of the raw video stream instead of the framerate of the container.") + "\r\n" +
-                Languages.Translate("This option is meaningful only when a file is opening.");
-            check_nonstandard_fps.ToolTip = Languages.Translate("If checked, all non-standard fps will be passed on output without rounding to the nearest standard value");
+                Languages.Translate("This option is meaningful only when a file is opening.") + "\r\n\r\n" + _def + off;
+            check_nonstandard_fps.ToolTip = Languages.Translate("If checked, all non-standard fps will be passed on output without rounding to the nearest standard value") + ".\r\n\r\n" + _def + off;
         }
 
         private void button_analyse_Click(object sender, System.Windows.RoutedEventArgs e)

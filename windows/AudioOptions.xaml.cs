@@ -549,23 +549,50 @@ namespace XviD4PSP
 
         private void AddExternalTrack(string infilepath)
         {
-            //разрешаем формы
-            group_channels.IsEnabled = true;
-            group_delay.IsEnabled = true;
-            group_samplerate.IsEnabled = true;
-            group_volume.IsEnabled = true;
-
-            textbox_apath.Text = infilepath;
-
             //получаем медиа информацию
-            MediaInfoWrapper mi = new MediaInfoWrapper();
+            MediaInfoWrapper mi = null;
             try
             {
-                AudioStream stream = mi.GetAudioInfoFromAFile(infilepath);
-                stream = Format.GetValidADecoder(stream);
-                //делаем трек активным
-                m.inaudiostream = m.inaudiostreams.Count;
-                m.inaudiostreams.Add(stream);
+                AudioStream stream;
+                string ext = Path.GetExtension(infilepath).ToLower();
+                if (ext != ".avs" && ext != ".grf")
+                {
+                    mi = new MediaInfoWrapper();
+                    stream = mi.GetAudioInfoFromAFile(infilepath);
+                    stream = Format.GetValidADecoder(stream);
+                    m.inaudiostream = m.inaudiostreams.Count;
+                    m.inaudiostreams.Add(stream.Clone());
+                }
+                else
+                {
+                    stream = new AudioStream();
+                    stream.audiopath = infilepath;
+                    stream.audiofiles = new string[] { stream.audiopath };
+                    stream.codec = stream.codecshort = "PCM";
+                    stream.language = "Unknown";
+                    stream = Format.GetValidADecoder(stream);
+                    m.inaudiostream = m.inaudiostreams.Count;
+                    m.inaudiostreams.Add(stream.Clone());
+
+                    //Оставшаяся инфа + ошибки
+                    Caching cach = new Caching(m);
+                    if (cach.m == null)
+                    {
+                        //Удаляем этот трек
+                        m.inaudiostream = Math.Max(m.inaudiostream - 1, 0);
+                        m.inaudiostreams.RemoveAt(m.inaudiostreams.Count - 1);
+                        return;
+                    }
+                    m = cach.m.Clone();
+                }
+
+                textbox_apath.Text = infilepath;
+
+                //разрешаем формы
+                group_channels.IsEnabled = true;
+                group_delay.IsEnabled = true;
+                group_samplerate.IsEnabled = true;
+                group_volume.IsEnabled = true;
 
                 //прописываем в список внешний трек
                 ComboBoxItem item = new ComboBoxItem();
@@ -577,10 +604,15 @@ namespace XviD4PSP
             catch (Exception ex)
             {
                 ErrorException("AddExternalTrack: " + ex.Message, ex.StackTrace);
+                return;
             }
             finally
             {
-                mi.Close();
+                if (mi != null)
+                {
+                    mi.Close();
+                    mi = null;
+                }
             }
 
             AudioStream newstream = new AudioStream();
