@@ -60,7 +60,7 @@ namespace XviD4PSP
             text_crop_tb.Content = text_manual_crop_tb.Content = Languages.Translate("Crop top, bottom:");
             text_crop_lr.Content = text_manual_crop_lr.Content = Languages.Translate("Crop left, right:");
             text_black.Content = text_manual_black.Content = Languages.Translate("Black width, height:");
-            text_flip.Content = Languages.Translate("Flip vertical, horizontal:");
+            text_flip.Content = Languages.Translate("Flip horizontal, vertical:");
             combo_crop_b.ToolTip = manual_crop_b.ToolTip = Languages.Translate("Bottom");
             combo_crop_t.ToolTip = manual_crop_t.ToolTip = Languages.Translate("Top");
             combo_crop_l.ToolTip = manual_crop_l.ToolTip = Languages.Translate("Left");

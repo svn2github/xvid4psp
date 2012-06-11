@@ -1,8 +1,11 @@
-﻿XviD4PSP 5.10.276.0 (29.11.2011), main changes:
+﻿XviD4PSP 5.10.277.0 (11.06.2012), main changes:
 
+>>> (r277) "Resolution/Aspect" window: swap comboboxes for flipping vertical/horizontal.
+>>> (r277) MKVToolnix: changed the way to retrieving tracks IDs for (de)muxing (v5.2.1+); changed the way how
+           audio delay must be handled when copying from MP4\MOV (v5.3.0+).
 >>> (r276) Added support for opening a grf-files (see http://avisynth.org/mediawiki/DirectShowSource#Opening_GRF_files
            and http://avisynth.org/mediawiki/Importing_media - "1.5 How do I use GraphEdit" item). If file name starts
-           with the "audio" prefix, this file will be opened as an audio graf, otherwise it will be opened as a video graph.
+           with the "audio" prefix, this file will be opened as an audio graph, otherwise it will be opened as a video graph.
            For the video graphs you can also add a key "fps=xxx" - this value will be passed to the DirectShowSource().
            And if the folder contains another grf-file with a similar name, but starts with the "audio" prefix (for example:
            "my_file fps=25.000.grf" and "audio my_file.grf") - this file will be loaded too. Or you can load it manually

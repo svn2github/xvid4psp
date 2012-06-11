@@ -126,29 +126,42 @@ namespace XviD4PSP
             }
         }
 
-        private int _mkvid = 0;
-        public int mkvid
+        private int _mi_id = 0;
+        public int mi_id
         {
             get
             {
-                return _mkvid;
+                return _mi_id;
             }
             set
             {
-                _mkvid = value;
+                _mi_id = value;
             }
         }
 
-        private int _ffid = 0;
-        public int ffid
+        private int _mi_order = -1;
+        public int mi_order
         {
             get
             {
-                return _ffid;
+                return _mi_order;
             }
             set
             {
-                _ffid = value;
+                _mi_order = value;
+            }
+        }
+
+        private int _ff_order = 0;
+        public int ff_order
+        {
+            get
+            {
+                return _ff_order;
+            }
+            set
+            {
+                _ff_order = value;
             }
         }
 

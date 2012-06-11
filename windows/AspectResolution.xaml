@@ -65,9 +65,9 @@
 					<ComboBox x:Name="combo_black_w" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_black_w_SelectionChanged" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"/>
 				</DockPanel>
                 <DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
-                    <Label OpacityMask="{x:Null}" x:Name="text_flip" Content="Flip vertical, horizontal:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
-                    <ComboBox x:Name="combo_flip_h" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_flip_h_SelectionChanged" HorizontalAlignment="Right" DockPanel.Dock="Right" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="combo_flip_v" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_flip_v_SelectionChanged" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_flip" Content="Flip horizontal, vertical:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
+                    <ComboBox x:Name="combo_flip_v" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_flip_v_SelectionChanged" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="combo_flip_h" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_flip_h_SelectionChanged" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"/>
                 </DockPanel>
                 <DockPanel Margin="16,0,16,6" Width="Auto" Height="Auto">
                     <Button x:Name="button_analyse" Content="Auto" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="button_analyse_Click" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Width="132" Height="22" FontSize="12" />

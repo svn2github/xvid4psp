@@ -1339,7 +1339,7 @@ namespace XviD4PSP
                 object value = GetValue("GoodFilesExtensions");
                 if (value == null)
                 {
-                    return "avi/divx/wmv/mpg/mpeg/mod/asf/mkv/mov/qt/3gp/mp4/ogm/avs/vob/ts/m2t/m2v/d2v/m2ts/flv/pmp/h264/264/evo/vdr/dpg/wav/ac3/dts/mpa/mp3/mp2/wma/m4a/aac/ogg/aiff/aif/flac/ape";
+                    return "avi/divx/wmv/mpg/mpeg/mod/asf/mkv/mka/mov/qt/3gp/mp4/ogm/avs/vob/ts/m2t/m2v/d2v/m2ts/flv/pmp/h264/264/evo/vdr/dpg/wav/ac3/dts/mpa/mp3/mp2/wma/m4a/aac/ogg/aiff/aif/flac/ape";
                 }
                 else
                 {

@@ -173,7 +173,7 @@ namespace XviD4PSP
             return stream;
         }
 
-        public int AudioID(int track)
+        public int ATrackID(int track)
         {
             string x = Get(StreamKind.Audio, track, "ID");
             if (x == "C0" ||
@@ -196,19 +196,31 @@ namespace XviD4PSP
             }
         }
 
-        public int VideoID()
+        public int ATrackOrder(int track)
         {
-            try
-            {
-                int z = 0;
-                string s = Get(StreamKind.Video, 0, "ID");
-                Int32.TryParse(s, NumberStyles.Integer, null, out z);
+            string s = Get(StreamKind.Audio, track, "StreamOrder");
+            if (Int32.TryParse(s, NumberStyles.Integer, null, out track))
+                return track;
+            else
+                return -1;
+        }
+
+        public int VTrackID()
+        {
+            int z = 0;
+            string s = Get(StreamKind.Video, 0, "ID");
+            Int32.TryParse(s, NumberStyles.Integer, null, out z);
+            return z;
+        }
+
+        public int VTrackOrder()
+        {
+            int z = 0;
+            string s = Get(StreamKind.Video, 0, "StreamOrder");
+            if (Int32.TryParse(s, NumberStyles.Integer, null, out z))
                 return z;
-            }
-            catch
-            {
-                return 0;
-            }
+            else
+                return -1;
         }
 
         public string VCodecString

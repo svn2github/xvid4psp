@@ -75,7 +75,8 @@ namespace XviD4PSP
                     m.inaspect = media.Aspect;
                     //m.pixelaspect = (m.inresw != 0 && m.inresh != 0) ? (m.inaspect / ((double)m.inresw / (double)m.inresh)) : 1.0;
                     m.pixelaspect = media.PixelAspect;
-                    m.invideostream_mkvid = media.VideoID();
+                    m.invideostream_mi_id = media.VTrackID();
+                    m.invideostream_mi_order = media.VTrackOrder();
                     m.intextstreams = media.CountTextStreams;
                     m.inframerate = media.FrameRate;
                     m.induration = TimeSpan.FromMilliseconds(media.Milliseconds);
@@ -171,7 +172,8 @@ namespace XviD4PSP
                             stream.delay = Calculate.GetDelay(apath);
                             stream = Format.GetValidADecoder(stream);
 
-                            stream.mkvid = media.AudioID(n);
+                            stream.mi_id = media.ATrackID(n);
+                            stream.mi_order = media.ATrackOrder(n);
 
                             m.inaudiostreams.Add(stream.Clone());
                             n++;
@@ -188,7 +190,8 @@ namespace XviD4PSP
                                 stream.codec = media.ACodecString(snum);
                                 stream.codecshort = media.ACodecShort(snum);
                                 stream.bitrate = media.AudioBitrate(snum);
-                                stream.mkvid = media.AudioID(snum);
+                                stream.mi_id = media.ATrackID(snum);
+                                stream.mi_order = media.ATrackOrder(snum);
                                 stream.samplerate = media.Samplerate(snum);
                                 stream.bits = media.Bits(snum);
                                 stream.channels = media.Channels(snum);
@@ -266,13 +269,14 @@ namespace XviD4PSP
                 //Выходим при отмене
                 if (m == null || worker.CancellationPending) return;
 
-                m.invideostream_ffid = ff.FirstVideoStreamID();
+                m.invideostream_ff_order = ff.FirstVideoStreamID();
+                if (m.invideostream_mi_order < 0) m.invideostream_mi_order = m.invideostream_ff_order;
 
                 //null - MediaInfo для этого файла не запускалась (avs, grf..)
                 //"" - MediaInfo запускалась, но нужной инфы получить не удалось
                 if (m.inframerate == "")
                 {
-                    m.inframerate = ff.StreamFramerate(m.invideostream_ffid);
+                    m.inframerate = ff.StreamFramerate(m.invideostream_ff_order);
                     if (m.inframerate != "")
                     {
                         m.induration = ff.Duration();
@@ -284,11 +288,11 @@ namespace XviD4PSP
                 if (ext == ".avs")
                 {
                     //m.invideostream_ffid = 0;
-                    m.invcodec = ff.StreamCodec(m.invideostream_ffid);
-                    m.invcodecshort = ff.StreamCodecShort(m.invideostream_ffid);
-                    m.invbitrate = ff.VideoBitrate(m.invideostream_ffid);
-                    m.inresw = ff.StreamW(m.invideostream_ffid);
-                    m.inresh = ff.StreamH(m.invideostream_ffid);
+                    m.invcodec = ff.StreamCodec(m.invideostream_ff_order);
+                    m.invcodecshort = ff.StreamCodecShort(m.invideostream_ff_order);
+                    m.invbitrate = ff.VideoBitrate(m.invideostream_ff_order);
+                    m.inresw = ff.StreamW(m.invideostream_ff_order);
+                    m.inresh = ff.StreamH(m.invideostream_ff_order);
                     m.inaspect = (double)m.inresw / (double)m.inresh;
                 }
                 else if (ext == ".grf")
@@ -558,9 +562,9 @@ namespace XviD4PSP
                 }
                 else if (m.isvideo && Settings.UseFFmpegAR)
                 {
-                    double par = ff.CalculatePAR(m.invideostream_ffid);
+                    double par = ff.CalculatePAR(m.invideostream_ff_order);
                     if (par != 0) m.pixelaspect = par;
-                    double dar = ff.CalculateDAR(m.invideostream_ffid);
+                    double dar = ff.CalculateDAR(m.invideostream_ff_order);
                     if (dar != 0) m.inaspect = dar;
                 }
 
@@ -576,15 +580,16 @@ namespace XviD4PSP
                     foreach (object o in m.inaudiostreams)
                     {
                         AudioStream s = (AudioStream)o;
-                        s.ffid = (int)AStreams[astream]; //ID трека для FFmpeg
-                        if (s.bitrate == 0) s.bitrate = ff.StreamBitrate(s.ffid);
-                        if (s.channels == 0) s.channels = ff.StreamChannels(s.ffid);
-                        if (s.samplerate == null) s.samplerate = ff.StreamSamplerate(s.ffid);
-                        if (s.language == "Unknown") s.language = ff.StreamLanguage(s.ffid);
+                        s.ff_order = (int)AStreams[astream]; //ID трека для FFmpeg
+                        if (s.mi_order < 0) s.mi_order = s.ff_order;
+                        if (s.bitrate == 0) s.bitrate = ff.StreamBitrate(s.ff_order);
+                        if (s.channels == 0) s.channels = ff.StreamChannels(s.ff_order);
+                        if (s.samplerate == null) s.samplerate = ff.StreamSamplerate(s.ff_order);
+                        if (s.language == "Unknown") s.language = ff.StreamLanguage(s.ff_order);
                         if (s.codec == "A_MS/ACM")
                         {
-                            s.codec = ff.StreamCodec(s.ffid);
-                            s.codecshort = ff.StreamCodecShort(s.ffid);
+                            s.codec = ff.StreamCodec(s.ff_order);
+                            s.codecshort = ff.StreamCodecShort(s.ff_order);
                         }
 
                         astream++;
@@ -608,7 +613,7 @@ namespace XviD4PSP
                             stream.bits = ff.StreamBits(stream_num);
                             stream.channels = ff.StreamChannels(stream_num);
                             stream.language = ff.StreamLanguage(stream_num);
-                            stream.ffid = stream_num;
+                            stream.mi_order = stream.ff_order = stream_num;
                             m.inaudiostreams.Add(stream.Clone());
                         }
 

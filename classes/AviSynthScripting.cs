@@ -236,7 +236,7 @@ namespace XviD4PSP
            else if (m.vdecoder == Decoders.AVISource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.EnableAudio))
                audio = ", audio=false";
            else if (m.vdecoder == Decoders.FFmpegSource2 && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio && Settings.EnableAudio)
-               audio = ", atrack=" + (instream.ffid) + ", adjustdelay=-3";
+               audio = ", atrack=" + (instream.ff_order) + ", adjustdelay=-3";
 
            //ипортируем видео
            string invideostring = "";
@@ -838,7 +838,7 @@ namespace XviD4PSP
                audio = ", audio=false";
            else if (m.vdecoder == Decoders.FFmpegSource2 && m.inaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio &&
                Settings.EnableAudio && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
-               audio = ", atrack=" + (instream.ffid) + ", adjustdelay=-3";
+               audio = ", atrack=" + (instream.ff_order) + ", adjustdelay=-3";
 
            //ипортируем видео
            string invideostring = "";

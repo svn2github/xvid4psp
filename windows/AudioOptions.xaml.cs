@@ -571,6 +571,8 @@ namespace XviD4PSP
                     stream.codec = stream.codecshort = "PCM";
                     stream.language = "Unknown";
                     stream = Format.GetValidADecoder(stream);
+
+                    int old_stream = m.inaudiostream;
                     m.inaudiostream = m.inaudiostreams.Count;
                     m.inaudiostreams.Add(stream.Clone());
 
@@ -579,7 +581,7 @@ namespace XviD4PSP
                     if (cach.m == null)
                     {
                         //Удаляем этот трек
-                        m.inaudiostream = Math.Max(m.inaudiostream - 1, 0);
+                        m.inaudiostream = old_stream;
                         m.inaudiostreams.RemoveAt(m.inaudiostreams.Count - 1);
                         return;
                     }

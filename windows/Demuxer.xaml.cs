@@ -154,7 +154,7 @@ namespace XviD4PSP
                 else if (outext == ".wav") { acodec = "pcm_s16le"; forceformat = " -f wav"; }
                 else if (outext == ".truehd") forceformat = " -f truehd";
 
-                info.Arguments = "-map 0." + s.ffid + " -i \"" + source_file + "\" -vn -acodec " + acodec + forceformat + " \"" + outfile + "\"";
+                info.Arguments = "-map 0." + s.ff_order + " -i \"" + source_file + "\" -vn -acodec " + acodec + forceformat + " \"" + outfile + "\"";
             }
             else if (mode == DemuxerMode.ExtractVideo)
             {
@@ -241,13 +241,13 @@ namespace XviD4PSP
             SafeDelete(outfile);
 
             if (mode == Demuxer.DemuxerMode.ExtractVideo)
-                info.Arguments = "-raw " + m.invideostream_mkvid + " \"" + source_file + "\" -out \"" + outfile + "\"";
+                info.Arguments = "-raw " + m.invideostream_mi_id + " \"" + source_file + "\" -out \"" + outfile + "\"";
 
             if (mode == Demuxer.DemuxerMode.ExtractAudio)
             {
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                info.Arguments = "-raw " + instream.mkvid + " \"" + source_file + "\" -out \"" + outfile + "\"";
+                info.Arguments = "-raw " + instream.mi_id + " \"" + source_file + "\" -out \"" + outfile + "\"";
             }
 
             encoderProcess.StartInfo = info;
@@ -488,10 +488,10 @@ namespace XviD4PSP
             if (mode == DemuxerMode.ExtractAudio)
             {
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                info.Arguments = "tracks " + flist + instream.mkvid + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + instream.mi_order + ":" + "\"" + outfile + "\"" + charset;
             }
             else if (mode == DemuxerMode.ExtractVideo)
-                info.Arguments = "tracks " + flist + m.invideostream_mkvid + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + m.invideostream_mi_order + ":" + "\"" + outfile + "\"" + charset;
             else if (mode == DemuxerMode.RepairMKV)
             {
                 info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvmerge.exe";

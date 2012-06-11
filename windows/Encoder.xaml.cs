@@ -1880,7 +1880,7 @@ namespace XviD4PSP
                 if (outext == ".lpcm" || instream.codec == "LPCM")
                     forceformat = " -f s16be";
 
-                info.Arguments = "-map 0." + instream.ffid + " -i \"" + m.infilepath +
+                info.Arguments = "-map 0." + instream.ff_order + " -i \"" + m.infilepath +
                     "\" -vn -acodec copy" + forceformat  + " \"" + outfile + "\"";
 
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
@@ -1979,7 +1979,7 @@ namespace XviD4PSP
                 busyfile = Path.GetFileName(outstream.audiopath);
 
                 outfile = outstream.audiopath;
-                info.Arguments = "-raw " + instream.mkvid + " \"" + m.infilepath + "\" -out \"" + outfile + "\"";
+                info.Arguments = "-raw " + instream.mi_id + " \"" + m.infilepath + "\" -out \"" + outfile + "\"";
 
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
@@ -2006,7 +2006,7 @@ namespace XviD4PSP
                     Environment.NewLine);
 
                 outfile = m.outvideofile;
-                info.Arguments = "-raw " + m.invideostream_mkvid + " \"" + m.infilepath + "\" -out \"" + outfile + "\"";
+                info.Arguments = "-raw " + m.invideostream_mi_id + " \"" + m.infilepath + "\" -out \"" + outfile + "\"";
             }
 
             if (Settings.ArgumentsToLog)
@@ -2219,7 +2219,7 @@ namespace XviD4PSP
                 busyfile = Path.GetFileName(outstream.audiopath);
 
                 outfile = outstream.audiopath;
-                info.Arguments = "tracks " + flist + instream.mkvid + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + instream.mi_order + ":" + "\"" + outfile + "\"" + charset;
 
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
@@ -2242,7 +2242,7 @@ namespace XviD4PSP
                 busyfile = Path.GetFileName(m.outvideofile);
 
                 outfile = m.outvideofile;
-                info.Arguments = "tracks " + flist + m.invideostream_mkvid + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + m.invideostream_mi_order + ":" + "\"" + outfile + "\"" + charset;
 
                 SetLog("Demuxing video stream to: " + m.outvideofile);
                 SetLog(m.inresw + "x" + m.inresh + " " + m.invcodecshort + " " + m.invbitrate + "kbps " + m.inframerate + "fps" +
@@ -2810,9 +2810,9 @@ namespace XviD4PSP
             {
                 vpath = m.infilepath;
                 //if (ext == ".mkv")
-                vtrack = ", track=" + m.invideostream_mkvid;
+                vtrack = ", track=" + m.invideostream_mi_id;
                 //else
-                //    vtrack = ", track=" + m.invideostream_ffid;
+                //    vtrack = ", track=" + m.invideostream_ff_order;
             }
             else if (Path.GetExtension(m.outvideofile).ToLower() == ".mp4")
             {
@@ -2868,9 +2868,9 @@ namespace XviD4PSP
                     {
                         apath = m.infilepath;
                         //if (ext == ".mkv")
-                        atrack = ", track=" + i.mkvid;
+                        atrack = ", track=" + i.mi_id;
                         //else
-                        //    atrack = ", track=" + i.ffid;
+                        //    atrack = ", track=" + i.ff_order;
                     }
                 }
 
@@ -3326,8 +3326,9 @@ namespace XviD4PSP
             {
                 //Видео из исходника (режим Copy без демукса)
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                int vID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" ||
-                    ext == ".m2t" || ext == ".mts") ? m.invideostream_ffid : m.invideostream_mkvid;
+                int vID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? m.invideostream_ff_order :
+                    (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? m.invideostream_mi_order :
+                    m.invideostream_mi_id; //avi, rm, ogm
 
                 mux_v = (!string.IsNullOrEmpty(mux_v)) ? mux_v.Replace("%v_id%", vID.ToString()) + " " : "";
                 video = "-d " + vID + " -A -S " + mux_v + "\"" + m.infilepath + "\" ";
@@ -3336,7 +3337,7 @@ namespace XviD4PSP
             {
                 //Обычный муксинг
                 string ext = Path.GetExtension(m.outvideofile).ToLower();
-                int vID = (ext == ".mp4") ? 1 : 0;
+                int vID = 0;
 
                 string rate = "--default-duration " + vID + ":" + m.outframerate + "fps ";
                 if (m.outvcodec == "Copy")
@@ -3362,24 +3363,15 @@ namespace XviD4PSP
                 {
                     //Звук из исходника (режим Copy без демукса)
                     string ext = Path.GetExtension(m.infilepath).ToLower();
-                    int aID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" ||
-                        ext == ".m2t" || ext == ".mts") ? instream.ffid : instream.mkvid;
+                    int aID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? instream.ff_order :
+                    (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? instream.mi_order :
+                    instream.mi_id; //avi, rm, ogm
 
                     string delay = "";
                     if (CopyDelay)
                     {
-                        int new_delay;
-                        if (ext == ".mp4" || ext == ".mov" || ext == ".m4v")
-                        {
-                            //Файлы, для которых mkvmerge не использует существующую задержку, и поправка не нужна
-                            new_delay = outstream.delay;
-                        }
-                        else
-                        {
-                            //Для остальных файлов нужно учесть уже имеющуюся в них задержку
-                            new_delay = outstream.delay - instream.delay;
-                        }
-                        delay = " --sync " + aID + ":" + new_delay;
+                        //Нужно учесть уже имеющуюся в файлах задержку
+                        delay = " --sync " + aID + ":" + (outstream.delay - instream.delay);
                     }
 
                     mux_a = (!string.IsNullOrEmpty(mux_a)) ? mux_a.Replace("%a_id%", aID.ToString()) + " " : "";
@@ -3388,10 +3380,9 @@ namespace XviD4PSP
                 else
                 {
                     //Обычный муксинг
-                    int aID = outstream.mkvid;
+                    int aID = 0;
                     string aext = Path.GetExtension(outstream.audiopath).ToLower();
-                    if (aext == ".m4a" || aext == ".avi") aID = 1;
-                    else if (aext == ".aac") aID = 0; //Для aac всегда ноль, т.к. это RAW
+                    if (aext == ".avi") aID = 1; //Видеофайл, добавленный как внешний аудиотрек - не запрещено, но и не поддерживается!
 
                     string sbr = "";
                     if (outstream.codec == "Copy" && instream.codec.Contains("AAC"))

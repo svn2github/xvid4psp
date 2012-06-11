@@ -422,29 +422,47 @@ namespace XviD4PSP
             }
         }
 
-        private int _invideostream_mkvid = 0;
-        public int invideostream_mkvid
+        //Поле "ID" в логе MediaInfo. Для некоторых форматов - это похоже на порядковый
+        //номер трека, для других (mkv, mp4, mpeg-ts\ps) - это идентификатор трека.
+        private int _invideostream_mi_id = 0;
+        public int invideostream_mi_id
         {
             get
             {
-                return _invideostream_mkvid;
+                return _invideostream_mi_id;
             }
             set
             {
-                _invideostream_mkvid = value;
+                _invideostream_mi_id = value;
             }
         }
 
-        private int _invideostream_ffid = 0;
-        public int invideostream_ffid
+        //Поле "StreamOrder" в логе MediaInfo. Порядковый номер трека. На 09.06.12
+        //выдается только для форматов Matroska и MPEG-4 (mkv, webm, mp4, mov).
+        private int _invideostream_mi_order = -1;
+        public int invideostream_mi_order
         {
             get
             {
-                return _invideostream_ffid;
+                return _invideostream_mi_order;
             }
             set
             {
-                _invideostream_ffid = value;
+                _invideostream_mi_order = value;
+            }
+        }
+
+        //Порядковый номер трека в логе FFmpeg
+        private int _invideostream_ff_order = 0;
+        public int invideostream_ff_order
+        {
+            get
+            {
+                return _invideostream_ff_order;
+            }
+            set
+            {
+                _invideostream_ff_order = value;
             }
         }
 
@@ -865,21 +883,8 @@ namespace XviD4PSP
             }
         }
 
-        private bool _flipw = false;
-        public bool fliph
-        {
-            get
-            {
-                return _flipw;
-            }
-            set
-            {
-                _flipw = value;
-            }
-        }
-
         private bool _fliph = false;
-        public bool flipv
+        public bool fliph
         {
             get
             {
@@ -888,6 +893,19 @@ namespace XviD4PSP
             set
             {
                 _fliph = value;
+            }
+        }
+
+        private bool _flipv = false;
+        public bool flipv
+        {
+            get
+            {
+                return _flipv;
+            }
+            set
+            {
+                _flipv = value;
             }
         }
 
