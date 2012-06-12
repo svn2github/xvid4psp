@@ -85,7 +85,7 @@ namespace XviD4PSP
                     //краткая инфа
                     MediaInfoWrapper media = new MediaInfoWrapper();
                     media.Open(infilepath);
-                    media.Option("Complete");
+                    media.Option("Complete", "");
                     media.Option("Language", "  Config_Text_ColumnSize;" + Settings.MI_ColumnSize);
                     tbxInfo.Text = media.Inform();
                     media.Close();
@@ -116,7 +116,6 @@ namespace XviD4PSP
 
                     encoderProcess.StartInfo = info;
                     encoderProcess.Start();
-                    encoderProcess.WaitForExit();
 
                     tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd();
                 }
@@ -163,7 +162,6 @@ namespace XviD4PSP
 
                     encoderProcess.StartInfo = info;
                     encoderProcess.Start();
-                    encoderProcess.WaitForExit();
 
                     tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd().Replace("\r\r\n", "\r\n");
                 }

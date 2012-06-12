@@ -80,45 +80,58 @@ namespace XviD4PSP
     {        
         //Import of DLL functions. DO NOT USE until you know what you do (MediaInfo DLL do NOT use CoTaskMemAlloc to allocate memory)  
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_New();
+        private static extern IntPtr MediaInfo_New();
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern void MediaInfo_Delete(IntPtr Handle);
+        private static extern void MediaInfo_Delete(IntPtr Handle);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_Open(IntPtr Handle, [MarshalAs(UnmanagedType.LPWStr)] string FileName);
+        private static extern IntPtr MediaInfo_Open(IntPtr Handle, [MarshalAs(UnmanagedType.LPWStr)] string FileName);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern void MediaInfo_Close(IntPtr Handle);
+        private static extern void MediaInfo_Close(IntPtr Handle);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_Inform(IntPtr Handle, IntPtr Reserved);
+        private static extern IntPtr MediaInfo_Inform(IntPtr Handle, IntPtr Reserved);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_GetI(IntPtr Handle, IntPtr StreamKind, IntPtr StreamNumber, IntPtr Parameter, IntPtr KindOfInfo);
+        private static extern IntPtr MediaInfo_GetI(IntPtr Handle, IntPtr StreamKind, IntPtr StreamNumber, IntPtr Parameter, IntPtr KindOfInfo);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_Get(IntPtr Handle, IntPtr StreamKind, IntPtr StreamNumber, [MarshalAs(UnmanagedType.LPWStr)] string Parameter, IntPtr KindOfInfo, IntPtr KindOfSearch);
+        private static extern IntPtr MediaInfo_Get(IntPtr Handle, IntPtr StreamKind, IntPtr StreamNumber, [MarshalAs(UnmanagedType.LPWStr)] string Parameter, IntPtr KindOfInfo, IntPtr KindOfSearch);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_Option(IntPtr Handle, [MarshalAs(UnmanagedType.LPWStr)] string Option, [MarshalAs(UnmanagedType.LPWStr)] string Value);
+        private static extern IntPtr MediaInfo_Option(IntPtr Handle, [MarshalAs(UnmanagedType.LPWStr)] string Option, [MarshalAs(UnmanagedType.LPWStr)] string Value);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_State_Get(IntPtr Handle);
+        private static extern IntPtr MediaInfo_State_Get(IntPtr Handle);
         [DllImport("dlls//MediaInfo//MediaInfo.dll")]
-        public static extern IntPtr MediaInfo_Count_Get(IntPtr Handle, IntPtr StreamKind, IntPtr StreamNumber);
+        private static extern IntPtr MediaInfo_Count_Get(IntPtr Handle, IntPtr StreamKind, IntPtr StreamNumber);
 
         //MediaInfo class
+        private IntPtr Handle;
         public MediaInfoWrapper() { Handle = MediaInfo_New(); }
-        ~MediaInfoWrapper() { MediaInfo_Delete(Handle); }
         public int Open(String FileName) { return (int)MediaInfo_Open(Handle, FileName); }
         public void Close() { MediaInfo_Close(Handle); }
+        ~MediaInfoWrapper() { MediaInfo_Delete(Handle); }
+
         public String Inform() { return Marshal.PtrToStringUni(MediaInfo_Inform(Handle, (IntPtr)0)); }
-        public String Get(StreamKind StreamKind, int StreamNumber, String Parameter, InfoKind KindOfInfo, InfoKind KindOfSearch) { return Marshal.PtrToStringUni(MediaInfo_Get(Handle, (IntPtr)StreamKind, (IntPtr)StreamNumber, Parameter, (IntPtr)KindOfInfo, (IntPtr)KindOfSearch)); } //туут
-        public String Get(StreamKind StreamKind, int StreamNumber, int Parameter, InfoKind KindOfInfo) { return Marshal.PtrToStringUni(MediaInfo_GetI(Handle, (IntPtr)StreamKind, (IntPtr)StreamNumber, (IntPtr)Parameter, (IntPtr)KindOfInfo)); }
         public String Option(String Option, String Value) { return Marshal.PtrToStringUni(MediaInfo_Option(Handle, Option, Value)); }
-        public int State_Get() { return (int)MediaInfo_State_Get(Handle); }
-        public int Count_Get(StreamKind StreamKind, int StreamNumber) { return (int)MediaInfo_Count_Get(Handle, (IntPtr)StreamKind, (IntPtr)StreamNumber); }
-        private IntPtr Handle;
+        private String Get(StreamKind StreamKind, int StreamNumber, String Parameter, InfoKind KindOfInfo, InfoKind KindOfSearch) { return Marshal.PtrToStringUni(MediaInfo_Get(Handle, (IntPtr)StreamKind, (IntPtr)StreamNumber, Parameter, (IntPtr)KindOfInfo, (IntPtr)KindOfSearch)); }
+        private String Get(StreamKind StreamKind, int StreamNumber, int Parameter, InfoKind KindOfInfo) { return Marshal.PtrToStringUni(MediaInfo_GetI(Handle, (IntPtr)StreamKind, (IntPtr)StreamNumber, (IntPtr)Parameter, (IntPtr)KindOfInfo)); }
+        private int Count_Get(StreamKind StreamKind, int StreamNumber) { return (int)MediaInfo_Count_Get(Handle, (IntPtr)StreamKind, (IntPtr)StreamNumber); }
+        private int State_Get() { return (int)MediaInfo_State_Get(Handle); }
 
         //Default values, if you know how to set default values in C#, say me
-        public String Get(StreamKind StreamKind, int StreamNumber, String Parameter, InfoKind KindOfInfo) { return Get(StreamKind, StreamNumber, Parameter, KindOfInfo, InfoKind.Name); }
-        public String Get(StreamKind StreamKind, int StreamNumber, String Parameter) { return Get(StreamKind, StreamNumber, Parameter, InfoKind.Text, InfoKind.Name); }
-        public String Get(StreamKind StreamKind, int StreamNumber, int Parameter) { return Get(StreamKind, StreamNumber, Parameter, InfoKind.Text); }
-        public String Option(String Option_) { return Option(Option_, ""); }
-        public int Count_Get(StreamKind StreamKind) { return Count_Get(StreamKind, -1); }
+        private int Count_Get(StreamKind StreamKind) { return Count_Get(StreamKind, -1); }
+        private String Get(StreamKind StreamKind, int StreamNumber, int Parameter) { return Get(StreamKind, StreamNumber, Parameter, InfoKind.Text); }
+        private String Get(StreamKind StreamKind, int StreamNumber, String Parameter, InfoKind KindOfInfo) { return Get(StreamKind, StreamNumber, Parameter, KindOfInfo, InfoKind.Name); }
+        private String Get(StreamKind StreamKind, int StreamNumber, String Parameter) { return Get(StreamKind, StreamNumber, Parameter, InfoKind.Text, InfoKind.Name); }
+        private String Get_Splitted(StreamKind StreamKind, int StreamNumber, String Parameter)
+        {
+            string value = Get(StreamKind, StreamNumber, Parameter, InfoKind.Text, InfoKind.Name);
+            if (value.Length > 4)
+            {
+                //Берём только первую часть из двойных значений (1280 / 1280).
+                //Сами такие значения - вероятно очень редки, но было дело..
+                int index = value.IndexOf(" / ");
+                if (index >= 0) return value.Substring(0, index);
+            }
+
+            return value;
+        }
 
         //public AudioStream GetAudioInfo(Massive m)
         //{
@@ -369,11 +382,11 @@ namespace XviD4PSP
                 string s = "";
                 if (Settings.MI_Original_AR)
                 {
-                    s = Get(StreamKind.Video, 0, "DisplayAspectRatio_Original");     //Из потока (если доступно)
-                    if (s == "") s = Get(StreamKind.Video, 0, "DisplayAspectRatio"); //Из контейнера или общее
+                    s = Get_Splitted(StreamKind.Video, 0, "DisplayAspectRatio_Original");     //Из потока (если доступно)
+                    if (s == "") s = Get_Splitted(StreamKind.Video, 0, "DisplayAspectRatio"); //Из контейнера или общее
                 }
                 else
-                    s = Get(StreamKind.Video, 0, "DisplayAspectRatio");
+                    s = Get_Splitted(StreamKind.Video, 0, "DisplayAspectRatio");
 
                 //Подправляем DAR
                 if (s == "" || s == "1.333") return 4.0 / 3.0;
@@ -389,11 +402,11 @@ namespace XviD4PSP
                 string s = "";
                 if (Settings.MI_Original_AR)
                 {
-                    s = Get(StreamKind.Video, 0, "PixelAspectRatio_Original");     //Из потока (если доступно)
-                    if (s == "") s = Get(StreamKind.Video, 0, "PixelAspectRatio"); //Из контейнера или общее
+                    s = Get_Splitted(StreamKind.Video, 0, "PixelAspectRatio_Original");     //Из потока (если доступно)
+                    if (s == "") s = Get_Splitted(StreamKind.Video, 0, "PixelAspectRatio"); //Из контейнера или общее
                 }
                 else
-                    s = Get(StreamKind.Video, 0, "PixelAspectRatio");
+                    s = Get_Splitted(StreamKind.Video, 0, "PixelAspectRatio");
 
                 if (s == "") return 1.0;
 
@@ -405,9 +418,9 @@ namespace XviD4PSP
                     if (Settings.MI_Original_AR)
                     {
                         //Из потока (если доступно)
-                        string ow = Get(StreamKind.Video, 0, "Width_Original");
+                        string ow = Get_Splitted(StreamKind.Video, 0, "Width_Original");
                         Int32.TryParse(ow, NumberStyles.Integer, null, out w);
-                        string oh = Get(StreamKind.Video, 0, "Height_Original");
+                        string oh = Get_Splitted(StreamKind.Video, 0, "Height_Original");
                         Int32.TryParse(oh, NumberStyles.Integer, null, out  h);
                     }
                     if (w == 0) w = Width;
@@ -422,14 +435,6 @@ namespace XviD4PSP
             }
         }
 
-        public string FrameRateString
-        {
-            get
-            {
-                return Get(StreamKind.Video, 0, "FrameRate/String");
-            }
-        }
-
         public string FrameRate
         {
             get
@@ -437,11 +442,11 @@ namespace XviD4PSP
                 string x = "";
                 if (Settings.MI_Original_fps)
                 {
-                    x = Get(StreamKind.Video, 0, "FrameRate_Original");     //Из потока (если доступно)
-                    if (x == "") x = Get(StreamKind.Video, 0, "FrameRate"); //Из контейнера или общее
+                    x = Get_Splitted(StreamKind.Video, 0, "FrameRate_Original");     //Из потока (если доступно)
+                    if (x == "") x = Get_Splitted(StreamKind.Video, 0, "FrameRate"); //Из контейнера или общее
                 }
                 else
-                    x = Get(StreamKind.Video, 0, "FrameRate");
+                    x = Get_Splitted(StreamKind.Video, 0, "FrameRate");
 
                 if (x == "")
                 {
@@ -464,7 +469,7 @@ namespace XviD4PSP
             get
             {
                 int n = 0;
-                string x = Get(StreamKind.Video, 0, "Width");
+                string x = Get_Splitted(StreamKind.Video, 0, "Width");
                 Int32.TryParse(x, NumberStyles.Integer, null, out n);
                 return n;
             }
@@ -475,7 +480,7 @@ namespace XviD4PSP
             get
             {
                 int n = 0;
-                string x = Get(StreamKind.Video, 0, "Height");
+                string x = Get_Splitted(StreamKind.Video, 0, "Height");
                 Int32.TryParse(x, NumberStyles.Integer, null, out n);
                 return n;
             }
@@ -486,7 +491,7 @@ namespace XviD4PSP
             get
             {
                 long n = 0;
-                string x = Get(StreamKind.General, 0, "Duration");
+                string x = Get_Splitted(StreamKind.General, 0, "Duration");
                 if (x != "")
                 {
                     try
@@ -511,9 +516,9 @@ namespace XviD4PSP
 
         public int Delay (int track)
         {
-            string vvdelay = Get(StreamKind.Audio, track, "Video_Delay");
-            string sadelay = Get(StreamKind.Audio, track, "Delay");
-            string svdelay = Get(StreamKind.Video, 0, "Delay");
+            string vvdelay = Get_Splitted(StreamKind.Audio, track, "Video_Delay");
+            string sadelay = Get_Splitted(StreamKind.Audio, track, "Delay");
+            string svdelay = Get_Splitted(StreamKind.Video, 0, "Delay");
 
             //Используем параметр "Video delay", похоже МедиаИнфо уже всё посчитала
             if (vvdelay != "" && Settings.NewDelayMethod)
@@ -521,24 +526,8 @@ namespace XviD4PSP
                 int delay;
                 if (Int32.TryParse(vvdelay, NumberStyles.Integer, null, out delay)) return delay;
             }
-            
-            //подправляем
-            if (sadelay.Contains("/"))
-            {
-                string[] separator = new string[] { " / " };
-                string[] a = sadelay.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-                sadelay = a[0];
-            }
 
-            //подправляем
-            if (svdelay.Contains("/"))
-            {
-                string[] separator = new string[] { " / " };
-                string[] a = svdelay.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-                svdelay = a[0];
-            }
-
-            //Еще подправляем (mpeg, ts файлы)
+            //Подправляем (mpeg, ts файлы)
             if (Settings.NewDelayMethod)
             {
                 while (sadelay.Length > 2 && sadelay.Contains(".")) sadelay = sadelay.Remove(sadelay.Length - 1, 1);
@@ -570,50 +559,18 @@ namespace XviD4PSP
 
         public string Samplerate(int track)
         {
-            string value = Get(StreamKind.Audio, track, "SamplingRate");
-            if (value.Contains("/"))
-            {
-                string[] separator = new string[] { " / " };
-                string[] a = value.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-                value = a[0];
-            }
-
-            if (value == "")
-                value = null;
+            string value = Get_Splitted(StreamKind.Audio, track, "SamplingRate");
+            if (value == "") value = null;
 
             return value;
-        }
-
-        public string SamplerateString(int track)
-        {
-            return Get(StreamKind.Audio, track, "SamplingRate/String");
-        }
-
-        public int AudioBitrateBytes(int track)
-        {
-            int n = 0;
-
-            string bitrates = Get(StreamKind.Audio, track, "BitRate");
-            string nbitrates = Get(StreamKind.Audio, track, "BitRate_Nominal");
-
-            double bitrate = Calculate.ConvertStringToDouble(bitrates);
-            double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
-
-            if (nbitrate < bitrate &&
-                nbitrate != 0.0)
-                n = (int)nbitrate;
-            else
-                n = (int)bitrate;
-
-            return n;
         }
 
         public int AudioBitrate(int track)
         {
             int n = 0;
 
-            string bitrates = Get(StreamKind.Audio, track, "BitRate");
-            string nbitrates = Get(StreamKind.Audio, track, "BitRate_Nominal");
+            string bitrates = Get_Splitted(StreamKind.Audio, track, "BitRate");
+            string nbitrates = Get_Splitted(StreamKind.Audio, track, "BitRate_Nominal");
 
             double bitrate = 0.0;
             Double.TryParse(bitrates, NumberStyles.Float, null, out bitrate);
@@ -621,52 +578,12 @@ namespace XviD4PSP
             double nbitrate = 0.0;
             Double.TryParse(nbitrates, NumberStyles.Float, null, out nbitrate);
 
-            if (nbitrate < bitrate &&
-                nbitrate != 0.0)
+            if (nbitrate < bitrate && nbitrate != 0.0)
                 n = (int)(nbitrate / 1000.0);
             else
                 n = (int)(bitrate / 1000.0);
-            
+
             return n;
-        }
-
-        public long VideoBitrateBytes
-        {
-            get
-            {
-                int n = 0;
-
-                string bitrates = Get(StreamKind.Video, 0, "BitRate");
-                string nbitrates = Get(StreamKind.Video, 0, "BitRate_Nominal");
-
-                if (bitrates == "")
-                {
-                    bitrates = Get(StreamKind.General, 0, "OverallBitRate");
-                    nbitrates = Get(StreamKind.General, 0, "OverallBitRate_Nominal");
-
-                    double bitrate = Calculate.ConvertStringToDouble(bitrates);
-                    double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
-
-                    if (nbitrate < bitrate &&
-                        nbitrate != 0.0)
-                        n = (int)(nbitrate);
-                    else
-                        n = (int)(bitrate);
-                }
-                else
-                {
-                    double bitrate = Calculate.ConvertStringToDouble(bitrates);
-                    double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
-
-                    if (nbitrate < bitrate &&
-                        nbitrate != 0.0)
-                        n = (int)(nbitrate);
-                    else
-                        n = (int)(bitrate);
-                }
-
-                return n;
-            }
         }
 
         public int VideoBitrate
@@ -675,34 +592,22 @@ namespace XviD4PSP
             {
                 int n = 0;
 
-                string bitrates = Get(StreamKind.Video, 0, "BitRate");
-                string nbitrates = Get(StreamKind.Video, 0, "BitRate_Nominal");
+                string bitrates = Get_Splitted(StreamKind.Video, 0, "BitRate");
+                string nbitrates = Get_Splitted(StreamKind.Video, 0, "BitRate_Nominal");
 
                 if (bitrates == "")
                 {
-                    bitrates = Get(StreamKind.General, 0, "OverallBitRate");
-                    nbitrates = Get(StreamKind.General, 0, "OverallBitRate_Nominal");
-
-                    double bitrate = Calculate.ConvertStringToDouble(bitrates);
-                    double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
-
-                    if (nbitrate < bitrate &&
-                        nbitrate != 0.0)
-                        n = (int)(nbitrate / 1000.0);
-                    else
-                        n = (int)(bitrate / 1000.0);
+                    bitrates = Get_Splitted(StreamKind.General, 0, "OverallBitRate");
+                    nbitrates = Get_Splitted(StreamKind.General, 0, "OverallBitRate_Nominal");
                 }
+
+                double bitrate = Calculate.ConvertStringToDouble(bitrates);
+                double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
+
+                if (nbitrate < bitrate && nbitrate != 0.0)
+                    n = (int)(nbitrate / 1000.0);
                 else
-                {
-                    double bitrate = Calculate.ConvertStringToDouble(bitrates);
-                    double nbitrate = Calculate.ConvertStringToDouble(nbitrates);
- 
-                    if (nbitrate < bitrate &&
-                        nbitrate != 0.0)
-                        n = (int)(nbitrate / 1000.0);
-                    else
-                        n = (int)(bitrate / 1000.0);
-                }
+                    n = (int)(bitrate / 1000.0);
 
                 return n;
             }
@@ -710,7 +615,7 @@ namespace XviD4PSP
 
         public string AudioLanguage(int track)
         {
-            string x = Get(StreamKind.Audio, track, "Language/String");
+            string x = Get_Splitted(StreamKind.Audio, track, "Language/String");
             if (x == "" || x.Contains(" "))
                 x = "Unknown";
             if (x == "en-us")
@@ -720,16 +625,16 @@ namespace XviD4PSP
 
         public string SubLanguage(int track)
         {
-            string x = Get(StreamKind.Text, track, "Language/String");
-            if (x == "")
-                x = "Unknown";
+            string x = Get_Splitted(StreamKind.Text, track, "Language/String");
+            if (x == "") x = "Unknown";
+
             return x;
         }
 
         public int Channels(int track)
         {
             int n = 0;
-            string x = Get(StreamKind.Audio, track, "Channel(s)");
+            string x = Get_Splitted(StreamKind.Audio, track, "Channel(s)");
             Int32.TryParse(x, NumberStyles.Integer, null, out n);
             return n;
         }
@@ -737,7 +642,8 @@ namespace XviD4PSP
         public int Bits(int track)
         {
             int n = 0;
-            string x = Get(StreamKind.Audio, track, "BitDepth");
+            string x = Get_Splitted(StreamKind.Audio, track, "BitDepth");
+            if (x == "") x = Get_Splitted(StreamKind.Audio, track, "Resolution");
             Int32.TryParse(x, NumberStyles.Integer, null, out n);
             return n;
         }
@@ -746,23 +652,7 @@ namespace XviD4PSP
         {
             get
             {
-                return Get(StreamKind.Video, 0, "Standard");
-            }
-        }
-
-        public int FileSizeBytes
-        {
-            get
-            {
-                return Convert.ToInt32(Get(StreamKind.General, 0, "FileSize"));
-            }
-        }
-
-        public string FileSizeString
-        {
-            get
-            {
-                return Get(StreamKind.General, 0, "FileSize/String4");
+                return Get_Splitted(StreamKind.Video, 0, "Standard");
             }
         }
 
@@ -771,7 +661,7 @@ namespace XviD4PSP
             get
             {
                 int n = 0;
-                string x = Get(StreamKind.Video, 0, "FrameCount");
+                string x = Get_Splitted(StreamKind.Video, 0, "FrameCount");
                 if (x != "")
                 {
                     try
@@ -788,7 +678,7 @@ namespace XviD4PSP
         {
             get
             {
-                string interlace = Get(StreamKind.Video, 0, "ScanType");
+                string interlace = Get_Splitted(StreamKind.Video, 0, "ScanType");
                 SourceType ininterlace = SourceType.PROGRESSIVE;
 
                 if (interlace == "Interlaced")
@@ -802,7 +692,7 @@ namespace XviD4PSP
         {
             get
             {
-                return Get(StreamKind.Video, 0, "ScanOrder");
+                return Get_Splitted(StreamKind.Video, 0, "ScanOrder");
             }
         }
     }
