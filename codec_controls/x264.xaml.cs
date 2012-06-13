@@ -66,6 +66,7 @@ namespace XviD4PSP
             combo_level.Items.Add("4.2");
             combo_level.Items.Add("5.0");
             combo_level.Items.Add("5.1");
+            combo_level.Items.Add("5.2");
 
             //Tune
             combo_tune.Items.Add("None");
@@ -139,11 +140,16 @@ namespace XviD4PSP
             combo_open_gop.Items.Add("No");
             combo_open_gop.Items.Add("Yes");
 
+            //Кол-во потоков для lookahead
+            combo_lookahead_threads.Items.Add("Auto");
+            for (int n = 1; n <= 10; n++)
+                combo_lookahead_threads.Items.Add(Convert.ToString(n));
+
             //Кол-во потоков для x264-го
             combo_threads_count.Items.Add("Auto");
             combo_threads_count.Items.Add("1");
             combo_threads_count.Items.Add("1+1"); //+ --thread-input
-            for (int n = 2; n <= 16; n++)
+            for (int n = 2; n <= 32; n++)
                 combo_threads_count.Items.Add(Convert.ToString(n));
 
             //-b-adapt
@@ -164,6 +170,14 @@ namespace XviD4PSP
             combo_nal_hrd.Items.Add("None");
             combo_nal_hrd.Items.Add("VBR");
             combo_nal_hrd.Items.Add("CBR");
+
+            combo_range_in.Items.Add("Auto");
+            combo_range_in.Items.Add("TV");
+            combo_range_in.Items.Add("PC");
+
+            combo_range_out.Items.Add("Auto");
+            combo_range_out.Items.Add("TV");
+            combo_range_out.Items.Add("PC");
 
             combo_colorprim.Items.Add("Undefined");
             combo_colorprim.Items.Add("bt709");
@@ -375,6 +389,10 @@ namespace XviD4PSP
             check_slow_first.IsChecked = m.x264options.slow_frstpass;
             check_nombtree.IsChecked = m.x264options.no_mbtree;
             num_lookahead.Value = m.x264options.lookahead;
+
+            if (m.x264options.lookahead_threads == "auto") combo_lookahead_threads.SelectedIndex = 0;
+            else combo_lookahead_threads.SelectedItem = m.x264options.lookahead_threads;
+
             check_enable_psy.IsChecked = !m.x264options.no_psy;
             check_aud.IsChecked = m.x264options.aud;
             num_ratio_ip.Value = m.x264options.ratio_ip;
@@ -382,7 +400,15 @@ namespace XviD4PSP
             num_slices.Value = m.x264options.slices;
             check_pic_struct.IsChecked = m.x264options.pic_struct;
             check_fake_int.IsChecked = m.x264options.fake_int;
-            check_full_range.IsChecked = m.x264options.full_range;
+
+            if (m.x264options.range_in == "auto") combo_range_in.SelectedIndex = 0;
+            else if (m.x264options.range_in == "tv") combo_range_in.SelectedIndex = 1;
+            else if (m.x264options.range_in == "pc") combo_range_in.SelectedIndex = 2;
+
+            if (m.x264options.range_out == "auto") combo_range_out.SelectedIndex = 0;
+            else if (m.x264options.range_out == "tv") combo_range_out.SelectedIndex = 1;
+            else if (m.x264options.range_out == "pc") combo_range_out.SelectedIndex = 2;
+
             combo_colorprim.SelectedItem = m.x264options.colorprim;
             combo_transfer.SelectedItem = m.x264options.transfer;
             combo_colormatrix.SelectedItem = m.x264options.colormatrix;
@@ -489,7 +515,8 @@ namespace XviD4PSP
             combo_badapt_mode.IsEnabled = !m.x264options.extra_cli.Contains("--b-adapt ");
             combo_bpyramid_mode.IsEnabled = !m.x264options.extra_cli.Contains("--b-pyramid ");
             combo_weightp_mode.IsEnabled = !m.x264options.extra_cli.Contains("--weightp ");
-            num_lookahead.IsEnabled = (!m.x264options.extra_cli.Contains("--rc-lookahead ") && !m.x264options.no_mbtree);
+            num_lookahead.IsEnabled = !m.x264options.extra_cli.Contains("--rc-lookahead ");
+            combo_lookahead_threads.IsEnabled = !m.x264options.extra_cli.Contains("--lookahead-threads ");
             combo_trellis.IsEnabled = !m.x264options.extra_cli.Contains("--trellis ");
             combo_adapt_quant_mode.IsEnabled = !m.x264options.extra_cli.Contains("--aq-mode ");
             combo_adapt_quant.IsEnabled = !m.x264options.extra_cli.Contains("--ag-strength ");
@@ -511,7 +538,8 @@ namespace XviD4PSP
             num_slices.IsEnabled = !m.x264options.extra_cli.Contains("--slices ");
             check_pic_struct.IsEnabled = !m.x264options.extra_cli.Contains("--pic-struct");
             check_fake_int.IsEnabled = !m.x264options.extra_cli.Contains("--fake-interlaced");
-            check_full_range.IsEnabled = !m.x264options.extra_cli.Contains("--fullrange ");
+            combo_range_in.IsEnabled = !m.x264options.extra_cli.Contains("---input-range ");
+            combo_range_out.IsEnabled = !m.x264options.extra_cli.Contains("--range ");
             combo_colorprim.IsEnabled = !m.x264options.extra_cli.Contains("--colorprim ");
             combo_transfer.IsEnabled = !m.x264options.extra_cli.Contains("--transfer ");
             combo_colormatrix.IsEnabled = !m.x264options.extra_cli.Contains("--colormatrix ");
@@ -647,7 +675,7 @@ namespace XviD4PSP
             combo_merange.ToolTip = "Maximum motion vector search range (--merange, default: " + def.merange + ")";
             check_chroma.ToolTip = "Ignore chroma in motion estimation (--no-chroma-me, default: unchecked)";
             combo_bframes.ToolTip = "Number of B-frames between I and P (--bframes, default: " + def.bframes + ")";
-            combo_bframe_mode.ToolTip = "Direct MV prediction mode, requires B-frames (--direct, default: " + def.direct + ")";
+            combo_bframe_mode.ToolTip = "Direct MV prediction mode, requires B-frames (--direct, default: " + (def.direct.Substring(0, 1).ToUpper() + def.direct.Substring(1)) + ")";
             combo_bpyramid_mode.ToolTip = "Keep some B-frames as references (--b-pyramid, default: " + (def.bpyramid == 0 ? "None)" : def.bpyramid == 1 ? "Strict)" : "Normal)") +
                 "\r\nNone - disabled \r\nStrict - strictly hierarchical pyramid (Blu-ray compatible)\r\nNormal - non-strict (not Blu-ray compatible)";
             check_weightedb.ToolTip = "Weighted prediction for B-frames (--no-weightb if not checked)";
@@ -697,7 +725,8 @@ namespace XviD4PSP
                 "Auto = 1.5 * logical_processors\r\n1+1 = --threads 1 --thread-input";
             check_slow_first.ToolTip = "Enable slow 1-st pass for multipassing encoding (off by default)" + Environment.NewLine + "(--slow-firstpass if checked)";
             check_nombtree.ToolTip = "Disable mb-tree ratecontrol (off by default, --no-mbtree if checked)";
-            num_lookahead.ToolTip = "Number of frames for frametype lookahead (--rc-lookahead, default: " + def.lookahead + ")";
+            num_lookahead.ToolTip = "Number of frames for mb-tree ratecontrol and VBV-lookahead (--rc-lookahead, default: " + def.lookahead + ")";
+            combo_lookahead_threads.ToolTip = "Force a specific number of lookahead threads (--lookahead-threads, default: Auto)\r\nAuto = 1/6 of regular threads.";
             check_enable_psy.ToolTip = "If unchecked disable all visual optimizations that worsen both PSNR and SSIM" + Environment.NewLine + "(--no-psy if not checked)";
             num_min_gop.ToolTip = "Minimum GOP size (--min-keyint, default: " + def.gop_min + ")\r\n0 - Auto";
             num_max_gop.ToolTip = "Maximum GOP size (--keyint, default: " + def.gop_max + ")\r\n0 - \"infinite\"";
@@ -709,7 +738,8 @@ namespace XviD4PSP
             num_slices.ToolTip = "Number of slices per frame (--slices, default: " + def.slices + ")";
             check_pic_struct.ToolTip = "Force pic_struct in Picture Timing SEI (--pic-struct, default: unchecked)";
             check_fake_int.ToolTip = "Flag stream as interlaced but encode progressive (--fake-interlaced, default: unchecked)";
-            check_full_range.ToolTip = "Specify full range samples setting (--fullrange on, default: unchecked)";
+            combo_range_in.ToolTip = "Forces the range of the input (--input-range, default: Auto)\r\nIf input and output ranges aren't the same, x264 will perform range conversion!";
+            combo_range_out.ToolTip = "Sets the range of the output (--range, default: Auto)\r\nIf input and output ranges aren't the same, x264 will perform range conversion!";
             combo_colorprim.ToolTip = "Specify color primaries (--colorprim, default: " + def.colorprim + ")";
             combo_transfer.ToolTip = "Specify transfer characteristics (--transfer, default: " + def.transfer + ")";
             combo_colormatrix.ToolTip = "Specify color matrix setting (--colormatrix, default: " + def.colormatrix + ")";
@@ -968,6 +998,9 @@ namespace XviD4PSP
                 else if (value == "--rc-lookahead")
                     m.x264options.lookahead = Convert.ToInt32(cli[n + 1]);
 
+                else if (value == "--lookahead-threads")
+                    m.x264options.lookahead_threads = cli[n + 1];
+
                 else if (value == "--nal-hrd")
                     m.x264options.nal_hrd = cli[n + 1];
 
@@ -999,8 +1032,11 @@ namespace XviD4PSP
                 else if (value == "--fake-interlaced")
                     m.x264options.fake_int = true;
 
-                else if (value == "--fullrange")
-                    m.x264options.full_range = (cli[n + 1] == "on");
+                else if (value == "--input-range")
+                    m.x264options.range_in = cli[n + 1];
+
+                else if (value == "--range")
+                    m.x264options.range_out = cli[n + 1];
 
                 else if (value == "--colorprim")
                 {
@@ -1232,6 +1268,9 @@ namespace XviD4PSP
             if (!m.x264options.no_mbtree && m.x264options.lookahead != defaults.lookahead && !m.x264options.extra_cli.Contains("--rc-lookahead "))
                 line += " --rc-lookahead " + m.x264options.lookahead;
 
+            if (m.x264options.lookahead_threads != defaults.lookahead_threads && !m.x264options.extra_cli.Contains("--lookahead-threads "))
+                line += " --lookahead-threads " + m.x264options.lookahead_threads;
+
             if (m.x264options.gop_min > 0 && m.x264options.gop_min != defaults.gop_min && !m.x264options.extra_cli.Contains("--min-keyint "))
                 line += " --min-keyint " + m.x264options.gop_min;
 
@@ -1256,8 +1295,11 @@ namespace XviD4PSP
             if (m.x264options.fake_int && !defaults.fake_int && !m.x264options.extra_cli.Contains("--fake-interlaced"))
                 line += " --fake-interlaced";
 
-            if (m.x264options.full_range && !defaults.full_range && !m.x264options.extra_cli.Contains("--fullrange on"))
-                line += " --fullrange on";
+            if (m.x264options.range_in != defaults.range_in && !m.x264options.extra_cli.Contains("--input-range "))
+                line += " --input-range " + m.x264options.range_in;
+
+            if (m.x264options.range_out != defaults.range_out && !m.x264options.extra_cli.Contains("--range "))
+                line += " --range " + m.x264options.range_out;
 
             if (m.x264options.colorprim != defaults.colorprim && !m.x264options.extra_cli.Contains("--colorprim "))
                 line += " --colorprim " + ((m.x264options.colorprim == "Undefined") ? "undef" : m.x264options.colorprim);
@@ -2093,7 +2135,6 @@ namespace XviD4PSP
         private void check_nombtree_Clicked(object sender, RoutedEventArgs e)
         {
             m.x264options.no_mbtree = check_nombtree.IsChecked.Value;
-            num_lookahead.IsEnabled = (!m.x264options.extra_cli.Contains("--rc-lookahead ") && !m.x264options.no_mbtree);
 
             root_window.UpdateManualProfile();
             UpdateCLI();
@@ -2104,6 +2145,17 @@ namespace XviD4PSP
             if (num_lookahead.IsAction)
             {
                 m.x264options.lookahead = Convert.ToInt32(num_lookahead.Value);
+
+                root_window.UpdateManualProfile();
+                UpdateCLI();
+            }
+        }
+
+        private void combo_lookahead_threads_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_lookahead_threads.IsDropDownOpen || combo_lookahead_threads.IsSelectionBoxHighlighted)
+            {
+                m.x264options.lookahead_threads = combo_lookahead_threads.SelectedItem.ToString().ToLower();
 
                 root_window.UpdateManualProfile();
                 UpdateCLI();
@@ -2279,11 +2331,24 @@ namespace XviD4PSP
             UpdateCLI();
         }
 
-        private void check_full_range_Click(object sender, RoutedEventArgs e)
+        private void combo_range_in_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            m.x264options.full_range = check_full_range.IsChecked.Value;
-            root_window.UpdateManualProfile();
-            UpdateCLI();
+            if (combo_range_in.IsDropDownOpen || combo_range_in.IsSelectionBoxHighlighted)
+            {
+                m.x264options.range_in = combo_range_in.SelectedItem.ToString().ToLower();
+                root_window.UpdateManualProfile();
+                UpdateCLI();
+            }
+        }
+
+        private void combo_range_out_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_range_out.IsDropDownOpen || combo_range_out.IsSelectionBoxHighlighted)
+            {
+                m.x264options.range_out = combo_range_out.SelectedItem.ToString().ToLower();
+                root_window.UpdateManualProfile();
+                UpdateCLI();
+            }
         }
 
         private void combo_colorprim_SelectionChanged(object sender, SelectionChangedEventArgs e)

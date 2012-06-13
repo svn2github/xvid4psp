@@ -806,6 +806,19 @@ namespace XviD4PSP
             }
         }
 
+        private string _lookahead_threads = "auto";
+        public string lookahead_threads
+        {
+            get
+            {
+                return _lookahead_threads;
+            }
+            set
+            {
+                _lookahead_threads = value;
+            }
+        }
+
         private string _nal_hrd = "none";
         public string nal_hrd
         {
@@ -923,16 +936,29 @@ namespace XviD4PSP
             }
         }
 
-        private bool _full_range = false;
-        public bool full_range
+        private string _range_in = "auto";
+        public string range_in
         {
             get
             {
-                return _full_range;
+                return _range_in;
             }
             set
             {
-                _full_range = value;
+                _range_in = value;
+            }
+        }
+
+        private string _range_out = "auto";
+        public string range_out
+        {
+            get
+            {
+                return _range_out;
+            }
+            set
+            {
+                _range_out = value;
             }
         }
 
