@@ -112,6 +112,7 @@
     <Compile Include="classes\Formats.cs" />
     <Compile Include="classes\HotKeys.cs" />
     <Compile Include="classes\flac_arguments.cs" />
+    <Compile Include="classes\qaac_arguments.cs" />
     <Compile Include="classes\Trim.cs" />
     <Compile Include="classes\Win7Taskbar.cs" />
     <Compile Include="classes\wmv_arguments.cs" />
@@ -180,6 +181,9 @@
     </Compile>
     <Compile Include="codec_controls\FMP2.xaml.cs">
       <DependentUpon>FMP2.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="codec_controls\QAAC.xaml.cs">
+      <DependentUpon>QAAC.xaml</DependentUpon>
     </Compile>
     <Compile Include="codec_controls\XviD.xaml.cs">
       <DependentUpon>XviD.xaml</DependentUpon>
@@ -326,6 +330,10 @@
     <Page Include="codec_controls\FDV.xaml" />
     <Page Include="codec_controls\FPCM.xaml" />
     <Page Include="codec_controls\FMP2.xaml" />
+    <Page Include="codec_controls\QAAC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="codec_controls\XviD.xaml" />
     <Page Include="codec_controls\LameMP3.xaml" />
     <Page Include="codec_controls\NeroAAC.xaml" />
@@ -458,6 +466,7 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="pictures\logo_QAAC.png" />
     <Resource Include="pictures\Delete.png" />
     <Resource Include="pictures\Expand.png" />
     <Resource Include="pictures\folder_magnify.png" />

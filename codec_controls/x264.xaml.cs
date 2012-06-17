@@ -211,6 +211,7 @@ namespace XviD4PSP
             combo_colorspace.Items.Add("I444");
             combo_colorspace.Items.Add("RGB");
 
+            text_mode.Content = Languages.Translate("Encoding mode") + ":";
             Apply_CLI.Content = Languages.Translate("Apply");
             Reset_CLI.Content = Languages.Translate("Reset");
             x264_help.Content = Languages.Translate("Help");
@@ -538,7 +539,7 @@ namespace XviD4PSP
             num_slices.IsEnabled = !m.x264options.extra_cli.Contains("--slices ");
             check_pic_struct.IsEnabled = !m.x264options.extra_cli.Contains("--pic-struct");
             check_fake_int.IsEnabled = !m.x264options.extra_cli.Contains("--fake-interlaced");
-            combo_range_in.IsEnabled = !m.x264options.extra_cli.Contains("---input-range ");
+            combo_range_in.IsEnabled = !m.x264options.extra_cli.Contains("--input-range ");
             combo_range_out.IsEnabled = !m.x264options.extra_cli.Contains("--range ");
             combo_colorprim.IsEnabled = !m.x264options.extra_cli.Contains("--colorprim ");
             combo_transfer.IsEnabled = !m.x264options.extra_cli.Contains("--transfer ");

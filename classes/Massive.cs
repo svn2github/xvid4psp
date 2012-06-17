@@ -17,6 +17,7 @@ namespace XviD4PSP
             this.ffmpeg_options = new ffmpeg_arguments();
             this.wmv_options = new wmv_arguments();
             this.aac_options = new aac_arguments();
+            this.qaac_options = new qaac_arguments();
             this.mp3_options = new mp3_arguments();
             this.ac3_options = new ac3_arguments();
             this.flac_options = new flac_arguments();
@@ -36,6 +37,7 @@ namespace XviD4PSP
             temp.wmv_options = this.wmv_options.Clone();
             temp.ffmpeg_options = this.ffmpeg_options.Clone();
             temp.aac_options = this.aac_options.Clone();
+            temp.qaac_options = this.qaac_options.Clone();
             temp.mp3_options = this.mp3_options.Clone();
             temp.ac3_options = this.ac3_options.Clone();
             temp.flac_options = this.flac_options.Clone();
@@ -1141,6 +1143,19 @@ namespace XviD4PSP
             set
             {
                 _aac_options = value;
+            }
+        }
+
+        private qaac_arguments _qaac_options;
+        public qaac_arguments qaac_options
+        {
+            get
+            {
+                return _qaac_options;
+            }
+            set
+            {
+                _qaac_options = value;
             }
         }
 

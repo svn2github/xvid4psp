@@ -22,10 +22,10 @@
             <ComboBox HorizontalAlignment="Right" Margin="0,80.9,8,0" x:Name="combo_bitrate" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_bitrate_SelectionChanged" VerticalAlignment="Top"/>
 			<Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,76.24,0,0" VerticalAlignment="Top"/>
 			<ComboBox x:Name="combo_quality" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,109.52,8,0" SelectionChanged="combo_quality_SelectionChanged" VerticalAlignment="Top"/>
-			<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="Quality:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,104.86,0,0" VerticalAlignment="Top"/>
+			<Label OpacityMask="{x:Null}" x:Name="text_quality" Content="Accuracy:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,104.86,0,0" VerticalAlignment="Top"/>
             <ComboBox x:Name="combo_gain" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,139,8,0" SelectionChanged="combo_gain_SelectionChanged" VerticalAlignment="Top"/>
             <Label OpacityMask="{x:Null}" x:Name="text_gain" Content="Replay gain:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,134.86,0,0" VerticalAlignment="Top"/>
-            <CheckBox x:Name="check_force_samplearte" Width="Auto" Height="Auto" Content="Don`t change samplerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="13,0,0,12" Click="check_force_samplearte_Click" d:LayoutOverrides="Width, Height" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+            <CheckBox x:Name="check_force_samplearte" Width="Auto" Height="Auto" Content="Don't change samplerate" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Margin="13,0,0,12" Click="check_force_samplearte_Click" d:LayoutOverrides="Width, Height" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
 		</Grid>
 	</Grid>
 </UserControl>

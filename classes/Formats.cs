@@ -499,7 +499,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "AAC" };
+                this.ACodecs = new string[] { "MP3", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -546,7 +546,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC" };
+                this.ACodecs = new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -594,7 +594,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "MP2", "AAC" };
+                this.ACodecs = new string[] { "MP3", "MP2", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -642,7 +642,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "MP2", "AC3", "AAC" };
+                this.ACodecs = new string[] { "MP3", "MP2", "AC3", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -690,7 +690,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "MP2", "AC3", "AAC" };
+                this.ACodecs = new string[] { "MP3", "MP2", "AC3", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -748,7 +748,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "AAC" };
+                this.ACodecs = new string[] { "MP3", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -809,7 +809,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "AAC" };
+                this.ACodecs = new string[] { "MP3", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -866,7 +866,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "AAC" };
+                this.ACodecs = new string[] { "MP3", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -914,7 +914,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "MP3", "AAC" };
+                this.ACodecs = new string[] { "MP3", "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -962,7 +962,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1018,7 +1018,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1067,7 +1067,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1115,7 +1115,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1163,7 +1163,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1211,7 +1211,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1259,7 +1259,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1312,7 +1312,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1365,7 +1365,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "AAC" };
+                this.ACodecs = new string[] { "AAC", "QAAC" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1522,7 +1522,7 @@ namespace XviD4PSP
                 this.Interlaced = false;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "PCM", "AAC", "MP2", "MP3", "AC3" };
+                this.ACodecs = new string[] { "PCM", "AAC", "QAAC", "MP2", "MP3", "AC3" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "Auto" };
                 this.Samplerates_IsEditable = true;
@@ -1578,7 +1578,7 @@ namespace XviD4PSP
                 this.Interlaced = true;
                 this.Interlaced_IsEditable = true;
 
-                this.ACodecs = new string[] { "PCM", "FLAC", "AAC", "MP2", "MP3", "AC3" };
+                this.ACodecs = new string[] { "PCM", "FLAC", "AAC", "QAAC", "MP2", "MP3", "AC3" };
                 this.ACodecs_IsEditable = true;
                 this.Samplerates = new string[] { "22050", "32000", "44100", "48000" };
                 this.Samplerates_IsEditable = true;

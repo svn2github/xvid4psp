@@ -14,7 +14,7 @@ namespace XviD4PSP
         public enum PlayerEngines { DirectShow = 1, MediaBridge, PictureView }
         public enum VRenderers { Auto = 0, Overlay, VMR7, VMR9, EVR }
         public enum AfterImportActions { Nothing = 1, Middle, Play }
-        public enum AudioEncodingModes { CBR = 1, VBR, ABR, TwoPass }
+        public enum AudioEncodingModes { CBR = 1, VBR, ABR, TwoPass, CVBR, ALAC }
         public enum AutoDeinterlaceModes { AllFiles = 1, MPEGs, Disabled }
         public enum ATrackModes { Manual = 0, Language, Number }
 

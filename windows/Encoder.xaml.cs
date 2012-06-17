@@ -123,6 +123,10 @@ namespace XviD4PSP
                     if (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass) steps++; //Два прохода
                     //if (muxer == Format.Muxers.tsmuxer) steps++; //Извлечение aac из m4a (видимо оно больше не нужно)
                 }
+                else if (codec == "QAAC")
+                {
+                    //if (muxer == Format.Muxers.tsmuxer) steps++; //Извлечение aac из m4a (видимо оно больше не нужно)
+                }
                 else if (codec == "Copy" && Settings.CopyDelay) CopyDelay = true;
             }
 
@@ -1634,6 +1638,10 @@ namespace XviD4PSP
             }
             else if (outstream.codec == "AAC" && m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 SetLog(outstream.codec + " Q" + m.aac_options.quality + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz");
+            else if (outstream.codec == "QAAC" && m.qaac_options.encodingmode == Settings.AudioEncodingModes.VBR)
+                SetLog(outstream.codec + " Q" + m.qaac_options.quality + " " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz");
+            else if (outstream.codec == "QAAC" && m.qaac_options.encodingmode == Settings.AudioEncodingModes.ALAC)
+                SetLog(outstream.codec + " Lossless " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz");
             else
                 SetLog(outstream.codec + " " + outstream.bitrate + "kbps " + outstream.channels + "ch " + outstream.bits + "bit " + outstream.samplerate + "khz");
 
@@ -1661,6 +1669,8 @@ namespace XviD4PSP
                     else
                         avs.encoderPath = Calculate.StartupPath + "\\apps\\neroAacEnc\\neroAacEnc.exe";
                 }
+                else if (outstream.codec == "QAAC")
+                    avs.encoderPath = Calculate.StartupPath + "\\apps\\qaac\\qaac.exe";
                 else if (outstream.codec == "MP3")
                     avs.encoderPath = Calculate.StartupPath + "\\apps\\lame\\lame.exe";
                 else if (outstream.codec == "MP2" || outstream.codec == "PCM" || outstream.codec == "LPCM" || outstream.codec == "FLAC")
@@ -1713,7 +1723,7 @@ namespace XviD4PSP
             }
 
             //Похоже, что tsMuxeR уже умеет принимать m4a на вход..
-            //if (muxer == Format.Muxers.tsmuxer && outstream.codec == "AAC")
+            //if (muxer == Format.Muxers.tsmuxer && (outstream.codec == "AAC" || outstream.codec == "QAAC"))
             //    make_aac();
         }
 
@@ -2847,9 +2857,9 @@ namespace XviD4PSP
                 string acodec = (o.codec == "Copy") ? i.codecshort : o.codec;
 
                 string atag = "A_AC3";
-                if (acodec == "AAC") atag = "A_AAC";
-                else if (acodec == "DTS") atag = "A_DTS";
+                if (acodec == "DTS") atag = "A_DTS";
                 else if (acodec == "MP2" || acodec == "MP3") atag = "A_MP3";
+                else if (acodec == "AAC" || acodec == "QAAC") atag = "A_AAC";
                 else if (acodec == "PCM" || acodec == "LPCM") atag = "A_LPCM";
 
                 //audio path

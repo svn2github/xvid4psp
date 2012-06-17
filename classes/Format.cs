@@ -196,7 +196,7 @@ namespace XviD4PSP
            switch (format)
            {
                case ExportFormats.Audio:
-                   return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC" };
+                   return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC", "QAAC" };
 
                case ExportFormats.Mpeg1PS:
                case ExportFormats.DpgNintendoDS:
@@ -219,7 +219,7 @@ namespace XviD4PSP
                return Formats.GetDefaults(format).ACodecs;
            }
 
-           return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC" };
+           return new string[] { "PCM", "FLAC", "AC3", "MP3", "MP2", "AAC", "QAAC" };
        }
 
        public static AviSynthScripting.Decoders GetValidVDecoder(Massive m)
@@ -655,7 +655,7 @@ namespace XviD4PSP
                        if (m.outaudiostreams.Count > 0)
                        {
                            AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                           if (outstream.codec == "AAC") return ".m4a";
+                           if (outstream.codec == "AAC" || outstream.codec == "QAAC") return ".m4a";
                            else if (outstream.codec == "PCM") return ".wav";
                            else return "." + outstream.codec.ToLower();
                        }
@@ -1361,6 +1361,7 @@ namespace XviD4PSP
        {
            if (codec == "PCM" || codec == "LPCM") return ".wav";
            else if (codec == "TrueHD") return ".ac3";
+           else if (codec == "QAAC") return ".m4a";
            else return "." + codec.ToLower();
        }
 

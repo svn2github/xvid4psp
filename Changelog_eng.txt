@@ -1,5 +1,12 @@
-﻿XviD4PSP 5.10.279.0 (13.06.2012), main changes:
+﻿XviD4PSP 5.10.280.0 (17.06.2012), main changes:
 
+>>> (r280) Added support for qaac.exe - an AAC\ALAC encoder that uses QuickTime (Apple) API. QuickTime, iTunes or
+           Safari must be installed in order to make it possible to use qaac. Or you can extract AppleApplicationSupport.msi
+           from theirs installers and install only this package, since this is the only one and only component that is
+           required for qaac. Additionally you can avoid to install anything at all, simply copy required dlls from
+           AppleApplicationSupport.msi to the same folder with qaac.exe (or to subfolder qaac\QTFiles - this is also
+           allowed). Or ask Google for "qaac.exe portable". https://sites.google.com/site/qaacpage/ - qaac.exe site.
+           Thanks to AuronSV (wayger) for the initial start of this revision and for the logo.
 >>> (r279) x264 settings window: added Level 5.2, in\out range, lookahead threads (r2200+).
 >>> (r278) Added filtering of MediaInfo information to avoid getting double-values (rep. by brunorex).
 >>> (r278) "Media Info" window: fixed stdout buffer overflow for mkvinfo.exe and MP4Box.exe.

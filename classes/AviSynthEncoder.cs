@@ -226,6 +226,7 @@ namespace XviD4PSP
                     error_text = ((IsGainDetecting) ? "Gain Detector Error: " : "AviSynth Encoder Error: ") + ex.Message;
                     try
                     {
+                        Thread.Sleep(500);
                         if (_encoderProcess != null && _encoderProcess.HasExited && _encoderProcess.ExitCode != 0)
                             error_text += ("\r\n" + (!string.IsNullOrEmpty(_encoderStdErr) ? "\r\n" + _encoderStdErr : "") +
                                 (!string.IsNullOrEmpty(_encoderStdOut) ? "\r\n" + _encoderStdOut : ""));
@@ -268,6 +269,14 @@ namespace XviD4PSP
                 if (encoderPath.Contains("neroAacEnc.exe"))
                 {
                     info.Arguments = "-ignorelength " + stream.passes + " -if - -of \"" + outfilepath + "\"";
+                }
+                else if (encoderPath.Contains("qaac.exe"))
+                {
+                    info.Arguments = stream.passes + " --no-optimize --ignorelength - -o \"" + outfilepath + "\"";
+
+                    //Начиная с версии 1.26 qaac.exe работает со stdout\stderr используя UTF-8
+                    info.StandardOutputEncoding = System.Text.Encoding.UTF8;
+                    info.StandardErrorEncoding = System.Text.Encoding.UTF8;
                 }
                 else if (encoderPath.Contains("lame.exe"))
                 {

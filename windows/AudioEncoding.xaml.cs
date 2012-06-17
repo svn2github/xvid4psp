@@ -18,6 +18,7 @@ namespace XviD4PSP
 
         LameMP3 mp3;
         NeroAAC aac;
+        QuickTimeAAC qaac;
         AftenAC3 ac3;
         FMP2 fmp2;
         FPCM fpcm;
@@ -115,6 +116,11 @@ namespace XviD4PSP
                 aac = new NeroAAC(m, this);
                 grid_codec.Children.Add(aac);
             }
+            else if (outstream.codec == "QAAC")
+            {
+                qaac = new QuickTimeAAC(m, this);
+                grid_codec.Children.Add(qaac);
+            }
             else if (outstream.codec == "MP3")
             {
                 mp3 = new LameMP3(m, this);
@@ -170,6 +176,11 @@ namespace XviD4PSP
             {
                 grid_codec.Children.Remove(aac);
                 aac = null;
+            }
+            else if (qaac != null)
+            {
+                grid_codec.Children.Remove(qaac);
+                qaac = null;
             }
             else if (mp3 != null)
             {
@@ -269,6 +280,7 @@ namespace XviD4PSP
 
                 m.mp3_options = new mp3_arguments();
                 m.aac_options = new aac_arguments();
+                m.qaac_options = new qaac_arguments();
                 m.ac3_options = new ac3_arguments();
                 m.flac_options = new flac_arguments();
 
@@ -358,6 +370,11 @@ namespace XviD4PSP
                 m = aac.m.Clone();
                 m = NeroAAC.EncodeLine(m);
             }
+            else if (qaac != null)
+            {
+                m = qaac.m.Clone();
+                m = QuickTimeAAC.EncodeLine(m);
+            }
             else if (mp3 != null)
             {
                 m = mp3.m.Clone();
@@ -393,6 +410,7 @@ namespace XviD4PSP
         private void UpdateCodecMassive()
         {
             if (aac != null) aac.m = m.Clone();
+            else if (qaac != null) qaac.m = m.Clone();
             else if (mp3 != null) mp3.m = m.Clone();
             else if (ac3 != null) ac3.m = m.Clone();
             else if (fmp2 != null) fmp2.m = m.Clone();
@@ -439,6 +457,16 @@ namespace XviD4PSP
                 outstream.passes = PresetLoader.GetACodecPasses(aac.m);
                 aac.m = PresetLoader.DecodePresets(aac.m);
                 aac.LoadFromProfile();
+            }
+            else if (qaac != null)
+            {
+                AudioStream outstream = (AudioStream)qaac.m.outaudiostreams[qaac.m.outaudiostream];
+                //забиваем настройки из профиля
+                outstream.encoding = combo_profile.SelectedItem.ToString();
+                outstream.codec = PresetLoader.GetACodec(qaac.m.format, outstream.encoding);
+                outstream.passes = PresetLoader.GetACodecPasses(qaac.m);
+                qaac.m = PresetLoader.DecodePresets(qaac.m);
+                qaac.LoadFromProfile();
             }
             else if (mp3 != null)
             {
@@ -517,20 +545,34 @@ namespace XviD4PSP
                 if (m.aac_options.aacprofile == "AAC-LC") auto_name += "-LC";
                 else if (m.aac_options.aacprofile == "AAC-HE") auto_name += "-HE";
                 else if (m.aac_options.aacprofile == "AAC-HEv2") auto_name += "-HEv2";
+
                 auto_name += " " + m.aac_options.encodingmode.ToString();
+                if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
+                    auto_name += " Q" + m.aac_options.quality;
+                else
+                    auto_name += " " + outstream.bitrate + "k";
+            }
+            else if (outstream.codec == "QAAC")
+            {
+                if (m.qaac_options.encodingmode != Settings.AudioEncodingModes.ALAC)
+                {
+                    if (m.qaac_options.aacprofile == "AAC-LC") auto_name += "-LC";
+                    else if (m.qaac_options.aacprofile == "AAC-HE") auto_name += "-HE";
+
+                    auto_name += " " + m.qaac_options.encodingmode.ToString();
+                    if (m.qaac_options.encodingmode == Settings.AudioEncodingModes.VBR)
+                        auto_name += " Q" + m.qaac_options.quality;
+                    else
+                        auto_name += " " + outstream.bitrate + "k";
+                }
+                else
+                    auto_name += " " + m.qaac_options.encodingmode.ToString();
             }
             else if (outstream.codec == "MP3")
             {
                 auto_name += " " + m.mp3_options.encodingmode.ToString().ToUpper();
                 if (m.mp3_options.encodingmode == Settings.AudioEncodingModes.VBR)
                     auto_name += " Q" + m.mp3_options.quality;
-                else
-                    auto_name += " " + outstream.bitrate + "k";
-            }
-            else if (outstream.codec == "AAC")
-            {
-                if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
-                    auto_name += " Q" + m.aac_options.quality;
                 else
                     auto_name += " " + outstream.bitrate + "k";
             }

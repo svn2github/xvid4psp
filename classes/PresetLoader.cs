@@ -232,6 +232,7 @@ namespace XviD4PSP
 
                 //расшифровываем audio параметры
                 if (outstream.codec == "AAC") m = NeroAAC.DecodeLine(m);
+                else if (outstream.codec == "QAAC") m = QuickTimeAAC.DecodeLine(m);
                 else if (outstream.codec == "MP3") m = LameMP3.DecodeLine(m);
                 else if (outstream.codec == "AC3") m = AftenAC3.DecodeLine(m);
                 else if (outstream.codec == "MP2") m = FMP2.DecodeLine(m);

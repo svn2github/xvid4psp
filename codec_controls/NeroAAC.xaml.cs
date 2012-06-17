@@ -15,6 +15,8 @@ namespace XviD4PSP
 	{
         public Massive m;
         private AudioEncoding root_window;
+        private string str_bitrate = Languages.Translate("Bitrate") + ":";
+        private string str_quality = Languages.Translate("Quality") + ":";
 
         public NeroAAC(Massive mass, AudioEncoding AudioEncWindow)
 		{
@@ -36,6 +38,8 @@ namespace XviD4PSP
             this.num_period.ValueChanged += new RoutedPropertyChangedEventHandler<decimal>(num_period_ValueChanged);
             num_period.ToolTip = "2-Pass encoding bitrate averaging period, milliseconds. \r\nDefault and recommended: 0 (Auto).\r\n" +
             "\r\nWARNING! Low values may produce crash of neroAacEnc.exe!";
+
+            text_mode.Content = Languages.Translate("Encoding mode") + ":";
 
             LoadFromProfile();
 		}
@@ -65,7 +69,6 @@ namespace XviD4PSP
 
         private void LoadBitrates()
         {
-            num_period.IsEnabled = (m.aac_options.encodingmode == Settings.AudioEncodingModes.TwoPass);
             try
             {
                 combo_bitrate.Items.Clear();
@@ -194,17 +197,27 @@ namespace XviD4PSP
                 root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();
             }
+
+            if (combo_mode.SelectedIndex != -1)
+            {
+                text_bitrate.Content = (combo_mode.SelectedIndex == 1) ? str_quality : str_bitrate;
+                num_period.IsEnabled = (combo_mode.SelectedIndex == 3);
+            }
         }
 
         private void combo_bitrate_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (combo_bitrate.IsDropDownOpen || combo_bitrate.IsSelectionBoxHighlighted)
             {
-                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                
-                if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
+                if (m.aac_options.encodingmode != Settings.AudioEncodingModes.VBR)
+                {
                     m.aac_options.quality = Calculate.ConvertStringToDouble(combo_bitrate.SelectedItem.ToString());
-                else outstream.bitrate = Convert.ToInt32(combo_bitrate.SelectedItem);
+                }
+                else
+                {
+                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                    outstream.bitrate = Convert.ToInt32(combo_bitrate.SelectedItem);
+                }
 
                 root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();

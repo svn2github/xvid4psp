@@ -15,6 +15,8 @@ namespace XviD4PSP
 	{
         public Massive m;
         private AudioEncoding root_window;
+        private string str_bitrate = Languages.Translate("Bitrate") + ":";
+        private string str_quality = Languages.Translate("Quality") + ":";
 
         public LameMP3(Massive mass, AudioEncoding AudioEncWindow)
 		{
@@ -62,6 +64,9 @@ namespace XviD4PSP
 
             //прогружаем битрейты
             LoadBitrates();
+
+            text_mode.Content = Languages.Translate("Encoding mode") + ":";
+            text_quality.Content = Languages.Translate("Accuracy") + ":";
 
             LoadFromProfile();
 		}
@@ -316,6 +321,11 @@ namespace XviD4PSP
 
                 root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();
+            }
+
+            if (combo_mode.SelectedIndex != -1)
+            {
+                text_bitrate.Content = (combo_mode.SelectedIndex == 1) ? str_quality : str_bitrate;
             }
         }
 

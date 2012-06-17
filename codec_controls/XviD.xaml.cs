@@ -96,6 +96,7 @@ namespace XviD4PSP
             foreach (string preset in Enum.GetNames(typeof(CodecPresets)))
                 combo_codec_preset.Items.Add(preset);
 
+            text_mode.Content = Languages.Translate("Encoding mode") + ":";
             Apply_CLI.Content = Languages.Translate("Apply");
             Reset_CLI.Content = Languages.Translate("Reset");
             xvid_help.Content = Languages.Translate("Help");

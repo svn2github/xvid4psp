@@ -540,7 +540,7 @@ namespace XviD4PSP
             if (check_anamorphic.IsEnabled) check_anamorphic.ToolTip = Languages.Translate("Enable this option if you want to allow anamorphic encoding for this format") + _def + " " + (def.Anamorphic ? _on : _off);
             if (check_interlaced.IsEnabled) check_interlaced.ToolTip = Languages.Translate("Enable this option if you want to allow interlaced encoding for this format") + _def + " " + (def.Interlaced ? _on : _off);
             if (textbox_acodecs.IsEnabled) textbox_acodecs.ToolTip = Languages.Translate("Codecs, that will be selectable in the audio-codecs settings window.") + "\r\n" + Languages.Translate("Valid values:") +
-                " PCM, FLAC, AAC, MP2, MP3, AC3\r\n" + Languages.Translate("Separate by comma.") + _def + StringArrayToString(def.ACodecs);
+                " PCM, FLAC, AAC, QAAC, MP2, MP3, AC3\r\n" + Languages.Translate("Separate by comma.") + _def + StringArrayToString(def.ACodecs);
             if (textbox_samplerates.IsEnabled) textbox_samplerates.ToolTip = Languages.Translate("Samplerates, that can be set for this format.") + "\r\n" + Languages.Translate("Valid values:") +
                 " Auto | 22050, 32000, 44100, 48000, 96000, 192000, ...\r\n" + Languages.Translate("Separate by comma.") + _def + StringArrayToString(def.Samplerates);
             if (check_stereo.IsEnabled) check_stereo.ToolTip = Languages.Translate("Maximum numbers of audio channels for this format is 2") + _def + " " + (def.LimitedToStereo ? _on : _off);
@@ -871,6 +871,7 @@ namespace XviD4PSP
                 string ss = value.Trim().ToUpper();
                 if (ss == "PCM") ss = "PCM, ";
                 else if (ss == "FLAC") ss = "FLAC, ";
+                else if (ss == "QAAC") ss = "QAAC, ";
                 else if (ss == "AAC") ss = "AAC, ";
                 else if (ss == "MP2") ss = "MP2, ";
                 else if (ss == "MP3") ss = "MP3, ";
