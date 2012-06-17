@@ -277,7 +277,6 @@ namespace XviD4PSP
                 m.x264options = new x264_arguments();
                 m.XviD_options = new XviD_arguments();
                 m.ffmpeg_options = new ffmpeg_arguments();
-                m.wmv_options = new wmv_arguments();
 
                 m.outvcodec = combo_codec.SelectedItem.ToString();
                 m = Format.GetValidVEncodingMode(m);

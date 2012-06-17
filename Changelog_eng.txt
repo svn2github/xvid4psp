@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.280.0 (17.06.2012), main changes:
+﻿XviD4PSP 5.10.281.0 (18.06.2012), main changes:
 
+>>> (r281) Updated the year and _READ_THIS_.txt.
 >>> (r280) Added support for qaac.exe - an AAC\ALAC encoder that uses QuickTime (Apple) API. QuickTime, iTunes or
            Safari must be installed in order to make it possible to use qaac. Or you can extract AppleApplicationSupport.msi
            from theirs installers and install only this package, since this is the only one and only component that is

@@ -106,24 +106,23 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="classes\aac_arguments.cs" />
+    <Compile Include="encoders\arguments\aac_arguments.cs" />
     <Compile Include="classes\AudioStream.cs" />
     <Compile Include="classes\AviSynthScripting.cs" />
     <Compile Include="classes\AviSynthWrapper.cs" />
     <Compile Include="classes\AviSynthReader.cs" />
     <Compile Include="classes\Calculate.cs" />
     <Compile Include="classes\AviSynthEncoder.cs" />
-    <Compile Include="classes\ac3_arguments.cs" />
+    <Compile Include="encoders\arguments\ac3_arguments.cs" />
     <Compile Include="classes\EVRHelper.cs" />
     <Compile Include="classes\Formats.cs" />
     <Compile Include="classes\HotKeys.cs" />
-    <Compile Include="classes\flac_arguments.cs" />
-    <Compile Include="classes\qaac_arguments.cs" />
+    <Compile Include="encoders\arguments\flac_arguments.cs" />
+    <Compile Include="encoders\arguments\qaac_arguments.cs" />
     <Compile Include="classes\Trim.cs" />
     <Compile Include="classes\Win7Taskbar.cs" />
-    <Compile Include="classes\wmv_arguments.cs" />
     <Compile Include="classes\FFInfo.cs" />
-    <Compile Include="classes\ffmpeg_arguments.cs" />
+    <Compile Include="encoders\arguments\ffmpeg_arguments.cs" />
     <Compile Include="classes\muxers\dpgmuxer.cs" />
     <Compile Include="classes\PowerManagement\PowerManagement.cs">
       <SubType>Component</SubType>
@@ -136,71 +135,71 @@
     </Compile>
     <Compile Include="classes\PowerManagement\PowerManagerExeptions.cs" />
     <Compile Include="classes\VirtualDubModWrapper.cs" />
-    <Compile Include="classes\XviD_arguments.cs" />
+    <Compile Include="encoders\arguments\XviD_arguments.cs" />
     <Compile Include="classes\PresetLoader.cs" />
     <Compile Include="classes\Format.cs" />
     <Compile Include="classes\Languages.cs" />
     <Compile Include="classes\Massive.cs" />
     <Compile Include="classes\MediaInfoWrapper.cs" />
-    <Compile Include="classes\mp3_arguments.cs" />
+    <Compile Include="encoders\arguments\mp3_arguments.cs" />
     <Compile Include="classes\Open.cs" />
     <Compile Include="classes\Settings.cs" />
     <Compile Include="classes\SysInfo.cs" />
     <Compile Include="classes\Tasks.cs" />
     <Compile Include="classes\Win32.cs" />
-    <Compile Include="classes\x264_arguments.cs" />
-    <Compile Include="codec_controls\AftenAC3.xaml.cs">
+    <Compile Include="encoders\arguments\x264_arguments.cs" />
+    <Compile Include="encoders\AftenAC3.xaml.cs">
       <DependentUpon>AftenAC3.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FFFLAC.xaml.cs">
+    <Compile Include="encoders\FFFLAC.xaml.cs">
       <DependentUpon>FFFLAC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FMPEG1.xaml.cs">
+    <Compile Include="encoders\FMPEG1.xaml.cs">
       <DependentUpon>FMPEG1.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FLV1.xaml.cs">
+    <Compile Include="encoders\FLV1.xaml.cs">
       <DependentUpon>FLV1.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FMJPEG.xaml.cs">
+    <Compile Include="encoders\FMJPEG.xaml.cs">
       <DependentUpon>FMJPEG.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FFV1.xaml.cs">
+    <Compile Include="encoders\FFV1.xaml.cs">
       <DependentUpon>FFV1.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FFHUFF.xaml.cs">
+    <Compile Include="encoders\FFHUFF.xaml.cs">
       <DependentUpon>FFHUFF.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FLPCM.xaml.cs">
+    <Compile Include="encoders\FLPCM.xaml.cs">
       <DependentUpon>FLPCM.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FMPEG2.xaml.cs">
+    <Compile Include="encoders\FMPEG2.xaml.cs">
       <DependentUpon>FMPEG2.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FMPEG4.xaml.cs">
+    <Compile Include="encoders\FMPEG4.xaml.cs">
       <DependentUpon>FMPEG4.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FDV.xaml.cs">
+    <Compile Include="encoders\FDV.xaml.cs">
       <DependentUpon>FDV.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FPCM.xaml.cs">
+    <Compile Include="encoders\FPCM.xaml.cs">
       <DependentUpon>FPCM.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\FMP2.xaml.cs">
+    <Compile Include="encoders\FMP2.xaml.cs">
       <DependentUpon>FMP2.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\QAAC.xaml.cs">
+    <Compile Include="encoders\QAAC.xaml.cs">
       <DependentUpon>QAAC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\XviD.xaml.cs">
+    <Compile Include="encoders\XviD.xaml.cs">
       <DependentUpon>XviD.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\LameMP3.xaml.cs">
+    <Compile Include="encoders\LameMP3.xaml.cs">
       <DependentUpon>LameMP3.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\NeroAAC.xaml.cs">
+    <Compile Include="encoders\NeroAAC.xaml.cs">
       <DependentUpon>NeroAAC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\x264.xaml.cs">
+    <Compile Include="encoders\x264.xaml.cs">
       <DependentUpon>x264.xaml</DependentUpon>
     </Compile>
     <Compile Include="controls\NumericUpDown.xaml.cs">
@@ -276,7 +275,7 @@
     <Compile Include="windows\OpenDialog.xaml.cs">
       <DependentUpon>OpenDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="codec_controls\CopyOrDisabled.xaml.cs">
+    <Compile Include="encoders\CopyOrDisabled.xaml.cs">
       <DependentUpon>CopyOrDisabled.xaml</DependentUpon>
     </Compile>
     <Compile Include="windows\Demuxer.xaml.cs">
@@ -321,76 +320,76 @@
     <Compile Include="windows\VisualCrop.xaml.cs">
       <DependentUpon>VisualCrop.xaml</DependentUpon>
     </Compile>
-    <Page Include="codec_controls\AftenAC3.xaml">
+    <Page Include="encoders\AftenAC3.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FFFLAC.xaml">
+    <Page Include="encoders\FFFLAC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FMPEG1.xaml">
+    <Page Include="encoders\FMPEG1.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FLV1.xaml">
+    <Page Include="encoders\FLV1.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FMJPEG.xaml">
+    <Page Include="encoders\FMJPEG.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FFV1.xaml">
+    <Page Include="encoders\FFV1.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FFHUFF.xaml">
+    <Page Include="encoders\FFHUFF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FLPCM.xaml">
+    <Page Include="encoders\FLPCM.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FMPEG2.xaml">
+    <Page Include="encoders\FMPEG2.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FMPEG4.xaml">
+    <Page Include="encoders\FMPEG4.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FDV.xaml">
+    <Page Include="encoders\FDV.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FPCM.xaml">
+    <Page Include="encoders\FPCM.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\FMP2.xaml">
+    <Page Include="encoders\FMP2.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\QAAC.xaml">
+    <Page Include="encoders\QAAC.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\XviD.xaml">
+    <Page Include="encoders\XviD.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\LameMP3.xaml">
+    <Page Include="encoders\LameMP3.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\NeroAAC.xaml">
+    <Page Include="encoders\NeroAAC.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\x264.xaml">
+    <Page Include="encoders\x264.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -506,7 +505,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="codec_controls\CopyOrDisabled.xaml">
+    <Page Include="encoders\CopyOrDisabled.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

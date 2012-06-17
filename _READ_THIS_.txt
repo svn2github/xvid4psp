@@ -1,22 +1,68 @@
-After you compile XviD4PSP.exe (or before), you must reproduce in you_source_folder\trunk\bin\Debug\
-exactly the same directory structure, like you can see in C:\Program Files\Winnydows\XviD4PSP5, or 
-where you have to install it. I.e. you must place in Debug folder this folders with theirs content:
-apps, dlls, presets, languages. Without this steps your compiled XviD4PSP.exe will won`t work..
-BUT FIRST YOU MUST INSTALL XviD4PSP 5.0.37.6 OR NEWER (i.e. latest available version)!
+﻿After compiling XviD4PSP (or before) you must reproduce in "your_source_folder\bin\Debug\" exactly
+the same directory structure, as you can see in "C:\Program Files\XviD4PSP 5\" (or where you have to
+install it). I.e. you must place in \bin\Debug all this folders with theirs content: apps, dlls, presets.
+Without this folders XviD4PSP.exe itself will won't work (you will able to run it, but you will not able
+to use it like you usually do). BUT FIRST YOU MUST INSTALL THE MOST RECENT VERSION OF XviD4PSP (to be sure
+that apps, dlls, and presets aren't too old). You don't need to do all this steps if you simply want to
+compile XviD4PSP and don't want to modify the sources or to debug anything.
 
-Don`t forget to update 3d-party components and plugins (apps, dlls), if they was updated in current
-version to.
+For Visual Studio 2008 run XviD4PSP.sln or XviD4PSP.csproj.
+For Visual Studio 2010 run XviD4PSP_2010.sln or XviD4PSP_2010.csproj.
+
+Choose Release or Debug mode (the switcher is somwhere on top part of the window) and run Build->Build,
+or press F5 to compile and run XviD4PSP immediately.
+
+Note that for Release and for Debug modes output folder is the same - \bin\Debug. Run Build->Rebuild
+in case of any problems related to this.
+
+If you want to share your binaries with other people:
+1.0 Don't forget to switch compiler to Release mode.
+2.0 Do not add all those files that appears in \bin\Debug folder after compiling. You need only:
+2.1 XviD4PSP.exe
+2.2 XviD4PSP.pdb*
+2.3 Changelog_eng.txt and Changelog_rus.txt
+2.4 If there was changes in "languages" folder, add affected files from this folder too.
+
+*XviD4PSP.pdb must be exactly from the same build, as XviD4PSP.exe. Even if you build the project twice
+and from the same sources - this files wouldn't match! They must be builded together at one time! And
+don't forget that XviD4PSP.pdb stores info about your source folder and this info will be available to
+the users as part of advanced info in any kind of error messages: 
+
+at XviD4PSP.MainWindow.MainFormLoader() in F:\new\windows\MainWindow.xaml.cs:line 412 - here it is.
 
 
+-----------
 
-����� ����, ��� �� ������������� XviD4PSP.exe (��� �� �����), �� ������ ���������� � ����� �� ������
-you_source_folder\trunk\bin\Debug\ ����� �����-�� ��������� ����������, ����� ������ ������ �� ������,
-���� ���� ����������� XviD4PSP (�� ��������� ��� ���-�� ���� C:\Program Files\Winnydows\XviD4PSP5).
-����� �������, �� ������ ����������� ������ (�� ���� ����������) � ��������� � ����� Debug ���������
-�����: apps, dlls, presets, languages. �� �������� ���� ��������, �� �� ������� ��������� �������� 
-��� ���������������� XviD4PSP.exe.
-�� ����� ���� �� ����������� ������ ���������� XviD4PSP 5.0.37.6 ��� ����� (�.�. ��������� ��������-
-���� �� ������ ������ ������)!
 
-�� ��������� ��������� ��������� ������� � ������� (apps, dlls), ���� � ������� ������ ��������� ���
-���-�� ���� ��������.
+После компиляции XviD4PSP (или до этого), вы должны воссоздать в папке "папка_с_исходниками\bin\Debug\"
+точно такую-же структуру директорий, какую можете видеть по месту установки XviD4PSP (по умолчанию это
+что-то типа "C:\Program Files\XviD4PSP 5\"). Таким образом, вы должны скопировать оттуда и перенести в
+папку \bin\Debug следующие папки (со всем их содержимым): apps, dlls, presets. Без них XviD4PSP.exe не
+сможет нормально работать. Его можно будет запустить, однако использовать по прямому назначению не выйдет.
+НО ПЕРЕД ЭТИМ НЕОБХОДИМО УСТАНОВИТЬ САМУЮ СВЕЖУЮ ВЕРСИЮ XviD4PSP (для уверенности в том, что содержимое
+копируемых папок не устарело). Ничего из перечисленного можно не делать, если вам нужно просто собрать
+XviD4PSP из исходников, без необходимости искать какие-либо баги или что-либо править в коде.
+
+Для открытия в Visual Studio 2008 используйте XviD4PSP.sln или XviD4PSP.csproj.
+Для открытия в Visual Studio 2010 используйте XviD4PSP_2010.sln или XviD4PSP_2010.csproj.
+
+Выберите Release или Debug режим (переключатель обычно находится где-то в верхней части окна), после чего
+запустите Build->Build. Или можно нажать F5 для компиляции и запуска XviD4PSP сразу же после неё.
+
+Учтите, что для Release и для Debug конфигураций используется одна и та же папка - \bin\Debug. В
+случае возникновения проблем при переключении между конфигурациями, запустите Build->Rebuild.
+
+Если вы хотите поделиться готовым билдом с кем-то еще:
+1.0 Не забудьте переключиться в режим Release.
+2.0 Не кладите всю кучу файлов из папки \bin\Debug, оттуда нужны только:
+2.1 XviD4PSP.exe
+2.2 XviD4PSP.pdb*
+2.3 Changelog_eng.txt и Changelog_rus.txt
+2.4 Если были какие-либо изменения в языковых файлах (папка languages), то нужно добавить и эти файлы.
+
+*XviD4PSP.pdb должен быть скомпилирован одновременно с XviD4PSP.exe, т.е. это должны быть файлы из единой
+компиляции! Если дважды собрать проект, даже не меняя ничего в исходниках, - эти файлы уже не будут совпадать!
+И не забывайте, что в XviD4PSP.pdb хранится вся информация о месте расположения исходников, которая затем
+будет доступна пользователям в виде доп. информации при выводе различных сообщений об ошибках:
+
+в XviD4PSP.MainWindow.MainFormLoader() в F:\new\windows\MainWindow.xaml.cs:строка 412 - вот она.

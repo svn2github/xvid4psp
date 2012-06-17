@@ -209,7 +209,7 @@ namespace XviD4PSP
         {
             if (combo_bitrate.IsDropDownOpen || combo_bitrate.IsSelectionBoxHighlighted)
             {
-                if (m.aac_options.encodingmode != Settings.AudioEncodingModes.VBR)
+                if (m.aac_options.encodingmode == Settings.AudioEncodingModes.VBR)
                 {
                     m.aac_options.quality = Calculate.ConvertStringToDouble(combo_bitrate.SelectedItem.ToString());
                 }

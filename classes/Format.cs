@@ -1858,13 +1858,6 @@ namespace XviD4PSP
                else
                    return false;
            }
-           else if (m.outvcodec == "WMV3")
-           {
-               if (m.wmv_options.bframes > 0)
-                   return true;
-               else
-                   return false;
-           }
            else
            {
                if (m.ffmpeg_options.bframes > 0)
