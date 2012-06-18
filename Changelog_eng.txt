@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.281.0 (18.06.2012), main changes:
+﻿XviD4PSP 5.10.282.0 (19.06.2012), main changes:
 
+>>> (r282) The results of the interlace detection, that appears in tooltip for the Analyse button, now will
+           be stored. Also added some info about interlacement from MediaInfo (available not in all cases).
 >>> (r281) Updated the year and _READ_THIS_.txt.
 >>> (r280) Added support for qaac.exe - an AAC\ALAC encoder that uses QuickTime (Apple) API. QuickTime, iTunes or
            Safari must be installed in order to make it possible to use qaac. Or you can extract AppleApplicationSupport.msi

@@ -295,7 +295,7 @@ namespace XviD4PSP
             string _def = Languages.Translate("Default") + ": ";
 
             num_analyze_percent.ToolTip = _def + "1";
-            num_min_sections.ToolTip = _def +  "150 (1 section = 5 frames, 150 sections = 750 frames)";
+            num_min_sections.ToolTip = _def + "150 (1 section = 5 frames, 150 sections = 750 frames)";
             num_hybrid_int.ToolTip = _def + "5";
             num_hybrid_fo.ToolTip = _def + "10";
             check_fo_portions.ToolTip = _def + on;
@@ -308,14 +308,37 @@ namespace XviD4PSP
             check_original_fps.ToolTip = Languages.Translate("If checked, use the framerate of the raw video stream instead of the framerate of the container.") + "\r\n" +
                 Languages.Translate("This option is meaningful only when a file is opening.") + "\r\n\r\n" + _def + off;
             check_nonstandard_fps.ToolTip = Languages.Translate("If checked, all non-standard fps will be passed on output without rounding to the nearest standard value") + ".\r\n\r\n" + _def + off;
+
+            if (m != null)
+                SetAnalyseToolTip();
+        }
+
+        private void SetAnalyseToolTip()
+        {
+            //Результаты анализа интерлейса
+            button_analyse.ToolTip = Languages.Translate("Last results") + ":";
+            button_analyse.ToolTip += (!string.IsNullOrEmpty(m.interlace_results)) ? ("\r\n\r\n" + m.interlace_results) : ("      n/a");
+
+            //Инфа от MediaInfo (если доступно)
+            button_analyse.ToolTip += "\r\n\r\nMediaInfo:\r\nScan type:        ";
+            button_analyse.ToolTip += ((!string.IsNullOrEmpty(m.interlace_raw)) ? m.interlace_raw : "n/a") + "\r\nScan order:       ";
+            button_analyse.ToolTip += (!string.IsNullOrEmpty(m.fieldOrder_raw)) ? m.fieldOrder_raw : "n/a";
+
+            //Частота кадров изменена декодером
+            if (m.IsForcedFilm) button_analyse.ToolTip += "\r\n\r\nForced film:      Yes";
         }
 
         private void button_analyse_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            button_analyse.ToolTip = null;
             SourceDetector sd = new SourceDetector(m);
 
-            if (sd.m != null)
+            if (sd.IsErrors)
+            {
+                //Сбрасываем результаты
+                m.interlace_results = null;
+                SetAnalyseToolTip();
+            }
+            else if (sd.m != null)
             {
                 DeinterlaceType olddeint = m.deinterlace;
                 FieldOrder oldfo = m.fieldOrder;
@@ -346,11 +369,7 @@ namespace XviD4PSP
                 }
 
                 //Выводим результаты
-                if (sd.results != null)
-                {
-                    ToolTipService.SetShowDuration(button_analyse, 100000);
-                    button_analyse.ToolTip = sd.results;
-                }
+                SetAnalyseToolTip();
             }
         }
 

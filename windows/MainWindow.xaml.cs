@@ -2194,7 +2194,7 @@ namespace XviD4PSP
                 acrop_mpeg.Header = auto_deint_mpeg.Header = Languages.Translate("MPEG`s only");
                 acrop_allfiles.Header = auto_deint_all.Header = Languages.Translate("All files");
 
-                menu_auto_deinterlace.Header = Languages.Translate("Auto deinterlace");
+                menu_auto_deinterlace.Header = Languages.Translate("Analyse interlace");
 
                 menu_auto_join.Header = Languages.Translate("Auto join");
                 auto_join_enabled.Header = Languages.Translate("Enabled");

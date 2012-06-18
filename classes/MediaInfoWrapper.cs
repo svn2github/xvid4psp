@@ -674,6 +674,14 @@ namespace XviD4PSP
             }
         }
 
+        public string ScanType
+        {
+            get
+            {
+                return Get_Splitted(StreamKind.Video, 0, "ScanType");
+            }
+        }
+
         public SourceType Interlace
         {
             get

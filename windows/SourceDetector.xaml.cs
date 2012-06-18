@@ -45,13 +45,12 @@ namespace XviD4PSP
         private BackgroundWorker worker = null;
         private AviSynthReader reader = null;
         private IntPtr Handle = IntPtr.Zero;
-        private bool IsErrors = false;
-        private bool IsAborted = false;
         private string ErrorText = null;
         private string StackTrace = null;
         private string Script = null;
         private int num_closes = 0;
-        public string results = null;
+        private bool IsAborted = false;
+        public bool IsErrors = false;
         public Massive m;
 
         SourceType source_type = SourceType.UNKNOWN;
@@ -117,14 +116,14 @@ namespace XviD4PSP
                     if (!IsAborted || IsAborted && source_type != SourceType.UNKNOWN)
                     {
                         m.interlace = source_type;
-                        results = "Film:               " + numTC + "\r\nInterlaced:      " + numInt + "\r\nProgressive:    " + numProg +
-                           "\r\nUseless:          " + numUseless + "\r\nTotal:             " + (numTC + numInt + numProg + numUseless);
+                        m.interlace_results = "Film:                 " + numTC + "\r\nInterlaced:        " + numInt + "\r\nProgressive:      " + numProg +
+                           "\r\nUseless:            " + numUseless + "\r\nTotal:               " + (numTC + numInt + numProg + numUseless);
                     }
                     if (!IsAborted || IsAborted && field_order != FieldOrder.UNKNOWN)
                     {
                         m.fieldOrder = field_order;
                         if (sectionCountA != 0 || sectionCountB != 0)
-                            results += "\r\n\r\nTFF:               " + sectionCountA + "\r\nBFF:               " + sectionCountB;
+                            m.interlace_results += "\r\n\r\nTFF:                 " + sectionCountA + "\r\nBFF:                 " + sectionCountB;
                     }
 
                     m = Format.GetOutInterlace(m);

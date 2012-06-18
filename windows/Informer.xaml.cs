@@ -82,6 +82,8 @@ namespace XviD4PSP
                     m.induration = TimeSpan.FromMilliseconds(media.Milliseconds);
                     m.outduration = m.induration;
                     m.interlace = media.Interlace;
+                    m.interlace_raw = media.ScanType;
+                    m.fieldOrder_raw = media.ScanOrder;
                     m.inframes = media.Frames;
                     m.standart = media.Standart;
 

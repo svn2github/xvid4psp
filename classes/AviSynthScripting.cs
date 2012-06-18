@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
@@ -51,12 +51,12 @@ namespace XviD4PSP
 
        public enum ScriptMode
        {
-           Info = 1,    //Video+Audio, без какой-либо обработки
-           VCrop,       //Video без звука и какой-либо обработки
-           Autocrop,    //Video без звука, LoadPlugin(AutoCrop.dll)+ConvertToYV12()+AutoCrop()
-           Interlace,   //Video без звука, LoadPlugin(TIVTC.dll)+ConvertToYV12()
-           FastPreview, //Video+Audio, включая обработку звука
-           Normalize,   //Video+Audio, включая обработку звука, но без AmplifydB()
+           Info = 1,    //Video+Audio, Р±РµР· РєР°РєРѕР№-Р»РёР±Рѕ РѕР±СЂР°Р±РѕС‚РєРё
+           VCrop,       //Video Р±РµР· Р·РІСѓРєР° Рё РєР°РєРѕР№-Р»РёР±Рѕ РѕР±СЂР°Р±РѕС‚РєРё
+           Autocrop,    //Video Р±РµР· Р·РІСѓРєР°, LoadPlugin(AutoCrop.dll)+ConvertToYV12()+AutoCrop()
+           Interlace,   //Video Р±РµР· Р·РІСѓРєР°, LoadPlugin(TIVTC.dll)+Crop(0, 0, -0, -Height%4)+ConvertToYV12()
+           FastPreview, //Video+Audio, РІРєР»СЋС‡Р°СЏ РѕР±СЂР°Р±РѕС‚РєСѓ Р·РІСѓРєР°
+           Normalize,   //Video+Audio, РІРєР»СЋС‡Р°СЏ РѕР±СЂР°Р±РѕС‚РєСѓ Р·РІСѓРєР°, РЅРѕ Р±РµР· AmplifydB()
        }
 
        public enum FramerateModifers { AssumeFPS = 1, ChangeFPS, ConvertFPS, ConvertMFlowFPS }
@@ -67,7 +67,7 @@ namespace XviD4PSP
            string old_filtering = null;
            string startup_path = Calculate.StartupPath;
 
-           //Ищем и сохраняем старую фильтрацию
+           //РС‰РµРј Рё СЃРѕС…СЂР°РЅСЏРµРј СЃС‚Р°СЂСѓСЋ С„РёР»СЊС‚СЂР°С†РёСЋ
            if (m.script != null && !m.filtering_changed)
            {
                bool ok = false;
@@ -77,40 +77,40 @@ namespace XviD4PSP
                {
                    if (!ok && line.StartsWith("###[FILTERING]###"))
                    {
-                       //Нашли начало
+                       //РќР°С€Р»Рё РЅР°С‡Р°Р»Рѕ
                        ok = true;
                    }
                    else if (ok)
                    {
                        if (line.StartsWith("###[FILTERING]###"))
                        {
-                           //Нашли конец
+                           //РќР°С€Р»Рё РєРѕРЅРµС†
                            old_filtering = temp_filtering;
                            break;
                        }
                        else
                        {
-                           //Всё, что в промежутке между ними
+                           //Р’СЃС‘, С‡С‚Рѕ РІ РїСЂРѕРјРµР¶СѓС‚РєРµ РјРµР¶РґСѓ РЅРёРјРё
                            temp_filtering += line + Environment.NewLine;
                        }
                    }
                }
            }
 
-           //определяем расширения
+           //РѕРїСЂРµРґРµР»СЏРµРј СЂР°СЃС€РёСЂРµРЅРёСЏ
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           //определяем аудио потоки
+           //РѕРїСЂРµРґРµР»СЏРµРј Р°СѓРґРёРѕ РїРѕС‚РѕРєРё
            AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
-           //начинаем писать скрипт
+           //РЅР°С‡РёРЅР°РµРј РїРёСЃР°С‚СЊ СЃРєСЂРёРїС‚
            m.script = "";
 
-           //загружаем доп функции
+           //Р·Р°РіСЂСѓР¶Р°РµРј РґРѕРї С„СѓРЅРєС†РёРё
            m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
            m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
 
-           //загружаем необходимые плагины импорта
+           //Р·Р°РіСЂСѓР¶Р°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїР»Р°РіРёРЅС‹ РёРјРїРѕСЂС‚Р°
            if (m.vdecoder == Decoders.MPEG2Source)
                m.script += "loadplugin(\"" + startup_path + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.AVCSource)
@@ -217,19 +217,19 @@ namespace XviD4PSP
 
            m.script += Environment.NewLine;
 
-           //прописываем импорт видео
+           //РїСЂРѕРїРёСЃС‹РІР°РµРј РёРјРїРѕСЂС‚ РІРёРґРµРѕ
 
-           //принудительная установка fps
+           //РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅР°СЏ СѓСЃС‚Р°РЅРѕРІРєР° fps
            string fps = "";
            if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DirectShowSource2) && !string.IsNullOrEmpty(m.inframerate))
                fps = ", fps=" + m.inframerate;
 
-           //принудительная конвертация частоты
+           //РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅР°СЏ РєРѕРЅРІРµСЂС‚Р°С†РёСЏ С‡Р°СЃС‚РѕС‚С‹
            string convertfps = "";
            if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
-           //выбор аудио трека
+           //РІС‹Р±РѕСЂ Р°СѓРґРёРѕ С‚СЂРµРєР°
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio || !Settings.EnableAudio || ext == ".grf"))
                audio = ", audio=false";
@@ -238,14 +238,14 @@ namespace XviD4PSP
            else if (m.vdecoder == Decoders.FFmpegSource2 && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath == null && Settings.FFMS_Enable_Audio && Settings.EnableAudio)
                audio = ", atrack=" + (instream.ff_order) + ", adjustdelay=-3";
 
-           //ипортируем видео
+           //РёРїРѕСЂС‚РёСЂСѓРµРј РІРёРґРµРѕ
            string invideostring = "";
 
-           if (m.vdecoder == Decoders.BlankClip) //пустой клип (черный экран)
+           if (m.vdecoder == Decoders.BlankClip) //РїСѓСЃС‚РѕР№ РєР»РёРї (С‡РµСЂРЅС‹Р№ СЌРєСЂР°РЅ)
            {
                invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + ((!string.IsNullOrEmpty(m.inframerate) ? m.inframerate : "25.000")) + ", color=$000000)";
            }
-           else if (ext == ".d2v") //d2v и MPEG2Source
+           else if (ext == ".d2v") //d2v Рё MPEG2Source
            {
                int n = 0;
                foreach (string file in m.infileslist)
@@ -255,7 +255,7 @@ namespace XviD4PSP
                    if (n < m.infileslist.Length) invideostring += "++";
                }
            }
-           else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source) //мпег2 и MPEG2Source
+           else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source) //РјРїРµРі2 Рё MPEG2Source
            {
                invideostring = m.vdecoder.ToString() + "(\"" + m.indexfile + "\", cpu=0, info=3)";
            }
@@ -269,21 +269,21 @@ namespace XviD4PSP
                    if (n < m.infileslist.Length) invideostring += "++";
                }
            }
-           else //другое
+           else //РґСЂСѓРіРѕРµ
            {
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   //Изменения под FFmpegSource2
+                   //РР·РјРµРЅРµРЅРёСЏ РїРѕРґ FFmpegSource2
                    string cache_path = "";
                    string assume_fps = "";
                    if (m.vdecoder == Decoders.FFmpegSource2)
                    {
-                       //Корректировка кривого fps от FFmpegSource2 - не самое лучшее решение, и обязательно приведет к новым проблемам..
-                       //Так-же как и принудительная установка частоты для DirectShowSource (1 и 2) - не самое лучшее решение, и тоже приводит к другим проблемам..
-                       //Лучшее решение - писать скрипт вручную! Внимательно анализируя исходник, и разбираясь, отчего-же декодер выдает не тот фпс!
-                       //С другой стороны, при муксинге все-равно муксер получит фпс, с которым должен будет муксить - получится тот-же самый AssumeFPS, только после кодирования.
-                       //Ну а если исходная частота, и частота, с которой декодирует декодер, совпадают - то AssumeFPS вообще ни на что не повлияет..
+                       //РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° РєСЂРёРІРѕРіРѕ fps РѕС‚ FFmpegSource2 - РЅРµ СЃР°РјРѕРµ Р»СѓС‡С€РµРµ СЂРµС€РµРЅРёРµ, Рё РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РїСЂРёРІРµРґРµС‚ Рє РЅРѕРІС‹Рј РїСЂРѕР±Р»РµРјР°Рј..
+                       //РўР°Рє-Р¶Рµ РєР°Рє Рё РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅР°СЏ СѓСЃС‚Р°РЅРѕРІРєР° С‡Р°СЃС‚РѕС‚С‹ РґР»СЏ DirectShowSource (1 Рё 2) - РЅРµ СЃР°РјРѕРµ Р»СѓС‡С€РµРµ СЂРµС€РµРЅРёРµ, Рё С‚РѕР¶Рµ РїСЂРёРІРѕРґРёС‚ Рє РґСЂСѓРіРёРј РїСЂРѕР±Р»РµРјР°Рј..
+                       //Р›СѓС‡С€РµРµ СЂРµС€РµРЅРёРµ - РїРёСЃР°С‚СЊ СЃРєСЂРёРїС‚ РІСЂСѓС‡РЅСѓСЋ! Р’РЅРёРјР°С‚РµР»СЊРЅРѕ Р°РЅР°Р»РёР·РёСЂСѓСЏ РёСЃС…РѕРґРЅРёРє, Рё СЂР°Р·Р±РёСЂР°СЏСЃСЊ, РѕС‚С‡РµРіРѕ-Р¶Рµ РґРµРєРѕРґРµСЂ РІС‹РґР°РµС‚ РЅРµ С‚РѕС‚ С„РїСЃ!
+                       //РЎ РґСЂСѓРіРѕР№ СЃС‚РѕСЂРѕРЅС‹, РїСЂРё РјСѓРєСЃРёРЅРіРµ РІСЃРµ-СЂР°РІРЅРѕ РјСѓРєСЃРµСЂ РїРѕР»СѓС‡РёС‚ С„РїСЃ, СЃ РєРѕС‚РѕСЂС‹Рј РґРѕР»Р¶РµРЅ Р±СѓРґРµС‚ РјСѓРєСЃРёС‚СЊ - РїРѕР»СѓС‡РёС‚СЃСЏ С‚РѕС‚-Р¶Рµ СЃР°РјС‹Р№ AssumeFPS, С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РєРѕРґРёСЂРѕРІР°РЅРёСЏ.
+                       //РќСѓ Р° РµСЃР»Рё РёСЃС…РѕРґРЅР°СЏ С‡Р°СЃС‚РѕС‚Р°, Рё С‡Р°СЃС‚РѕС‚Р°, СЃ РєРѕС‚РѕСЂРѕР№ РґРµРєРѕРґРёСЂСѓРµС‚ РґРµРєРѕРґРµСЂ, СЃРѕРІРїР°РґР°СЋС‚ - С‚Рѕ AssumeFPS РІРѕРѕР±С‰Рµ РЅРё РЅР° С‡С‚Рѕ РЅРµ РїРѕРІР»РёСЏРµС‚..
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.FFMS_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
                        cache_path = ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
                            ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
@@ -294,13 +294,13 @@ namespace XviD4PSP
                }
            }
 
-           //теперь звук!
+           //С‚РµРїРµСЂСЊ Р·РІСѓРє!
            if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath != null)
            {
-               //прописываем импорт видео
+               //РїСЂРѕРїРёСЃС‹РІР°РµРј РёРјРїРѕСЂС‚ РІРёРґРµРѕ
                m.script += "video = " + invideostring + Environment.NewLine;
                
-               //пришиваем звук
+               //РїСЂРёС€РёРІР°РµРј Р·РІСѓРє
                string ffindex = "";
                string inaudiostring = "";
                string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
@@ -325,18 +325,18 @@ namespace XviD4PSP
                if (instream.decoder == Decoders.FFAudioSource) m.script += ffindex;
                m.script += "audio = " + inaudiostring + Environment.NewLine;
 
-               //объединение
+               //РѕР±СЉРµРґРёРЅРµРЅРёРµ
                m.script += "AudioDub(video, audio)" + Environment.NewLine;
            }
            else
            {
-               //прописываем импорт всего клипа
+               //РїСЂРѕРїРёСЃС‹РІР°РµРј РёРјРїРѕСЂС‚ РІСЃРµРіРѕ РєР»РёРїР°
                m.script += invideostring + Environment.NewLine;
            }
 
            m.script += Environment.NewLine;
 
-           //Определяем необходимость смены частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
+           //РћРїСЂРµРґРµР»СЏРµРј РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚СЊ СЃРјРµРЅС‹ С‡Р°СЃС‚РѕС‚С‹ РєР°РґСЂРѕРІ (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
            bool ApplyFramerateModifier = false, IsAssumeFramerateConvertion = false;
            if (m.outframerate != Calculate.GetRawOutFramerate(m))
            {
@@ -344,47 +344,47 @@ namespace XviD4PSP
                IsAssumeFramerateConvertion = (m.frameratemodifer == FramerateModifers.AssumeFPS);
            }
 
-           //блок обработки звука
+           //Р±Р»РѕРє РѕР±СЂР°Р±РѕС‚РєРё Р·РІСѓРєР°
            if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
            {
                AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-               //задержка
+               //Р·Р°РґРµСЂР¶РєР°
                if (outstream.delay != 0)
                    m.script += "DelayAudio(" + Calculate.ConvertDoubleToPointString(Convert.ToDouble(outstream.delay) / 1000) + ")" + Environment.NewLine;
 
-               //меняем канальность
+               //РјРµРЅСЏРµРј РєР°РЅР°Р»СЊРЅРѕСЃС‚СЊ
                if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
                    m.script += instream.channelconverter.ToString() + "()" + Environment.NewLine;
 
-               //меняем битность
+               //РјРµРЅСЏРµРј Р±РёС‚РЅРѕСЃС‚СЊ
                if (instream.bits != outstream.bits)
                    m.script += "ConvertAudioTo16bit()" + Environment.NewLine;
 
-               //прописываем смену частоты
+               //РїСЂРѕРїРёСЃС‹РІР°РµРј СЃРјРµРЅСѓ С‡Р°СЃС‚РѕС‚С‹
                if (instream.samplerate != outstream.samplerate && !IsAssumeFramerateConvertion && outstream.samplerate != null)
                    m.script += m.sampleratemodifer + "(" + outstream.samplerate + ")" + Environment.NewLine;
 
-               //нормализация звука
+               //РЅРѕСЂРјР°Р»РёР·Р°С†РёСЏ Р·РІСѓРєР°
                if (instream.gain != "0.0")
                    m.script += "AmplifydB(" + instream.gain + ")" + Environment.NewLine;
            }
 
            ///////////////////////
-           //блок работы с видео//
+           //Р±Р»РѕРє СЂР°Р±РѕС‚С‹ СЃ РІРёРґРµРѕ//
            ///////////////////////
 
-           //прописываем цветовое пространство
+           //РїСЂРѕРїРёСЃС‹РІР°РµРј С†РІРµС‚РѕРІРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ
            m.script += "ConvertToYV12(" + ((m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE &&
                m.interlace != SourceType.DECIMATING) ? "interlaced = true" : "") + ")" + Environment.NewLine;
 
            //Mod protection
            string mod2 = null;
-           //Для высоты можно и mod8 (когда в настройках стоит mod16)
+           //Р”Р»СЏ РІС‹СЃРѕС‚С‹ РјРѕР¶РЅРѕ Рё mod8 (РєРѕРіРґР° РІ РЅР°СЃС‚СЂРѕР№РєР°С… СЃС‚РѕРёС‚ mod16)
            int modw = Format.GetValidModW(m.format), modh = Math.Min(Format.GetValidModH(m.format), 8);
            if (m.inresw % modw != 0 || m.inresh % modh != 0)
            {
-               //Для интерлейсных исходников в этом месте будет проблема!
+               //Р”Р»СЏ РёРЅС‚РµСЂР»РµР№СЃРЅС‹С… РёСЃС…РѕРґРЅРёРєРѕРІ РІ СЌС‚РѕРј РјРµСЃС‚Рµ Р±СѓРґРµС‚ РїСЂРѕР±Р»РµРјР°!
                m.script += "#Mod" + modw + "xMod" + modh + " protection" + Environment.NewLine;
                if (m.resizefilter == Resizers.BicubicResizePlus)
                    mod2 = "BicubicResize(" + Calculate.GetValid(m.inresw, modw) + ", " + Calculate.GetValid(m.inresh, modh) + ", 0, 0.75)";
@@ -432,7 +432,7 @@ namespace XviD4PSP
            if (m.hue != 0)
                m.script += "Tweak(hue=" + m.hue + ")" + Environment.NewLine;         
 
-           //разделяем при необходимости на поля
+           //СЂР°Р·РґРµР»СЏРµРј РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё РЅР° РїРѕР»СЏ
            if (m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE && m.interlace != SourceType.DECIMATING)
            {
                if (m.deinterlace == DeinterlaceType.Disabled)
@@ -442,32 +442,32 @@ namespace XviD4PSP
                }
            }
 
-           //Деинтерлейсинг
+           //Р”РµРёРЅС‚РµСЂР»РµР№СЃРёРЅРі
            int order = (m.fieldOrder == FieldOrder.TFF) ? 1 : (m.fieldOrder == FieldOrder.BFF) ? 0 : -1;
            string mark = (Settings.IsCombed_Mark ? "" : "#") + ".Subtitle(\"deinterlaced frame\", align=5)";
            if (m.deinterlace == DeinterlaceType.TomsMoComp)
            {
                string deinterlacer = "TomsMoComp(" + order + ", 5, 1)";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "global deinterlaced_part = " + deinterlacer + mark + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deinterlaced_part : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.Yadif)
            {
                string deinterlacer = "Yadif(order=" + order + ")";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "global deinterlaced_part = " + deinterlacer + mark + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deinterlaced_part : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.YadifModEDI)
            {
                string deinterlacer = "YadifMod(order=" + order + ", edeint=nnedi3(field=" + order + "))";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
-                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "global deinterlaced_part = " + deinterlacer + mark + Environment.NewLine +
+                   "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deinterlaced_part : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
            {
-               string deinterlacer = "LeakKernelDeint(order=" + ((order < 0) ? "((GetParity) ? 1 : 0)" : order.ToString()) + ", sharp=true)";
-               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "deint = " + deinterlacer + mark + Environment.NewLine +
-               "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deint : last\")" : deinterlacer) + Environment.NewLine;
+               string deinterlacer = "LeakKernelDeint(order=" + ((order < 0) ? "((GetParity()) ? 1 : 0)" : order.ToString()) + ", sharp=true)";
+               m.script += ((m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED) ? "global deinterlaced_part = " + deinterlacer + mark + Environment.NewLine +
+               "ScriptClip(last, \"IsCombedTIVTC(last, cthresh=" + Settings.IsCombed_CThresh + ", MI=" + Settings.IsCombed_MI + ") ? deinterlaced_part : last\")" : deinterlacer) + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.TFM)
            {
@@ -564,7 +564,7 @@ namespace XviD4PSP
                if (m.fliph) m.script += "FlipHorizontal()" + Environment.NewLine;
            }
 
-           //Фильтрация до ресайза
+           //Р¤РёР»СЊС‚СЂР°С†РёСЏ РґРѕ СЂРµСЃР°Р№Р·Р°
            if (!Settings.ResizeFirst)
            {
                m.script += "\r\n###[FILTERING]###\r\n";
@@ -573,7 +573,7 @@ namespace XviD4PSP
                m.script += "###[FILTERING]###\r\n\r\n";
            }
 
-           //блок применяется только если разрешение поменялось
+           //Р±Р»РѕРє РїСЂРёРјРµРЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РµСЃР»Рё СЂР°Р·СЂРµС€РµРЅРёРµ РїРѕРјРµРЅСЏР»РѕСЃСЊ
            string newres = null;
            bool check_mod2 = false;
            if (m.inresw != m.outresw || m.inresh != m.outresh || m.cropl != 0 || m.cropr != 0 ||
@@ -588,7 +588,7 @@ namespace XviD4PSP
                int outresw = m.outresw;
                int outresh = m.outresh;
 
-               //пересчитываем размеры для раздельных полей
+               //РїРµСЂРµСЃС‡РёС‚С‹РІР°РµРј СЂР°Р·РјРµСЂС‹ РґР»СЏ СЂР°Р·РґРµР»СЊРЅС‹С… РїРѕР»РµР№
                if (m.interlace == SourceType.FILM ||
                    m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
                    m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
@@ -618,16 +618,16 @@ namespace XviD4PSP
                else
                    newres = m.resizefilter + "(" + (outresw - (blackw * 2)) + ", " + (outresh - (blackh * 2)) + ")";
 
-               //Вписываем ресайз
+               //Р’РїРёСЃС‹РІР°РµРј СЂРµСЃР°Р№Р·
                if (cropl == 0 && cropr == 0 && cropt == 0 && cropb == 0 && newres != mod2)
                {
-                   //если mod2 защита отличается от нужного разрешения
+                   //РµСЃР»Рё mod2 Р·Р°С‰РёС‚Р° РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ РЅСѓР¶РЅРѕРіРѕ СЂР°Р·СЂРµС€РµРЅРёСЏ
                    m.script += newres + Environment.NewLine;
                    check_mod2 = (mod2 != null);
                }
                else if (cropl != 0 || cropr != 0 || cropt != 0 || cropb != 0)
                {
-                   //если mod2 защита равна нужному разрешению, но есть кроп
+                   //РµСЃР»Рё mod2 Р·Р°С‰РёС‚Р° СЂР°РІРЅР° РЅСѓР¶РЅРѕРјСѓ СЂР°Р·СЂРµС€РµРЅРёСЋ, РЅРѕ РµСЃС‚СЊ РєСЂРѕРї
                    m.script += newres + Environment.NewLine;
                    check_mod2 = (mod2 != null);
                }
@@ -636,7 +636,7 @@ namespace XviD4PSP
                    m.script += "AddBorders(" + blackw + ", " + blackh + ", " + blackw + ", " + blackh + ")" + Environment.NewLine;
            }
 
-           //Фильтрация после ресайза
+           //Р¤РёР»СЊС‚СЂР°С†РёСЏ РїРѕСЃР»Рµ СЂРµСЃР°Р№Р·Р°
            if (Settings.ResizeFirst)
            {
                m.script += "\r\n###[FILTERING]###\r\n";
@@ -645,18 +645,18 @@ namespace XviD4PSP
                m.script += "###[FILTERING]###\r\n\r\n";
            }
 
-           //объединяем поля при необходимости
+           //РѕР±СЉРµРґРёРЅСЏРµРј РїРѕР»СЏ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
            if (m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE && m.interlace != SourceType.DECIMATING)
            {
                if (m.deinterlace == DeinterlaceType.Disabled)
                    m.script += "Weave()" + Environment.NewLine;
            }
 
-           //вписываем параметры для гистограммы
+           //РІРїРёСЃС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ РіРёСЃС‚РѕРіСЂР°РјРјС‹
            if (m.levels != "Disabled")
                m.script += "Histogram(\"" + m.levels + "\")" + Environment.NewLine;
            
-           //добавляем субтитры
+           //РґРѕР±Р°РІР»СЏРµРј СЃСѓР±С‚РёС‚СЂС‹
            if (m.subtitlepath != null)
            {
                string subext = Path.GetExtension(m.subtitlepath).ToLower();
@@ -666,27 +666,27 @@ namespace XviD4PSP
                     m.script += "TextSub(\"" + m.subtitlepath + "\")";
            }
 
-           //Смена частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
+           //РЎРјРµРЅР° С‡Р°СЃС‚РѕС‚С‹ РєР°РґСЂРѕРІ (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
            if (ApplyFramerateModifier && m.frameratemodifer == FramerateModifers.ConvertMFlowFPS)
            {
                m.script += "ConvertMFlowFPS(" + m.outframerate.Replace(".", "") + ", 1000)\r\n";
            }
            else if (ApplyFramerateModifier)
            {
-               //Подгонка звука для AssumeFPS
+               //РџРѕРґРіРѕРЅРєР° Р·РІСѓРєР° РґР»СЏ AssumeFPS
                if (IsAssumeFramerateConvertion && m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
                {
                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                    m.script += m.frameratemodifer + "(" + m.outframerate + ", true)" + Environment.NewLine;
-                   //Должен вписываться ресемплер из настроек (sampleratemodifer) но тогда надо отлавливать ошибки SSRC
-                   //из-за несовместимых частот (могут получиться после AssumeFPS).
+                   //Р”РѕР»Р¶РµРЅ РІРїРёСЃС‹РІР°С‚СЊСЃСЏ СЂРµСЃРµРјРїР»РµСЂ РёР· РЅР°СЃС‚СЂРѕРµРє (sampleratemodifer) РЅРѕ С‚РѕРіРґР° РЅР°РґРѕ РѕС‚Р»Р°РІР»РёРІР°С‚СЊ РѕС€РёР±РєРё SSRC
+                   //РёР·-Р·Р° РЅРµСЃРѕРІРјРµСЃС‚РёРјС‹С… С‡Р°СЃС‚РѕС‚ (РјРѕРіСѓС‚ РїРѕР»СѓС‡РёС‚СЊСЃСЏ РїРѕСЃР»Рµ AssumeFPS).
                    if (outstream.samplerate != null) m.script += "ResampleAudio(" + outstream.samplerate + ")" + Environment.NewLine;
                }
                else
                    m.script += m.frameratemodifer + "(" + m.outframerate + ")" + Environment.NewLine;
            }
 
-           //Трим
+           //РўСЂРёРј
            if (m.trim_is_on)
            {
                for (int i = 0; i < m.trims.Count; i++)
@@ -696,19 +696,19 @@ namespace XviD4PSP
                }
            }
 
-           //Тестовая нарезка
+           //РўРµСЃС‚РѕРІР°СЏ РЅР°СЂРµР·РєР°
            if (m.testscript)
                m.script += "SelectRangeEvery(FrameCount()/50, 50) #2500 frames test-script\r\n\r\n";
 
-           //Убираем лишнюю mod2 защиту
+           //РЈР±РёСЂР°РµРј Р»РёС€РЅСЋСЋ mod2 Р·Р°С‰РёС‚Сѓ
            if (check_mod2)
            {
                string[] lines = m.script.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
                System.Collections.ArrayList sorted = new System.Collections.ArrayList();
                bool res_found = false, mod2_done = false;
 
-               //Перебираем скрипт с конца в поисках текущего ресайза, если
-               //между ресайзом и mod2 только строки с "" и # - mod2 не нужен
+               //РџРµСЂРµР±РёСЂР°РµРј СЃРєСЂРёРїС‚ СЃ РєРѕРЅС†Р° РІ РїРѕРёСЃРєР°С… С‚РµРєСѓС‰РµРіРѕ СЂРµСЃР°Р№Р·Р°, РµСЃР»Рё
+               //РјРµР¶РґСѓ СЂРµСЃР°Р№Р·РѕРј Рё mod2 С‚РѕР»СЊРєРѕ СЃС‚СЂРѕРєРё СЃ "" Рё # - mod2 РЅРµ РЅСѓР¶РµРЅ
                for (int i = lines.Length - 1; i >= 0; i--)
                {
                    string line = lines[i];
@@ -729,7 +729,7 @@ namespace XviD4PSP
                    }
                }
 
-               //Переворачиваем скрипт обратно
+               //РџРµСЂРµРІРѕСЂР°С‡РёРІР°РµРј СЃРєСЂРёРїС‚ РѕР±СЂР°С‚РЅРѕ
                m.script = "";
                for (int i = sorted.Count - 1; i >= 0; i--)
                    m.script += sorted[i] + Environment.NewLine;
@@ -740,14 +740,14 @@ namespace XviD4PSP
 
        public static Massive SetGain(Massive m)
        {
-           //определяем аудио потоки
+           //РѕРїСЂРµРґРµР»СЏРµРј Р°СѓРґРёРѕ РїРѕС‚РѕРєРё
            AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
            bool ok = false;
            string new_script = "";
            string[] lines = m.script.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 
-           //замена
+           //Р·Р°РјРµРЅР°
            foreach (string line in lines)
            {
                if (line.ToLower().StartsWith("amplifydb("))
@@ -759,7 +759,7 @@ namespace XviD4PSP
                    new_script += line + Environment.NewLine;
            }
 
-           //добавление
+           //РґРѕР±Р°РІР»РµРЅРёРµ
            if (!ok && instream.gain != "0.0") new_script += "AmplifydB(" + instream.gain + ")\r\n";
 
            m.script = new_script;
@@ -768,19 +768,19 @@ namespace XviD4PSP
 
        public static string GetInfoScript(Massive m, ScriptMode mode)
        {
-           //определяем расширения
+           //РѕРїСЂРµРґРµР»СЏРµРј СЂР°СЃС€РёСЂРµРЅРёСЏ
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
            AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
-           //начинаем писать скрипт
+           //РЅР°С‡РёРЅР°РµРј РїРёСЃР°С‚СЊ СЃРєСЂРёРїС‚
            string script = "";
 
-           // загружаем доп функции
+           // Р·Р°РіСЂСѓР¶Р°РµРј РґРѕРї С„СѓРЅРєС†РёРё
            script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
            script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
 
-           //загружаем необходимые плагины импорта
+           //Р·Р°РіСЂСѓР¶Р°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїР»Р°РіРёРЅС‹ РёРјРїРѕСЂС‚Р°
            if (m.vdecoder == Decoders.AVCSource)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.MPEG2Source)
@@ -816,19 +816,19 @@ namespace XviD4PSP
 
            script += Environment.NewLine;
 
-           //прописываем импорт видео
+           //РїСЂРѕРїРёСЃС‹РІР°РµРј РёРјРїРѕСЂС‚ РІРёРґРµРѕ
 
-           //принудительная установка fps
+           //РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅР°СЏ СѓСЃС‚Р°РЅРѕРІРєР° fps
            string fps = "";
            if ((m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.DirectShowSource2) && !string.IsNullOrEmpty(m.inframerate))
                fps = ", fps=" + m.inframerate;
 
-           //принудительная конвертация частоты
+           //РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅР°СЏ РєРѕРЅРІРµСЂС‚Р°С†РёСЏ С‡Р°СЃС‚РѕС‚С‹
            string convertfps = "";
            if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
-           //выбор аудио трека
+           //РІС‹Р±РѕСЂ Р°СѓРґРёРѕ С‚СЂРµРєР°
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource && (mode == ScriptMode.VCrop || mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace ||
                instream.audiopath != null || !Settings.DSS_Enable_Audio || !Settings.EnableAudio || ext == ".grf"))
@@ -840,7 +840,7 @@ namespace XviD4PSP
                Settings.EnableAudio && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
                audio = ", atrack=" + (instream.ff_order) + ", adjustdelay=-3";
 
-           //ипортируем видео
+           //РёРїРѕСЂС‚РёСЂСѓРµРј РІРёРґРµРѕ
            string invideostring = "";
            if (m.vdecoder == Decoders.BlankClip)
            {
@@ -875,12 +875,12 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   //Изменения под FFmpegSource2
+                   //РР·РјРµРЅРµРЅРёСЏ РїРѕРґ FFmpegSource2
                    string cache_path = "";
                    string assume_fps = "";
                    if (m.vdecoder == Decoders.FFmpegSource2)
                    {
-                       //Стоит-ли повторяться? :) 
+                       //РЎС‚РѕРёС‚-Р»Рё РїРѕРІС‚РѕСЂСЏС‚СЊСЃСЏ? :) 
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.FFMS_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
                        cache_path = ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
                            ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
@@ -891,13 +891,13 @@ namespace XviD4PSP
                }
            }
 
-           //импорт звука и объединение
+           //РёРјРїРѕСЂС‚ Р·РІСѓРєР° Рё РѕР±СЉРµРґРёРЅРµРЅРёРµ
            if (m.inaudiostreams.Count > 0 && instream.audiopath != null && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
            {
-               //прописываем импорт видео
+               //РїСЂРѕРїРёСЃС‹РІР°РµРј РёРјРїРѕСЂС‚ РІРёРґРµРѕ
                script += "video = " + invideostring + Environment.NewLine;
 
-               //пришиваем звук
+               //РїСЂРёС€РёРІР°РµРј Р·РІСѓРє
                string ffindex = "";
                string inaudiostring = "";
                string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
@@ -922,45 +922,45 @@ namespace XviD4PSP
                if (instream.decoder == Decoders.FFAudioSource) script += ffindex;
                script += "audio = " + inaudiostring + Environment.NewLine;
 
-               //объединение
+               //РѕР±СЉРµРґРёРЅРµРЅРёРµ
                script += "AudioDub(video, audio)" + Environment.NewLine;
            }
            else
            {
-               //прописываем импорт всего клипа
+               //РїСЂРѕРїРёСЃС‹РІР°РµРј РёРјРїРѕСЂС‚ РІСЃРµРіРѕ РєР»РёРїР°
                script += invideostring + Environment.NewLine;
            }
 
            if (mode == ScriptMode.FastPreview || mode == ScriptMode.Normalize)
            {
-               //блок обработки звука
+               //Р±Р»РѕРє РѕР±СЂР°Р±РѕС‚РєРё Р·РІСѓРєР°
                if (m.outaudiostreams.Count > 0)
                {
                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-                   //задержка
+                   //Р·Р°РґРµСЂР¶РєР°
                    if (outstream.delay != 0)
                        script += "DelayAudio(" + Calculate.ConvertDoubleToPointString(Convert.ToDouble(outstream.delay) / 1000) + ")" + Environment.NewLine;
 
-                   //меняем канальность
+                   //РјРµРЅСЏРµРј РєР°РЅР°Р»СЊРЅРѕСЃС‚СЊ
                    if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
                        script += instream.channelconverter.ToString() + "()" + Environment.NewLine;
 
-                   //меняем битность
+                   //РјРµРЅСЏРµРј Р±РёС‚РЅРѕСЃС‚СЊ
                    if (instream.bits != outstream.bits)
                        script += "ConvertAudioTo16bit()" + Environment.NewLine;
 
-                   //прописываем смену частоты
+                   //РїСЂРѕРїРёСЃС‹РІР°РµРј СЃРјРµРЅСѓ С‡Р°СЃС‚РѕС‚С‹
                    if (instream.samplerate != outstream.samplerate && outstream.samplerate != null)
                        script += m.sampleratemodifer + "(" + outstream.samplerate + ")" + Environment.NewLine;
 
-                   //нормализация звука
+                   //РЅРѕСЂРјР°Р»РёР·Р°С†РёСЏ Р·РІСѓРєР°
                    if (mode != ScriptMode.Normalize && instream.gain != "0.0")
                        script += "AmplifydB(" + instream.gain + ")" + Environment.NewLine;
                }
            }
 
-           //автокроп
+           //Р°РІС‚РѕРєСЂРѕРї
            if (mode == ScriptMode.Autocrop)
            {
                //Flip
@@ -973,7 +973,7 @@ namespace XviD4PSP
                }
 
                script += "ConvertToYV12()" + Environment.NewLine + Environment.NewLine;
-               script += "log_file = \"" + Settings.TempPath + "\\AutoCrop.log\"" + Environment.NewLine;
+               script += "global log_file = \"" + Settings.TempPath + "\\AutoCrop.log\"" + Environment.NewLine;
                script += "FrameEvaluate(last, \"AutoCrop(mode=2, wMultOf=4, hMultOf=4, samples=1, samplestartframe=current_frame, " +
                    "sampleendframe=current_frame, threshold=" + Settings.AutocropSensivity + ", file=log_file, overwrite=false)\")" + Environment.NewLine;
            }
@@ -987,7 +987,7 @@ namespace XviD4PSP
 
            if (mode == ScriptMode.Interlace)
            {
-               script += "ConvertToYV12()" + Environment.NewLine;
+               script += "Crop(0, 0, -0, -Height() % 4)\r\nConvertToYV12()" + Environment.NewLine;
            }
 
            return script;
@@ -995,16 +995,16 @@ namespace XviD4PSP
 
        public static string GetFramerateScript(Massive m)
        {
-           //определяем расширения
+           //РѕРїСЂРµРґРµР»СЏРµРј СЂР°СЃС€РёСЂРµРЅРёСЏ
            string ext = Path.GetExtension(m.infilepath).ToLower();
 
-           //начинаем писать скрипт
+           //РЅР°С‡РёРЅР°РµРј РїРёСЃР°С‚СЊ СЃРєСЂРёРїС‚
            string script = "";
 
-           //загружаем доп функции
+           //Р·Р°РіСЂСѓР¶Р°РµРј РґРѕРї С„СѓРЅРєС†РёРё
            script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
 
-           //загружаем необходимые плагины импорта
+           //Р·Р°РіСЂСѓР¶Р°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїР»Р°РіРёРЅС‹ РёРјРїРѕСЂС‚Р°
            if(m.vdecoder == Decoders.AVCSource)
                script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.MPEG2Source)
@@ -1035,14 +1035,14 @@ namespace XviD4PSP
                script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.FFmpegSource2)
            {
-               //Если FFMS_Enable_Audio, то разрешаем звук, чтоб файл сразу проиндексировался вместе с ним (иначе позже произойдет переиндексация)
+               //Р•СЃР»Рё FFMS_Enable_Audio, С‚Рѕ СЂР°Р·СЂРµС€Р°РµРј Р·РІСѓРє, С‡С‚РѕР± С„Р°Р№Р» СЃСЂР°Р·Сѓ РїСЂРѕРёРЅРґРµРєСЃРёСЂРѕРІР°Р»СЃСЏ РІРјРµСЃС‚Рµ СЃ РЅРёРј (РёРЅР°С‡Рµ РїРѕР·Р¶Рµ РїСЂРѕРёР·РѕР№РґРµС‚ РїРµСЂРµРёРЅРґРµРєСЃР°С†РёСЏ)
                string atrack = (m.inaudiostreams.Count > 0 && Settings.FFMS_Enable_Audio) ? ", atrack=-1, adjustdelay=-3" : ", atrack=-2";
                string cache_path = atrack + ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
                    ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(m.infilepath) + ".ffindex\"" : "");
                script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
            }
 
-           script += "ConvertToYUY2()" + Environment.NewLine;//тут
+           script += "ConvertToYUY2()" + Environment.NewLine;//С‚СѓС‚
            script += "Trim(0, 100)" + Environment.NewLine;
 
            return script;
@@ -1105,8 +1105,8 @@ namespace XviD4PSP
        private const string InterlaceScript =
 @"{0}
 {1}
-log_file=""{2}""
-global sep=""-""
+log_file = ""{2}""
+global sep = ""-""
 c = last
 global clip = c
 c = WriteFile(c, log_file, ""a"", ""sep"", ""b"")
@@ -1118,11 +1118,11 @@ Crop(0, 0, 16, 16)";
        private const string FieldOrderScript =
 @"{0}
 {1}
-log_file=""{2}""
-global sep=""-""
+log_file = ""{2}""
+global sep = ""-""
 d = last
-global abff = d.assumebff.separatefields
-global atff = d.assumetff.separatefields
+global abff = d.AssumeBFF().SeparateFields()
+global atff = d.AssumeTFF().SeparateFields()
 c = abff
 c = WriteFile(c, log_file, ""diffa"", ""sep"", ""diffb"")
 c = FrameEvaluate(c,""global diffa = 0.50*YDifference{5}(abff) + 0.25*UDifference{5}(abff) + 0.25*VDifference{5}(abff)"")
@@ -1132,11 +1132,11 @@ Crop(0, 0, 16, 16)";
 
        public static string GetSourceDetectionScript(Detecting det, string originalScript, string trimLine, string logFileName, int selectEvery, int selectLength)
        {
-           //Скрипты для анализа работают намного быстрее, если вместо DifferenceFromPrevious использовать DifferenceToNext.
-           //Не должно сильно сказаться на погрешности, т.к. всё-равно для достоверного определения движения в текущем кадре
-           //нужны оба, и предыдущий, и последующий. Используя только два кадра нельзя определить, какой из них с движением,
-           //а какой статичен. Так-что с FromPrevious всегда будет сколько-то неверно определенных кадров, для которых лучше
-           //было бы использовать ToNext. И наоборот. Зато прибавка в скорости существенная! :)
+           //РЎРєСЂРёРїС‚С‹ РґР»СЏ Р°РЅР°Р»РёР·Р° СЂР°Р±РѕС‚Р°СЋС‚ РЅР°РјРЅРѕРіРѕ Р±С‹СЃС‚СЂРµРµ, РµСЃР»Рё РІРјРµСЃС‚Рѕ DifferenceFromPrevious РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ DifferenceToNext.
+           //РќРµ РґРѕР»Р¶РЅРѕ СЃРёР»СЊРЅРѕ СЃРєР°Р·Р°С‚СЊСЃСЏ РЅР° РїРѕРіСЂРµС€РЅРѕСЃС‚Рё, С‚.Рє. РІСЃС‘-СЂР°РІРЅРѕ РґР»СЏ РґРѕСЃС‚РѕРІРµСЂРЅРѕРіРѕ РѕРїСЂРµРґРµР»РµРЅРёСЏ РґРІРёР¶РµРЅРёСЏ РІ С‚РµРєСѓС‰РµРј РєР°РґСЂРµ
+           //РЅСѓР¶РЅС‹ РѕР±Р°, Рё РїСЂРµРґС‹РґСѓС‰РёР№, Рё РїРѕСЃР»РµРґСѓСЋС‰РёР№. РСЃРїРѕР»СЊР·СѓСЏ С‚РѕР»СЊРєРѕ РґРІР° РєР°РґСЂР° РЅРµР»СЊР·СЏ РѕРїСЂРµРґРµР»РёС‚СЊ, РєР°РєРѕР№ РёР· РЅРёС… СЃ РґРІРёР¶РµРЅРёРµРј,
+           //Р° РєР°РєРѕР№ СЃС‚Р°С‚РёС‡РµРЅ. РўР°Рє-С‡С‚Рѕ СЃ FromPrevious РІСЃРµРіРґР° Р±СѓРґРµС‚ СЃРєРѕР»СЊРєРѕ-С‚Рѕ РЅРµРІРµСЂРЅРѕ РѕРїСЂРµРґРµР»РµРЅРЅС‹С… РєР°РґСЂРѕРІ, РґР»СЏ РєРѕС‚РѕСЂС‹С… Р»СѓС‡С€Рµ
+           //Р±С‹Р»Рѕ Р±С‹ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ ToNext. Р РЅР°РѕР±РѕСЂРѕС‚. Р—Р°С‚Рѕ РїСЂРёР±Р°РІРєР° РІ СЃРєРѕСЂРѕСЃС‚Рё СЃСѓС‰РµСЃС‚РІРµРЅРЅР°СЏ! :)
            if (det == Detecting.Interlace)   //detection
                return string.Format(InterlaceScript, originalScript, trimLine, logFileName, selectEvery, selectLength, "ToNext");
            else if (det == Detecting.Fields) //field order
@@ -1149,7 +1149,7 @@ Crop(0, 0, 16, 16)";
        {
            script += Environment.NewLine;
 
-           //Выборка кадров или только один требуемый кадр
+           //Р’С‹Р±РѕСЂРєР° РєР°РґСЂРѕРІ РёР»Рё С‚РѕР»СЊРєРѕ РѕРґРёРЅ С‚СЂРµР±СѓРµРјС‹Р№ РєР°РґСЂ
            if (frame < 0) script += "SelectRangeEvery(FrameCount()/" + (Settings.AutocropFrames - 1) + ", 1)" + Environment.NewLine;
            else script += "Trim(" + frame + ", 1)" + Environment.NewLine;
 

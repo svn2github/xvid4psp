@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
@@ -42,8 +42,8 @@ namespace XviD4PSP
             temp.vpasses = (ArrayList)this.vpasses.Clone();
             temp.inaudiostreams = (ArrayList)this.inaudiostreams.Clone();
             temp.outaudiostreams = (ArrayList)this.outaudiostreams.Clone();
-            //Ýòî ðåøèò ïðîáëåìó ñ íåïðàâèëüíûì êëîíèðîâàíèåì AudioStreams, íî ñîçäàñò íîâûå ïðîáëåìû
-            //(â íåêîòîðûõ ìåñòàõ àóäèî ïàðàìåòðû îáíîâëÿþòñÿ, íå ÿâíî èñïîëüçóÿ ýòîò áàã)
+            //Ð­Ñ‚Ð¾ Ñ€ÐµÑˆÐ¸Ñ‚ Ð¿Ñ€Ð¾Ð±Ð»ÐµÐ¼Ñƒ Ñ Ð½ÐµÐ¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ñ‹Ð¼ ÐºÐ»Ð¾Ð½Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸ÐµÐ¼ AudioStreams, Ð½Ð¾ ÑÐ¾Ð·Ð´Ð°ÑÑ‚ Ð½Ð¾Ð²Ñ‹Ðµ Ð¿Ñ€Ð¾Ð±Ð»ÐµÐ¼Ñ‹
+            //(Ð² Ð½ÐµÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ñ… Ð¼ÐµÑÑ‚Ð°Ñ… Ð°ÑƒÐ´Ð¸Ð¾ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹ Ð¾Ð±Ð½Ð¾Ð²Ð»ÑÑŽÑ‚ÑÑ, Ð½Ðµ ÑÐ²Ð½Ð¾ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑ ÑÑ‚Ð¾Ñ‚ Ð±Ð°Ð³)
             //for (int i = 0; this.inaudiostreams.Count > 0 && i < this.inaudiostreams.Count; i++)
             //{
             //    temp.inaudiostreams[i] = ((AudioStream)this.inaudiostreams[i]).Clone();
@@ -422,8 +422,8 @@ namespace XviD4PSP
             }
         }
 
-        //Ïîëå "ID" â ëîãå MediaInfo. Äëÿ íåêîòîðûõ ôîðìàòîâ - ýòî ïîõîæå íà ïîðÿäêîâûé
-        //íîìåð òðåêà, äëÿ äðóãèõ (mkv, mp4, mpeg-ts\ps) - ýòî èäåíòèôèêàòîð òðåêà.
+        //ÐŸÐ¾Ð»Ðµ "ID" Ð² Ð»Ð¾Ð³Ðµ MediaInfo. Ð”Ð»Ñ Ð½ÐµÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ñ… Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¾Ð² - ÑÑ‚Ð¾ Ð¿Ð¾Ñ…Ð¾Ð¶Ðµ Ð½Ð° Ð¿Ð¾Ñ€ÑÐ´ÐºÐ¾Ð²Ñ‹Ð¹
+        //Ð½Ð¾Ð¼ÐµÑ€ Ñ‚Ñ€ÐµÐºÐ°, Ð´Ð»Ñ Ð´Ñ€ÑƒÐ³Ð¸Ñ… (mkv, mp4, mpeg-ts\ps) - ÑÑ‚Ð¾ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ñ‚Ñ€ÐµÐºÐ°.
         private int _invideostream_mi_id = 0;
         public int invideostream_mi_id
         {
@@ -437,8 +437,8 @@ namespace XviD4PSP
             }
         }
 
-        //Ïîëå "StreamOrder" â ëîãå MediaInfo. Ïîðÿäêîâûé íîìåð òðåêà. Íà 09.06.12
-        //âûäàåòñÿ òîëüêî äëÿ ôîðìàòîâ Matroska è MPEG-4 (mkv, webm, mp4, mov).
+        //ÐŸÐ¾Ð»Ðµ "StreamOrder" Ð² Ð»Ð¾Ð³Ðµ MediaInfo. ÐŸÐ¾Ñ€ÑÐ´ÐºÐ¾Ð²Ñ‹Ð¹ Ð½Ð¾Ð¼ÐµÑ€ Ñ‚Ñ€ÐµÐºÐ°. ÐÐ° 09.06.12
+        //Ð²Ñ‹Ð´Ð°ÐµÑ‚ÑÑ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð´Ð»Ñ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¾Ð² Matroska Ð¸ MPEG-4 (mkv, webm, mp4, mov).
         private int _invideostream_mi_order = -1;
         public int invideostream_mi_order
         {
@@ -452,7 +452,7 @@ namespace XviD4PSP
             }
         }
 
-        //Ïîðÿäêîâûé íîìåð òðåêà â ëîãå FFmpeg
+        //ÐŸÐ¾Ñ€ÑÐ´ÐºÐ¾Ð²Ñ‹Ð¹ Ð½Ð¾Ð¼ÐµÑ€ Ñ‚Ñ€ÐµÐºÐ° Ð² Ð»Ð¾Ð³Ðµ FFmpeg
         private int _invideostream_ff_order = 0;
         public int invideostream_ff_order
         {
@@ -635,6 +635,19 @@ namespace XviD4PSP
             }
         }
 
+        private string _interlace_raw = "";
+        public string interlace_raw
+        {
+            get
+            {
+                return _interlace_raw;
+            }
+            set
+            {
+                _interlace_raw = value;
+            }
+        }
+
         private FieldOrder _fieldOrder = FieldOrder.UNKNOWN;
         public FieldOrder fieldOrder
         {
@@ -648,7 +661,20 @@ namespace XviD4PSP
             }
         }
 
-        //Ïîñëå èíäåêñàöèè DGIndex`îì áûë ïðîèçâåäåí Auto ForceFilm è FPS ñòàë ðàâåí 23.976
+        private string _fieldOrder_raw = "";
+        public string fieldOrder_raw
+        {
+            get
+            {
+                return _fieldOrder_raw;
+            }
+            set
+            {
+                _fieldOrder_raw = value;
+            }
+        }
+
+        //ÐŸÐ¾ÑÐ»Ðµ Ð¸Ð½Ð´ÐµÐºÑÐ°Ñ†Ð¸Ð¸ DGIndex`Ð¾Ð¼ Ð±Ñ‹Ð» Ð¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½ Auto ForceFilm Ð¸ FPS ÑÑ‚Ð°Ð» Ñ€Ð°Ð²ÐµÐ½ 23.976
         private bool _IsForcedFilm = false;
         public bool IsForcedFilm
         {
@@ -672,6 +698,19 @@ namespace XviD4PSP
             set
             {
                 _deinterlace = value;
+            }
+        }
+
+        private string _interlace_results;
+        public string interlace_results
+        {
+            get
+            {
+                return _interlace_results;
+            }
+            set
+            {
+                _interlace_results = value;
             }
         }
 
@@ -1261,7 +1300,7 @@ namespace XviD4PSP
             }
         }
 
-        //Ïî óìîë÷àíèþ Ãèñòîãðàììà îòêëþ÷åíà
+        //ÐŸÐ¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ Ð“Ð¸ÑÑ‚Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ð° Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½Ð°
         private string _levels = "Disabled";
         public string levels
         {
@@ -1314,7 +1353,7 @@ namespace XviD4PSP
             }
         }
 
-        //Òåñò-ñêðèïò (íàðåçêà)
+        //Ð¢ÐµÑÑ‚-ÑÐºÑ€Ð¸Ð¿Ñ‚ (Ð½Ð°Ñ€ÐµÐ·ÐºÐ°)
         private bool _testscript = false;
         public bool testscript
         {
