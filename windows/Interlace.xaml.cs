@@ -49,6 +49,8 @@ namespace XviD4PSP
             //button_fullscreen.Content = Languages.Translate("Fullscreen");
             tab_main.Header = Languages.Translate("Main");
             tab_settings.Header = Languages.Translate("Settings");
+            group_detector.Header = Languages.Translate("Source detector");
+            group_misc.Header = Languages.Translate("Misc");
             text_analyze_percent.Content = Languages.Translate("Analyze (% of the source lenght)") + ":";
             text_min_sections.Content = Languages.Translate("But no less than (sections)") + ":";
             text_hybrid_int.Content = Languages.Translate("Hybrid interlace threshold") + " (%):";
@@ -317,7 +319,7 @@ namespace XviD4PSP
         {
             //Результаты анализа интерлейса
             button_analyse.ToolTip = Languages.Translate("Last results") + ":";
-            button_analyse.ToolTip += (!string.IsNullOrEmpty(m.interlace_results)) ? ("\r\n\r\n" + m.interlace_results) : ("      n/a");
+            button_analyse.ToolTip += (!string.IsNullOrEmpty(m.interlace_results)) ? ("\r\n\r\n" + m.interlace_results) : "      n/a";
 
             //Инфа от MediaInfo (если доступно)
             button_analyse.ToolTip += "\r\n\r\nMediaInfo:\r\nScan type:        ";

@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
@@ -15,7 +15,7 @@ namespace XviD4PSP
 {
     static class Calculate
     {
-        public static bool ContainsInStringArray(string[] list, string value) //Не используется
+        public static bool ContainsInStringArray(string[] list, string value) //РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         {
             foreach (string v in list)
             {
@@ -95,10 +95,10 @@ namespace XviD4PSP
             else if (mode == Settings.EncodingModes.Quantizer) return "Constant Quantizer";
             else if (mode == Settings.EncodingModes.TwoPassQuality) return "2-Pass Quality";
             else if (mode == Settings.EncodingModes.ThreePassQuality) return "3-Pass Quality";
-            return null; //null, чтоб сработала защита от пустого профиля
+            return null; //null, С‡С‚РѕР± СЃСЂР°Р±РѕС‚Р°Р»Р° Р·Р°С‰РёС‚Р° РѕС‚ РїСѓСЃС‚РѕРіРѕ РїСЂРѕС„РёР»СЏ
         }
 
-        public static Settings.EncodingModes EncodingModeStringToEnum(string mode) //Не используется
+        public static Settings.EncodingModes EncodingModeStringToEnum(string mode) //РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         {
             if (mode == "1-Pass Bitrate") return Settings.EncodingModes.OnePass;
             else if (mode == "2-Pass Bitrate") return Settings.EncodingModes.TwoPass;
@@ -145,39 +145,39 @@ namespace XviD4PSP
         {
             if (m.frameratemodifer == AviSynthScripting.FramerateModifers.AssumeFPS)
             {
-                //AssumeFPS не меняет число кадров, но его меняют деинтерлейсеры
+                //AssumeFPS РЅРµ РјРµРЅСЏРµС‚ С‡РёСЃР»Рѕ РєР°РґСЂРѕРІ, РЅРѕ РµРіРѕ РјРµРЅСЏСЋС‚ РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂС‹
                 if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
                     m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI)
                 {
-                    //Для "деинтерлейсеров", делящих fps на 1.25
+                    //Р”Р»СЏ "РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂРѕРІ", РґРµР»СЏС‰РёС… fps РЅР° 1.25
                     m.outframes = Convert.ToInt32((Calculate.ConvertStringToDouble(m.inframerate) / 1.25) * m.induration.TotalSeconds);
                 }
                 else if (m.deinterlace == DeinterlaceType.TDecimate ||
                     m.deinterlace == DeinterlaceType.TDecimate_23)
                 {
-                    //Для "деинтерлейсеров", возвращающих 23.976fps
+                    //Р”Р»СЏ "РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂРѕРІ", РІРѕР·РІСЂР°С‰Р°СЋС‰РёС… 23.976fps
                     m.outframes = Convert.ToInt32(23.976 * m.induration.TotalSeconds);
                 }
                 else if (m.deinterlace == DeinterlaceType.TDecimate_24)
                 {
-                    //TDecimate_24 возвращает 24.000fps
+                    //TDecimate_24 РІРѕР·РІСЂР°С‰Р°РµС‚ 24.000fps
                     m.outframes = Convert.ToInt32(24.000 * m.induration.TotalSeconds);
                 }
                 else if (m.deinterlace == DeinterlaceType.TDecimate_25)
                 {
-                    //TDecimate_25 возвращает 25.000fps
+                    //TDecimate_25 РІРѕР·РІСЂР°С‰Р°РµС‚ 25.000fps
                     m.outframes = Convert.ToInt32(25.000 * m.induration.TotalSeconds);
                 }
                 else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace || m.deinterlace == DeinterlaceType.MCBob ||
                     m.deinterlace == DeinterlaceType.NNEDI || m.deinterlace == DeinterlaceType.YadifModEDI2 ||
                     m.deinterlace == DeinterlaceType.QTGMC_2)
                 {
-                    //Для деинтерлейсеров, удваивающих fps
+                    //Р”Р»СЏ РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂРѕРІ, СѓРґРІР°РёРІР°СЋС‰РёС… fps
                     m.outframes = Convert.ToInt32(Calculate.ConvertStringToDouble(m.inframerate) * 2.0 * m.induration.TotalSeconds);
                 }
                 else
                 {
-                    //Во всех остальных случаях
+                    //Р’Рѕ РІСЃРµС… РѕСЃС‚Р°Р»СЊРЅС‹С… СЃР»СѓС‡Р°СЏС…
                     m.outframes = m.inframes;
                 }
             }
@@ -186,7 +186,7 @@ namespace XviD4PSP
                 m.outframes = Convert.ToInt32(Calculate.ConvertStringToDouble(m.outframerate) * m.induration.TotalSeconds);
             }
 
-            //Учитываем обрезку
+            //РЈС‡РёС‚С‹РІР°РµРј РѕР±СЂРµР·РєСѓ
             if (m.trims.Count > 0 && m.trim_is_on)
             {
                 int total = m.outframes;
@@ -206,60 +206,60 @@ namespace XviD4PSP
                 }
             }
 
-            //С тест-скриптом тоже что-то надо делать..
+            //РЎ С‚РµСЃС‚-СЃРєСЂРёРїС‚РѕРј С‚РѕР¶Рµ С‡С‚Рѕ-С‚Рѕ РЅР°РґРѕ РґРµР»Р°С‚СЊ..
             if (m.testscript && m.outframes > 2555) m.outframes = 2555;
 
-            //Пересчитываем duration
+            //РџРµСЂРµСЃС‡РёС‚С‹РІР°РµРј duration
             m.outduration = TimeSpan.FromSeconds((double)m.outframes / Calculate.ConvertStringToDouble(m.outframerate));
 
-            //Пересчитываем кадр для THM
+            //РџРµСЂРµСЃС‡РёС‚С‹РІР°РµРј РєР°РґСЂ РґР»СЏ THM
             m.thmframe = m.outframes / 2;
 
             return m;
         }
 
-        //Выходная частота кадров с учетом деинтерлейса, но без учета каких-либо ограничений
+        //Р’С‹С…РѕРґРЅР°СЏ С‡Р°СЃС‚РѕС‚Р° РєР°РґСЂРѕРІ СЃ СѓС‡РµС‚РѕРј РґРµРёРЅС‚РµСЂР»РµР№СЃР°, РЅРѕ Р±РµР· СѓС‡РµС‚Р° РєР°РєРёС…-Р»РёР±Рѕ РѕРіСЂР°РЅРёС‡РµРЅРёР№
         public static string GetRawOutFramerate(Massive m)
         {
             if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
                 m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI)
             {
-                //Для "деинтерлейсеров", делящих fps на 1.25
+                //Р”Р»СЏ "РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂРѕРІ", РґРµР»СЏС‰РёС… fps РЅР° 1.25
                 double inframerate = Calculate.ConvertStringToDouble(m.inframerate);
                 return Calculate.ConvertDoubleToPointString(inframerate / 1.25);
             }
             else if (m.deinterlace == DeinterlaceType.TDecimate ||
                 m.deinterlace == DeinterlaceType.TDecimate_23)
             {
-                //Для "деинтерлейсеров", возвращающих 23.976fps
+                //Р”Р»СЏ "РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂРѕРІ", РІРѕР·РІСЂР°С‰Р°СЋС‰РёС… 23.976fps
                 return "23.976";
             }
             else if (m.deinterlace == DeinterlaceType.TDecimate_24)
             {
-                //TDecimate_24 возвращает 24.000fps
+                //TDecimate_24 РІРѕР·РІСЂР°С‰Р°РµС‚ 24.000fps
                 return "24.000";
             }
             else if (m.deinterlace == DeinterlaceType.TDecimate_25)
             {
-                //TDecimate_25 возвращает 25.000fps
+                //TDecimate_25 РІРѕР·РІСЂР°С‰Р°РµС‚ 25.000fps
                 return "25.000";
             }
              else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace || m.deinterlace == DeinterlaceType.MCBob ||
                 m.deinterlace == DeinterlaceType.NNEDI || m.deinterlace == DeinterlaceType.YadifModEDI2 ||
                 m.deinterlace == DeinterlaceType.QTGMC_2)
             {
-                //Для деинтерлейсеров, удваивающих fps
+                //Р”Р»СЏ РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂРѕРІ, СѓРґРІР°РёРІР°СЋС‰РёС… fps
                 double inframerate = Calculate.ConvertStringToDouble(m.inframerate);
                 return Calculate.ConvertDoubleToPointString(inframerate * 2);
             }
             else
             {
-                //Во всех остальных случаях
+                //Р’Рѕ РІСЃРµС… РѕСЃС‚Р°Р»СЊРЅС‹С… СЃР»СѓС‡Р°СЏС…
                 return m.inframerate;
             }
         }
 
-        //Выходная частота кадров с учетом деинтерлейса и ограничений форматов
+        //Р’С‹С…РѕРґРЅР°СЏ С‡Р°СЃС‚РѕС‚Р° РєР°РґСЂРѕРІ СЃ СѓС‡РµС‚РѕРј РґРµРёРЅС‚РµСЂР»РµР№СЃР° Рё РѕРіСЂР°РЅРёС‡РµРЅРёР№ С„РѕСЂРјР°С‚РѕРІ
         public static Massive UpdateOutFramerate(Massive m)
         {
             string rate = Calculate.GetRawOutFramerate(m);
@@ -268,7 +268,7 @@ namespace XviD4PSP
             return m;
         }
 
-        public static string SplitCapString(string source) //Не используется
+        public static string SplitCapString(string source) //РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         {
             string newstring = "";
             int n = 0;
@@ -289,7 +289,7 @@ namespace XviD4PSP
             return newstring;
         }
 
-        public static double GetProcent(int total, int current) //Не используется
+        public static double GetProcent(int total, int current) //РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         {
             return ((double)current / (double)total) * 100.0;
         }
@@ -338,7 +338,7 @@ namespace XviD4PSP
                 string apath = "";
                 if (m.outaudiostreams.Count > 0)
                 {
-                    //Мы не можем посчитать качество, т.к. не можем посчитать видео-битрет, т.к. не знаем аудио-битрейта
+                    //РњС‹ РЅРµ РјРѕР¶РµРј РїРѕСЃС‡РёС‚Р°С‚СЊ РєР°С‡РµСЃС‚РІРѕ, С‚.Рє. РЅРµ РјРѕР¶РµРј РїРѕСЃС‡РёС‚Р°С‚СЊ РІРёРґРµРѕ-Р±РёС‚СЂРµС‚, С‚.Рє. РЅРµ Р·РЅР°РµРј Р°СѓРґРёРѕ-Р±РёС‚СЂРµР№С‚Р°
                     AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                     AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                     if (outstream.codec == "Copy" && File.Exists(instream.audiopath))
@@ -367,7 +367,7 @@ namespace XviD4PSP
 
         public static int GetAutoBitrate(Massive m)
         {
-            //поправка на сжимаемость кодека
+            //РїРѕРїСЂР°РІРєР° РЅР° СЃР¶РёРјР°РµРјРѕСЃС‚СЊ РєРѕРґРµРєР°
             double quality = 1.0;
             if (m.outvcodec == "x264")
                 quality = 0.245;
@@ -469,7 +469,7 @@ namespace XviD4PSP
 
         public static string GetClosePointDoubleFPS(string CompareValue, string[] ValuesList)
         {
-            //Фильтруем
+            //Р¤РёР»СЊС‚СЂСѓРµРј
             bool any = false;
             ArrayList values = new ArrayList();
             foreach (string value in ValuesList)
@@ -478,12 +478,12 @@ namespace XviD4PSP
                 else values.Add(value);
             }
 
-            //Если разрешены любые значения fps
+            //Р•СЃР»Рё СЂР°Р·СЂРµС€РµРЅС‹ Р»СЋР±С‹Рµ Р·РЅР°С‡РµРЅРёСЏ fps
             if (any && Settings.Nonstandard_fps)
             {
                 if (!string.IsNullOrEmpty(CompareValue))
                 {
-                    //На всякий случай приводим к нужному формату
+                    //РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ РїСЂРёРІРѕРґРёРј Рє РЅСѓР¶РЅРѕРјСѓ С„РѕСЂРјР°С‚Сѓ
                     return Calculate.ConvertDoubleToPointString(ConvertStringToDouble(CompareValue), 3);
                 }
                 else if (values.Count > 1)
@@ -492,12 +492,12 @@ namespace XviD4PSP
                     return "25.000";
             }
 
-            //Защита от пустого списка (если в нем было только "0.000")
+            //Р—Р°С‰РёС‚Р° РѕС‚ РїСѓСЃС‚РѕРіРѕ СЃРїРёСЃРєР° (РµСЃР»Рё РІ РЅРµРј Р±С‹Р»Рѕ С‚РѕР»СЊРєРѕ "0.000")
             if (values.Count == 0)
             {
                 if (!string.IsNullOrEmpty(CompareValue))
                 {
-                    //На всякий случай приводим к нужному формату
+                    //РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ РїСЂРёРІРѕРґРёРј Рє РЅСѓР¶РЅРѕРјСѓ С„РѕСЂРјР°С‚Сѓ
                     return Calculate.ConvertDoubleToPointString(ConvertStringToDouble(CompareValue), 3);
                 }
                 else
@@ -583,13 +583,13 @@ namespace XviD4PSP
             {
                 if (m.outaudiostreams.Count > 0)
                 {
-                    //Мы не можем знать размер если звук = VBR или Copy, но файл еще не извлечен и битрейт неизвестен
+                    //РњС‹ РЅРµ РјРѕР¶РµРј Р·РЅР°С‚СЊ СЂР°Р·РјРµСЂ РµСЃР»Рё Р·РІСѓРє = VBR РёР»Рё Copy, РЅРѕ С„Р°Р№Р» РµС‰Рµ РЅРµ РёР·РІР»РµС‡РµРЅ Рё Р±РёС‚СЂРµР№С‚ РЅРµРёР·РІРµСЃС‚РµРЅ
                     AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                     AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                     if (outstream.bitrate == 0 && outstream.codec != "Disabled")
                     {
-                        //Если звук будет кодироваться первым, то размер звукового файла уже будет известен к моменту начала
-                        //кодирования видео (кроме случая DirectRemux для Copy), и его можно будет учесть
+                        //Р•СЃР»Рё Р·РІСѓРє Р±СѓРґРµС‚ РєРѕРґРёСЂРѕРІР°С‚СЊСЃСЏ РїРµСЂРІС‹Рј, С‚Рѕ СЂР°Р·РјРµСЂ Р·РІСѓРєРѕРІРѕРіРѕ С„Р°Р№Р»Р° СѓР¶Рµ Р±СѓРґРµС‚ РёР·РІРµСЃС‚РµРЅ Рє РјРѕРјРµРЅС‚Сѓ РЅР°С‡Р°Р»Р°
+                        //РєРѕРґРёСЂРѕРІР°РЅРёСЏ РІРёРґРµРѕ (РєСЂРѕРјРµ СЃР»СѓС‡Р°СЏ DirectRemux РґР»СЏ Copy), Рё РµРіРѕ РјРѕР¶РЅРѕ Р±СѓРґРµС‚ СѓС‡РµСЃС‚СЊ
                         if (outstream.codec == "Copy" && !(Settings.EncodeAudioFirst && !Format.IsDirectRemuxingPossible(m))
                             && !File.Exists(instream.audiopath))
                         {
@@ -616,7 +616,7 @@ namespace XviD4PSP
             else if (m.format == Format.ExportFormats.Audio && m.outaudiostreams.Count > 0)
             {
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                if (outstream.bitrate == 0) return ssize; //"Unknown" для VBR
+                if (outstream.bitrate == 0) return ssize; //"Unknown" РґР»СЏ VBR
                 double outsize = (0.125261 * (double)outstream.bitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
                 ssize = Calculate.ConvertDoubleToPointString(outsize, 1) + " mb";
             }
@@ -629,7 +629,7 @@ namespace XviD4PSP
                     double outsize = (0.1258 * (double)m.outvbitrate * (double)m.outduration.TotalSeconds) / 1052.0 / 0.994;
                     if (m.outaudiostreams.Count > 0)
                     {
-                        //Мы не можем знать размер если звук = VBR или Copy, но файл еще не извлечен и битрейт неизвестен
+                        //РњС‹ РЅРµ РјРѕР¶РµРј Р·РЅР°С‚СЊ СЂР°Р·РјРµСЂ РµСЃР»Рё Р·РІСѓРє = VBR РёР»Рё Copy, РЅРѕ С„Р°Р№Р» РµС‰Рµ РЅРµ РёР·РІР»РµС‡РµРЅ Рё Р±РёС‚СЂРµР№С‚ РЅРµРёР·РІРµСЃС‚РµРЅ
                         AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                         AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                         if (outstream.codec == "Copy" && File.Exists(instream.audiopath))
@@ -726,10 +726,10 @@ namespace XviD4PSP
 
         public static bool IsValidVOBName(string vobpath)
         {
-            //это точно не воб
+            //СЌС‚Рѕ С‚РѕС‡РЅРѕ РЅРµ РІРѕР±
             if (Path.GetExtension(vobpath).ToLower() != ".vob") return false;
 
-            string pat = @"^VTS_(\d\d)_(\d\d?)$"; //Не более 2-х цифр в конце
+            string pat = @"^VTS_(\d\d)_(\d\d?)$"; //РќРµ Р±РѕР»РµРµ 2-С… С†РёС„СЂ РІ РєРѕРЅС†Рµ
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match m = r.Match(Path.GetFileNameWithoutExtension(vobpath));
             if (m.Success)
@@ -762,20 +762,20 @@ namespace XviD4PSP
             string indexpath;
             string dvdname = GetDVDName(infilepath);
 
-            //Куда помещать индекс-папку
+            //РљСѓРґР° РїРѕРјРµС‰Р°С‚СЊ РёРЅРґРµРєСЃ-РїР°РїРєСѓ
             if (IsReadOnly(infilepath) || Settings.DGIndexInTemp)
             {
-                //В Temp-папку
+                //Р’ Temp-РїР°РїРєСѓ
                 indexpath = Settings.TempPath + "\\" + dvdname + ".index\\" + dvdname + title + ".d2v";
             }
             else
             {
-                //Рядом с исходником (если это ДВД, то имеет смысл изменить имя папки на более короткое)
+                //Р СЏРґРѕРј СЃ РёСЃС…РѕРґРЅРёРєРѕРј (РµСЃР»Рё СЌС‚Рѕ Р”Р’Р”, С‚Рѕ РёРјРµРµС‚ СЃРјС‹СЃР» РёР·РјРµРЅРёС‚СЊ РёРјСЏ РїР°РїРєРё РЅР° Р±РѕР»РµРµ РєРѕСЂРѕС‚РєРѕРµ)
                 indexpath = Path.GetDirectoryName(infilepath) + "\\" + ((title.Length > 0 && dvdname.Length > 10) ? "DGIndex" : dvdname) +
                     ".index\\" + dvdname + title + ".d2v";
             }
 
-            //Проверяем длину пути, если есть превышение - вылезет Exception с красивым сообщением :)
+            //РџСЂРѕРІРµСЂСЏРµРј РґР»РёРЅСѓ РїСѓС‚Рё, РµСЃР»Рё РµСЃС‚СЊ РїСЂРµРІС‹С€РµРЅРёРµ - РІС‹Р»РµР·РµС‚ Exception СЃ РєСЂР°СЃРёРІС‹Рј СЃРѕРѕР±С‰РµРЅРёРµРј :)
             if (Settings.EnableAudio)
                 title = Path.GetDirectoryName(indexpath + "_extra_characters_for_audio_info"); //+32
             else
@@ -805,7 +805,7 @@ namespace XviD4PSP
                     dvdname = Path.GetFileName(dvdpath);
                 }
 
-                //проверка на задание в корне
+                //РїСЂРѕРІРµСЂРєР° РЅР° Р·Р°РґР°РЅРёРµ РІ РєРѕСЂРЅРµ
                 if (dvdpath == Path.GetPathRoot(infilepath))
                 {
                     foreach (DriveInfo drive in DriveInfo.GetDrives())
@@ -815,7 +815,7 @@ namespace XviD4PSP
                             dvdname = drive.VolumeLabel;
                 }
 
-                //проверка на безымянный диск
+                //РїСЂРѕРІРµСЂРєР° РЅР° Р±РµР·С‹РјСЏРЅРЅС‹Р№ РґРёСЃРє
                 if (dvdname == "")
                     dvdname = "DVD";
 
@@ -877,7 +877,7 @@ namespace XviD4PSP
             return delay;
         }
 
-        public static int GetIntFromString(string value) //Не используется
+        public static int GetIntFromString(string value) //РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         {
             string pat = @"(\d+)";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -887,7 +887,7 @@ namespace XviD4PSP
             return 0;
         }
 
-        public static bool IsValid(int value, int validation) //Не используется
+        public static bool IsValid(int value, int validation) //РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         {
             string testS = Convert.ToString(Convert.ToDouble(value) / validation);
             if (testS.Contains(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator) == true)
@@ -903,7 +903,7 @@ namespace XviD4PSP
             return z;
         }
 
-        public static int GetSplittedValue(string value, int position) //Не используется
+        public static int GetSplittedValue(string value, int position) //РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         {
             //string[] separator = new string[] { "x" };
             string[] separator;
@@ -1024,16 +1024,16 @@ namespace XviD4PSP
         {
             if (Settings.ValidatePathes)
             {
-                //Наша дефолтная кодировка
+                //РќР°С€Р° РґРµС„РѕР»С‚РЅР°СЏ РєРѕРґРёСЂРѕРІРєР°
                 Encoding encoding = Encoding.Default;
 
-                //Чтоб определить наличие "нехороших" символов в пути, прогоняем его через нашу кодировку
+                //Р§С‚РѕР± РѕРїСЂРµРґРµР»РёС‚СЊ РЅР°Р»РёС‡РёРµ "РЅРµС…РѕСЂРѕС€РёС…" СЃРёРјРІРѕР»РѕРІ РІ РїСѓС‚Рё, РїСЂРѕРіРѕРЅСЏРµРј РµРіРѕ С‡РµСЂРµР· РЅР°С€Сѓ РєРѕРґРёСЂРѕРІРєСѓ
                 string reencoded = encoding.GetString(encoding.GetBytes(path));
                 if (path != reencoded)
                 {
                     if (throw_if_illegal)
                     {
-                        //Выделяем "нехорошие" символы
+                        //Р’С‹РґРµР»СЏРµРј "РЅРµС…РѕСЂРѕС€РёРµ" СЃРёРјРІРѕР»С‹
                         string characters = ":\r\n\r\n";
                         ArrayList chars = new ArrayList();
                         if (path.Length == reencoded.Length)
@@ -1066,7 +1066,7 @@ namespace XviD4PSP
 
         public static string WrapScript(string script, int max_length)
         {
-            //Перенос длинных строчек
+            //РџРµСЂРµРЅРѕСЃ РґР»РёРЅРЅС‹С… СЃС‚СЂРѕС‡РµРє
             string result = "\r\n\r\n   -------\r\n";
             string[] lines = (script.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
             foreach (string line in lines)

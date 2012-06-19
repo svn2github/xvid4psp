@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -7,7 +7,7 @@ namespace XviD4PSP
 {
     static class Languages
     {
-        public static string Dictionary = ""; //Ñëîâàðü
+        public static string Dictionary = ""; //Ð¡Ð»Ð¾Ð²Ð°Ñ€ÑŒ
 
         public static string Translate(string phrase)
         {

@@ -18,9 +18,10 @@ namespace XviD4PSP
         private Massive oldm;
         private MainWindow p;
         private Format.ExportFormats format;
+        private bool crop_loading = false;
 
         public enum AspectFixes { Disabled = 1, SAR, Crop, Black }
-        public enum GetResolutionModes { Maximum = 1, Optimal }
+        public enum CropRecalculate { Nothing, Aspect, Everything }
 
         public AspectResolution(Massive mass, MainWindow parent)
         {
@@ -77,8 +78,8 @@ namespace XviD4PSP
             text_autocrop_new_mode.ToolTip = check_autocrop_new_mode.ToolTip = Languages.Translate("If checked, find the most common values for all the frames that`s being analyzed.") +
                 "\r\n" + Languages.Translate("Otherwise find a minimum values only.") + "\r\n\r\n" + _def + off;
             text_aspecterror.Content = Languages.Translate("Aspect error:");
-            text_recalculate.Content = Languages.Translate("Recalculate aspect when crop is using:");
-            text_recalculate.ToolTip = check_recalculate_aspect.ToolTip = _def + on;
+            text_recalculate.Content = Languages.Translate("Recalculate when cropping") + ":";
+            text_recalculate.ToolTip = combo_recalculate.ToolTip = _def + Languages.Translate("Aspect");
             button_analyse.ToolTip = Languages.Translate("Autocrop black borders");
             button_vcrop.ToolTip = Languages.Translate("Crop black borders manually");
             button_analyse.Content = group_autocrop.Header = Languages.Translate("Auto crop");
@@ -86,7 +87,7 @@ namespace XviD4PSP
             tab_main.Header = Languages.Translate("Main");
             tab_settings.Header = Languages.Translate("Settings");
             Title = Languages.Translate("Resolution/Aspect");
-            textbox_error.Text = "";
+            group_misc.Header = Languages.Translate("Misc");
             text_ffmpeg_ar.Content = Languages.Translate("Use FFmpeg AR info:");
             text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg") +
                 ".\r\n" + Languages.Translate("This option is meaningful only when a file is opening.") + "\r\n\r\n" + _def + on;
@@ -128,7 +129,11 @@ namespace XviD4PSP
             combo_visualcrop_frame.Items.Add("1-st frame");
             combo_visualcrop_frame.SelectedItem = Settings.VCropFrame;
 
-            check_recalculate_aspect.IsChecked = Settings.RecalculateAspect;
+            combo_recalculate.Items.Add(new ComboBoxItem() { Tag = CropRecalculate.Nothing, Content = Languages.Translate(CropRecalculate.Nothing.ToString()) });
+            combo_recalculate.Items.Add(new ComboBoxItem() { Tag = CropRecalculate.Aspect, Content = Languages.Translate(CropRecalculate.Aspect.ToString()) });
+            combo_recalculate.Items.Add(new ComboBoxItem() { Tag = CropRecalculate.Everything, Content = Languages.Translate(CropRecalculate.Everything.ToString()) });
+            combo_recalculate.SelectedValue = Settings.CropRecalculate;
+
             check_original_ar.IsChecked = Settings.MI_Original_AR;
             check_use_ffmpeg_ar.IsChecked = Settings.UseFFmpegAR;
 
@@ -448,12 +453,17 @@ namespace XviD4PSP
 
         private void combo_crop_t_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if ((combo_crop_t.IsDropDownOpen || combo_crop_t.IsSelectionBoxHighlighted) && combo_crop_t.SelectedItem != null)
+            if ((combo_crop_t.IsDropDownOpen || combo_crop_t.IsSelectionBoxHighlighted) && combo_crop_t.SelectedItem != null && !crop_loading)
             {
                 m.cropt = Convert.ToInt32(combo_crop_t.SelectedItem);
                 m.cropt_copy = m.cropt;
 
-                if (Settings.RecalculateAspect)
+                if (Settings.CropRecalculate == CropRecalculate.Everything)
+                {
+                    ApplyCrop();
+                    return;
+                }
+                else if (Settings.CropRecalculate == CropRecalculate.Aspect)
                 {
                     m = FixInputAspect(m);
                     m = Format.GetValidOutAspect(m);
@@ -468,12 +478,17 @@ namespace XviD4PSP
 
         private void combo_crop_b_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if ((combo_crop_b.IsDropDownOpen || combo_crop_b.IsSelectionBoxHighlighted) && combo_crop_b.SelectedItem != null)
+            if ((combo_crop_b.IsDropDownOpen || combo_crop_b.IsSelectionBoxHighlighted) && combo_crop_b.SelectedItem != null && !crop_loading)
             {
                 m.cropb = Convert.ToInt32(combo_crop_b.SelectedItem);
                 m.cropb_copy = m.cropb;
 
-                if (Settings.RecalculateAspect)
+                if (Settings.CropRecalculate == CropRecalculate.Everything)
+                {
+                    ApplyCrop();
+                    return;
+                }
+                else if (Settings.CropRecalculate == CropRecalculate.Aspect)
                 {
                     m = FixInputAspect(m);
                     m = Format.GetValidOutAspect(m);
@@ -488,12 +503,17 @@ namespace XviD4PSP
 
         private void combo_crop_l_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if ((combo_crop_l.IsDropDownOpen || combo_crop_l.IsSelectionBoxHighlighted) && combo_crop_l.SelectedItem != null)
+            if ((combo_crop_l.IsDropDownOpen || combo_crop_l.IsSelectionBoxHighlighted) && combo_crop_l.SelectedItem != null && !crop_loading)
             {
                 m.cropl = Convert.ToInt32(combo_crop_l.SelectedItem);
                 m.cropl_copy = m.cropl;
 
-                if (Settings.RecalculateAspect)
+                if (Settings.CropRecalculate == CropRecalculate.Everything)
+                {
+                    ApplyCrop();
+                    return;
+                }
+                else if (Settings.CropRecalculate == CropRecalculate.Aspect)
                 {
                     m = FixInputAspect(m);
                     m = Format.GetValidOutAspect(m);
@@ -508,12 +528,17 @@ namespace XviD4PSP
 
         private void combo_crop_r_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if ((combo_crop_r.IsDropDownOpen || combo_crop_r.IsSelectionBoxHighlighted) && combo_crop_r.SelectedItem != null)
+            if ((combo_crop_r.IsDropDownOpen || combo_crop_r.IsSelectionBoxHighlighted) && combo_crop_r.SelectedItem != null && !crop_loading)
             {
                 m.cropr = Convert.ToInt32(combo_crop_r.SelectedItem);
                 m.cropr_copy = m.cropr;
 
-                if (Settings.RecalculateAspect)
+                if (Settings.CropRecalculate == CropRecalculate.Everything)
+                {
+                    ApplyCrop();
+                    return;
+                }
+                else if (Settings.CropRecalculate == CropRecalculate.Aspect)
                 {
                     m = FixInputAspect(m);
                     m = Format.GetValidOutAspect(m);
@@ -620,7 +645,7 @@ namespace XviD4PSP
                 }
 
                 //Входной аспект с учетом откропленного
-                if (Settings.RecalculateAspect)
+                if (Settings.CropRecalculate != CropRecalculate.Nothing)
                     mass.inaspect = ((double)(mass.inresw - mass.cropl - mass.cropr) / (double)(mass.inresh - mass.cropt - mass.cropb)) * mass.pixelaspect;
             }
             else if (mass.aspectfix == AspectFixes.SAR)
@@ -637,6 +662,7 @@ namespace XviD4PSP
 
         private void LoadCrop()
         {
+            crop_loading = true;
             combo_crop_l.Items.Clear();
             combo_crop_r.Items.Clear();
             combo_crop_t.Items.Clear();
@@ -662,6 +688,7 @@ namespace XviD4PSP
             combo_crop_r.SelectedItem = m.cropr;
             combo_crop_t.SelectedItem = m.cropt;
             combo_crop_b.SelectedItem = m.cropb;
+            crop_loading = false;
         }
 
         private void LoadBlack()
@@ -701,9 +728,12 @@ namespace XviD4PSP
             }
         }
 
-        private void check_recalculate_aspect_Click(object sender, RoutedEventArgs e)
+        private void combo_recalculate_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Settings.RecalculateAspect = check_recalculate_aspect.IsChecked.Value;
+            if ((combo_recalculate.IsDropDownOpen || combo_recalculate.IsSelectionBoxHighlighted) && combo_recalculate.SelectedItem != null)
+            {
+                Settings.CropRecalculate = (CropRecalculate)((ComboBoxItem)combo_recalculate.SelectedItem).Tag;
+            }
         }
 
         private void button_analyse_Click(object sender, RoutedEventArgs e)
@@ -850,7 +880,7 @@ namespace XviD4PSP
             else if (m.aspectfix == AspectFixes.SAR) m.aspectfix = AspectFixes.Disabled;
             combo_aspectfix.SelectedItem = m.aspectfix.ToString();
 
-            if (Settings.RecalculateAspect)
+            if (Settings.CropRecalculate != CropRecalculate.Nothing)
                 m.inaspect = ((double)(m.inresw - m.cropl - m.cropr) / (double)(m.inresh - m.cropt - m.cropb)) * m.pixelaspect;
 
             LoadResolutions();

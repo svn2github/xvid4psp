@@ -192,7 +192,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_misc" Header="Misc" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_enable_audio" Width="Auto" Height="Auto" Content="Enable audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_enable_audio_Click"/>

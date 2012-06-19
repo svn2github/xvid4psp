@@ -114,6 +114,7 @@ namespace XviD4PSP
             check_ffms_timecodes.Content = Languages.Translate("Timecodes");
             check_ffms_timecodes.ToolTip = Languages.Translate("Extract timecodes to a file");
             check_drc_ac3.ToolTip = check_drc_dts.ToolTip = Languages.Translate("Apply DRC (Dynamic Range Compression) for this decoder");
+            group_misc.Header = Languages.Translate("Misc");
             check_enable_audio.Content = Languages.Translate("Enable audio in input files");
             check_enable_audio.ToolTip = Languages.Translate("If checked, input files will be opened with audio, otherwise they will be opened WITHOUT audio!")
                 + "\r\n" + Languages.Translate("Audio files - exception, they always will be opened.");

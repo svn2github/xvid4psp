@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Win32;
@@ -308,7 +308,7 @@ namespace XviD4PSP
                 object value = GetValue("Filtering");
                 if (value == null)
                 {
-                    //значение по умолчанию
+                    //Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
                     return "Disabled";
                 }
                 else
@@ -329,7 +329,7 @@ namespace XviD4PSP
                 object value = GetValue("SBC");
                 if (value == null)
                 {
-                    //значение по умолчанию
+                    //Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
                     return "Disabled";
                 }
                 else
@@ -374,7 +374,7 @@ namespace XviD4PSP
 
             if (value == null)
             {
-                //значение по умолчанию
+                //Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
                 return Format.GetValidVPreset(format);
             }
             else
@@ -396,7 +396,7 @@ namespace XviD4PSP
             }
             if (value == null)
             {
-                //значение по умолчанию
+                //Р·РЅР°С‡РµРЅРёРµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
                 return Format.GetValidAPreset(format);
             }
             else
@@ -548,7 +548,7 @@ namespace XviD4PSP
             }
         }
 
-        //Список видео декодеров и расширений
+        //РЎРїРёСЃРѕРє РІРёРґРµРѕ РґРµРєРѕРґРµСЂРѕРІ Рё СЂР°СЃС€РёСЂРµРЅРёР№
         public static string VDecoders
         {
             get
@@ -569,7 +569,7 @@ namespace XviD4PSP
             }
         }
 
-        //Список аудио декодеров и расширений
+        //РЎРїРёСЃРѕРє Р°СѓРґРёРѕ РґРµРєРѕРґРµСЂРѕРІ Рё СЂР°СЃС€РёСЂРµРЅРёР№
         public static string ADecoders
         {
             get
@@ -604,7 +604,7 @@ namespace XviD4PSP
             }
         }
 
-        //Разрешить декодирование звука через DirectShowSource
+        //Р Р°Р·СЂРµС€РёС‚СЊ РґРµРєРѕРґРёСЂРѕРІР°РЅРёРµ Р·РІСѓРєР° С‡РµСЂРµР· DirectShowSource
         public static bool DSS_Enable_Audio
         {
             get
@@ -619,7 +619,7 @@ namespace XviD4PSP
             }
         }
 
-        //Разрешить декодирование звука через FFmpegSource
+        //Р Р°Р·СЂРµС€РёС‚СЊ РґРµРєРѕРґРёСЂРѕРІР°РЅРёРµ Р·РІСѓРєР° С‡РµСЂРµР· FFmpegSource
         public static bool FFMS_Enable_Audio
         {
             get
@@ -1061,7 +1061,7 @@ namespace XviD4PSP
             }
         }
 
-        //Значение для ползунка регулятора громкости 
+        //Р—РЅР°С‡РµРЅРёРµ РґР»СЏ РїРѕР»Р·СѓРЅРєР° СЂРµРіСѓР»СЏС‚РѕСЂР° РіСЂРѕРјРєРѕСЃС‚Рё 
         public static double VolumeLevel
         {
             get
@@ -1074,7 +1074,7 @@ namespace XviD4PSP
             }
         }
 
-        //Разрешает/запрещает изменять размер основного окна при запуске
+        //Р Р°Р·СЂРµС€Р°РµС‚/Р·Р°РїСЂРµС‰Р°РµС‚ РёР·РјРµРЅСЏС‚СЊ СЂР°Р·РјРµСЂ РѕСЃРЅРѕРІРЅРѕРіРѕ РѕРєРЅР° РїСЂРё Р·Р°РїСѓСЃРєРµ
         public static bool WindowResize
         {
             get
@@ -1096,7 +1096,7 @@ namespace XviD4PSP
             }
         }
 
-        //Положение окна
+        //РџРѕР»РѕР¶РµРЅРёРµ РѕРєРЅР°
         public static string WindowLocation
         {
             get
@@ -1115,7 +1115,7 @@ namespace XviD4PSP
             }
         }
 
-        //Размер области для заданий
+        //Р Р°Р·РјРµСЂ РѕР±Р»Р°СЃС‚Рё РґР»СЏ Р·Р°РґР°РЅРёР№
         public static string TasksRows
         {
             get
@@ -1136,7 +1136,7 @@ namespace XviD4PSP
             }
         }
 
-        //Разрешает или запрещает удалять из текста скрипта комментарии (#)
+        //Р Р°Р·СЂРµС€Р°РµС‚ РёР»Рё Р·Р°РїСЂРµС‰Р°РµС‚ СѓРґР°Р»СЏС‚СЊ РёР· С‚РµРєСЃС‚Р° СЃРєСЂРёРїС‚Р° РєРѕРјРјРµРЅС‚Р°СЂРёРё (#)
         public static bool HideComments
         {
             get
@@ -1158,7 +1158,7 @@ namespace XviD4PSP
             }
         }
 
-        //Кроп/ресайз до или после фильтрации
+        //РљСЂРѕРї/СЂРµСЃР°Р№Р· РґРѕ РёР»Рё РїРѕСЃР»Рµ С„РёР»СЊС‚СЂР°С†РёРё
         public static bool ResizeFirst
         {
             get
@@ -1180,7 +1180,7 @@ namespace XviD4PSP
             }
         }
 
-        //Кол-во кадров для анализа автокропа
+        //РљРѕР»-РІРѕ РєР°РґСЂРѕРІ РґР»СЏ Р°РЅР°Р»РёР·Р° Р°РІС‚РѕРєСЂРѕРїР°
         public static int AutocropFrames
         {
             get
@@ -1202,29 +1202,28 @@ namespace XviD4PSP
             }
         }
 
-        //Пересчет аспекта при ручном кропе
-        public static bool RecalculateAspect
+        //РџРµСЂРµСЃС‡РµС‚ Р·РЅР°С‡РµРЅРёР№ РїСЂРё СЂСѓС‡РЅРѕРј РєСЂРѕРїРµ
+        public static AspectResolution.CropRecalculate CropRecalculate
         {
             get
             {
-                object value = GetValue("RecalculateAspect");
+                object value = GetValue("CropRecalculate");
                 if (value == null)
                 {
-                    SetBool("RecalculateAspect", true);
-                    return true;
+                    return AspectResolution.CropRecalculate.Aspect;
                 }
                 else
                 {
-                    return Convert.ToBoolean(value);
+                    return (AspectResolution.CropRecalculate)Enum.Parse(typeof(AspectResolution.CropRecalculate), value.ToString(), true);
                 }
             }
             set
             {
-                SetBool("RecalculateAspect", value);
+                SetString("CropRecalculate", value.ToString());
             }
         }
 
-        //Переиндексация для FFmpegSource2
+        //РџРµСЂРµРёРЅРґРµРєСЃР°С†РёСЏ РґР»СЏ FFmpegSource2
         public static bool FFMS_Reindex
         {
             get
@@ -1245,7 +1244,7 @@ namespace XviD4PSP
             }
         }
 
-        //Извлекать таймкоды при индексации (FFmpegSource2)
+        //РР·РІР»РµРєР°С‚СЊ С‚Р°Р№РјРєРѕРґС‹ РїСЂРё РёРЅРґРµРєСЃР°С†РёРё (FFmpegSource2)
         public static bool FFMS_TimeCodes
         {
             get
@@ -1266,7 +1265,7 @@ namespace XviD4PSP
             }
         }
 
-        //Перечитывать или нет параметры видео из скрипта, при сохранении задания
+        //РџРµСЂРµС‡РёС‚С‹РІР°С‚СЊ РёР»Рё РЅРµС‚ РїР°СЂР°РјРµС‚СЂС‹ РІРёРґРµРѕ РёР· СЃРєСЂРёРїС‚Р°, РїСЂРё СЃРѕС…СЂР°РЅРµРЅРёРё Р·Р°РґР°РЅРёСЏ
         public static bool ReadScript
         {
             get
@@ -1288,7 +1287,7 @@ namespace XviD4PSP
             }
         }
 
-        //Записывать лог кодирования в файл
+        //Р—Р°РїРёСЃС‹РІР°С‚СЊ Р»РѕРі РєРѕРґРёСЂРѕРІР°РЅРёСЏ РІ С„Р°Р№Р»
         public static bool WriteLog
         {
             get
@@ -1310,7 +1309,7 @@ namespace XviD4PSP
             }
         }
 
-        //Сохранять файл лога кодирования во временную папку
+        //РЎРѕС…СЂР°РЅСЏС‚СЊ С„Р°Р№Р» Р»РѕРіР° РєРѕРґРёСЂРѕРІР°РЅРёСЏ РІРѕ РІСЂРµРјРµРЅРЅСѓСЋ РїР°РїРєСѓ
         public static bool LogInTemp
         {
             get
@@ -1352,7 +1351,7 @@ namespace XviD4PSP
             }
         }
 
-        //Автозапуск кодирования после открытия всех файлов (при пакетной обработке)
+        //РђРІС‚РѕР·Р°РїСѓСЃРє РєРѕРґРёСЂРѕРІР°РЅРёСЏ РїРѕСЃР»Рµ РѕС‚РєСЂС‹С‚РёСЏ РІСЃРµС… С„Р°Р№Р»РѕРІ (РїСЂРё РїР°РєРµС‚РЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРµ)
         public static bool AutoBatchEncoding
         {
             get
@@ -1374,7 +1373,7 @@ namespace XviD4PSP
             }
         }
 
-        //Авто ForceFilm при индексации DGIndex`ом
+        //РђРІС‚Рѕ ForceFilm РїСЂРё РёРЅРґРµРєСЃР°С†РёРё DGIndex`РѕРј
         public static bool DGForceFilm
         {
             get
@@ -1395,7 +1394,7 @@ namespace XviD4PSP
             }
         }
 
-        //Процент Film для Auto ForceFilm
+        //РџСЂРѕС†РµРЅС‚ Film РґР»СЏ Auto ForceFilm
         public static int DGFilmPercent
         {
             get
@@ -1410,7 +1409,7 @@ namespace XviD4PSP
             }
         }
 
-        //DGIndex-кэш в Темп-папку
+        //DGIndex-РєСЌС€ РІ РўРµРјРї-РїР°РїРєСѓ
         public static bool DGIndexInTemp
         {
             get
@@ -1431,7 +1430,7 @@ namespace XviD4PSP
             }
         }
 
-        //Папка для batch-encoding исходников
+        //РџР°РїРєР° РґР»СЏ batch-encoding РёСЃС…РѕРґРЅРёРєРѕРІ
         public static string BatchPath
         {
             get
@@ -1452,7 +1451,7 @@ namespace XviD4PSP
             }
         }
             
-        //Папка для batch-encoding перекодированного
+        //РџР°РїРєР° РґР»СЏ batch-encoding РїРµСЂРµРєРѕРґРёСЂРѕРІР°РЅРЅРѕРіРѕ
         public static string BatchEncodedPath
         {
             get
@@ -1473,7 +1472,7 @@ namespace XviD4PSP
             }
         }
 
-        //OldSeeking - непрерывное позиционирование
+        //OldSeeking - РЅРµРїСЂРµСЂС‹РІРЅРѕРµ РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ
         public static bool OldSeeking
         {
             get
@@ -1514,7 +1513,7 @@ namespace XviD4PSP
             }
         }
 
-        //Использовать FFmpeg-инфу об AR открываемого файла
+        //РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ FFmpeg-РёРЅС„Сѓ РѕР± AR РѕС‚РєСЂС‹РІР°РµРјРѕРіРѕ С„Р°Р№Р»Р°
         public static bool UseFFmpegAR
         {
             get
@@ -1735,7 +1734,7 @@ namespace XviD4PSP
             }
         }
 
-        //Новый способ определения задержки (относительно видео-трека, эквивалент "Video delay" в MediaInfo).
+        //РќРѕРІС‹Р№ СЃРїРѕСЃРѕР± РѕРїСЂРµРґРµР»РµРЅРёСЏ Р·Р°РґРµСЂР¶РєРё (РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РІРёРґРµРѕ-С‚СЂРµРєР°, СЌРєРІРёРІР°Р»РµРЅС‚ "Video delay" РІ MediaInfo).
         public static bool NewDelayMethod
         {
             get
@@ -1957,7 +1956,7 @@ namespace XviD4PSP
             }
         }
 
-        //Цвет фона:текста для окна ScriptView
+        //Р¦РІРµС‚ С„РѕРЅР°:С‚РµРєСЃС‚Р° РґР»СЏ РѕРєРЅР° ScriptView
         public static string ScriptView_Brushes
         {           
             get
@@ -1979,7 +1978,7 @@ namespace XviD4PSP
             }
         }
 
-        //Разрешаем иконку в трее
+        //Р Р°Р·СЂРµС€Р°РµРј РёРєРѕРЅРєСѓ РІ С‚СЂРµРµ
         public static bool TrayIconIsEnabled
         {
             get
@@ -2000,7 +1999,7 @@ namespace XviD4PSP
             }
         }
 
-        //В трей при закрытии программы
+        //Р’ С‚СЂРµР№ РїСЂРё Р·Р°РєСЂС‹С‚РёРё РїСЂРѕРіСЂР°РјРјС‹
         public static bool TrayClose
         {
             get
@@ -2021,7 +2020,7 @@ namespace XviD4PSP
             }
         }
         
-        //В трей при сворачивании окна
+        //Р’ С‚СЂРµР№ РїСЂРё СЃРІРѕСЂР°С‡РёРІР°РЅРёРё РѕРєРЅР°
         public static bool TrayMinimize
         {
             get
@@ -2042,7 +2041,7 @@ namespace XviD4PSP
             }
         }
 
-        //Одинарный клик по иконке для восстановления окна
+        //РћРґРёРЅР°СЂРЅС‹Р№ РєР»РёРє РїРѕ РёРєРѕРЅРєРµ РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РѕРєРЅР°
         public static bool TrayClickOnce
         {
             get
@@ -2063,7 +2062,7 @@ namespace XviD4PSP
             }
         }
 
-        //Запретить всплывающие сообщения в трее
+        //Р—Р°РїСЂРµС‚РёС‚СЊ РІСЃРїР»С‹РІР°СЋС‰РёРµ СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‚СЂРµРµ
         public static bool TrayNoBalloons
         {
             get
@@ -2084,7 +2083,7 @@ namespace XviD4PSP
             }
         }
 
-        //Рендерер для DirectShow движка превью
+        //Р РµРЅРґРµСЂРµСЂ РґР»СЏ DirectShow РґРІРёР¶РєР° РїСЂРµРІСЊСЋ
         public static VRenderers VideoRenderer
         {
             get
@@ -2105,7 +2104,7 @@ namespace XviD4PSP
             }
         }
 
-        //Кодировать сначала звук, потом видео
+        //РљРѕРґРёСЂРѕРІР°С‚СЊ СЃРЅР°С‡Р°Р»Р° Р·РІСѓРє, РїРѕС‚РѕРј РІРёРґРµРѕ
         public static bool EncodeAudioFirst
         {
             get
@@ -2146,7 +2145,7 @@ namespace XviD4PSP
             }
         }
 
-        //Charset для сообщений mkvmerge, mkvextract, mkvinfo
+        //Charset РґР»СЏ СЃРѕРѕР±С‰РµРЅРёР№ mkvmerge, mkvextract, mkvinfo
         public static string MKVToolnix_Charset
         {
             get
@@ -2168,7 +2167,7 @@ namespace XviD4PSP
             }
         }
 
-        //Обрабатывать звук при открытии файлов
+        //РћР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ Р·РІСѓРє РїСЂРё РѕС‚РєСЂС‹С‚РёРё С„Р°Р№Р»РѕРІ
         public static bool EnableAudio
         {
             get
@@ -2189,7 +2188,7 @@ namespace XviD4PSP
             }
         }
 
-        //Анализировать % (SourceDetector)
+        //РђРЅР°Р»РёР·РёСЂРѕРІР°С‚СЊ % (SourceDetector)
         public static double SD_Analyze
         {
             get
@@ -2202,7 +2201,7 @@ namespace XviD4PSP
             }
         }
 
-        //Минимум секций (блоков по 5 кадров) для анализа (SourceDetector)
+        //РњРёРЅРёРјСѓРј СЃРµРєС†РёР№ (Р±Р»РѕРєРѕРІ РїРѕ 5 РєР°РґСЂРѕРІ) РґР»СЏ Р°РЅР°Р»РёР·Р° (SourceDetector)
         public static int SD_Min_Sections
         {
             get
@@ -2220,7 +2219,7 @@ namespace XviD4PSP
             }
         }
 
-        //Порог для Hybrid Interlace % (SourceDetector)
+        //РџРѕСЂРѕРі РґР»СЏ Hybrid Interlace % (SourceDetector)
         public static int SD_Hybrid_Int
         {
             get
@@ -2238,7 +2237,7 @@ namespace XviD4PSP
             }
         }
 
-        //Порог для Hybrid FieldOrder % (SourceDetector)
+        //РџРѕСЂРѕРі РґР»СЏ Hybrid FieldOrder % (SourceDetector)
         public static int SD_Hybrid_FO
         {
             get
@@ -2256,7 +2255,7 @@ namespace XviD4PSP
             }
         }
 
-        //Выборочный анализ полей (SourceDetector)
+        //Р’С‹Р±РѕСЂРѕС‡РЅС‹Р№ Р°РЅР°Р»РёР· РїРѕР»РµР№ (SourceDetector)
         public static bool SD_Portions_FO
         {
             get
@@ -2277,7 +2276,7 @@ namespace XviD4PSP
             }
         }
 
-        //Пресет для FFRebuilder`а
+        //РџСЂРµСЃРµС‚ РґР»СЏ FFRebuilder`Р°
         public static string FFRebuilder_Profile
         {
             get
@@ -2298,7 +2297,7 @@ namespace XviD4PSP
             }
         }
 
-        //Путь до Windows Media Player
+        //РџСѓС‚СЊ РґРѕ Windows Media Player
         public static string WMP_Path
         {
             get
@@ -2319,7 +2318,7 @@ namespace XviD4PSP
             }
         }
 
-        //Путь до Media Player Classic
+        //РџСѓС‚СЊ РґРѕ Media Player Classic
         public static string MPC_Path
         {
             get
@@ -2329,7 +2328,7 @@ namespace XviD4PSP
                 {
                     string path = "";
 
-                    //Сначала пробуем найти путь к плейеру через реестр
+                    //РЎРЅР°С‡Р°Р»Р° РїСЂРѕР±СѓРµРј РЅР°Р№С‚Рё РїСѓС‚СЊ Рє РїР»РµР№РµСЂСѓ С‡РµСЂРµР· СЂРµРµСЃС‚СЂ
                     using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Gabest\Media Player Classic", false))
                     {
                         if (key != null)
@@ -2339,7 +2338,7 @@ namespace XviD4PSP
                         }
                     }
 
-                    //Если не вышло, ищем во всех возможных местах
+                    //Р•СЃР»Рё РЅРµ РІС‹С€Р»Рѕ, РёС‰РµРј РІРѕ РІСЃРµС… РІРѕР·РјРѕР¶РЅС‹С… РјРµСЃС‚Р°С…
                     if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\K-Lite Codec Pack\\Media Player Classic\\mpc-hc.exe"))
                         if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\Media Player Classic - Home Cinema\\mpc-hc.exe"))
                             if (!File.Exists(path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\MPC HomeCinema\\mpc-hc.exe"))
@@ -2362,7 +2361,7 @@ namespace XviD4PSP
             }
         }
 
-        //Путь до WPF_VideoPlayer
+        //РџСѓС‚СЊ РґРѕ WPF_VideoPlayer
         public static string WPF_Path
         {
             get
@@ -2383,7 +2382,7 @@ namespace XviD4PSP
             }
         }
 
-        //Выбор версии XviD (true = новая 1.3.0)
+        //Р’С‹Р±РѕСЂ РІРµСЂСЃРёРё XviD (true = РЅРѕРІР°СЏ 1.3.0)
         public static bool UseXviD_130
         {
             get
@@ -2404,7 +2403,7 @@ namespace XviD4PSP
             }
         }
 
-        //Поддержка таскбара в Windows 7
+        //РџРѕРґРґРµСЂР¶РєР° С‚Р°СЃРєР±Р°СЂР° РІ Windows 7
         public static bool Win7TaskbarIsEnabled
         {
             get
@@ -2426,7 +2425,7 @@ namespace XviD4PSP
             }
         }
 
-        //Создавать резервную копию списка заданий
+        //РЎРѕР·РґР°РІР°С‚СЊ СЂРµР·РµСЂРІРЅСѓСЋ РєРѕРїРёСЋ СЃРїРёСЃРєР° Р·Р°РґР°РЅРёР№
         public static bool EnableBackup
         {
             get
@@ -2447,7 +2446,7 @@ namespace XviD4PSP
             }
         }
 
-        //Проверять пути на "нехорошие" символы
+        //РџСЂРѕРІРµСЂСЏС‚СЊ РїСѓС‚Рё РЅР° "РЅРµС…РѕСЂРѕС€РёРµ" СЃРёРјРІРѕР»С‹
         public static bool ValidatePathes
         {
             get
@@ -2468,7 +2467,7 @@ namespace XviD4PSP
             }
         }
 
-        //DRC для NicAC3Source
+        //DRC РґР»СЏ NicAC3Source
         public static bool NicAC3_DRC
         {
             get
@@ -2489,7 +2488,7 @@ namespace XviD4PSP
             }
         }
 
-        //DRC для NicDTSSource
+        //DRC РґР»СЏ NicDTSSource
         public static bool NicDTS_DRC
         {
             get
@@ -2544,7 +2543,7 @@ namespace XviD4PSP
             }
         }
 
-        //Помечать интерлейсные кадры (Hybrid Progressive Interlaced)
+        //РџРѕРјРµС‡Р°С‚СЊ РёРЅС‚РµСЂР»РµР№СЃРЅС‹Рµ РєР°РґСЂС‹ (Hybrid Progressive Interlaced)
         public static bool IsCombed_Mark
         {
             get
@@ -2601,7 +2600,7 @@ namespace XviD4PSP
             }
         }
 
-        //Кол-во потоков для FFmpegSource2
+        //РљРѕР»-РІРѕ РїРѕС‚РѕРєРѕРІ РґР»СЏ FFmpegSource2
         public static int FFMS_Threads
         {
             get
@@ -2622,7 +2621,7 @@ namespace XviD4PSP
             }
         }
 
-        //Использовать AR из потока (Original AR в MediaInfo)
+        //РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ AR РёР· РїРѕС‚РѕРєР° (Original AR РІ MediaInfo)
         public static bool MI_Original_AR
         {
             get
@@ -2643,7 +2642,7 @@ namespace XviD4PSP
             }
         }
 
-        //Использовать fps из потока (Original fps в MediaInfo)
+        //РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ fps РёР· РїРѕС‚РѕРєР° (Original fps РІ MediaInfo)
         public static bool MI_Original_fps
         {
             get
@@ -2664,7 +2663,7 @@ namespace XviD4PSP
             }
         }
 
-        //Разрешить нестандартные fps на выход (отключает автоподгонку fps до ближайшего стандартного значения)
+        //Р Р°Р·СЂРµС€РёС‚СЊ РЅРµСЃС‚Р°РЅРґР°СЂС‚РЅС‹Рµ fps РЅР° РІС‹С…РѕРґ (РѕС‚РєР»СЋС‡Р°РµС‚ Р°РІС‚РѕРїРѕРґРіРѕРЅРєСѓ fps РґРѕ Р±Р»РёР¶Р°Р№С€РµРіРѕ СЃС‚Р°РЅРґР°СЂС‚РЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ)
         public static bool Nonstandard_fps
         {
             get
@@ -2685,8 +2684,8 @@ namespace XviD4PSP
             }
         }
 
-        //Переключает автокроп из режима обрезки по наименьшим значениям в режим
-        //обрезки по наиболее часто встречающимся значениям (при анализе от 5-ти кадров)
+        //РџРµСЂРµРєР»СЋС‡Р°РµС‚ Р°РІС‚РѕРєСЂРѕРї РёР· СЂРµР¶РёРјР° РѕР±СЂРµР·РєРё РїРѕ РЅР°РёРјРµРЅСЊС€РёРј Р·РЅР°С‡РµРЅРёСЏРј РІ СЂРµР¶РёРј
+        //РѕР±СЂРµР·РєРё РїРѕ РЅР°РёР±РѕР»РµРµ С‡Р°СЃС‚Рѕ РІСЃС‚СЂРµС‡Р°СЋС‰РёРјСЃСЏ Р·РЅР°С‡РµРЅРёСЏРј (РїСЂРё Р°РЅР°Р»РёР·Рµ РѕС‚ 5-С‚Рё РєР°РґСЂРѕРІ)
         public static bool AutocropMostCommon
         {
             get
@@ -2707,7 +2706,7 @@ namespace XviD4PSP
             }
         }
 
-        //Перенос строк в окне MediaInfo
+        //РџРµСЂРµРЅРѕСЃ СЃС‚СЂРѕРє РІ РѕРєРЅРµ MediaInfo
         public static bool MI_WrapText
         {
             get
@@ -2728,7 +2727,7 @@ namespace XviD4PSP
             }
         }
 
-        //Отмена кодирования зависших заданий
+        //РћС‚РјРµРЅР° РєРѕРґРёСЂРѕРІР°РЅРёСЏ Р·Р°РІРёСЃС€РёС… Р·Р°РґР°РЅРёР№
         public static bool AutoAbortEncoding
         {
             get
@@ -2749,7 +2748,7 @@ namespace XviD4PSP
             }
         }
 
-        //Режим автовыбора звуковой дорожки
+        //Р РµР¶РёРј Р°РІС‚РѕРІС‹Р±РѕСЂР° Р·РІСѓРєРѕРІРѕР№ РґРѕСЂРѕР¶РєРё
         public static ATrackModes DefaultATrackMode
         {
             get
@@ -2766,7 +2765,7 @@ namespace XviD4PSP
             }
         }
 
-        //Язык дорожки для автовыбора
+        //РЇР·С‹Рє РґРѕСЂРѕР¶РєРё РґР»СЏ Р°РІС‚РѕРІС‹Р±РѕСЂР°
         public static string DefaultATrackLang
         {
             get
@@ -2787,7 +2786,7 @@ namespace XviD4PSP
             }
         }
 
-        //Номер дорожки для автовыбора (отсчет с 1)
+        //РќРѕРјРµСЂ РґРѕСЂРѕР¶РєРё РґР»СЏ Р°РІС‚РѕРІС‹Р±РѕСЂР° (РѕС‚СЃС‡РµС‚ СЃ 1)
         public static int DefaultATrackNum
         {
             get
@@ -2808,7 +2807,7 @@ namespace XviD4PSP
             }
         }
 
-        //Ширина первой (левой) колонки в логе MediaInfo
+        //РЁРёСЂРёРЅР° РїРµСЂРІРѕР№ (Р»РµРІРѕР№) РєРѕР»РѕРЅРєРё РІ Р»РѕРіРµ MediaInfo
         public static string MI_ColumnSize
         {
             get

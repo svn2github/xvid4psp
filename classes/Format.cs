@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
@@ -240,7 +240,7 @@ namespace XviD4PSP
                if (ext == "dgi") return AviSynthScripting.Decoders.DGMultiSource;
            }
 
-           string mpeg_dec = "", other_dec = AviSynthScripting.Decoders.DirectShowSource.ToString(); //Дефолты
+           string mpeg_dec = "", other_dec = AviSynthScripting.Decoders.DirectShowSource.ToString(); //Р”РµС„РѕР»С‚С‹
            foreach (string line in (Settings.VDecoders.ToLower().Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)))
            {
                string[] extension_and_decoder = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
@@ -253,7 +253,7 @@ namespace XviD4PSP
                    else if (extension == Decoders_Settings.other_files) other_dec = decoder;
                    else if (extension == ext && decoder.Length > 0)
                    {
-                       //Мы нашли декодер для этого расширения
+                       //РњС‹ РЅР°С€Р»Рё РґРµРєРѕРґРµСЂ РґР»СЏ СЌС‚РѕРіРѕ СЂР°СЃС€РёСЂРµРЅРёСЏ
                        return (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), decoder, true);
                    }
                }
@@ -281,7 +281,7 @@ namespace XviD4PSP
 
                if (ext == "avs")
                {
-                   instream.decoder = AviSynthScripting.Decoders.WAVSource; //Нет, не Import
+                   instream.decoder = AviSynthScripting.Decoders.WAVSource; //РќРµС‚, РЅРµ Import
                    return instream;
                }
                if (ext == "grf")
@@ -290,7 +290,7 @@ namespace XviD4PSP
                    return instream;
                }
 
-               string other_dec = AviSynthScripting.Decoders.bassAudioSource.ToString(); //Дефолт
+               string other_dec = AviSynthScripting.Decoders.bassAudioSource.ToString(); //Р”РµС„РѕР»С‚
                foreach (string line in (Settings.ADecoders.ToLower().Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)))
                {
                    string[] extension_and_decoder = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
@@ -302,7 +302,7 @@ namespace XviD4PSP
                        if (extension == Decoders_Settings.other_files) other_dec = decoder;
                        else if (extension == ext && decoder.Length > 0)
                        {
-                           //Мы нашли декодер для этого расширения
+                           //РњС‹ РЅР°С€Р»Рё РґРµРєРѕРґРµСЂ РґР»СЏ СЌС‚РѕРіРѕ СЂР°СЃС€РёСЂРµРЅРёСЏ
                            instream.decoder = (AviSynthScripting.Decoders)Enum.Parse(typeof(AviSynthScripting.Decoders), decoder, true);
                            return instream;
                        }
@@ -503,13 +503,13 @@ namespace XviD4PSP
                }
            }
 
-           //получаем правильный samplerate конвертер
+           //РїРѕР»СѓС‡Р°РµРј РїСЂР°РІРёР»СЊРЅС‹Р№ samplerate РєРѕРЅРІРµСЂС‚РµСЂ
            m = GetValidSamplerateModifer(m);
 
            return m;
        }
 
-       //Хоть это и из инструкции, но некоторые недопустимые частоты не отлавливаются (42240->32000)
+       //РҐРѕС‚СЊ СЌС‚Рѕ Рё РёР· РёРЅСЃС‚СЂСѓРєС†РёРё, РЅРѕ РЅРµРєРѕС‚РѕСЂС‹Рµ РЅРµРґРѕРїСѓСЃС‚РёРјС‹Рµ С‡Р°СЃС‚РѕС‚С‹ РЅРµ РѕС‚Р»Р°РІР»РёРІР°СЋС‚СЃСЏ (42240->32000)
        public static Massive GetValidSamplerateModifer(Massive m)
        {
            if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 &&
@@ -606,7 +606,7 @@ namespace XviD4PSP
            }
            else
            {
-               //Пересчет fps с учетом деинтерлейсера и ограничений форматов
+               //РџРµСЂРµСЃС‡РµС‚ fps СЃ СѓС‡РµС‚РѕРј РґРµРёРЅС‚РµСЂР»РµР№СЃРµСЂР° Рё РѕРіСЂР°РЅРёС‡РµРЅРёР№ С„РѕСЂРјР°С‚РѕРІ
                m = Calculate.UpdateOutFramerate(m);
            }
 
@@ -682,7 +682,7 @@ namespace XviD4PSP
 
        public static void GetLimitedRes(Format.ExportFormats format, ref int MaxW, ref int MaxH)
        {
-           //Максимальное разрешение, устанавливаемое в Авто-режиме
+           //РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ СЂР°Р·СЂРµС€РµРЅРёРµ, СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРјРѕРµ РІ РђРІС‚Рѕ-СЂРµР¶РёРјРµ
            if (Formats.GetDefaults(format).IsEditable)
            {
                if (Formats.GetDefaults(format).Resolution_IsEditable)
@@ -703,7 +703,7 @@ namespace XviD4PSP
            ArrayList wlist = GetResWList(m);
            ArrayList hlist = GetResHList(m);
 
-           //Определяем лимиты
+           //РћРїСЂРµРґРµР»СЏРµРј Р»РёРјРёС‚С‹
            int MaxW = (int)wlist[wlist.Count - 1];
            int MaxH = (int)hlist[hlist.Count - 1];
            GetLimitedRes(m.format, ref MaxW, ref MaxH);
@@ -717,39 +717,39 @@ namespace XviD4PSP
                    anamorph_allowed = Formats.GetDefaults(m.format).Anamorphic;
            }
 
-           //Обработка анаморфа
+           //РћР±СЂР°Р±РѕС‚РєР° Р°РЅР°РјРѕСЂС„Р°
            if (anamorph_allowed || m.aspectfix == AspectResolution.AspectFixes.SAR)
            {
                if (m.blackh == 0 && m.blackw == 0)
                {
-                   //Накладываем лимиты
+                   //РќР°РєР»Р°РґС‹РІР°РµРј Р»РёРјРёС‚С‹
                    int w = Math.Min(m.inresw, MaxW);
                    int h = Math.Min(m.inresh, MaxH);
 
-                   //Если у нас анаморф на входе или сработали лимиты
+                   //Р•СЃР»Рё Сѓ РЅР°СЃ Р°РЅР°РјРѕСЂС„ РЅР° РІС…РѕРґРµ РёР»Рё СЃСЂР°Р±РѕС‚Р°Р»Рё Р»РёРјРёС‚С‹
                    if ((double)m.inresw / (double)m.inresh != m.inaspect ||
                        m.inresw != w || m.inresh != h)
                    {
-                       //Пересчет разрешения с учетом откропленного и лимитов
+                       //РџРµСЂРµСЃС‡РµС‚ СЂР°Р·СЂРµС€РµРЅРёСЏ СЃ СѓС‡РµС‚РѕРј РѕС‚РєСЂРѕРїР»РµРЅРЅРѕРіРѕ Рё Р»РёРјРёС‚РѕРІ
                        w = Math.Min(m.inresw - m.cropl - m.cropr, MaxW);
                        h = Math.Min(m.inresh - m.cropt - m.cropb, MaxH);
                        m.aspectfix = AspectResolution.AspectFixes.SAR;
                    }
 
-                   //Еще раз перепроверяем
+                   //Р•С‰Рµ СЂР°Р· РїРµСЂРµРїСЂРѕРІРµСЂСЏРµРј
                    m.outresw = Calculate.GetCloseIntegerAL(w, wlist);
                    m.outresh = Calculate.GetCloseIntegerAL(h, hlist);
                    return m;
                }
            }
 
-           //ограничение W*H
+           //РѕРіСЂР°РЅРёС‡РµРЅРёРµ W*H
            int limit = (int)wlist[wlist.Count - 1] * (int)hlist[hlist.Count - 1];
            if (m.format == ExportFormats.Mp4PSPASP) limit = 100100;
 
-           //первичное получение разрешений
+           //РїРµСЂРІРёС‡РЅРѕРµ РїРѕР»СѓС‡РµРЅРёРµ СЂР°Р·СЂРµС€РµРЅРёР№
            m.outresw = Calculate.GetCloseIntegerAL(m.inresw, wlist);
-           m.outresh = Convert.ToInt32(m.outresw / m.inaspect); //Высота
+           m.outresh = Convert.ToInt32(m.outresw / m.inaspect); //Р’С‹СЃРѕС‚Р°
 
            if (m.outresh > MaxH)
            {
@@ -762,10 +762,10 @@ namespace XviD4PSP
                m.outresh = Calculate.GetCloseIntegerAL(m.outresh, hlist); //Convert.ToInt32(m.outresw / m.inaspect), hlist);
            }
 
-           //выбираем по какой стороне подбирать
+           //РІС‹Р±РёСЂР°РµРј РїРѕ РєР°РєРѕР№ СЃС‚РѕСЂРѕРЅРµ РїРѕРґР±РёСЂР°С‚СЊ
            if (m.outresh > MaxH)
            {
-               //перебираем пока разрешение не будет в норме
+               //РїРµСЂРµР±РёСЂР°РµРј РїРѕРєР° СЂР°Р·СЂРµС€РµРЅРёРµ РЅРµ Р±СѓРґРµС‚ РІ РЅРѕСЂРјРµ
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
                    m.outresh = Calculate.GetCloseIntegerAL(m.outresh - GetValidModH(m.format), hlist);
@@ -774,7 +774,7 @@ namespace XviD4PSP
            }
            else
            {
-               //перебираем пока разрешение не будет в норме
+               //РїРµСЂРµР±РёСЂР°РµРј РїРѕРєР° СЂР°Р·СЂРµС€РµРЅРёРµ РЅРµ Р±СѓРґРµС‚ РІ РЅРѕСЂРјРµ
                while ((m.outresw * m.outresh) > limit || m.outresw > MaxW || m.outresh > MaxH)
                {
                    m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m.format), wlist);
@@ -802,33 +802,33 @@ namespace XviD4PSP
            ArrayList wlist = GetResWList(m);
            ArrayList hlist = GetResHList(m);
 
-           //При кодировании с сохранением анаморфа, высота равна исходной высоте минус всё что откроплено. 
+           //РџСЂРё РєРѕРґРёСЂРѕРІР°РЅРёРё СЃ СЃРѕС…СЂР°РЅРµРЅРёРµРј Р°РЅР°РјРѕСЂС„Р°, РІС‹СЃРѕС‚Р° СЂР°РІРЅР° РёСЃС…РѕРґРЅРѕР№ РІС‹СЃРѕС‚Рµ РјРёРЅСѓСЃ РІСЃС‘ С‡С‚Рѕ РѕС‚РєСЂРѕРїР»РµРЅРѕ. 
            if (m.aspectfix == AspectResolution.AspectFixes.SAR)
            {
-               //Определяем лимит
+               //РћРїСЂРµРґРµР»СЏРµРј Р»РёРјРёС‚
                int MaxW = 0;
                int MaxH = (int)hlist[hlist.Count - 1];
                GetLimitedRes(m.format, ref MaxW, ref MaxH);
 
-               //Пересчет высоты с учетом откропленного и лимита
+               //РџРµСЂРµСЃС‡РµС‚ РІС‹СЃРѕС‚С‹ СЃ СѓС‡РµС‚РѕРј РѕС‚РєСЂРѕРїР»РµРЅРЅРѕРіРѕ Рё Р»РёРјРёС‚Р°
                m.outresh = Calculate.GetCloseIntegerAL(Math.Min(m.inresh - m.cropt - m.cropb, MaxH), hlist);
                return m;
            }
 
-           //ограничение W*H
+           //РѕРіСЂР°РЅРёС‡РµРЅРёРµ W*H
            int limit = (int)wlist[wlist.Count - 1] * (int)hlist[hlist.Count - 1];
            if (m.format == ExportFormats.Mp4PSPASP) limit = 100100;
 
-           //первичное получение разрешений
+           //РїРµСЂРІРёС‡РЅРѕРµ РїРѕР»СѓС‡РµРЅРёРµ СЂР°Р·СЂРµС€РµРЅРёР№
            m.outresh = Convert.ToInt32(w / m.inaspect);
 
-           //выбираем по какой стороне подбирать
+           //РІС‹Р±РёСЂР°РµРј РїРѕ РєР°РєРѕР№ СЃС‚РѕСЂРѕРЅРµ РїРѕРґР±РёСЂР°С‚СЊ
            if (m.outresh > (int)hlist[hlist.Count - 1])
            {
                m.outresh = Calculate.GetCloseIntegerAL(m.outresh, hlist);
                m.outresw = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresh * m.inaspect), wlist);
 
-               //перебираем пока разрешение не будет в норме
+               //РїРµСЂРµР±РёСЂР°РµРј РїРѕРєР° СЂР°Р·СЂРµС€РµРЅРёРµ РЅРµ Р±СѓРґРµС‚ РІ РЅРѕСЂРјРµ
                while ((m.outresw * m.outresh) > limit)
                {
                    m.outresh = Calculate.GetCloseIntegerAL(m.inresh - GetValidModH(m.format), hlist);
@@ -839,7 +839,7 @@ namespace XviD4PSP
            {
                m.outresh = Calculate.GetCloseIntegerAL(Convert.ToInt32(m.outresw / m.inaspect), hlist);
 
-               //перебираем пока разрешение не будет в норме
+               //РїРµСЂРµР±РёСЂР°РµРј РїРѕРєР° СЂР°Р·СЂРµС€РµРЅРёРµ РЅРµ Р±СѓРґРµС‚ РІ РЅРѕСЂРјРµ
                while ((m.outresw * m.outresh) > limit)
                {
                    m.outresw = Calculate.GetCloseIntegerAL(m.outresw - GetValidModW(m.format), wlist);
@@ -1081,7 +1081,7 @@ namespace XviD4PSP
 
        public static bool Is4GBlimitedFormat(Massive m)
        {
-           //Просто выводит предупреждение, если ожидаемый размер файла > 4Gb
+           //РџСЂРѕСЃС‚Рѕ РІС‹РІРѕРґРёС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ, РµСЃР»Рё РѕР¶РёРґР°РµРјС‹Р№ СЂР°Р·РјРµСЂ С„Р°Р№Р»Р° > 4Gb
            if (m.format == ExportFormats.DpgNintendoDS)
                return true;
            else if (Formats.GetDefaults(m.format).IsEditable)
@@ -1253,7 +1253,7 @@ namespace XviD4PSP
 
            if (Formats.GetDefaults(m.format).IsEditable)
            {
-               //Точно выкл.
+               //РўРѕС‡РЅРѕ РІС‹РєР».
                if (Formats.GetDefaults(m.format).DirectRemuxing_IsEditable)
                {
                    if (!Formats.GetSettings(m.format, "DirectRemuxing", Formats.GetDefaults(m.format).DirectRemuxing))
@@ -1348,7 +1348,7 @@ namespace XviD4PSP
 
            Demuxers dem = GetDemuxer(m);
            if (dem == Demuxers.mp4box && ext == "avi") ext = "m4v";
-           //ffmpeg извлекает кривой raw-h264 (из mkv, mp4, mov, flv - точно, но из avi, mpg, ts, m2ts вроде нормальный)
+           //ffmpeg РёР·РІР»РµРєР°РµС‚ РєСЂРёРІРѕР№ raw-h264 (РёР· mkv, mp4, mov, flv - С‚РѕС‡РЅРѕ, РЅРѕ РёР· avi, mpg, ts, m2ts РІСЂРѕРґРµ РЅРѕСЂРјР°Р»СЊРЅС‹Р№)
            else if (dem == Demuxers.ffmpeg && ext == "h264" && fext != ".avi" && fext != ".mpg" && fext != ".ts" && fext != ".m2ts") ext = "mp4";
 
            //Muxers mux = GetMuxer(m);
@@ -1476,7 +1476,7 @@ namespace XviD4PSP
            }
            else if (Formats.GetDefaults(m.format).IsEditable)
            {
-               //Кодирование сразу в контейнер
+               //РљРѕРґРёСЂРѕРІР°РЅРёРµ СЃСЂР°Р·Сѓ РІ РєРѕРЅС‚РµР№РЅРµСЂ
                bool direct_encoding = false;
                if (Formats.GetDefaults(m.format).DirectEncoding_IsEditable)
                {
@@ -1490,7 +1490,7 @@ namespace XviD4PSP
                    string ext = GetValidExtension(m);
                    if (m.outaudiostreams.Count == 0)
                    {
-                       //Звука нет и видеокодер может кодировать сразу в нужный контейнер
+                       //Р—РІСѓРєР° РЅРµС‚ Рё РІРёРґРµРѕРєРѕРґРµСЂ РјРѕР¶РµС‚ РєРѕРґРёСЂРѕРІР°С‚СЊ СЃСЂР°Р·Сѓ РІ РЅСѓР¶РЅС‹Р№ РєРѕРЅС‚РµР№РЅРµСЂ
                        if (m.outvcodec == "x264" && (ext == ".mkv" || ext == ".mp4" || ext == ".flv" || ext == ".264" || ext == ".h264") ||
                            m.outvcodec == "XviD" && (ext == ".avi") ||
                            m.outvcodec == "HUFF" ||
@@ -1505,7 +1505,7 @@ namespace XviD4PSP
                    }
                    else
                    {
-                       //Видео и звук кодируются через FFmpeg
+                       //Р’РёРґРµРѕ Рё Р·РІСѓРє РєРѕРґРёСЂСѓСЋС‚СЃСЏ С‡РµСЂРµР· FFmpeg
                        if (m.outvcodec == "HUFF" ||
                            m.outvcodec == "FFV1" ||
                            m.outvcodec == "MJPEG" ||
@@ -1575,7 +1575,7 @@ namespace XviD4PSP
 
        public static Massive GetValidOutAspect(Massive m)
        {
-           //методы для форматов с фиксированным аспектом
+           //РјРµС‚РѕРґС‹ РґР»СЏ С„РѕСЂРјР°С‚РѕРІ СЃ С„РёРєСЃРёСЂРѕРІР°РЅРЅС‹Рј Р°СЃРїРµРєС‚РѕРј
            if (m.format == ExportFormats.BluRay)
            {
                m.outaspect = (double)m.outresw / (double)m.outresh;
@@ -1590,7 +1590,7 @@ namespace XviD4PSP
 
                if (Formats.GetDefaults(m.format).IsEditable)
                {
-                   //Анаморф
+                   //РђРЅР°РјРѕСЂС„
                    bool anamorphic = false;
                    if (Formats.GetDefaults(m.format).Anamorphic_IsEditable)
                        anamorphic = Formats.GetSettings(m.format, "Anamorphic", Formats.GetDefaults(m.format).Anamorphic);
@@ -1600,7 +1600,7 @@ namespace XviD4PSP
                    if (!anamorphic) m.sar = null;
                    else m = Calculate.CalculateSAR(m);
 
-                   //Метод изменения аспекта
+                   //РњРµС‚РѕРґ РёР·РјРµРЅРµРЅРёСЏ Р°СЃРїРµРєС‚Р°
                    if (Formats.GetDefaults(m.format).LockedAR_Methods.Length > 1)
                    {
                        string method = Formats.GetSettings(m.format, "LockedAR_Method", Formats.GetDefaults(m.format).LockedAR_Method);
@@ -1611,7 +1611,7 @@ namespace XviD4PSP
                                m.aspectfix = (AspectResolution.AspectFixes)Enum.Parse(typeof(AspectResolution.AspectFixes), method);
                                if (m.aspectfix == AspectResolution.AspectFixes.SAR && !anamorphic)
                                {
-                                   //Но анаморф не был разрешен..
+                                   //РќРѕ Р°РЅР°РјРѕСЂС„ РЅРµ Р±С‹Р» СЂР°Р·СЂРµС€РµРЅ..
                                    m.aspectfix = AspectResolution.AspectFixes.Disabled;
                                    m.outaspect = (double)m.outresw / (double)m.outresh;
                                }
@@ -1626,7 +1626,7 @@ namespace XviD4PSP
            }
            else
            {
-               //методы для остальных форматов
+               //РјРµС‚РѕРґС‹ РґР»СЏ РѕСЃС‚Р°Р»СЊРЅС‹С… С„РѕСЂРјР°С‚РѕРІ
                if (m.aspectfix == AspectResolution.AspectFixes.SAR)
                {
                    m.outaspect = m.inaspect;

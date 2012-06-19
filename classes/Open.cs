@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections;
 using System.IO;
 using System.Collections.Generic;
@@ -37,25 +37,25 @@ namespace XviD4PSP
 
             ArrayList files = GetFilesFromConsole("ovm");
 
-            if (files.Count > 1) //Мульти-открытие файлов
+            if (files.Count > 1) //РњСѓР»СЊС‚Рё-РѕС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»РѕРІ
             {
                 Massive m = new Massive();
-                //Временно будем использовать m.infileslist немного не по назначению (для передачи списка файлов)
+                //Р’СЂРµРјРµРЅРЅРѕ Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ m.infileslist РЅРµРјРЅРѕРіРѕ РЅРµ РїРѕ РЅР°Р·РЅР°С‡РµРЅРёСЋ (РґР»СЏ РїРµСЂРµРґР°С‡Рё СЃРїРёСЃРєР° С„Р°Р№Р»РѕРІ)
                 m.infileslist = files.ToArray(typeof(string)) as string[];
                 return m;
             }
 
-            if (files.Count == 1) //Обычное открытие
+            if (files.Count == 1) //РћР±С‹С‡РЅРѕРµ РѕС‚РєСЂС‹С‚РёРµ
                 infilepath = files[0].ToString();
 
             if (infilepath != null)
             {
-                //создаём массив и забиваем в него данные
+                //СЃРѕР·РґР°С‘Рј РјР°СЃСЃРёРІ Рё Р·Р°Р±РёРІР°РµРј РІ РЅРµРіРѕ РґР°РЅРЅС‹Рµ
                 Massive m = new Massive();
                 m.infilepath = infilepath;
                 m.infileslist = new string[] { infilepath };
 
-                //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
+                //РёС‰РµРј СЃРѕСЃРµРґРЅРёРµ С„Р°Р№Р»С‹ Рё СЃРїСЂР°С€РёРІР°РµРј РґРѕР±Р°РІРёС‚СЊ Р»Рё РёС… Рє Р·Р°РґР°РЅРёСЋ РїСЂРё РЅР°С…РѕР¶РґРµРЅРёРё С‚Р°РєРѕРІС‹С…
                 if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(m.infilepath) ||
                     Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
                     m = GetFriendFilesList(m);
@@ -67,7 +67,7 @@ namespace XviD4PSP
 
         public static string SaveDialog(Massive m)
         {
-            //для форматов с выводом в папку
+            //РґР»СЏ С„РѕСЂРјР°С‚РѕРІ СЃ РІС‹РІРѕРґРѕРј РІ РїР°РїРєСѓ
             if (m.format == Format.ExportFormats.BluRay)
             {
 
@@ -82,7 +82,7 @@ namespace XviD4PSP
                 {
                     Settings.BluRayPath = folder.SelectedPath;
 
-                    //проверяем есть ли файлы в папке
+                    //РїСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ Р»Рё С„Р°Р№Р»С‹ РІ РїР°РїРєРµ
                     if (Calculate.GetFolderSize(folder.SelectedPath) != 0)
                     {
                         Message mess = new Message(App.Current.MainWindow);
@@ -97,7 +97,7 @@ namespace XviD4PSP
                 else
                     return null;
             }
-            //для файловых форматов
+            //РґР»СЏ С„Р°Р№Р»РѕРІС‹С… С„РѕСЂРјР°С‚РѕРІ
             else
             {
                 SaveFileDialog s = new SaveFileDialog();
@@ -139,14 +139,14 @@ namespace XviD4PSP
                 if (Path.GetFileName(m.infilepath).ToUpper() != "VIDEO_TS.VOB")
                 {
                     string title = Calculate.GetTitleNum(m.infilepath);
-                    string dir = Path.GetDirectoryName(m.infilepath).TrimEnd(new char[] { '\\' }); //C:\, но C:\Some_Path
+                    string dir = Path.GetDirectoryName(m.infilepath).TrimEnd(new char[] { '\\' }); //C:\, РЅРѕ C:\Some_Path
                     for (int i = 1; i <= 20; i++)
                     {
                         friendfile = dir + "\\VTS_" + title + "_" + i.ToString() + ".VOB";
                         if (File.Exists(friendfile)) fileslist.Add(friendfile);
                     }
 
-                    //Если каким-то чудесным образом ни одного файла не нашлось
+                    //Р•СЃР»Рё РєР°РєРёРј-С‚Рѕ С‡СѓРґРµСЃРЅС‹Рј РѕР±СЂР°Р·РѕРј РЅРё РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р° РЅРµ РЅР°С€Р»РѕСЃСЊ
                     if (fileslist.Count == 0) fileslist.Add(m.infilepath);
                 }
                 else
@@ -163,7 +163,7 @@ namespace XviD4PSP
                     string cstring = c.ToString();
                     if (cstring == "1")
                     {
-                        string dir = Path.GetDirectoryName(m.infilepath).TrimEnd(new char[] { '\\' }) + "\\"; //Так надо
+                        string dir = Path.GetDirectoryName(m.infilepath).TrimEnd(new char[] { '\\' }) + "\\"; //РўР°Рє РЅР°РґРѕ
                         string file_name = Path.GetFileNameWithoutExtension(m.infilepath);
                         string ext = Path.GetExtension(m.infilepath);
                         for (int i = 2; i <= 9; i++)
@@ -175,10 +175,10 @@ namespace XviD4PSP
                 }
             }
 
-            //забиваем все найденные файлы
+            //Р·Р°Р±РёРІР°РµРј РІСЃРµ РЅР°Р№РґРµРЅРЅС‹Рµ С„Р°Р№Р»С‹
             m.infileslist = Calculate.ConvertArrayListToStringArray(fileslist);
 
-            //диалог выбора файлов если их больше одного
+            //РґРёР°Р»РѕРі РІС‹Р±РѕСЂР° С„Р°Р№Р»РѕРІ РµСЃР»Рё РёС… Р±РѕР»СЊС€Рµ РѕРґРЅРѕРіРѕ
             if (fileslist.Count > 1)
             {
                 FilesListWindow f = new FilesListWindow(m);

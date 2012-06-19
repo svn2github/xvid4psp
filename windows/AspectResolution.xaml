@@ -112,11 +112,11 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_other" Header="Other" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_misc" Header="Misc" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="4,2,6,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate aspect when crop is using:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="2,0,0,0" Padding="2.5"/>
-                                    <CheckBox x:Name="check_recalculate_aspect" Width="Auto" Height="Auto" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_recalculate_aspect_Click" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="text_recalculate" Content="Recalculate when cropping:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" Margin="2,0,0,0" Padding="2.5"/>
+                                    <ComboBox x:Name="combo_recalculate" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectedValuePath="Tag" SelectionChanged="combo_recalculate_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,-2,0,0"/>
                                 </DockPanel>
                                 <DockPanel Margin="4,0,6,0" Width="Auto" Height="Auto">
                                     <Label OpacityMask="{x:Null}" x:Name="text_original_ar" Content="Use the original AR of the stream (if available):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="2,0,0,0" Padding="2.5"/>
