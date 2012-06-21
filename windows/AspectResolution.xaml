@@ -51,13 +51,13 @@
 				</DockPanel>
 				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="text_crop_tb" Content="Crop top, bottom:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
-					<ComboBox x:Name="combo_crop_b" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_b_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
-					<ComboBox x:Name="combo_crop_t" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_t_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+					<ComboBox x:Name="combo_crop_b" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+					<ComboBox x:Name="combo_crop_t" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
 				</DockPanel>
 				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="text_crop_lr" Content="Crop left, right:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
-					<ComboBox x:Name="combo_crop_r" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_r_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
-					<ComboBox x:Name="combo_crop_l" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_l_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+					<ComboBox x:Name="combo_crop_r" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+					<ComboBox x:Name="combo_crop_l" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_crop_SelectionChanged" HorizontalAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
 				</DockPanel>
 				<DockPanel Margin="16,0,16,0" Width="Auto" Height="Auto">
 					<Label OpacityMask="{x:Null}" x:Name="text_black" Content="Black width, height:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>

@@ -451,87 +451,17 @@ namespace XviD4PSP
             combo_height.SelectedItem = m.outresh;
         }
 
-        private void combo_crop_t_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void combo_crop_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if ((combo_crop_t.IsDropDownOpen || combo_crop_t.IsSelectionBoxHighlighted) && combo_crop_t.SelectedItem != null && !crop_loading)
+            if (crop_loading) return;
+            ComboBox combo = (ComboBox)sender;
+
+            if ((combo.IsDropDownOpen || combo.IsSelectionBoxHighlighted) && combo.SelectedItem != null)
             {
-                m.cropt = Convert.ToInt32(combo_crop_t.SelectedItem);
-                m.cropt_copy = m.cropt;
-
-                if (Settings.CropRecalculate == CropRecalculate.Everything)
-                {
-                    ApplyCrop();
-                    return;
-                }
-                else if (Settings.CropRecalculate == CropRecalculate.Aspect)
-                {
-                    m = FixInputAspect(m);
-                    m = Format.GetValidOutAspect(m);
-                    LoadInAspect();
-                    LoadOutAspect();
-                }
-
-                combo_aspectfix.SelectedItem = m.aspectfix.ToString();
-                Refresh();
-            }
-        }
-
-        private void combo_crop_b_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if ((combo_crop_b.IsDropDownOpen || combo_crop_b.IsSelectionBoxHighlighted) && combo_crop_b.SelectedItem != null && !crop_loading)
-            {
-                m.cropb = Convert.ToInt32(combo_crop_b.SelectedItem);
-                m.cropb_copy = m.cropb;
-
-                if (Settings.CropRecalculate == CropRecalculate.Everything)
-                {
-                    ApplyCrop();
-                    return;
-                }
-                else if (Settings.CropRecalculate == CropRecalculate.Aspect)
-                {
-                    m = FixInputAspect(m);
-                    m = Format.GetValidOutAspect(m);
-                    LoadInAspect();
-                    LoadOutAspect();
-                }
-
-                combo_aspectfix.SelectedItem = m.aspectfix.ToString();
-                Refresh();
-            }
-        }
-
-        private void combo_crop_l_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if ((combo_crop_l.IsDropDownOpen || combo_crop_l.IsSelectionBoxHighlighted) && combo_crop_l.SelectedItem != null && !crop_loading)
-            {
-                m.cropl = Convert.ToInt32(combo_crop_l.SelectedItem);
-                m.cropl_copy = m.cropl;
-
-                if (Settings.CropRecalculate == CropRecalculate.Everything)
-                {
-                    ApplyCrop();
-                    return;
-                }
-                else if (Settings.CropRecalculate == CropRecalculate.Aspect)
-                {
-                    m = FixInputAspect(m);
-                    m = Format.GetValidOutAspect(m);
-                    LoadInAspect();
-                    LoadOutAspect();
-                }
-
-                combo_aspectfix.SelectedItem = m.aspectfix.ToString();
-                Refresh();
-            }
-        }
-
-        private void combo_crop_r_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if ((combo_crop_r.IsDropDownOpen || combo_crop_r.IsSelectionBoxHighlighted) && combo_crop_r.SelectedItem != null && !crop_loading)
-            {
-                m.cropr = Convert.ToInt32(combo_crop_r.SelectedItem);
-                m.cropr_copy = m.cropr;
+                if (sender == combo_crop_t) m.cropt = m.cropt_copy = Convert.ToInt32(combo.SelectedItem);
+                else if (sender == combo_crop_b) m.cropb = m.cropb_copy = Convert.ToInt32(combo.SelectedItem);
+                else if (sender == combo_crop_l) m.cropl = m.cropl_copy = Convert.ToInt32(combo.SelectedItem);
+                else m.cropr = m.cropr_copy = Convert.ToInt32(combo.SelectedItem);
 
                 if (Settings.CropRecalculate == CropRecalculate.Everything)
                 {

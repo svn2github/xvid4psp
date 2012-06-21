@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.283.0 (19.06.2012), main changes:
+﻿XviD4PSP 5.10.284.0 (22.06.2012), main changes:
 
+>>> (r284) In the project files added a bat-patcher for setting the LARGEADDRESSAWARE flag. It will increase the
+           maximum amount of memory available for the program when running on 64-bit OS or on appropriately
+           configured 32-bit OS (thanks to shark000X for the info).
 >>> (r283) "Resolution/Aspect" window: checkbox for the option "Recalculate aspect when crop is using" replaced with
            combobox. Now it is possible to choose between: Nothing, Aspect, Everything. With the last one all values
            will be recalculated in the same way as for the autocrop (req. by XACAH18).

@@ -12,16 +12,21 @@ For Visual Studio 2010 run XviD4PSP_2010.sln or XviD4PSP_2010.csproj.
 Choose Release or Debug mode (the switcher is somwhere on top part of the window) and run Build->Build,
 or press F5 to compile and run XviD4PSP immediately.
 
-Note that for Release and for Debug modes output folder is the same - \bin\Debug. Run Build->Rebuild
+Note that for Release and for Debug modes output folder is the same - \bin\. Run Build->Rebuild
 in case of any problems related to this.
+
+\bin\4Gb patcher.bat - run this file after the compilation if you want to get executable flagged
+as LARGEADDRESSAWARE. It will increase the maximum amount of memory available for the program
+when running on 64-bit OS or on appropriately configured 32-bit OS.
 
 If you want to share your binaries with other people:
 1.0 Don't forget to switch compiler to Release mode.
-2.0 Do not add all those files that appears in \bin\Debug folder after compiling. You need only:
-2.1 XviD4PSP.exe
-2.2 XviD4PSP.pdb*
-2.3 Changelog_eng.txt and Changelog_rus.txt
-2.4 If there was changes in "languages" folder, add affected files from this folder too.
+2.0 Decide about LARGEADDRESSAWARE.
+3.0 Do not add all those files that appears in \bin\ folder after compiling. You need only:
+3.1 XviD4PSP.exe
+3.2 XviD4PSP.pdb*
+3.3 Changelog_eng.txt and Changelog_rus.txt
+3.4 If there was changes in "languages" folder, add affected files from this folder too.
 
 *XviD4PSP.pdb must be exactly from the same build, as XviD4PSP.exe. Even if you build the project twice
 and from the same sources - this files wouldn't match! They must be builded together at one time! And
@@ -49,16 +54,21 @@ XviD4PSP из исходников, без необходимости искат
 Выберите Release или Debug режим (переключатель обычно находится где-то в верхней части окна), после чего
 запустите Build->Build. Или можно нажать F5 для компиляции и запуска XviD4PSP сразу же после неё.
 
-Учтите, что для Release и для Debug конфигураций используется одна и та же папка - \bin\Debug. В
+Учтите, что для Release и для Debug конфигураций используется одна и та же папка - \bin\. В
 случае возникновения проблем при переключении между конфигурациями, запустите Build->Rebuild.
+
+\bin\4Gb patcher.bat - запустите этот файл после компиляци, если требуется получить exe с установленным
+флагом LARGEADDRESSAWARE, что повысит лимит выделяемой программе памяти при работе на 64-битных ОС и на
+соответствующим образом настроенных 32-битных.
 
 Если вы хотите поделиться готовым билдом с кем-то еще:
 1.0 Не забудьте переключиться в режим Release.
-2.0 Не кладите всю кучу файлов из папки \bin\Debug, оттуда нужны только:
-2.1 XviD4PSP.exe
-2.2 XviD4PSP.pdb*
-2.3 Changelog_eng.txt и Changelog_rus.txt
-2.4 Если были какие-либо изменения в языковых файлах (папка languages), то нужно добавить и эти файлы.
+2.0 Определитесь с LARGEADDRESSAWARE.
+3.0 Не кладите всю кучу файлов из папки \bin\, оттуда нужны только:
+3.1 XviD4PSP.exe
+3.2 XviD4PSP.pdb*
+3.3 Changelog_eng.txt и Changelog_rus.txt
+3.4 Если были какие-либо изменения в языковых файлах (папка languages), то нужно добавить и эти файлы.
 
 *XviD4PSP.pdb должен быть скомпилирован одновременно с XviD4PSP.exe, т.е. это должны быть файлы из единой
 компиляции! Если дважды собрать проект, даже не меняя ничего в исходниках, - эти файлы уже не будут совпадать!
