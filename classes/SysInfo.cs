@@ -202,31 +202,28 @@ namespace XviD4PSP
             }
         }
 
-        public static string RetrievedAviSynthVersion = "";
-        public static bool RetrieveAviSynthVersion()
+        //AviSynth`ное
+        public static bool AVSIsMT { get; private set; }
+        public static float AVSVersionFloat { get; private set; }
+        public static string AVSVersionString { get; private set; }
+        public static bool RetrieveAviSynthInfo()
         {
-#if DEBUG
-            RetrievedAviSynthVersion = "Unknown (DEBUG mode)";
-#else
-            AviSynthReader reader = new AviSynthReader();
+            AVSIsMT = false;
+            AVSVersionFloat = 0;
+            AVSVersionString = Languages.Translate("AviSynth is not found!");
 
             try
             {
-                reader.ParseScript("Assert(false, VersionString())");
+                using (AviSynthClip clp = new AviSynthClip())
+                {
+                    AVSVersionString = clp.Invoke("VersionString", null, AVSVersionString);
+                    AVSVersionFloat = clp.Invoke("VersionNumber", null, AVSVersionFloat);
+                    AVSIsMT = clp.IsFuncExists("SetMTMode");
+                    if (AVSVersionFloat > 0) return true;
+                }
             }
-            catch (Exception ex)
-            {
-                if (ex.Message == "Cannot load avisynth.dll") return false;
-                if (ex is AviSynthException) RetrievedAviSynthVersion = ex.Message;
-                else return false;
-            }
-            finally
-            {
-                reader.Close();
-                reader = null;
-            }
-#endif
-            return true;
+            catch (Exception) { }
+            return false;
         }
     }
 }

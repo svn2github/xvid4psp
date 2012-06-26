@@ -105,8 +105,7 @@ namespace XviD4PSP
             {
                 using (AviSynthScriptEnvironment env = new AviSynthScriptEnvironment())
                 {
-                    using (AviSynthClip a = env.ParseScript(script, AviSynthColorspace.RGB24))
-                    //using (AviSynthClip a = env.OpenScriptFile(inFilePath, AviSynthColorspace.RGB24))
+                    using (AviSynthClip a = env.ParseScript(script, AviSynthColorspace.RGB24, AudioSampleType.INT16))
                     {
                         if (a.ChannelsCount == 0) throw new Exception("Can't find audio stream");
 
@@ -344,7 +343,7 @@ namespace XviD4PSP
             target.Write(BitConverter.GetBytes(useFaadTrick ? FAAD_MAGIC_VALUE : (uint)(a.AudioSizeInBytes + WAV_HEADER_SIZE)), 0, 4);
             target.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "), 0, 8);
             target.Write(BitConverter.GetBytes((uint)0x10), 0, 4);
-            target.Write(BitConverter.GetBytes((short)0x01), 0, 2);
+            target.Write(BitConverter.GetBytes((a.SampleType == AudioSampleType.FLOAT) ? (short)0x03 : (short)0x01), 0, 2);
             target.Write(BitConverter.GetBytes(a.ChannelsCount), 0, 2);
             target.Write(BitConverter.GetBytes(a.AudioSampleRate), 0, 4);
             target.Write(BitConverter.GetBytes(a.AvgBytesPerSec), 0, 4);

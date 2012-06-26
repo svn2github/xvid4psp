@@ -8,19 +8,40 @@ namespace XviD4PSP
 {
     public enum AviSynthColorspace : int
     {
-        Unknown = 0,
+        Undefined = 0,
         YV12 = -1610612728,
         RGB24 = +1342177281,
         RGB32 = +1342177282,
-        YUY2 = -1610612740,
+        YUY2 = +1610612740,
         I420 = -1610612720,
-        IYUV = I420
+        IYUV = I420,
+
+        //2.6
+        Y8 = -536870912,
+        YV16 = -1610611960,
+        YV24 = -1610611957,
+        YV411 = -1610611959
     }
+
+    public enum AudioSampleType : int
+    {
+        Undefined = 0,
+        INT8 = 1,
+        INT16 = 2,
+        INT24 = 4,    // Int24 is a very stupid thing to code, but it's supported by some hardware.
+        INT32 = 8,
+        FLOAT = 16
+    };
+
+    public enum MTMode : int
+    {
+        Undefined = 0, //Ничего не делать с MT
+        Disabled = 1,  //Запретить MT, добавив SetMTMode(0) перед импортом скрипта
+        AddDistr = 2   //При MT-режимах добавлять Distributor() после импорта скрипта
+    };
 
     public class AviSynthException : ApplicationException
     {
-
-
         public AviSynthException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -42,26 +63,15 @@ namespace XviD4PSP
         }
     }
 
-
-    public enum AudioSampleType : int
-    {
-        Unknown = 0,
-        INT8 = 1,
-        INT16 = 2,
-        INT24 = 4,    // Int24 is a very stupid thing to code, but it's supported by some hardware.
-        INT32 = 8,
-        FLOAT = 16
-    };
-
     public sealed class AviSynthScriptEnvironment : IDisposable
     {
+        public AviSynthScriptEnvironment()
+        {
+        }
+
         public static string GetLastError()
         {
             return null;
-        }
-
-        public AviSynthScriptEnvironment()
-        {
         }
 
         public IntPtr Handle
@@ -72,175 +82,83 @@ namespace XviD4PSP
             }
         }
 
-        public AviSynthClip OpenScriptFile(string filePath, AviSynthColorspace forceColorspace)
+        public AviSynthClip OpenScriptFile(string filePath, AviSynthColorspace forceColorSpace, AudioSampleType forceSampleType)
         {
-            return new AviSynthClip("Import", filePath, forceColorspace, this);
+            return new AviSynthClip("Import", filePath, forceColorSpace, forceSampleType); //, this);
         }
 
-        public AviSynthClip ParseScript(string script, AviSynthColorspace forceColorspace)
+        public AviSynthClip ParseScript(string script, AviSynthColorspace forceColorSpace, AudioSampleType forceSampleType)
         {
-            return new AviSynthClip("Eval", script, forceColorspace, this);
+            return new AviSynthClip("Eval", script, forceColorSpace, forceSampleType); //, this);
         }
-
-
-        public AviSynthClip OpenScriptFile(string filePath)
-        {
-            return OpenScriptFile(filePath, AviSynthColorspace.RGB24);
-        }
-
-        public AviSynthClip ParseScript(string script)
-        {
-            return ParseScript(script, AviSynthColorspace.RGB24);
-        }
-
 
         void IDisposable.Dispose()
         {
-
         }
     }
 
-    /// <summary>
-    /// Summary description for AviSynthClip.
-    /// </summary>
     public class AviSynthClip : IDisposable
     {
         #region PInvoke related stuff
         [StructLayout(LayoutKind.Sequential)]
         struct AVSDLLVideoInfo
         {
+            public MTMode mt_import;
+
+            //Video
             public int width;
             public int height;
             public int raten;
             public int rated;
-            public int aspectn;
-            public int aspectd;
-            public int interlaced_frame;
-            public int top_field_first;
             public int num_frames;
+            public int field_based;
+            public int first_field;
+            public AviSynthColorspace pixel_type_orig;
             public AviSynthColorspace pixel_type;
 
             // Audio
             public int audio_samples_per_second;
+            public AudioSampleType sample_type_orig;
             public AudioSampleType sample_type;
             public int nchannels;
-            public int num_audio_frames;
             public long num_audio_samples;
         }
 
-
         [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
-        private static extern int dimzon_avs_init(ref IntPtr avs, string func, string arg, ref AVSDLLVideoInfo vi, ref AviSynthColorspace originalColorspace, ref AudioSampleType originalSampleType, string cs);
+        private static extern int dimzon_avs_init(ref IntPtr avs, string func, string arg, ref AVSDLLVideoInfo vi);
+        [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
+        private static extern int dimzon_avs_invoke(IntPtr avs, string func, string[] args, int len, ref AVSDLLVideoInfo vi, ref float func_out);
         [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
         private static extern int dimzon_avs_destroy(ref IntPtr avs);
+
+        [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
+        private static extern int dimzon_avs_isfuncexists(IntPtr avs, string name);
         [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
         private static extern int dimzon_avs_getlasterror(IntPtr avs, [MarshalAs(UnmanagedType.LPStr)] StringBuilder sb, int len);
+        [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
+        private static extern int dimzon_avs_getvariable_b(IntPtr avs, string name, ref bool val);
+        [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
+        private static extern int dimzon_avs_getvariable_i(IntPtr avs, string name, ref int val);
+        [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
+        private static extern int dimzon_avs_getvariable_f(IntPtr avs, string name, ref float val);
+        [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
+        private static extern int dimzon_avs_getvariable_s(IntPtr avs, string name, [MarshalAs(UnmanagedType.LPStr)] StringBuilder sb, int len);
+
         [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
         private static extern int dimzon_avs_getaframe(IntPtr avs, IntPtr buf, long sampleNo, long sampleCount);
         [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
         private static extern int dimzon_avs_getvframe(IntPtr avs, IntPtr buf, int stride, int frm);
-        [DllImport("dlls//AviSynth//AvisynthWrapper", ExactSpelling = true, SetLastError = false, CharSet = CharSet.Ansi)]
-        private static extern int dimzon_avs_getintvariable(IntPtr avs, string name, ref int val);
-
         #endregion
 
         private IntPtr _avs;
         private AVSDLLVideoInfo _vi;
-        private AviSynthColorspace _colorSpace;
-        private AudioSampleType _sampleType;
+        private static object locker = new object();
 
-#if dimzon
-
-        #region syncronization staff
-
-        private class EnvRef
-        {
-            public IntPtr env;
-            public long refCount;
-            public object lockObj;
-            public int threadID;
-
-            public EnvRef(IntPtr e, int threadID)
-            {
-                this.env = e;
-                refCount = 1;
-                lockObj = new object();
-                this.threadID = threadID;
-            }
-        }
-        private static Hashtable _threadHash = new Hashtable();
-
-        private EnvRef createNewEnvRef(int threadId)
-        {
-            //TODO:
-            return new EnvRef(new IntPtr(0), threadId);
-        }
-
-        private void destroyEnvRef(EnvRef r)
-        {
-            //TODO:
-        }
-
-        private EnvRef addRef()
-        {
-            int threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            lock (_threadHash.SyncRoot)
-            {
-                EnvRef r;
-                if(_threadHash.ContainsKey(threadId))
-                {
-                    r = (EnvRef)_threadHash[threadId];
-                    lock(r.lockObj)
-                    {
-                        if (0 == r.refCount)
-                        {
-                            r = createNewEnvRef(threadId);
-                            _threadHash.Remove(threadId);
-                            _threadHash.Add(threadId, r);
-                        }
-                        else
-                        {
-                            ++r.refCount;
-                        }
-                    }
-                }
-                else
-                {
-                    r = createNewEnvRef(threadId);
-                    _threadHash.Add(threadId, r);
-                }
-                return r;
-            }
-        }
-
-        private void Release()
-        {
-            if (_avsEnv == null)
-                return;
-            lock (_avsEnv.lockObj)
-            {
-                --_avsEnv.refCount;
-                if (0 == _avsEnv.refCount)
-                {
-                    destroyEnvRef(_avsEnv);
-                }
-            }
-            _avsEnv = null;
-        }
-
-        private EnvRef _avsEnv;
-
-
-        #endregion
-#endif
-
-        private string getLastError()
-        {
-            const int errlen = 1024;
-            StringBuilder sb = new StringBuilder(errlen);
-            sb.Length = dimzon_avs_getlasterror(_avs, sb, errlen);
-            return sb.ToString();
-        }
+        private const int ERRMSG_LEN = 1024;      //Макс. длина текста в pstr->err
+        private const int AVS_VARNFOUND = 666;    //Нет такой переменной\фукнции (avs_invoke, avs_isfuncexists, avs_getvariable_b\i\f\s)
+        private const int AVS_VARNDEFINED = 999;  //Переменной не присвоено значение (avs_getvariable_b\i\f\s)
+        private const int AVS_VARWRNGTYPE = -999; //Переменная оказалась другого типа (avs_getvariable_b\i\f\s)
+        private const int AVS_GERROR = -1;        //Всё, что попалось в catch как AvisynthError
 
         #region Clip Properties
 
@@ -259,6 +177,7 @@ namespace XviD4PSP
                 return _vi.width;
             }
         }
+
         public int VideoHeight
         {
             get
@@ -266,6 +185,7 @@ namespace XviD4PSP
                 return _vi.height;
             }
         }
+
         public int raten
         {
             get
@@ -273,6 +193,7 @@ namespace XviD4PSP
                 return _vi.raten;
             }
         }
+
         public int rated
         {
             get
@@ -280,34 +201,25 @@ namespace XviD4PSP
                 return _vi.rated;
             }
         }
-        public int aspectn
+
+        public int field_based
         {
             get
             {
-                return _vi.aspectn;
+                //0-false, 1-true
+                return _vi.field_based;
             }
         }
-        public int aspectd
+
+        public int first_field
         {
             get
             {
-                return _vi.aspectd;
+                //0-?, 1-TFF, 2-BFF
+                return _vi.first_field;
             }
         }
-        public int interlaced_frame
-        {
-            get
-            {
-                return _vi.interlaced_frame;
-            }
-        }
-        public int top_field_first
-        {
-            get
-            {
-                return _vi.top_field_first;
-            }
-        }
+
         public int num_frames
         {
             get
@@ -315,6 +227,7 @@ namespace XviD4PSP
                 return _vi.num_frames;
             }
         }
+
         // Audio
         public int AudioSampleRate
         {
@@ -331,6 +244,7 @@ namespace XviD4PSP
                 return _vi.num_audio_samples;
             }
         }
+
         public AudioSampleType SampleType
         {
             get
@@ -338,6 +252,7 @@ namespace XviD4PSP
                 return _vi.sample_type;
             }
         }
+
         public short ChannelsCount
         {
             get
@@ -358,36 +273,189 @@ namespace XviD4PSP
         {
             get
             {
-                return _colorSpace;
+                return _vi.pixel_type_orig;
             }
         }
+
         public AudioSampleType OriginalSampleType
         {
             get
             {
-                return _sampleType;
+                return _vi.sample_type_orig;
             }
         }
 
-
         #endregion
 
-
-        public int GetIntVariable(string variableName, int defaultValue)
+        //Полноценное открытие: инициализация + Invoke + GetVideoInfo (func обязательно должна возвращать Clip с видео!)
+        public AviSynthClip(string func, string arg, AviSynthColorspace forceColorSpace, AudioSampleType forceSampleType) //, AviSynthScriptEnvironment env)
         {
-            int v = 0;
+            _avs = new IntPtr(0);
+            _vi = new AVSDLLVideoInfo();
+            _vi.mt_import = MTMode.Undefined;
+
+            //Эти два поля работают и на вход, и на выход. Для "dimzon_avs_init" через них можно задать требуемые на выходе PixelType и SampleType.
+            //При нуле (Undefined) никаких преобразований не будет. На выходе из "dimzon_avs_init" поля будут содержать то, что получилось в итоге.
+            //В "dimzon_avs_invoke" работают только на выход.
+            _vi.pixel_type = forceColorSpace;
+            _vi.sample_type = forceSampleType;
+
+            //Эти поля содержат инфу об исходных PixelType и SampleType, т.е. до того, как они были изменены в "dimzon_avs_init".
+            //В "dimzon_avs_invoke" обновляются только в случае их равенства нулю.
+            _vi.pixel_type_orig = AviSynthColorspace.Undefined;
+            _vi.sample_type_orig = AudioSampleType.Undefined;
+  
+            if (0 != dimzon_avs_init(ref _avs, func, arg, ref _vi))
+            {
+                string err = GetLastError();
+                cleanup(false);
+                throw new AviSynthException(err);
+            }
+        }
+
+        //Только инициализация
+        public AviSynthClip()
+        {
+            _avs = new IntPtr(0);
+            _vi = new AVSDLLVideoInfo();
+
+            //Просто получаем Handle и выходим
+            if (0 != dimzon_avs_init(ref _avs, null, null, ref _vi))
+            {
+                string err = GetLastError();
+                cleanup(false);
+                throw new AviSynthException(err);
+            }
+        }
+
+        public float Invoke(string function, string[] args, float default_value)
+        {
+            #region Description for Invoke
+            //Для функций, которые не принимают\не требуют параметров: args = new string[] { } или null
+            //Для функций, которым требуется входной клип: args = new string[] { "last" }
+            //Для передачи функции доп. параметров: args = new string[] { "last", "Rec709", "10", "98.6" }
+            //Для передачи параметров не-клип функции: new string[] { "12345", "Orange", "true" }
+            //Всего в args можно передать до 10-ти параметров (включая last), лишнее обрезается.
+            //Всё передается как string, "расшифровка и восстановление" типов в AviSynthWrapper`е - по косвенным признакам.
+            //Но можно использовать и Eval (хотя работает он иногда странновато): Invoke("Eval", new string[] { "SetMTMode(5, 4)" }, 0);
+            //Возвращаемое значение преобразуется в float и выводится через func_out в виде:
+            //Invoke вернул   Clip: MinValue (и для оставшегося неперечисленного)
+            //Invoke вернул   Bool: 0 - false, MaxValue - true
+            //Invoke вернул    Int: (float)value
+            //Invoke вернул  Float: value
+            //Invoke вернул String: MaxValue (текст в pstr->err)
+            #endregion
+
+            float func_out = float.MinValue;
+            if (0 != dimzon_avs_invoke(_avs, function, args, ((args != null) ? args.Length : 0), ref _vi, ref func_out))
+            {
+                string err = GetLastError();
+                cleanup(false);
+                throw new AviSynthException(err);
+            }
+            return (func_out != float.MinValue) ? func_out : default_value;
+        }
+
+        public string Invoke(string function, string[] args, string default_value)
+        {
+            float func_out = float.MinValue;
+            if (0 != dimzon_avs_invoke(_avs, function, args, ((args != null) ? args.Length : 0), ref _vi, ref func_out))
+            {
+                string err = GetLastError();
+                cleanup(false);
+                throw new AviSynthException(err);
+            }
+            return (func_out == float.MaxValue) ? GetLastError() : default_value;
+        }
+
+        private void cleanup(bool disposing)
+        {
+            if (_avs != IntPtr.Zero)
+            {
+                lock (locker)
+                {
+                    if (_avs != IntPtr.Zero)
+                    {
+                        //Позаимствовано из MeGUI (для уменьшения вылетов из-за DGMultiSource).
+                        //Видимо сто лет как не актуально, но пусть уж остаётся..
+                        System.Threading.Thread.Sleep(100);
+
+                        try
+                        {
+                            dimzon_avs_destroy(ref _avs);
+                        }
+                        catch (DllNotFoundException) { }
+
+                        _avs = new IntPtr(0);
+                        if (disposing)
+                            GC.SuppressFinalize(this);
+                    }
+                }
+            }
+        }
+
+        ~AviSynthClip()
+        {
+            cleanup(false);
+        }
+
+        void IDisposable.Dispose()
+        {
+            cleanup(true);
+        }
+
+        public bool IsFuncExists(string name)
+        {
+            int res = dimzon_avs_isfuncexists(_avs, name);
+            if (res < 0) throw new AviSynthException(GetLastError());
+            return (res == 0);
+        }
+
+        private string GetLastError()
+        {
+            StringBuilder sb = new StringBuilder(ERRMSG_LEN);
+            sb.Length = dimzon_avs_getlasterror(_avs, sb, ERRMSG_LEN);
+            return sb.ToString();
+        }
+
+        public bool GetVarBoolean(string variableName, bool defaultValue)
+        {
             int res = 0;
-            res = dimzon_avs_getintvariable(this._avs, variableName, ref v);
-            if (res < 0)
-                throw new AviSynthException(getLastError());
-            return (0 == res) ? v : defaultValue;
+            bool v = false;
+            res = dimzon_avs_getvariable_b(_avs, variableName, ref v);
+            if (res < 0) throw new AviSynthException(GetLastError());
+            return (res == 0) ? v : defaultValue;
+        }
+
+        public int GetVarInteger(string variableName, int defaultValue)
+        {
+            int v = 0, res = 0;
+            res = dimzon_avs_getvariable_i(_avs, variableName, ref v);
+            if (res < 0) throw new AviSynthException(GetLastError());
+            return (res == 0) ? v : defaultValue;
+        }
+
+        public float GetVarFloat(string variableName, float defaultValue)
+        {
+            int res = 0;
+            float v = 0;
+            res = dimzon_avs_getvariable_f(_avs, variableName, ref v);
+            if (res < 0) throw new AviSynthException(GetLastError());
+            return (res == 0) ? v : defaultValue;
+        }
+
+        public string GetVarString(string variableName, string defaultValue)
+        {
+            StringBuilder sb = new StringBuilder(ERRMSG_LEN);
+            int res = dimzon_avs_getvariable_s(_avs, variableName, sb, ERRMSG_LEN);
+            if (res < 0) throw new AviSynthException(GetLastError());
+            return (res == 0) ? sb.ToString() : defaultValue;
         }
 
         public void ReadAudio(IntPtr addr, long offset, int count)
         {
             if (0 != dimzon_avs_getaframe(_avs, addr, offset, count))
-                throw new AviSynthException(getLastError());
-
+                throw new AviSynthException(GetLastError());
         }
 
         public void ReadAudio(byte buffer, long offset, int count)
@@ -406,49 +474,9 @@ namespace XviD4PSP
         public void ReadFrame(IntPtr addr, int stride, int frame)
         {
             if (0 != dimzon_avs_getvframe(_avs, addr, stride, frame))
-                throw new AviSynthException(getLastError());
+                throw new AviSynthException(GetLastError());
         }
 
-        public AviSynthClip(string func, string arg, AviSynthColorspace forceColorspace, AviSynthScriptEnvironment env)
-        {
-
-            _vi = new AVSDLLVideoInfo();
-            _avs = new IntPtr(0);
-            _colorSpace = AviSynthColorspace.Unknown;
-            _sampleType = AudioSampleType.Unknown;
-            if (0 != dimzon_avs_init(ref _avs, func, arg, ref _vi, ref _colorSpace, ref _sampleType, forceColorspace.ToString()))
-            {
-                string err = getLastError();
-                cleanup(false);
-                throw new AviSynthException(err);
-            }
-        }
-
-        private void cleanup(bool disposing)
-        {
-            //Позаимствовано из MeGUI (для уменьшения вылетов из-за DGMultiSource)
-            System.Threading.Thread.Sleep(100);
-
-            try
-            {
-                dimzon_avs_destroy(ref _avs);
-            }
-            catch (DllNotFoundException) { }
-
-            _avs = new IntPtr(0);
-            if (disposing)
-                GC.SuppressFinalize(this);
-        }
-
-        ~AviSynthClip()
-        {
-            cleanup(false);
-        }
-
-        void IDisposable.Dispose()
-        {
-            cleanup(true);
-        }
         public short BitsPerSample
         {
             get
@@ -456,6 +484,7 @@ namespace XviD4PSP
                 return (short)(BytesPerSample * 8);
             }
         }
+
         public short BytesPerSample
         {
             get
@@ -493,6 +522,5 @@ namespace XviD4PSP
                 return SamplesCount * ChannelsCount * BytesPerSample;
             }
         }
-
     }
 }

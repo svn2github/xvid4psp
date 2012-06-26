@@ -182,7 +182,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\avisynthdll.h"
+			RelativePath=".\AviSynthWrapper.h"
 			>
 		</File>
 		<File

@@ -81,7 +81,7 @@ namespace XviD4PSP
                 }
 
                 if (m.isvideo && ext != ".avs" && (reader.Width == 0 || reader.Height == 0))
-                    throw new Exception(m.vdecoder.ToString() + " can`t decode video (zero-size image was returned)!");
+                    throw new Exception(m.vdecoder.ToString() + " can't decode video (zero-size image was returned)!");
                 else
                 {
                     m.inresw = reader.Width;
@@ -93,7 +93,7 @@ namespace XviD4PSP
                     if (ext == ".avs")
                     {
                         //Считываем SAR из скрипта
-                        m.pixelaspect = (double)reader.GetIntVariable("OUT_SAR_X", 1) / (double)reader.GetIntVariable("OUT_SAR_Y", 1);
+                        m.pixelaspect = reader.GetVarFloat("OUT_SAR_X", 1) / reader.GetVarFloat("OUT_SAR_Y", 1);
                     }
                 }
 

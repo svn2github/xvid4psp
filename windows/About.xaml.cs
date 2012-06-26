@@ -28,6 +28,8 @@ namespace XviD4PSP
             }
             catch { }
 
+            text_about.ToolTip = SysInfo.AVSVersionString;
+
             Title = Languages.Translate("About");
             text_import.Text = Languages.Translate("Output codecs:");
             text_export.Text = Languages.Translate("Output containers:");

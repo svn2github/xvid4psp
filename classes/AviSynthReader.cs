@@ -7,11 +7,8 @@ namespace XviD4PSP
 {
     public class AviSynthReader
     {
-        private AviSynthScriptEnvironment enviroment = null;
+        private AviSynthScriptEnvironment environment = null;
         private AviSynthClip clip = null;
-        private int width, height;
-        private double frameRate;
-
         public AviSynthClip Clip
         {
             get
@@ -24,19 +21,14 @@ namespace XviD4PSP
         {
         }
 
+        //Скрипт в виде string
         public void ParseScript(string script)
         {
             try
             {
-                this.enviroment = new AviSynthScriptEnvironment();
-                this.clip = enviroment.ParseScript(script, AviSynthColorspace.RGB24);
-                if (this.clip.HasVideo)
-                {
-                    //throw new ArgumentException("Script doesn't contain video");
-                    this.height = this.clip.VideoHeight;
-                    this.width = this.clip.VideoWidth;
-                    this.frameRate = ((double)clip.raten) / ((double)clip.rated);
-                }
+                this.environment = new AviSynthScriptEnvironment();
+                this.clip = environment.ParseScript(script, AviSynthColorspace.RGB24, AudioSampleType.INT16);
+                //if (!this.clip.HasVideo) throw new ArgumentException("Script doesn't contain video");
             }
             catch (Exception)
             {
@@ -45,17 +37,14 @@ namespace XviD4PSP
             }
         }
 
+        //Скрипт из файла
         public void OpenScript(string script)
         {
             try
             {
-                this.enviroment = new AviSynthScriptEnvironment();
-                this.clip = enviroment.OpenScriptFile(script, AviSynthColorspace.RGB24);
-                if (!this.clip.HasVideo)
-                    throw new ArgumentException("Script doesn't contain video");
-                this.height = this.clip.VideoHeight;
-                this.width = this.clip.VideoWidth;
-                this.frameRate = ((double)clip.raten) / ((double)clip.rated);
+                this.environment = new AviSynthScriptEnvironment();
+                this.clip = environment.OpenScriptFile(script, AviSynthColorspace.RGB24, AudioSampleType.INT16);
+                if (!this.clip.HasVideo) throw new ArgumentException("Script doesn't contain video");
             }
             catch (Exception)
             {
@@ -71,10 +60,10 @@ namespace XviD4PSP
                 (this.clip as IDisposable).Dispose();
                 this.clip = null;
             }
-            if (this.enviroment != null)
+            if (this.environment != null)
             {
-                (this.enviroment as IDisposable).Dispose();
-                this.enviroment = null;
+                (this.environment as IDisposable).Dispose();
+                this.environment = null;
             }
         }
 
@@ -85,17 +74,17 @@ namespace XviD4PSP
 
         public int Width
         {
-            get { return this.width; }
+            get { return (clip.HasVideo) ? clip.VideoWidth : 0; }
         }
 
         public int Height
         {
-            get { return this.height; }
+            get { return (clip.HasVideo) ? clip.VideoHeight : 0; }
         }
 
         public double Framerate
         {
-            get { return this.frameRate; }
+            get { return (clip.HasVideo) ? ((double)clip.raten) / ((double)clip.rated) : 0; }
         }
 
         public int FrameCount
@@ -123,9 +112,24 @@ namespace XviD4PSP
             get { return clip.ChannelsCount; }
         }
 
-        public int GetIntVariable(string variable_name, int default_value)
+        public bool GetVarBoolean(string variable_name, bool default_value)
         {
-            return clip.GetIntVariable(variable_name, default_value);
+            return clip.GetVarBoolean(variable_name, default_value);
+        }
+
+        public int GetVarInteger(string variable_name, int default_value)
+        {
+            return clip.GetVarInteger(variable_name, default_value);
+        }
+
+        public float GetVarFloat(string variable_name, float default_value)
+        {
+            return clip.GetVarFloat(variable_name, default_value);
+        }
+
+        public string GetVarString(string variable_name, string default_value)
+        {
+            return clip.GetVarString(variable_name, default_value);
         }
 
         public Bitmap ReadFrameBitmap(int position)

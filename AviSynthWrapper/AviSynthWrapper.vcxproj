@@ -102,7 +102,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="avisynth.h" />
-    <ClInclude Include="avisynthdll.h" />
+    <ClInclude Include="AviSynthWrapper.h" />
     <ClInclude Include="internal.h" />
   </ItemGroup>
   <ItemGroup>

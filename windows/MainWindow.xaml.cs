@@ -161,7 +161,7 @@ namespace XviD4PSP
             try
             {
                 //Определяем наличие Ависинта
-                SysInfo.RetrieveAviSynthVersion();
+                SysInfo.RetrieveAviSynthInfo();
             }
             catch (Exception ex)
             {
@@ -407,7 +407,7 @@ namespace XviD4PSP
                     }
 
                     //Если AviSynth не был найден при старте
-                    if (SysInfo.RetrievedAviSynthVersion.Length == 0)
+                    if (SysInfo.AVSVersionFloat == 0)
                     {
                         throw new Exception(Languages.Translate("AviSynth is not found!") + "\r\n" +
                             Languages.Translate("Please install AviSynth 2.5.7 MT or higher."));
@@ -1105,7 +1105,7 @@ namespace XviD4PSP
                 if (x == null) return;
 
                 //Если AviSynth не был найден при старте и не был установлен после него
-                if (SysInfo.RetrievedAviSynthVersion.Length == 0 && !SysInfo.RetrieveAviSynthVersion())
+                if (SysInfo.AVSVersionFloat == 0 && !SysInfo.RetrieveAviSynthInfo())
                 {
                     throw new Exception(Languages.Translate("AviSynth is not found!") + "\r\n" +
                         Languages.Translate("Please install AviSynth 2.5.7 MT or higher."));

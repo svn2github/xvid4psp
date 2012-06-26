@@ -96,7 +96,7 @@ namespace XviD4PSP
             text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
             combo_visualcrop_brightness.ToolTip = _def + "25";
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
-            combo_visualcrop_frame.ToolTip = _def + "THM-frame";
+            combo_visualcrop_frame.ToolTip = _def + Languages.Translate("THM-frame");
             manual_outaspect.ToolTip = Languages.Translate("In case of non-anamorphic encoding: Aspect = Width/Height.") +
                 "\r\n" + Languages.Translate("In case of anamorphic encoding: Aspect = (Width/Height)*SAR.");
             manual_outsar.ToolTip = Languages.Translate("Leave it empty for non-anamorphic encoding.") +
@@ -125,9 +125,9 @@ namespace XviD4PSP
                 combo_visualcrop_brightness.Items.Add(n);
             combo_visualcrop_brightness.SelectedItem = Settings.VCropBrightness;
 
-            combo_visualcrop_frame.Items.Add("THM-frame");
-            combo_visualcrop_frame.Items.Add("1-st frame");
-            combo_visualcrop_frame.SelectedItem = Settings.VCropFrame;
+            combo_visualcrop_frame.Items.Add(new ComboBoxItem() { Tag = "THM-frame", Content = Languages.Translate("THM-frame") });
+            combo_visualcrop_frame.Items.Add(new ComboBoxItem() { Tag = "1-st frame", Content = Languages.Translate("1-st frame") });
+            combo_visualcrop_frame.SelectedValue = Settings.VCropFrame;
 
             combo_recalculate.Items.Add(new ComboBoxItem() { Tag = CropRecalculate.Nothing, Content = Languages.Translate(CropRecalculate.Nothing.ToString()) });
             combo_recalculate.Items.Add(new ComboBoxItem() { Tag = CropRecalculate.Aspect, Content = Languages.Translate(CropRecalculate.Aspect.ToString()) });
@@ -734,7 +734,7 @@ namespace XviD4PSP
         {
             if ((combo_visualcrop_frame.IsDropDownOpen || combo_visualcrop_frame.IsSelectionBoxHighlighted) && combo_visualcrop_frame.SelectedItem != null)
             {
-                Settings.VCropFrame = combo_visualcrop_frame.SelectedItem.ToString();
+                Settings.VCropFrame = ((ComboBoxItem)combo_visualcrop_frame.SelectedItem).Tag.ToString();
             }
         }
 

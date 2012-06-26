@@ -28,7 +28,7 @@ namespace XviD4PSP
         public Message(System.Windows.Window owner)
         {
             this.InitializeComponent();
-            if (owner.IsVisible) this.Owner = owner;
+            if (owner != null && owner.IsVisible) this.Owner = owner;
             else if (App.Current.MainWindow.IsVisible) this.Owner = App.Current.MainWindow;
             else this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }

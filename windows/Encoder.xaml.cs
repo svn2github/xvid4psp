@@ -3897,7 +3897,7 @@ namespace XviD4PSP
                 SetLog("OS Code: " + Environment.OSVersion.ToString());
                 SetLog("OS Name: " + SysInfo.GetOSNameFull());
                 SetLog("Framework: " + Environment.Version + SysInfo.GetFrameworkVersion());
-                SetLog("AviSynth: " + SysInfo.RetrievedAviSynthVersion);
+                SetLog("AviSynth: " + SysInfo.AVSVersionString);
                 SetLog("CPU Info: " + SysInfo.GetCPUInfo() + ", " + Environment.ProcessorCount + " core(s)");
                 SetLog("RAM Total: " + SysInfo.GetTotalRAM());
                 SetLog("Language: " + CultureInfo.CurrentCulture.ThreeLetterWindowsLanguageName + " (" +

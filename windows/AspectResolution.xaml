@@ -108,7 +108,7 @@
                                 </DockPanel>
                                 <DockPanel Margin="4,0,6,3" Width="Auto" Height="Auto" >
                                     <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_frame" Content="Startup frame:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
-                                    <ComboBox x:Name="combo_visualcrop_frame" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_visualcrop_frame_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_visualcrop_frame" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectedValuePath="Tag" SelectionChanged="combo_visualcrop_frame_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
