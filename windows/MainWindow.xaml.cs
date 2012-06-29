@@ -4069,12 +4069,14 @@ namespace XviD4PSP
                     
                     ColorCorrection col = new ColorCorrection(m, this);
 
+                    string old_histogram = m.histogram;
+                    bool old_dither = m.tweak_dither;
+                    bool old_nocoring = m.tweak_nocoring;
                     bool old_colormatrix = m.iscolormatrix;
                     double old_saturation = m.saturation;
                     double old_contrast = m.contrast;
                     int old_brightness = m.brightness;
                     int old_hue = m.hue;
-                    string old_levels = m.levels;
 
                     m = col.m.Clone();
                     LoadSBCPresets();
@@ -4092,12 +4094,14 @@ namespace XviD4PSP
                     Settings.SBC = m.sbc;
 
                     //обновление при необходимости
-                    if (old_colormatrix != m.iscolormatrix ||
+                    if (old_histogram != m.histogram ||
+                        old_dither != m.tweak_dither ||
+                        old_nocoring != m.tweak_nocoring ||
+                        old_colormatrix != m.iscolormatrix ||
                         old_saturation != m.saturation ||
                         old_contrast != m.contrast ||
                         old_brightness != m.brightness ||
-                        old_hue != m.hue ||
-                        old_levels != m.levels)
+                        old_hue != m.hue)
                     {
                         m = AviSynthScripting.CreateAutoAviSynthScript(m);
                         LoadVideo(MediaLoad.update);

@@ -423,14 +423,13 @@ namespace XviD4PSP
                m.script += colormatrix + Environment.NewLine;
            }
 
-           if (m.saturation != 1.0)
-               m.script += "Tweak(sat=" + Calculate.ConvertDoubleToPointString(m.saturation, 1) + ")" + Environment.NewLine;
-           if (m.brightness != 0)
-               m.script += "Tweak(bright=" + m.brightness + ")" + Environment.NewLine;
-           if (m.contrast != 1.00)
-               m.script += "Tweak(cont=" + Calculate.ConvertDoubleToPointString(m.contrast, 2) + ")" + Environment.NewLine;
-           if (m.hue != 0)
-               m.script += "Tweak(hue=" + m.hue + ")" + Environment.NewLine;         
+           //Tweak
+           if (m.saturation != 1.0 || m.brightness != 0 || m.contrast != 1.00 || m.hue != 0)
+           {
+               m.script += "Tweak(hue=" + m.hue + ", sat=" + Calculate.ConvertDoubleToPointString(m.saturation, 1) + ", bright=" +
+                   m.brightness + ", cont=" + Calculate.ConvertDoubleToPointString(m.contrast, 2) + ", coring=" + ((m.tweak_nocoring) ? "false" :
+                   "true") + ((SysInfo.AVSVersionFloat >= 2.6f) ? (", dither=" + ((m.tweak_dither) ? "true" : "false")) : "") + ")" + Environment.NewLine;
+           }
 
            //разделяем при необходимости на поля
            if (m.interlace != SourceType.UNKNOWN && m.interlace != SourceType.PROGRESSIVE && m.interlace != SourceType.DECIMATING)
@@ -653,8 +652,8 @@ namespace XviD4PSP
            }
 
            //вписываем параметры для гистограммы
-           if (m.levels != "Disabled")
-               m.script += "Histogram(\"" + m.levels + "\")" + Environment.NewLine;
+           if (m.histogram != "Disabled")
+               m.script += "Histogram(\"" + m.histogram + "\")" + Environment.NewLine;
            
            //добавляем субтитры
            if (m.subtitlepath != null)

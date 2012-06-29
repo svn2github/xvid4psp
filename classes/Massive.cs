@@ -1066,6 +1066,32 @@ namespace XviD4PSP
             }
         }
 
+        private bool _tweak_nocoring = false;
+        public bool tweak_nocoring
+        {
+            get
+            {
+                return _tweak_nocoring;
+            }
+            set
+            {
+                _tweak_nocoring = value;
+            }
+        }
+
+        private bool _tweak_dither = false;
+        public bool tweak_dither
+        {
+            get
+            {
+                return _tweak_dither;
+            }
+            set
+            {
+                _tweak_dither = value;
+            }
+        }
+
         private string _outframerate;
         public string outframerate
         {
@@ -1301,16 +1327,16 @@ namespace XviD4PSP
         }
 
         //По умолчанию Гистограмма отключена
-        private string _levels = "Disabled";
-        public string levels
+        private string _histogram = "Disabled";
+        public string histogram
         {
             get
             {
-                return _levels;
+                return _histogram;
             }
             set
             {
-                _levels = value;
+                _histogram = value;
             }
         }
 

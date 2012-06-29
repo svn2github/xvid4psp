@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.285.0 (27.06.2012), main changes:
+﻿XviD4PSP 5.10.286.0 (29.06.2012), main changes:
 
+>>> (r286) "Color correction" window: added "Full range" and "Dithering" options. For "Dithering"
+           AviSynth 2.6+ is required.
 >>> (r285) Fixed possible NullReferenceException in the "Message" window (bug since r269).
 >>> (r285) Various changes in AviSynthWrapper.dll. Changed the way to retrieve the AviSynth version.
 >>> (r284) In the project files added a bat-patcher for setting the LARGEADDRESSAWARE flag. It will increase the

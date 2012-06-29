@@ -34,7 +34,7 @@ namespace XviD4PSP
                 m = new Massive();
                 m.format = Settings.FormatOut;
                 m.sbc = old_sbc = Settings.SBC;
-                m = ColorCorrection.DecodeProfile(m);
+                m = DecodeProfile(m);
 
                 //Настройки гистограммы не хранятся в пресете
                 combo_histogram.IsEnabled = false;
@@ -57,6 +57,20 @@ namespace XviD4PSP
             text_contrast.Content = Languages.Translate("Contrast") + ":";
             text_hue.Content = Languages.Translate("Hue") + ":";
             text_histogram.Content = Languages.Translate("Histogram") + ":";
+
+            //AviSynth 2.6+
+            if (SysInfo.AVSVersionFloat >= 2.6f)
+            {
+                check_dithering.IsEnabled = true;
+                check_dithering.ToolTip = Languages.Translate("Apply dithering to prevent banding");
+            }
+            else
+            {
+                check_dithering.IsEnabled = false;
+                check_dithering.ToolTip = Languages.Translate("AviSynth 2.6+ is required");
+            }
+
+            check_fullrange.ToolTip = Languages.Translate("Do not clip luma and chroma to TV levels");
 
             combo_brightness.ToolTip = Languages.Translate("Is used to change the brightness of the image.") + Environment.NewLine +
                Languages.Translate("Positive values increase the brightness.") + Environment.NewLine +
@@ -113,7 +127,7 @@ namespace XviD4PSP
             combo_histogram.Items.Add("Stereo");
             combo_histogram.Items.Add("StereoOverlay");
             combo_histogram.Items.Add("AudioLevels");
-            combo_histogram.SelectedItem = (oldm != null) ? oldm.levels : "Disabled";
+            combo_histogram.SelectedItem = (oldm != null) ? oldm.histogram : "Disabled";
 
             LoadProfiles();    //загружает список профилей в форму, название текущего профиля выбирается = m.sbc
             LoadFromProfile(); //загружает параметры в форму (из массива m)
@@ -168,6 +182,8 @@ namespace XviD4PSP
         {
             //обнуляем параметры на параметры по умолчанию
             mass.iscolormatrix = false;
+            mass.tweak_nocoring = false;
+            mass.tweak_dither = false;
             mass.saturation = 1.0;
             mass.brightness = 0;
             mass.contrast = 1.00;
@@ -183,46 +199,54 @@ namespace XviD4PSP
                 {
                     while (!sr.EndOfStream)
                     {
-                        line = sr.ReadLine().ToLower();
                         //дешифровка яркости контраста ...
-                        if (line.StartsWith("tweak")) //начинает читать строчку со слова tweak
+                        line = sr.ReadLine().ToLower();
+                        if (line.StartsWith("tweak"))
                         {
-                            string pat;
                             Regex r;
                             Match mat;
 
                             //получаем hue - оттенок
-                            pat = @"hue=(-?\d+)";
-                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            r = new Regex(@"hue=(-?\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                             mat = r.Match(line);
                             if (mat.Success)
                                 mass.hue = Convert.ToInt32(mat.Groups[1].Value);
 
                             //получаем насыщенность
-                            pat = @"sat=(\d+.\d+)";
-                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            r = new Regex(@"sat=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                             mat = r.Match(line);
                             if (mat.Success)
-                                mass.saturation = Convert.ToDouble(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
+                                mass.saturation = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
 
                             //получаем яркость
-                            pat = @"bright=(-?\d+)";
-                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            r = new Regex(@"bright=(-?\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                             mat = r.Match(line);
                             if (mat.Success)
                                 mass.brightness = Convert.ToInt32(mat.Groups[1].Value);
 
                             //получаем контраст
-                            pat = @"cont=(\d+.\d+)";
-                            r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            r = new Regex(@"cont=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                             mat = r.Match(line);
                             if (mat.Success)
-                                mass.contrast = Convert.ToDouble(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
-                        }
+                                mass.contrast = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
 
-                        //дешифровка ColorMatrix
-                        if (line == "colormatrix()")
+                            //Full range
+                            r = new Regex(@"coring=(\w+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            mat = r.Match(line);
+                            if (mat.Success)
+                                mass.tweak_nocoring = !Convert.ToBoolean(mat.Groups[1].Value);
+
+                            //Dithering
+                            r = new Regex(@"dither=(\w+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            mat = r.Match(line);
+                            if (mat.Success)
+                                mass.tweak_dither = Convert.ToBoolean(mat.Groups[1].Value);
+                        }
+                        else if (line == "colormatrix()")
+                        {
+                            //дешифровка ColorMatrix
                             mass.iscolormatrix = true;
+                        }
                     }
                 }
             }
@@ -233,7 +257,6 @@ namespace XviD4PSP
 
         private void LoadFromProfile() //загружает значения параметров в форму (из массива m)
         {
-            check_colormatrix.IsChecked = m.iscolormatrix;
             combo_saturation.SelectedItem = m.saturation.ToString("0.0").Replace(",", ".");
             combo_hue.SelectedItem = m.hue;
             combo_brightness.SelectedItem = m.brightness;
@@ -243,6 +266,10 @@ namespace XviD4PSP
             slider_hue.Value = m.hue;
             slider_brightness.Value = m.brightness;
             slider_contrast.Value = m.contrast;
+
+            check_colormatrix.IsChecked = m.iscolormatrix;
+            check_fullrange.IsChecked = m.tweak_nocoring;
+            check_dithering.IsChecked = m.tweak_dither;
         }
 
         private void button_add_Click(object sender, System.Windows.RoutedEventArgs e) //кнопка "добавить новый профиль"
@@ -332,6 +359,8 @@ namespace XviD4PSP
                 if (m.saturation != 1.0) text += "Tweak(sat=" + m.saturation.ToString("0.0").Replace(",", ".") + ")" + Environment.NewLine;
                 if (m.brightness != 0) text += "Tweak(bright=" + m.brightness + ")" + Environment.NewLine;
                 if (m.contrast != 1.0) text += "Tweak(cont=" + m.contrast.ToString("0.00").Replace(",", ".") + ")" + Environment.NewLine;
+                if (m.tweak_nocoring) text += "Tweak(coring=false" + Environment.NewLine;
+                if (m.tweak_dither) text += "Tweak(dither=true" + Environment.NewLine;
 
                 string path = Calculate.StartupPath + "\\presets\\sbc\\" + profile + ".avs";
                 File.WriteAllText(path, text, System.Text.Encoding.Default);
@@ -431,24 +460,25 @@ namespace XviD4PSP
             }
         }
 
-        private void check_colormatrix_Checked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_colormatrix_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_colormatrix.IsFocused)
-            {
-                m.iscolormatrix = check_colormatrix.IsChecked.Value;
-                UpdateManualProfile();
-                Refresh();
-            }
+            m.iscolormatrix = check_colormatrix.IsChecked.Value;
+            UpdateManualProfile();
+            Refresh();
         }
 
-        private void check_colormatrix_Unchecked(object sender, System.Windows.RoutedEventArgs e)
+        private void check_fullrange_Clicked(object sender, RoutedEventArgs e)
         {
-            if (check_colormatrix.IsFocused)
-            {
-                m.iscolormatrix = check_colormatrix.IsChecked.Value;
-                UpdateManualProfile();
-                Refresh();
-            }
+            m.tweak_nocoring = check_fullrange.IsChecked.Value;
+            UpdateManualProfile();
+            Refresh();
+        }
+
+        private void check_dithering_Clicked(object sender, RoutedEventArgs e)
+        {
+            m.tweak_dither = check_dithering.IsChecked.Value;
+            UpdateManualProfile();
+            Refresh();
         }
 
         private void Refresh()
@@ -481,7 +511,7 @@ namespace XviD4PSP
         {
             if (combo_histogram.IsDropDownOpen || combo_histogram.IsSelectionBoxHighlighted)
             {
-                m.levels = Convert.ToString(combo_histogram.SelectedItem);
+                m.histogram = Convert.ToString(combo_histogram.SelectedItem);
                 Refresh();
             }
         }
