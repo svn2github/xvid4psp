@@ -175,7 +175,7 @@ namespace XviD4PSP
            {
                m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-2" + ((SysInfo.AVSVersionFloat < 2.6f) ? "5" : "6") + ".dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Repair.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
@@ -187,7 +187,7 @@ namespace XviD4PSP
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrainSSE2.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RepairSSE2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-25.dll\")" + Environment.NewLine;
+               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-2" + ((SysInfo.AVSVersionFloat < 2.6f) ? "5" : "6") + ".dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\fft3dfilter.dll\")" + Environment.NewLine;
                m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
                m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;

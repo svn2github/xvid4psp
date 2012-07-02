@@ -359,8 +359,8 @@ namespace XviD4PSP
                 if (m.saturation != 1.0) text += "Tweak(sat=" + m.saturation.ToString("0.0").Replace(",", ".") + ")" + Environment.NewLine;
                 if (m.brightness != 0) text += "Tweak(bright=" + m.brightness + ")" + Environment.NewLine;
                 if (m.contrast != 1.0) text += "Tweak(cont=" + m.contrast.ToString("0.00").Replace(",", ".") + ")" + Environment.NewLine;
-                if (m.tweak_nocoring) text += "Tweak(coring=false" + Environment.NewLine;
-                if (m.tweak_dither) text += "Tweak(dither=true" + Environment.NewLine;
+                if (m.tweak_nocoring) text += "Tweak(coring=false)" + Environment.NewLine;
+                if (m.tweak_dither) text += "Tweak(dither=true)" + Environment.NewLine;
 
                 string path = Calculate.StartupPath + "\\presets\\sbc\\" + profile + ".avs";
                 File.WriteAllText(path, text, System.Text.Encoding.Default);

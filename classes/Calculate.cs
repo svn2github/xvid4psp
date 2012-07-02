@@ -1125,5 +1125,20 @@ namespace XviD4PSP
 
             return false;
         }
+
+        public static int GetScriptBitDepth(string script)
+        {
+            string[] strings = script.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            for (int i = strings.Length - 1; i >= 0; i--) //Перебираем с конца
+            {
+                string line = strings[i].TrimStart(new char[] { ' ' });
+                if (line.StartsWith("OUTPUT_BIT_DEPTH", StringComparison.OrdinalIgnoreCase))
+                {
+                    string res = GetRegexValue(@"^OUTPUT_BIT_DEPTH\s*=\s*(\d+)", line);
+                    if (!string.IsNullOrEmpty(res)) return Convert.ToInt32(res);
+                }
+            }
+            return 8;
+        }
     }
 }

@@ -1775,11 +1775,11 @@ namespace XviD4PSP
             }
         }
 
-        public static bool Use64x264
+        public static bool UseAVS4x264
         {
             get
             {
-                object value = GetValue("Use64x264");
+                object value = GetValue("UseAVS4x264");
                 if (value == null)
                 {
                     return false;
@@ -1791,7 +1791,7 @@ namespace XviD4PSP
             }
             set
             {
-                SetBool("Use64x264", value);
+                SetBool("UseAVS4x264", value);
             }
         }
 

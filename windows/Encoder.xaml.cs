@@ -418,6 +418,9 @@ namespace XviD4PSP
             //10-bit depth энкодер
             bool _10bit = (m.x264options.profile == x264.Profiles.High10);
 
+            //Хакнутый скрипт
+            int bdepth = Calculate.GetScriptBitDepth(m.script);
+
             //Убираем метку " --extra:"
             for (int n = 0; n < m.vpasses.Count; n++)
                 m.vpasses[n] = m.vpasses[n].ToString().Replace(" --extra:", "");
@@ -531,12 +534,17 @@ namespace XviD4PSP
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
-            string arguments; //начало создания командной строчки для x264-го
 
+            string in_depth = "";
+            string executable = "";
             if (m.format == Format.ExportFormats.PmpAvc)
                 info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
             else
-                info.FileName = Calculate.StartupPath + "\\apps\\" + (_10bit ? "x264_10b\\" : "x264\\") + ((Settings.Use64x264) ? "avs4x264.exe" : "x264.exe");
+            {
+                if (bdepth != 8) in_depth = "--input-depth " + bdepth + " ";
+                if (Settings.UseAVS4x264 || bdepth != 8) { executable = (SysInfo.GetOSArchInt() == 64) ? "-L x264_64.exe " : "-L x264.exe "; }
+                info.FileName = Calculate.StartupPath + "\\apps\\" + ((_10bit) ? "x264_10b\\" : "x264\\") + ((executable.Length > 0) ? "avs4x264.exe" : "x264.exe");
+            }
 
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
@@ -544,19 +552,23 @@ namespace XviD4PSP
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
+            string arguments; //начало создания командной строчки для x264-го
+
             string psnr = (Settings.x264_PSNR) ? " --psnr" : "";
             string ssim = (Settings.x264_SSIM) ? " --ssim" : "";
 
-            arguments = m.vpasses[0] + psnr + ssim;
-
-            //прописываем sar
             string sar = "";
             if (!m.vpasses[m.vpasses.Count - 1].ToString().Contains("--sar "))
             {
                 if (!string.IsNullOrEmpty(m.sar)) sar = " --sar " + m.sar;
                 else sar = " --sar 1:1";
             }
-            arguments += sar;
+
+            //Добавляем новое
+            for (int n = 0; n < m.vpasses.Count; n++)
+                m.vpasses[n] = executable + in_depth + m.vpasses[n] + psnr + ssim + sar;
+
+            arguments = m.vpasses[0].ToString();
 
             if (m.vpasses.Count == 1)
                 info.Arguments = arguments + " --output \"" + m.outvideofile + "\" \"" + m.scriptpath + "\"";
@@ -576,7 +588,7 @@ namespace XviD4PSP
             SetLog("");
             if (Settings.ArgumentsToLog)
             {
-                SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
+                SetLog(((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") + info.Arguments);
                 SetLog("");
             }
 
@@ -607,10 +619,7 @@ namespace XviD4PSP
                 else if (m.vpasses.Count == 3) SetLog("...second pass...");
 
                 step++;
-                arguments = m.vpasses[1] + psnr + ssim + " --stats \"" + passlog + "\"";
-
-                //прописываем sar
-                arguments += sar;
+                arguments = m.vpasses[1] + " --stats \"" + passlog + "\"";
 
                 if (m.vpasses.Count == 2)
                     info.Arguments = arguments + " --output \"" + m.outvideofile + "\" \"" + m.scriptpath + "\"";
@@ -635,7 +644,7 @@ namespace XviD4PSP
                 SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
+                    SetLog(((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") + info.Arguments);
                     SetLog("");
                 }
 
@@ -649,10 +658,7 @@ namespace XviD4PSP
                 SetLog("...last pass...");
 
                 step++;
-                arguments = m.vpasses[2] + psnr + ssim + " --stats \"" + passlog + "\"";
-
-                //прописываем sar
-                arguments += sar;
+                arguments = m.vpasses[2] + " --stats \"" + passlog + "\"";
 
                 info.Arguments = arguments + " --output \"" + m.outvideofile + "\" \"" + m.scriptpath + "\"";
 
@@ -660,7 +666,7 @@ namespace XviD4PSP
                 SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog((Settings.Use64x264 ? "x264_64.exe: " : "x264.exe: ") + info.Arguments);
+                    SetLog(((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") + info.Arguments);
                     SetLog("");
                 }
 
@@ -3950,7 +3956,8 @@ namespace XviD4PSP
                         SetLog("VCodecPreset: " + m.vencoding);
                         SetLog("VEncodingMode: " + m.encodingmode);
 
-                        string vcodec_info = (m.outvcodec == "x264") ? (((m.x264options.profile == x264.Profiles.High10) ? " 10-bit depth" : "") + ((Settings.Use64x264) ? " (64-bit)" : "")) :
+                        string vcodec_info = (m.outvcodec == "x264") ? (((m.x264options.profile == x264.Profiles.High10) ? " 10-bit depth" : "") +
+                            ((Settings.UseAVS4x264 && SysInfo.GetOSArchInt() == 64) ? " (x64)" : "")) :
                             (m.outvcodec == "XviD") ? (Settings.UseXviD_130) ? " (1.3.x)" : " (1.2.2)" : "";
 
                         if (m.invcodec != m.outvcodec)

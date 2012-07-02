@@ -53,12 +53,22 @@ namespace XviD4PSP
             check_clone_fps.Content = Languages.Translate("Framerate");
             check_clone_audio.Content = Languages.Translate("Audio options");
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
-            check_use_64bit.Content = Languages.Translate("Use 64-bit x264");
+
+            if (SysInfo.GetOSArchInt() == 64)
+            {
+                check_use_avs4x264.Content = Languages.Translate("Use 64-bit x264");
+                check_use_avs4x264.ToolTip = Languages.Translate("This option will allow you to use 64-bit x264 with 32-bit AviSynth (via avs4x264 proxy)");
+            }
+            else
+            {
+                check_use_avs4x264.Content = Languages.Translate("Run x264 using avs4x264 proxy");
+                check_use_avs4x264.ToolTip = Languages.Translate("Use this option if you run out of memory due to 32-bit OS limitation of ~2GB per process");
+            }
+
             check_dont_delete_caches.Content = Languages.Translate("Don`t delete any caches and temporal files");
             check_use_trayicon.Content = Languages.Translate("Enable system tray icon");
             check_audio_first.Content = Languages.Translate("Encode audio first, then video");
 
-            check_use_64bit.ToolTip = Languages.Translate("Your OS must be 64-bit also!");
             check_batch_pause.ToolTip = Languages.Translate("So you can tune all encoding settings as needed, and then continue opening");
             check_clone_ar.ToolTip = Languages.Translate("Clone: resolution, crop on each side, added black borders, output SAR/aspect and aspect adjusting method.") +
                 "\r\n" + Languages.Translate("Note: Autocrop analysis will not be performed!");
@@ -101,7 +111,7 @@ namespace XviD4PSP
             check_hide_comments.IsChecked = Settings.HideComments;                                //Удалять комментарии из скрипта
             check_resize_first.IsChecked = Settings.ResizeFirst;                                  //Ресайз перед фильтрацией
             check_read_prmtrs.IsChecked = Settings.ReadScript;                                    //Считывать параметры скрипта
-            check_log_to_file.IsChecked = check_logfile_tempfolder.IsEnabled = Settings.WriteLog; //Записывать лог кодирования в файл..
+            check_log_to_file.IsChecked = Settings.WriteLog;                                      //Записывать лог кодирования в файл..
             check_logfile_tempfolder.IsChecked = Settings.LogInTemp;                              //.. а файл поместить во временную папку
             textbox_extensions.Text = Settings.GoodFilesExtensions;                               //Окно со списком допустимых расширений файлов (при пакетной обработке)
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding;                      //Автозапуск кодирования (при пакетной обработке)
@@ -113,7 +123,7 @@ namespace XviD4PSP
             check_clone_fps.IsChecked = Settings.BatchCloneFPS;                                   //Это для fps
             check_clone_audio.IsChecked = Settings.BatchCloneAudio;                               //Ну а это для звуковых параметров
             check_batch_pause.IsChecked = Settings.BatchPause;                                    //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
-            check_use_64bit.IsChecked = Settings.Use64x264;                                       //Использовать 64-битную версию x264.exe
+            check_use_avs4x264.IsChecked = Settings.UseAVS4x264;                                  //Запускать x264\x264_64 через avs4x264
             check_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
             check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled
                  = check_delete_dgindex_cache.IsEnabled = Settings.DeleteTempFiles);              //Удалять кэши и временные файлы
@@ -287,7 +297,7 @@ namespace XviD4PSP
         //Лог кодирования в файл
         private void check_log_to_file_Click(object sender, RoutedEventArgs e)
         {
-            check_logfile_tempfolder.IsEnabled = Settings.WriteLog = check_log_to_file.IsChecked.Value;
+            Settings.WriteLog = check_log_to_file.IsChecked.Value;
         }
 
         //Файл с логом кодирования во временную папку
@@ -354,9 +364,9 @@ namespace XviD4PSP
             Settings.BatchPause = check_batch_pause.IsChecked.Value;
         }
 
-        private void check_use_64bit_Click(object sender, RoutedEventArgs e)
+        private void check_use_avs4x264_Click(object sender, RoutedEventArgs e)
         {
-            Settings.Use64x264 = check_use_64bit.IsChecked.Value;
+            Settings.UseAVS4x264 = check_use_avs4x264.IsChecked.Value;
         }
 
         private void button_restore_hotkeys_Click(object sender, RoutedEventArgs e)

@@ -232,6 +232,8 @@ int __stdcall dimzon_avs_init(SafeStruct** ppstr, char *func, char *arg, AVSDLLV
 			vi->nchannels                = inf.nchannels;
 		}
 
+		//Нужен ли нам вообще этот res?!
+		if(pstr->res) delete pstr->res;
 		pstr->res = new AVSValue(res);
 
 		pstr->err[0] = 0;
@@ -279,6 +281,7 @@ int __stdcall dimzon_avs_invoke(SafeStruct* pstr, char *func, char **arg, int le
 				if (i == 0 && was_letters && !was_digits && !was_spaces && lower.compare("last") == 0)
 				{
 					//Clip (last)
+					if(!pstr->clp) throw AvisynthError("AviSynthWrapper: The \"last\" clip was requested, but it doesn't exist!");
 					args[actual_len] = pstr->clp; //pstr->res->AsClip();
 					actual_len += 1;
 
@@ -359,8 +362,11 @@ int __stdcall dimzon_avs_invoke(SafeStruct* pstr, char *func, char **arg, int le
 				vi->nchannels                = inf.nchannels;
 			}
 
-			pstr->err[0] = 0;
+			//Нужен ли нам вообще этот res?!
+			if(pstr->res) delete pstr->res;
 			pstr->res = new AVSValue(res);
+
+			pstr->err[0] = 0;
 		}
 
 		return 0;

@@ -13,10 +13,10 @@ namespace XviD4PSP
         public static ArrayList CustomMatrixes(MatrixTypes mtype)
         {
             ArrayList list = new ArrayList();
-            foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\matrix\\" + mtype.ToString().ToLower()))
+            string type = mtype.ToString().ToLower();
+            foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\matrix\\" + type, ("*." + type)))
             {
-                string name = Path.GetFileNameWithoutExtension(file);
-                list.Add(name);
+                list.Add(Path.GetFileNameWithoutExtension(file));
             }
             return list;
         }

@@ -130,29 +130,35 @@ namespace XviD4PSP
             }
         }
 
-        public static string GetOSArchitecture()
+        public static int GetOSArchInt()
         {
             try
             {
                 string env = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-                if (!String.IsNullOrEmpty(env) && env.Contains("64")) return " (x64)";
+                if (!String.IsNullOrEmpty(env) && env.Contains("64")) return 64;
                 else
                 {
                     env = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432");
-                    if (!String.IsNullOrEmpty(env) && env.Contains("64")) return " (x64)";
+                    if (!String.IsNullOrEmpty(env) && env.Contains("64")) return 64;
                 }
 
-                return " (x32)";
+                return 32;
             }
             catch
             {
-                return "";
+                return 0;
             }
+        }
+
+        public static string GetOSArchString()
+        {
+            int os = GetOSArchInt();
+            return (os == 64) ? " (x64)" : (os == 32) ? " (x32)" : "";
         }
 
         public static string GetOSNameFull()
         {
-            return GetOSName() + (Environment.OSVersion.ServicePack.Length > 0 ? " " + Environment.OSVersion.ServicePack : "") + GetOSArchitecture();
+            return GetOSName() + (Environment.OSVersion.ServicePack.Length > 0 ? " " + Environment.OSVersion.ServicePack : "") + GetOSArchString();
         }
 
         public static string GetFrameworkVersion()

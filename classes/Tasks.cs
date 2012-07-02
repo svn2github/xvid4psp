@@ -56,11 +56,10 @@ namespace XviD4PSP
 
         public Task(string thm, TaskStatus status, Massive mass)
         {
+            _info = "";
             _thm = thm;
             _status = status;
             _name = Path.GetFileName(mass.outfilepath);
-
-            _info = "";
 
             if (mass.outvcodec != "Copy" &&
                 mass.outvcodec != "Disabled")
@@ -70,12 +69,31 @@ namespace XviD4PSP
                 {
                     bool recalc_sar = false;
                     AviSynthReader reader = null;
+
                     try
                     {
                         reader = new AviSynthReader();
                         reader.ParseScript(mass.script);
-                        if (mass.outresw != reader.Width) { mass.outresw = reader.Width; recalc_sar = true; }
+
+                        if (mass.outresw != reader.Width) 
+                        {
+                            if (mass.outvcodec == "x264" && Calculate.GetScriptBitDepth(mass.script) != 8)
+                            {
+                                if (mass.outresw != reader.Width / 2)
+                                {
+                                    mass.outresw = reader.Width / 2;
+                                    recalc_sar = true;
+                                }
+                            }
+                            else
+                            {
+                                mass.outresw = reader.Width;
+                                recalc_sar = true;
+                            }
+                        }
+
                         if (mass.outresh != reader.Height) { mass.outresh = reader.Height; recalc_sar = true; }
+
                         mass.outframes = reader.FrameCount;
                         mass.outframerate = Calculate.ConvertDoubleToPointString(reader.Framerate);
                         mass.outduration = TimeSpan.FromSeconds((double)mass.outframes / reader.Framerate);

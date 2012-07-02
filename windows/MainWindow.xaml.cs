@@ -4589,7 +4589,7 @@ namespace XviD4PSP
 
                     g.DrawString(avs_error, font, System.Drawing.Brushes.Red, left, top, System.Drawing.StringFormat.GenericTypographic);
                     font.Dispose();
-                    
+
                     total_frames = "0";
                 }
                 else

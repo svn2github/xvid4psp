@@ -30,7 +30,7 @@ typedef struct tagSafeStruct
 {
 	char err[ERRMSG_LEN];
 	IScriptEnvironment* env;
-	AVSValue* res;
+	AVSValue* res;           //Используется как буфер или оно вообще нам не нужно?!
 	PClip clp;
 	HMODULE dll;
 } SafeStruct;

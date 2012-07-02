@@ -2223,15 +2223,16 @@ namespace XviD4PSP
         {
             try
             {
+                bool x264_64 = (Settings.UseAVS4x264 && SysInfo.GetOSArchInt() == 64);
                 System.Diagnostics.ProcessStartInfo help = new System.Diagnostics.ProcessStartInfo();
-                help.FileName = Calculate.StartupPath + "\\apps\\" + (m.x264options.profile == x264.Profiles.High10 ? "x264_10b\\" : "x264\\") + ((Settings.Use64x264) ? "x264_64.exe" : "x264.exe");
+                help.FileName = Calculate.StartupPath + "\\apps\\" + (m.x264options.profile == x264.Profiles.High10 ? "x264_10b\\" : "x264\\") + ((x264_64) ? "x264_64.exe" : "x264.exe");
                 help.WorkingDirectory = Path.GetDirectoryName(help.FileName);
                 help.Arguments = " --fullhelp";
                 help.UseShellExecute = false;
                 help.CreateNoWindow = true;
                 help.RedirectStandardOutput = true;
                 System.Diagnostics.Process p = System.Diagnostics.Process.Start(help);
-                string title = "x264 " + (m.x264options.profile == x264.Profiles.High10 ? "10" : "8") + "-bit depth " + ((Settings.Use64x264) ? "(64-bit) " : "") + "--fullhelp";
+                string title = "x264 " + (m.x264options.profile == x264.Profiles.High10 ? "10" : "8") + "-bit depth " + ((x264_64) ? "(x64) " : "") + "--fullhelp";
                 new ShowWindow(root_window, title, p.StandardOutput.ReadToEnd().Replace("\n", "\r\n"), new FontFamily("Lucida Console"));
             }
             catch (Exception ex)
