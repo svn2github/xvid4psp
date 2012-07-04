@@ -432,7 +432,7 @@
                     <Image x:Name="image_settings1" Source="..\pictures\settings.png" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="None" FlowDirection="RightToLeft" />
                 </Button>
                 <Label x:Name="text_filtering" Height="Auto" Content="Filtering:" Foreground="#FFFFFFFF" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" VerticalAlignment="Top" Width="Auto" Margin="0,50.58,0,0" FontSize="14"/>
-                <ComboBox x:Name="combo_filtering" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_filtering_SelectionChanged" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Stretch" Margin="4,79.2,30.55,0" Width="Auto" VerticalAlignment="Top" ToolTip="{Binding Path=SelectedItem, RelativeSource={RelativeSource Self}}"/>
+                <ComboBox x:Name="combo_filtering" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectedValuePath="Content" SelectionChanged="combo_filtering_SelectionChanged" d:LayoutOverrides="VerticalAlignment, Width, Height" HorizontalAlignment="Stretch" Margin="4,79.2,30.55,0" Width="Auto" VerticalAlignment="Top" ToolTip="{Binding Path=SelectionBoxItem, RelativeSource={RelativeSource Self}}"/>
                 <Button x:Name="button_edit_filters" Click="EditScript" Height="26" Margin="0,77.2,3,0" HorizontalAlignment="Right" Width="26" Grid.ColumnSpan="1" d:LayoutOverrides="VerticalAlignment" VerticalAlignment="Top" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}">
                     <Image  Stretch="None" x:Name="image_settings5" Source="..\pictures\settings1.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="LeftToRight" />
                 </Button>

@@ -38,6 +38,7 @@ namespace XviD4PSP
             label_temppath.Content = Languages.Translate("Temp folder path:");
             check_window_dim.Content = Languages.Translate("Remember last window location");
             check_hide_comments.Content = Languages.Translate("Remove comments (#text) from the AviSynth script");
+            check_show_ftooltips.Content = Languages.Translate("Show advanced tooltips for filtering presets");
             check_resize_first.Content = Languages.Translate("Make crop/resize before filtering (otherwise - after filtering)");
             check_read_prmtrs.Content = Languages.Translate("Read parameters from the script when saving a new task");
             check_log_to_file.Content = Languages.Translate("Write encoding log to file");
@@ -109,6 +110,7 @@ namespace XviD4PSP
             check_auto_colormatrix.IsChecked = Settings.AutoColorMatrix;
             check_window_dim.IsChecked = Settings.WindowResize;                                   //Запоминать параметры окна
             check_hide_comments.IsChecked = Settings.HideComments;                                //Удалять комментарии из скрипта
+            check_show_ftooltips.IsChecked = Settings.ShowFToolTips;                              //Показывать подсказки к пресетам фильтрации
             check_resize_first.IsChecked = Settings.ResizeFirst;                                  //Ресайз перед фильтрацией
             check_read_prmtrs.IsChecked = Settings.ReadScript;                                    //Считывать параметры скрипта
             check_log_to_file.IsChecked = Settings.WriteLog;                                      //Записывать лог кодирования в файл..
@@ -280,6 +282,12 @@ namespace XviD4PSP
         private void check_hide_comments_Click(object sender, RoutedEventArgs e)
         {
             Settings.HideComments = check_hide_comments.IsChecked.Value;
+        }
+
+        private void check_show_ftooltips_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.ShowFToolTips = check_show_ftooltips.IsChecked.Value;
+            p.LoadFilteringPresets();
         }
 
         //Обработка чекбокса "кроп перед фильтрацией"

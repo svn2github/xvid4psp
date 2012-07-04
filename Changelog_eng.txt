@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.287.0 (02.07.2012), main changes:
+﻿XviD4PSP 5.10.288.0 (04.07.2012), main changes:
 
+>>> (r288) Added advanced tooltips for filtering presets. But, since they are written on Russian and not
+           translated to other languages, this option is disabled by default if selected language is not Russian.
+           Can be enabled in "Settings->Global settings->Misc->Show advanced tooltips for filtering presets".
 >>> (r287) "Global settings->Encoding" window: an option "Use 64-bit x264" has changed it's meaning and name
            for 32-bit OS users. Like previously, this option allows to launch x264 via avs4x264, but
            instead of x264_64.exe (which is a 64-bit version of the encoder) on a 32-bit OS will be launched

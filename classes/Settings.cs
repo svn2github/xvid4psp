@@ -1158,6 +1158,27 @@ namespace XviD4PSP
             }
         }
 
+        //Всплывающие подсказки к фильтрам при раскрытом списке
+        public static bool ShowFToolTips
+        {
+            get
+            {
+                object value = GetValue("ShowFToolTips");
+                if (value == null)
+                {
+                    return (Language == "Russian");
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("ShowFToolTips", value);
+            }
+        }
+
         //Кроп/ресайз до или после фильтрации
         public static bool ResizeFirst
         {

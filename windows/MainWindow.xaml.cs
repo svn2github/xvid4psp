@@ -1151,7 +1151,7 @@ namespace XviD4PSP
 
                     combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut = m.format);
                     combo_sbc.SelectedItem = Settings.SBC = m.sbc;
-                    combo_filtering.SelectedItem = Settings.Filtering = m.filtering;
+                    combo_filtering.SelectedValue = Settings.Filtering = m.filtering;
                     combo_vencoding.SelectedItem = m.vencoding;
                     Settings.SetVEncodingPreset(m.format, m.vencoding);
 
@@ -2754,26 +2754,93 @@ namespace XviD4PSP
             }
         }
 
-        private void LoadFilteringPresets()
+        public void LoadFilteringPresets()
         {
             //загружаем список фильтров
             combo_filtering.Items.Clear();
-            combo_filtering.Items.Add("Disabled");
+            combo_filtering.Items.Add(new ComboBoxItem() { Content = "Disabled" });
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering"))
+                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering", "*.avs"))
                 {
-                    combo_filtering.Items.Add(Path.GetFileNameWithoutExtension(file));
+                    ComboBoxItem item = new ComboBoxItem();
+                    item.Content = Path.GetFileNameWithoutExtension(file);
+
+                    if (Settings.ShowFToolTips)
+                    {
+                        item.ToolTipOpening += new ToolTipEventHandler(filtering_ToolTipOpening);
+                        item.ToolTip = ""; //Временная пустышка
+                    }
+
+                    combo_filtering.Items.Add(item);
                 }
             }
             catch (Exception) { }
 
             //прописываем текущий фильтр
             string preset = Settings.Filtering;
-            if (combo_filtering.Items.Contains(preset))
-                combo_filtering.SelectedItem = preset;
-            else
-                combo_filtering.SelectedItem = Settings.Filtering = "Disabled";
+            foreach (ComboBoxItem item in combo_filtering.Items)
+            {
+                if (item.Content.ToString() == preset)
+                {
+                    combo_filtering.SelectedItem = item;
+                    return;
+                }
+            }
+            combo_filtering.SelectedValue = Settings.Filtering = "Disabled";
+        }
+
+        private void filtering_ToolTipOpening(object sender, ToolTipEventArgs e)
+        {
+            ComboBoxItem item = ((ComboBoxItem)sender);
+            if (item.Tag != null) return;
+            item.Tag = true;
+
+            try
+            {
+                //Поиск и считывание нужного нам комментария
+                using (StreamReader sr = new StreamReader(Calculate.StartupPath + "\\presets\\filtering\\" + item.Content + ".avs", System.Text.Encoding.Default))
+                {
+                    ArrayList in_lines = new ArrayList();
+                    ArrayList out_lines = new ArrayList();
+                    while (!sr.EndOfStream) in_lines.Add(sr.ReadLine());
+
+                    bool got_something = false;
+                    for (int i = in_lines.Count - 1; i >= 0; i--)
+                    {
+                        string line = in_lines[i].ToString().Trim();
+                        if (line.StartsWith("#"))
+                        {
+                            //Обрезаем только первый символ #
+                            out_lines.Add(line.Substring(1).Trim());
+                            got_something = true;
+                        }
+                        else if (got_something || line.Length > 0)
+                        {
+                            //Это уже сам пресет
+                            break;
+                        }
+                    }
+
+                    if (out_lines.Count == 0)
+                    {
+                        //Пусто - отключаем тултип
+                        item.ToolTip = null;
+                        e.Handled = true;
+                    }
+                    else
+                    {
+                        //Не пусто - переворачиваем текст обратно
+                        for (int i = out_lines.Count - 1; i >= 0; i--)
+                            item.ToolTip += out_lines[i] + ((i > 0) ? Environment.NewLine : null);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                item.ToolTip = null;
+                e.Handled = true;
+            }
         }
 
         private void AspectResolution_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -3282,11 +3349,11 @@ namespace XviD4PSP
         {
             if ((combo_filtering.IsDropDownOpen || combo_filtering.IsSelectionBoxHighlighted) && combo_filtering.SelectedItem != null)
             {
-                Settings.Filtering = combo_filtering.SelectedItem.ToString();
+                Settings.Filtering = ((ComboBoxItem)combo_filtering.SelectedItem).Content.ToString();
 
                 if (m != null)
                 {
-                    m.filtering = combo_filtering.SelectedItem.ToString();
+                    m.filtering = ((ComboBoxItem)combo_filtering.SelectedItem).Content.ToString();
 
                     //создаём новый AviSynth скрипт
                     m.filtering_changed = true;
@@ -3732,7 +3799,7 @@ namespace XviD4PSP
 
                 combo_format.SelectedItem = Format.EnumToString(Settings.FormatOut = m.format);
                 combo_sbc.SelectedItem = Settings.SBC = m.sbc;
-                combo_filtering.SelectedItem = Settings.Filtering = m.filtering;
+                combo_filtering.SelectedValue = Settings.Filtering = m.filtering;
                 combo_vencoding.SelectedItem = m.vencoding;
                 Settings.SetVEncodingPreset(m.format, m.vencoding);
 
