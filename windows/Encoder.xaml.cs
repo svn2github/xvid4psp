@@ -4468,6 +4468,8 @@ namespace XviD4PSP
                 if (!IsErrors)
                 {
                     if (m.outvideofile != null && !DontMuxStreams &&
+                        muxer != Format.Muxers.Disabled &&
+                        m.outvideofile != m.outfilepath &&
                         Path.GetDirectoryName(m.outvideofile) == Settings.TempPath)
                     {
                         //Защита от удаления исходников
@@ -4578,7 +4580,7 @@ namespace XviD4PSP
                 //Смотрим, есть ли что ещё скодировать
                 if (!IsAborted && !IsAutoAborted && p.EncodeNextTask())
                 {
-                    //Если нет заданий со статусами Waiting, Encoding и Errors, то можно выходить 
+                    //Если нет заданий со статусами Waiting, Encoding и Errors, то можно выходить
                     if (ending == Shutdown.ShutdownMode.Exit)
                     {
                         p.IsExiting = true;
