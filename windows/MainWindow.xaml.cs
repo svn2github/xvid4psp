@@ -4599,7 +4599,7 @@ namespace XviD4PSP
             System.Drawing.Bitmap bmp = null;
             System.Drawing.Graphics g = null;
             IntPtr hObject = IntPtr.Zero;
-            AviSynthReader reader = new AviSynthReader();
+            AviSynthReader reader = new AviSynthReader(AviSynthColorspace.RGB24, AudioSampleType.Undefined);
 
             try
             {
@@ -5826,7 +5826,7 @@ namespace XviD4PSP
                     new_script += ("Lanczos4Resize(" + width + ", " + height + ", " + crop_w + ", " + crop_h + ", -" + crop_w + ", -" + crop_h + ")\r\n");
                 }
 
-                reader = new AviSynthReader();
+                reader = new AviSynthReader(AviSynthColorspace.RGB24, AudioSampleType.Undefined);
                 reader.ParseScript(new_script);
                 if (width == 0 || height == 0 || (width == reader.Width && height == reader.Height))
                 {

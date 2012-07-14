@@ -358,7 +358,7 @@ namespace XviD4PSP
                     new_script += ("Lanczos4Resize(" + width + ", " + height + ", " + crop_w + ", " + crop_h + ", -" + crop_w + ", -" + crop_h + ")\r\n");
                 }
 
-                reader = new AviSynthReader();
+                reader = new AviSynthReader(AviSynthColorspace.RGB24, AudioSampleType.Undefined);
                 reader.ParseScript(new_script);
 
                 //проверка на выходы за пределы общего количества кадров

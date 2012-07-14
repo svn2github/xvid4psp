@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.289.0 (05.07.2012), main changes:
+﻿XviD4PSP 5.10.290.0 (14.07.2012), main changes:
 
+>>> (r290) ScriptRunner ("Run script"): improved performance by removing unnecessary colorspace conversion;
+           added displaying of elapsed time and average fps; automatic closing the window when running is
+           finished - is now an option, that can be disabled.
 >>> (r289) Fixed deletion of encoded files when output path is Temp-folder and the muxing stage
            isn't required (rep. by D.Y).
 >>> (r288) Added advanced tooltips for filtering presets. But, since they are written on Russian and not

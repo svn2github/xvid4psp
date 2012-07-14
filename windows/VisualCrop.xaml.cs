@@ -96,7 +96,7 @@ namespace XviD4PSP
                 if (reader == null)
                 {
                     //Открываем скрипт
-                    reader = new AviSynthReader();
+                    reader = new AviSynthReader(AviSynthColorspace.RGB24, AudioSampleType.Undefined);
                     reader.ParseScript(script);
                     fps = reader.Framerate;
                 }

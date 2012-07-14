@@ -8,17 +8,27 @@ namespace XviD4PSP
     public class AviSynthReader
     {
         private AviSynthScriptEnvironment environment = null;
+        private AviSynthColorspace forced_colorspace;
+        private AudioSampleType forced_sampletype;
+
         private AviSynthClip clip = null;
         public AviSynthClip Clip
-        {
-            get
-            {
-                return this.clip;
-            }
+        { 
+            get { return this.clip; }
         }
 
         public AviSynthReader()
         {
+            //По умолчанию форматы не меняются
+            forced_colorspace = AviSynthColorspace.Undefined;
+            forced_sampletype = AudioSampleType.Undefined;
+        }
+
+        public AviSynthReader(AviSynthColorspace forceColorSpace, AudioSampleType forceSampleType)
+        {
+            //Если надо - меняем форматы
+            forced_colorspace = forceColorSpace;
+            forced_sampletype = forceSampleType;
         }
 
         //Скрипт в виде string
@@ -27,7 +37,7 @@ namespace XviD4PSP
             try
             {
                 this.environment = new AviSynthScriptEnvironment();
-                this.clip = environment.ParseScript(script, AviSynthColorspace.RGB24, AudioSampleType.INT16);
+                this.clip = environment.ParseScript(script, forced_colorspace, forced_sampletype);
                 //if (!this.clip.HasVideo) throw new ArgumentException("Script doesn't contain video");
             }
             catch (Exception)
@@ -43,7 +53,7 @@ namespace XviD4PSP
             try
             {
                 this.environment = new AviSynthScriptEnvironment();
-                this.clip = environment.OpenScriptFile(script, AviSynthColorspace.RGB24, AudioSampleType.INT16);
+                this.clip = environment.OpenScriptFile(script, forced_colorspace, forced_sampletype);
                 if (!this.clip.HasVideo) throw new ArgumentException("Script doesn't contain video");
             }
             catch (Exception)
@@ -134,6 +144,9 @@ namespace XviD4PSP
 
         public Bitmap ReadFrameBitmap(int position)
         {
+            if (clip.PixelType != AviSynthColorspace.RGB24)
+                throw new Exception("ReadFrameBitmap: Invalid PixelType (only RGB24 is supported)");
+
             Bitmap bmp = new Bitmap(Width, Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
             try
             {

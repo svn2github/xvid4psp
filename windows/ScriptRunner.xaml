@@ -5,10 +5,12 @@
 	x:Class="XviD4PSP.ScriptRunner"
 	x:Name="Window"
 	Title="ScriptRunner"
-	MinWidth="298" Height="90" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	MinWidth="298" Height="110" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
 	<Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
-		<ProgressBar x:Name="progress_total" Foreground="{DynamicResource StrawBerryBrush}" Margin="8,0,8,8" VerticalAlignment="Bottom" Height="12" IsIndeterminate="True"/>
-		<Label OpacityMask="{x:Null}" x:Name="label_info" Content="Running the script..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,6,0" VerticalAlignment="Top"/>
+        <ProgressBar x:Name="progress_total" Foreground="{DynamicResource StrawBerryBrush}" Margin="6,0,20,8" VerticalAlignment="Bottom" Height="12" IsIndeterminate="True"/>
+        <CheckBox x:Name="check_autoclose" Width="Auto" Height="12" Foreground="#FFFFFFFF" Margin="0,0,6,8" Padding="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="check_autoclose_Click"/>
+		<Label OpacityMask="{x:Null}" x:Name="label_info" Content="Running the script..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="6,8,6,0" VerticalAlignment="Top"/>
+        <Label OpacityMask="{x:Null}" x:Name="label_fps" Content="Elapsed: 00:00:00.00   avg fps: 0.00" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="6,28,6,0" VerticalAlignment="Top"/>
 	</Grid>
 </Window>

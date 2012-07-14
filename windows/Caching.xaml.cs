@@ -63,7 +63,7 @@ namespace XviD4PSP
                 //получаем инфу из простого avs
                 script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
 
-                reader = new AviSynthReader();
+                reader = new AviSynthReader(AviSynthColorspace.RGB24, AudioSampleType.INT16);
                 reader.ParseScript(script);
 
                 //Выходим при отмене

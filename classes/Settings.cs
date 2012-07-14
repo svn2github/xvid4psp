@@ -2849,5 +2849,26 @@ namespace XviD4PSP
                 SetString("MI_ColumnSize", value);
             }
         }
+
+        //Закрывать ScriptRunner при завершении прогона скрипта
+        public static bool CloseScriptRunner
+        {
+            get
+            {
+                object value = GetValue("CloseScriptRunner");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("CloseScriptRunner", value);
+            }
+        }
     }
 }

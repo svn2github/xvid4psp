@@ -22,11 +22,14 @@ namespace XviD4PSP
         private static object locker = new object();
         private BackgroundWorker worker = null;
         private AviSynthReader reader = null;
+        private DateTime start = DateTime.Now;
         private IntPtr Handle = IntPtr.Zero;
         private bool IsAborted = false;
         private string script = null;
         private string label = null;
+        private string elapsed = null;
         private int num_closes = 0;
+        private int total = 0;
 
         public ScriptRunner(string script)
         {
@@ -35,8 +38,12 @@ namespace XviD4PSP
             this.script = script;
 
             label = Languages.Translate("Frame XX of YY");
+            elapsed = Languages.Translate("Elapsed") + ": ";
             Title = Languages.Translate("Running the script") + "...";
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
+            label_fps.Content = elapsed + "00:00:00.00   avg fps: 0.00";
+            check_autoclose.ToolTip = Languages.Translate("Close window when finished");
+            check_autoclose.IsChecked = Settings.CloseScriptRunner;
             this.ContentRendered += new EventHandler(Window_ContentRendered);
 
             //BackgroundWorker
@@ -68,12 +75,13 @@ namespace XviD4PSP
             {
                 reader = new AviSynthReader();
                 reader.ParseScript(script);
-                int total = reader.FrameCount;
+                total = reader.FrameCount;
+                start = DateTime.Now;
 
                 for (int i = 0; i < total && !IsAborted; i++)
                 {
                     reader.ReadFrameDummy(i);
-                    worker.ReportProgress(i + 1, total);
+                    worker.ReportProgress(i + 1, DateTime.Now);
                 }
             }
             catch (Exception ex)
@@ -95,17 +103,22 @@ namespace XviD4PSP
             {
                 if (progress_total.IsIndeterminate)
                 {
+                    label = label.Replace("YY", total.ToString());
                     progress_total.IsIndeterminate = false;
-                    progress_total.Maximum = (int)e.UserState;
+                    progress_total.Maximum = total;
                 }
 
-                Title = "(" + ((e.ProgressPercentage * 100) / (int)e.UserState).ToString("0") + "%)";
-                label_info.Content = label.Replace("XX", e.ProgressPercentage.ToString()).Replace("YY", e.UserState.ToString());
+                Title = "(" + ((e.ProgressPercentage * 100) / total).ToString("0") + "%)";
+                label_info.Content = label.Replace("XX", e.ProgressPercentage.ToString());
                 progress_total.Value = e.ProgressPercentage;
+
+                TimeSpan time = ((DateTime)e.UserState) - start;
+                label_fps.Content = elapsed + (new DateTime(time.Ticks).ToString("HH:mm:ss.ff")) + "   avg fps: " +
+                    (e.ProgressPercentage / time.TotalSeconds).ToString("0.00", CultureInfo.InvariantCulture);
 
                 //Прогресс в Taskbar
                 //if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
-                Win7Taskbar.SetProgressValue(Handle, Convert.ToUInt64(e.ProgressPercentage), Convert.ToUInt64(e.UserState));
+                Win7Taskbar.SetProgressValue(Handle, Convert.ToUInt64(e.ProgressPercentage), Convert.ToUInt64(total));
             }
         }
 
@@ -114,6 +127,7 @@ namespace XviD4PSP
             if (e.Error != null)
             {
                 ErrorException("ScriptRunner (Unhandled): " + ((Exception)e.Error).Message, ((Exception)e.Error).StackTrace);
+                Close();
             }
             else if (e.Result != null)
             {
@@ -123,9 +137,24 @@ namespace XviD4PSP
                     stacktrace += Calculate.WrapScript(script, 150);
 
                 ErrorException("ScriptRunner: " + ((Exception)e.Result).Message, stacktrace);
+                Close();
             }
-
-            Close();
+            else if (IsAborted || Settings.CloseScriptRunner)
+            {
+                Close();
+            }
+            else
+            {
+                Title = Languages.Translate("Complete");
+                if (progress_total.IsIndeterminate)
+                {
+                    //Прогресс еще не выводился
+                    progress_total.IsIndeterminate = false;
+                    progress_total.Value = progress_total.Maximum;
+                    label_info.Content = label.Replace("XX", total.ToString()).Replace("YY", total.ToString());
+                    Win7Taskbar.SetProgressTaskComplete(Handle, TBPF.NORMAL);
+                }
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -190,6 +219,11 @@ namespace XviD4PSP
                 Message mes = new Message(this.IsLoaded ? this : Owner);
                 mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
+        }
+
+        private void check_autoclose_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.CloseScriptRunner = check_autoclose.IsChecked.Value;
         }
     }
 }

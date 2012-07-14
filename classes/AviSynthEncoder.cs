@@ -105,7 +105,7 @@ namespace XviD4PSP
             {
                 using (AviSynthScriptEnvironment env = new AviSynthScriptEnvironment())
                 {
-                    using (AviSynthClip a = env.ParseScript(script, AviSynthColorspace.RGB24, AudioSampleType.INT16))
+                    using (AviSynthClip a = env.ParseScript(script, AviSynthColorspace.Undefined, AudioSampleType.INT16))
                     {
                         if (a.ChannelsCount == 0) throw new Exception("Can't find audio stream");
 
