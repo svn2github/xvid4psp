@@ -16,15 +16,17 @@
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 
+#define WIN32_LEAN_AND_MEAN
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <io.h>
 #include <fcntl.h>
-#include "internal.h"
-#include "avisynth.h"
 #include <windows.h>
 #include <float.h>
+#include <vector>
+
+#include "avisynth.h"
 
 typedef __int64 int64_t;
 #include "AviSynthWrapper.h"
@@ -96,7 +98,7 @@ int __stdcall dimzon_avs_init(SafeStruct** ppstr, char *func, char *arg, AVSDLLV
 		if (vi != NULL && vi->mt_import == MT_DISABLED)
 		{
 			//Если надо, отключаем MT - до импорта
-			try { res = pstr->env->Invoke("SetMTMode", 0); }
+			try { pstr->env->Invoke("SetMTMode", 0); }
 			catch (IScriptEnvironment::NotFound) { /*AviSynth без MT*/ }
 		}
 
@@ -109,14 +111,20 @@ int __stdcall dimzon_avs_init(SafeStruct** ppstr, char *func, char *arg, AVSDLLV
 			return 4;
 		}
 
-		if (vi != NULL && vi->mt_import == MT_ADDDISTR)
+		if (vi != NULL && (vi->mt_import == MT_ADDDISTR || vi->mt_import == MT_ADDM1DISTR))
 		{
 			try
 			{
 				//Если надо, добавляем Distributor() - после импорта
 				AVSValue mt_test = pstr->env->Invoke("GetMTMode", false);
 				const int mt_mode = mt_test.IsInt() ? mt_test.AsInt() : 0;
-				if (mt_mode > 0 && mt_mode < 5) res = pstr->env->Invoke("Distributor", res);
+				if (mt_mode > 0 && mt_mode < 5)
+				{
+					if (mt_mode != 1 && vi->mt_import == MT_ADDM1DISTR)
+						pstr->env->Invoke("SetMTMode", 1);
+
+					res = pstr->env->Invoke("Distributor", res);
+				}
 			}
 			catch (IScriptEnvironment::NotFound) { /*AviSynth без MT*/ }
 

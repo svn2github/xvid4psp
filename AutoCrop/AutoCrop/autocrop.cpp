@@ -1,5 +1,15 @@
 /*
 
+This version has some modifications to be used with XviD4PSP v5. Two new parameters were added:
+
+file (string) - to specify where to create a log-file in mode=2/3. For example: file="c:\MyFolder\this_is_the_log_file.log".
+overwrite (bool) - overwrite existing file (true, default) or append to existing file (false).
+
+Mode 4 added: calculate cropping values and write them into global variables (crop_left, crop_top, (-)crop_right, (-)crop_bottom).
+
+*/
+///////////
+/*
 	Copyright (c) 2002 Glenn Bussell.  All rights reserved.
     glenn@videofringe.com
 
@@ -27,14 +37,11 @@ improvements are welcome.
 The latest version of this filter is available at
 
 http://www.videofringe.com/autocrop
-
 */
-
 
 // Version 1.2 Released 02/01/2005
 
-
-
+#define WIN32_LEAN_AND_MEAN
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,18 +49,19 @@ http://www.videofringe.com/autocrop
 #include <windows.h>
 #include <math.h>
 
-#include "internal.h"
+#include "avisynth.h"
 #include "info.h"
 #include "infoYV12.h"
-//#define DEBUG 1
 
-
+//#define DEBUG
+#ifdef DEBUG
+#pragma comment(lib, "winmm.lib")
+#endif
 
 int debugLog(char *str);
 int autocropLog(char *str, const char* str2, bool overwrite);
 char* strpad(char *str,int len);
 
-//float x;
 /*
 
 My first time using YUV color so I need this. Taken from a Doom9 forum post by Donald Graft 
@@ -114,7 +122,7 @@ public:
 				leftAdd= _leftAdd;
 				rightAdd = _rightAdd;
 			}
-			file = _file;////
+			file = _file;
 			overwrite = _overwrite;
 			topAdd = _topAdd;
 			bottomAdd = _bottomAdd;
@@ -150,21 +158,41 @@ public:
 			if (yMultipleOf%2!=0)
 				env->ThrowError("hMultOf must be a multiple of 2.");
 
+			SampleFrames(env);
 
-			SampleFrames(env);			
-			if (mode==0 || mode==3) {
+			if (mode==0 || mode==3)
+			{
 				if (vi.IsYUY2())
 					vi.width = (right-left)/2+1;
 				else
 					vi.width = (right-left)+1;
 				vi.height = bottom-top+1;
 			}
-			if (mode==2 || mode==3) {
+
+			if (mode==2 || mode==3)
+			{
 				if (vi.IsYUY2())
 					sprintf(buf,"Crop(%d,%d,%d,%d)",left/2,top,((right-left)/2)+1,(bottom-top)+1);
 				else
 					sprintf(buf,"Crop(%d,%d,%d,%d)",left,top,(right-left)+1,(bottom-top)+1);
 				autocropLog(buf,file,overwrite);
+			}
+			else if (mode == 4)
+			{
+				if (vi.IsYUY2())
+				{
+					env->SetGlobalVar("crop_left", left/2);
+					env->SetGlobalVar("crop_top", top);
+					env->SetGlobalVar("crop_right", vi.width-(right/2)-1);
+					env->SetGlobalVar("crop_bottom", vi.height-bottom-1);
+				}
+				else
+				{
+					env->SetGlobalVar("crop_left", left);
+					env->SetGlobalVar("crop_top", top);
+					env->SetGlobalVar("crop_right", vi.width-right-1);
+					env->SetGlobalVar("crop_bottom", vi.height-bottom-1);
+				}
 			}
 		}
     PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
@@ -177,37 +205,33 @@ public:
 int __stdcall AutoCrop::FindBordersYV12(IScriptEnvironment* env,int frameno)
 {
 		int found,lum,avglum;
-    PVideoFrame eval;
-		DWORD start, finish;
-		double duration;
-		char buf[1024];
+		PVideoFrame eval;
 
 #ifdef DEBUG
-		start = timeGetTime();
+		DWORD start = timeGetTime();
 #endif
+
 		eval = child->GetFrame(frameno, env);  // Fetch frame
+
 #ifdef DEBUG
-		finish = timeGetTime();
-		duration = (double)(finish - start);
+		char buf[1024];
+		DWORD finish = timeGetTime();
+		double duration = (double)(finish - start);
 		sprintf(buf,"Frame %d Load %f",frameno, duration );
 		debugLog(buf);
 		start = timeGetTime();
 #endif
 
-
-
 		const unsigned char *evalp;
-
 		evalp = eval->GetReadPtr(PLANAR_Y);
 
 		// Find the top
 		found = 0;
-		//тут
 		for (int ctop = 0; ctop < eval->GetHeight()-1; ctop++) {
 			lum=0;
 			int x1;
 			for (x1 = 0; x1 < eval->GetRowSize(PLANAR_Y); x1++) {	  // Sum the luminance for that line
-				lum+=evalp[x1];					
+				lum+=evalp[x1];
 			}
 			avglum = lum/x1;
 			if (avglum>=threshold) { 		// If the average luminance if > threshold we've found the top
@@ -224,34 +248,32 @@ int __stdcall AutoCrop::FindBordersYV12(IScriptEnvironment* env,int frameno)
 
 		// Find the bottom
 		found=0;
-		int x2;//тут
 		for (int cbottom = eval->GetHeight()-1; cbottom>=0; cbottom--) {
 			lum=0;
-			evalp = eval->GetReadPtr(PLANAR_Y) + eval->GetPitch(PLANAR_Y)*cbottom;					
-			for (x2 = 0; x2 < eval->GetRowSize(PLANAR_Y); x2++) // Sum the luminance for that line
-				lum+=evalp[x2];					
+			int x2;
+			evalp = eval->GetReadPtr(PLANAR_Y) + eval->GetPitch(PLANAR_Y)*cbottom;
+			for (x2 = 0; x2 < eval->GetRowSize(PLANAR_Y); x2++) {	  // Sum the luminance for that line
+				lum+=evalp[x2];
+			}
 			avglum = lum/x2;
-			
 			if (avglum>=threshold) { // If the average luminance if > threshold we've found the top
 				found++;
 				if (found==3) {
-					if (cbottom+2>bottom)							
-					bottom = cbottom+2;							
+					if (cbottom+2>bottom)
+						bottom = cbottom+2;
 					break;
 				}
-			} else 
+			} else
 				found = 0;
 		}
 
-
-
 		// Find the Left
-		found = 0;				
+		found = 0;
 		for (int cleft = 0; cleft < eval->GetRowSize(PLANAR_Y); cleft++) {
-			evalp = eval->GetReadPtr(PLANAR_Y) + cleft;					
+			evalp = eval->GetReadPtr(PLANAR_Y) + cleft;
 			lum=0;
 			for (int y = 0; y < eval->GetHeight(PLANAR_Y) ; y++) {	  // Sum the luminance for that line
-				lum+=evalp[y*eval->GetPitch(PLANAR_Y)];					
+				lum+=evalp[y*eval->GetPitch(PLANAR_Y)];
 			}
 			avglum = lum/eval->GetHeight();
 			if (avglum>=threshold) { 		// If the average luminance if > threshold we've found the top
@@ -265,16 +287,14 @@ int __stdcall AutoCrop::FindBordersYV12(IScriptEnvironment* env,int frameno)
 				found = 0;
 		}
 
-
 		// Find the Right
-		found = 0;				
+		found = 0;
 		for (int cright = eval->GetRowSize(PLANAR_Y)-1; cright >=0 ; cright--) {
-			evalp = eval->GetReadPtr(PLANAR_Y) + cright;					
+			evalp = eval->GetReadPtr(PLANAR_Y) + cright;
 			lum=0;
 			for (int y = 0; y < eval->GetHeight(); y++) {	  // Sum the luminance for that line
-				lum+=evalp[y*eval->GetPitch(PLANAR_Y)];					
+				lum+=evalp[y*eval->GetPitch(PLANAR_Y)];
 			}
-
 			avglum = lum/eval->GetHeight();
 			if (avglum>=threshold) { 		// If the average luminance if > threshold we've found the right
 				found++;
@@ -287,10 +307,6 @@ int __stdcall AutoCrop::FindBordersYV12(IScriptEnvironment* env,int frameno)
 				found = 0;
 		}
 
-//		sprintf(buf,"Crop(%d,%d,%d,%d)",left,top,right,bottom);
-//		env->ThrowError(buf);
-
-
 	#ifdef DEBUG
 		finish = timeGetTime();
 		duration = (double)(finish - start);
@@ -300,8 +316,6 @@ int __stdcall AutoCrop::FindBordersYV12(IScriptEnvironment* env,int frameno)
 
 		return 1;
 }
-
-
 
 int __stdcall AutoCrop::FindBordersYUY2(IScriptEnvironment* env,int frameno)
 {
@@ -317,7 +331,7 @@ int __stdcall AutoCrop::FindBordersYUY2(IScriptEnvironment* env,int frameno)
 		for (int ctop = 0; ctop < eval->GetHeight()-1; ctop++) {
 			lum=0;
 			for (int x = 0; x < eval->GetRowSize(); x+=2) {	  // Sum the luminance for that line
-				lum+=evalp[x];					
+				lum+=evalp[x];
 			}
 			avglum = lum/(eval->GetRowSize()/2);
 			if (avglum>=threshold) { 		// If the average luminance if > threshold we've found the top
@@ -336,15 +350,16 @@ int __stdcall AutoCrop::FindBordersYUY2(IScriptEnvironment* env,int frameno)
 		found=0;
 		for (int cbottom = eval->GetHeight()-1; cbottom>=0; cbottom--) {
 			lum=0;
-			evalp = eval->GetReadPtr() + eval->GetPitch()*cbottom;					
-			for (int x = 0; x < eval->GetRowSize(); x+=2) // Sum the luminance for that line
-				lum+=evalp[x];					
+			evalp = eval->GetReadPtr() + eval->GetPitch()*cbottom;
+			for (int x = 0; x < eval->GetRowSize(); x+=2) {	  // Sum the luminance for that line
+				lum+=evalp[x];
+			}
 			avglum = lum/(eval->GetRowSize()/2);
 			if (avglum>=threshold) { // If the average luminance if > threshold we've found the top
 				found++;
 				if (found==3) {
-					if (cbottom+2>bottom)							
-					bottom = cbottom+2;							
+					if (cbottom+2>bottom)
+						bottom = cbottom+2;
 					break;
 				}
 			} else 
@@ -352,12 +367,12 @@ int __stdcall AutoCrop::FindBordersYUY2(IScriptEnvironment* env,int frameno)
 		}
 
 		// Find the Left
-		found = 0;				
+		found = 0;
 		for (int cleft = 0; cleft < eval->GetRowSize()-2; cleft+=2) {
-			evalp = eval->GetReadPtr() + cleft;					
+			evalp = eval->GetReadPtr() + cleft;
 			lum=0;
 			for (int y = 0; y < eval->GetHeight() ; y++) {	  // Sum the luminance for that line
-				lum+=evalp[y*eval->GetPitch()];					
+				lum+=evalp[y*eval->GetPitch()];
 			}
 			avglum = lum/eval->GetHeight();
 			if (avglum>=threshold) { 		// If the average luminance if > threshold we've found the top
@@ -372,14 +387,13 @@ int __stdcall AutoCrop::FindBordersYUY2(IScriptEnvironment* env,int frameno)
 		}
 
 		// Find the Right
-		found = 0;				
+		found = 0;
 		for (int cright = eval->GetRowSize()-2; cright >=0 ; cright-=2) {
-			evalp = eval->GetReadPtr() + cright;					
+			evalp = eval->GetReadPtr() + cright;
 			lum=0;
 			for (int y = 0; y < eval->GetHeight(); y++) {	  // Sum the luminance for that line
-				lum+=evalp[y*eval->GetPitch()];					
+				lum+=evalp[y*eval->GetPitch()];
 			}
-
 			avglum = lum/eval->GetHeight();
 			if (avglum>=threshold) { 		// If the average luminance if > threshold we've found the top
 				found++;
@@ -398,15 +412,12 @@ int __stdcall AutoCrop::FindBordersYUY2(IScriptEnvironment* env,int frameno)
 		return 1;
 }
 
-
-
 int __stdcall AutoCrop::SampleFrames(IScriptEnvironment* env)
 {
-    PVideoFrame eval;
+		PVideoFrame eval;
 		const int frames = vi.num_frames;
 		const int framesToSample = samples;
 		int remainder,a1,a2,tmp;
-
 
 		if (vi.IsYUY2())
 			tmp=2;
@@ -434,7 +445,7 @@ int __stdcall AutoCrop::SampleFrames(IScriptEnvironment* env)
 	#endif
 
 		// Setup some sensible defaults
-		eval = child->GetFrame(1, env);  // Fetch frame
+		eval = child->GetFrame(sstart, env); // Fetch frame
 		top = eval->GetHeight()-1;
 		bottom = 0;
 		left=eval->GetRowSize()-1;
@@ -445,8 +456,7 @@ int __stdcall AutoCrop::SampleFrames(IScriptEnvironment* env)
 				FindBordersYUY2(env,sstart+cnt*interval);
 			else
 				FindBordersYV12(env,sstart+cnt*interval);
-
-		}	
+		}
 
 		// Add any extra cropping user asks for
 		left = __max(0,left+leftAdd);
@@ -555,18 +565,15 @@ int __stdcall AutoCrop::SampleFrames(IScriptEnvironment* env)
 		return 1;
 }
 
-
 PVideoFrame __stdcall AutoCrop::GetFrame(int n, IScriptEnvironment* env) {
 
-		char buf[2048];
+	char buf[2048];
     PVideoFrame frame = child->GetFrame(n, env);
-		unsigned char* framep;
+	unsigned char* framep;
     int pitch,row_size;
     const int height = frame->GetHeight();
     const int frames = vi.num_frames;
-
-		int x,y;
-
+	int x,y;
 
 		// Write Cropping Information only, don't crop
 		if (mode==1) {
@@ -650,22 +657,21 @@ PVideoFrame __stdcall AutoCrop::GetFrame(int n, IScriptEnvironment* env) {
 					// Crop
 			if (vi.IsYUY2()) {
 				return env->Subframe(frame,top * frame->GetPitch() + left, frame->GetPitch(), right-left+2, bottom-top+1);
-			} 	else {
+			} else {
 
 				PVideoFrame dst = env->NewVideoFrame(vi);
 				// Y 
-				env->BitBlt(dst->GetWritePtr(PLANAR_Y), dst->GetPitch(PLANAR_Y), frame->GetReadPtr(PLANAR_Y)+left+frame->GetPitch(PLANAR_Y)*top, frame->GetPitch(PLANAR_Y), (right-left+1),bottom-top+1);			
+				env->BitBlt(dst->GetWritePtr(PLANAR_Y), dst->GetPitch(PLANAR_Y), frame->GetReadPtr(PLANAR_Y)+left+frame->GetPitch(PLANAR_Y)*top, frame->GetPitch(PLANAR_Y), (right-left+1),bottom-top+1);
 				// U
-				env->BitBlt(dst->GetWritePtr(PLANAR_U), dst->GetPitch(PLANAR_U), frame->GetReadPtr(PLANAR_U)+left/2+frame->GetPitch(PLANAR_U)*top/2, frame->GetPitch(PLANAR_U), (right-left+1)/2,(bottom-top+1)/2);			
+				env->BitBlt(dst->GetWritePtr(PLANAR_U), dst->GetPitch(PLANAR_U), frame->GetReadPtr(PLANAR_U)+left/2+frame->GetPitch(PLANAR_U)*top/2, frame->GetPitch(PLANAR_U), (right-left+1)/2,(bottom-top+1)/2);
 				// V 
-				env->BitBlt(dst->GetWritePtr(PLANAR_V), dst->GetPitch(PLANAR_V), frame->GetReadPtr(PLANAR_V)+left/2+frame->GetPitch(PLANAR_V)*top/2, frame->GetPitch(PLANAR_V), (right-left+1)/2,(bottom-top+1)/2);			
+				env->BitBlt(dst->GetWritePtr(PLANAR_V), dst->GetPitch(PLANAR_V), frame->GetReadPtr(PLANAR_V)+left/2+frame->GetPitch(PLANAR_V)*top/2, frame->GetPitch(PLANAR_V), (right-left+1)/2,(bottom-top+1)/2);
 				return dst;
-//			return env->Subframe(frame,top * frame->GetPitch() + left, frame->GetPitch(), right-left+1, bottom-top+1, (top/2) * frame->GetPitch(PLANAR_U) + (left/2), (top/2) * frame->GetPitch(PLANAR_V) + (left/2), frame->GetPitch(PLANAR_U));
+				//return env->Subframe(frame,top * frame->GetPitch() + left, frame->GetPitch(), right-left+1, bottom-top+1, (top/2) * frame->GetPitch(PLANAR_U) + (left/2), (top/2) * frame->GetPitch(PLANAR_V) + (left/2), frame->GetPitch(PLANAR_U));
 			}
 		}
 		return frame;
 }
-
 
 AVSValue __cdecl Create_AutoCrop(AVSValue args, void* user_data, IScriptEnvironment* env) {
     return new AutoCrop(args[0].AsClip(),
@@ -686,12 +692,10 @@ AVSValue __cdecl Create_AutoCrop(AVSValue args, void* user_data, IScriptEnvironm
 			env);
 }
 
-
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env) {
     env->AddFunction("AutoCrop", "c[mode]i[wMultOf]i[hMultOf]i[leftAdd]i[topAdd]i[rightAdd]i[bottomAdd]i[threshold]i[samples]i[samplestartframe]i[sampleendframe]i[aspect]f[file]s[overwrite]b", Create_AutoCrop, 0);
     return "`AutoCrop' Automatic Cropping plugin";
 }
-
 
 int debugLog(char *str)
 {
@@ -723,7 +727,6 @@ int autocropLog(char *str, char const* str2, bool overwrite)
 	}
 	return 1;
 }
-
 
 char* strpad(char *str,int len)
 {

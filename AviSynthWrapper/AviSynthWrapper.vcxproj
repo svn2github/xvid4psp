@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -103,7 +103,6 @@
   <ItemGroup>
     <ClInclude Include="avisynth.h" />
     <ClInclude Include="AviSynthWrapper.h" />
-    <ClInclude Include="internal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AviSynthWrapper.cpp">

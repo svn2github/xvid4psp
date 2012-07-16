@@ -95,12 +95,9 @@ namespace XviD4PSP
         {
             try
             {
-                //Удаляем старый лог-файл
-                File.Delete(Settings.TempPath + "\\AutoCrop.log");
-
                 //Готовим скрипт
                 script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Autocrop);
-                script = AviSynthScripting.GetAutoCropScript(script, frame);
+                script = AviSynthScripting.TuneAutoCropScript(script, frame);
 
                 //Открываем скрипт
                 reader = new AviSynthReader();
@@ -110,45 +107,27 @@ namespace XviD4PSP
                 int height = m.inresh;
                 int frames = reader.FrameCount;
 
-                //Проигрываем все кадры
-                for (int i = 0; i < frames && !worker.CancellationPending; i++)
-                {
-                    reader.ReadFrameDummy(i);
-                    worker.ReportProgress(((i + 1) * 100) / frames);
-                }
-
                 ArrayList ll = new ArrayList();
                 ArrayList tt = new ArrayList();
                 ArrayList rr = new ArrayList();
                 ArrayList bb = new ArrayList();
 
-                //Чтение и анализ лог-файла
+                //Проигрываем все кадры и считываем значения кропа
+                for (int i = 0; i < frames && !worker.CancellationPending; i++)
+                {
+                    reader.ReadFrameDummy(i);
+                    worker.ReportProgress(((i + 1) * 100) / frames);
+
+                    //Фильтрация возможных(?) недопустимых значений
+                    ll.Add(Math.Min(Math.Max(reader.GetVarInteger("crop_left", 0), 0), width));
+                    tt.Add(Math.Min(Math.Max(reader.GetVarInteger("crop_top", 0), 0), height));
+                    rr.Add(Math.Min(Math.Max(reader.GetVarInteger("crop_right", 0), 0), width));
+                    bb.Add(Math.Min(Math.Max(reader.GetVarInteger("crop_bottom", 0), 0), height));
+                }
+
+                //Анализ полученного
                 if (!worker.CancellationPending)
                 {
-                    using (StreamReader sr = new StreamReader(Settings.TempPath + "\\AutoCrop.log", System.Text.Encoding.Default))
-                    {
-                        Match mat;
-                        Regex r = new Regex(@"Crop.(\d+),(\d+),(\d+),(\d+).", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-
-                        while (!sr.EndOfStream)
-                        {
-                            mat = r.Match(sr.ReadLine());
-                            if (mat.Success)
-                            {
-                                //Фильтрация недопустимых значений
-                                int left = Math.Max(Convert.ToInt32(mat.Groups[1].Value), 0);
-                                int top = Math.Max(Convert.ToInt32(mat.Groups[2].Value), 0);
-                                int right = Math.Min(Convert.ToInt32(mat.Groups[3].Value), width);
-                                int bottom = Math.Min(Convert.ToInt32(mat.Groups[4].Value), height);
-
-                                ll.Add(left);
-                                tt.Add(top);
-                                rr.Add(width - left - right);
-                                bb.Add(height - top - bottom);
-                            }
-                        }
-                    }
-
                     if (ll.Count > 0)
                     {
                         bool new_mode = Settings.AutocropMostCommon;
@@ -167,9 +146,6 @@ namespace XviD4PSP
                         m.cropb = m.cropb_copy = 0;  //Снизу
                     }
                 }
-
-                //Удаляем лог-файл
-                File.Delete(Settings.TempPath + "\\AutoCrop.log");
             }
             catch (Exception ex)
             {

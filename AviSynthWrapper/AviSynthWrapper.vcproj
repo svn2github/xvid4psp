@@ -211,10 +211,6 @@
 			RelativePath=".\AviSynthWrapper.def"
 			>
 		</File>
-		<File
-			RelativePath="internal.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

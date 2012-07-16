@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.290.0 (14.07.2012), main changes:
+﻿XviD4PSP 5.10.291.0 (16.07.2012), main changes:
 
+>>> (r291) AutoCrop: transmit calculated values using script global variables (instead of creating a
+           temporal file).
 >>> (r290) ScriptRunner ("Run script"): improved performance by removing unnecessary colorspace conversion;
            added displaying of elapsed time and average fps; automatic closing the window when running is
            finished - is now an option, that can be disabled.

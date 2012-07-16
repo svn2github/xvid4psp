@@ -21,8 +21,8 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			UseOfMFC="1"
-			CharacterSet="1"
+			UseOfMFC="0"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -93,9 +93,9 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			UseOfATL="0"
-			CharacterSet="1"
+			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -193,10 +193,6 @@
 			</File>
 			<File
 				RelativePath=".\infoYV12.h"
-				>
-			</File>
-			<File
-				RelativePath=".\internal.h"
 				>
 			</File>
 		</Filter>

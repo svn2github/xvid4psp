@@ -37,9 +37,10 @@ typedef struct tagSafeStruct
 
 enum
 {
-	MT_UNDEFINED  = 0,  //Ничего не делать с MT
-	MT_DISABLED = 1<<0, //Запретить, добавив SetMTMode(0) перед импортом скрипта
-	MT_ADDDISTR = 1<<1  //При MT-режимах добавлять Distributor() после импорта скрипта
+	MT_UNDEFINED  = 0,    //Ничего не делать с MT
+	MT_DISABLED = 1<<0,   //Запретить, вызвав SetMTMode(0) перед импортом скрипта
+	MT_ADDDISTR = 1<<1,   //При MT-режимах добавлять Distributor() после импорта скрипта
+	MT_ADDM1DISTR = 1<<2  //-//-, но перед Distributor() вызывать SetMTMode(1)
 };
 
 typedef struct AVSDLLVideoInfo {

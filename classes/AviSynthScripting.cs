@@ -972,9 +972,8 @@ namespace XviD4PSP
                }
 
                script += "ConvertToYV12()" + Environment.NewLine + Environment.NewLine;
-               script += "global log_file = \"" + Settings.TempPath + "\\AutoCrop.log\"" + Environment.NewLine;
-               script += "FrameEvaluate(last, \"AutoCrop(mode=2, wMultOf=4, hMultOf=4, samples=1, samplestartframe=current_frame, " +
-                   "sampleendframe=current_frame, threshold=" + Settings.AutocropSensivity + ", file=log_file, overwrite=false)\")" + Environment.NewLine;
+               script += "FrameEvaluate(last, \"AutoCrop(mode=4, wMultOf=4, hMultOf=4, samples=1, samplestartframe=current_frame, " +
+                   "sampleendframe=current_frame, threshold=" + Settings.AutocropSensivity + ")\")" + Environment.NewLine;
            }
 
            if (mode == ScriptMode.VCrop)
@@ -1144,13 +1143,13 @@ Crop(0, 0, 16, 16)";
                return null;
        }
 
-       public static string GetAutoCropScript(string script, int frame)
+       public static string TuneAutoCropScript(string script, int frame)
        {
            script += Environment.NewLine;
 
            //Выборка кадров или только один требуемый кадр
            if (frame < 0) script += "SelectRangeEvery(FrameCount()/" + (Settings.AutocropFrames - 1) + ", 1)" + Environment.NewLine;
-           else script += "Trim(" + frame + ", 1)" + Environment.NewLine;
+           else script += "Trim(" + frame + ", -1)" + Environment.NewLine;
 
            script += "Crop(0, 0, 16, 16)" + Environment.NewLine;
            return script;

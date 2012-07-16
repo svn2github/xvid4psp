@@ -5,6 +5,8 @@ This version has some modifications to be used with XviD4PSP v5. Two new paramet
 file (string) - to specify where to create a log-file in mode=2/3. For example: file="c:\MyFolder\this_is_the_log_file.log".
 overwrite (bool) - overwrite existing file (true, default) or append to existing file (false).
 
+Mode 4 added: calculate cropping values and write them into global variables (crop_left, crop_top, (-)crop_right, (-)crop_bottom).
+
 Source code available at http://code.google.com/p/xvid4psp/source/browse/#svn%2Ftrunk%2FAutoCrop
 
 ----

@@ -35,9 +35,10 @@ namespace XviD4PSP
 
     public enum MTMode : int
     {
-        Undefined = 0, //Ничего не делать с MT
-        Disabled = 1,  //Запретить MT, добавив SetMTMode(0) перед импортом скрипта
-        AddDistr = 2   //При MT-режимах добавлять Distributor() после импорта скрипта
+        Undefined = 0,  //Ничего не делать с MT
+        Disabled = 1,   //Запретить MT, вызвав SetMTMode(0) перед импортом скрипта
+        AddDistr = 2,   //При MT-режимах добавлять Distributor() после импорта скрипта
+        AddM1Distr = 4  //-//-, но перед Distributor() вызывать SetMTMode(1)
     };
 
     public class AviSynthException : ApplicationException
