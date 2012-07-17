@@ -243,7 +243,7 @@ namespace XviD4PSP
 
            if (m.vdecoder == Decoders.BlankClip) //пустой клип (черный экран)
            {
-               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + ((!string.IsNullOrEmpty(m.inframerate) ? m.inframerate : "25.000")) + ", color=$000000)";
+               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + ((!string.IsNullOrEmpty(m.inframerate) ? m.inframerate : "25.000")) + ", pixel_type=\"YV12\", audio_rate=0)";
            }
            else if (ext == ".d2v") //d2v и MPEG2Source
            {
@@ -304,8 +304,9 @@ namespace XviD4PSP
                string ffindex = "";
                string inaudiostring = "";
                string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
-               string drc = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
-                   instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" : "";
+               string nicaudio = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
+                   instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" :
+                   (instream.decoder == Decoders.RaWavSource) ? ", 0" : ""; //0 - это дефолт, но его забыли выставить в RaWavSource
                if (instream.audiofiles != null && instream.audiofiles.Length > 0)
                {
                    int n = 0;
@@ -313,14 +314,14 @@ namespace XviD4PSP
                    {
                        n++;
                        ffindex += "FFIndex(" + "\"" + file + "\")\r\n";
-                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + drc + ")";
+                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + nicaudio + ")";
                        if (n < instream.audiofiles.Length) inaudiostring += "++";
                    }
                }
                else
                {
                    ffindex += "FFIndex(" + "\"" + instream.audiopath + "\")\r\n";
-                   inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + drc + ")";
+                   inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + nicaudio + ")";
                }
                if (instream.decoder == Decoders.FFAudioSource) m.script += ffindex;
                m.script += "audio = " + inaudiostring + Environment.NewLine;
@@ -843,7 +844,7 @@ namespace XviD4PSP
            string invideostring = "";
            if (m.vdecoder == Decoders.BlankClip)
            {
-               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + ((!string.IsNullOrEmpty(m.inframerate) ? m.inframerate : "25.000")) + ", color=$000000)";
+               invideostring = m.vdecoder.ToString() + "(length=" + m.inframes + ", width=128, height=96, fps=" + ((!string.IsNullOrEmpty(m.inframerate) ? m.inframerate : "25.000")) + ", pixel_type=\"YV12\", audio_rate=0)";
            }
            else if (ext == ".d2v")
            {
@@ -900,8 +901,9 @@ namespace XviD4PSP
                string ffindex = "";
                string inaudiostring = "";
                string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
-               string drc = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
-                   instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" : "";
+               string nicaudio = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
+                   instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" :
+                   (instream.decoder == Decoders.RaWavSource) ? ", 0" : ""; //0 - это дефолт, но его забыли выставить в RaWavSource
                if (instream.audiofiles != null && instream.audiofiles.Length > 0)
                {
                    int n = 0;
@@ -909,14 +911,14 @@ namespace XviD4PSP
                    {
                        n++;
                        ffindex += "FFIndex(" + "\"" + file + "\")\r\n";
-                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + drc + ")";
+                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + nicaudio + ")";
                        if (n < instream.audiofiles.Length) inaudiostring += "++";
                    }
                }
                else
                {
                    ffindex += "FFIndex(" + "\"" + instream.audiopath + "\")\r\n";
-                   inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + drc + ")";
+                   inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + nicaudio + ")";
                }
                if (instream.decoder == Decoders.FFAudioSource) script += ffindex;
                script += "audio = " + inaudiostring + Environment.NewLine;

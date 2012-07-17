@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.291.0 (16.07.2012), main changes:
+﻿XviD4PSP 5.10.292.0 (17.07.2012), main changes:
 
+>>> (r292) Fix for error message from RaWavSource (NicAudio): "m2RaWavSource: unsupported number of channels defined".
 >>> (r291) AutoCrop: transmit calculated values using script global variables (instead of creating a
            temporal file).
 >>> (r290) ScriptRunner ("Run script"): improved performance by removing unnecessary colorspace conversion;
