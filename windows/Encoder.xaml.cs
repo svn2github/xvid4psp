@@ -700,11 +700,13 @@ namespace XviD4PSP
             encoderProcess.Start();
             SetPriority(Settings.ProcessPriority);
 
-            string line;
-            string pat = @"(\d+)/(\d+).frames,.(\d+.\d+).fps";
+            //              frames       fps       kb/s     elapsed    remain
+            //[  0.0%]       1/35127    21.28     376.71    0:00:00    0:27:30
+            string pat = (m.format != Format.ExportFormats.PmpAvc) ? @"(\d+)/(\d+)\s+(\d+\.\d+)\s" : @"(\d+)/(\d+).frames,.(\d+.\d+).fps";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
 
+            string line;
             while (!encoderProcess.HasExited)
             {
                 locker.WaitOne();
@@ -724,7 +726,7 @@ namespace XviD4PSP
                         {
                             SetLog("x264 [total]: " + line);
                         }
-                        else
+                        else if (!line.StartsWith("      "))
                         {
                             //if (encodertext != null) encodertext += Environment.NewLine;
                             //encodertext += line;
