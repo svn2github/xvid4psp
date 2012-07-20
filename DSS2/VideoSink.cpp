@@ -4,23 +4,16 @@
  * $Id: VideoSink.cpp,v 1.8 2007/01/17 23:40:51 mike Exp $
  * 
  */
-/*
+
 #include <windows.h>
-#ifdef __WXDEBUG__
-#undef __WXDEBUG__
-#endif
 typedef TCHAR* PTCHAR;
 #include <streams.h>
 #include <dvdmedia.h>
+#include <atlcomcli.h>
 #include "VideoSink.h"
-#include "initguid.h"
+#include "guids.h"
 
 class CVideoSink;
-// CLSID for videosink: {F13D3732-96BD-4108-AFEB-E85F68FF64DC}
-//DEFINE_GUID(CLSID_AegiVideoSink, 0xf13d3732, 0x96bd, 0x4108, 0xaf, 0xeb, 0xe8, 0x5f, 0x68, 0xff, 0x64, 0xdc);
-
-// {E9C80780-4C07-4b36-87D4-5241CD0C6FE2}
-DEFINE_GUID(CLSID_AegiVideoSink, 0xe9c80780, 0x4c07, 0x4b36, 0x87, 0xd4, 0x52, 0x41, 0xcd, 0xc, 0x6f, 0xe2);
 
 static int  GetBPP(const BITMAPINFOHEADER& h) {
   switch (h.biCompression) {
@@ -37,7 +30,7 @@ interface IVSAllocator : public IUnknown {
 };
 
 class CVSAllocator : public CMemAllocator, public IVSAllocator {
-  CMediaType  *m_nextmt;
+  CMediaType *m_nextmt;
 public:
   CVSAllocator(TCHAR *pName, LPUNKNOWN pUnk, HRESULT *phr) : CMemAllocator(pName, pUnk, phr), m_nextmt(NULL) { }
   ~CVSAllocator() {
@@ -45,7 +38,7 @@ public:
   }
 
   STDMETHOD(SetNextMT)(const AM_MEDIA_TYPE *pMT) {
-    CMediaType  *newMT = new CMediaType(*pMT);
+    CMediaType *newMT = new CMediaType(*pMT);
     newMT = (CMediaType *)InterlockedExchangePointer((void **)&m_nextmt, newMT);
     if (newMT != NULL)
       delete pMT;
@@ -53,9 +46,9 @@ public:
   }
 
   STDMETHOD(GetBuffer)(IMediaSample **ppS, REFERENCE_TIME *pStart, REFERENCE_TIME *pStop, DWORD dwFlags) {
-    CMediaType  *pMT = (CMediaType *)InterlockedExchangePointer((void **)&m_nextmt, NULL);
+    CMediaType *pMT = (CMediaType *)InterlockedExchangePointer((void **)&m_nextmt, NULL);
     if (pMT != NULL) {
-      BITMAPINFOHEADER  *bmh = NULL;
+      BITMAPINFOHEADER *bmh = NULL;
 
       if (pMT->formattype == FORMAT_VideoInfo)
         bmh = &((VIDEOINFOHEADER *)pMT->pbFormat)->bmiHeader;
@@ -63,7 +56,7 @@ public:
         bmh = &((VIDEOINFOHEADER2 *)pMT->pbFormat)->bmiHeader;
 
       if (bmh != NULL) {
-        ALLOCATOR_PROPERTIES  ap, act;
+        ALLOCATOR_PROPERTIES ap, act;
 
         Decommit();
         GetProperties(&ap);
@@ -168,7 +161,7 @@ public:
       return hr;
 
     if ((stride & 15) != 0) { // extend
-      CMediaType  newMT(m_mt);
+      CMediaType newMT(m_mt);
 
       if (newMT.formattype == FORMAT_VideoInfo) {
         VIDEOINFOHEADER *vh = (VIDEOINFOHEADER *)newMT.pbFormat;
@@ -206,18 +199,17 @@ public:
     return S_OK;
   }
 
-  BOOL		  AtEOF() { return m_bAtEndOfStream; }
+  BOOL            AtEOF() { return m_bAtEndOfStream; }
   REFERENCE_TIME  SegStartTime() { return m_tStart; }
-  unsigned	  GetTypes() { return m_types; }
-  void		  SetTypes(unsigned t) { m_types = t; }
+  unsigned        GetTypes() { return m_types; }
+  void            SetTypes(unsigned t) { m_types = t; }
 
-  HRESULT GetFrameFormat(unsigned *type, unsigned *width, unsigned *height, int *stride,
-			 unsigned *pbpp, unsigned *arx, unsigned *ary, __int64 *def_duration)
+  HRESULT GetFrameFormat(unsigned *type, unsigned *width, unsigned *height, int *stride, unsigned *pbpp, unsigned *arx, unsigned *ary, __int64 *def_duration)
   {
     if (!IsConnected())
       return VFW_E_NOT_CONNECTED;
 
-    unsigned  bpp;
+    unsigned bpp;
 
     if (m_mt.subtype == MEDIASUBTYPE_RGB24)
       *type = IVS_RGB24, bpp = 3;
@@ -233,17 +225,17 @@ public:
     if (pbpp)
       *pbpp = bpp;
 
-    BITMAPINFOHEADER  *bmh;
-    RECT	      rct;
+    BITMAPINFOHEADER *bmh;
+    RECT             rct;
 
     if (m_mt.formattype == FORMAT_VideoInfo && m_mt.FormatLength() >= sizeof(VIDEOINFOHEADER)) {
       VIDEOINFOHEADER *vh = (VIDEOINFOHEADER *)m_mt.Format();
       bmh = &vh->bmiHeader;
       rct = vh->rcTarget;
       if (arx)
-	*arx = 1;
+        *arx = 1;
       if (*ary)
-	*ary = 1;
+        *ary = 1;
       if (def_duration)
         *def_duration = vh->AvgTimePerFrame;
     } else if (m_mt.formattype == FORMAT_VideoInfo2 && m_mt.FormatLength() >= sizeof(VIDEOINFOHEADER2)) {
@@ -251,9 +243,9 @@ public:
       bmh = &vh->bmiHeader;
       rct = vh->rcTarget;
       if (arx)
-	*arx = vh->dwPictAspectRatioX;
+        *arx = vh->dwPictAspectRatioX;
       if (ary)
-	*ary = vh->dwPictAspectRatioY;
+        *ary = vh->dwPictAspectRatioY;
       if (def_duration)
         *def_duration = vh->AvgTimePerFrame;
     } else
@@ -283,16 +275,16 @@ class CVideoSink :
   public IVideoSink2,
   public IAMFilterMiscFlags
 {
-  CVideoSinkPin		    *m_pin;
-  CRendererPosPassThru      *m_rpp;
-  CCritSec		    m_lock;
+  CVideoSinkPin         *m_pin;
+  CRendererPosPassThru  *m_rpp;
+  CCritSec              m_lock;
 
   int	    GetPinCount() { return 1; }
   CBasePin  *GetPin(int n) { return n == 0 ? m_pin : NULL; }
 
-  CComPtr<IMediaSample>	    m_sample;
-  HANDLE		    m_hEvent1, m_hEvent2, m_hNotify;
-  CComPtr<IVideoSinkNotify> m_notify;
+  CComPtr<IMediaSample>      m_sample;
+  HANDLE                     m_hEvent1, m_hEvent2, m_hNotify;
+  CComPtr<IVideoSinkNotify>  m_notify;
 
 public:
   CVideoSink(IUnknown *pUnk, HRESULT *phr) :
@@ -319,10 +311,11 @@ public:
     CloseHandle(m_hEvent2);
   }
 
-  CCritSec  *pStateLock() { return m_pLock; }
+  CCritSec *pStateLock() { return m_pLock; }
 
   // called when lock is held
-  HRESULT   Receive(IMediaSample *pS) {
+  HRESULT Receive(IMediaSample *pS)
+  {
     if (pS == NULL)
       m_rpp->EOS();
     else
@@ -330,9 +323,10 @@ public:
 
     // notify callback
     CComPtr<IVideoSinkNotify> notify = m_notify;
-    HANDLE  hNotify = m_hNotify;
+    HANDLE hNotify = m_hNotify;
 
-    if (notify || hNotify) {
+    if (notify || hNotify)
+    {
       // save our sample
       m_sample = pS;
 
@@ -342,7 +336,8 @@ public:
 
     pStateLock()->Unlock();
 
-    if (notify || hNotify) {
+    if (notify || hNotify)
+    {
       if (notify)
         notify->FrameReady();
       if (hNotify)
@@ -358,7 +353,7 @@ public:
     return S_OK;
   }
 
-  HRESULT   BeginFlush() {
+  HRESULT BeginFlush() {
     CAutoLock lock(pStateLock());
     ResetEvent(m_hEvent1);
     m_sample = NULL;
@@ -395,10 +390,12 @@ public:
     CAutoLock lock(pStateLock());
     return m_pin->GetFrameFormat(type, width, height, NULL, NULL, arx, ary, NULL);
   }
-  STDMETHOD(ReadFrame)(ReadFrameFunc f, void *arg) {
+  STDMETHOD(ReadFrame)(ReadFrameFunc f, void *arg)
+  {
     {
       CAutoLock	lock(pStateLock());
-      if (m_pin->AtEOF()) {
+      if (m_pin->AtEOF())
+      {
         if (WaitForSingleObject(m_hEvent1, 0) == WAIT_OBJECT_0)
           SetEvent(m_hEvent2);
         return S_FALSE;
@@ -411,31 +408,32 @@ public:
     {
       CAutoLock	lock(pStateLock());
 
-      CComPtr<IMediaSample>   pS(m_sample);
+      CComPtr<IMediaSample> pS(m_sample);
       m_sample = NULL;
 
       if (!pS)
         hr = S_FALSE;
-      else {
+      else
+      {
         REFERENCE_TIME	rtS, rtE;
         if (SUCCEEDED(pS->GetTime(&rtS, &rtE)))
           rtS += m_pin->SegStartTime();
         else
           rtS = -1;
 
-	if (f) {
-	  unsigned  type, srcW, srcH, arx, ary, srcBPP;
-          int       srcS;
-	  BYTE	  *srcP;
-	  if (FAILED(m_pin->GetFrameFormat(&type, &srcW, &srcH, &srcS, &srcBPP, &arx, &ary, NULL)) ||
-	      FAILED(pS->GetPointer(&srcP)))
-	    hr = E_FAIL;
-	  else {
-            if (srcS < 0)
-              srcP += abs(srcS) * (srcH - 1);
-	    f(rtS, type, srcBPP, srcP, srcW, srcH, srcS, arx, ary, arg);
+        if (f)
+        {
+          int srcS;
+          BYTE *srcP;
+          unsigned type, srcW, srcH, arx, ary, srcBPP;
+          if (FAILED(m_pin->GetFrameFormat(&type, &srcW, &srcH, &srcS, &srcBPP, &arx, &ary, NULL)) || FAILED(pS->GetPointer(&srcP)))
+            hr = E_FAIL;
+          else
+          {
+            if (srcS < 0) srcP += abs(srcS) * (srcH - 1);
+            f(rtS, type, srcBPP, srcP, srcW, srcH, srcS, arx, ary, arg);
           }
-	}
+        }
       }
     }
 
@@ -538,7 +536,7 @@ HRESULT	CVideoSinkPin::BeginFlush() {
   m_sink->BeginFlush();
   return hr;
 }
-*/
+
 //CUnknown * WINAPI CreateVideoSink(IUnknown *pUnk, HRESULT *phr) {
 //  CVideoSink  *vs = new CVideoSink(pUnk, phr);
 //  if (vs == NULL)
@@ -549,7 +547,7 @@ HRESULT	CVideoSinkPin::BeginFlush() {
 //  }
 //  return vs;
 //}
-/*
+
 HRESULT CreateVideoSink(IBaseFilter **pVS) {
 	HRESULT hr = S_OK;
 	CVideoSink *vs = new CVideoSink(NULL,&hr);
@@ -561,4 +559,4 @@ HRESULT CreateVideoSink(IBaseFilter **pVS) {
 	vs->AddRef();
 	*pVS = vs;
 	return hr;
-}*/
+}

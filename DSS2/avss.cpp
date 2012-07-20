@@ -16,9 +16,9 @@
 #include <atlcom.h>
 #include <atlstr.h>
 #include <atlcoll.h>
-#include <initguid.h>
 #include "VideoSink.h"
 #include "utils.h"
+#include "guids.h"
 
 #if defined AVS_26
 #include "avisynth_26.h"
@@ -26,8 +26,8 @@
 #include "avisynth.h"
 #endif
 
-// {F13D3732-96BD-4108-AFEB-E85F68FF64DC}
-DEFINE_GUID(CLSID_VideoSink, 0xf13d3732, 0x96bd, 0x4108, 0xaf, 0xeb, 0xe8, 0x5f, 0x68, 0xff, 0x64, 0xdc);
+#define ERRMSG_LEN 1024
+char err[ERRMSG_LEN] = {0};
 
 class DSS2 : public IClip
 {
@@ -56,7 +56,7 @@ class DSS2 : public IClip
 	DWORD                   m_rot_cookie;
 
 	VideoInfo               m_vi;
-	long long               m_avgframe;
+	__int64                 m_avgframe;
 
 	void RegROT()
 	{
@@ -67,7 +67,7 @@ class DSS2 : public IClip
 		if (FAILED(GetRunningObjectTable(0, &rot)))
 			return;
 
-		CStringA  name;
+		CStringA name;
 		name.Format("FilterGraph %08p pid %08x (avss)", m_pGC.p, GetCurrentProcessId());
 
 		CComPtr<IMoniker> mk;
@@ -91,73 +91,75 @@ class DSS2 : public IClip
 			m_registered = false;
 	}
 
-	HRESULT Open(const wchar_t *filename, long long avgf)
+	HRESULT Open(const wchar_t *filename, __int64 avgf)
 	{
 		HRESULT hr;
 
-		CComPtr<IGraphBuilder> pG;
-		if (FAILED(hr = pG.CoCreateInstance(CLSID_FilterGraph)))
-			return hr;
+		CComPtr<IGraphBuilder> pGB; //CLSID_FilterGraphNoThread
+		if (FAILED(hr = pGB.CoCreateInstance(CLSID_FilterGraph))) {
+			SetError("Create FilterGraph: "); return hr; }
 
-		CComPtr<IBaseFilter> pR;
-		if (FAILED(hr = pR.CoCreateInstance(CLSID_VideoSink)))
-			return hr;
+		CComPtr<IBaseFilter> pVS;
+		if (FAILED(hr = CreateVideoSink(&pVS))) {
+			SetError("Create VideoSink: "); return hr; }
 
-		pG->AddFilter(pR, L"VideoSink");
+		if (FAILED(hr = pGB->AddFilter(pVS, L"VideoSink"))) {
+			SetError("Add VideoSink: "); return hr; }
 
-		CComQIPtr<IVideoSink> sink(pR);
-		if (!sink) return E_NOINTERFACE;
+		CComQIPtr<IVideoSink> sink(pVS);
+		if (!sink) { SetError("Get IVideoSink: "); return E_NOINTERFACE; }
 
-		CComQIPtr<IVideoSink2> sink2(pR);
-		if (!sink2) return E_NOINTERFACE;
+		CComQIPtr<IVideoSink2> sink2(pVS);
+		if (!sink2) { SetError("Get IVideoSink2: "); return E_NOINTERFACE; }
 
 		sink->SetAllowedTypes(IVS_RGB32|IVS_YV12|IVS_YUY2);
 		ResetEvent(m_hFrameReady);
 		sink2->NotifyFrame(m_hFrameReady);
 
-		CComPtr<IBaseFilter> pS;
-		if (FAILED(hr = pG->AddSourceFilter(filename, NULL, &pS)))
-			return hr;
+		CComPtr<IBaseFilter> pSrc;
+		if (FAILED(hr = pGB->AddSourceFilter(filename, NULL, &pSrc))) {
+			SetError("Add Source: "); return hr; }
 
-		CComQIPtr<IPropertyBag> pPB(pS);
-		if (pPB) pPB->Write(L"ui.interactive", &CComVariant(0u, VT_UI4));
+		//Это отключает иконку Haali-сплиттера в трее (зачем?!)
+		//CComQIPtr<IPropertyBag> pPB(pS);
+		//if (pPB) pPB->Write(L"ui.interactive", &CComVariant(0u, VT_UI4));
 
-		CComPtr<IPin> pO(GetPin(pS, false, PINDIR_OUTPUT, &MEDIATYPE_Video));
-		if (!pO) pO = GetPin(pS, false, PINDIR_OUTPUT, &MEDIATYPE_Stream);
+		CComPtr<IPin> pSrcOutP(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Video));
+		if (!pSrcOutP) pSrcOutP = GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Stream);
 
-		CComPtr<IPin> pI(GetPin(pR, false, PINDIR_INPUT));
+		CComPtr<IPin> pVSInP(GetPin(pVS, false, PINDIR_INPUT));
 
-		if (!pO || !pI)
-			return E_FAIL;
+		if (!pSrcOutP || !pVSInP) {
+			SetError("GetPin: "); return E_FAIL; }
 
-		if (FAILED(hr = pG->Connect(pO, pI)))
-			return hr;
+		if (FAILED(hr = pGB->Connect(pSrcOutP, pVSInP))) {
+			SetError("Connect filters: "); return hr; }
 
-		CComQIPtr<IMediaControl> mc(pG);
-		CComQIPtr<IMediaSeeking> ms(pG);
+		CComQIPtr<IMediaControl> mc(pGB);
+		if (!mc) { SetError("Get IMediaControl: "); return E_NOINTERFACE; }
 
-		if (!mc || !ms)
-			return E_NOINTERFACE;
+		CComQIPtr<IMediaSeeking> ms(pGB);
+		if (!ms) { SetError("Get IMediaSeeking: "); return E_NOINTERFACE; }
 
-		if (FAILED(hr = mc->Run()))
-			return hr;
+		if (FAILED(hr = mc->Run())) {
+			SetError("Run FilterGraph: "); return hr; }
 
 		OAFilterState fs;
-		if (FAILED(hr = mc->GetState(2000, &fs)))
-			return hr;
+		if (FAILED(hr = mc->GetState(2000, &fs))) {
+			SetError("GetState: "); return hr; }
 
-		// wait for the first frame to arrive
-		if (WaitForSingleObject(m_hFrameReady, 5000) != WAIT_OBJECT_0) // up to 5s
-			return E_FAIL;
+		// wait for the first frame to arrive (up to 10s) //5s
+		if (WaitForSingleObject(m_hFrameReady, 10000) != WAIT_OBJECT_0) {
+			SetError("Timeout waiting for FrameReady: "); return E_FAIL; }
 
-		long long defd;
+		__int64 defd;
 		unsigned  type, width, height, arx, ary;
-		if (FAILED(hr = sink2->GetFrameFormat(&type, &width, &height, &arx, &ary, &defd)))
-			return hr;
+		if (FAILED(hr = sink2->GetFrameFormat(&type, &width, &height, &arx, &ary, &defd))) {
+			SetError("GetFrameFormat: "); return hr; }
 
 		REFERENCE_TIME duration;
-		if (FAILED(hr = ms->GetDuration(&duration)))
-			return hr;
+		if (FAILED(hr = ms->GetDuration(&duration))) {
+			SetError("GetDuration: "); return hr; }
 
 		if (defd == 0)
 			defd = 400000;
@@ -170,7 +172,7 @@ class DSS2 : public IClip
 			case IVS_RGB32: m_vi.pixel_type = VideoInfo::CS_BGR32; break;
 			case IVS_YUY2: m_vi.pixel_type = VideoInfo::CS_YUY2; break;
 			case IVS_YV12: m_vi.pixel_type = VideoInfo::CS_YV12; break;
-			default: return E_FAIL;
+			default: { SetError("Unsupported colorspace: "); return E_FAIL; }
 		}
 
 		m_vi.width = width;
@@ -214,7 +216,7 @@ class DSS2 : public IClip
 		VideoInfo *vi;
 	};
 
-	static void ReadFrame(long long timestamp, unsigned format, unsigned bpp, const unsigned char *frame, unsigned width, unsigned height, int stride, unsigned arx, unsigned ary, void *arg)
+	static void ReadFrame(__int64 timestamp, unsigned format, unsigned bpp, const unsigned char *frame, unsigned width, unsigned height, int stride, unsigned arx, unsigned ary, void *arg)
 	{
 		RFArg     *rfa = (RFArg *)arg;
 		DF        *df = rfa->df;
@@ -288,7 +290,7 @@ class DSS2 : public IClip
 
 	bool NextFrame(IScriptEnvironment *env, DF& rdf, int& fn)
 	{
-		for (;;)
+		while (true)
 		{
 			if (WaitForSingleObject(m_hFrameReady, INFINITE) != WAIT_OBJECT_0)
 				return false;
@@ -306,7 +308,6 @@ class DSS2 : public IClip
 			if (df.timestamp >= 0)
 			{
 				int frameno = (int)((double)df.timestamp / m_avgframe + 0.5);
-
 				if (frameno >= 0 && frameno < m_f.GetCount())
 				{
 					fn = frameno;
@@ -335,7 +336,7 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, long long avgframe)
+	HRESULT OpenFile(const wchar_t *filename, __int64 avgframe)
 	{
 		return Open(filename, avgframe);
 	}
@@ -344,7 +345,7 @@ public:
 	PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment *env)
 	{
 		if (n < 0 || n >= m_f.GetCount())
-			env->ThrowError("GetFrame: frame number out of range");
+			env->ThrowError("DSS2: GetFrame: Requested frame number is out of range!");
 
 		if (m_f[n].frame)
 			return m_f[n].frame;
@@ -376,11 +377,11 @@ public:
 			if (cur < 0) cur = 0;
 
 			if (FAILED(m_pGS->SetPositions(&cur, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning)))
-				env->ThrowError("DS Seeking failed");
+				env->ThrowError("DSS2: DirectShow seeking failed!");
 		}
 
 		// we performed a seek or are reading sequentially
-		for (;;)
+		while (true)
 		{
 			DF df;
 			int frameno;
@@ -432,13 +433,30 @@ public:
 	const VideoInfo& __stdcall GetVideoInfo() { return m_vi; }
 
 	// TODO
-	void __stdcall GetAudio(void *buf, long long start, long long count, IScriptEnvironment *env) { memset(buf, 0, m_vi.BytesFromAudioSamples(count)); }
+	void __stdcall GetAudio(void *buf, __int64 start, __int64 count, IScriptEnvironment *env) { memset(buf, 0, m_vi.BytesFromAudioSamples(count)); }
 	bool __stdcall GetParity(int n) { return true; }
 #ifdef AVS_26
-	int __stdcall SetCacheHints(int cachehints,int frame_range) { return 0; };
+	int __stdcall SetCacheHints(int cachehints, int frame_range) { return 0; }
 #else
 	void __stdcall SetCacheHints(int cachehints, int frame_range) { }
 #endif
+
+	void SetError(const char* text)
+	{
+		if (strlen(err) > 0)
+		{
+			//Append
+			char err_temp[ERRMSG_LEN] = {0};
+			strncpy_s(err_temp, ERRMSG_LEN, err, _TRUNCATE);
+			strncpy_s(err, ERRMSG_LEN, text, _TRUNCATE);
+			strncat_s(err, ERRMSG_LEN, err_temp, _TRUNCATE);
+		}
+		else
+		{
+			//Copy
+			strncpy_s(err, ERRMSG_LEN, text, _TRUNCATE);
+		}
+	}
 };
 
 static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* env)
@@ -448,17 +466,22 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 
 	const char *filename = args[0][0].AsString();
 	if (filename == NULL || strlen(filename) == 0)
-		env->ThrowError("Filename expected");
+		env->ThrowError("DSS2: Filename expected!");
 
-	long long avgframe = args[1].Defined() ? (long long)(10000000ll / args[1].AsFloat() + 0.5) : 0;
+	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0;
 
 	DSS2 *dss2 = new DSS2();
 
-	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_OEMCP), avgframe);
+	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), avgframe);
 	if (FAILED(hr))
 	{
 		delete dss2;
-		env->ThrowError("Can't open %s: %08x", filename, hr);
+
+		//Расшифровка HRESULT и формирование сообщения об ошибке (из DSS)
+		char string[MAX_ERROR_TEXT_LEN] = {0}; //string[1024]
+		if (AMGetErrorTextA(hr, string, MAX_ERROR_TEXT_LEN) > 0) //1023
+			env->ThrowError("DSS2: Can't open \"%s\"\n\n%s(%08x) %s\n", filename, err, hr, string);
+		env->ThrowError("DSS2: Can't open \"%s\"\n\n%s(%08x) Unknown error.\n", filename, err, hr);
 	}
 
 	return dss2;
