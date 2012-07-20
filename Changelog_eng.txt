@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.293.0 (18.07.2012), main changes:
+﻿XviD4PSP 5.10.294.0 (20.07.2012), main changes:
 
+>>> (r294) Added source code for DSS2.
+>>> (r294) Reverted encoding progress detection for x264 r2208+.
 >>> (r293) Encoding progress detection for x264 r2204+.
 >>> (r292) Fix for error message from RaWavSource (NicAudio): "m2RaWavSource: unsupported number of channels defined".
 >>> (r291) AutoCrop: transmit calculated values using script global variables (instead of creating a
