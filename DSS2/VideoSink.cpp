@@ -1,3 +1,4 @@
+//(XviD4PSP5) modded version
 /*
  * Copyright (c) 2004-2006 Mike Matsnev.  All Rights Reserved.
  * 
@@ -338,13 +339,12 @@ public:
 
     if (notify || hNotify)
     {
-      if (notify)
-        notify->FrameReady();
-      if (hNotify)
-        SetEvent(hNotify);
+      if (notify) notify->FrameReady();
+      if (hNotify) SetEvent(hNotify);
 
       // wait until the thing is processed
-      WaitForSingleObject(m_hEvent2, INFINITE);
+      if (pS != NULL)
+        WaitForSingleObject(m_hEvent2, INFINITE);
     }
 
     if (pS == NULL)
@@ -358,6 +358,16 @@ public:
     ResetEvent(m_hEvent1);
     m_sample = NULL;
     SetEvent(m_hEvent2);
+    return S_OK;
+  }
+
+  STDMETHOD(Reset)() {
+    //CAutoLock lock(pStateLock());
+    BeginFlush();
+    //SetEvent(m_hEvent1); //Ждем в ReadFrame(), когда кадр будет получен в Receive() (т.е. нам есть, что считывать)
+    //SetEvent(m_hEvent2); //В Receive() ждем, когда кадр будет считан в ReadFrame() или сброшен в BeginFlush() (т.е. обработан)
+    //SetEvent(evtDoneWithSample); //DSS
+    //SetEvent(evtNewSampleReady); //DSS
     return S_OK;
   }
 
@@ -398,6 +408,10 @@ public:
       {
         if (WaitForSingleObject(m_hEvent1, 0) == WAIT_OBJECT_0)
           SetEvent(m_hEvent2);
+
+        HANDLE hNotify = m_hNotify;
+        if (hNotify) SetEvent(hNotify);
+
         return S_FALSE;
       }
     }

@@ -1,0 +1,128 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "version.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Russian resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+#ifdef _WIN32
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "version.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "VS_VERSION_INFO VERSIONINFO\r\n"
+    " FILEVERSION AVSS_VER_N\r\n"
+    " PRODUCTVERSION AVSS_VER_N\r\n"
+    " FILEFLAGSMASK 0x17L\r\n"
+    "#ifdef _DEBUG\r\n"
+    " FILEFLAGS 0x1L\r\n"
+    "#else\r\n"
+    " FILEFLAGS 0x0L\r\n"
+    "#endif\r\n"
+    " FILEOS 0x4L\r\n"
+    " FILETYPE 0x2L\r\n"
+    " FILESUBTYPE 0x0L\r\n"
+    "BEGIN\r\n"
+    "    BLOCK ""StringFileInfo""\r\n"
+    "    BEGIN\r\n"
+    "        BLOCK ""000004b0""\r\n"
+    "        BEGIN\r\n"
+    "#ifdef AVS_26\r\n"
+    "            VALUE ""FileDescription"", ""DSS2 - DirectShow source plugin for AviSynth 2.6""\r\n"
+    "#else\r\n"
+    "            VALUE ""FileDescription"", ""DSS2 - DirectShow source plugin for AviSynth 2.5""\r\n"
+    "#endif\r\n"
+    "            VALUE ""FileVersion"", AVSS_VER_S\r\n"
+    "            VALUE ""LegalCopyright"", ""Created by Haali, modded by fcp""\r\n"
+    "            VALUE ""OriginalFilename"", ""avss.dll""\r\n"
+    "            VALUE ""ProductName"", ""DSS2""\r\n"
+    "        END\r\n"
+    "    END\r\n"
+    "    BLOCK ""VarFileInfo""\r\n"
+    "    BEGIN\r\n"
+    "        VALUE ""Translation"", 0x0, 1200\r\n"
+    "    END\r\n"
+    "END\r\n"
+    "\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Russian resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION AVSS_VER_N
+ PRODUCTVERSION AVSS_VER_N
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+#ifdef AVS_26
+            VALUE "FileDescription", "DSS2 - DirectShow source plugin for AviSynth 2.6"
+#else
+            VALUE "FileDescription", "DSS2 - DirectShow source plugin for AviSynth 2.5"
+#endif
+            VALUE "FileVersion", AVSS_VER_S
+            VALUE "LegalCopyright", "Created by Haali, modded by fcp"
+            VALUE "OriginalFilename", "avss.dll"
+            VALUE "ProductName", "DSS2"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

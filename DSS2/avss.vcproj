@@ -52,6 +52,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4995"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -128,6 +129,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4995"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -206,6 +208,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4995"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -285,6 +288,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4995"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -372,6 +376,42 @@
 			<File
 				RelativePath=".\VideoSink.cpp"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Version"
+			>
+			<File
+				RelativePath=".\version.h"
+				>
+			</File>
+			<File
+				RelativePath=".\version.rc"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="_DEBUG"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_26|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="AVS_26"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_26|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="_DEBUG;AVS_26"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

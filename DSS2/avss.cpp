@@ -1,4 +1,5 @@
-﻿/*
+﻿//(XviD4PSP5) modded version
+/*
  * Copyright (c) 2004-2008 Mike Matsnev.  All Rights Reserved.
  * 
  * $Id: avss.cpp,v 1.7 2008/03/29 15:41:28 mike Exp $
@@ -8,6 +9,7 @@
 #define _ATL_FREE_THREADED
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 #define _ATL_ALL_WARNINGS
+#define ERRMSG_LEN 1024
 
 #include <windows.h>
 #include <tchar.h>
@@ -26,9 +28,6 @@
 #include "avisynth.h"
 #endif
 
-#define ERRMSG_LEN 1024
-char err[ERRMSG_LEN] = {0};
-
 class DSS2 : public IClip
 {
 	struct DF
@@ -46,7 +45,10 @@ class DSS2 : public IClip
 	int                     m_qfirst,
 		                    m_qnext,
 		                    m_qmax,
-		                    m_seek_thr;
+		                    m_seek_thr,
+		                    m_preroll,
+		                    m_do_not_trespass;
+	PVideoFrame             m_last_good_frame;
 
 	CComPtr<IVideoSink>     m_pR;
 	CComPtr<IMediaControl>  m_pGC;
@@ -91,26 +93,26 @@ class DSS2 : public IClip
 			m_registered = false;
 	}
 
-	HRESULT Open(const wchar_t *filename, __int64 avgf)
+	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf)
 	{
 		HRESULT hr;
 
 		CComPtr<IGraphBuilder> pGB; //CLSID_FilterGraphNoThread
 		if (FAILED(hr = pGB.CoCreateInstance(CLSID_FilterGraph))) {
-			SetError("Create FilterGraph: "); return hr; }
+			SetError("Create FilterGraph: ", err); return hr; }
 
 		CComPtr<IBaseFilter> pVS;
 		if (FAILED(hr = CreateVideoSink(&pVS))) {
-			SetError("Create VideoSink: "); return hr; }
+			SetError("Create VideoSink: ", err); return hr; }
 
 		if (FAILED(hr = pGB->AddFilter(pVS, L"VideoSink"))) {
-			SetError("Add VideoSink: "); return hr; }
+			SetError("Add VideoSink: ", err); return hr; }
 
 		CComQIPtr<IVideoSink> sink(pVS);
-		if (!sink) { SetError("Get IVideoSink: "); return E_NOINTERFACE; }
+		if (!sink) { SetError("Get IVideoSink: ", err); return E_NOINTERFACE; }
 
 		CComQIPtr<IVideoSink2> sink2(pVS);
-		if (!sink2) { SetError("Get IVideoSink2: "); return E_NOINTERFACE; }
+		if (!sink2) { SetError("Get IVideoSink2: ", err); return E_NOINTERFACE; }
 
 		sink->SetAllowedTypes(IVS_RGB32|IVS_YV12|IVS_YUY2);
 		ResetEvent(m_hFrameReady);
@@ -118,10 +120,10 @@ class DSS2 : public IClip
 
 		CComPtr<IBaseFilter> pSrc;
 		if (FAILED(hr = pGB->AddSourceFilter(filename, NULL, &pSrc))) {
-			SetError("Add Source: "); return hr; }
+			SetError("Add Source: ", err); return hr; }
 
 		//Это отключает иконку Haali-сплиттера в трее (зачем?!)
-		//CComQIPtr<IPropertyBag> pPB(pS);
+		//CComQIPtr<IPropertyBag> pPB(pSrc);
 		//if (pPB) pPB->Write(L"ui.interactive", &CComVariant(0u, VT_UI4));
 
 		CComPtr<IPin> pSrcOutP(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Video));
@@ -130,38 +132,38 @@ class DSS2 : public IClip
 		CComPtr<IPin> pVSInP(GetPin(pVS, false, PINDIR_INPUT));
 
 		if (!pSrcOutP || !pVSInP) {
-			SetError("GetPin: "); return E_FAIL; }
+			SetError("GetPin: ", err); return E_FAIL; }
 
 		if (FAILED(hr = pGB->Connect(pSrcOutP, pVSInP))) {
-			SetError("Connect filters: "); return hr; }
+			SetError("Connect filters: ", err); return hr; }
 
 		CComQIPtr<IMediaControl> mc(pGB);
-		if (!mc) { SetError("Get IMediaControl: "); return E_NOINTERFACE; }
+		if (!mc) { SetError("Get IMediaControl: ", err); return E_NOINTERFACE; }
 
 		CComQIPtr<IMediaSeeking> ms(pGB);
-		if (!ms) { SetError("Get IMediaSeeking: "); return E_NOINTERFACE; }
+		if (!ms) { SetError("Get IMediaSeeking: ", err); return E_NOINTERFACE; }
 
 		if (FAILED(hr = mc->Run())) {
-			SetError("Run FilterGraph: "); return hr; }
+			SetError("Run FilterGraph: ", err); return hr; }
 
 		OAFilterState fs;
 		if (FAILED(hr = mc->GetState(2000, &fs))) {
-			SetError("GetState: "); return hr; }
+			SetError("GetState: ", err); return hr; }
 
 		// wait for the first frame to arrive (up to 10s) //5s
 		if (WaitForSingleObject(m_hFrameReady, 10000) != WAIT_OBJECT_0) {
-			SetError("Timeout waiting for FrameReady: "); return E_FAIL; }
+			SetError("Timeout waiting for FrameReady: ", err); return E_FAIL; }
 
 		__int64 defd;
 		unsigned  type, width, height, arx, ary;
 		if (FAILED(hr = sink2->GetFrameFormat(&type, &width, &height, &arx, &ary, &defd))) {
-			SetError("GetFrameFormat: "); return hr; }
+			SetError("GetFrameFormat: ", err); return hr; }
 
 		REFERENCE_TIME duration;
 		if (FAILED(hr = ms->GetDuration(&duration))) {
-			SetError("GetDuration: "); return hr; }
+			SetError("GetDuration: ", err); return hr; }
 
-		if (defd == 0)
+		if (defd <= 0)
 			defd = 400000;
 
 		if (avgf > 0)
@@ -172,14 +174,14 @@ class DSS2 : public IClip
 			case IVS_RGB32: m_vi.pixel_type = VideoInfo::CS_BGR32; break;
 			case IVS_YUY2: m_vi.pixel_type = VideoInfo::CS_YUY2; break;
 			case IVS_YV12: m_vi.pixel_type = VideoInfo::CS_YV12; break;
-			default: { SetError("Unsupported colorspace: "); return E_FAIL; }
+			default: { SetError("Unsupported colorspace: ", err); return E_FAIL; }
 		}
 
 		m_vi.width = width;
 		m_vi.height = height;
 
-		m_vi.num_frames = duration / defd;
-		m_vi.SetFPS(10000000, defd);
+		m_vi.num_frames = (int)(duration / defd);
+		m_vi.SetFPS(10000000, (unsigned int)defd);
 
 		m_avgframe = defd;
 
@@ -292,8 +294,15 @@ class DSS2 : public IClip
 	{
 		while (true)
 		{
-			if (WaitForSingleObject(m_hFrameReady, INFINITE) != WAIT_OBJECT_0)
+			//Ждем не дольше 10-ти сек., т.к. ждать INFINITE - слишком долго :)
+			if (WaitForSingleObject(m_hFrameReady, 10000) != WAIT_OBJECT_0)
+			{
+				//Запоминаем номер кадра, получая который мы зависли
+				m_do_not_trespass = fn;
+
+				m_pR->Reset();
 				return false;
+			}
 
 			DF df(env->NewVideoFrame(m_vi));
 			RFArg arg = { &df, &m_vi };
@@ -303,12 +312,21 @@ class DSS2 : public IClip
 				return false;
 
 			if (hr == S_FALSE) // EOF
+			{
+				//Запоминаем номер кадра, получая который мы дошли до EOF
+				m_do_not_trespass = fn;
+
+				m_pR->Reset();
 				return false;
+			}
+
+			//Картинка последнего успешно декодированного кадра
+			m_last_good_frame = df.frame;
 
 			if (df.timestamp >= 0)
 			{
 				int frameno = (int)((double)df.timestamp / m_avgframe + 0.5);
-				if (frameno >= 0 && frameno < m_f.GetCount())
+				if (frameno >= 0 && frameno < (int)m_f.GetCount())
 				{
 					fn = frameno;
 					rdf = df;
@@ -321,11 +339,13 @@ class DSS2 : public IClip
 public:
 	DSS2() :
 		m_registered(false),
-		m_qfirst(0),
-		m_qnext(0),
-		m_qmax(10),
-		m_seek_thr(100)
-	{
+		m_qfirst(0),                //Номер кадра, с которого начинается кэш.
+		m_qnext(0),                 //Номер текущего кадра + 1 (т.е. следующий кадр).
+		m_qmax(10),                 //Макс. кол-во кадров, хранимых в кэше, а так-же размер кэшируемого "прыжка назад" при последовательном чтении в обратную сторону.
+		m_seek_thr(100),            //Порог для сикинга вперёд. Если требуемый кадр дальше от текущего на эту величину - будет сикинг, иначе будем ползти покадрово.
+		m_preroll(0),               //На сколько кадров "недосикивать" (т.е. отступ при сикинге), оставшееся будет пройдено покадрово - помогает выдать нужный кадр на "плохосикающихся" файлах.
+		m_do_not_trespass(INT_MAX)  //Номер кадра, дальше которого двигаться нельзя (конец файла\потока).
+	{                               //P.S. Актуальные дефолты перенесены отсюда в Create_DSS2()
 		m_hFrameReady = CreateEvent(NULL, FALSE, FALSE, NULL);
 		memset(&m_vi, 0, sizeof(m_vi));
 	}
@@ -336,15 +356,19 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, __int64 avgframe)
+	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll)
 	{
-		return Open(filename, avgframe);
+		m_qmax = cache;
+		m_seek_thr = seekthr;
+		m_preroll = preroll;
+
+		return Open(filename, err, avgframe);
 	}
 
 	// IClip
 	PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment *env)
 	{
-		if (n < 0 || n >= m_f.GetCount())
+		if (n < 0 || n >= (int)m_f.GetCount())
 			env->ThrowError("DSS2: GetFrame: Requested frame number is out of range!");
 
 		if (m_f[n].frame)
@@ -358,10 +382,10 @@ public:
 				m_f[i].frame = NULL;
 
 			// reset read postion
-			if (n >= m_qfirst - m_qmax && n < m_qfirst) // assume we are scanning backwards
+			if (n >= m_qfirst - m_qmax && n < m_qfirst) // assume we are scanning backwards (не дальше, чем на 10(m_qmax) кадров назад от начала кэша)
 			{
-				m_qfirst = n - m_qmax + 1;
-				if (m_qfirst < 0) m_qfirst = 0;
+				m_qfirst = n - m_qmax + 1;       //Отступ на -9 (m_qmax-1) кадров от требуемого, "лишние" кадры (от m_qfirst до n) будут кэшированы.
+				if (m_qfirst < 0) m_qfirst = 0;  //Т.е. чтение назад идет не покадрово, а "прыжками" по 9-ть кадров, по мере надобности кадры выдаются из кэша.
 				m_qnext = m_qfirst;
 			}
 			else
@@ -373,21 +397,46 @@ public:
 			// seek the graph
 			ResetEvent(m_hFrameReady);
 
-			REFERENCE_TIME cur = m_avgframe * m_qfirst - 10001; // -1ms, account for typical timestamps rounding
-			if (cur < 0) cur = 0;
+			//Отступ (без кэширования "лишних" кадров)
+			int pos_frame = m_qfirst - m_preroll;
+			if (pos_frame < 0) pos_frame = 0;
 
-			if (FAILED(m_pGS->SetPositions(&cur, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning)))
+			REFERENCE_TIME pos_time = m_avgframe * pos_frame - 10001; // -1ms, account for typical timestamps rounding
+			if (pos_time < 0) pos_time = 0;
+
+			if (FAILED(m_pGS->SetPositions(&pos_time, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning)))
 				env->ThrowError("DSS2: DirectShow seeking failed!");
+
+			//Сброс защиты от "последнего кадра"
+			m_do_not_trespass = INT_MAX;
+
+			//Сброс последнего полученного изображения
+			m_last_good_frame = NULL;
 		}
 
 		// we performed a seek or are reading sequentially
 		while (true)
 		{
 			DF df;
-			int frameno;
+			int frameno = n;
 
-			if (!NextFrame(env, df, frameno))
-				return env->NewVideoFrame(m_vi);
+			//Если дальше нельзя или просто некуда - выдаем последний декодированный кадр
+			if (n >= m_do_not_trespass || !NextFrame(env, df, frameno))
+			{
+				//Обновляем m_qnext, иначе через m_seek_thr кадров будет попытка сделать сикинг.
+				//Это нужно для совсем кривых файлов, у которых duration определяется намного больше, чем есть на самом деле.
+				if (m_qnext < (int)m_f.GetCount() - 1)
+					m_qnext += 1;
+
+				if (!m_last_good_frame)
+				{
+					//Если выдать нечего - создаем "серый" кадр (из DSS)
+					m_last_good_frame = env->NewVideoFrame(m_vi);
+					memset(m_last_good_frame->GetWritePtr(), 128, m_last_good_frame->GetPitch() * m_last_good_frame->GetHeight() +
+						m_last_good_frame->GetPitch(PLANAR_U) * m_last_good_frame->GetHeight(PLANAR_U) * 2);
+				}
+				return m_last_good_frame;
+			}
 
 			// let's see what we've got
 			if (frameno < m_qnext)
@@ -409,7 +458,7 @@ public:
 			}
 			else //frameno > m_qnext
 			{ 
-				// somehow we got beyond the place we wanted, fill in intermediate frames        
+				// somehow we got beyond the place we wanted, fill in intermediate frames
 				// don't check for timestamps, just use what we've got
 				for (int i = m_qnext; i <= frameno; ++i)
 				{
@@ -433,7 +482,7 @@ public:
 	const VideoInfo& __stdcall GetVideoInfo() { return m_vi; }
 
 	// TODO
-	void __stdcall GetAudio(void *buf, __int64 start, __int64 count, IScriptEnvironment *env) { memset(buf, 0, m_vi.BytesFromAudioSamples(count)); }
+	void __stdcall GetAudio(void *buf, __int64 start, __int64 count, IScriptEnvironment *env) { memset(buf, 0, (size_t)m_vi.BytesFromAudioSamples(count)); }
 	bool __stdcall GetParity(int n) { return true; }
 #ifdef AVS_26
 	int __stdcall SetCacheHints(int cachehints, int frame_range) { return 0; }
@@ -441,7 +490,7 @@ public:
 	void __stdcall SetCacheHints(int cachehints, int frame_range) { }
 #endif
 
-	void SetError(const char* text)
+	void SetError(const char *text, char *err)
 	{
 		if (strlen(err) > 0)
 		{
@@ -468,19 +517,23 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	if (filename == NULL || strlen(filename) == 0)
 		env->ThrowError("DSS2: Filename expected!");
 
-	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0;
+	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0; //fps       (>0, undef.)
+	int cache = __max(args[2].AsInt(10), 1);                                                    //cache     (>=1, def=10)
+	int seekthr = __max(args[3].AsInt(100), 1);                                                 //seekthr   (>=1, def=100)
+	int preroll = __max(args[4].AsInt(0), 0);                                                   //preroll   (>=0, def=0)
 
 	DSS2 *dss2 = new DSS2();
+	char err[ERRMSG_LEN] = {0};
 
-	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), avgframe);
+	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll);
 	if (FAILED(hr))
 	{
 		delete dss2;
 
 		//Расшифровка HRESULT и формирование сообщения об ошибке (из DSS)
-		char string[MAX_ERROR_TEXT_LEN] = {0}; //string[1024]
-		if (AMGetErrorTextA(hr, string, MAX_ERROR_TEXT_LEN) > 0) //1023
-			env->ThrowError("DSS2: Can't open \"%s\"\n\n%s(%08x) %s\n", filename, err, hr, string);
+		char hr_err[MAX_ERROR_TEXT_LEN] = {0}; //string[1024]
+		if (AMGetErrorTextA(hr, hr_err, MAX_ERROR_TEXT_LEN) > 0) //1023
+			env->ThrowError("DSS2: Can't open \"%s\"\n\n%s(%08x) %s\n", filename, err, hr, hr_err);
 		env->ThrowError("DSS2: Can't open \"%s\"\n\n%s(%08x) Unknown error.\n", filename, err, hr);
 	}
 
@@ -492,13 +545,13 @@ const AVS_Linkage *AVS_linkage = 0;
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScriptEnvironment* env, const AVS_Linkage* const vectors)
 {
 	AVS_linkage = vectors;
-	env->AddFunction("DSS2", "s+[fps]f", Create_DSS2, 0);
+	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i", Create_DSS2, 0);
 	return "DSS2";
 }
 #else
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
 {
-	env->AddFunction("DSS2", "s+[fps]f", Create_DSS2, 0);
+	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i", Create_DSS2, 0);
 	return "DSS2";
 }
 #endif

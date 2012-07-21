@@ -54,7 +54,8 @@ CComPtr<IPin> GetPin(IBaseFilter *pF, bool include_connected, PIN_DIRECTION dir,
 				AM_MEDIA_TYPE MT;
 				if (SUCCEEDED(pP->ConnectionMediaType(&MT)))
 				{
-					bool found = (MT.majortype == *pMT);
+					//"warning C4800: 'int' : forcing value to bool 'true' or 'false'"
+					bool found = ((MT.majortype == *pMT) ? true : false);
 					MTPtr::FreeMediaType(&MT);
 					if (found) return pP;
 				}

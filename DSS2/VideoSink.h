@@ -35,6 +35,8 @@ interface IVideoSink : public IUnknown {
 
   // S_FALSE return means end of file was reached
   STDMETHOD(ReadFrame)(ReadFrameFunc f, void *arg) = 0;
+
+  STDMETHOD(Reset)() = 0;
 };
 
 [uuid("80CADA0E-DFA5-4fcc-99DD-52F7C1B0E575")]
