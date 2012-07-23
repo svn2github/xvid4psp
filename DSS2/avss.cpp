@@ -9,7 +9,6 @@
 #define _ATL_FREE_THREADED
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 #define _ATL_ALL_WARNINGS
-#define ERRMSG_LEN 1024
 
 #include <windows.h>
 #include <tchar.h>
@@ -27,6 +26,15 @@
 #else
 #include "avisynth.h"
 #endif
+
+#define ERRMSG_LEN 1024
+#define SAFE_FREELIBRARY(x) { if (x) FreeLibrary(x); x = NULL; }
+volatile static HMODULE hLAVSplitter = NULL;
+volatile static HMODULE hLAVVideo = NULL;
+volatile static HMODULE hVSFilter = NULL;
+
+//Кол-во DSS2, открытых из-под одного процесса
+volatile static long RefCount = 0;
 
 class DSS2 : public IClip
 {
@@ -93,8 +101,10 @@ class DSS2 : public IClip
 			m_registered = false;
 	}
 
-	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf)
+	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, bool lav_splitter, bool lav_decoder)
 	{
+		InterlockedIncrement(&RefCount);
+
 		HRESULT hr;
 
 		CComPtr<IGraphBuilder> pGB; //CLSID_FilterGraphNoThread
@@ -119,23 +129,120 @@ class DSS2 : public IClip
 		sink2->NotifyFrame(m_hFrameReady);
 
 		CComPtr<IBaseFilter> pSrc;
-		if (FAILED(hr = pGB->AddSourceFilter(filename, NULL, &pSrc))) {
-			SetError("Add Source: ", err); return hr; }
+		if (!lav_splitter)
+		{
+			//Открываем через SourceFilter
+			if (FAILED(hr = pGB->AddSourceFilter(filename, NULL, &pSrc))) {
+				SetError("Add Source: ", err); return hr; }
 
-		//Это отключает иконку Haali-сплиттера в трее (зачем?!)
-		//CComQIPtr<IPropertyBag> pPB(pSrc);
-		//if (pPB) pPB->Write(L"ui.interactive", &CComVariant(0u, VT_UI4));
+			//Это отключает иконку Haali-сплиттера в трее (зачем?!)
+			//CComQIPtr<IPropertyBag> pPB(pSrc);
+			//if (pPB) pPB->Write(L"ui.interactive", &CComVariant(0u, VT_UI4));
+		}
+		else
+		{
+			//Открываем через LAVSplitterSource
+			CComPtr<IFileSourceFilter> pLAVS;
+			if (FAILED(hr = LoadSplitterFromFile(&pLAVS, &hLAVSplitter, "LAVFilters\\", "LAVSplitter.ax", CLSID_LAVSplitterSource, err, ERRMSG_LEN))) {
+				SetError("Load LAVSplitter: ", err); return hr; }
+
+			if (FAILED(hr = pLAVS->Load(filename, NULL))) {
+				SetError("Add file to LAVSplitter: ", err); return hr; }
+
+			if (FAILED(hr = pLAVS->QueryInterface(IID_IBaseFilter, (void**)&pSrc))) {
+				SetError("Get IBaseFilter: ", err); return hr; }
+
+			if (FAILED(hr = pGB->AddFilter(pSrc, L"LAV Splitter"))) {
+				SetError("Add LAVSplitter: ", err); return hr; }
+		}
 
 		CComPtr<IPin> pSrcOutP(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Video));
 		if (!pSrcOutP) pSrcOutP = GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Stream);
+		if (!pSrcOutP) { SetError("GetPin (SrcOut): ", err); return E_FAIL; }
 
-		CComPtr<IPin> pVSInP(GetPin(pVS, false, PINDIR_INPUT));
+		CComPtr<IPin> pLAVVOutP;
+		if (lav_decoder)
+		{
+			CComPtr<IBaseFilter> pLAVV;
+			if (FAILED(hr = LoadFilterFromFile(&pLAVV, &hLAVVideo, "LAVFilters\\", "LAVVideo.ax", CLSID_LAVVideo, err, ERRMSG_LEN))) {
+				SetError("Load LAVVideo: ", err); return hr; }
 
-		if (!pSrcOutP || !pVSInP) {
-			SetError("GetPin: ", err); return E_FAIL; }
+			if(FAILED(hr = pGB->AddFilter(pLAVV, L"LAV Video Decoder"))) {
+				SetError("Add LAVVideo: ", err); return hr; }
 
-		if (FAILED(hr = pGB->Connect(pSrcOutP, pVSInP))) {
-			SetError("Connect filters: ", err); return hr; }
+			CComPtr<IPin> pLAVVInP(GetPin(pLAVV, false, PINDIR_INPUT));
+			if (!pLAVVInP) { SetError("GetPin (LAVVIn): ", err); return hr; }
+
+			//IFilterGraph::ConnectDirect
+			if(FAILED(hr = pGB->Connect(pSrcOutP, pLAVVInP))) {
+				SetError("Connect (SrcOut+LAVVIn): ", err); return hr; }
+
+			pLAVVOutP = GetPin(pLAVV, false, PINDIR_OUTPUT);
+			if (!pLAVVOutP) { SetError("GetPin (LAVVOut): ", err); return E_FAIL; }
+		}
+
+		if (subs_mode <= 0) //Без субтитров - старый способ
+		{
+			CComPtr<IPin> pVSInP(GetPin(pVS, false, PINDIR_INPUT));
+			if (!pVSInP) { SetError("GetPin (VSinkIn): ", err); return E_FAIL; }
+
+			if (FAILED(hr = pGB->Connect(((!lav_decoder) ? pSrcOutP : pLAVVOutP), pVSInP))) {
+				SetError("Connect filters: ", err); return hr; }
+		}
+		else //С возможностью грузить субтитры - новый способ
+		{
+			CComPtr<IFilterGraph2> pFG2;
+			if (FAILED(hr = pGB.QueryInterface(&pFG2))) {
+				SetError("Get IFilterGraph2: ", err); return hr; }
+
+			CComPtr<IPin> pSubs(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Subtitle));
+			if (!pSubs) pSubs = (GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Text));
+
+			if (subs_mode == 1 || !pSubs)
+			{
+				if (FAILED(hr = pFG2->RenderEx(((!lav_decoder) ? pSrcOutP : pLAVVOutP), AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
+					SetError("RenderEx: ", err); return hr; }
+			}
+
+			if (pSubs)
+			{
+				if (subs_mode >= 2) //Принудительно грузим DirectVobSub
+				{
+					//В этом месте DirectVobSub скорее всего еще не может быть в Графе, т.к. мы его туда еще не добавляли.
+					//А даже если он и добавляется туда Haali-сплиттером, еще чем или сам по себе - то только после команды Render(Ex).
+					bool DirectVobSubHere = false;
+					ENUM_FILTERS(pGB, tBF)
+					{
+						GUID gID;
+						tBF->GetClassID(&gID);
+						if (gID == CLSID_DirectVobSubA || gID == CLSID_DirectVobSubM)
+							DirectVobSubHere = true;
+					}
+
+					if (!DirectVobSubHere)
+					{
+						//A(uto)\M(anual) loading
+						GUID gDVS = CLSID_DirectVobSubA; //(lav_decoder) ? CLSID_DirectVobSubM : CLSID_DirectVobSubA;
+
+						CComPtr<IBaseFilter> pDVS;
+						if(FAILED(pDVS.CoCreateInstance(gDVS))) //Сначала пробуем так..
+						{
+							if (FAILED(hr = LoadFilterFromFile(&pDVS, &hVSFilter, "", "VSFilter.dll", gDVS, err, ERRMSG_LEN))) { //..потом из dll
+								SetError("Load VSFilter: ", err); return hr; }
+						}
+
+						if (FAILED(hr = pGB->AddFilter(pDVS, L"DirectVobSub"))) {
+							SetError("Add DirectVobSub: ", err); return hr; }
+					}
+
+					if (FAILED(hr = pFG2->RenderEx(((!lav_decoder) ? pSrcOutP : pLAVVOutP), AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
+						SetError("RenderEx (video): ", err); return hr; }
+				}
+
+				if (FAILED(hr = pFG2->RenderEx(pSubs, AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
+					SetError("RenderEx (subs): ", err); return hr; }
+			}
+		}
 
 		CComQIPtr<IMediaControl> mc(pGB);
 		if (!mc) { SetError("Get IMediaControl: ", err); return E_NOINTERFACE; }
@@ -210,6 +317,13 @@ class DSS2 : public IClip
 		m_pR.Release();
 		m_pGC.Release();
 		m_pGS.Release();
+
+		if (!InterlockedDecrement(&RefCount))
+		{
+			SAFE_FREELIBRARY(hLAVSplitter);
+			SAFE_FREELIBRARY(hLAVVideo);
+			SAFE_FREELIBRARY(hVSFilter);
+		}
 	}
 
 	struct RFArg
@@ -356,13 +470,13 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll)
+	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, bool lavs, bool lavd)
 	{
 		m_qmax = cache;
 		m_seek_thr = seekthr;
 		m_preroll = preroll;
 
-		return Open(filename, err, avgframe);
+		return Open(filename, err, avgframe, subsm, lavs, lavd);
 	}
 
 	// IClip
@@ -494,7 +608,7 @@ public:
 	{
 		if (strlen(err) > 0)
 		{
-			//Append
+			//Swap & append
 			char err_temp[ERRMSG_LEN] = {0};
 			strncpy_s(err_temp, ERRMSG_LEN, err, _TRUNCATE);
 			strncpy_s(err, ERRMSG_LEN, text, _TRUNCATE);
@@ -508,8 +622,21 @@ public:
 	}
 };
 
+static void __cdecl FreeLibraries(void* user_data, IScriptEnvironment* env)
+{
+	/*if (!InterlockedDecrement(&RefCount))
+	{
+		SAFE_FREELIBRARY(hLAVSplitter);
+		SAFE_FREELIBRARY(hLAVVideo);
+		SAFE_FREELIBRARY(hVSFilter);
+	}*/
+}
+
 static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* env)
 {
+	//InterlockedIncrement(&RefCount);
+	//env->AtExit(FreeLibraries, 0);
+
 	if (args[0].ArraySize() != 1)
 		env->ThrowError("DSS2: Only 1 filename currently supported!");
 
@@ -517,15 +644,18 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	if (filename == NULL || strlen(filename) == 0)
 		env->ThrowError("DSS2: Filename expected!");
 
-	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0; //fps       (>0, undef.)
-	int cache = __max(args[2].AsInt(10), 1);                                                    //cache     (>=1, def=10)
-	int seekthr = __max(args[3].AsInt(100), 1);                                                 //seekthr   (>=1, def=100)
-	int preroll = __max(args[4].AsInt(0), 0);                                                   //preroll   (>=0, def=0)
+	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0;  //fps       (>0, undef.)
+	int cache = max(args[2].AsInt(10), 1);                                                       //cache     (>=1, def=10)
+	int seekthr = max(args[3].AsInt(100), 1);                                                    //seekthr   (>=1, def=100)
+	int preroll = max(args[4].AsInt(0), 0);                                                      //preroll   (>=0, def=0)
+	int subsm = max(args[5].AsInt(0), 0);                                                        //subsm     (>=0, def=0)
+	bool lavs = args[6].AsBool(false);                                                           //lavs      (def=false)
+	bool lavd = args[7].AsBool(false);                                                           //lavd      (def=false)
 
 	DSS2 *dss2 = new DSS2();
 	char err[ERRMSG_LEN] = {0};
 
-	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll);
+	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd);
 	if (FAILED(hr))
 	{
 		delete dss2;
@@ -545,13 +675,10 @@ const AVS_Linkage *AVS_linkage = 0;
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScriptEnvironment* env, const AVS_Linkage* const vectors)
 {
 	AVS_linkage = vectors;
-	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i", Create_DSS2, 0);
-	return "DSS2";
-}
 #else
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
 {
-	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i", Create_DSS2, 0);
+#endif
+	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]b[lavd]b", Create_DSS2, 0);
 	return "DSS2";
 }
-#endif

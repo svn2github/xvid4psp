@@ -1,4 +1,4 @@
-//(XviD4PSP5) modded version
+п»ї//(XviD4PSP5) modded version
 /*
  * Copyright (c) 2004-2006 Mike Matsnev.  All Rights Reserved.
  * 
@@ -364,8 +364,8 @@ public:
   STDMETHOD(Reset)() {
     //CAutoLock lock(pStateLock());
     BeginFlush();
-    //SetEvent(m_hEvent1); //Ждем в ReadFrame(), когда кадр будет получен в Receive() (т.е. нам есть, что считывать)
-    //SetEvent(m_hEvent2); //В Receive() ждем, когда кадр будет считан в ReadFrame() или сброшен в BeginFlush() (т.е. обработан)
+    //SetEvent(m_hEvent1); //Р–РґРµРј РІ ReadFrame(), РєРѕРіРґР° РєР°РґСЂ Р±СѓРґРµС‚ РїРѕР»СѓС‡РµРЅ РІ Receive() (С‚.Рµ. РЅР°Рј РµСЃС‚СЊ, С‡С‚Рѕ СЃС‡РёС‚С‹РІР°С‚СЊ)
+    //SetEvent(m_hEvent2); //Р’ Receive() Р¶РґРµРј, РєРѕРіРґР° РєР°РґСЂ Р±СѓРґРµС‚ СЃС‡РёС‚Р°РЅ РІ ReadFrame() РёР»Рё СЃР±СЂРѕС€РµРЅ РІ BeginFlush() (С‚.Рµ. РѕР±СЂР°Р±РѕС‚Р°РЅ)
     //SetEvent(evtDoneWithSample); //DSS
     //SetEvent(evtNewSampleReady); //DSS
     return S_OK;
