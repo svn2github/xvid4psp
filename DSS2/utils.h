@@ -8,9 +8,56 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define LANG_BUFFER_SIZE 256
+struct LAVSplitterSettings              //x = digit
+{
+	unsigned int Loading;               //lx
+	unsigned int VC1Fix;                //vcx
+	unsigned int SMode;                 //smx
+	WCHAR SLanguage[LANG_BUFFER_SIZE];  //sl[...]
+	WCHAR SAdvanced[LANG_BUFFER_SIZE];  //sa[...]
+};
+
+struct LAVVideoSettings       //x = digit
+{
+	unsigned int Loading;     //lx
+	unsigned int Threads;     //tx or txx
+	unsigned int Range;       //rx
+	unsigned int Dither;      //dx
+	unsigned int DeintMode;   //dmx
+	unsigned int FieldOrder;  //fox
+	unsigned int SWDeint;     //sdx
+	bool WMVDMO;              //vcx
+
+	unsigned int HWMode;      //hmx
+	unsigned int HWCodecs;    //hcx or hcxx
+	unsigned int HWDeint;     //hdx
+	bool HWDeintHQ;           //hqx
+};
+
+enum LAVLoading
+{
+	LFSystem,   //LoadFromSystem
+	LFFile,     //LoadFromFile
+	LFSystemS,  //+ apply Settings
+	LFFileS     //+ apply Settings
+};
+
+enum HWCodecs
+{
+	H264 = 1,
+	VC1 = 2,
+	MPEG2 = 4,
+	MPEG4 = 8
+};
+
 CComPtr<IPin> GetPin(IBaseFilter *pF, bool include_connected, PIN_DIRECTION dir, const GUID *pMT = NULL);
 HRESULT LoadSplitterFromFile(IFileSourceFilter **pFSource, volatile HMODULE *hModule, const char *subDir, const char *fileName, const GUID CLSID_Filter, char *err, rsize_t err_len);
 HRESULT LoadFilterFromFile(IBaseFilter **pBFilter, volatile HMODULE *hModule, const char *subDir, const char *fileName, const GUID CLSID_Filter, char *err, rsize_t err_len);
+void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s);
+void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s);
+bool ApplyLAVSplitterSettings(IFileSourceFilter *pLAVS, LAVSplitterSettings lss);
+bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs);
 
 #define ENUM_FILTERS(graph, var) for (CComPtr<IEnumFilters> __pEF__; !__pEF__ && SUCCEEDED(graph->EnumFilters(&__pEF__)); ) for (CComPtr<IBaseFilter> var; __pEF__->Next(1, &var, NULL) == S_OK; var.Release())
 #define ENUM_PINS(filter, var) for (CComPtr<IEnumPins> __pEP__; !__pEP__ && SUCCEEDED(filter->EnumPins(&__pEP__)); ) for (CComPtr<IPin> var; __pEP__->Next(1, &var, NULL) == S_OK; var.Release())

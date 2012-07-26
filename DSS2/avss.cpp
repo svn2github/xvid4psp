@@ -101,11 +101,15 @@ class DSS2 : public IClip
 			m_registered = false;
 	}
 
-	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, bool lav_splitter, bool lav_decoder)
+	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, const char *lavs, const char *lavd)
 	{
 		InterlockedIncrement(&RefCount);
 
 		HRESULT hr;
+
+		bool lav_splitter = (strlen(lavs) > 0);
+		bool lav_decoder = (strlen(lavd) > 0);
+		bool text_subs = true;
 
 		CComPtr<IGraphBuilder> pGB; //CLSID_FilterGraphNoThread
 		if (FAILED(hr = pGB.CoCreateInstance(CLSID_FilterGraph))) {
@@ -124,7 +128,7 @@ class DSS2 : public IClip
 		CComQIPtr<IVideoSink2> sink2(pVS);
 		if (!sink2) { SetError("Get IVideoSink2: ", err); return E_NOINTERFACE; }
 
-		sink->SetAllowedTypes(IVS_RGB32|IVS_YV12|IVS_YUY2);
+		sink->SetAllowedTypes(IVS_RGB24|IVS_RGB32|IVS_YUY2|IVS_YV12);
 		ResetEvent(m_hFrameReady);
 		sink2->NotifyFrame(m_hFrameReady);
 
@@ -143,8 +147,32 @@ class DSS2 : public IClip
 		{
 			//Открываем через LAVSplitterSource
 			CComPtr<IFileSourceFilter> pLAVS;
-			if (FAILED(hr = LoadSplitterFromFile(&pLAVS, &hLAVSplitter, "LAVFilters\\", "LAVSplitter.ax", CLSID_LAVSplitterSource, err, ERRMSG_LEN))) {
-				SetError("Load LAVSplitter: ", err); return hr; }
+
+			LAVSplitterSettings lss = {};
+			ParseLAVSplitterSettings(&lss, lavs); //"l3 vc2 sm2 sl[] sa[]"
+
+			if (lss.Loading == LFSystem || lss.Loading == LFSystemS)
+			{
+				if (FAILED(hr = pLAVS.CoCreateInstance(CLSID_LAVSplitterSource))) {
+					SetError("Create LAVSplitter: ", err); return hr; }
+			}
+			else
+			{
+				if (FAILED(hr = LoadSplitterFromFile(&pLAVS, &hLAVSplitter, "LAVFilters\\", "LAVSplitter.ax", CLSID_LAVSplitterSource, err, ERRMSG_LEN))) {
+					SetError("Load LAVSplitter: ", err); return hr; }
+			}
+
+			if (lss.Loading == LFSystemS || lss.Loading == LFFileS)
+			{
+				//Похоже, что LAVSplitter всегда создаёт пин с MEDIATYPE_Text, даже если
+				//субтитры в его настройках отключены, но они есть в открываемом файле.
+				//В результате мы будем пытаться отрендерить то, что нам не нужно.
+				if (lss.SMode == 0 && subs_mode > 0)
+					text_subs = false;
+
+				if (!ApplyLAVSplitterSettings(pLAVS, lss)) {
+					SetError("Apply LAVSplitter settings: ", err); return E_FAIL; }
+			}
 
 			if (FAILED(hr = pLAVS->Load(filename, NULL))) {
 				SetError("Add file to LAVSplitter: ", err); return hr; }
@@ -163,9 +191,23 @@ class DSS2 : public IClip
 		CComPtr<IPin> pLAVVOutP;
 		if (lav_decoder)
 		{
+			LAVVideoSettings lvs = {};
+			ParseLAVVideoSettings(&lvs, lavd); //"l3 t0 r0 d1 dm0 fo0 sd0 vc0 hm0 hc7 hd0 hq0"
+
 			CComPtr<IBaseFilter> pLAVV;
-			if (FAILED(hr = LoadFilterFromFile(&pLAVV, &hLAVVideo, "LAVFilters\\", "LAVVideo.ax", CLSID_LAVVideo, err, ERRMSG_LEN))) {
-				SetError("Load LAVVideo: ", err); return hr; }
+			if (lvs.Loading == LFSystem || lvs.Loading == LFSystemS)
+			{
+				if (FAILED(hr = pLAVV.CoCreateInstance(CLSID_LAVVideo))) {
+					SetError("Create LAVVideo: ", err); return hr; }
+			}
+			else
+			{
+				if (FAILED(hr = LoadFilterFromFile(&pLAVV, &hLAVVideo, "LAVFilters\\", "LAVVideo.ax", CLSID_LAVVideo, err, ERRMSG_LEN))) {
+					SetError("Load LAVVideo: ", err); return hr; }
+			}
+
+			if ((lvs.Loading == LFSystemS || lvs.Loading == LFFileS) && !ApplyLAVVideoSettings(pLAVV, lvs)) {
+				SetError("Apply LAVVideo settings: ", err); return E_FAIL; }
 
 			if(FAILED(hr = pGB->AddFilter(pLAVV, L"LAV Video Decoder"))) {
 				SetError("Add LAVVideo: ", err); return hr; }
@@ -192,11 +234,11 @@ class DSS2 : public IClip
 		else //С возможностью грузить субтитры - новый способ
 		{
 			CComPtr<IFilterGraph2> pFG2;
-			if (FAILED(hr = pGB.QueryInterface(&pFG2))) {
+			if (FAILED(hr = pGB->QueryInterface(IID_IFilterGraph2, (void**)&pFG2))) {
 				SetError("Get IFilterGraph2: ", err); return hr; }
 
 			CComPtr<IPin> pSubs(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Subtitle));
-			if (!pSubs) pSubs = (GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Text));
+			if (!pSubs && text_subs) pSubs = (GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Text));
 
 			if (subs_mode == 1 || !pSubs)
 			{
@@ -279,6 +321,7 @@ class DSS2 : public IClip
 		switch (type)
 		{
 			case IVS_RGB32: m_vi.pixel_type = VideoInfo::CS_BGR32; break;
+			case IVS_RGB24: m_vi.pixel_type = VideoInfo::CS_BGR24; break;
 			case IVS_YUY2: m_vi.pixel_type = VideoInfo::CS_YUY2; break;
 			case IVS_YV12: m_vi.pixel_type = VideoInfo::CS_YV12; break;
 			default: { SetError("Unsupported colorspace: ", err); return E_FAIL; }
@@ -344,18 +387,32 @@ class DSS2 : public IClip
 		int h_cp = min((int)height, vi->height);
 
 		if ((format == IVS_RGB32 && vi->pixel_type == VideoInfo::CS_BGR32) ||
+			(format == IVS_RGB24 && vi->pixel_type == VideoInfo::CS_BGR24) ||
 			(format == IVS_YUY2 && vi->pixel_type == VideoInfo::CS_YUY2))
 		{
 			BYTE *dst = df->frame->GetWritePtr();
 			int  dstride = df->frame->GetPitch();
 
-			w_cp *= bpp;
+			w_cp *= bpp; //=dstride?
 
-			for (int y = 0; y < h_cp; ++y)
+			if (format != IVS_YUY2)
 			{
-				memcpy(dst, frame, w_cp);
-				frame += stride;
-				dst += dstride;
+				dst += (h_cp - 1) * dstride;
+				for (int y = 0; y < h_cp; ++y)
+				{
+					memcpy(dst, frame, w_cp);
+					frame += stride;
+					dst -= dstride;
+				}
+			}
+			else
+			{
+				for (int y = 0; y < h_cp; ++y)
+				{
+					memcpy(dst, frame, w_cp);
+					frame += stride;
+					dst += dstride;
+				}
 			}
 		}
 		else if (format == IVS_YV12 && vi->pixel_type == VideoInfo::CS_YV12)
@@ -470,7 +527,7 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, bool lavs, bool lavd)
+	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd)
 	{
 		m_qmax = cache;
 		m_seek_thr = seekthr;
@@ -649,8 +706,10 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	int seekthr = max(args[3].AsInt(100), 1);                                                    //seekthr   (>=1, def=100)
 	int preroll = max(args[4].AsInt(0), 0);                                                      //preroll   (>=0, def=0)
 	int subsm = max(args[5].AsInt(0), 0);                                                        //subsm     (>=0, def=0)
-	bool lavs = args[6].AsBool(false);                                                           //lavs      (def=false)
-	bool lavd = args[7].AsBool(false);                                                           //lavd      (def=false)
+	const char *lavs = args[6].AsString("");                                                     //lavs      (def="")
+	const char *lavd = args[7].AsString("");                                                     //lavd      (def="")
+	bool flipv = args[8].AsBool(false);                                                          //flipv     (def=false)
+	bool fliph = args[9].AsBool(false);                                                          //fliph     (def=false)
 
 	DSS2 *dss2 = new DSS2();
 	char err[ERRMSG_LEN] = {0};
@@ -667,6 +726,14 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 		env->ThrowError("DSS2: Can't open \"%s\"\n\n%s(%08x) Unknown error.\n", filename, err, hr);
 	}
 
+	if (flipv || fliph)
+	{
+		PClip flipped = dss2;
+		if (flipv) flipped = env->Invoke("FlipVertical", flipped).AsClip();
+		if (fliph) flipped = env->Invoke("FlipHorizontal", flipped).AsClip();
+		return flipped;
+	}
+
 	return dss2;
 }
 
@@ -679,6 +746,6 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
 {
 #endif
-	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]b[lavd]b", Create_DSS2, 0);
+	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[flipv]b[fliph]b", Create_DSS2, 0);
 	return "DSS2";
 }

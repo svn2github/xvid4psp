@@ -352,6 +352,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LAVSplitterSettings.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LAVVideoSettings.h"
+				>
+			</File>
+			<File
 				RelativePath=".\utils.h"
 				>
 			</File>
