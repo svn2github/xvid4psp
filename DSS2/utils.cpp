@@ -78,15 +78,15 @@ HRESULT LoadSplitterFromFile(IFileSourceFilter **pFSource, volatile HMODULE *hMo
 
 	if (!*hModule)
 	{
-		TCHAR VarPath[MAX_PATH], LibPath[MAX_PATH];
-		GetModuleFileName(_AtlBaseModule.GetModuleInstance(), VarPath, MAX_PATH);  //Полный путь к DSS2
-		_tcsrchr(VarPath, _T('\\'))[1] = 0;                                        //Отсекаем имя файла
-		_stprintf_s(LibPath, MAX_PATH, "%s%s", VarPath, subDir);                   //Добавляем подпапку
-		GetCurrentDirectory(MAX_PATH, VarPath);                                    //Запоминаем текущую директорию
-		SetCurrentDirectory(LibPath);                                              //Меняем её на директорию с загружаемой длл (иначе не подгрузятся связанные с ней dll)
-		_tcsncat_s(LibPath, MAX_PATH, fileName, _TRUNCATE);                        //Добавляем в путь имя нужной нам dll
-		*hModule = LoadLibrary(LibPath);                                           //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
-		SetCurrentDirectory(VarPath);                                              //Восстанавливаем текущую директорию
+		char VarPath[MAX_PATH], LibPath[MAX_PATH];
+		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), VarPath, MAX_PATH);  //Полный путь к DSS2
+		PathRemoveFileSpecA(VarPath);                                               //Отсекаем имя файла
+		PathCombineA(LibPath, VarPath, subDir);                                     //Добавляем подпапку
+		GetCurrentDirectoryA(MAX_PATH, VarPath);                                    //Запоминаем текущую директорию
+		SetCurrentDirectoryA(LibPath);                                              //Меняем её на директорию с загружаемой длл (иначе не подгрузятся связанные с ней dll)
+		PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
+		*hModule = LoadLibraryA(LibPath);                                           //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+		SetCurrentDirectoryA(VarPath);                                              //Восстанавливаем текущую директорию
 		if (!*hModule) { strncpy_s(err, err_len, "LoadLibrary: ", _TRUNCATE); return E_FAIL; }
 	}
 
@@ -111,15 +111,15 @@ HRESULT LoadFilterFromFile(IBaseFilter **pBFilter, volatile HMODULE *hModule, co
 
 	if (!*hModule)
 	{
-		TCHAR VarPath[MAX_PATH], LibPath[MAX_PATH];
-		GetModuleFileName(_AtlBaseModule.GetModuleInstance(), VarPath, MAX_PATH);  //Полный путь к DSS2
-		_tcsrchr(VarPath, _T('\\'))[1] = 0;                                        //Отсекаем имя файла
-		_stprintf_s(LibPath, MAX_PATH, "%s%s", VarPath, subDir);                   //Добавляем подпапку
-		GetCurrentDirectory(MAX_PATH, VarPath);                                    //Запоминаем текущую директорию
-		SetCurrentDirectory(LibPath);                                              //Меняем её на директорию с загружаемой длл (иначе не подгрузятся связанные с ней dll)
-		_tcsncat_s(LibPath, MAX_PATH, fileName, _TRUNCATE);                        //Добавляем в путь имя нужной нам dll
-		*hModule = LoadLibrary(LibPath);                                           //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
-		SetCurrentDirectory(VarPath);                                              //Восстанавливаем текущую директорию
+		char VarPath[MAX_PATH], LibPath[MAX_PATH];
+		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), VarPath, MAX_PATH);  //Полный путь к DSS2
+		PathRemoveFileSpecA(VarPath);                                               //Отсекаем имя файла
+		PathCombineA(LibPath, VarPath, subDir);                                     //Добавляем подпапку
+		GetCurrentDirectoryA(MAX_PATH, VarPath);                                    //Запоминаем текущую директорию
+		SetCurrentDirectoryA(LibPath);                                              //Меняем её на директорию с загружаемой длл (иначе не подгрузятся связанные с ней dll)
+		PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
+		*hModule = LoadLibraryA(LibPath);                                           //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+		SetCurrentDirectoryA(VarPath);                                              //Восстанавливаем текущую директорию
 		if (!*hModule) { strncpy_s(err, err_len, "LoadLibrary: ", _TRUNCATE); return E_FAIL; }
 	}
 
@@ -375,6 +375,12 @@ bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs)
 	pLAVVs->SetRGBOutputRange(lvs.Range);
 	pLAVVs->SetDitherMode((LAVDitherMode)lvs.Dither);
 	pLAVVs->SetUseMSWMV9Decoder(lvs.WMVDMO);
+
+	//Хотя вряд-ли это будет отключено в дефолтах..
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_YV12, true);
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_YUY2, true);
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB32, true);
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB24, true);
 
 	if (lvs.DeintMode == 0)
 	{

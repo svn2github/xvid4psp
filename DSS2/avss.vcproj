@@ -22,7 +22,7 @@
 			IntermediateDirectory="Debug"
 			ConfigurationType="2"
 			UseOfMFC="0"
-			UseOfATL="0"
+			UseOfATL="1"
 			CharacterSet="2"
 			>
 			<Tool
@@ -99,7 +99,7 @@
 			IntermediateDirectory="Release"
 			ConfigurationType="2"
 			UseOfMFC="0"
-			UseOfATL="0"
+			UseOfATL="1"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -178,7 +178,7 @@
 			IntermediateDirectory="Release_26"
 			ConfigurationType="2"
 			UseOfMFC="0"
-			UseOfATL="0"
+			UseOfATL="1"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -258,7 +258,7 @@
 			IntermediateDirectory="Debug_26"
 			ConfigurationType="2"
 			UseOfMFC="0"
-			UseOfATL="0"
+			UseOfATL="1"
 			CharacterSet="2"
 			>
 			<Tool

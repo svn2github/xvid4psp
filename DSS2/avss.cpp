@@ -101,15 +101,14 @@ class DSS2 : public IClip
 			m_registered = false;
 	}
 
-	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, const char *lavs, const char *lavd)
+	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path)
 	{
 		InterlockedIncrement(&RefCount);
 
-		HRESULT hr;
-
 		bool lav_splitter = (strlen(lavs) > 0);
 		bool lav_decoder = (strlen(lavd) > 0);
-		bool text_subs = true;
+
+		HRESULT hr;
 
 		CComPtr<IGraphBuilder> pGB; //CLSID_FilterGraphNoThread
 		if (FAILED(hr = pGB.CoCreateInstance(CLSID_FilterGraph))) {
@@ -121,6 +120,9 @@ class DSS2 : public IClip
 
 		if (FAILED(hr = pGB->AddFilter(pVS, L"VideoSink"))) {
 			SetError("Add VideoSink: ", err); return hr; }
+
+		CComPtr<IPin> pVS_In(GetPin(pVS, false, PINDIR_INPUT));
+		if (!pVS_In) { SetError("GetPin (VS_In): ", err); return E_FAIL; }
 
 		CComQIPtr<IVideoSink> sink(pVS);
 		if (!sink) { SetError("Get IVideoSink: ", err); return E_NOINTERFACE; }
@@ -158,20 +160,18 @@ class DSS2 : public IClip
 			}
 			else
 			{
-				if (FAILED(hr = LoadSplitterFromFile(&pLAVS, &hLAVSplitter, "LAVFilters\\", "LAVSplitter.ax", CLSID_LAVSplitterSource, err, ERRMSG_LEN))) {
+				if (FAILED(hr = LoadSplitterFromFile(&pLAVS, &hLAVSplitter, lavf_path, "LAVSplitter.ax", CLSID_LAVSplitterSource, err, ERRMSG_LEN))) {
 					SetError("Load LAVSplitter: ", err); return hr; }
 			}
 
 			if (lss.Loading == LFSystemS || lss.Loading == LFFileS)
 			{
-				//Похоже, что LAVSplitter всегда создаёт пин с MEDIATYPE_Text, даже если
-				//субтитры в его настройках отключены, но они есть в открываемом файле.
-				//В результате мы будем пытаться отрендерить то, что нам не нужно.
+				//Даже не будем пытаться искать субтитры, если в LAVSplitter`е они отключены
 				if (lss.SMode == 0 && subs_mode > 0)
-					text_subs = false;
+					subs_mode = 0;
 
 				if (!ApplyLAVSplitterSettings(pLAVS, lss)) {
-					SetError("Apply LAVSplitter settings: ", err); return E_FAIL; }
+					SetError("Apply LAVSplitter settings: ", err); return E_NOINTERFACE; }
 			}
 
 			if (FAILED(hr = pLAVS->Load(filename, NULL))) {
@@ -184,11 +184,11 @@ class DSS2 : public IClip
 				SetError("Add LAVSplitter: ", err); return hr; }
 		}
 
-		CComPtr<IPin> pSrcOutP(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Video));
-		if (!pSrcOutP) pSrcOutP = GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Stream);
-		if (!pSrcOutP) { SetError("GetPin (SrcOut): ", err); return E_FAIL; }
+		CComPtr<IPin> pSrc_Out(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Video));
+		if (!pSrc_Out) pSrc_Out = GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Stream);
+		if (!pSrc_Out) { SetError("GetPin (Src_Out): ", err); return VFW_E_CANNOT_LOAD_SOURCE_FILTER; }
 
-		CComPtr<IPin> pLAVVOutP;
+		CComPtr<IPin> pLAVV_Out;
 		if (lav_decoder)
 		{
 			LAVVideoSettings lvs = {};
@@ -202,87 +202,179 @@ class DSS2 : public IClip
 			}
 			else
 			{
-				if (FAILED(hr = LoadFilterFromFile(&pLAVV, &hLAVVideo, "LAVFilters\\", "LAVVideo.ax", CLSID_LAVVideo, err, ERRMSG_LEN))) {
+				if (FAILED(hr = LoadFilterFromFile(&pLAVV, &hLAVVideo, lavf_path, "LAVVideo.ax", CLSID_LAVVideo, err, ERRMSG_LEN))) {
 					SetError("Load LAVVideo: ", err); return hr; }
 			}
 
 			if ((lvs.Loading == LFSystemS || lvs.Loading == LFFileS) && !ApplyLAVVideoSettings(pLAVV, lvs)) {
-				SetError("Apply LAVVideo settings: ", err); return E_FAIL; }
+				SetError("Apply LAVVideo settings: ", err); return E_NOINTERFACE; }
 
 			if(FAILED(hr = pGB->AddFilter(pLAVV, L"LAV Video Decoder"))) {
 				SetError("Add LAVVideo: ", err); return hr; }
 
-			CComPtr<IPin> pLAVVInP(GetPin(pLAVV, false, PINDIR_INPUT));
-			if (!pLAVVInP) { SetError("GetPin (LAVVIn): ", err); return hr; }
+			CComPtr<IPin> pLAVV_In(GetPin(pLAVV, false, PINDIR_INPUT));
+			if (!pLAVV_In) { SetError("GetPin (LAVV_In): ", err); return E_FAIL; }
 
-			//IFilterGraph::ConnectDirect
-			if(FAILED(hr = pGB->Connect(pSrcOutP, pLAVVInP))) {
-				SetError("Connect (SrcOut+LAVVIn): ", err); return hr; }
+			if (!lav_splitter)
+			{
+				//На выходе SourceFilter может быть просто Stream, в режиме Connect Граф сам вставит нужный сплиттер
+				if(FAILED(hr = pGB->Connect(pSrc_Out, pLAVV_In))) {
+					SetError("Connect (Src_Out + LAVV_In): ", err); return hr; }
+			}
+			else
+			{
+				//На выходе LAVSplitter всегда то, что нам нужно - можно подключаться напрямую
+				if(FAILED(hr = pGB->ConnectDirect(pSrc_Out, pLAVV_In, NULL))) {
+					SetError("Connect direct (Src_Out + LAVV_In): ", err); return hr; }
+			}
 
-			pLAVVOutP = GetPin(pLAVV, false, PINDIR_OUTPUT);
-			if (!pLAVVOutP) { SetError("GetPin (LAVVOut): ", err); return E_FAIL; }
+			pLAVV_Out = GetPin(pLAVV, false, PINDIR_OUTPUT);
+			if (!pLAVV_Out) { SetError("GetPin (LAVV_Out): ", err); return E_FAIL; }
+
+			//LAVVideo не обрабатывает субтитры, а при ConnectDirect Граф сам никогда не вставит нужный обработчик.
+			//В режиме 1 мы его тоже не вставляем - значит можно отключить все попытки искать субтитры (или выдать ошибку?).
+			if (subs_mode == 1) subs_mode = 0;
 		}
 
-		if (subs_mode <= 0) //Без субтитров - старый способ
+		if (subs_mode <= 0) //Без субтитров
 		{
-			CComPtr<IPin> pVSInP(GetPin(pVS, false, PINDIR_INPUT));
-			if (!pVSInP) { SetError("GetPin (VSinkIn): ", err); return E_FAIL; }
-
-			if (FAILED(hr = pGB->Connect(((!lav_decoder) ? pSrcOutP : pLAVVOutP), pVSInP))) {
-				SetError("Connect filters: ", err); return hr; }
+			if (!lav_decoder)
+			{
+				//Старый способ - промежуточные фильтры вставляются сами
+				if (FAILED(hr = pGB->Connect(pSrc_Out, pVS_In))) {
+					SetError("Connect filters (Src_Out + VS_In): ", err); return hr; }
+			}
+			else
+			{
+				//Прямое соединение фильтров - исключается подхват всякого DS-мусора
+				if (FAILED(hr = pGB->ConnectDirect(pLAVV_Out, pVS_In, NULL))) {
+					SetError("Connect direct (LAVV_Out + VS_In): ", err); return hr; }
+			}
 		}
-		else //С возможностью грузить субтитры - новый способ
+		else //С возможностью грузить субтитры
 		{
 			CComPtr<IFilterGraph2> pFG2;
 			if (FAILED(hr = pGB->QueryInterface(IID_IFilterGraph2, (void**)&pFG2))) {
 				SetError("Get IFilterGraph2: ", err); return hr; }
 
-			CComPtr<IPin> pSubs(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Subtitle));
-			if (!pSubs && text_subs) pSubs = (GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Text));
+			CComPtr<IPin> pSrc_SOut(GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Subtitle));
+			if (!pSrc_SOut) pSrc_SOut = (GetPin(pSrc, false, PINDIR_OUTPUT, &MEDIATYPE_Text));
 
-			if (subs_mode == 1 || !pSubs)
+			if (subs_mode == 1 || !pSrc_SOut)
 			{
-				if (FAILED(hr = pFG2->RenderEx(((!lav_decoder) ? pSrcOutP : pLAVVOutP), AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
-					SetError("RenderEx: ", err); return hr; }
+				if (!lav_decoder)
+				{
+					if (FAILED(hr = pFG2->RenderEx(pSrc_Out, AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
+						SetError("RenderEx: ", err); return hr; }
+				}
+				else
+				{
+					//IFilterMapper2::EnumMatchingFilters
+					if (FAILED(hr = pGB->ConnectDirect(pLAVV_Out, pVS_In, NULL))) {
+						SetError("Connect direct (LAVV_Out + VS_In): ", err); return hr; }
+				}
 			}
 
-			if (pSubs)
+			if (pSrc_SOut)
 			{
 				if (subs_mode >= 2) //Принудительно грузим DirectVobSub
 				{
-					//В этом месте DirectVobSub скорее всего еще не может быть в Графе, т.к. мы его туда еще не добавляли.
+					//Ищем DirectVobSub в Графе. Хотя скорее всего его там пока-что нет, т.к. мы его туда еще не добавляли.
 					//А даже если он и добавляется туда Haali-сплиттером, еще чем или сам по себе - то только после команды Render(Ex).
-					bool DirectVobSubHere = false;
+					CComPtr<IBaseFilter> pDVS;
 					ENUM_FILTERS(pGB, tBF)
 					{
 						GUID gID;
 						tBF->GetClassID(&gID);
-						if (gID == CLSID_DirectVobSubA || gID == CLSID_DirectVobSubM)
-							DirectVobSubHere = true;
+						if (gID == CLSID_DirectVobSubA)
+						{
+							//См. ниже..
+							pGB->RemoveFilter(tBF);
+							__pEF__->Reset();
+						}
+						else if (gID == CLSID_DirectVobSubM)
+						{
+							pDVS = tBF;
+						}
 					}
 
-					if (!DirectVobSubHere)
+					if (!pDVS)
 					{
 						//A(uto)\M(anual) loading
-						GUID gDVS = CLSID_DirectVobSubA; //(lav_decoder) ? CLSID_DirectVobSubM : CLSID_DirectVobSubA;
+						//Старый DVS_A не хочет ни с чем соединяться, если используется LAVSplitter (как при ConnectDirect, так и при Render).
+						//Новый DVS_A (от xy) соединяется, но при ConnectDirect с LAVVideo Граф виснет при выгрузке. С DVS_M ничего такого не наблюдается.. 
+						GUID gDVS = CLSID_DirectVobSubM; //(lav_decoder) ? CLSID_DirectVobSubM : CLSID_DirectVobSubA;
 
-						CComPtr<IBaseFilter> pDVS;
-						if(FAILED(pDVS.CoCreateInstance(gDVS))) //Сначала пробуем так..
+						int HaaliLoadDVS = -1;
+						if (!lav_splitter && !lav_decoder)
 						{
-							if (FAILED(hr = LoadFilterFromFile(&pDVS, &hVSFilter, "", "VSFilter.dll", gDVS, err, ERRMSG_LEN))) { //..потом из dll
-								SetError("Load VSFilter: ", err); return hr; }
+							CComQIPtr<IPropertyBag> pPB(pSrc);
+							if (pPB)
+							{
+								CComVariant pVar(0u, VT_UI4); //uintVal = 0
+								pPB->Read(L"vsfilter.autoload", &pVar, 0);
+								if (pVar.uintVal > 0) //AutoLoad = true
+								{
+									CComPtr<IBaseFilter> pDummy;
+
+									//Если мы не смогли - то и Haali Splitter тоже вряд-ли сможет
+									HaaliLoadDVS = (FAILED(pDummy.CoCreateInstance(gDVS))) ? 0 : 1;
+								}
+							}
 						}
 
-						if (FAILED(hr = pGB->AddFilter(pDVS, L"DirectVobSub"))) {
-							SetError("Add DirectVobSub: ", err); return hr; }
+						if (HaaliLoadDVS < 1)
+						{
+							if (HaaliLoadDVS == 0 || HaaliLoadDVS < 0 && FAILED(pDVS.CoCreateInstance(gDVS))) //Сначала пробуем системный..
+							{
+								if (FAILED(hr = LoadFilterFromFile(&pDVS, &hVSFilter, dvs_path, "VSFilter.dll", gDVS, err, ERRMSG_LEN))) { //..потом из dll
+									SetError("Load VSFilter: ", err); return hr; }
+							}
+
+							if (FAILED(hr = pGB->AddFilter(pDVS, L"DirectVobSub"))) {
+								SetError("Add DirectVobSub: ", err); return hr; }
+						}
 					}
 
-					if (FAILED(hr = pFG2->RenderEx(((!lav_decoder) ? pSrcOutP : pLAVVOutP), AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
-						SetError("RenderEx (video): ", err); return hr; }
+					if (!lav_decoder)
+					{
+						//(тут Haali Splitter вставит в Граф DirectVobSub)
+						if (FAILED(hr = pFG2->RenderEx(pSrc_Out, AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
+							SetError("RenderEx (video): ", err); return hr; }
+					}
+					else
+					{
+						//Соединяем (какой-то) первый входной пин DirectVobSub..
+						CComPtr<IPin> pDVS_VIn(GetPin(pDVS, false, PINDIR_INPUT)); //DVS почему-то не выдаёт MediaType входного пина.. Или ENUM_MT криво работает?
+						if (!pDVS_VIn) { SetError("GetPin (DVS_VIn): ", err); return E_FAIL; }
+
+						//.. с видео выходом LAVVideo
+						if (FAILED(hr = pGB->ConnectDirect(pLAVV_Out, pDVS_VIn, NULL))) {
+							SetError("Connect direct (LAVV_Out + DVS_VIn): ", err); return hr; }
+
+						//Соединяем (какой-то) второй входной пин DirectVobSub..
+						CComPtr<IPin> pDVS_SIn(GetPin(pDVS, false, PINDIR_INPUT)); //Просто второй входной пин, хз как там оно устроено, но мы подключим к нему субтитры..
+						if (!pDVS_SIn) { SetError("GetPin (DVS_SIn): ", err); return E_FAIL; }
+
+						//.. с субтитровым выходом сплиттера
+						if (FAILED(hr = pGB->ConnectDirect(pSrc_SOut, pDVS_SIn, NULL))) {
+							SetError("Connect direct (Src_SOut + DVS_SIn): ", err); return hr; }
+
+						//Соединяем выход DirectVobSub..
+						CComPtr<IPin> pDVS_OutP(GetPin(pDVS, false, PINDIR_OUTPUT));
+						if (!pDVS_OutP) { SetError("GetPin (DVS_Out): ", err); return E_FAIL; }
+
+						//.. со входом VideoSink
+						if (FAILED(hr = pGB->ConnectDirect(pDVS_OutP, pVS_In, NULL))) {
+							SetError("Connect direct (DVS_Out + VS_In): ", err); return hr; }
+					}
 				}
 
-				if (FAILED(hr = pFG2->RenderEx(pSubs, AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
-					SetError("RenderEx (subs): ", err); return hr; }
+				if (!lav_decoder)
+				{
+					if (FAILED(hr = pFG2->RenderEx(pSrc_SOut, AM_RENDEREX_RENDERTOEXISTINGRENDERERS, NULL))) {
+						SetError("RenderEx (subs): ", err); return hr; }
+				}
 			}
 		}
 
@@ -301,7 +393,7 @@ class DSS2 : public IClip
 
 		// wait for the first frame to arrive (up to 10s) //5s
 		if (WaitForSingleObject(m_hFrameReady, 10000) != WAIT_OBJECT_0) {
-			SetError("Timeout waiting for FrameReady: ", err); return E_FAIL; }
+			SetError("Wait for FrameReady: ", err); return VFW_E_TIMEOUT; }
 
 		__int64 defd;
 		unsigned  type, width, height, arx, ary;
@@ -324,7 +416,7 @@ class DSS2 : public IClip
 			case IVS_RGB24: m_vi.pixel_type = VideoInfo::CS_BGR24; break;
 			case IVS_YUY2: m_vi.pixel_type = VideoInfo::CS_YUY2; break;
 			case IVS_YV12: m_vi.pixel_type = VideoInfo::CS_YV12; break;
-			default: { SetError("Unsupported colorspace: ", err); return E_FAIL; }
+			default: { SetError("Unsupported colorspace. ", err); return E_FAIL; }
 		}
 
 		m_vi.width = width;
@@ -527,13 +619,13 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd)
+	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path)
 	{
 		m_qmax = cache;
 		m_seek_thr = seekthr;
 		m_preroll = preroll;
 
-		return Open(filename, err, avgframe, subsm, lavs, lavd);
+		return Open(filename, err, avgframe, subsm, lavs, lavd, lavf_path, dvs_path);
 	}
 
 	// IClip
@@ -708,13 +800,15 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	int subsm = max(args[5].AsInt(0), 0);                                                        //subsm     (>=0, def=0)
 	const char *lavs = args[6].AsString("");                                                     //lavs      (def="")
 	const char *lavd = args[7].AsString("");                                                     //lavd      (def="")
-	bool flipv = args[8].AsBool(false);                                                          //flipv     (def=false)
-	bool fliph = args[9].AsBool(false);                                                          //fliph     (def=false)
+	const char *lavf_path = args[8].AsString("LAVFilters");                                      //lavf_path (def="LAVFilters")
+	const char *dvs_path = args[9].AsString("");                                                 //dvs_path  (def="")
+	bool flipv = args[10].AsBool(false);                                                         //flipv     (def=false)
+	bool fliph = args[11].AsBool(false);                                                         //fliph     (def=false)
 
 	DSS2 *dss2 = new DSS2();
 	char err[ERRMSG_LEN] = {0};
 
-	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd);
+	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd, lavf_path, dvs_path);
 	if (FAILED(hr))
 	{
 		delete dss2;
@@ -746,6 +840,6 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
 {
 #endif
-	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[flipv]b[fliph]b", Create_DSS2, 0);
+	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[lavf_path]s[dvs_path]s[flipv]b[fliph]b", Create_DSS2, 0);
 	return "DSS2";
 }
