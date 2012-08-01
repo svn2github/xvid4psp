@@ -229,6 +229,18 @@ namespace XviD4PSP
            if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
+           //Настройки DSS2
+           string dss2 = "";
+           if (m.vdecoder == Decoders.DirectShowSource2)
+           {
+               int dss2_temp_val = 0;
+               dss2 = (((dss2_temp_val = Settings.DSS2_SubsMode) > 0) ? ", subsm=" + dss2_temp_val : "") +
+                   (((dss2_temp_val = Settings.DSS2_Preroll) > 0) ? ", preroll=" + dss2_temp_val : "") +
+                   ((Settings.DSS2_LAVSplitter) ? ", lavs=\"" + Settings.DSS2_LAVS_Settings + "\"" : "") +
+                   ((Settings.DSS2_LAVDecoder) ? ", lavd=\"" + Settings.DSS2_LAVV_Settings + "\"" : "") +
+                   ((Settings.DSS2_FlipV) ? ", flipv=true" : "") + ((Settings.DSS2_FlipH) ? ", fliph=true" : "");
+           }
+
            //выбор аудио трека
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource && (instream.audiopath != null || m.outaudiostreams.Count == 0 || !Settings.DSS_Enable_Audio || !Settings.EnableAudio || ext == ".grf"))
@@ -289,7 +301,7 @@ namespace XviD4PSP
                            ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
                    }
                    n++;
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + cache_path + ")" + assume_fps;
+                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + dss2 + cache_path + ")" + assume_fps;
                    if (n < m.infileslist.Length) invideostring += "++";
                }
            }
@@ -828,6 +840,18 @@ namespace XviD4PSP
            if (m.vdecoder == Decoders.DirectShowSource && m.isconvertfps && Settings.DSS_ConvertFPS)
                convertfps = ", convertfps=true";
 
+           //Настройки DSS2
+           string dss2 = "";
+           if (m.vdecoder == Decoders.DirectShowSource2)
+           {
+               int dss2_temp_val = 0;
+               dss2 = (((dss2_temp_val = Settings.DSS2_SubsMode) > 0) ? ", subsm=" + dss2_temp_val : "") +
+                   (((dss2_temp_val = Settings.DSS2_Preroll) > 0) ? ", preroll=" + dss2_temp_val : "") +
+                   ((Settings.DSS2_LAVSplitter) ? ", lavs=\"" + Settings.DSS2_LAVS_Settings + "\"" : "") +
+                   ((Settings.DSS2_LAVDecoder) ? ", lavd=\"" + Settings.DSS2_LAVV_Settings + "\"" : "") +
+                   ((Settings.DSS2_FlipV) ? ", flipv=true" : "") + ((Settings.DSS2_FlipH) ? ", fliph=true" : "");
+           }
+
            //выбор аудио трека
            string audio = "";
            if (m.vdecoder == Decoders.DirectShowSource && (mode == ScriptMode.VCrop || mode == ScriptMode.Autocrop || mode == ScriptMode.Interlace ||
@@ -886,7 +910,7 @@ namespace XviD4PSP
                            ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
                    }
                    n += 1;
-                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + cache_path + ")" + assume_fps;
+                   invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + dss2 + cache_path + ")" + assume_fps;
                    if (n < m.infileslist.Length) invideostring += "++";
                }
            }

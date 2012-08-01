@@ -56,8 +56,7 @@ namespace XviD4PSP
             "\r\n" + Languages.Translate("Frame accurate seeking is not guaranteed!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_dss2 = Languages.Translate("Mostly the same as DirectShowSource, but from Haali. It provides frame accurate seeking when it`s possible.") +
-            "\r\n" + Languages.Translate("Haali Media Splitter must be installed.") +
-            "\r\n" + Languages.Translate("May hang when processing the last frames!") +
+            "\r\n" + Languages.Translate("Current modded version also allow you to use LAV Filters in portable mode, without interference from any other DirectShow filters.") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_ffms = Languages.Translate("This decoder (based on FFmpeg) uses their own splitters and decoders, but requires some extra time for indexing your file.") +
             "\r\n" + Languages.Translate("However, Haali Media Splitter is still required if you want to open MPEG-PS/TS or OGM files with this decoder.") +
@@ -75,6 +74,11 @@ namespace XviD4PSP
         private string tltp_bass = Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_ffas = Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
 
+        //Дефолты
+        string on = Languages.Translate("On");
+        string off = Languages.Translate("Off");
+        string _def = Languages.Translate("Default") + ": ";
+
         public Massive m;
         private string old_raw_script;
         public bool NeedUpdate = false;
@@ -82,6 +86,9 @@ namespace XviD4PSP
         private bool adecoders_loaded = false;
         private bool text_editing = false;
         private int default_index = 0;
+
+        private string lavs_language = "";
+        private string lavs_advanced = "";
 
         public Decoders_Settings(Massive mass, System.Windows.Window owner, int set_focus_to)
         {
@@ -102,32 +109,35 @@ namespace XviD4PSP
             //переводим
             Title = Languages.Translate("Decoding");
             button_ok.Content = Languages.Translate("OK");
+            check_dss_convert_fps.ToolTip = _def + on;
             check_dss_audio.Content = check_ffms_audio.Content = Languages.Translate("Enable Audio");
             check_dss_audio.ToolTip = Languages.Translate("Allow DirectShowSource to decode audio directly from the source-file (without demuxing)");
             check_force_film.Content = Languages.Translate("Auto force Film at") + " (%):";
-            check_force_film.ToolTip = Languages.Translate("Auto force Film if Film percentage is more than selected value (for NTSC sources only)");
+            check_force_film.ToolTip = Languages.Translate("Auto force Film if Film percentage is more than selected value (for NTSC sources only)") + "\r\n\r\n" + _def + on;
+            num_force_film.ToolTip = _def + "95";
             check_ffms_force_fps.Content = Languages.Translate("Add AssumeFPS()");
-            check_ffms_force_fps.ToolTip = Languages.Translate("Force FPS using AssumeFPS()");
-            check_ffms_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "FFmpegSource2");
+            check_ffms_force_fps.ToolTip = Languages.Translate("Force FPS using AssumeFPS()") + "\r\n\r\n" + _def + on;
+            check_ffms_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "FFmpegSource2") + "\r\n\r\n" + _def + off;
+            check_dss_audio.ToolTip += "\r\n\r\n" + _def + on;
             check_ffms_reindex.Content = Languages.Translate("Overwrite existing index files");
-            check_ffms_reindex.ToolTip = Languages.Translate("Always re-index the source file and overwrite existing index file, even if it was valid");
+            check_ffms_reindex.ToolTip = Languages.Translate("Always re-index the source file and overwrite existing index file, even if it was valid") + "\r\n\r\n" + _def + off;
             check_ffms_timecodes.Content = Languages.Translate("Timecodes");
-            check_ffms_timecodes.ToolTip = Languages.Translate("Extract timecodes to a file");
-            check_drc_ac3.ToolTip = check_drc_dts.ToolTip = Languages.Translate("Apply DRC (Dynamic Range Compression) for this decoder");
+            check_ffms_timecodes.ToolTip = Languages.Translate("Extract timecodes to a file") + "\r\n\r\n" + _def + off;
+            check_drc_ac3.ToolTip = check_drc_dts.ToolTip = Languages.Translate("Apply DRC (Dynamic Range Compression) for this decoder") + "\r\n\r\n" + _def + off;
             group_misc.Header = Languages.Translate("Misc");
             check_enable_audio.Content = Languages.Translate("Enable audio in input files");
             check_enable_audio.ToolTip = Languages.Translate("If checked, input files will be opened with audio, otherwise they will be opened WITHOUT audio!")
-                + "\r\n" + Languages.Translate("Audio files - exception, they always will be opened.");
+                + "\r\n" + Languages.Translate("Audio files - exception, they always will be opened.") + "\r\n\r\n" + _def + on;
             check_new_delay.Content = Languages.Translate("Use new Delay calculation method");
-            check_new_delay.ToolTip = Languages.Translate("A new method uses the difference between video and audio delays, while old method uses audio delay only."); //+
-            //"\r\n" + Languages.Translate("This new method can be helpfull for the FFmpegSource decoders, but harmful for the DirectShowSource.");
+            check_new_delay.ToolTip = Languages.Translate("A new method uses the difference between video and audio delays, while old method uses audio delay only.") + "\r\n\r\n" + _def + off;
             check_copy_delay.Content = Languages.Translate("Apply Delay in Copy mode");
+            check_copy_delay.ToolTip = _def + off;
             button_vdec_add.Content = button_adec_add.Content = Languages.Translate("Add");
             button_vdec_delete.Content = button_adec_delete.Content = Languages.Translate("Remove");
             button_vdec_reset.Content = button_adec_reset.Content = Languages.Translate("Reset");
             combo_ffms_threads.ToolTip = label_ffms_threads.ToolTip = "1 = " + Languages.Translate("disable multithreading (recommended)") + "\r\nAuto = " +
-                Languages.Translate("logical CPU's count") + "\r\n\r\n" + Languages.Translate("Attention! Multithreaded decoding can be unstable!");
-            label_ffms_threads.Content = "- " + Languages.Translate("decoding threads");
+                Languages.Translate("logical CPU's count") + "\r\n\r\n" + Languages.Translate("Attention! Multithreaded decoding can be unstable!") + "\r\n\r\n" + _def + "1";
+            label_ffms_threads.Content = "- " + Languages.Translate("Decoding threads").ToLower();
             group_tracks.Header = Languages.Translate("Track selection");
             check_tracks_manual.Content = Languages.Translate("Manual");
             check_tracks_manual.ToolTip = Languages.Translate("During the opening of the file you will be prompted to select the track.");
@@ -139,6 +149,38 @@ namespace XviD4PSP
             //DirectShowSource
             check_dss_convert_fps.IsChecked = Settings.DSS_ConvertFPS;
             check_dss_audio.IsChecked = Settings.DSS_Enable_Audio;
+
+            //DirectShowSource2
+            check_dss2_lavs.ToolTip = Languages.Translate("Use LAV Splitter to separate streams.");
+            check_dss2_lavd.ToolTip = Languages.Translate("Use LAV Video Decoder to decode video stream.") + "\r\n" +
+                Languages.Translate("If enabled, any other installed DirectShow filters will not be used and they will not affect the output!");
+            button_lavs.ToolTip = check_dss2_lavs.ToolTip + "\r\n\r\n" + Languages.Translate("Press this button to open LAV Splitter settings tab.");
+            button_lavd.ToolTip = check_dss2_lavd.ToolTip + "\r\n\r\n" + Languages.Translate("Press this button to open LAV Video Decoder settings tab.");
+            check_dss2_lavs.ToolTip += "\r\n\r\n" + _def + on;
+            check_dss2_lavd.ToolTip += "\r\n\r\n" + _def + on;
+
+            check_dss2_lavs.IsChecked = Settings.DSS2_LAVSplitter;
+            check_dss2_lavd.IsChecked = Settings.DSS2_LAVDecoder;
+
+            string txt_no = Languages.Translate("No");
+            label_dss2_subsm.ToolTip = Languages.Translate("Subtitles mode") + "\r\n\r\n" + _def + txt_no;
+            combo_dss2_subsm.Items.Add(new ComboBoxItem() { Content = txt_no, ToolTip = Languages.Translate("Do not load subtitles") });
+            combo_dss2_subsm.Items.Add(new ComboBoxItem() { Content = "1", ToolTip = Languages.Translate("Try to load subtitles (with LAV Decoder = \"No\")") });
+            combo_dss2_subsm.Items.Add(new ComboBoxItem() { Content = "2", ToolTip = Languages.Translate("Force loading DirectVobSub and then try to load subtitles") });
+            combo_dss2_subsm.Tag = _def + txt_no;
+            combo_dss2_subsm.SelectedIndex = Settings.DSS2_SubsMode;
+
+            check_dss2_flipv.ToolTip = Languages.Translate("Flip vertical") + "\r\n\r\n" + _def + off;
+            check_dss2_fliph.ToolTip = Languages.Translate("Flip horizontal") + "\r\n\r\n" + _def + off;
+
+            check_dss2_flipv.IsChecked = Settings.DSS2_FlipV;
+            check_dss2_fliph.IsChecked = Settings.DSS2_FlipH;
+
+            label_dss2_preroll.ToolTip = num_dss2_preroll.ToolTip = Languages.Translate("Preroll - it's a number of frames that will be minused from the requested frame No. when seeking to desired position.") +
+                "\r\n" + Languages.Translate("All \"extra-frames\" will be read frame-by-frame till we get what we want (slower, but more precise way).") +
+                "\r\n" + Languages.Translate("If after the seeking you can see artifacts or frozen frames for some time - you may want to increase this value.") +
+                "\r\n\r\n" + _def + "15";
+            num_dss2_preroll.Value = Settings.DSS2_Preroll;
 
             //MPEG2Source
             check_force_film.IsChecked = Settings.DGForceFilm;
@@ -205,7 +247,7 @@ namespace XviD4PSP
             ShowDialog();
         }
 
-        void Window_ContentRendered(object sender, EventArgs e)
+        private void Window_ContentRendered(object sender, EventArgs e)
         {
             //Подгоняем высоту ListView
             double new_height = 136;
@@ -453,7 +495,7 @@ namespace XviD4PSP
             }
         }
 
-        void listview_Loaded(object sender, RoutedEventArgs e)
+        private void listview_Loaded(object sender, RoutedEventArgs e)
         {
             //Делаем ScrollIntoView для выбранной строки, т.к.
             //на автомате оно иногда делается через одно место
@@ -472,6 +514,10 @@ namespace XviD4PSP
                 };
                 timer.Start();
             }
+
+            //Мы всегда оказываемся сдесь при переключении табов
+            tab_lav_splitter.Visibility = Visibility.Collapsed;
+            tab_lav_decoder.Visibility = Visibility.Collapsed;
         }
 
         private void combo_decoder_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -758,7 +804,7 @@ namespace XviD4PSP
 
         private void combo_ffms_threads_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_ffms_threads.IsDropDownOpen || combo_ffms_threads.IsSelectionBoxHighlighted)
+            if ((combo_ffms_threads.IsDropDownOpen || combo_ffms_threads.IsSelectionBoxHighlighted) && combo_ffms_threads.SelectedIndex != -1)
             {
                 Settings.FFMS_Threads = combo_ffms_threads.SelectedIndex;
             }
@@ -848,10 +894,375 @@ namespace XviD4PSP
 
         private void combo_tracks_number_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_tracks_number.IsDropDownOpen || combo_tracks_number.IsSelectionBoxHighlighted)
+            if ((combo_tracks_number.IsDropDownOpen || combo_tracks_number.IsSelectionBoxHighlighted) && combo_tracks_number.SelectedIndex != -1)
             {
                 Settings.DefaultATrackNum = combo_tracks_number.SelectedIndex + 1;
             }
+        }
+
+        private void check_dss2_lavs_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DSS2_LAVSplitter = check_dss2_lavs.IsChecked.Value;
+        }
+
+        private void check_dss2_lavd_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DSS2_LAVDecoder = check_dss2_lavd.IsChecked.Value;
+        }
+
+        private void combo_dss2_subsm_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combo_dss2_subsm.SelectedIndex != -1)
+            {
+                if (combo_dss2_subsm.IsDropDownOpen || combo_dss2_subsm.IsSelectionBoxHighlighted)
+                    Settings.DSS2_SubsMode = combo_dss2_subsm.SelectedIndex;
+
+                combo_dss2_subsm.ToolTip = ((ComboBoxItem)combo_dss2_subsm.SelectedItem).ToolTip + "\r\n\r\n" + combo_dss2_subsm.Tag;
+            }
+        }
+
+        private void check_dss2_flipv_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DSS2_FlipV = check_dss2_flipv.IsChecked.Value;
+        }
+
+        private void check_dss2_fliph_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DSS2_FlipH = check_dss2_fliph.IsChecked.Value;
+        }
+
+        private void num_dss2_preroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_dss2_preroll.IsAction)
+            {
+                Settings.DSS2_Preroll = Convert.ToInt32(num_dss2_preroll.Value);
+            }
+        }
+
+        private void button_lavs_Click(object sender, RoutedEventArgs e)
+        {
+            if (tab_lav_splitter.Tag == null) LoadLAVSSettings();
+            tab_lav_splitter.Visibility = Visibility.Visible;
+            tab_lav_splitter.IsSelected = true;
+        }
+
+        private void button_lavd_Click(object sender, RoutedEventArgs e)
+        {
+            if (tab_lav_decoder.Tag == null) LoadLAVVSettings();
+            tab_lav_decoder.Visibility = Visibility.Visible;
+            tab_lav_decoder.IsSelected = true;
+        }
+
+        private void LoadLAVSSettings()
+        {
+            label_lavs_loading.Content = Languages.Translate("Loading mode") + ":";
+            combo_lavs_loading.Items.Add(new ComboBoxItem() { Content = "System", ToolTip = Languages.Translate("Load installed version with its settings, every other options on this tab will be ignored!") });
+            combo_lavs_loading.Items.Add(new ComboBoxItem() { Content = "Portable", ToolTip = Languages.Translate("Load portable version, that not depend on what you have installed and how it tuned.") });
+            combo_lavs_loading.Tag = _def + "Portable";
+            combo_lavs_loading.SelectedIndex = 1;
+
+            label_lavs_vc1.Content = Languages.Translate("VC-1 correction") + ":";
+            combo_lavs_vc1.Items.Add(new ComboBoxItem() { Content = "Disabled", ToolTip = Languages.Translate("No timestamps correction") });
+            combo_lavs_vc1.Items.Add(new ComboBoxItem() { Content = "Always", ToolTip = Languages.Translate("Always timestamps correction") });
+            combo_lavs_vc1.Items.Add(new ComboBoxItem() { Content = "Auto", ToolTip = Languages.Translate("Timestamps correction only for decoders, that need it") });
+            combo_lavs_vc1.Tag = _def + "Auto";
+            combo_lavs_vc1.SelectedIndex = 2;
+
+            label_lavs_subsm.Content = Languages.Translate("Subtitles mode") + ":";
+            combo_lavs_subsm.Items.Add(new ComboBoxItem() { Content = "Disabled", ToolTip = Languages.Translate("Disable subtitles") });
+            combo_lavs_subsm.Items.Add(new ComboBoxItem() { Content = "Forced", ToolTip = Languages.Translate("Forced only") });
+            combo_lavs_subsm.Items.Add(new ComboBoxItem() { Content = "Default", ToolTip = Languages.Translate("Default mode") });
+            combo_lavs_subsm.Items.Add(new ComboBoxItem() { Content = "Advanced", ToolTip = Languages.Translate("Advanced mode") });
+            combo_lavs_subsm.Tag = _def + "Default";
+            combo_lavs_subsm.SelectedIndex = 2;
+
+            label_lavs_subsl.Content = Languages.Translate("Preferred subtitles languages") + ":";
+            label_lavs_subsa.Content = Languages.Translate("Advanced subtitles settings") + ":";
+            textbox_lavs_subsl.ToolTip = Languages.Translate("As ISO 639-2 language codes.") + "\r\n" + Languages.Translate("Separate by comma.") + "\r\n\r\n" + _def + Languages.Translate("(empty)");
+            textbox_lavs_subsa.ToolTip = Languages.Translate("Please refer to MUXER documentation for more info").Replace("MUXER", "LAV Filters") + ".\r\n" + Languages.Translate("Separate by comma.") +
+                "\r\n\r\n" + _def + Languages.Translate("(empty)");
+
+            //"l3 vc2 sm2 sl[] sa[]"
+            string s = Settings.DSS2_LAVS_Settings.ToLower();
+            bool l_args = false, a_args = false;
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (!l_args && !a_args)
+                {
+                    char next_ch = (i + 1 < s.Length) ? s[i + 1] : '\0';
+                    char nnext_ch = (i + 2 < s.Length) ? s[i + 2] : '\0';
+
+                    //48 = 0, 49 = 1, .. 57 = 9
+                    int next_i = (next_ch >= 48 && next_ch <= 57) ? next_ch - 48 : -1;
+                    int nnext_i = (nnext_ch >= 48 && nnext_ch <= 57) ? nnext_ch - 48 : -1;
+
+                    if (s[i] == 'l' && next_i >= 0) //l - Loading (от 0 до 3)
+                    {
+                        combo_lavs_loading.SelectedIndex = (next_i == 3) ? 1 : 0;
+                        i += 1;
+                    }
+                    else if (s[i] == 'v' && next_ch == 'c' && nnext_i >= 0) //vc - VC1Fix (от 0 до 2)
+                    {
+                        combo_lavs_vc1.SelectedIndex = Math.Min(nnext_i, combo_lavs_vc1.Items.Count - 1);
+                        i += 2;
+                    }
+                    else if (s[i] == 's')
+                    {
+                        if (next_ch == 'm' && nnext_i >= 0) //sm - SMode (от 0 до 3)
+                        {
+                            combo_lavs_subsm.SelectedIndex = Math.Min(nnext_i, combo_lavs_subsm.Items.Count - 1);
+                            i += 2;
+                        }
+                        else if (next_ch == 'l' && nnext_ch == '[') //sl - SLanguage (sl[...])
+                        {
+                            //Скобка открывается - всё идущее после неё будем сохранять в language
+                            l_args = true;
+                            lavs_language = "";
+                            i += 2;
+                        }
+                        else if ((next_ch == 'a' || next_ch == 'A') && nnext_ch == '[') //sa - SAdvanced (sa[...])
+                        {
+                            //Скобка открывается - всё идущее после неё будем сохранять в advanced
+                            a_args = true;
+                            lavs_advanced = "";
+                            i += 2;
+                        }
+                    }
+                }
+                else
+                {
+                    if (s[i] == ']')
+                    {
+                        //Скобка закрывается - переключаемся обратно на парсинг
+                        l_args = a_args = false;
+                    }
+                    else if (l_args && s[i] != '[')
+                    {
+                        //Language args
+                        lavs_language += s[i];
+                    }
+                    else if (a_args && s[i] != '[')
+                    {
+                        //Advanced args
+                        lavs_advanced += s[i];
+                    }
+                }
+            }
+
+            if (lavs_language.Length > 0 && !l_args)
+                textbox_lavs_subsl.Text = lavs_language;
+            else
+                lavs_language = "";
+
+            if (lavs_advanced.Length > 0 && !a_args)
+                textbox_lavs_subsa.Text = lavs_advanced;
+            else
+                lavs_advanced = "";
+
+            tab_lav_splitter.Tag = true;
+        }
+
+        private void LoadLAVVSettings()
+        {
+            label_lavd_loading.Content = Languages.Translate("Loading mode") + ":";
+            combo_lavd_loading.Items.Add(new ComboBoxItem() { Content = "System", ToolTip = Languages.Translate("Load installed version with its settings, every other options on this tab will be ignored!") });
+            combo_lavd_loading.Items.Add(new ComboBoxItem() { Content = "Portable", ToolTip = Languages.Translate("Load portable version, that not depend on what you have installed and how it tuned.") });
+            combo_lavd_loading.Tag = _def + "Portable";
+            combo_lavd_loading.SelectedIndex = 1;
+
+            label_lavd_threads.Content = Languages.Translate("Decoding threads") + ":";
+            combo_lavd_threads.Items.Add("Auto");
+            for (int i = 1; i < 21; i++)
+                combo_lavd_threads.Items.Add(i);
+            combo_lavd_threads.Tag = _def + "Auto";
+            combo_lavd_threads.SelectedIndex = 0;
+
+            label_lavd_range.Content = Languages.Translate("YUV->RGB range") + ":";
+            combo_lavd_range.Items.Add(new ComboBoxItem() { Content = "Auto", ToolTip = Languages.Translate("Same as input") });
+            combo_lavd_range.Items.Add(new ComboBoxItem() { Content = "Limited", ToolTip = Languages.Translate("Limited range (TV, 16-235)") });
+            combo_lavd_range.Items.Add(new ComboBoxItem() { Content = "Full", ToolTip = Languages.Translate("Full range (PC, 0-255)") });
+            combo_lavd_range.Tag = _def + "Auto";
+            combo_lavd_range.SelectedIndex = 0;
+
+            label_lavd_dither.Content = Languages.Translate("Dithering mode") + ":";
+            combo_lavd_dither.Items.Add(new ComboBoxItem() { Content = "Ordered", ToolTip = Languages.Translate("Ordered (static) pattern - sometimes can be visible") });
+            combo_lavd_dither.Items.Add(new ComboBoxItem() { Content = "Random", ToolTip = Languages.Translate("Random pattern - invisible, but increases the noise floor slightly") });
+            combo_lavd_dither.Tag = _def + "Random";
+            combo_lavd_dither.SelectedIndex = 1;
+
+            label_lavd_vc1.Content = Languages.Translate("Use WMV9 DMO for VC-1") + ":";
+            combo_lavd_vc1.Items.Add(Languages.Translate("No"));
+            combo_lavd_vc1.Items.Add(Languages.Translate("Yes"));
+            combo_lavd_vc1.Tag = _def + Languages.Translate("Yes");
+            combo_lavd_vc1.SelectedIndex = 1;
+
+            label_lavd_hw.Content = Languages.Translate("Hardware decoding") + ":";
+            combo_lavd_hw.Items.Add("Disabled");
+            combo_lavd_hw.Items.Add("CUDA");
+            combo_lavd_hw.Items.Add("QuickSink");
+            combo_lavd_hw.Tag = _def + "Disabled";
+            combo_lavd_hw.SelectedIndex = 0;
+
+            check_dss2_hw_h264.IsChecked = true;
+            check_dss2_hw_vc1.IsChecked = true;
+            check_dss2_hw_mpeg2.IsChecked = true;
+            check_dss2_hw_mpeg4.IsChecked = false;
+
+            string txt = Languages.Translate("Enable hardware decoding for this codec") + "\r\n\r\n";
+            check_dss2_hw_h264.ToolTip = txt + _def + on;
+            check_dss2_hw_vc1.ToolTip = txt + _def + on;
+            check_dss2_hw_mpeg2.ToolTip = txt + _def + on;
+            check_dss2_hw_mpeg4.ToolTip = txt + _def + off;
+
+            //"l3 t0 r0 d1 dm0 fo0 sd0 vc1 hm0 hc7 hd0 hq0"
+            string s = Settings.DSS2_LAVV_Settings.ToLower();
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                char next_ch = (i + 1 < s.Length) ? s[i + 1] : '\0';
+                char nnext_ch = (i + 2 < s.Length) ? s[i + 2] : '\0';
+
+                //48 = 0, 49 = 1, .. 57 = 9
+                int next_i = (next_ch >= 48 && next_ch <= 57) ? next_ch - 48 : -1;
+                int nnext_i = (nnext_ch >= 48 && nnext_ch <= 57) ? nnext_ch - 48 : -1;
+
+                if (s[i] == 'l' && next_i >= 0) //l - Loading (от 0 до 3)
+                {
+                    combo_lavd_loading.SelectedIndex = (next_i == 3) ? 1 : 0;
+                    i += 1;
+                }
+                else if (s[i] == 't' && next_i >= 0) //t - Threads (от 0 до xx)
+                {
+                    int val = next_i;
+                    if (nnext_i >= 0)
+                    {
+                        val *= 10;
+                        val += nnext_i;
+                        i += 1;
+                    }
+                    combo_lavd_threads.SelectedIndex = Math.Min(val, combo_lavd_threads.Items.Count - 1);
+                    i += 1;
+                }
+                else if (s[i] == 'r' && next_i >= 0) //r - Range (от 0 до 2)
+                {
+                    combo_lavd_range.SelectedIndex = Math.Min(next_i, combo_lavd_range.Items.Count - 1);
+                    i += 1;
+                }
+                else if (s[i] == 'd' && next_i >= 0) //d - Dither (от 0 до 1)
+                {
+                    combo_lavd_dither.SelectedIndex = Math.Min(next_i, combo_lavd_dither.Items.Count - 1);
+                    i += 1;
+                }
+                else if (s[i] == 'v' && next_ch == 'c' && nnext_i >= 0) //vc - WMV9 DMO (0 = false, 1+ = true)
+                {
+                    combo_lavd_vc1.SelectedIndex = (nnext_i > 0) ? 1 : 0;
+                    i += 2;
+                }
+                else if (((s[i] == 'd' && next_ch == 'm') || (s[i] == 'f' && next_ch == 'o') || (s[i] == 's' && next_ch == 'd')) && nnext_i >= 0)
+                {
+                    //dm - DeintMode (от 0 до 3), fo - FieldOrder (от 0 до 2), sd - SWDeint (от 0 до 2)
+                    i += 2;
+                }
+                else if (s[i] == 'h' && nnext_i >= 0)
+                {
+                    if (next_ch == 'm') //hm - HW Mode (от 0 до 2)
+                    {
+                        combo_lavd_hw.SelectedIndex = Math.Min(nnext_i, combo_lavd_hw.Items.Count - 1);
+                        i += 2;
+                    }
+                    else if (next_ch == 'c') //hc - HW Codecs (от 0 до 15)
+                    {
+                        int val = nnext_i;
+                        if (i + 3 < s.Length && s[i + 3] >= 48 && s[i + 3] <= 57)
+                        {
+                            val *= 10;
+                            val += s[i + 3] - 48;
+                            if (val > 15) val = 15;
+                            i += 1;
+                        }
+                        check_dss2_hw_h264.IsChecked = ((val & 1) > 0);
+                        check_dss2_hw_vc1.IsChecked = ((val & 2) > 0);
+                        check_dss2_hw_mpeg2.IsChecked = ((val & 4) > 0);
+                        check_dss2_hw_mpeg4.IsChecked = ((val & 8) > 0);
+                        i += 2;
+                    }
+                    else if (next_ch == 'd' || next_ch == 'q') //hd - HW Deint (от 0 до 4), hq - HW Deint HQ (0 = false, 1+ = true)
+                    {
+                        i += 2;
+                    }
+                }
+            }
+
+            tab_lav_decoder.Tag = true;
+        }
+
+        private void combo_lav_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox combo = (ComboBox)sender;
+            if (combo.SelectedItem != null)
+            {
+                if (combo.IsDropDownOpen || combo.IsSelectionBoxHighlighted)
+                {
+                    if (tab_lav_splitter.IsSelected) StoreLAVSSettings();
+                    if (tab_lav_decoder.IsSelected) StoreLAVVSettings();
+                }
+
+                combo.ToolTip = null;
+                ComboBoxItem item = combo.SelectedItem as ComboBoxItem;
+                if (item != null) combo.ToolTip = item.ToolTip;
+                if (combo.Tag != null) combo.ToolTip += ((combo.ToolTip != null) ? "\r\n\r\n" : "") + combo.Tag;
+            }
+        }
+
+        private void textbox_lavs_sl_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (textbox_lavs_subsl.Text != lavs_language)
+            {
+                lavs_language = textbox_lavs_subsl.Text;
+                StoreLAVSSettings();
+            }
+        }
+
+        private void textbox_lavs_sa_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (textbox_lavs_subsa.Text != lavs_advanced)
+            {
+                lavs_advanced = textbox_lavs_subsa.Text;
+                StoreLAVSSettings();
+            }
+        }
+
+        private void check_dss2_hwc_Click(object sender, RoutedEventArgs e)
+        {
+            StoreLAVVSettings();
+        }
+
+        private void StoreLAVSSettings()
+        {
+            string val = (combo_lavs_loading.SelectedIndex == 1) ? "L3" : "L0";
+            if (combo_lavs_vc1.SelectedIndex != 2) val += "vc" + combo_lavs_vc1.SelectedIndex;
+            if (combo_lavs_subsm.SelectedIndex != 2) val += "sm" + combo_lavs_subsm.SelectedIndex;
+            if (textbox_lavs_subsl.Text.Length > 0) val += "sl[" + textbox_lavs_subsl.Text + "]";
+            if (textbox_lavs_subsa.Text.Length > 0) val += "sa[" + textbox_lavs_subsa.Text + "]";
+            Settings.DSS2_LAVS_Settings = val;
+        }
+
+        private void StoreLAVVSettings()
+        {
+            int n = 0;
+            string val = (combo_lavd_loading.SelectedIndex == 1) ? "L3" : "L0";
+            if (combo_lavd_threads.SelectedIndex > 0) val += "t" + combo_lavd_threads.SelectedIndex;
+            if (combo_lavd_range.SelectedIndex > 0) val += "r" + combo_lavd_range.SelectedIndex;
+            if (combo_lavd_dither.SelectedIndex != 1) val += "d" + combo_lavd_dither.SelectedIndex;
+            if (combo_lavd_vc1.SelectedIndex != 1) val += "vc" + combo_lavd_vc1.SelectedIndex;
+            if (combo_lavd_hw.SelectedIndex > 0) val += "hm" + combo_lavd_hw.SelectedIndex;
+            if (check_dss2_hw_h264.IsChecked.Value) n += 1;
+            if (check_dss2_hw_vc1.IsChecked.Value) n += 2;
+            if (check_dss2_hw_mpeg2.IsChecked.Value) n += 4;
+            if (check_dss2_hw_mpeg4.IsChecked.Value) n += 8;
+            if (n != 7) val += "hc" + n;
+            Settings.DSS2_LAVV_Settings = val;
         }
     }
 }

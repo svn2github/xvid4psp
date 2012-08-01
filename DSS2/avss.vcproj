@@ -340,31 +340,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\avisynth.h"
+				RelativePath=".\src\avisynth.h"
 				>
 			</File>
 			<File
-				RelativePath=".\avisynth_26.h"
+				RelativePath=".\src\avisynth_26.h"
 				>
 			</File>
 			<File
-				RelativePath=".\guids.h"
+				RelativePath=".\src\guids.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LAVSplitterSettings.h"
+				RelativePath=".\src\LAVFilters\LAVSplitterSettings.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LAVVideoSettings.h"
+				RelativePath=".\src\LAVFilters\LAVVideoSettings.h"
 				>
 			</File>
 			<File
-				RelativePath=".\utils.h"
+				RelativePath=".\src\utils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\VideoSink.h"
+				RelativePath=".\src\VideoSink.h"
 				>
 			</File>
 		</Filter>
@@ -374,15 +374,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\avss.cpp"
+				RelativePath=".\src\avss.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\utils.cpp"
+				RelativePath=".\src\utils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\VideoSink.cpp"
+				RelativePath=".\src\VideoSink.cpp"
 				>
 			</File>
 		</Filter>
@@ -390,11 +390,11 @@
 			Name="Version"
 			>
 			<File
-				RelativePath=".\version.h"
+				RelativePath=".\src\version.h"
 				>
 			</File>
 			<File
-				RelativePath=".\version.rc"
+				RelativePath=".\src\version.rc"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

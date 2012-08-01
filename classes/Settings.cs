@@ -619,6 +619,126 @@ namespace XviD4PSP
             }
         }
 
+        //DSS2: использовать LAV Splitter
+        public static bool DSS2_LAVSplitter
+        {
+            get
+            {
+                object value = GetValue("DSS2_LAVSplitter");
+                if (value == null) return true;
+                else return Convert.ToBoolean(value);
+            }
+            set
+            {
+                SetBool("DSS2_LAVSplitter", value);
+            }
+        }
+
+        //Настройки LAVSplitter`а
+        public static string DSS2_LAVS_Settings
+        {
+            get
+            {
+                object value = GetValue("DSS2_LAVS_Settings");
+                if (value == null) return "L3";
+                else return Convert.ToString(value);
+            }
+            set
+            {
+                SetString("DSS2_LAVS_Settings", value);
+            }
+        }
+
+        //DSS2: использовать LAV Video Decoder
+        public static bool DSS2_LAVDecoder
+        {
+            get
+            {
+                object value = GetValue("DSS2_LAVDecoder");
+                if (value == null) return true;
+                else return Convert.ToBoolean(value);
+            }
+            set
+            {
+                SetBool("DSS2_LAVDecoder", value);
+            }
+        }
+
+        //Настройки LAV Video Decoder`а
+        public static string DSS2_LAVV_Settings
+        {
+            get
+            {
+                object value = GetValue("DSS2_LAVV_Settings");
+                if (value == null) return "L3";
+                else return Convert.ToString(value);
+            }
+            set
+            {
+                SetString("DSS2_LAVV_Settings", value);
+            }
+        }
+
+        //DSS2: режим субтитров
+        public static int DSS2_SubsMode
+        {
+            get
+            {
+                object value = GetValue("DSS2_SubsMode");
+                if (value == null) return 0;
+                else return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("DSS2_SubsMode", value);
+            }
+        }
+
+        //DSS2: отразить по вертикали
+        public static bool DSS2_FlipV
+        {
+            get
+            {
+                object value = GetValue("DSS2_FlipV");
+                if (value == null) return false;
+                else return Convert.ToBoolean(value);
+            }
+            set
+            {
+                SetBool("DSS2_FlipV", value);
+            }
+        }
+
+        //DSS2: отразить по горизонтали
+        public static bool DSS2_FlipH
+        {
+            get
+            {
+                object value = GetValue("DSS2_FlipH");
+                if (value == null) return false;
+                else return Convert.ToBoolean(value);
+            }
+            set
+            {
+                SetBool("DSS2_FlipH", value);
+            }
+        }
+
+        //DSS2: предзагрузка ("недосикинг")
+        public static int DSS2_Preroll
+        {
+            get
+            {
+                object value = GetValue("DSS2_Preroll");
+                if (value == null) return 15;
+                else return Convert.ToInt32(value);
+            }
+            set
+            {
+                SetInt("DSS2_Preroll", value);
+            }
+        }
+
         //Разрешить декодирование звука через FFmpegSource
         public static bool FFMS_Enable_Audio
         {

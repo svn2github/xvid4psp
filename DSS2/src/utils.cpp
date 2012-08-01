@@ -1,4 +1,4 @@
-﻿//(XviD4PSP5) modded version
+﻿//(XviD4PSP5) modded version, 2012
 /*
  * Copyright (c) 2004-2008 Mike Matsnev.  All Rights Reserved.
  * 
@@ -22,8 +22,8 @@
 #include "utils.h"
 #include "guids.h"
 
-#include "LAVSplitterSettings.h"
-#include "LAVVideoSettings.h"
+#include ".\LAVFilters\LAVSplitterSettings.h"
+#include ".\LAVFilters\LAVVideoSettings.h"
 
 CComPtr<IPin> GetPin(IBaseFilter *pF, bool include_connected, PIN_DIRECTION dir, const GUID *pMT)
 {
@@ -210,7 +210,7 @@ void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s)
 				//Скобка закрывается - переключаемся обратно на парсинг
 				l_args = a_args = false;
 			}
-			else if (l_args)
+			else if (l_args && s[i] != '[')
 			{
 				if (l_index < l_len - 1)
 				{
@@ -219,7 +219,7 @@ void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s)
 					l_index += 1;
 				}
 			}
-			else if (a_args)
+			else if (a_args && s[i] != '[')
 			{
 				if (a_index < a_len - 1)
 				{
@@ -231,12 +231,12 @@ void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s)
 		}
 	}
 
-	if (l_index > 0)
+	if (l_index > 0 && !l_args)
 	{
 		language[l_index] = '\0';
 		MultiByteToWideChar(CP_ACP, 0, language, -1, lss->SLanguage, l_len);
 	}
-	if (a_index > 0)
+	if (a_index > 0 && !a_args)
 	{
 		advanced[a_index] = '\0';
 		MultiByteToWideChar(CP_ACP, 0, advanced, -1, lss->SAdvanced, a_len);
@@ -250,7 +250,7 @@ void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s)
 	lvs->Threads = 0;        //Кол-во потоков декодирования: 0 = Auto (based on number of CPU cores), 1 = 1 (без MT), x = x
 	lvs->Range = 0;          //YUV->RGB уровни: 0 = Auto (same as input), 1 = Limited (16-235), 2 = Full (0-255)
 	lvs->Dither = 1;         //Dithering mode при преобразованиях форматов: 0 = Ordered(постоянный), 1 = Random(случайный) паттерны
-	lvs->DeintMode = 0;      //Режим деинтерлейса: 0 = всегда выкл., 1 = авто, 2 = авто (agressive), 3 = всегда вкл.
+	lvs->DeintMode = 0;      //Режим деинтерлейса: 0 = всегда выкл., 1 = авто, 2 = авто (aggressive), 3 = всегда вкл.
 	lvs->FieldOrder = 0;     //Порядок полей при деинтерлейсе: 0 = Auto, 1 = TFF, 2 = BFF
 	lvs->SWDeint = 0;        //Софтварный деинтерлейс: 0 = None, 1 = Yadif, 2 = Yadif (x2)
 	lvs->WMVDMO = true;      //Использовать MS WMV9 DMO Decoder для декодирования VC-1\WMV3
@@ -391,7 +391,7 @@ bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs)
 	else
 	{
 		pLAVVs->SetDeintTreatAsProgressive(false);
-		pLAVVs->SetDeintAggressive(lvs.DeintMode >= 2); //1 = Auto, 2 = Auto (agressive)
+		pLAVVs->SetDeintAggressive(lvs.DeintMode >= 2); //1 = Auto, 2 = Auto (aggressive)
 		pLAVVs->SetDeintForce(lvs.DeintMode >= 3);      //3 = Always on
 		pLAVVs->SetDeintFieldOrder((LAVDeintFieldOrder)lvs.FieldOrder);
 

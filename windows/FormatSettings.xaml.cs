@@ -291,7 +291,9 @@ namespace XviD4PSP
             undo_mux_v = undo_mux_a = undo_mux_o = "";
             combo_split.IsEnabled = false;
 
+            string temp = null;
             string muxer_cli = "";
+            string empty = Languages.Translate("(empty)");
             string _def = Languages.Translate("Default") + ": ";
             string info = Languages.Translate("Please refer to MUXER documentation for more info") + ".\r\n";
             string wcards = Languages.Translate("You can use a wildcards") + ":\r\n\r\n";
@@ -308,9 +310,9 @@ namespace XviD4PSP
                 textbox_mux_v.IsEnabled = textbox_mux_a.IsEnabled = textbox_mux_o.IsEnabled = true;
 
                 info = info.Replace("MUXER", "FFmpeg");
-                textbox_mux_v.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_ffmpeg);
-                textbox_mux_a.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_ffmpeg);
-                textbox_mux_o.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_ffmpeg);
+                textbox_mux_v.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_ffmpeg))) ? empty : temp);
+                textbox_mux_a.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_ffmpeg))) ? empty : temp);
+                textbox_mux_o.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_ffmpeg))) ? empty : temp);
             }
             else if (combo_Muxer.SelectedItem.ToString() == "mkvmerge")
             {
@@ -322,9 +324,9 @@ namespace XviD4PSP
                 string video = "%v_id% - " + Languages.Translate("video track ID (TID, track number)") + "\r\n\r\n";
                 string audio = "%a_id% - " + Languages.Translate("audio track ID (TID, track number)") + "\r\n\r\n";
 
-                textbox_mux_v.ToolTip = info + wcards + video + common + _def + Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_mkvmerge);
-                textbox_mux_a.ToolTip = info + wcards + audio + common + _def + Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_mkvmerge);
-                textbox_mux_o.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_mkvmerge);
+                textbox_mux_v.ToolTip = info + wcards + video + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_mkvmerge))) ? empty : temp);
+                textbox_mux_a.ToolTip = info + wcards + audio + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_mkvmerge))) ? empty : temp);
+                textbox_mux_o.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_mkvmerge))) ? empty : temp);
             }
             else if (combo_Muxer.SelectedItem.ToString() == "mp4box")
             {
@@ -333,9 +335,9 @@ namespace XviD4PSP
                 combo_split.IsEnabled = true;
 
                 info = info.Replace("MUXER", "MP4Box");
-                textbox_mux_v.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_mp4box);
-                textbox_mux_a.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_mp4box);
-                textbox_mux_o.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_mp4box);
+                textbox_mux_v.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_mp4box))) ? empty : temp);
+                textbox_mux_a.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_mp4box))) ? empty : temp);
+                textbox_mux_o.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_mp4box))) ? empty : temp);
             }
             else if (combo_Muxer.SelectedItem.ToString() == "tsmuxer")
             {
@@ -344,9 +346,9 @@ namespace XviD4PSP
                 combo_split.IsEnabled = true;
 
                 info = info.Replace("MUXER", "tsMuxeR");
-                textbox_mux_v.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_tsmuxer);
-                textbox_mux_a.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_tsmuxer);
-                textbox_mux_o.ToolTip = info + wcards + common + _def + Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_tsmuxer);
+                textbox_mux_v.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_tsmuxer))) ? empty : temp);
+                textbox_mux_a.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_tsmuxer))) ? empty : temp);
+                textbox_mux_o.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_tsmuxer))) ? empty : temp);
             }
             else if (combo_Muxer.SelectedItem.ToString() == "virtualdubmod")
             {
@@ -357,13 +359,13 @@ namespace XviD4PSP
                 string text = Languages.Translate("some text");
 
                 textbox_mux_v.ToolTip = opts + "title=\"" + text + "\"\r\nauthor=\"" + text + "\"\r\ncopyright=\"" + text + "\"\r\n\r\n" + wcards + common + _def +
-                    Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_virtualdubmod);
+                    ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_virtualdubmod))) ? empty : temp);
                 textbox_mux_a.ToolTip = opts + "title=\"" + text + "\"\r\nlanguage=\"" + text + "\"\r\n\r\n" + wcards + common + _def +
-                    Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_virtualdubmod);
+                    ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_virtualdubmod))) ? empty : temp);
                 textbox_mux_o.ToolTip = opts + "interleave=\"1, 500, 1, 0\"\r\n" + Languages.Translate("1 - interleaving is enabled, 0 - disabled") + "\r\n" +
                     Languages.Translate("500 - preload (ms)") + "\r\n" + Languages.Translate("1 - interleaving interval (ms or frames, see below)") + "\r\n" +
                     Languages.Translate("0 - interval is in frames, 1 - in ms") + "\r\n\r\n" + _def +
-                    Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_virtualdubmod);
+                    ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_virtualdubmod))) ? empty : temp);
             }
             else
             {

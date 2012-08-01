@@ -1,5 +1,15 @@
-﻿XviD4PSP 5.10.294.0 (20.07.2012), main changes:
+﻿XviD4PSP 5.10.301.0 (01.08.2012), main changes:
 
+>>> (r301) "Decoding" window: added few new options for DirectShowSource2; added 2 tabs with some LAV Filters settings;
+           by default DSS2 will use LAV Filters (LAV Splitter and LAV Video Decoder) in portable mode, instead of using
+           your system DirectShow filters.
+>>> (r295-r301) Various changes in DSS2: added advanced error messages; fixed hangs when processing the last frames;
+           Haali Video Sink - is now internal part of the plugin, so Haali Media Splitter is not required anymore;
+           improved behavior when it's not possible to decode requested frame; added few new settings; added ability
+           to load subtitles (but only the first stream will be processed); added ability to load LAV Filters directly
+           from theirs .ax-files, with custom settings (i.e. in portable mode); when LAV Video Decoder is used, all the
+           filters in the Graph will be connected using ConnectDirect method - it's excludes the possibility of some
+           unwanted filters will be auto-inserted in the Graph.
 >>> (r294) Added source code for DSS2.
 >>> (r294) Reverted encoding progress detection for x264 r2208+.
 >>> (r293) Encoding progress detection for x264 r2204+.

@@ -1,4 +1,4 @@
-﻿//(XviD4PSP5) modded version
+﻿//(XviD4PSP5) modded version, 2012
 /*
  * Copyright (c) 2004-2006 Mike Matsnev.  All Rights Reserved.
  * 

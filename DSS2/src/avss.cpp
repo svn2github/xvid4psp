@@ -1,4 +1,4 @@
-﻿//(XviD4PSP5) modded version
+﻿//(XviD4PSP5) modded version, 2012
 /*
  * Copyright (c) 2004-2008 Mike Matsnev.  All Rights Reserved.
  * 
@@ -192,7 +192,7 @@ class DSS2 : public IClip
 		if (lav_decoder)
 		{
 			LAVVideoSettings lvs = {};
-			ParseLAVVideoSettings(&lvs, lavd); //"l3 t0 r0 d1 dm0 fo0 sd0 vc0 hm0 hc7 hd0 hq0"
+			ParseLAVVideoSettings(&lvs, lavd); //"l3 t0 r0 d1 dm0 fo0 sd0 vc1 hm0 hc7 hd0 hq0"
 
 			CComPtr<IBaseFilter> pLAVV;
 			if (lvs.Loading == LFSystem || lvs.Loading == LFSystemS)
@@ -282,19 +282,19 @@ class DSS2 : public IClip
 					//Ищем DirectVobSub в Графе. Хотя скорее всего его там пока-что нет, т.к. мы его туда еще не добавляли.
 					//А даже если он и добавляется туда Haali-сплиттером, еще чем или сам по себе - то только после команды Render(Ex).
 					CComPtr<IBaseFilter> pDVS;
-					ENUM_FILTERS(pGB, tBF)
+					ENUM_FILTERS(pGB, pBF)
 					{
 						GUID gID;
-						tBF->GetClassID(&gID);
+						pBF->GetClassID(&gID);
 						if (gID == CLSID_DirectVobSubA)
 						{
 							//См. ниже..
-							pGB->RemoveFilter(tBF);
+							pGB->RemoveFilter(pBF);
 							__pEF__->Reset();
 						}
 						else if (gID == CLSID_DirectVobSubM)
 						{
-							pDVS = tBF;
+							pDVS = pBF;
 						}
 					}
 

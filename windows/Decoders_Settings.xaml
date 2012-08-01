@@ -77,31 +77,49 @@
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_directshowsource" Header="DirectShowSource" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
-                                    <CheckBox x:Name="check_dss_convert_fps" Width="226" Height="Auto" Content="ConvertFPS = true" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_convert_fps_Click"/>
-                                    <CheckBox x:Name="check_dss_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_audio_Click"/>
+                                    <CheckBox x:Name="check_dss_convert_fps" Width="180" Height="Auto" Content="ConvertFPS = true" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_convert_fps_Click"/>
+                                    <CheckBox x:Name="check_dss_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="50,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss_audio_Click"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_directshowsource2" Header="DirectShowSource2" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_dss2_lavs" Width="Auto" Height="Auto" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" Foreground="#FFFFFFFF" Click="check_dss2_lavs_Click"/>
+                                    <Button x:Name="button_lavs" Width="90" Height="20" FontSize="14" Content="LAV Splitter" d:LayoutOverrides="HorizontalAlignment, Height" HorizontalAlignment="Right" Margin="3,0,0,0" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Center" Click="button_lavs_Click"/>
+                                    <CheckBox x:Name="check_dss2_lavd" Width="Auto" Height="Auto" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="12,0,0,0" Foreground="#FFFFFFFF" Click="check_dss2_lavd_Click"/>
+                                    <Button x:Name="button_lavd" Width="98" Height="20" FontSize="14" Content="LAV Decoder" d:LayoutOverrides="HorizontalAlignment, Height" HorizontalAlignment="Right" Margin="3,0,0,0" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" VerticalAlignment="Center" Click="button_lavd_Click"/>
+                                    <ComboBox x:Name="combo_dss2_subsm" Width="60" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_dss2_subsm_SelectionChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="label_dss2_subsm" Content="Subs:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,0,6,0" Padding="0" Height="Auto" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,3" Width="Auto" Height="24">
+                                    <CheckBox x:Name="check_dss2_flipv" Width="110" Height="Auto" Content="Flip Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_flipv_Click"/>
+                                    <CheckBox x:Name="check_dss2_fliph" Width="Auto" Height="Auto" Content="Flip Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="8,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_fliph_Click"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_dss2_preroll" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="500" Minimum="0" Value="10" ValueChanged="num_dss2_preroll_ValueChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="label_dss2_preroll" Content="Preroll:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,0,6,0" Padding="0" Height="Auto" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="MPEG2Source" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
-                                    <CheckBox x:Name="check_force_film" Width="290" Height="Auto" Content="Auto force Film at (%):" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_force_film_Click"/>
-                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_force_film" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="100" Minimum="0" Value="95" ValueChanged="num_force_film_ValueChanged"/>
+                                    <CheckBox x:Name="check_force_film" Width="210" Height="Auto" Content="Auto force Film at (%):" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_force_film_Click"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_force_film" HorizontalAlignment="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="100" Minimum="0" Value="95" ValueChanged="num_force_film_ValueChanged"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource2" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
-                                    <CheckBox x:Name="check_ffms_force_fps" Width="226" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_force_fps_Click"/>
-                                    <CheckBox x:Name="check_ffms_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_audio_Click"/>
+                                    <CheckBox x:Name="check_ffms_force_fps" Width="180" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_force_fps_Click"/>
+                                    <CheckBox x:Name="check_ffms_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="50,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_audio_Click"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,0" Width="Auto" Height="Auto">
-                                    <CheckBox x:Name="check_ffms_reindex" Width="226" Height="Auto" Content="Overwrite existing index file" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_reindex_Click"/>
-                                    <CheckBox x:Name="check_ffms_timecodes" Width="Auto" Height="Auto" Content="Timecodes" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_timecodes_Click"/>
+                                    <CheckBox x:Name="check_ffms_reindex" Width="220" Height="Auto" Content="Overwrite existing index file" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_reindex_Click"/>
+                                    <CheckBox x:Name="check_ffms_timecodes" Width="Auto" Height="Auto" Content="Timecodes" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="10,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_timecodes_Click"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
-                                    <ComboBox x:Name="combo_ffms_threads" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_ffms_threads_SelectionChanged"/>
+                                    <ComboBox x:Name="combo_ffms_threads" Width="50" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_ffms_threads_SelectionChanged"/>
                                     <Label OpacityMask="{x:Null}" x:Name="label_ffms_threads" Content="- decoding threads" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                 </DockPanel>
                             </StackPanel>
@@ -176,8 +194,8 @@
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_nicaudio" Header="DRC" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
-                                    <CheckBox x:Name="check_drc_ac3" Width="190" Height="Auto" Content="NicAC3Source +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_ac3_Click"/>
-                                    <CheckBox x:Name="check_drc_dts" Width="Auto" Height="Auto" Content="NicDTSSource +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_dts_Click"/>
+                                    <CheckBox x:Name="check_drc_ac3" Width="180" Height="Auto" Content="NicAC3Source +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_ac3_Click"/>
+                                    <CheckBox x:Name="check_drc_dts" Width="Auto" Height="Auto" Content="NicDTSSource +DRC" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="14,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_drc_dts_Click"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -186,9 +204,9 @@
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
                                     <CheckBox x:Name="check_tracks_manual" Width="Auto" Height="Auto" Content="Manual" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,10,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_tracks_Click"/>
                                     <CheckBox x:Name="check_tracks_language" Width="Auto" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="16,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_tracks_Click"/>
-                                    <ComboBox x:Name="combo_tracks_language" Width="110" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="3,0,10,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_tracks_language_SelectionChanged" IsTextSearchEnabled="False" KeyDown="combo_tracks_language_KeyDown" LostFocus="combo_tracks_language_LostFocus"/>
+                                    <ComboBox x:Name="combo_tracks_language" Width="110" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="3,0,10,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_tracks_language_SelectionChanged" IsTextSearchEnabled="False" KeyDown="combo_tracks_language_KeyDown" LostFocus="combo_tracks_language_LostFocus"/>
                                     <CheckBox x:Name="check_tracks_number" Width="Auto" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="16,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_tracks_Click"/>
-                                    <ComboBox x:Name="combo_tracks_number" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="3,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_tracks_number_SelectionChanged"/>
+                                    <ComboBox x:Name="combo_tracks_number" Width="50" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="3,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_tracks_number_SelectionChanged"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
@@ -202,6 +220,78 @@
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,5" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_copy_delay" Width="Auto" Height="Auto" Content="Apply Delay in Copy mode" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_copy_delay_Click"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </TabItem>
+                <TabItem x:Name="tab_lav_splitter" Visibility="Collapsed">
+                    <TabItem.Header>
+                        <TextBlock x:Name="tab_lav_splitter_Header" Text="LAV Splitter"/>
+                    </TabItem.Header>
+                    <StackPanel Width="380" Height="Auto">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_lav_splitter" Header="LAV Splitter" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,2" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavs_loading" Content="Loading mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavs_loading" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavs_vc1" Content="VC-1 correction:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavs_vc1" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavs_subsm" Content="Subtitles mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavs_subsm" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavs_subsl" Content="Preferred subtitles languages:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,2" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <TextBox Margin="4,0,4,0" Height="21" x:Name="textbox_lavs_subsl" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="12" FontFamily="Tahoma" VerticalScrollBarVisibility="Auto" LostFocus="textbox_lavs_sl_LostFocus"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavs_subsa" Content="Advanced subtitles settings:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,2" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <TextBox Margin="4,0,4,0" Height="21" x:Name="textbox_lavs_subsa" Text="" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="12" FontFamily="Tahoma" VerticalScrollBarVisibility="Auto" LostFocus="textbox_lavs_sa_LostFocus"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </TabItem>
+                <TabItem x:Name="tab_lav_decoder" Visibility="Collapsed">
+                    <TabItem.Header>
+                        <TextBlock x:Name="tab_lav_decoder_Header" Text="LAV Decoder"/>
+                    </TabItem.Header>
+                    <StackPanel Width="380" Height="Auto">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_lav_decoder" Header="LAV Decoder" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,2" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavd_loading" Content="Loading mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavd_loading" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavd_threads" Content="Decoding threads:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavd_threads" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavd_range" Content="YUV->RGB range:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavd_range" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavd_dither" Content="Dithering mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavd_dither" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavd_vc1" Content="Use WMV9 DMO for VC-1:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavd_vc1" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lavd_hw" Content="Hardware decoding:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <ComboBox x:Name="combo_lavd_hw" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_dss2_hw_h264" Width="70" Height="Auto" Content="H264" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
+                                    <CheckBox x:Name="check_dss2_hw_vc1" Width="70" Height="Auto" Content="VC-1" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="30,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
+                                    <CheckBox x:Name="check_dss2_hw_mpeg4" Width="70" Height="Auto" Content="MPEG4" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,-2,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
+                                    <CheckBox x:Name="check_dss2_hw_mpeg2" Width="70" Height="Auto" Content="MPEG2" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,30,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
