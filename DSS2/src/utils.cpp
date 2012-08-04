@@ -21,7 +21,7 @@
 
 #include "utils.h"
 #include "guids.h"
-
+#include "VideoSink.h"
 #include ".\LAVFilters\LAVSplitterSettings.h"
 #include ".\LAVFilters\LAVVideoSettings.h"
 
@@ -363,7 +363,7 @@ bool ApplyLAVSplitterSettings(IFileSourceFilter *pLAVS, LAVSplitterSettings lss)
 	return true;
 }
 
-bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs)
+bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs, unsigned int pixel_types)
 {
 	CComPtr<ILAVVideoSettings> pLAVVs;
 	if (FAILED(pLAVV->QueryInterface(IID_ILAVVideoSettings, (void**)&pLAVVs)))
@@ -376,11 +376,15 @@ bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs)
 	pLAVVs->SetDitherMode((LAVDitherMode)lvs.Dither);
 	pLAVVs->SetUseMSWMV9Decoder(lvs.WMVDMO);
 
-	//Хотя вряд-ли это будет отключено в дефолтах..
-	pLAVVs->SetPixelFormat(LAVOutPixFmt_YV12, true);
-	pLAVVs->SetPixelFormat(LAVOutPixFmt_YUY2, true);
-	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB32, true);
-	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB24, true);
+	//Отключаем все форматы..
+	for (int i = 0; i < LAVOutPixFmt_NB; i++)
+		pLAVVs->SetPixelFormat((LAVOutPixFmts)i, false);
+
+	//.. и включаем обратно только нужные
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_YV12, (pixel_types & IVS_YV12));
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_YUY2, (pixel_types & IVS_YUY2));
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB32, (pixel_types & IVS_RGB32));
+	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB24, (pixel_types & IVS_RGB24));
 
 	if (lvs.DeintMode == 0)
 	{

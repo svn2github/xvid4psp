@@ -101,7 +101,7 @@ class DSS2 : public IClip
 			m_registered = false;
 	}
 
-	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path)
+	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types)
 	{
 		InterlockedIncrement(&RefCount);
 
@@ -130,7 +130,7 @@ class DSS2 : public IClip
 		CComQIPtr<IVideoSink2> sink2(pVS);
 		if (!sink2) { SetError("Get IVideoSink2: ", err); return E_NOINTERFACE; }
 
-		sink->SetAllowedTypes(IVS_RGB24|IVS_RGB32|IVS_YUY2|IVS_YV12);
+		sink->SetAllowedTypes(pixel_types);
 		ResetEvent(m_hFrameReady);
 		sink2->NotifyFrame(m_hFrameReady);
 
@@ -206,7 +206,7 @@ class DSS2 : public IClip
 					SetError("Load LAVVideo: ", err); return hr; }
 			}
 
-			if ((lvs.Loading == LFSystemS || lvs.Loading == LFFileS) && !ApplyLAVVideoSettings(pLAVV, lvs)) {
+			if ((lvs.Loading == LFSystemS || lvs.Loading == LFFileS) && !ApplyLAVVideoSettings(pLAVV, lvs, pixel_types)) {
 				SetError("Apply LAVVideo settings: ", err); return E_NOINTERFACE; }
 
 			if(FAILED(hr = pGB->AddFilter(pLAVV, L"LAV Video Decoder"))) {
@@ -419,8 +419,9 @@ class DSS2 : public IClip
 			default: { SetError("Unsupported colorspace. ", err); return E_FAIL; }
 		}
 
-		m_vi.width = width;
-		m_vi.height = height;
+		//Crop (1 pixel), если требуется mod2
+		m_vi.width = width - ((m_vi.pixel_type == VideoInfo::CS_YUY2 || m_vi.pixel_type == VideoInfo::CS_YV12) ? (width % 2) : 0);
+		m_vi.height = height - ((m_vi.pixel_type == VideoInfo::CS_YV12) ? (height % 2) : 0);
 
 		m_vi.num_frames = (int)(duration / defd);
 		m_vi.SetFPS(10000000, (unsigned int)defd);
@@ -619,13 +620,13 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path)
+	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types)
 	{
 		m_qmax = cache;
 		m_seek_thr = seekthr;
 		m_preroll = preroll;
 
-		return Open(filename, err, avgframe, subsm, lavs, lavd, lavf_path, dvs_path);
+		return Open(filename, err, avgframe, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types);
 	}
 
 	// IClip
@@ -771,21 +772,8 @@ public:
 	}
 };
 
-static void __cdecl FreeLibraries(void* user_data, IScriptEnvironment* env)
-{
-	/*if (!InterlockedDecrement(&RefCount))
-	{
-		SAFE_FREELIBRARY(hLAVSplitter);
-		SAFE_FREELIBRARY(hLAVVideo);
-		SAFE_FREELIBRARY(hVSFilter);
-	}*/
-}
-
 static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* env)
 {
-	//InterlockedIncrement(&RefCount);
-	//env->AtExit(FreeLibraries, 0);
-
 	if (args[0].ArraySize() != 1)
 		env->ThrowError("DSS2: Only 1 filename currently supported!");
 
@@ -793,22 +781,34 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	if (filename == NULL || strlen(filename) == 0)
 		env->ThrowError("DSS2: Filename expected!");
 
-	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0;  //fps       (>0, undef.)
-	int cache = max(args[2].AsInt(10), 1);                                                       //cache     (>=1, def=10)
-	int seekthr = max(args[3].AsInt(100), 1);                                                    //seekthr   (>=1, def=100)
-	int preroll = max(args[4].AsInt(0), 0);                                                      //preroll   (>=0, def=0)
-	int subsm = max(args[5].AsInt(0), 0);                                                        //subsm     (>=0, def=0)
-	const char *lavs = args[6].AsString("");                                                     //lavs      (def="")
-	const char *lavd = args[7].AsString("");                                                     //lavd      (def="")
-	const char *lavf_path = args[8].AsString("LAVFilters");                                      //lavf_path (def="LAVFilters")
-	const char *dvs_path = args[9].AsString("");                                                 //dvs_path  (def="")
-	bool flipv = args[10].AsBool(false);                                                         //flipv     (def=false)
-	bool fliph = args[11].AsBool(false);                                                         //fliph     (def=false)
+	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0;  //fps        (>0, undef.)
+	int cache = max(args[2].AsInt(10), 1);                                                       //cache      (>=1, def=10)
+	int seekthr = max(args[3].AsInt(100), 1);                                                    //seekthr    (>=1, def=100)
+	int preroll = max(args[4].AsInt(0), 0);                                                      //preroll    (>=0, def=0)
+	int subsm = max(args[5].AsInt(0), 0);                                                        //subsm      (>=0, def=0)
+	const char *lavs = args[6].AsString("");                                                     //lavs       (def="")
+	const char *lavd = args[7].AsString("");                                                     //lavd       (def="")
+	const char *lavf_path = args[8].AsString("LAVFilters");                                      //lavf_path  (def="LAVFilters")
+	const char *dvs_path = args[9].AsString("");                                                 //dvs_path   (def="")
+	bool flipv = args[10].AsBool(false);                                                         //flipv      (def=false)
+	bool fliph = args[11].AsBool(false);                                                         //fliph      (def=false)
+	const char *pixel_type = args[12].AsString("");                                              //pixel_type (def="")
+
+	unsigned int pixel_types = (IVS_RGB24|IVS_RGB32|IVS_YUY2|IVS_YV12);
+	if (strlen(pixel_type) > 0)
+	{
+		if (_strcmpi(pixel_type, "YV12") == 0) pixel_types = IVS_YV12;
+		else if (_strcmpi(pixel_type, "YUY2") == 0) pixel_types = IVS_YUY2;
+		else if (_strcmpi(pixel_type, "RGB24") == 0) pixel_types = IVS_RGB24;
+		else if (_strcmpi(pixel_type, "RGB32") == 0) pixel_types = IVS_RGB32;
+		else if (_strcmpi(pixel_type, "RGB") == 0) pixel_types = (IVS_RGB24|IVS_RGB32);
+		else env->ThrowError("DSS2: Valid values for \"pixel_type\" are (choose only one): \"YV12\", \"YUY2\", \"RGB24\", \"RGB32\" or \"RGB\"!");
+	}
 
 	DSS2 *dss2 = new DSS2();
 	char err[ERRMSG_LEN] = {0};
 
-	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd, lavf_path, dvs_path);
+	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types);
 	if (FAILED(hr))
 	{
 		delete dss2;
@@ -840,6 +840,6 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
 {
 #endif
-	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[lavf_path]s[dvs_path]s[flipv]b[fliph]b", Create_DSS2, 0);
+	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[lavf_path]s[dvs_path]s[flipv]b[fliph]b[pixel_type]s", Create_DSS2, 0);
 	return "DSS2";
 }

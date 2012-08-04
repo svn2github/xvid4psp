@@ -57,7 +57,7 @@ HRESULT LoadFilterFromFile(IBaseFilter **pBFilter, volatile HMODULE *hModule, co
 void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s);
 void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s);
 bool ApplyLAVSplitterSettings(IFileSourceFilter *pLAVS, LAVSplitterSettings lss);
-bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs);
+bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs, unsigned int pixel_types);
 
 #define ENUM_FILTERS(graph, var) for (CComPtr<IEnumFilters> __pEF__; !__pEF__ && SUCCEEDED(graph->EnumFilters(&__pEF__)); ) for (CComPtr<IBaseFilter> var; __pEF__->Next(1, &var, NULL) == S_OK; var.Release())
 #define ENUM_PINS(filter, var) for (CComPtr<IEnumPins> __pEP__; !__pEP__ && SUCCEEDED(filter->EnumPins(&__pEP__)); ) for (CComPtr<IPin> var; __pEP__->Next(1, &var, NULL) == S_OK; var.Release())
