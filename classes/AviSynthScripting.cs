@@ -1017,61 +1017,6 @@ namespace XviD4PSP
            return script;
        }
 
-       public static string GetFramerateScript(Massive m)
-       {
-           //определяем расширения
-           string ext = Path.GetExtension(m.infilepath).ToLower();
-
-           //начинаем писать скрипт
-           string script = "";
-
-           //загружаем доп функции
-           script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
-
-           //загружаем необходимые плагины импорта
-           if(m.vdecoder == Decoders.AVCSource)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.MPEG2Source)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.DGMultiSource)
-               script += "loadplugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.DirectShowSource2)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.RawSource)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.QTInput)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\QTSource.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.FFmpegSource2)
-           {
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
-               script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
-           }
-
-           script += Environment.NewLine;
-
-           if (m.vdecoder == Decoders.MPEG2Source)
-               script += m.vdecoder.ToString() + "(\"" + m.indexfile + "\", cpu=0, info=3)" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.AVCSource || m.vdecoder == Decoders.DGMultiSource)
-               script += m.vdecoder.ToString() + "(\"" + m.indexfile + "\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.DirectShowSource || m.vdecoder == Decoders.AVISource)
-               script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\", audio=false)" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.DirectShowSource2)
-               script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.FFmpegSource2)
-           {
-               //Если FFMS_Enable_Audio, то разрешаем звук, чтоб файл сразу проиндексировался вместе с ним (иначе позже произойдет переиндексация)
-               string atrack = (m.inaudiostreams.Count > 0 && Settings.FFMS_Enable_Audio) ? ", atrack=-1, adjustdelay=-3" : ", atrack=-2";
-               string cache_path = atrack + ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
-                   ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(m.infilepath) + ".ffindex\"" : "");
-               script += m.vdecoder.ToString() + "(\"" + m.infilepath + "\"" + cache_path + ")" + Environment.NewLine;
-           }
-
-           script += "ConvertToYUY2()" + Environment.NewLine;//тут
-           script += "Trim(0, 100)" + Environment.NewLine;
-
-           return script;
-       }
-
        public static string LoadScript(string scriptpath)
        {
            string line;

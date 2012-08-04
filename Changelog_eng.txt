@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.301.0 (01.08.2012), main changes:
+﻿XviD4PSP 5.10.303.0 (04.08.2012), main changes:
 
+>>> (r303) "FramerateDetector" window - removed.
+>>> (r302) DSS2: added cropping of 1 pixel if pixel format requires that the side of the image must be mod2.
 >>> (r301) "Decoding" window: added few new options for DirectShowSource2; added 2 tabs with some LAV Filters settings;
            by default DSS2 will use LAV Filters (LAV Splitter and LAV Video Decoder) in portable mode, instead of using
            your system DirectShow filters.

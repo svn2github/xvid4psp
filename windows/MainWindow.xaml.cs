@@ -1311,18 +1311,6 @@ namespace XviD4PSP
                     SetAudioPreset();
                 }
 
-                //пытаемся точно узнать фреймрейт (если до этого не вышло)
-                if (x.format != Format.ExportFormats.Audio && x.isvideo)
-                {
-                    //"" - уже были попытки определить fps через MediaInfo\FFmpeg
-                    //null - никаких попыток определить fps пока-что не было (т.к. бесполезно)
-                    if (x.inframerate == "" && ext != ".vdr" && ext != ".y4m" && ext != ".yuv")
-                    {
-                        FramerateDetector frd = new FramerateDetector(x);
-                        if (frd.m != null) x = frd.m.Clone();
-                    }
-                }
-
                 //Индексация для FFmpegSource2
                 if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2)
                 {

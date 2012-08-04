@@ -95,7 +95,7 @@
                                 <DockPanel Margin="0,0,0,3" Width="Auto" Height="24">
                                     <CheckBox x:Name="check_dss2_flipv" Width="110" Height="Auto" Content="Flip Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_flipv_Click"/>
                                     <CheckBox x:Name="check_dss2_fliph" Width="Auto" Height="Auto" Content="Flip Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="8,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_fliph_Click"/>
-                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_dss2_preroll" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="500" Minimum="0" Value="10" ValueChanged="num_dss2_preroll_ValueChanged"/>
+                                    <MyUserControl:NumericUpDown Height="22" x:Name="num_dss2_preroll" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="500" Minimum="0" Value="15" ValueChanged="num_dss2_preroll_ValueChanged"/>
                                     <Label OpacityMask="{x:Null}" x:Name="label_dss2_preroll" Content="Preroll:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="0,0,6,0" Padding="0" Height="Auto" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </DockPanel>
                             </StackPanel>
