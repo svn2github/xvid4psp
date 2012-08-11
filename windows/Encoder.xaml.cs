@@ -415,18 +415,20 @@ namespace XviD4PSP
 
         private void make_x264()
         {
+            bool is_x262 = (m.outvcodec == "x262");
+
             //10-bit depth энкодер
-            bool _10bit = (m.x264options.profile == x264.Profiles.High10);
+            bool is_10bit = (!is_x262 && m.x264options.profile == x264.Profiles.High10);
 
             //Хакнутый скрипт
-            int bdepth = Calculate.GetScriptBitDepth(m.script);
+            int bdepth = (!is_x262) ? Calculate.GetScriptBitDepth(m.script) : 8;
 
             //Убираем метку " --extra:"
             for (int n = 0; n < m.vpasses.Count; n++)
                 m.vpasses[n] = m.vpasses[n].ToString().Replace(" --extra:", "");
 
             //Для Lossless нужно убрать ключ --profile
-            if (x264.IsLossless(m))
+            if (!is_x262 && x264.IsLossless(m))
             {
                 for (int n = 0; n < m.vpasses.Count; n++)
                     m.vpasses[n] = Regex.Replace(m.vpasses[n].ToString(), @"\s?--profile\s+\w+", "", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
@@ -478,10 +480,10 @@ namespace XviD4PSP
             step++;
 
             if (m.outvideofile == null)
-                m.outvideofile = Settings.TempPath + "\\" + m.key + ".264";
+                m.outvideofile = Settings.TempPath + "\\" + m.key + ((!is_x262) ? ".264" : ".m2v");
 
             //ffmpeg криво муксит raw-avc, нужно кодировать в контейнер
-            if (muxer == Format.Muxers.ffmpeg && !DontMuxStreams)
+            if (!is_x262 && muxer == Format.Muxers.ffmpeg && !DontMuxStreams)
             {
                 //А в АВИ наоборот, криво муксит из контейнера.. :(
                 if (Path.GetExtension(m.outfilepath).ToLower() != ".avi")
@@ -499,7 +501,7 @@ namespace XviD4PSP
                 {
                     m.outvideofile = Calculate.RemoveExtention(m.outfilepath, true) +
                         (m.format == Format.ExportFormats.BluRay ? "\\" + m.key : "") + //Кодирование в папку
-                        ".264";
+                        ((!is_x262) ? ".264" : ".m2v");
                 }
             }
 
@@ -521,14 +523,14 @@ namespace XviD4PSP
                 m.encodingmode == Settings.EncodingModes.Quantizer ||
                 m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
                 m.encodingmode == Settings.EncodingModes.ThreePassQuality)
-                SetLog(m.outvcodec + (_10bit ? " 10-bit depth Q" : " Q") + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) +
+                SetLog(m.outvcodec + ((is_10bit) ? " 10-bit depth Q" : " Q") + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) +
                     " " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
             //else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
             //    m.encodingmode == Settings.EncodingModes.ThreePassSize)
             //    SetLog(m.outvcodec + " " + m.outvbitrate + "mb " + m.outresw + "x" + m.outresh + " " +
             //        m.outframerate + "fps (" + m.outframes + " frames)");
             else
-                SetLog(m.outvcodec + (_10bit ? " 10-bit depth " : " ") + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
+                SetLog(m.outvcodec + ((is_10bit) ? " 10-bit depth " : " ") + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
 
             if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
 
@@ -537,13 +539,15 @@ namespace XviD4PSP
 
             string in_depth = "";
             string executable = "";
-            if (m.format == Format.ExportFormats.PmpAvc)
+            if (is_x262)
+                info.FileName = Calculate.StartupPath + "\\apps\\x262\\x262.exe";
+            else if (m.format == Format.ExportFormats.PmpAvc)
                 info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
             else
             {
                 if (bdepth != 8) in_depth = "--input-depth " + bdepth + " ";
                 if (Settings.UseAVS4x264 || bdepth != 8) { executable = (SysInfo.GetOSArchInt() == 64) ? "-L x264_64.exe " : "-L x264.exe "; }
-                info.FileName = Calculate.StartupPath + "\\apps\\" + ((_10bit) ? "x264_10b\\" : "x264\\") + ((executable.Length > 0) ? "avs4x264.exe" : "x264.exe");
+                info.FileName = Calculate.StartupPath + "\\apps\\" + ((is_10bit) ? "x264_10b\\" : "x264\\") + ((executable.Length > 0) ? "avs4x264.exe" : "x264.exe");
             }
 
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
@@ -554,13 +558,24 @@ namespace XviD4PSP
 
             string arguments; //начало создания командной строчки для x264-го
 
-            string psnr = (Settings.x264_PSNR) ? " --psnr" : "";
-            string ssim = (Settings.x264_SSIM) ? " --ssim" : "";
+            string psnr = (!is_x262 && Settings.x264_PSNR || is_x262 && Settings.x262_PSNR) ? " --psnr" : "";
+            string ssim = (!is_x262 && Settings.x264_SSIM || is_x262 && Settings.x262_SSIM) ? " --ssim" : "";
 
             string sar = "";
             if (!m.vpasses[m.vpasses.Count - 1].ToString().Contains("--sar "))
             {
-                if (!string.IsNullOrEmpty(m.sar)) sar = " --sar " + m.sar;
+                if (!string.IsNullOrEmpty(m.sar) && m.sar != "1:1")
+                {
+                    if (is_x262)
+                    {
+                        //Для x262 --sar = DAR, и возможны только стандартные для MPEG2 значения
+                        if (Math.Abs(m.outaspect - 1.33) <= 0.01) sar = " --sar 4:3";
+                        else if (Math.Abs(m.outaspect - 1.77) <= 0.01) sar = " --sar 16:9";
+                        else if (Math.Abs(m.outaspect - 2.21) <= 0.01) sar = " --sar 221:100";
+                        else sar = " --sar " + m.sar; //x262 покажет warning и будет использовать 1:1
+                    }
+                    else sar = " --sar " + m.sar;
+                }
                 else sar = " --sar 1:1";
             }
 
@@ -588,12 +603,12 @@ namespace XviD4PSP
             SetLog("");
             if (Settings.ArgumentsToLog)
             {
-                SetLog(((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") + info.Arguments);
+                SetLog(((!is_x262) ? ((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") : "x262.exe: ") + info.Arguments);
                 SetLog("");
             }
 
             //Кодируем первый проход
-            Do_x264_Cycle(info);
+            Do_x264_Cycle(info, is_x262);
 
             //второй проход
             if (m.vpasses.Count > 1 && !IsAborted && !IsErrors)
@@ -644,12 +659,12 @@ namespace XviD4PSP
                 SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog(((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") + info.Arguments);
+                    SetLog(((!is_x262) ? ((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") : "x262.exe: ") + info.Arguments);
                     SetLog("");
                 }
 
                 //Кодируем второй проход
-                Do_x264_Cycle(info);
+                Do_x264_Cycle(info, is_x262);
             }
 
             //третий проход
@@ -666,12 +681,12 @@ namespace XviD4PSP
                 SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog(((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") + info.Arguments);
+                    SetLog(((!is_x262) ? ((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") : "x262.exe: ") + info.Arguments);
                     SetLog("");
                 }
 
                 //Кодируем третий проход
-                Do_x264_Cycle(info);
+                Do_x264_Cycle(info, is_x262);
             }
 
             //чистим ресурсы
@@ -694,7 +709,7 @@ namespace XviD4PSP
             SafeDelete(passlog + ".mbtree");
         }
 
-        private void Do_x264_Cycle(ProcessStartInfo info)
+        private void Do_x264_Cycle(ProcessStartInfo info, bool is_x262)
         {
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
@@ -722,7 +737,8 @@ namespace XviD4PSP
                     {
                         if (line.StartsWith("encoded"))
                         {
-                            SetLog("x264 [total]: " + line);
+                            if (!is_x262) SetLog("x264 [total]: " + line);
+                            else SetLog("x262 [total]: " + line);
                         }
                         else
                         {
@@ -2785,7 +2801,7 @@ namespace XviD4PSP
             //создаём мета файл
             string metapath = Settings.TempPath + "\\" + m.key + ".meta";
             string vcodec = (m.outvcodec == "Copy") ? m.invcodecshort : m.outvcodec;
-            string vtag = (vcodec == "MPEG2") ? "V_MPEG-2" : (vcodec == "VC1") ? "V_MS/VFW/WVC1" : "V_MPEG4/ISO/AVC";
+            string vtag = (vcodec == "MPEG2" || vcodec == "x262") ? "V_MPEG-2" : (vcodec == "VC1") ? "V_MS/VFW/WVC1" : "V_MPEG4/ISO/AVC";
             string fps = (m.outvcodec == "Copy") ? ((!string.IsNullOrEmpty(m.inframerate)) ? ", fps=" + m.inframerate : "") : (!string.IsNullOrEmpty(m.outframerate)) ? ", fps=" + m.outframerate : "";
             string h264tweak = (vtag == "V_MPEG4/ISO/AVC") ? ", level=4.1, insertSEI, contSPS" : "";
             string bluray = (m.format == Format.ExportFormats.BluRay) ? " --blu-ray --auto-chapters=5" : "";
@@ -4139,7 +4155,8 @@ namespace XviD4PSP
                     SetLog("------------------------------");
                 }
 
-                if (m.outvcodec == "x264")
+                if (m.outvcodec == "x264" ||
+                    m.outvcodec == "x262")
                     make_x264();
                 if (m.outvcodec == "XviD")
                     make_XviD();

@@ -13,6 +13,7 @@ namespace XviD4PSP
         public Massive()
         {
             this.x264options = new x264_arguments();
+            this.x262options = new x262_arguments();
             this.XviD_options = new XviD_arguments();
             this.ffmpeg_options = new ffmpeg_arguments();
             this.aac_options = new aac_arguments();
@@ -32,6 +33,7 @@ namespace XviD4PSP
         {
             Massive temp = (Massive)this.MemberwiseClone();
             temp.x264options = this.x264options.Clone();
+            temp.x262options = this.x262options.Clone();
             temp.XviD_options = this.XviD_options.Clone();
             temp.ffmpeg_options = this.ffmpeg_options.Clone();
             temp.aac_options = this.aac_options.Clone();
@@ -1154,6 +1156,19 @@ namespace XviD4PSP
             set
             {
                 _x264options = value;
+            }
+        }
+
+        private x262_arguments _x262options;
+        public x262_arguments x262options
+        {
+            get
+            {
+                return _x262options;
+            }
+            set
+            {
+                _x262options = value;
             }
         }
 

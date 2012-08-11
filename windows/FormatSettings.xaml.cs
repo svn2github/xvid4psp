@@ -515,7 +515,7 @@ namespace XviD4PSP
 
             button_reset.ToolTip = Languages.Translate("Reset all settings");
             if (textbox_vcodecs.IsEnabled) textbox_vcodecs.ToolTip = Languages.Translate("Codecs, that will be selectable in the video-codecs settings window.") + "\r\n" + Languages.Translate("Valid values:") +
-                " x264, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV\r\n" + Languages.Translate("Separate by comma.") + _def + StringArrayToString(def.VCodecs);
+                " x264, x262, MPEG1, MPEG2, MPEG4, FLV1, MJPEG, HUFF, FFV1, XviD, DV\r\n" + Languages.Translate("Separate by comma.") + _def + StringArrayToString(def.VCodecs);
             if (textbox_framerates.IsEnabled) textbox_framerates.ToolTip = Languages.Translate("Framerates, that can be set for this format.") + "\r\n" + Languages.Translate("Valid values:") +
                 " 0.000 (" + Languages.Translate("means \"any\"") + "), 15.000, 18.000, 20.000, 23.976, 24.000, 25.000, 29.970, 30.000, 50.000, 59.940, 60.000, 120.000, ...\r\n" + Languages.Translate("Separate by comma.") +
                 _def + StringArrayToString(def.Framerates);
@@ -844,6 +844,7 @@ namespace XviD4PSP
             {
                 string ss = value.Trim().ToUpper();
                 if (ss == "X264") ss = "x264, ";
+                else if (ss == "X262") ss = "x262, ";
                 else if (ss == "MPEG1") ss = "MPEG1, ";
                 else if (ss == "MPEG2") ss = "MPEG2, ";
                 else if (ss == "MPEG4") ss = "MPEG4, ";

@@ -26,8 +26,10 @@ namespace XviD4PSP
             //переводим
             button_ok.Content = Languages.Translate("OK");
             Title = Languages.Translate("Settings") + ":";
-            check_show_psnr.ToolTip = Languages.Translate("Show x264 PSNR info");
-            check_show_ssim.ToolTip = Languages.Translate("Show x264 SSIM info");
+            check_x264_psnr.ToolTip = Languages.Translate("Show x264 PSNR info");
+            check_x264_ssim.ToolTip = Languages.Translate("Show x264 SSIM info");
+            check_x262_psnr.ToolTip = check_x264_psnr.ToolTip.ToString().Replace("x264", "x262");
+            check_x262_ssim.ToolTip = check_x264_ssim.ToolTip.ToString().Replace("x264", "x262");
             check_show_arguments.Content = Languages.Translate("Show encoding arguments");
             check_show_script.Content = Languages.Translate("Show AviSynth script");
             check_ffms_cache_in_temp.Content = Languages.Translate("Create FFmpegSource2 cache in Temp folder");
@@ -99,8 +101,10 @@ namespace XviD4PSP
             tab_open_folder.Header = Languages.Translate("Batch encoding");
             //tab_hotkeys.Header = Languages.Translate("HotKeys");
 
-            check_show_psnr.IsChecked = Settings.x264_PSNR;
-            check_show_ssim.IsChecked = Settings.x264_SSIM;
+            check_x264_psnr.IsChecked = Settings.x264_PSNR;
+            check_x264_ssim.IsChecked = Settings.x264_SSIM;
+            check_x262_psnr.IsChecked = Settings.x262_PSNR;
+            check_x262_ssim.IsChecked = Settings.x262_SSIM;
             check_show_arguments.IsChecked = Settings.ArgumentsToLog;
             check_show_script.IsChecked = Settings.PrintAviSynth;
             check_delete_ff_cache.IsChecked = Settings.DeleteFFCache;
@@ -207,14 +211,24 @@ namespace XviD4PSP
             new Message(this).ShowMessage(message, Languages.Translate("Error"));
         }
 
-        private void check_show_psnr_Click(object sender, RoutedEventArgs e)
+        private void check_x264_psnr_Click(object sender, RoutedEventArgs e)
         {
-            Settings.x264_PSNR = check_show_psnr.IsChecked.Value;
+            Settings.x264_PSNR = check_x264_psnr.IsChecked.Value;
         }
 
-        private void check_show_ssim_Click(object sender, RoutedEventArgs e)
+        private void check_x264_ssim_Click(object sender, RoutedEventArgs e)
         {
-            Settings.x264_SSIM = check_show_ssim.IsChecked.Value;
+            Settings.x264_SSIM = check_x264_ssim.IsChecked.Value;
+        }
+
+        private void check_x262_psnr_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.x262_PSNR = check_x262_psnr.IsChecked.Value;
+        }
+
+        private void check_x262_ssim_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.x262_SSIM = check_x262_ssim.IsChecked.Value;
         }
 
         private void check_show_arguments_Click(object sender, RoutedEventArgs e)

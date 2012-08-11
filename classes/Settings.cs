@@ -1150,6 +1150,46 @@ namespace XviD4PSP
             }
         }
 
+        public static bool x262_PSNR
+        {
+            get
+            {
+                object value = GetValue("x262_PSNR");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("x262_PSNR", value);
+            }
+        }
+
+        public static bool x262_SSIM
+        {
+            get
+            {
+                object value = GetValue("x262_SSIM");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("x262_SSIM", value);
+            }
+        }
+
         public static bool PrintAviSynth
         {
             get

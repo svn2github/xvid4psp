@@ -135,6 +135,7 @@
     </Compile>
     <Compile Include="classes\PowerManagement\PowerManagerExeptions.cs" />
     <Compile Include="classes\VirtualDubModWrapper.cs" />
+    <Compile Include="encoders\arguments\x262_arguments.cs" />
     <Compile Include="encoders\arguments\XviD_arguments.cs" />
     <Compile Include="classes\PresetLoader.cs" />
     <Compile Include="classes\Format.cs" />
@@ -189,6 +190,9 @@
     </Compile>
     <Compile Include="encoders\QAAC.xaml.cs">
       <DependentUpon>QAAC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="encoders\x262.xaml.cs">
+      <DependentUpon>x262.xaml</DependentUpon>
     </Compile>
     <Compile Include="encoders\XviD.xaml.cs">
       <DependentUpon>XviD.xaml</DependentUpon>
@@ -371,6 +375,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="encoders\QAAC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="encoders\x262.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -625,6 +633,8 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="pictures\warning.png" />
+    <Resource Include="pictures\logo_x262.png" />
     <Resource Include="pictures\logo_QAAC.png" />
     <Resource Include="pictures\Delete.png" />
     <Resource Include="pictures\Expand.png" />

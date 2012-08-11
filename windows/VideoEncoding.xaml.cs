@@ -18,6 +18,7 @@ namespace XviD4PSP
         private string old_vencoding;
 
         x264 x264c;
+        x262 x262c;
         XviD xvid;
         FMPEG4 mpeg4;
         FMPEG2 mpeg2;
@@ -108,6 +109,11 @@ namespace XviD4PSP
                 x264c = new x264(m, this, p);
                 grid_codec.Children.Add(x264c);
             }
+            else if (m.outvcodec == "x262")
+            {
+                x262c = new x262(m, this, p);
+                grid_codec.Children.Add(x262c);
+            }
             else if (m.outvcodec == "XviD")
             {
                 xvid = new XviD(m, this, p);
@@ -172,6 +178,11 @@ namespace XviD4PSP
                 grid_codec.Children.Remove(x264c);
                 x264c = null;
             }
+            else if (x262c != null)
+            {
+                grid_codec.Children.Remove(x262c);
+                x262c = null;
+            }
             else if (xvid != null)
             {
                 grid_codec.Children.Remove(xvid);
@@ -226,7 +237,7 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (oldm != null && x264c == null && xvid == null) UpdateMassive(); //CustomCLI
+            if (oldm != null && x264c == null && x262c == null && xvid == null) UpdateMassive(); //CustomCLI
             Close();
         }
 
@@ -275,6 +286,7 @@ namespace XviD4PSP
                 UnLoadCodecWindow();
 
                 m.x264options = new x264_arguments();
+                m.x262options = new x262_arguments();
                 m.XviD_options = new XviD_arguments();
                 m.ffmpeg_options = new ffmpeg_arguments();
 
@@ -308,6 +320,7 @@ namespace XviD4PSP
                 UpdateOutSize();
                 
                 if (x264c != null) x264c.UpdateCLI();
+                if (x262c != null) x262c.UpdateCLI();
                 if (xvid != null) xvid.UpdateCLI();
             }
         }
@@ -348,6 +361,11 @@ namespace XviD4PSP
             {
                 m = x264c.m.Clone();
                 m = x264.EncodeLine(m); //Обнуляет vpasses[x] и перезабивает заново на основе m.x264options (т.е. только предусмотренные ключи)
+            }
+            else if (x262c != null)
+            {
+                m = x262c.m.Clone();
+                m = x262.EncodeLine(m);
             }
             else if (xvid != null)
             {
@@ -399,6 +417,7 @@ namespace XviD4PSP
         private void UpdateCodecMassive()
         {
             if (x264c != null) x264c.m = m.Clone();
+            else if (x262c != null) x262c.m = m.Clone();
             else if (xvid != null) xvid.m = m.Clone();
             else if (mpeg1 != null) mpeg1.m = m.Clone();
             else if (mpeg2 != null) mpeg2.m = m.Clone();
@@ -439,6 +458,15 @@ namespace XviD4PSP
                 x264c.m.vpasses = PresetLoader.GetVCodecPasses(x264c.m);
                 x264c.m = PresetLoader.DecodePresets(x264c.m);
                 x264c.LoadFromProfile();
+            }
+            else if (x262c != null)
+            {
+                //забиваем настройки из профиля
+                x262c.m.vencoding = combo_profile.SelectedItem.ToString();
+                x262c.m.outvcodec = PresetLoader.GetVCodec(x262c.m);
+                x262c.m.vpasses = PresetLoader.GetVCodecPasses(x262c.m);
+                x262c.m = PresetLoader.DecodePresets(x262c.m);
+                x262c.LoadFromProfile();
             }
             else if (xvid != null)
             {
@@ -527,7 +555,8 @@ namespace XviD4PSP
         {
             if (m.outvcodec == "Copy") return;
 
-            if (x264c == null && xvid == null) UpdateMassive(); //CustomCLI
+            if (x264c == null && x262c == null && xvid == null)
+                UpdateMassive(); //CustomCLI
 
             string auto_name = m.outvcodec + " ";
             if (m.outvcodec == "HUFF" || m.outvcodec == "FFV1")
@@ -589,7 +618,7 @@ namespace XviD4PSP
             }
 
             //Не совсем понятно, зачем нужно перезагружаться с пресета, который мы только что сохранили..
-            if (x264c == null && xvid == null) //CustomCLI
+            if (x264c == null && x262c == null && xvid == null) //CustomCLI
             {
                 LoadProfileToCodec();
                 UpdateOutSize();
@@ -679,6 +708,7 @@ namespace XviD4PSP
             if (profile_was_changed)
             {
                 if (x264c != null) m = x264c.m.Clone();
+                else if (x262c != null) m = x262c.m.Clone();
                 else if (xvid != null) m = xvid.m.Clone();
             }
             else UpdateMassive();

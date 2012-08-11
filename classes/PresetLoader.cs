@@ -216,6 +216,7 @@ namespace XviD4PSP
         {
             //расшифровываем видео параметры
             if (m.outvcodec == "x264") m = x264.DecodeLine(m);
+            else if (m.outvcodec == "x262") m = x262.DecodeLine(m);
             else if (m.outvcodec == "XviD") m = XviD.DecodeLine(m);
             else if (m.outvcodec == "MPEG2") m = FMPEG2.DecodeLine(m);
             else if (m.outvcodec == "MPEG1") m = FMPEG1.DecodeLine(m);

@@ -1400,11 +1400,11 @@ namespace XviD4PSP
             else if (format == Format.ExportFormats.Mpeg2PS)
             {
                 #region MPEG2 PS
-                this.VCodecs = new string[] { "MPEG2" };
+                this.VCodecs = new string[] { "MPEG2", "x262" };
                 this.VCodecs_IsEditable = true;
                 this.Framerates = new string[] { "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940" };
                 this.Framerates_IsEditable = true;
-                this.Aspects = new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };
+                this.Aspects = new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.2100", "2.3529" };
                 this.Aspects_IsEditable = true;
                 this.MinW = 16; this.MinH = 16;
                 this.MidW = 1920; this.MidH = 1088;
@@ -1447,7 +1447,7 @@ namespace XviD4PSP
             else if (format == Format.ExportFormats.Mpeg2PAL || format == Format.ExportFormats.Mpeg2NTSC)
             {
                 #region MPEG2 PAL/NTSC
-                this.VCodecs = new string[] { "MPEG2" };
+                this.VCodecs = new string[] { "MPEG2", "x262" };
                 this.VCodecs_IsEditable = false;
                 this.Framerates_IsEditable = false;
                 this.Aspects = new string[] { "1.3333 (4:3)", "1.7778 (16:9)" };
@@ -1504,11 +1504,11 @@ namespace XviD4PSP
             else if (format == Format.ExportFormats.TS || format == Format.ExportFormats.M2TS)
             {
                 #region TS/M2TS
-                this.VCodecs = new string[] { "MPEG2", "x264" };
+                this.VCodecs = new string[] { "MPEG2", "x264", "x262" };
                 this.VCodecs_IsEditable = true;
                 this.Framerates = new string[] { "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940" };
                 this.Framerates_IsEditable = true;
-                this.Aspects = new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.3529" };
+                this.Aspects = new string[] { "1.3333 (4:3)", "1.7778 (16:9)", "1.8500", "2.2100", "2.3529" };
                 this.Aspects_IsEditable = true;
                 this.MinW = 16; this.MinH = 16;
                 this.MidW = 1920; this.MidH = 1088;
@@ -1560,7 +1560,7 @@ namespace XviD4PSP
             else if (format == Format.ExportFormats.Custom)
             {
                 #region Custom
-                this.VCodecs = new string[] { "x264", "MPEG1", "MPEG2", "MPEG4", "FLV1", "MJPEG", "HUFF", "FFV1", "XviD", "DV" };
+                this.VCodecs = new string[] { "x264", "x262", "MPEG1", "MPEG2", "MPEG4", "FLV1", "MJPEG", "HUFF", "FFV1", "XviD", "DV" };
                 this.VCodecs_IsEditable = true;
                 this.Framerates = new string[] { "0.000", "15.000", "18.000", "20.000", "23.976", "24.000", "25.000", "29.970", "30.000", "50.000", "59.940", "60.000", "120.000" };
                 this.Framerates_IsEditable = true;

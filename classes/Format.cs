@@ -163,7 +163,7 @@ namespace XviD4PSP
 
        public static string[] GetVCodecsList(ExportFormats format)
        {
-           //XviD x264 MPEG4 MPEG2 HUFF DV FLV1 FFV1
+           //XviD x264 x262 MPEG4 MPEG2 HUFF DV FLV1 FFV1
 
            switch (format)
            {
@@ -172,7 +172,7 @@ namespace XviD4PSP
                    return new string[] { "MPEG1" };
 
                case ExportFormats.BluRay:
-                   return new string[] { "MPEG2", "x264" };
+                   return new string[] { "MPEG2", "x264", "x262" };
 
                case ExportFormats.PmpAvc:
                    return new string[] { "x264", "MPEG4", "XviD" };
@@ -334,6 +334,7 @@ namespace XviD4PSP
                        m.outvcodec == "HUFF" ||
                        m.outvcodec == "FFV1" ||
                        m.outvcodec == "x264" ||
+                       m.outvcodec == "x262" ||
                        m.outvcodec == "XviD")
                    {
                        if (interlace_allowed)
@@ -1049,8 +1050,9 @@ namespace XviD4PSP
            {
                if (m.outvcodec == "x264")
                    return 90000;//16384;
-               else if (m.outvcodec == "MPEG2" ||
-                        m.outvcodec == "MPEG1")
+               else if (m.outvcodec == "x262" ||
+                   m.outvcodec == "MPEG2" ||
+                   m.outvcodec == "MPEG1")
                    return 90000;
                else if (m.outvcodec == "MJPEG")
                    return 90000;
@@ -1492,6 +1494,7 @@ namespace XviD4PSP
                    {
                        //Звука нет и видеокодер может кодировать сразу в нужный контейнер
                        if (m.outvcodec == "x264" && (ext == ".mkv" || ext == ".mp4" || ext == ".flv" || ext == ".264" || ext == ".h264") ||
+                           m.outvcodec == "x262" && (ext == ".mkv" || ext == ".mp4" || ext == ".flv" || ext == ".m2v" || ext == ".mpg") ||
                            m.outvcodec == "XviD" && (ext == ".avi") ||
                            m.outvcodec == "HUFF" ||
                            m.outvcodec == "FFV1" ||
@@ -1941,7 +1944,7 @@ namespace XviD4PSP
 
        public static Massive GetValidVEncodingMode(Massive m)
        {
-           //XviD x264 MPEG4 MPEG2 HUFF DV FLV1 FFV1
+           //XviD x264 x262 MPEG4 MPEG2 HUFF DV FLV1 FFV1
            if (m.outvcodec == "XviD")
            {
                if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
@@ -1952,7 +1955,7 @@ namespace XviD4PSP
                    m.encodingmode = Settings.EncodingModes.TwoPassSize;
            }
 
-           if (m.outvcodec == "x264")
+           if (m.outvcodec == "x264" || m.outvcodec == "x262")
            {
                if (m.encodingmode == Settings.EncodingModes.OnePassSize)
                    m.encodingmode = Settings.EncodingModes.TwoPassSize;

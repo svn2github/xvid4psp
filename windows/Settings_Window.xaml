@@ -49,8 +49,10 @@
 				<TabItem Header="Encoding" x:Name="tab_encoding">
 					<Grid Height="Auto">
 						<StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8,8,0,0">
-                            <CheckBox x:Name="check_show_ssim" Width="Auto" Height="Auto" Content="x264 SSIM" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Click="check_show_ssim_Click"/>
-                            <CheckBox x:Name="check_show_psnr" Width="Auto" Height="Auto" Content="x264 PSNR" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="16,0,0,0" VerticalAlignment="Top" Click="check_show_psnr_Click"/>
+                            <CheckBox x:Name="check_x264_ssim" Width="Auto" Height="Auto" Content="x264 SSIM" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Click="check_x264_ssim_Click"/>
+                            <CheckBox x:Name="check_x264_psnr" Width="Auto" Height="Auto" Content="x264 PSNR" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="16,0,0,0" VerticalAlignment="Top" Click="check_x264_psnr_Click"/>
+                            <CheckBox x:Name="check_x262_ssim" Width="Auto" Height="Auto" Content="x262 SSIM" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="30,0,0,0" VerticalAlignment="Top" Click="check_x262_ssim_Click"/>
+                            <CheckBox x:Name="check_x262_psnr" Width="Auto" Height="Auto" Content="x262 PSNR" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="16,0,0,0" VerticalAlignment="Top" Click="check_x262_psnr_Click"/>
                         </StackPanel>
                         <CheckBox x:Name="check_use_avs4x264" Width="Auto" Height="Auto" Content="Run x264 using avs4x264 proxy" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,30,0,0" VerticalAlignment="Top" Click="check_use_avs4x264_Click"/>
                         <CheckBox x:Name="check_show_arguments" Width="Auto" Height="Auto" Content="Show encoding arguments" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" HorizontalAlignment="Left" Margin="8,52,0,0" d:LayoutOverrides="Width, Height" VerticalAlignment="Top" Click="check_show_arguments_Click"/>

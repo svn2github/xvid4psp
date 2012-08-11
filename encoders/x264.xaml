@@ -30,7 +30,7 @@
                     <Label OpacityMask="{x:Null}" x:Name="text_preset_name" Content="Medium" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Center" Margin="0,156,0,0" VerticalAlignment="Top" />
                     <Slider x:Name="slider_preset" ToolTipService.ShowDuration="10000" Minimum="0" Maximum="9" TickFrequency="1" ValueChanged="slider_preset_ValueChanged" IsSnapToTickEnabled="True" TickPlacement="BottomRight" Foreground="White" Margin="4,184,4,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Style="{DynamicResource GlassSlider}" IsMoveToPointEnabled="True"/>
                     <CheckBox x:Name="check_lossless" Width="Auto" Height="Auto" Content="Lossless" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="7,224,0,10" VerticalAlignment="Top" Click="check_lossless_Click" />
-                    <CheckBox x:Name="check_slow_first" Width="130" Height="Auto" Content="Slow 1-st pass" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,224,4,10" VerticalAlignment="Top" Click="check_slow_first_Click" />
+                    <CheckBox x:Name="check_slow_first" Width="130" Height="Auto" Content="Slow 1-st pass" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,224,2,10" VerticalAlignment="Top" Click="check_slow_first_Click" />
                 </Grid>
             </TabItem>
             <TabItem Header="Motion" Width="58" Padding="0,2,0,2">
