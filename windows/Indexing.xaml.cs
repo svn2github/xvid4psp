@@ -48,7 +48,6 @@ namespace XviD4PSP
             prCurrent.Maximum = 100;
             Title = Languages.Translate("Indexing");
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
-            label_info.ToolTip = "DGIndex";
             this.ContentRendered += new EventHandler(Window_ContentRendered);
 
             //BackgroundWorker
@@ -182,7 +181,7 @@ namespace XviD4PSP
                 if (prCurrent.IsIndeterminate)
                 {
                     prCurrent.IsIndeterminate = false;
-                    label_info.Content = Languages.Translate("Indexing") + "...";
+                    label_info.Content = Languages.Translate("Indexing") + " (DGIndex)...";
                 }
 
                 prCurrent.Value = e.ProgressPercentage;

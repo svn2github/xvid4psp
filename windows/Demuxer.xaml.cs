@@ -7,12 +7,12 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
-
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace XviD4PSP
 {
@@ -26,12 +26,31 @@ namespace XviD4PSP
         private DemuxerMode mode;
         private string outfile;
 
-        private string encodertext;
         private bool IsAborted = false;
         public bool IsErrors = false;
         public string error_message;
         private int exit_code;
         private string source_file;
+
+        //Логи утилит
+        private StringBuilder encodertext = new StringBuilder();
+        private void AppendEncoderText(string text)
+        {
+            if (encodertext.Length > 0)
+            {
+                //Укорачиваем лог, если он слишком длинный
+                if (encodertext.Length > 5000)
+                {
+                    int new_line_pos = encodertext.ToString().IndexOf(Environment.NewLine, 500);
+                    if (new_line_pos <= 0) new_line_pos = 500;
+                    encodertext.Remove(0, new_line_pos);
+                    encodertext.Insert(0, ".....");
+                }
+
+                encodertext.Append(Environment.NewLine);
+            }
+            encodertext.Append(text);
+        }
 
         public Demuxer(Massive mass, DemuxerMode mode, string outfile)
         {
@@ -115,9 +134,9 @@ namespace XviD4PSP
             //Ловим ошибки, если они были
             if (avs.IsErrors)
             {
-                encodertext = avs.error_text;
+                AppendEncoderText(avs.error_text);
                 avs = null;
-                throw new Exception(encodertext);
+                throw new Exception(encodertext.ToString());
             }
 
             //чистим ресурсы
@@ -142,7 +161,7 @@ namespace XviD4PSP
             info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
-            encodertext = null;
+            encodertext.Length = 0;
 
             if (mode == DemuxerMode.ExtractAudio)
             {
@@ -181,24 +200,21 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                        double p = ((double)(ctime) / (double)m.induration.TotalSeconds) * 100.0;
-                        worker.ReportProgress((int)p);
+                        worker.ReportProgress((int)((ctime / m.induration.TotalSeconds) * 100.0));
                     }
                     else
                     {
-                        if (encodertext != null)
-                            encodertext += Environment.NewLine;
-                        encodertext += line;
+                        AppendEncoderText(line);
                     }
                 }
             }
 
             //чистим ресурсы
             exit_code = encoderProcess.ExitCode;
-            encodertext += encoderProcess.StandardError.ReadToEnd();
+            AppendEncoderText(encoderProcess.StandardError.ReadToEnd());
             encoderProcess.Close();
             encoderProcess.Dispose();
             encoderProcess = null;
@@ -206,10 +222,10 @@ namespace XviD4PSP
             if (IsAborted) return;
 
             //проверка на удачное завершение
-            if (exit_code != 0 && encodertext != null)
+            if (exit_code != 0 && encodertext.Length > 0)
             {
                 //Оставляем только последнюю строчку из всего лога
-                string[] log = encodertext.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                string[] log = encodertext.ToString().Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
                 throw new Exception(log[log.Length - 1]);
             }
             if (!File.Exists(outfile) || new FileInfo(outfile).Length == 0)
@@ -217,7 +233,7 @@ namespace XviD4PSP
                 if (mode == DemuxerMode.ExtractVideo) throw new Exception(Languages.Translate("Can`t find output video file!"));
                 if (mode == DemuxerMode.ExtractAudio) throw new Exception(Languages.Translate("Can`t find output audio file!"));
             }
-            encodertext = null;
+            encodertext.Length = 0;
         }
 
         private void demux_mp4box()
@@ -235,7 +251,7 @@ namespace XviD4PSP
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = false;
             info.CreateNoWindow = true;
-            encodertext = null;
+            encodertext.Length = 0;
 
             //удаляем старый файл
             SafeDelete(outfile);
@@ -257,7 +273,6 @@ namespace XviD4PSP
             string pat = @"(\d+)/(\d+)";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
-            int procent = 0;
 
             //первый проход
             while (!encoderProcess.HasExited)
@@ -267,16 +282,13 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
-                        procent = Convert.ToInt32(mat.Groups[1].Value);
-                        worker.ReportProgress(procent);
+                        worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
                     }
                     else
                     {
-                        if (encodertext != null)
-                            encodertext += Environment.NewLine;
-                        encodertext += line;
+                        AppendEncoderText(line);
                     }
                 }
             }
@@ -292,14 +304,14 @@ namespace XviD4PSP
             //проверка на удачное завершение
             if (exit_code != 0)
             {
-                throw new Exception(encodertext);
+                throw new Exception(encodertext.ToString());
             }
             if (!File.Exists(outfile) || new FileInfo(outfile).Length == 0)
             {
                 if (mode == DemuxerMode.ExtractVideo) throw new Exception(Languages.Translate("Can`t find output video file!"));
                 if (mode == DemuxerMode.ExtractAudio) throw new Exception(Languages.Translate("Can`t find output audio file!"));
             }
-            encodertext = null;
+            encodertext.Length = 0;
         }
 
         private void demux_dpg()
@@ -383,17 +395,14 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success == true)
+                    if (mat.Success)
                     {
                         int frame = Convert.ToInt32(mat.Groups[1].Value);
-                        double p = ((double)(frame) / (double)m.inframes) * 100.0;
-                        worker.ReportProgress((int)p);
+                        worker.ReportProgress((int)(((double)(frame) / (double)m.inframes) * 100.0));
                     }
                     else
                     {
-                        if (encodertext != null)
-                            encodertext += Environment.NewLine;
-                        encodertext += line;
+                        AppendEncoderText(line);
                     }
                 }
             }
@@ -432,7 +441,7 @@ namespace XviD4PSP
             }
 
             //перемещаем файл в правильное место
-            encodertext = null;
+            encodertext.Length = 0;
 
             SafeDelete(source_file + ".log");
         }
@@ -456,7 +465,7 @@ namespace XviD4PSP
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = false;
             info.CreateNoWindow = true;
-            encodertext = null;
+            encodertext.Length = 0;
 
             string charset = "";
             string _charset = Settings.MKVToolnix_Charset;
@@ -505,7 +514,6 @@ namespace XviD4PSP
             string pat = @"^[^\+].+:\s(\d+)%";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
-            int procent = 0;
 
             //первый проход
             while (!encoderProcess.HasExited)
@@ -517,21 +525,18 @@ namespace XviD4PSP
                     mat = r.Match(line);
                     if (mat.Success)
                     {
-                        procent = Convert.ToInt32(mat.Groups[1].Value);
-                        worker.ReportProgress(procent);
+                        worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
                     }
                     else if (line != "")
                     {
-                        if (encodertext != null)
-                            encodertext += Environment.NewLine;
-                        encodertext += line;
+                        AppendEncoderText(line);
                     }
                 }
             }
 
             //Дочитываем остатки лога, если что-то не успело считаться
             line = encoderProcess.StandardOutput.ReadToEnd();
-            if (!string.IsNullOrEmpty(line)) encodertext += Calculate.FilterLogMessage(r, line.Replace("\r\r\n", "\r\n"));
+            if (!string.IsNullOrEmpty(line)) AppendEncoderText(Calculate.FilterLogMessage(r, line.Replace("\r\r\n", "\r\n")));
 
             //чистим ресурсы
             exit_code = encoderProcess.ExitCode;
@@ -544,14 +549,14 @@ namespace XviD4PSP
             //проверка на удачное завершение
             if (exit_code < 0 || exit_code > 1) //1 - Warning, 2 - Error
             {
-                throw new Exception(encodertext);
+                throw new Exception(encodertext.ToString());
             }
             if (!File.Exists(outfile) || new FileInfo(outfile).Length == 0)
             {
                 if (mode == DemuxerMode.ExtractVideo) throw new Exception(Languages.Translate("Can`t find output video file!"));
                 if (mode == DemuxerMode.ExtractAudio) throw new Exception(Languages.Translate("Can`t find output audio file!"));
             }
-            encodertext = null;
+            encodertext.Length = 0;
         }
 
         private void worker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)

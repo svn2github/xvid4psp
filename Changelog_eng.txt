@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.304.0 (11.08.2012), main changes:
+﻿XviD4PSP 5.10.305.0 (18.08.2012), main changes:
 
+>>> (r305) Encoder, Decoder, Demuxer, Indexing_FFMS and FFInfo windows: improved performance of logging (utilities output).
 >>> (r304) Added support for x262.exe. But this encoder is highly experimental, use it at your own risk!
            Thanks to AkvenJan for the logo.
 >>> (r303) "FramerateDetector" window - removed.

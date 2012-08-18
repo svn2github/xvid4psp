@@ -131,12 +131,6 @@ namespace XviD4PSP
             {
                 //
             }
-
-            /*if (profile == x262.Profiles.High10)
-            {
-                //10-bit depth
-                _max_quant = 81;
-            }*/
         }
 
         public x262_arguments Clone()
@@ -274,32 +268,6 @@ namespace XviD4PSP
             }
         }
 
-        /*private string _direct = "none";
-        public string direct
-        {
-            get
-            {
-                return _direct;
-            }
-            set
-            {
-                _direct = value;
-            }
-        }*/
-
-        /*private int _bpyramid = 0;
-        public int bpyramid
-        {
-            get
-            {
-                return _bpyramid;
-            }
-            set
-            {
-                _bpyramid = value;
-            }
-        }*/
-
         private bool _altscan = false;
         public bool altscan
         {
@@ -325,58 +293,6 @@ namespace XviD4PSP
                 _weightp = value;
             }
         }
-
-        /*private bool _adaptivedct = false;
-        public bool adaptivedct
-        {
-            get
-            {
-                return _adaptivedct;
-            }
-            set
-            {
-                _adaptivedct = value;
-            }
-        }*/
-
-        /*private int _trellis = 0;
-        public int trellis
-        {
-            get
-            {
-                return _trellis;
-            }
-            set
-            {
-                _trellis = value;
-            }
-        }*/
-
-        /*private bool _mixedrefs = false;
-        public bool mixedrefs
-        {
-            get
-            {
-                return _mixedrefs;
-            }
-            set
-            {
-                _mixedrefs = value;
-            }
-        }*/
-
-        /*private bool _cabac = true;
-        public bool cabac
-        {
-            get
-            {
-                return _cabac;
-            }
-            set
-            {
-                _cabac = value;
-            }
-        }*/
 
         private bool _no_fastpskip = false;
         public bool no_fastpskip
@@ -507,19 +423,6 @@ namespace XviD4PSP
                 _psyrdo = value;
             }
         }
-
-        /*private decimal _psytrellis = 0.0m;
-        public decimal psytrellis
-        {
-            get
-            {
-                return _psytrellis;
-            }
-            set
-            {
-                _psytrellis = value;
-            }
-        }*/
 
         private string _threads = "auto";
         public string threads

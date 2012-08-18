@@ -170,10 +170,10 @@ namespace XviD4PSP
                     ff = new FFInfo();
                     ff.Open(infilepath);
 
-                    if (ff.info != null)
+                    if (ff.info.Length > 0)
                     {
                         string sortedinfo = "";
-                        string[] lines = ff.info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                        string[] lines = ff.info.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
                         foreach (string line in lines)
                         {
                             if (!line.StartsWith("  configuration:") &&

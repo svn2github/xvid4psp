@@ -15,6 +15,7 @@ using System.Timers;
 using System.Text.RegularExpressions;
 using System.Windows.Interop;
 using System.Collections;
+using System.Text;
 
 namespace XviD4PSP
 {
@@ -31,6 +32,26 @@ namespace XviD4PSP
         private int current = 0;
         private int total = 0;
 
+        //Лог ffmsindex
+        private StringBuilder encodertext = new StringBuilder();
+        private void AppendEncoderText(string text)
+        {
+            if (encodertext.Length > 0)
+            {
+                //Укорачиваем лог, если он слишком длинный
+                if (encodertext.Length > 5000)
+                {
+                    int new_line_pos = encodertext.ToString().IndexOf(Environment.NewLine, 500);
+                    if (new_line_pos <= 0) new_line_pos = 500;
+                    encodertext.Remove(0, new_line_pos);
+                    encodertext.Insert(0, ".....");
+                }
+
+                encodertext.Append(Environment.NewLine);
+            }
+            encodertext.Append(text);
+        }
+
         public Indexing_FFMS(Massive mass)
         {
             this.InitializeComponent();
@@ -42,7 +63,6 @@ namespace XviD4PSP
             total = m.infileslist.Length;
             Title = Languages.Translate("Indexing");
             text_info.Content = Languages.Translate("Please wait... Work in progress...");
-            text_info.ToolTip = "FFmpegSource2";
             this.ContentRendered += new EventHandler(Window_ContentRendered);
 
             //BackgroundWorker
@@ -97,10 +117,9 @@ namespace XviD4PSP
                     encoderProcess.Start();
                     encoderProcess.PriorityClass = ProcessPriorityClass.Normal;
                     encoderProcess.PriorityBoostEnabled = true;
+                    encodertext.Length = 0;
 
-                    string line;
-                    string ffindex_out = "";
-                    string pat = @"\.\.\.\s(\d+)%";
+                    string line, pat = @"\.\.\.\s(\d+)%";
                     Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                     Match mat;
 
@@ -113,24 +132,23 @@ namespace XviD4PSP
                             if (mat.Success)
                                 worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
                             else
-                                ffindex_out += line + "\r\n";
+                                AppendEncoderText(line);
                         }
                     }
 
                     //Ловим ошибки
-                    ffindex_out += encoderProcess.StandardOutput.ReadToEnd();
-                    if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && ffindex_out != null)
+                    AppendEncoderText(encoderProcess.StandardOutput.ReadToEnd());
+                    if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && encodertext.Length > 0)
                     {
                         //"index file already exists" - это не ошибка, игнорируем
-                        if (!ffindex_out.Contains("index file already exists"))
+                        if (!encodertext.ToString().Contains("index file already exists"))
                         {
                             //Отрезаем мусор
                             int start = 0;
-                            if ((start = ffindex_out.IndexOf("Indexing error")) >= 0)
-                                ffindex_out = ffindex_out.Substring(start);
-
-                            ffindex_out = ffindex_out.Trim();
-                            throw new Exception("FFIndex: " + ffindex_out);
+                            if ((start = encodertext.ToString().IndexOf("Indexing error")) >= 0)
+                                throw new Exception("FFIndex: " + encodertext.ToString().Substring(start).Trim());
+                            else
+                                throw new Exception("FFIndex: " + encodertext.ToString().Trim());
                         }
                     }
 
@@ -160,7 +178,7 @@ namespace XviD4PSP
                 if (prCurrent.IsIndeterminate)
                 {
                     prCurrent.IsIndeterminate = false;
-                    text_info.Content = Languages.Translate("Indexing") + "...";
+                    text_info.Content = Languages.Translate("Indexing") + " (FFMS2)...";
                 }
 
                 prCurrent.Value = e.ProgressPercentage;

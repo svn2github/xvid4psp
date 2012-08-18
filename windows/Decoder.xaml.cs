@@ -7,12 +7,12 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
-
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace XviD4PSP
 {
@@ -31,6 +31,25 @@ namespace XviD4PSP
         public string error_message;
         private int exit_code;
         private string source_file;
+
+        //Лог ffmpeg
+        private StringBuilder encodertext = new StringBuilder();
+        private void AppendEncoderText(string text)
+        {
+            if (encodertext.Length > 0)
+            {
+                //Укорачиваем лог, если он слишком длинный
+                if (encodertext.Length > 5000)
+                {
+                    int new_line_pos = encodertext.ToString().IndexOf(Environment.NewLine, 500);
+                    if (new_line_pos <= 0) new_line_pos = 500;
+                    encodertext.Remove(0, new_line_pos);
+                }
+
+                encodertext.Append(Environment.NewLine);
+            }
+            encodertext.Append(text);
+        }
 
         public Decoder(Massive mass, DecoderModes mode, string outfile)
         {
@@ -150,9 +169,7 @@ namespace XviD4PSP
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
 
-                string line;
-                string encodertext = null;
-                string pat = @"time=(\d+.\d+)";
+                string line, pat = @"time=(\d+.\d+)";
                 Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                 Match mat;
 
@@ -172,16 +189,14 @@ namespace XviD4PSP
                         }
                         else
                         {
-                            if (encodertext != null)
-                                encodertext += Environment.NewLine;
-                            encodertext += line;
+                            AppendEncoderText(line);
                         }
                     }
                 }
 
                 //чистим ресурсы
                 exit_code = encoderProcess.ExitCode;
-                encodertext += encoderProcess.StandardError.ReadToEnd();
+                AppendEncoderText(encoderProcess.StandardError.ReadToEnd());
                 encoderProcess.Close();
                 encoderProcess.Dispose();
                 encoderProcess = null;
@@ -189,10 +204,10 @@ namespace XviD4PSP
                 if (IsAborted) return;
 
                 //проверка на удачное завершение
-                if (exit_code != 0 && encodertext != null)
+                if (exit_code != 0 && encodertext.Length > 0)
                 {
                     //Оставляем только последнюю строчку из всего лога
-                    string[] log = encodertext.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                    string[] log = encodertext.ToString().Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
                     throw new Exception(log[log.Length - 1]);
                 }
                 if (!File.Exists(outfile) || new FileInfo(outfile).Length == 0)

@@ -15,7 +15,7 @@ namespace XviD4PSP
         private static object locker = new object();
         private Process encoderProcess = null;
         private string[] global_lines = null;
-        public string info = null;
+        public StringBuilder info = new StringBuilder();
 
         public void Open(string filepath)
         {
@@ -37,14 +37,14 @@ namespace XviD4PSP
             //Читаем лог
             while (encoderProcess != null && !encoderProcess.HasExited)
             {
-                info += encoderProcess.StandardError.ReadLine() + Environment.NewLine;
+                info.AppendLine(encoderProcess.StandardError.ReadLine());
             }
 
             //Дочитываем и сразу делим на строки
             if (encoderProcess != null)
             {
-                info += encoderProcess.StandardError.ReadToEnd();
-                if (info != null) global_lines = info.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                info.Append(encoderProcess.StandardError.ReadToEnd());
+                if (info.Length > 0) global_lines = info.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
             }
         }
 
@@ -72,14 +72,14 @@ namespace XviD4PSP
                 }
             }
 
-            info = null;
+            info.Length = 0;
             global_lines = null;
         }
 
         private bool SearchRegEx(string pattern, out string value)
         {
             value = "";
-            if (info == null) return false;
+            if (info.Length == 0) return false;
 
             Regex r = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             foreach (string line in global_lines)
@@ -96,7 +96,7 @@ namespace XviD4PSP
 
         private string SearchRegEx(string pattern, string _default)
         {
-            if (info == null) return _default;
+            if (info.Length == 0) return _default;
 
             Regex r = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             foreach (string line in global_lines)
@@ -109,7 +109,7 @@ namespace XviD4PSP
 
         private int SearchRegEx(string pattern, int _default)
         {
-            if (info == null) return _default;
+            if (info.Length == 0) return _default;
 
             Regex r = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             foreach (string line in global_lines)
@@ -124,7 +124,7 @@ namespace XviD4PSP
         public int StreamsCount()
         {
             int streams = 0;
-            if (info != null)
+            if (info.Length > 0)
             {
                 Regex r = new Regex(@"^\s+Stream\s\#0\.", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                 foreach (string line in global_lines)
@@ -146,7 +146,7 @@ namespace XviD4PSP
         public ArrayList VideoStreams()
         {
             ArrayList v_streams = new ArrayList();
-            if (info != null)
+            if (info.Length > 0)
             {
                 //Stream #0.0[0x1e0]: Video:
                 Regex r = new Regex(@"^\s+Stream\s\#0\.(\d+).+Video:", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -169,7 +169,7 @@ namespace XviD4PSP
         public ArrayList AudioStreams()
         {
             ArrayList a_streams = new ArrayList();
-            if (info != null)
+            if (info.Length > 0)
             {
                 //Stream #0.1[0x1c0]: Audio:
                 Regex r = new Regex(@"^\s+Stream\s\#0\.(\d+).+Audio:", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -248,7 +248,7 @@ namespace XviD4PSP
 
         public int StreamChannels(int stream)
         {
-            if (info != null)
+            if (info.Length > 0)
             {
                 string value = "";
                 //Stream #0.1[0x1c0]: Audio: mp2, 48000 Hz, 2 channels,
@@ -303,7 +303,7 @@ namespace XviD4PSP
 
         public int VideoBitrate(int stream)
         {
-            if (info != null)
+            if (info.Length > 0)
             {
                 string value = "";
                 if (SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+Video.+,\s(\d+)\skb", out value))
@@ -343,7 +343,7 @@ namespace XviD4PSP
 
         public double CalculatePAR(int stream)
         {
-            if (info != null)
+            if (info.Length > 0)
             {
                 string value = "";
                 if (Settings.MI_Original_AR && SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\[PAR\s(\d+:\d+)\s", out value)) //В скобках [] - значение из потока
@@ -383,7 +383,7 @@ namespace XviD4PSP
 
         public double CalculateDAR(int stream)
         {
-            if (info != null)
+            if (info.Length > 0)
             {
                 string value = "";
                 if (Settings.MI_Original_AR && SearchRegEx(@"^\s+Stream\s\#0\." + stream + @"\D.+\sDAR\s(\d+:\d+)\]", out value)) //В скобках [] - значение из потока
