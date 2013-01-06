@@ -1,4 +1,4 @@
-﻿//(XviD4PSP5) modded version, 2012
+﻿//(XviD4PSP5) modded version, 2012-2013
 /*
  * Copyright (c) 2004-2008 Mike Matsnev.  All Rights Reserved.
  * 
@@ -18,6 +18,7 @@
 #include <dvdmedia.h>
 #include <ks.h>
 #include <ksmedia.h>
+#include <comdef.h>
 
 #include "utils.h"
 #include "guids.h"
@@ -78,16 +79,19 @@ HRESULT LoadSplitterFromFile(IFileSourceFilter **pFSource, volatile HMODULE *hMo
 
 	if (!*hModule)
 	{
-		char VarPath[MAX_PATH], LibPath[MAX_PATH];
-		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), VarPath, MAX_PATH);  //Полный путь к DSS2
-		PathRemoveFileSpecA(VarPath);                                               //Отсекаем имя файла
-		PathCombineA(LibPath, VarPath, subDir);                                     //Добавляем подпапку
-		GetCurrentDirectoryA(MAX_PATH, VarPath);                                    //Запоминаем текущую директорию
-		SetCurrentDirectoryA(LibPath);                                              //Меняем её на директорию с загружаемой длл (иначе не подгрузятся связанные с ней dll)
+		char OurPath[MAX_PATH], LibPath[MAX_PATH];
+		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), OurPath, MAX_PATH);  //Полный путь к DSS2
+		PathRemoveFileSpecA(OurPath);                                               //Отсекаем имя файла
+		PathCombineA(LibPath, OurPath, subDir);                                     //Добавляем подпапку
 		PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
-		*hModule = LoadLibraryA(LibPath);                                           //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
-		SetCurrentDirectoryA(VarPath);                                              //Восстанавливаем текущую директорию
-		if (!*hModule) { strncpy_s(err, err_len, "LoadLibrary: ", _TRUNCATE); return E_FAIL; }
+		*hModule = LoadLibraryExA(LibPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);    //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+		if (!*hModule)
+		{
+			DWORD res = GetLastError();
+			_com_error error(HRESULT_FROM_WIN32(res));
+			_snprintf_s(err, err_len, _TRUNCATE, "LoadLibrary: (%lu) %s\n", res, error.ErrorMessage());
+			return E_FAIL;
+		}
 	}
 
 	pDllGetClassObject = (DllGetClassObjectFunc)GetProcAddress(*hModule, "DllGetClassObject");
@@ -111,16 +115,19 @@ HRESULT LoadFilterFromFile(IBaseFilter **pBFilter, volatile HMODULE *hModule, co
 
 	if (!*hModule)
 	{
-		char VarPath[MAX_PATH], LibPath[MAX_PATH];
-		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), VarPath, MAX_PATH);  //Полный путь к DSS2
-		PathRemoveFileSpecA(VarPath);                                               //Отсекаем имя файла
-		PathCombineA(LibPath, VarPath, subDir);                                     //Добавляем подпапку
-		GetCurrentDirectoryA(MAX_PATH, VarPath);                                    //Запоминаем текущую директорию
-		SetCurrentDirectoryA(LibPath);                                              //Меняем её на директорию с загружаемой длл (иначе не подгрузятся связанные с ней dll)
+		char OurPath[MAX_PATH], LibPath[MAX_PATH];
+		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), OurPath, MAX_PATH);  //Полный путь к DSS2
+		PathRemoveFileSpecA(OurPath);                                               //Отсекаем имя файла
+		PathCombineA(LibPath, OurPath, subDir);                                     //Добавляем подпапку
 		PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
-		*hModule = LoadLibraryA(LibPath);                                           //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
-		SetCurrentDirectoryA(VarPath);                                              //Восстанавливаем текущую директорию
-		if (!*hModule) { strncpy_s(err, err_len, "LoadLibrary: ", _TRUNCATE); return E_FAIL; }
+		*hModule = LoadLibraryExA(LibPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);    //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+		if (!*hModule)
+		{
+			DWORD res = GetLastError();
+			_com_error error(HRESULT_FROM_WIN32(res));
+			_snprintf_s(err, err_len, _TRUNCATE, "LoadLibrary: (%lu) %s\n", res, error.ErrorMessage());
+			return E_FAIL;
+		}
 	}
 
 	pDllGetClassObject = (DllGetClassObjectFunc)GetProcAddress(*hModule, "DllGetClassObject");

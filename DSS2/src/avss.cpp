@@ -1,4 +1,4 @@
-﻿//(XviD4PSP5) modded version, 2012
+﻿//(XviD4PSP5) modded version, 2012-2013
 /*
  * Copyright (c) 2004-2008 Mike Matsnev.  All Rights Reserved.
  * 
@@ -63,7 +63,8 @@ class DSS2 : public IClip
 	CComPtr<IMediaSeeking>  m_pGS;
 	HANDLE                  m_hFrameReady;
 	bool                    m_registered;
-	DWORD                   m_rot_cookie;
+	DWORD                   m_rot_cookie,
+		                    m_timeout;
 
 	VideoInfo               m_vi;
 	__int64                 m_avgframe;
@@ -391,8 +392,8 @@ class DSS2 : public IClip
 		if (FAILED(hr = mc->GetState(2000, &fs))) {
 			SetError("GetState: ", err); return hr; }
 
-		// wait for the first frame to arrive (up to 10s) //5s
-		if (WaitForSingleObject(m_hFrameReady, 10000) != WAIT_OBJECT_0) {
+		// wait for the first frame to arrive
+		if (WaitForSingleObject(m_hFrameReady, m_timeout) != WAIT_OBJECT_0) {
 			SetError("Wait for FrameReady: ", err); return VFW_E_TIMEOUT; }
 
 		__int64 defd;
@@ -558,8 +559,8 @@ class DSS2 : public IClip
 	{
 		while (true)
 		{
-			//Ждем не дольше 10-ти сек., т.к. ждать INFINITE - слишком долго :)
-			if (WaitForSingleObject(m_hFrameReady, 10000) != WAIT_OBJECT_0)
+			//Ждем не дольше установленного лимита времени
+			if (WaitForSingleObject(m_hFrameReady, m_timeout) != WAIT_OBJECT_0)
 			{
 				//Запоминаем номер кадра, получая который мы зависли
 				m_do_not_trespass = fn;
@@ -608,6 +609,7 @@ public:
 		m_qmax(10),                 //Макс. кол-во кадров, хранимых в кэше, а так-же размер кэшируемого "прыжка назад" при последовательном чтении в обратную сторону.
 		m_seek_thr(100),            //Порог для сикинга вперёд. Если требуемый кадр дальше от текущего на эту величину - будет сикинг, иначе будем ползти покадрово.
 		m_preroll(0),               //На сколько кадров "недосикивать" (т.е. отступ при сикинге), оставшееся будет пройдено покадрово - помогает выдать нужный кадр на "плохосикающихся" файлах.
+		m_timeout(30000),           //Лимит времени для WaitForSingleObject (ожидание готовности m_hFrameReady).
 		m_do_not_trespass(INT_MAX)  //Номер кадра, дальше которого двигаться нельзя (конец файла\потока).
 	{                               //P.S. Актуальные дефолты перенесены отсюда в Create_DSS2()
 		m_hFrameReady = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -620,11 +622,12 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types)
+	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types, DWORD timeout)
 	{
 		m_qmax = cache;
 		m_seek_thr = seekthr;
 		m_preroll = preroll;
+		m_timeout = timeout;
 
 		return Open(filename, err, avgframe, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types);
 	}
@@ -793,6 +796,7 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	bool flipv = args[10].AsBool(false);                                                         //flipv      (def=false)
 	bool fliph = args[11].AsBool(false);                                                         //fliph      (def=false)
 	const char *pixel_type = args[12].AsString("");                                              //pixel_type (def="")
+	DWORD timeout = max(args[13].AsInt(30), 0);                                                  //timeout    (>=0, def=30)
 
 	unsigned int pixel_types = (IVS_RGB24|IVS_RGB32|IVS_YUY2|IVS_YV12);
 	if (strlen(pixel_type) > 0)
@@ -805,10 +809,12 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 		else env->ThrowError("DSS2: Valid values for \"pixel_type\" are (choose only one): \"YV12\", \"YUY2\", \"RGB24\", \"RGB32\" or \"RGB\"!");
 	}
 
+	timeout = (timeout == 0) ? INFINITE : (timeout * 1000);
+
 	DSS2 *dss2 = new DSS2();
 	char err[ERRMSG_LEN] = {0};
 
-	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types);
+	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types, timeout);
 	if (FAILED(hr))
 	{
 		delete dss2;
@@ -840,6 +846,6 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
 {
 #endif
-	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[lavf_path]s[dvs_path]s[flipv]b[fliph]b[pixel_type]s", Create_DSS2, 0);
+	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[lavf_path]s[dvs_path]s[flipv]b[fliph]b[pixel_type]s[timeout]i", Create_DSS2, 0);
 	return "DSS2";
 }

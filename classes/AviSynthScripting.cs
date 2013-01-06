@@ -667,15 +667,15 @@ namespace XviD4PSP
            //вписываем параметры для гистограммы
            if (m.histogram != "Disabled")
                m.script += "Histogram(\"" + m.histogram + "\")" + Environment.NewLine;
-           
+
            //добавляем субтитры
            if (m.subtitlepath != null)
            {
                string subext = Path.GetExtension(m.subtitlepath).ToLower();
                if (subext == ".idx")
-                    m.script += "VobSub(\"" + m.subtitlepath + "\")";
+                   m.script += "VobSub(\"" + m.subtitlepath + "\")" + Environment.NewLine;
                else
-                    m.script += "TextSub(\"" + m.subtitlepath + "\")";
+                   m.script += "TextSub(\"" + m.subtitlepath + "\")" + Environment.NewLine;
            }
 
            //Смена частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)

@@ -62,7 +62,7 @@ BEGIN
     "            VALUE ""FileDescription"", ""DSS2 - DirectShow source plugin for AviSynth 2.5""\r\n"
     "#endif\r\n"
     "            VALUE ""FileVersion"", AVSS_VER_S\r\n"
-    "            VALUE ""LegalCopyright"", ""Created by Haali, modded by fcp. 2004-2008, 2012.""\r\n"
+    "            VALUE ""LegalCopyright"", ""Created by Haali, modded by fcp. 2004-2008, 2012-2013.""\r\n"
     "            VALUE ""OriginalFilename"", ""avss.dll""\r\n"
     "            VALUE ""ProductName"", ""DSS2""\r\n"
     "        END\r\n"
@@ -111,7 +111,7 @@ BEGIN
             VALUE "FileDescription", "DSS2 - DirectShow source plugin for AviSynth 2.5"
 #endif
             VALUE "FileVersion", AVSS_VER_S
-            VALUE "LegalCopyright", "Created by Haali, modded by fcp. 2004-2008, 2012."
+            VALUE "LegalCopyright", "Created by Haali, modded by fcp. 2004-2008, 2012-2013."
             VALUE "OriginalFilename", "avss.dll"
             VALUE "ProductName", "DSS2"
         END

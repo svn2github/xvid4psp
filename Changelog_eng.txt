@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.305.0 (18.08.2012), main changes:
+﻿XviD4PSP 5.10.306.0 (06.01.2013), main changes:
 
+>>> (r306) DSS2: waiting timeout for decoded frame was increased from 10 to 30 seconds, but it can be
+           adjusted via "timeout" (int) key.
+>>> (r306) DSS2: changed the way how the filters is loaded in "portable" mode (rep. by Alfa Romeo).
 >>> (r305) Encoder, Decoder, Demuxer, Indexing_FFMS and FFInfo windows: improved performance of logging (utilities output).
 >>> (r304) Added support for x262.exe. But this encoder is highly experimental, use it at your own risk!
            Thanks to AkvenJan for the logo.

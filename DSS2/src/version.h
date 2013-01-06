@@ -4,8 +4,8 @@
 //
 
 //dll info
-#define AVSS_VER_N  2,0,0,8
-#define AVSS_VER_S "2.0.0.8"
+#define AVSS_VER_N  2,0,0,9
+#define AVSS_VER_S "2.0.0.9"
 
 // Next default values for new objects
 // 
