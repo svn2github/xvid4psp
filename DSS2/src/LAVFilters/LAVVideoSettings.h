@@ -78,7 +78,7 @@ typedef enum LAVVideoCodec {
   Codec_FFV1,
   Codec_v210,
 
-  Codec_NB            // Number of entrys (do not use when dynamically linking)
+  Codec_VideoNB            // Number of entrys (do not use when dynamically linking)
 };
 
 // Codecs with hardware acceleration
@@ -87,9 +87,15 @@ typedef enum LAVVideoHWCodec {
   HWCodec_VC1   = Codec_VC1,
   HWCodec_MPEG2 = Codec_MPEG2,
   HWCodec_MPEG4 = Codec_MPEG4,
+  HWCodec_MPEG2DVD,
 
-  HWCodec_NB    = HWCodec_MPEG4 + 1
+  HWCodec_NB    = HWCodec_MPEG2DVD + 1
 };
+
+// Flags for HW Resolution support
+#define LAVHWResFlag_SD      0x0001
+#define LAVHWResFlag_HD      0x0002
+#define LAVHWResFlag_UHD     0x0004
 
 // Type of hardware accelerations
 typedef enum LAVHWAccel {
@@ -104,7 +110,7 @@ typedef enum LAVHWAccel {
 // Deinterlace algorithms offered by the hardware decoders
 typedef enum LAVHWDeintModes {
   HWDeintMode_Weave,
-  HWDeintMode_BOB,
+  HWDeintMode_BOB, // Deprecated
   HWDeintMode_Hardware
 };
 
@@ -112,6 +118,14 @@ typedef enum LAVHWDeintModes {
 typedef enum LAVSWDeintModes {
   SWDeintMode_None,
   SWDeintMode_YADIF
+};
+
+// Deinterlacing processing mode
+typedef enum LAVDeintMode {
+  DeintMode_Auto,
+  DeintMode_Aggressive,
+  DeintMode_Force,
+  DeintMode_Disable
 };
 
 // Type of deinterlacing to perform
@@ -192,15 +206,17 @@ interface ILAVVideoSettings : public IUnknown
 
   // Set wether the aspect ratio encoded in the stream should be forwarded to the renderer,
   // or the aspect ratio specified by the source filter should be kept.
-  // TRUE  = AR from the Stream
-  // FALSE = AR from the source filter
-  STDMETHOD(SetStreamAR)(BOOL bStreamAR) = 0;
+  // 0 = AR from the source filter
+  // 1 = AR from the Stream
+  // 2 = AR from stream if source is not reliable
+  STDMETHOD(SetStreamAR)(DWORD bStreamAR) = 0;
 
   // Get wether the aspect ratio encoded in the stream should be forwarded to the renderer,
   // or the aspect ratio specified by the source filter should be kept.
-  // TRUE  = AR from the Stream
-  // FALSE = AR from the source filter
-  STDMETHOD_(BOOL,GetStreamAR)() = 0;
+  // 0 = AR from the source filter
+  // 1 = AR from the Stream
+  // 2 = AR from stream if source is not reliable
+  STDMETHOD_(DWORD,GetStreamAR)() = 0;
 
   // Configure which pixel formats are enabled for output
   // If pixFmt is invalid, Get will return FALSE and Set E_FAIL
@@ -221,16 +237,16 @@ interface ILAVVideoSettings : public IUnknown
   // get the deinterlacing field order of the hardware decoder
   STDMETHOD_(LAVDeintFieldOrder, GetDeintFieldOrder)() = 0;
 
-  // Set wether all frames should be deinterlaced if the stream is flagged interlaced
+  // DEPRECATED, use SetDeinterlacingMode
   STDMETHOD(SetDeintAggressive)(BOOL bAggressive) = 0;
 
-  // Get wether all frames should be deinterlaced if the stream is flagged interlaced
+  // DEPRECATED, use GetDeinterlacingMode
   STDMETHOD_(BOOL, GetDeintAggressive)() = 0;
 
-  // Set wether all frames should be deinterlaced, even ones marked as progressive
+  // DEPRECATED, use SetDeinterlacingMode
   STDMETHOD(SetDeintForce)(BOOL bForce) = 0;
 
-  // Get wether all frames should be deinterlaced, even ones marked as progressive
+  // DEPRECATED, use GetDeinterlacingMode
   STDMETHOD_(BOOL, GetDeintForce)() = 0;
 
   // Check if the specified HWAccel is supported
@@ -284,10 +300,10 @@ interface ILAVVideoSettings : public IUnknown
   // Get the software deinterlacing output
   STDMETHOD_(LAVDeintOutput, GetSWDeintOutput)() = 0;
 
-  // Set wether all content is treated as progressive, and any interlaced flags are ignored
+  // DEPRECATED, use SetDeinterlacingMode
   STDMETHOD(SetDeintTreatAsProgressive)(BOOL bEnabled) = 0;
 
-  // Get wether all content is treated as progressive, and any interlaced flags are ignored
+  // DEPRECATED, use GetDeinterlacingMode
   STDMETHOD_(BOOL, GetDeintTreatAsProgressive)() = 0;
 
   // Set the dithering mode used
@@ -301,6 +317,32 @@ interface ILAVVideoSettings : public IUnknown
 
   // Get if the MS WMV9 DMO Decoder should be used for VC-1/WMV3
   STDMETHOD_(BOOL, GetUseMSWMV9Decoder)() = 0;
+
+  // Set if DVD Video support is enabled
+  STDMETHOD(SetDVDVideoSupport)(BOOL bEnabled) = 0;
+
+  // Get if DVD Video support is enabled
+  STDMETHOD_(BOOL,GetDVDVideoSupport)() = 0;
+
+  // Set the HW Accel Resolution Flags
+  // flags: bitmask of LAVHWResFlag flags
+  STDMETHOD(SetHWAccelResolutionFlags)(DWORD dwResFlags) = 0;
+
+  // Get the HW Accel Resolution Flags
+  // flags: bitmask of LAVHWResFlag flags
+  STDMETHOD_(DWORD, GetHWAccelResolutionFlags)() = 0;
+
+  // Toggle Tray Icon
+  STDMETHOD(SetTrayIcon)(BOOL bEnabled) = 0;
+
+  // Get Tray Icon
+  STDMETHOD_(BOOL,GetTrayIcon)() = 0;
+
+  // Set the Deint Mode
+  STDMETHOD(SetDeinterlacingMode)(LAVDeintMode deintMode) = 0;
+
+  // Get the Deint Mode
+  STDMETHOD_(LAVDeintMode,GetDeinterlacingMode)() = 0;
 };
 
 // LAV Video status interface

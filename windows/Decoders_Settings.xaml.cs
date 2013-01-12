@@ -982,7 +982,7 @@ namespace XviD4PSP
             textbox_lavs_subsa.ToolTip = Languages.Translate("Please refer to MUXER documentation for more info").Replace("MUXER", "LAV Filters") + ".\r\n" + Languages.Translate("Separate by comma.") +
                 "\r\n\r\n" + _def + Languages.Translate("(empty)");
 
-            //"l3 vc2 sm2 sl[] sa[]"
+            //"l3 vc2 sm2 sl[] sa[] ti0"
             string s = Settings.DSS2_LAVS_Settings.ToLower();
             bool l_args = false, a_args = false;
 
@@ -1104,18 +1104,27 @@ namespace XviD4PSP
             combo_lavd_hw.Tag = _def + "Disabled";
             combo_lavd_hw.SelectedIndex = 0;
 
-            check_dss2_hw_h264.IsChecked = true;
-            check_dss2_hw_vc1.IsChecked = true;
-            check_dss2_hw_mpeg2.IsChecked = true;
-            check_dss2_hw_mpeg4.IsChecked = false;
-
             string txt = Languages.Translate("Enable hardware decoding for this codec") + "\r\n\r\n";
             check_dss2_hw_h264.ToolTip = txt + _def + on;
             check_dss2_hw_vc1.ToolTip = txt + _def + on;
             check_dss2_hw_mpeg2.ToolTip = txt + _def + on;
             check_dss2_hw_mpeg4.ToolTip = txt + _def + off;
 
-            //"l3 t0 r0 d1 dm0 fo0 sd0 vc1 hm0 hc7 hd0 hq0"
+            check_dss2_hw_h264.IsChecked = true;
+            check_dss2_hw_vc1.IsChecked = true;
+            check_dss2_hw_mpeg2.IsChecked = true;
+            check_dss2_hw_mpeg4.IsChecked = false;
+
+            txt = Languages.Translate("Enable hardware decoding for this resolution");
+            check_dss2_hw_sd.ToolTip = txt + " ( <= 1024x576)\r\n\r\n" + _def + on;
+            check_dss2_hw_hd.ToolTip = txt + " ( <= 1980x1200)\r\n\r\n" + _def + on;
+            check_dss2_hw_uhd.ToolTip = txt + " ( > 1980x1200)\r\n\r\n" + _def + off;
+
+            check_dss2_hw_sd.IsChecked = true;
+            check_dss2_hw_hd.IsChecked = true;
+            check_dss2_hw_uhd.IsChecked = false;
+
+            //"l3 t0 r0 d1 dm0 fo0 sd0 vc1 hm0 hc7 hr3 hd0 hq0 ti0"
             string s = Settings.DSS2_LAVV_Settings.ToLower();
 
             for (int i = 0; i < s.Length; i++)
@@ -1187,7 +1196,15 @@ namespace XviD4PSP
                         check_dss2_hw_mpeg4.IsChecked = ((val & 8) > 0);
                         i += 2;
                     }
-                    else if (next_ch == 'd' || next_ch == 'q') //hd - HW Deint (от 0 до 4), hq - HW Deint HQ (0 = false, 1+ = true)
+                    else if (next_ch == 'r') //hr - HW Resolutions (от 0 до 7)
+                    {
+                        int val = Math.Min(nnext_i, 7);
+                        check_dss2_hw_sd.IsChecked = ((val & 1) > 0);
+                        check_dss2_hw_hd.IsChecked = ((val & 2) > 0);
+                        check_dss2_hw_uhd.IsChecked = ((val & 4) > 0);
+                        i += 2;
+                    }
+                    else if (next_ch == 'd' || next_ch == 'q') //hd - HW Deint (от 0 до 2), hq - HW Deint HQ (0 = false, 1+ = true)
                     {
                         i += 2;
                     }
@@ -1250,18 +1267,22 @@ namespace XviD4PSP
 
         private void StoreLAVVSettings()
         {
-            int n = 0;
+            int cod = 0, res = 0;
             string val = (combo_lavd_loading.SelectedIndex == 1) ? "L3" : "L0";
             if (combo_lavd_threads.SelectedIndex > 0) val += "t" + combo_lavd_threads.SelectedIndex;
             if (combo_lavd_range.SelectedIndex > 0) val += "r" + combo_lavd_range.SelectedIndex;
             if (combo_lavd_dither.SelectedIndex != 1) val += "d" + combo_lavd_dither.SelectedIndex;
             if (combo_lavd_vc1.SelectedIndex != 1) val += "vc" + combo_lavd_vc1.SelectedIndex;
             if (combo_lavd_hw.SelectedIndex > 0) val += "hm" + combo_lavd_hw.SelectedIndex;
-            if (check_dss2_hw_h264.IsChecked.Value) n += 1;
-            if (check_dss2_hw_vc1.IsChecked.Value) n += 2;
-            if (check_dss2_hw_mpeg2.IsChecked.Value) n += 4;
-            if (check_dss2_hw_mpeg4.IsChecked.Value) n += 8;
-            if (n != 7) val += "hc" + n;
+            if (check_dss2_hw_h264.IsChecked.Value) cod += 1;
+            if (check_dss2_hw_vc1.IsChecked.Value) cod += 2;
+            if (check_dss2_hw_mpeg2.IsChecked.Value) cod += 4;
+            if (check_dss2_hw_mpeg4.IsChecked.Value) cod += 8;
+            if (check_dss2_hw_sd.IsChecked.Value) res += 1;
+            if (check_dss2_hw_hd.IsChecked.Value) res += 2;
+            if (check_dss2_hw_uhd.IsChecked.Value) res += 4;
+            if (cod != 7) val += "hc" + cod;
+            if (res != 3) val += "hr" + res;
             Settings.DSS2_LAVV_Settings = val;
         }
     }

@@ -14,6 +14,7 @@
 #include <atlstr.h>
 #include <atlcom.h>
 
+#include <streams.h>
 #include <dshow.h>
 #include <dvdmedia.h>
 #include <ks.h>
@@ -25,6 +26,9 @@
 #include "VideoSink.h"
 #include ".\LAVFilters\LAVSplitterSettings.h"
 #include ".\LAVFilters\LAVVideoSettings.h"
+
+//Локеры для защиты кода с LoadLibrary от нескольких потоков
+static CCritSec csLockForSplitter, csLockForFilter;
 
 CComPtr<IPin> GetPin(IBaseFilter *pF, bool include_connected, PIN_DIRECTION dir, const GUID *pMT)
 {
@@ -79,18 +83,24 @@ HRESULT LoadSplitterFromFile(IFileSourceFilter **pFSource, volatile HMODULE *hMo
 
 	if (!*hModule)
 	{
-		char OurPath[MAX_PATH], LibPath[MAX_PATH];
-		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), OurPath, MAX_PATH);  //Полный путь к DSS2
-		PathRemoveFileSpecA(OurPath);                                               //Отсекаем имя файла
-		PathCombineA(LibPath, OurPath, subDir);                                     //Добавляем подпапку
-		PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
-		*hModule = LoadLibraryExA(LibPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);    //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+		//Блокировка для других потоков
+		CAutoLock cObjectLock(&csLockForSplitter);
+
 		if (!*hModule)
 		{
-			DWORD res = GetLastError();
-			_com_error error(HRESULT_FROM_WIN32(res));
-			_snprintf_s(err, err_len, _TRUNCATE, "LoadLibrary: (%lu) %s\n", res, error.ErrorMessage());
-			return E_FAIL;
+			char OurPath[MAX_PATH], LibPath[MAX_PATH];
+			GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), OurPath, MAX_PATH);  //Полный путь к DSS2
+			PathRemoveFileSpecA(OurPath);                                               //Отсекаем имя файла
+			PathCombineA(LibPath, OurPath, subDir);                                     //Добавляем подпапку
+			PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
+			*hModule = LoadLibraryExA(LibPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);    //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+			if (!*hModule)
+			{
+				DWORD res = GetLastError();
+				_com_error error(HRESULT_FROM_WIN32(res));
+				_snprintf_s(err, err_len, _TRUNCATE, "LoadLibrary: (%lu) %s\n", res, error.ErrorMessage());
+				return E_FAIL;
+			}
 		}
 	}
 
@@ -115,18 +125,24 @@ HRESULT LoadFilterFromFile(IBaseFilter **pBFilter, volatile HMODULE *hModule, co
 
 	if (!*hModule)
 	{
-		char OurPath[MAX_PATH], LibPath[MAX_PATH];
-		GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), OurPath, MAX_PATH);  //Полный путь к DSS2
-		PathRemoveFileSpecA(OurPath);                                               //Отсекаем имя файла
-		PathCombineA(LibPath, OurPath, subDir);                                     //Добавляем подпапку
-		PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
-		*hModule = LoadLibraryExA(LibPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);    //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+		//Блокировка для других потоков
+		CAutoLock cObjectLock(&csLockForFilter);
+
 		if (!*hModule)
 		{
-			DWORD res = GetLastError();
-			_com_error error(HRESULT_FROM_WIN32(res));
-			_snprintf_s(err, err_len, _TRUNCATE, "LoadLibrary: (%lu) %s\n", res, error.ErrorMessage());
-			return E_FAIL;
+			char OurPath[MAX_PATH], LibPath[MAX_PATH];
+			GetModuleFileNameA(_AtlBaseModule.GetModuleInstance(), OurPath, MAX_PATH);  //Полный путь к DSS2
+			PathRemoveFileSpecA(OurPath);                                               //Отсекаем имя файла
+			PathCombineA(LibPath, OurPath, subDir);                                     //Добавляем подпапку
+			PathAppendA(LibPath, fileName);                                             //Добавляем в путь имя нужной нам dll
+			*hModule = LoadLibraryExA(LibPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);    //И грузим её (с указанием полного пути, иначе может подгрузиться хз что и хз откуда!)
+			if (!*hModule)
+			{
+				DWORD res = GetLastError();
+				_com_error error(HRESULT_FROM_WIN32(res));
+				_snprintf_s(err, err_len, _TRUNCATE, "LoadLibrary: (%lu) %s\n", res, error.ErrorMessage());
+				return E_FAIL;
+			}
 		}
 	}
 
@@ -155,6 +171,7 @@ void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s)
 	lss->SMode = 2;            //Режим субтитров: 0 = NoSubs, 1 = ForcedOnly, 2 = Default, 3 = Advanced
 	lss->SLanguage[0] = '\0';  //Строка с кодами языков для автовыбора субтитров
 	lss->SAdvanced[0] = '\0';  //Строка с Advanced-настройками для автовыбора субтитров
+	lss->TrayIcon = false;     //Иконка в трее
 
 	const int l_len = sizeof(lss->SLanguage)/sizeof(lss->SLanguage[0]);
 	char language[l_len] = {0};
@@ -185,6 +202,11 @@ void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s)
 			else if ((s[i] == 'v' || s[i] == 'V') && (next_ch == 'c' || next_ch == 'C') && nnext_i >= 0) //vc - VC1Fix (от 0 до 2)
 			{
 				lss->VC1Fix = min(nnext_i, 2);
+				i += 2;
+			}
+			else if ((s[i] == 't' || s[i] == 'T') && (next_ch == 'i' || next_ch == 'I') && nnext_i >= 0) //ti - TrayIcon (0 = false, 1+ = true)
+			{
+				lss->TrayIcon = (nnext_i > 0);
 				i += 2;
 			}
 			else if (s[i] == 's' || s[i] == 'S')
@@ -257,14 +279,16 @@ void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s)
 	lvs->Threads = 0;        //Кол-во потоков декодирования: 0 = Auto (based on number of CPU cores), 1 = 1 (без MT), x = x
 	lvs->Range = 0;          //YUV->RGB уровни: 0 = Auto (same as input), 1 = Limited (16-235), 2 = Full (0-255)
 	lvs->Dither = 1;         //Dithering mode при преобразованиях форматов: 0 = Ordered(постоянный), 1 = Random(случайный) паттерны
-	lvs->DeintMode = 0;      //Режим деинтерлейса: 0 = всегда выкл., 1 = авто, 2 = авто (aggressive), 3 = всегда вкл.
+	lvs->DeintMode = 0;      //Режим деинтерлейса: 0 = Disabled, 1 = Auto, 2 = Auto (aggressive), 3 = Always on
 	lvs->FieldOrder = 0;     //Порядок полей при деинтерлейсе: 0 = Auto, 1 = TFF, 2 = BFF
 	lvs->SWDeint = 0;        //Софтварный деинтерлейс: 0 = None, 1 = Yadif, 2 = Yadif (x2)
 	lvs->WMVDMO = true;      //Использовать MS WMV9 DMO Decoder для декодирования VC-1\WMV3
 	lvs->HWMode = 0;         //Хардварное декодирование: 0 = выкл., 1 = CUDA, 2 = QuickSink
 	lvs->HWCodecs = 7;       //Кодеки, для которых хардварное декодирование будет использовано (если включено)
-	lvs->HWDeint = 0;        //Хардварный деинтерлейс: 0 = Weave, 1 = Bob, 2 = Adaptive, 3 = Bob (x2), 4 = Adaptive (x2)
+	lvs->HWRes = 3;          //Разрешения, для которых можно использовать хардварное декодирование
+	lvs->HWDeint = 0;        //Хардварный деинтерлейс: 0 = Weave, 1 = Adaptive, 2 = Adaptive (x2)
 	lvs->HWDeintHQ = false;  //Хардварный деинтерлейс: HQ-режим (Vista+)
+	lvs->TrayIcon = false;   //Иконка в трее
 
 	for (unsigned int i = 0; i < strlen(s); i++)
 	{
@@ -280,16 +304,24 @@ void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s)
 			lvs->Loading = min(next_i, 3);
 			i += 1;
 		}
-		else if ((s[i] == 't' || s[i] == 'T') && next_i >= 0) //t - Threads (от 0 до xx)
+		else if (s[i] == 't' || s[i] == 'T')
 		{
-			lvs->Threads = next_i;
-			if (nnext_i >= 0)
+			if (next_i >= 0) //t - Threads (от 0 до xx)
 			{
-				lvs->Threads *= 10;
-				lvs->Threads += nnext_i;
+				lvs->Threads = next_i;
+				if (nnext_i >= 0)
+				{
+					lvs->Threads *= 10;
+					lvs->Threads += nnext_i;
+					i += 1;
+				}
 				i += 1;
 			}
-			i += 1;
+			else if ((next_ch == 'i' || next_ch == 'I') && nnext_i >= 0) //ti - TrayIcon (0 = false, 1+ = true)
+			{
+				lvs->TrayIcon = (nnext_i > 0);
+				i += 2;
+			}
 		}
 		else if ((s[i] == 'r' || s[i] == 'R') && next_i >= 0) //r - Range (от 0 до 2)
 		{
@@ -340,9 +372,14 @@ void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s)
 				}
 				i += 2;
 			}
-			else if (next_ch == 'd' || next_ch == 'D') //hd - HW Deint (от 0 до 4)
+			else if (next_ch == 'r' || next_ch == 'R') //hr - HW Resolutions (от 0 до 7)
 			{
-				lvs->HWDeint = min(nnext_i, 4);
+				lvs->HWRes = min(nnext_i, 7);
+				i += 2;
+			}
+			else if (next_ch == 'd' || next_ch == 'D') //hd - HW Deint (от 0 до 2)
+			{
+				lvs->HWDeint = min(nnext_i, 2);
 				i += 2;
 			}
 			else if (next_ch == 'q' || next_ch == 'Q') //hq - HW Deint HQ (0 = false, 1+ = true)
@@ -366,6 +403,7 @@ bool ApplyLAVSplitterSettings(IFileSourceFilter *pLAVS, LAVSplitterSettings lss)
 	pLAVSs->SetSubtitleMode((LAVSubtitleMode)lss.SMode);
 	pLAVSs->SetPreferredSubtitleLanguages(lss.SLanguage);
 	pLAVSs->SetAdvancedSubtitleConfig(lss.SAdvanced);
+	pLAVSs->SetTrayIcon(lss.TrayIcon);
 
 	return true;
 }
@@ -393,17 +431,17 @@ bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs, unsigned in
 	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB32, (pixel_types & IVS_RGB32));
 	pLAVVs->SetPixelFormat(LAVOutPixFmt_RGB24, (pixel_types & IVS_RGB24));
 
-	if (lvs.DeintMode == 0)
+	if (lvs.DeintMode == 0) //Disabled
 	{
 		//Полностью отключаем деинтерлейс
-		pLAVVs->SetDeintTreatAsProgressive(true);
+		pLAVVs->SetDeinterlacingMode(DeintMode_Disable);
 		pLAVVs->SetSWDeintMode(SWDeintMode_None);
 	}
 	else
 	{
-		pLAVVs->SetDeintTreatAsProgressive(false);
-		pLAVVs->SetDeintAggressive(lvs.DeintMode >= 2); //1 = Auto, 2 = Auto (aggressive)
-		pLAVVs->SetDeintForce(lvs.DeintMode >= 3);      //3 = Always on
+		if (lvs.DeintMode == 1) pLAVVs->SetDeinterlacingMode(DeintMode_Auto);            //Auto
+		else if (lvs.DeintMode == 2) pLAVVs->SetDeinterlacingMode(DeintMode_Aggressive); //Auto (aggressive)
+		else if (lvs.DeintMode == 3) pLAVVs->SetDeinterlacingMode(DeintMode_Force);      //Always on
 		pLAVVs->SetDeintFieldOrder((LAVDeintFieldOrder)lvs.FieldOrder);
 
 		if (lvs.SWDeint == 0) //None
@@ -430,28 +468,19 @@ bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs, unsigned in
 		pLAVVs->SetHWAccelCodec(HWCodec_VC1, (lvs.HWCodecs & VC1));
 		pLAVVs->SetHWAccelCodec(HWCodec_MPEG2, (lvs.HWCodecs & MPEG2));
 		pLAVVs->SetHWAccelCodec(HWCodec_MPEG4, (lvs.HWCodecs & MPEG4));
+		pLAVVs->SetHWAccelResolutionFlags(lvs.HWRes);
 
 		if (lvs.DeintMode == 0 || lvs.HWDeint == 0) //Weave
 		{
 			pLAVVs->SetHWAccelDeintMode(HWDeintMode_Weave);
 			pLAVVs->SetHWAccelDeintOutput(DeintOutput_FramePer2Field);
 		}
-		else if (lvs.HWDeint == 1) //Bob
-		{
-			pLAVVs->SetHWAccelDeintMode(HWDeintMode_BOB);
-			pLAVVs->SetHWAccelDeintOutput(DeintOutput_FramePer2Field);
-		}
-		else if (lvs.HWDeint == 2) //Adaptive
+		else if (lvs.HWDeint == 1) //Adaptive
 		{
 			pLAVVs->SetHWAccelDeintMode(HWDeintMode_Hardware);
 			pLAVVs->SetHWAccelDeintOutput(DeintOutput_FramePer2Field);
 		}
-		else if (lvs.HWDeint == 3) //Bob (x2)
-		{
-			pLAVVs->SetHWAccelDeintMode(HWDeintMode_BOB);
-			pLAVVs->SetHWAccelDeintOutput(DeintOutput_FramePerField);
-		}
-		else if (lvs.HWDeint == 4) //Adaptive (x2)
+		else if (lvs.HWDeint == 2) //Adaptive (x2)
 		{
 			pLAVVs->SetHWAccelDeintMode(HWDeintMode_Hardware);
 			pLAVVs->SetHWAccelDeintOutput(DeintOutput_FramePerField);
@@ -459,6 +488,10 @@ bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs, unsigned in
 
 		pLAVVs->SetHWAccelDeintHQ(lvs.HWDeintHQ);
 	}
+
+	pLAVVs->SetDVDVideoSupport(false);
+	pLAVVs->SetHWAccelCodec(HWCodec_MPEG2DVD, false);
+	pLAVVs->SetTrayIcon(lvs.TrayIcon);
 
 	return true;
 }

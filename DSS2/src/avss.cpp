@@ -152,7 +152,7 @@ class DSS2 : public IClip
 			CComPtr<IFileSourceFilter> pLAVS;
 
 			LAVSplitterSettings lss = {};
-			ParseLAVSplitterSettings(&lss, lavs); //"l3 vc2 sm2 sl[] sa[]"
+			ParseLAVSplitterSettings(&lss, lavs); //"l3 vc2 sm2 sl[] sa[] ti0"
 
 			if (lss.Loading == LFSystem || lss.Loading == LFSystemS)
 			{
@@ -193,7 +193,7 @@ class DSS2 : public IClip
 		if (lav_decoder)
 		{
 			LAVVideoSettings lvs = {};
-			ParseLAVVideoSettings(&lvs, lavd); //"l3 t0 r0 d1 dm0 fo0 sd0 vc1 hm0 hc7 hd0 hq0"
+			ParseLAVVideoSettings(&lvs, lavd); //"l3 t0 r0 d1 dm0 fo0 sd0 vc1 hm0 hc7 hr3 hd0 hq0 ti0"
 
 			CComPtr<IBaseFilter> pLAVV;
 			if (lvs.Loading == LFSystem || lvs.Loading == LFSystemS)
@@ -442,7 +442,7 @@ class DSS2 : public IClip
 		return S_OK;
 	}
 
-	void  Close()
+	void Close()
 	{
 		CComQIPtr<IVideoSink2> pVS2(m_pR);
 		if (pVS2) pVS2->NotifyFrame(NULL);
@@ -457,6 +457,11 @@ class DSS2 : public IClip
 
 		if (!InterlockedDecrement(&RefCount))
 		{
+			//К этому моменту какие-то потоки из наших длл-ок всё ещё
+			//могут быть в работе и использовать ресурсы. Вобщем костыль..
+			if (hLAVSplitter || hLAVVideo || hVSFilter)
+				Sleep(100);
+
 			SAFE_FREELIBRARY(hLAVSplitter);
 			SAFE_FREELIBRARY(hLAVVideo);
 			SAFE_FREELIBRARY(hVSFilter);

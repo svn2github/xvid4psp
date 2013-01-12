@@ -16,6 +16,7 @@ struct LAVSplitterSettings              //x = digit
 	unsigned int SMode;                 //smx
 	WCHAR SLanguage[LANG_BUFFER_SIZE];  //sl[...]
 	WCHAR SAdvanced[LANG_BUFFER_SIZE];  //sa[...]
+	bool TrayIcon;                      //tix
 };
 
 struct LAVVideoSettings       //x = digit
@@ -31,8 +32,10 @@ struct LAVVideoSettings       //x = digit
 
 	unsigned int HWMode;      //hmx
 	unsigned int HWCodecs;    //hcx or hcxx
+	unsigned int HWRes;       //hrx
 	unsigned int HWDeint;     //hdx
 	bool HWDeintHQ;           //hqx
+	bool TrayIcon;            //tix
 };
 
 enum LAVLoading

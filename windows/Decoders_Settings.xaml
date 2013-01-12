@@ -287,11 +287,16 @@
                                     <Label OpacityMask="{x:Null}" x:Name="label_lavd_hw" Content="Hardware decoding:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                     <ComboBox x:Name="combo_lavd_hw" Width="90" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lav_SelectionChanged"/>
                                 </DockPanel>
-                                <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                                <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_dss2_hw_h264" Width="70" Height="Auto" Content="H264" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
                                     <CheckBox x:Name="check_dss2_hw_vc1" Width="70" Height="Auto" Content="VC-1" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="30,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
                                     <CheckBox x:Name="check_dss2_hw_mpeg4" Width="70" Height="Auto" Content="MPEG4" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,-2,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
                                     <CheckBox x:Name="check_dss2_hw_mpeg2" Width="70" Height="Auto" Content="MPEG2" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,30,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_dss2_hw_sd" Width="70" Height="Auto" Content="SD" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
+                                    <CheckBox x:Name="check_dss2_hw_hd" Width="70" Height="Auto" Content="HD" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="30,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
+                                    <CheckBox x:Name="check_dss2_hw_uhd" Width="80" Height="Auto" Content="UltraHD" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,88,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_dss2_hwc_Click"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
