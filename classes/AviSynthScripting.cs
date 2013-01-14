@@ -217,6 +217,12 @@ namespace XviD4PSP
 
            m.script += Environment.NewLine;
 
+           //Память и многопоточность_1
+           int memory_max = (SysInfo.AVSIsMT) ? Settings.SetMemoryMax : 0;
+           int mtmode_1 = (SysInfo.AVSIsMT && m.vdecoder != Decoders.Import && m.vdecoder != Decoders.BlankClip) ? Settings.SetMTMode_1 : 0;
+           if (memory_max > 0) m.script += "SetMemoryMax(" + memory_max + ")\r\n" + ((mtmode_1 == 0) ? "\r\n" : "");
+           if (mtmode_1 > 0) m.script += "SetMTMode(" + mtmode_1 + ", " + Settings.SetMTMode_Threads + ")\r\n\r\n";
+
            //прописываем импорт видео
 
            //принудительная установка fps
@@ -348,6 +354,13 @@ namespace XviD4PSP
            }
 
            m.script += Environment.NewLine;
+
+           //Многопоточность_2
+           if (mtmode_1 > 0)
+           {
+               int mtmode_2 = Settings.SetMTMode_2;
+               if (mtmode_2 > 0) m.script += "SetMTMode(" + mtmode_2 + ")\r\n\r\n";
+           }
 
            //Определяем необходимость смены частоты кадров (AssumeFPS, ChangeFPS, ConvertFPS, ConvertMFlowFPS)
            bool ApplyFramerateModifier = false, IsAssumeFramerateConvertion = false;

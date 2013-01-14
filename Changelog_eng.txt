@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.307.0 (12.01.2013), main changes:
+﻿XviD4PSP 5.10.308.0 (14.01.2013), main changes:
 
+>>> (r308) Added a window for AviSynth MT settings (AviSynth->MT settings).
 >>> (r307) DSS2: thread-safe'ing the code for loading the filters in "portable" mode.
 >>> (r307) DSS2: changes for LAVFilters 0.55.1 (in XviD4PSP settings added allowed resolutions for hardware decoding).
 >>> (r306) DSS2: waiting timeout for decoded frame was increased from 10 to 30 seconds, but it can be

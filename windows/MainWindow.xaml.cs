@@ -511,6 +511,7 @@ namespace XviD4PSP
                     case ("Apply test script"): if (m != null) { ApplyTestScript(null, null); menu_createtestscript.IsChecked = m.testscript; }; break;
                     case ("Save script"): SaveScript(null, null); break;
                     case ("Run script"): menu_run_script_Click(null, null); break;
+                    case ("MT settings"): menu_mt_settings_Click(null, null); break;
                     case ("Windows Media Player"): menu_play_in_Click(menu_playinwmp, null); break;
                     case ("Media Player Classic"): menu_play_in_Click(menu_playinmpc, null); break;
                     case ("WPF Video Player"): menu_play_in_Click(menu_playinwpf, null); break;
@@ -2090,6 +2091,7 @@ namespace XviD4PSP
                 menu_createtestscript.InputGestureText = HotKeys.GetKeys("Apply test script");
                 menu_save_script.InputGestureText = HotKeys.GetKeys("Save script");
                 menu_run_script.InputGestureText = HotKeys.GetKeys("Run script");
+                menu_mt_settings.InputGestureText = HotKeys.GetKeys("MT settings");
                 menu_playinwmp.InputGestureText = HotKeys.GetKeys("Windows Media Player");
                 menu_playinmpc.InputGestureText = HotKeys.GetKeys("Media Player Classic");
                 menu_playinwpf.InputGestureText = HotKeys.GetKeys("WPF Video Player");
@@ -2152,6 +2154,7 @@ namespace XviD4PSP
                 menu_createtestscript.Header = Languages.Translate("Apply test script");
                 menu_save_script.Header = Languages.Translate("Save script");
                 menu_run_script.Header = Languages.Translate("Run script");
+                menu_mt_settings.Header = Languages.Translate("MT settings");
 
                 mnAspectResolution.Header = Languages.Translate("Resolution/Aspect") + "...";
                 menu_interlace.Header = Languages.Translate("Interlace/Framerate") + "...";
@@ -4284,6 +4287,23 @@ namespace XviD4PSP
         private void menu_run_script_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (m != null) { ScriptRunner sr = new ScriptRunner(m.script); }
+        }
+
+        private void menu_mt_settings_Click(object sender, RoutedEventArgs e)
+        {
+            MT_Settings mt_s = new MT_Settings(m, this);
+            if (m != null && mt_s.NeedUpdate)
+            {
+                string oldscript = m.script;
+                m.script = mt_s.m.script;
+
+                //обновление при необходимости
+                if (m.script.Trim() != oldscript.Trim())
+                {
+                    LoadVideo(MediaLoad.update);
+                    UpdateTaskMassive(m);
+                }
+            }
         }
 
         private void menu_play_in_Click(object sender, System.Windows.RoutedEventArgs e)

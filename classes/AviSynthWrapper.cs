@@ -293,7 +293,7 @@ namespace XviD4PSP
         {
             _avs = new IntPtr(0);
             _vi = new AVSDLLVideoInfo();
-            _vi.mt_import = MTMode.Undefined;
+            _vi.mt_import = (SysInfo.AVSIsMT) ? Settings.MTMode_Internal : MTMode.Undefined;
 
             //Эти два поля работают и на вход, и на выход. Для "dimzon_avs_init" через них можно задать требуемые на выходе PixelType и SampleType.
             //При нуле (Undefined) никаких преобразований не будет. На выходе из "dimzon_avs_init" поля будут содержать то, что получилось в итоге.

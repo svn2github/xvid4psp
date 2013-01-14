@@ -1,0 +1,40 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+    x:Class="XviD4PSP.MT_Settings"
+	x:Name="Window"
+	Title="MT settings"
+	Width="400" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="Height" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
+    <Grid x:Name="LayoutRoot">
+        <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35" ToolTipService.ShowOnDisabled="True" ToolTipService.ShowDuration="15000">
+            <GroupBox Foreground="#FFFFFFFF" x:Name="MT" Header="MT settings" Margin="4,3,4,6" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                <StackPanel>
+                    <DockPanel Margin="0,3,0,2" Width="Auto" Height="Auto">
+                        <Label OpacityMask="{x:Null}" x:Name="label_memorymax" Content="Value for SetMemoryMax:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="4,0,0,0" Padding="0" DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <MyUserControl:NumericUpDown Height="22" x:Name="num_memorymax" HorizontalAlignment="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="2048" Minimum="0" Value="0" ValueChanged="num_memorymax_ValueChanged"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                        <Label OpacityMask="{x:Null}" x:Name="label_mtmode_before" Content="Start SetMTMode with:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="4,0,0,0" Padding="0" DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <MyUserControl:NumericUpDown Height="22" x:Name="num_mtmode_before" HorizontalAlignment="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="6" Minimum="0" Value="0" ValueChanged="num_mtmode_before_ValueChanged"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                        <Label OpacityMask="{x:Null}" x:Name="label_mtmode_after" Content="End SetMTMode with:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="4,0,0,0" Padding="0" DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <MyUserControl:NumericUpDown Height="22" x:Name="num_mtmode_after" HorizontalAlignment="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="6" Minimum="0" Value="0" ValueChanged="num_mtmode_after_ValueChanged"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,2,0,2" Width="Auto" Height="Auto">
+                        <Label OpacityMask="{x:Null}" x:Name="label_mtmode_threads" Content="Threads number:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#ffffff" Margin="4,0,0,0" Padding="0" DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <MyUserControl:NumericUpDown Height="22" x:Name="num_mtmode_threads" HorizontalAlignment="Right" Margin="0,0,4,0" VerticalAlignment="Center" Width="60" Change="1" DecimalPlaces="0" Maximum="16" Minimum="0" Value="0" ValueChanged="num_mtmode_threads_ValueChanged"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                        <Label OpacityMask="{x:Null}" Width="240" x:Name="label_mt_internal" Content="MT internal handling:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" DockPanel.Dock="Left" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <ComboBox x:Name="combo_mt_internal" Width="100" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,4,0" FontSize="12" VerticalAlignment="Center" SelectedValuePath="Tag" SelectionChanged="combo_mt_internal_SelectionChanged"/>
+                    </DockPanel>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+        <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="35" Background="{DynamicResource black_gradient}">
+            <Button x:Name="button_ok" Width="80" Height="25" Content="Ok" Click="button_ok_Click" d:LayoutOverrides="Height" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+        </Grid>
+    </Grid>
+</Window>
