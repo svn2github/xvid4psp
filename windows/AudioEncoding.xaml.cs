@@ -427,7 +427,7 @@ namespace XviD4PSP
             combo_profile.Items.Clear();
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio"))
+                foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio", "*.txt"))
                     combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
@@ -649,7 +649,7 @@ namespace XviD4PSP
                     combo_profile.Items.Clear();
                     try
                     {
-                        foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio"))
+                        foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\encoding\\" + Format.EnumToString(m.format) + "\\audio", "*.txt"))
                             combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
                     catch { }

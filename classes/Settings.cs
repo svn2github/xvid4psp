@@ -3156,5 +3156,26 @@ namespace XviD4PSP
                 SetString("MTMode_Internal", value.ToString());
             }
         }
+
+        //Сортировка пресетов по времени изменений
+        public static bool SortPresetsByTime
+        {
+            get
+            {
+                object value = GetValue("SortPresetsByTime");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("SortPresetsByTime", value);
+            }
+        }
     }
 }

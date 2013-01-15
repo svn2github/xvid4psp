@@ -87,6 +87,7 @@ namespace XviD4PSP
             check_use_win7taskbar.Content = Languages.Translate("Enable Windows 7 taskbar progress indication");
             check_enable_backup.Content = Languages.Translate("Create a backups of the tasks list");
             check_validate_pathes.Content = Languages.Translate("Check for illegal characters in pathes");
+            check_sort_by_time.Content = Languages.Translate("Sort presets by last modification time");
             check_auto_abort.Content = Languages.Translate("Cancel encoding if there is no progress for a long time");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
@@ -138,6 +139,7 @@ namespace XviD4PSP
             check_use_win7taskbar.IsChecked = Settings.Win7TaskbarIsEnabled;                      //Поддержка таскбара в Win7 вкл\выкл
             check_enable_backup.IsChecked = Settings.EnableBackup;                                //Разрешаем сохранять резервную копию списка заданий
             check_validate_pathes.IsChecked = Settings.ValidatePathes;                            //Проверять пути на "нехорошие" символы
+            check_sort_by_time.IsChecked = Settings.SortPresetsByTime;                            //Сортировка пресетов по времени изменений
             check_auto_abort.IsChecked = Settings.AutoAbortEncoding;                              //Автоматически прерывать зависшие задания
 
             //Загружаем HotKeys (плюс перевод к действиям)
@@ -559,6 +561,12 @@ namespace XviD4PSP
         private void check_auto_abort_Click(object sender, RoutedEventArgs e)
         {
             Settings.AutoAbortEncoding = check_auto_abort.IsChecked.Value;
+        }
+
+        private void check_sort_by_time_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.SortPresetsByTime = check_sort_by_time.IsChecked.Value;
+            p.ReloadPresets();
         }
 	}
 }

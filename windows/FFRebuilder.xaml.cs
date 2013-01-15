@@ -249,7 +249,7 @@ namespace XviD4PSP
             combo_profile.Items.Add("Default");
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\ffrebuilder", "*.txt"))
+                foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\ffrebuilder", "*.txt"))
                 {
                     combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
                 }

@@ -169,7 +169,7 @@ namespace XviD4PSP
             combo_profile.Items.Add("Disabled");
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\sbc", "*.avs"))
                     combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
@@ -316,7 +316,7 @@ namespace XviD4PSP
                     combo_profile.Items.Add("Disabled");
                     try
                     {
-                        foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                        foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\sbc", "*.avs"))
                             combo_profile.Items.Add(Path.GetFileNameWithoutExtension(file));
                     }
                     catch { }

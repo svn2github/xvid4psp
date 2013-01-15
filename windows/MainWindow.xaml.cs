@@ -2752,7 +2752,7 @@ namespace XviD4PSP
             combo_filtering.Items.Add(new ComboBoxItem() { Content = "Disabled" });
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\filtering", "*.avs"))
+                foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\filtering", "*.avs"))
                 {
                     ComboBoxItem item = new ComboBoxItem();
                     item.Content = Path.GetFileNameWithoutExtension(file);
@@ -3105,7 +3105,7 @@ namespace XviD4PSP
             combo_vencoding.Items.Clear();
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\video"))
+                foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\video", "*txt"))
                     combo_vencoding.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
@@ -3151,7 +3151,7 @@ namespace XviD4PSP
             combo_aencoding.Items.Clear();
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\audio"))
+                foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\encoding\\" + format + "\\audio", "*.txt"))
                     combo_aencoding.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
@@ -4176,7 +4176,7 @@ namespace XviD4PSP
             combo_sbc.Items.Add("Disabled");
             try
             {
-                foreach (string file in Directory.GetFiles(Calculate.StartupPath + "\\presets\\sbc"))
+                foreach (string file in Calculate.GetSortedFiles(Calculate.StartupPath + "\\presets\\sbc", "*.avs"))
                     combo_sbc.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
             catch { }
@@ -7109,6 +7109,17 @@ namespace XviD4PSP
                 }
                 catch { }
             }
+        }
+
+        public void ReloadPresets()
+        {
+            LoadFilteringPresets();
+            LoadSBCPresets();
+            combo_sbc.SelectedItem = (m != null) ? m.sbc : Settings.SBC;
+            LoadVideoPresets();
+            SetVideoPreset();
+            LoadAudioPresets();
+            SetAudioPreset();
         }
     }
 }

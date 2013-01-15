@@ -1,5 +1,9 @@
-﻿XviD4PSP 5.10.308.0 (14.01.2013), main changes:
+﻿XviD4PSP 5.10.309.0 (15.01.2013), main changes:
 
+>>> (r309) Added ability to sort presets by last modification time ("Settings->Global settings->Sort presets
+           by last modification time").
+>>> (r309) The order of the presets (filtering, color correction, video and audio encoding, FFRebuilder)
+           wasn't guaranteed (rep. by imgeorgest).
 >>> (r308) Added a window for AviSynth MT settings (AviSynth->MT settings).
 >>> (r307) DSS2: thread-safe'ing the code for loading the filters in "portable" mode.
 >>> (r307) DSS2: changes for LAVFilters 0.55.1 (in XviD4PSP settings added allowed resolutions for hardware decoding).

@@ -29,6 +29,7 @@
                             <CheckBox x:Name="check_read_prmtrs" Width="Auto" Height="Auto" Content="Read parameters from the script when saving a new task" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_read_prmtrs_Click"/>
                             <CheckBox x:Name="check_enable_backup" Width="Auto" Height="Auto" Content="Create a backups of the tasks list" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_enable_backup_Click"/>
                             <CheckBox x:Name="check_validate_pathes" Width="Auto" Height="Auto" Content="Check for illegal characters in pathes" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_validate_pathes_Click"/>
+                            <CheckBox x:Name="check_sort_by_time" Width="Auto" Height="Auto" Content="Sort presets by last modification time" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_sort_by_time_Click"/>
                         </StackPanel>
                     </Grid>
 				</TabItem>

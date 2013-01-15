@@ -1140,5 +1140,26 @@ namespace XviD4PSP
             }
             return 8;
         }
+
+        public static ArrayList GetSortedFiles(string path, string searchPattern)
+        {
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(path);
+            FileSystemInfo[] files = (!string.IsNullOrEmpty(searchPattern)) ? dir.GetFileSystemInfos(searchPattern) : dir.GetFileSystemInfos();
+
+            if (files.Length > 1)
+            {
+                //Сортировка по имени или по времени изменений
+                if (!Settings.SortPresetsByTime) Array.Sort<FileSystemInfo>(files, delegate(FileSystemInfo a, FileSystemInfo b) { return a.Name.CompareTo(b.Name); });
+                else Array.Sort<FileSystemInfo>(files, delegate(FileSystemInfo a, FileSystemInfo b) { return b.LastWriteTime.CompareTo(a.LastWriteTime); });
+            }
+
+            ArrayList res = new ArrayList(files.Length);
+            foreach (FileSystemInfo file in files)
+            {
+                res.Add(file.Name);
+            }
+
+            return res;
+        }
     }
 }
