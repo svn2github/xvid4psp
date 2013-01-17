@@ -105,7 +105,7 @@ namespace XviD4PSP
         public MediaInfoWrapper() { Handle = MediaInfo_New(); }
         public int Open(String FileName) { return (int)MediaInfo_Open(Handle, FileName); }
         public void Close() { MediaInfo_Close(Handle); }
-        ~MediaInfoWrapper() { MediaInfo_Delete(Handle); }
+        ~MediaInfoWrapper() { if (Handle != IntPtr.Zero) MediaInfo_Delete(Handle); }
 
         public String Inform() { return Marshal.PtrToStringUni(MediaInfo_Inform(Handle, (IntPtr)0)); }
         public String Option(String Option, String Value) { return Marshal.PtrToStringUni(MediaInfo_Option(Handle, Option, Value)); }

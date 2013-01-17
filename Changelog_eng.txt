@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.309.0 (15.01.2013), main changes:
+﻿XviD4PSP 5.10.310.0 (17.01.2013), main changes:
 
+>>> (r310) XviD4PSP and WPF Video Player: instead of OLE Drag&Drop now uses Win32 Drag&Drop, which works with UAC.
 >>> (r309) Added ability to sort presets by last modification time ("Settings->Global settings->Sort presets
            by last modification time").
 >>> (r309) The order of the presets (filtering, color correction, video and audio encoding, FFRebuilder)

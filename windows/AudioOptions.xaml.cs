@@ -37,11 +37,6 @@ namespace XviD4PSP
             ConvertToUpmixSoundOnSound
         };
 
-        public AudioOptions()
-		{
-			this.InitializeComponent();
-		}
-
         public AudioOptions(Massive mass, MainWindow parent, AudioOptionsModes mode)
         {
             this.InitializeComponent();
@@ -49,6 +44,9 @@ namespace XviD4PSP
             this.mode = mode;
             p = parent;
             Owner = p;
+
+            DDHelper ddh = new DDHelper(this);
+            ddh.GotFiles += new DDEventHandler(DD_GotFiles);
 
             //загружаем фарш в форму
             Reload(mass);
@@ -662,29 +660,16 @@ namespace XviD4PSP
             SetInfo();
         }
 
-        private void TextBox_DragEnter(object sender, DragEventArgs e)
+        private void DD_GotFiles(object sender, string[] files)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            try
             {
-                e.Effects = DragDropEffects.All;
-                e.Handled = true;
+                if (Calculate.ValidatePath(files[0], true))
+                    AddExternalTrack(files[0]);
             }
-        }
-
-        private void TextBox_Drop(object sender, DragEventArgs e)
-        {
-            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
+            catch (Exception ex)
             {
-                try
-                {
-                    if (Calculate.ValidatePath(dropfile, true))
-                        AddExternalTrack(dropfile);
-                }
-                catch (Exception ex)
-                {
-                    ErrorException("DragOpen: " + ex.Message, ex.StackTrace);
-                }
-                return;
+                ErrorException("DragOpen: " + ex.Message, ex.StackTrace);
             }
         }
 

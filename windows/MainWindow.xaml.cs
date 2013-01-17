@@ -255,6 +255,9 @@ namespace XviD4PSP
                 this.textbox_name.MouseLeave += new MouseEventHandler(textbox_name_MouseLeave); //Мышь вышла из зоны с названием файла
                 if (Settings.TrayClickOnce) TrayIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
                 else TrayIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(TrayIcon_Click);
+
+                DDHelper ddh = new DDHelper(this);
+                ddh.GotFiles += new DDEventHandler(DD_GotFiles);
             }
             catch (Exception ex)
             {
@@ -3670,25 +3673,13 @@ namespace XviD4PSP
             }
         }
 
-        private void grid_player_window_DragEnter(object sender, System.Windows.DragEventArgs e)
+        private void DD_GotFiles(object sender, string[] files)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effects = DragDropEffects.All;
-                e.Handled = true;
-            }
-        }
-
-        private void grid_player_window_Drop(object sender, System.Windows.DragEventArgs e)
-        {
-            e.Handled = true;
-
             if (!IsDragOpening)
             {
                 IsDragOpening = true;
-                drop_data = (string[])e.Data.GetData(DataFormats.FileDrop);
-                if (drop_data != null) new Thread(new ThreadStart(this.DragOpen)).Start();
-                else IsDragOpening = false;
+                drop_data = files;
+                new Thread(new ThreadStart(this.DragOpen)).Start();
                 this.Activate();
             }
         }
@@ -5423,7 +5414,10 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException("BridgeCallback: " + ex.Message, ex.StackTrace);
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate()
+                {
+                    ErrorException("BridgeCallback: " + ex.Message, ex.StackTrace);
+                });
             }
         }
 

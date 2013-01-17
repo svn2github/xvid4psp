@@ -39,6 +39,9 @@ namespace WPF_VideoPlayer
             this.Owner = owner;
             this.infilepath = infilepath;
 
+            DDHelper ddh = new DDHelper(this);
+            ddh.GotFiles += new DDEventHandler(ddh_GotFiles);
+
             if (Settings.MI_WrapText)
             {
                 check_wrap.IsChecked = true;
@@ -120,27 +123,13 @@ namespace WPF_VideoPlayer
             }
         }
 
-        private void grid_main_DragEnter(object sender, DragEventArgs e)
+        private void ddh_GotFiles(object sender, string[] files)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                tbxInfo.ToolTip = null; //Чтоб не мешался
-                e.Effects = DragDropEffects.All;
-                e.Handled = true;
-            }
-        }
-
-        private void grid_main_Drop(object sender, DragEventArgs e)
-        {
-            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
-            {
-                tbxInfo.Clear();
-                tbxInfo.ScrollToHome();
-                infilepath = dropfile;
-                GetInfo();
-                Activate();
-                return;
-            }
+            tbxInfo.Clear();
+            tbxInfo.ScrollToHome();
+            infilepath = files[0];
+            GetInfo();
+            Activate();
         }
 
         private void button_save_Click(object sender, RoutedEventArgs e)

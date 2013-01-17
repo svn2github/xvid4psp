@@ -31,6 +31,9 @@ namespace XviD4PSP
             this.infomode = infomode;
             this.infilepath = infilepath;
 
+            DDHelper ddh = new DDHelper(this);
+            ddh.GotFiles += new DDEventHandler(DD_GotFiles);
+
             Title = "Info (" + infomode.ToString() + ")";
             button_open.Content = Languages.Translate("Open");
             button_save.Content = Languages.Translate("Save");
@@ -247,27 +250,13 @@ namespace XviD4PSP
             }
         }
 
-        private void grid_main_DragEnter(object sender, DragEventArgs e)
+        private void DD_GotFiles(object sender, string[] files)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                tbxInfo.ToolTip = null; //Чтоб не мешался
-                e.Effects = DragDropEffects.All;
-                e.Handled = true;
-            }
-        }
-
-        private void grid_main_Drop(object sender, DragEventArgs e)
-        {
-            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
-            {
-                tbxInfo.Clear();
-                tbxInfo.ScrollToHome();
-                infilepath = dropfile;
-                GetInfo();
-                Activate();
-                return;
-            }
+            tbxInfo.Clear();
+            tbxInfo.ScrollToHome();
+            infilepath = files[0];
+            GetInfo();
+            Activate();
         }
 
         private void button_save_Click(object sender, RoutedEventArgs e)

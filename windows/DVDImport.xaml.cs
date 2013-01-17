@@ -77,6 +77,9 @@ namespace XviD4PSP
             this.m = mass.Clone();
             this.dpi = dpi;
 
+            DDHelper ddh = new DDHelper(this);
+            ddh.GotFiles += new DDEventHandler(DD_GotFiles);
+
             //tooltips
             label_title.Content = Languages.Translate("Select title:");
             button_cancel.Content = Languages.Translate("Cancel");
@@ -348,21 +351,9 @@ namespace XviD4PSP
             MainFormLoader();
         }
 
-        private void LayoutRoot_DragEnter(object sender, System.Windows.DragEventArgs e)
+        private void DD_GotFiles(object sender, string[] files)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                e.Effects = DragDropEffects.All;
-        }
-
-        private void LayoutRoot_Drop(object sender, System.Windows.DragEventArgs e)
-        {
-
-            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
-            {
-                this.filepath = dropfile;
-                break;
-            }
-
+            this.filepath = files[0];
             if (this.filepath != null)
             {
                 try

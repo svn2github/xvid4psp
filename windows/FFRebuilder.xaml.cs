@@ -64,6 +64,9 @@ namespace XviD4PSP
             this.Owner = owner;
             this.p = owner;
 
+            DDHelper ddh = new DDHelper(this);
+            ddh.GotFiles += new DDEventHandler(DD_GotFiles);
+
             //переводим
             button_cancel.Content = Languages.Translate("Cancel");
             button_start.Content = Languages.Translate("Start");
@@ -195,7 +198,7 @@ namespace XviD4PSP
             this.ActiveHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
         }
 
-        void FFRebuilder_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void FFRebuilder_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!Win7Taskbar.IsInitialized) return;
             if (this.IsVisible)
@@ -828,22 +831,9 @@ namespace XviD4PSP
             }
         }
 
-        private void LayoutRoot_DragEnter(object sender, DragEventArgs e)
+        private void DD_GotFiles(object sender, string[] files)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effects = DragDropEffects.All;
-                e.Handled = true;
-            }
-        }
-
-        private void LayoutRoot_Drop(object sender, DragEventArgs e)
-        {
-            foreach (string dropfile in (string[])e.Data.GetData(DataFormats.FileDrop))
-            {
-                OpenFile(dropfile);
-                return;
-            }
+            OpenFile(files[0]);
         }
 
         private void OpenFile(string path)

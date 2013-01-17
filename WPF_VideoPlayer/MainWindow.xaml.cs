@@ -126,6 +126,9 @@ namespace WPF_VideoPlayer
                 double _dpi = (double)GetDeviceCaps(ScreenDC, 88) / 96.0;
                 if (_dpi != 0) dpi = _dpi;
                 ReleaseDC(IntPtr.Zero, ScreenDC);
+
+                DDHelper ddh = new DDHelper(this);
+                ddh.GotFiles += new DDEventHandler(DD_GotFiles);
             }
             catch (Exception ex)
             {
@@ -494,32 +497,19 @@ namespace WPF_VideoPlayer
             }
         }
 
-        private void LayoutRoot_DragEnter(object sender, System.Windows.DragEventArgs e)
+        private void DD_GotFiles(object sender, string[] files)
         {
-            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+            try
             {
-                e.Effects = DragDropEffects.All;
-                e.Handled = true;
+                if (File.Exists(files[0]))
+                {
+                    PlayVideo(files[0], MediaLoad.Load);
+                    this.Activate();
+                }
             }
-        }
-
-        private void LayoutRoot_Drop(object sender, System.Windows.DragEventArgs e)
-        {
-            string[] data = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
-            if (data != null && data.Length > 0)
+            catch (Exception ex)
             {
-                try
-                {
-                    if (File.Exists(data[0]))
-                    {
-                        PlayVideo(data[0], MediaLoad.Load);
-                        this.Activate();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show("Drag&Drop: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                System.Windows.MessageBox.Show("Drag&Drop: " + ex.Message, Languages.Translate("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

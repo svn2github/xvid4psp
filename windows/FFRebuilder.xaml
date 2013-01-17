@@ -7,7 +7,7 @@
 	Title="FFRebuilder"
 	Width="610" Height="520" MinWidth="610" MinHeight="520" ResizeMode="CanResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
 
-    <Grid x:Name="LayoutRoot" PreviewDragOver="LayoutRoot_DragEnter" PreviewDragEnter="LayoutRoot_DragEnter" Drop="LayoutRoot_Drop" AllowDrop="True">
+    <Grid x:Name="LayoutRoot">
         <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">
             <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" x:Name="tabs" SelectionChanged="tabs_SelectionChanged">
                 <TabItem Header="Main" x:Name="tab_main">
