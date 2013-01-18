@@ -431,22 +431,44 @@ namespace XviD4PSP
                         }
                     }
 
-                    //Открытие файла из командной строки (command line arguments)
+                    //Открытие файлов из командной строки (command line arguments)
                     string[] args = Environment.GetCommandLineArgs();
                     if (args.Length > 1)
                     {
-                        if (File.Exists(args[1]))
+                        //Проверяем файлы
+                        ArrayList files = new ArrayList();
+                        for (int i = 1; i < args.Length; i++)
+                        {
+                            if (File.Exists(args[i])) files.Add(args[i]);
+                        }
+
+                        if (files.Count == 1) //Один файл
                         {
                             //создаём массив и забиваем в него данные
                             Massive x = new Massive();
-                            x.infilepath = args[1];
-                            x.infileslist = new string[] { args[1] };
+                            x.infilepath = files[0].ToString();
+                            x.infileslist = new string[] { x.infilepath };
 
                             //ищем соседние файлы и спрашиваем добавить ли их к заданию при нахождении таковых
                             if (Settings.AutoJoinMode == Settings.AutoJoinModes.DVDonly && Calculate.IsValidVOBName(x.infilepath) ||
                                 Settings.AutoJoinMode == Settings.AutoJoinModes.Enabled)
                                 x = OpenDialogs.GetFriendFilesList(x);
                             if (x != null) action_open(x);
+                        }
+                        else if (files.Count > 1) //Несколько файлов
+                        {
+                            PauseAfterFirst = Settings.BatchPause;
+                            if (!PauseAfterFirst)
+                            {
+                                path_to_save = OpenDialogs.SaveFolder();
+                                if (path_to_save == null) return;
+                            }
+
+                            string[] _files = new string[files.Count];
+                            for (int i = 0; i < files.Count; i++)
+                                _files[i] = files[i].ToString();
+
+                            MultiOpen(_files);
                         }
                     }
                 }
@@ -6394,7 +6416,8 @@ namespace XviD4PSP
                 int count = files_to_open.Length; //Кол-во файлов для открытия
 
                 //Вывод первичной инфы об открытии
-                textbox_name.Text = count + " - " + Languages.Translate("total files, ") + opened_files + " - " + Languages.Translate("opened files, ") + outfiles.Count + " - " + Languages.Translate("in queue");
+                textbox_name.Text = count + " - " + Languages.Translate("total files") + ", " + opened_files + " - " + Languages.Translate("opened files") +
+                    ", " + outfiles.Count + " - " + Languages.Translate("in queue");
 
                 //Делим строку с валидными расширениями на отдельные строчки
                 string[] goodexts = Settings.GoodFilesExtensions.Split(new string[] { "/" }, StringSplitOptions.None);
@@ -6431,7 +6454,8 @@ namespace XviD4PSP
                     }
 
                     //Обновляем инфу об открытии
-                    textbox_name.Text = count + " - " + Languages.Translate("total files, ") + opened_files + " - " + Languages.Translate("opened files, ") + outfiles.Count + " - " + Languages.Translate("in queue");
+                    textbox_name.Text = count + " - " + Languages.Translate("total files") + ", " + opened_files + " - " + Languages.Translate("opened files") +
+                        ", " + outfiles.Count + " - " + Languages.Translate("in queue");
                 }
                 if (m != null && opened_files >= 1) //Если массив не пуст, и если кол-во открытых файлов больше нуля (чтоб не обновлять превью, если ни одного нового файла не открылось)
                 {
