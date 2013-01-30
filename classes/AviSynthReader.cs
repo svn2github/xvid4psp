@@ -48,13 +48,13 @@ namespace XviD4PSP
         }
 
         //Скрипт из файла
-        public void OpenScript(string script)
+        public void OpenScript(string scriptPath)
         {
             try
             {
                 this.environment = new AviSynthScriptEnvironment();
-                this.clip = environment.OpenScriptFile(script, forced_colorspace, forced_sampletype);
-                if (!this.clip.HasVideo) throw new ArgumentException("Script doesn't contain video");
+                this.clip = environment.OpenScriptFile(scriptPath, forced_colorspace, forced_sampletype);
+                //if (!this.clip.HasVideo) throw new ArgumentException("Script doesn't contain video");
             }
             catch (Exception)
             {

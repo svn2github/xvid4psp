@@ -7,10 +7,7 @@
 	x:Class="XviD4PSP.MainWindow"
 	x:Name="Window"
 	Title="XviD4PSP - AviSynth-based MultiMedia Converter"
-	Width="747" Height="577" MinWidth="250" MinHeight="100" SizeToContent="Manual" Closing="MainWindow_Closing" MouseLeftButtonDown="Window_MouseLeftButtonDown" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
-	<Window.Triggers>
-		<EventTrigger RoutedEvent="FrameworkElement.Loaded"/>
-	</Window.Triggers>
+	Width="747" Height="577" MinWidth="250" MinHeight="100" SizeToContent="Manual" LocationChanged="MainWindow_LocationChanged" SizeChanged="MainWindow_SizeChanged" Closing="MainWindow_Closing" MouseLeftButtonDown="Window_MouseLeftButtonDown" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
     <Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -207,6 +204,7 @@
                                 <RadioButton x:Name="check_engine_pictureview"/>
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="PictureView drop" x:Name="check_pictureview_drop" Click="check_pictureview_drop_Clicked" IsCheckable="True" StaysOpenOnClick="True" />
                         <Separator/>
                         <MenuItem Header="Preview" StaysOpenOnClick="True" Click="scriptview_Click">
                             <MenuItem.Icon>
@@ -359,9 +357,10 @@
             <Button x:Name="button_save" Content="Save" Width="90" Foreground="#FFFFFFFF" Click="button_save_Click" Template="{DynamicResource GlassButton}" HorizontalAlignment="Left" Margin="384,9,0,9"/>
             <Button x:Name="button_encode" Content="Encode" Foreground="#FFFFFFFF" Click="button_encode_Click" Template="{DynamicResource GlassButton}" Margin="478,9,0,9" HorizontalAlignment="Left" Width="90"/>
             <Slider x:Name="slider_Volume" d:LayoutOverrides="VerticalAlignment" Margin="600,8,4,8" Style="{DynamicResource GlassSlider}" ClipToBounds="False" MouseWheel="Volume_Wheel" FlowDirection="LeftToRight" HorizontalAlignment="Left" Width="Auto" MinWidth="120" MaxWidth="120" IsMoveToPointEnabled="False" Maximum="1" SmallChange="0.05" LargeChange="0.1" />
-            <Image Width="Auto" Source="..\pictures\Volume.png" Stretch="None" HorizontalAlignment="Left" Margin="584,6,0,6" x:Name="image_volume"/>
+            <Image x:Name="image_volume_on" Margin="584,6,0,6" Width="Auto" Height="Auto" HorizontalAlignment="Left" Source="..\pictures\Volume.png" Stretch="None" Visibility="Visible"/>
+            <Image x:Name="image_volume_off" Margin="584,6,0,6" Width="Auto" Height="Auto" HorizontalAlignment="Left" Source="..\pictures\Volume2.png" Stretch="None" Visibility="Collapsed"/>
         </Grid>
-        <Grid x:Name="grid_tasks" Background="{DynamicResource black_gradient_2}" Margin="0,60.96,0,0">
+        <Grid x:Name="grid_tasks" Background="{DynamicResource black_gradient_2}" Margin="0,60.96,0,0" SizeChanged="grid_tasks_SizeChanged">
             <ContentControl x:Name="content_tasks">
                 <ListView IsEnabled="True" x:Name="list_tasks" Background="#FF3B3B3B" Foreground="#FFFFFFFF" SelectionMode="Single" OverridesDefaultStyle="False" Margin="8,8,8,8" Width="Auto" Height="Auto" SelectionChanged="list_tasks_SelectionChanged">
                     <ListView.Resources>
@@ -452,7 +451,6 @@
                 <Button x:Name="button_edit_aencoding" Margin="0,228.94,3,0" Click="AudioEncodingSettings_Click" HorizontalAlignment="Right" Width="26" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButtonRounded}" VerticalAlignment="Top" Height="26">
                     <Image  Stretch="None" x:Name="image_settings4" Source="..\pictures\settings.png" VerticalAlignment="Center" HorizontalAlignment="Center" FlowDirection="RightToLeft" />
                 </Button>
-
                 <Grid Margin="0,279,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="Auto">
                     <TextBox x:Name="textbox_start" Text="" TextWrapping="Wrap" Margin="5,1,2,0" VerticalScrollBarVisibility="Disabled" HorizontalAlignment="Left" VerticalAlignment="Top" Width="77" Height="19" Opacity="0.9" HorizontalContentAlignment="Right" KeyDown="textbox_trim_KeyDown" />
                     <TextBox x:Name="textbox_end" Text="" TextWrapping="Wrap" Margin="0,1,33,0" VerticalScrollBarVisibility="Disabled" HorizontalAlignment="Right" VerticalAlignment="Top" Width="77" Height="19" Opacity="0.9" HorizontalContentAlignment="Right" KeyDown="textbox_trim_KeyDown" />
@@ -468,7 +466,7 @@
             <TextBox Opacity="0.8" PreviewKeyDown="GoTo_KeyDown" PreviewMouseRightButtonDown="GoTo_MouseRightDown" x:Name="textbox_frame_goto" Height="32" FontFamily="Segoe" FontSize="25" FontWeight="Bold" Foreground="#FFFFFFFF" Background="#00000000" TextAlignment="Right" TextWrapping="Wrap" Width="192" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="3,0,0,-2" BorderBrush="Transparent" BorderThickness="0" Visibility="Hidden" ContextMenu="{x:Null}" />
             <TextBlock  x:Name="target_goto" Width="192" Height="Auto" FontFamily="Segoe" FontSize="25" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,0" MouseDown="GoTo_Click" />
         </Grid>
-        <Grid x:Name="grid_player_window" Background="{DynamicResource black_gradient_2}" Margin="195.856,4,0,38.184" Grid.Row="1" MouseDown="Player_Mouse_Click">
+        <Grid x:Name="grid_player_window" Background="{DynamicResource black_gradient_2}" Margin="195.856,4,0,38.184" Grid.Row="1" MouseDown="Player_Mouse_Click" MouseWheel="Volume_Wheel">
             <Grid x:Name="grid_player_info" Height="44" RenderTransformOrigin="0.5,0.5" Margin="8,8,8,0" VerticalAlignment="Top">
                 <Grid.RenderTransform>
                     <TransformGroup>
@@ -499,9 +497,8 @@
                 <TextBlock Opacity="0.4" x:Name="textbox_duration" Height="Auto" FontFamily="Segoe" FontSize="26" FontWeight="Bold" Foreground="#FFFFFFFF" Text="" TextAlignment="Right" TextWrapping="Wrap" Width="Auto" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,-0.7,0,13.5" Visibility="Collapsed"/>
                 <TextBlock Opacity="1" FontFamily="Segoe" FontSize="24" FontWeight="Light" Foreground="#FFFFFFFF" Text="video_name" TextWrapping="Wrap" x:Name="textbox_name" OpacityMask="{DynamicResource opasity_1}" d:LayoutOverrides="Height" Margin="0,0,2,15.2" Padding="0,0,100,0" TextTrimming="CharacterEllipsis"/>
             </Grid>
-            <MediaElement Margin="8,56,8,8" Visibility="Collapsed" x:Name="VideoElement" Focusable="True" Volume="{Binding Path=Value, ElementName=slider_Volume}" MouseWheel="Volume_Wheel"/>
             <TextBox x:Name="script_box" Visibility="Collapsed" Text="" TextWrapping="Wrap" Margin="8,56,8,8" Background="#00FFFFFF" Foreground="#FFFFFFFF" BorderThickness="2" BorderBrush="Black" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto"/>
-            <Image x:Name="Pic" RenderOptions.BitmapScalingMode="HighQuality" Margin="8,56,8,8" Width="Auto" Height="Auto" Stretch="Uniform" Source="..\pictures\vc_background.png" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
+            <Viewbox Margin="8,56,8,8" x:Name="ErrBox" Visibility="Collapsed"/>
             <Grid.ContextMenu>
                 <ContextMenu Name="player_area_cmn">
                     <ContextMenu.Resources>
@@ -548,6 +545,12 @@
             <Button x:Name="button_avsp" Content="AvsP - Editor" Visibility="Collapsed" Foreground="#FFFFFFFF" Click="button_avsp_Click" Template="{DynamicResource GlassButton}" Margin="196,9,0,9" HorizontalAlignment="Left" Width="90"/>
             <Button x:Name="button_play_script" Content="Play" Visibility="Collapsed" Foreground="#FFFFFFFF" Click="button_play_script_Click" Template="{DynamicResource GlassButton}" Margin="290,9,8,9" HorizontalAlignment="Left" Width="90"/>
         </Grid>
-        <Border Name="VHostElement" Margin="0,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Transparent" Opacity="0"/>
+        <Border Name="VHostElement" Margin="0,0,0,0" Width="0" Height="0" Grid.RowSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Transparent" Opacity="0" Visibility="Collapsed"/>
+        <MediaElement x:Name="VideoElement" Margin="0,0,0,0" Width="0" Height="0" Grid.RowSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="Fill" Volume="{Binding Path=Value, ElementName=slider_Volume}" IsHitTestVisible="False" Visibility="Collapsed"/>
+        <Image x:Name="Pic" Margin="0,0,0,0" Width="0" Height="0" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Left" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" IsHitTestVisible="False" Visibility="Collapsed">
+            <Image.LayoutTransform>
+                <ScaleTransform ScaleY="-1"/>
+            </Image.LayoutTransform>
+        </Image>
     </Grid>
 </Window>

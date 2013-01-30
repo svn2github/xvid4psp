@@ -100,6 +100,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="classes\AviSynthPlayer.cs" />
     <Compile Include="classes\DDHelper.cs" />
     <Compile Include="encoders\arguments\aac_arguments.cs" />
     <Compile Include="classes\AudioStream.cs" />

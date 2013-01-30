@@ -788,7 +788,7 @@ namespace XviD4PSP
                         DsError.ThrowExceptionForHR(basicVideo.get_VideoHeight(out height)); //get_SourceHeight ?
                         aspect = ((double)width / (double)height);
                     }
-                    else if (EVRControl != null)
+                    else if (EVRControl != null && VHost != null)
                     {
                         System.Drawing.Size size, size_ar;
                         MFError.ThrowExceptionForHR(EVRControl.GetNativeVideoSize(out size, out size_ar));
@@ -817,7 +817,7 @@ namespace XviD4PSP
                     //Заставляем перерисовать окно
                     DsError.ThrowExceptionForHR(this.videoWindow.put_BorderColor(1));
                 }
-                else if (EVRControl != null)
+                else if (EVRControl != null && VHost != null)
                 {
                     //Идем на небольшую хитрость для указания позиции EVR-окна :)
                     //Её смысл в том, что элемент VHostElement располагается на макете страницы

@@ -597,7 +597,7 @@ namespace WPF_VideoPlayer
                     //Заставляем перерисовать окно
                     DsError.ThrowExceptionForHR(this.videoWindow.put_BorderColor(1));
                 }
-                else if (EVRControl != null)
+                else if (EVRControl != null && VHost != null)
                 {
                     //Масштабируем и вводим
                     MFError.ThrowExceptionForHR(EVRControl.SetVideoPosition(null, new MFRect(0, 0, Convert.ToInt32(dpi * VHostElement.ActualWidth),

@@ -3177,5 +3177,26 @@ namespace XviD4PSP
                 SetBool("SortPresetsByTime", value);
             }
         }
+
+        //Пропуск кадров для PictureView
+        public static bool PictureViewDropFrames
+        {
+            get
+            {
+                object value = GetValue("PictureViewDropFrames");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("PictureViewDropFrames", value);
+            }
+        }
     }
 }

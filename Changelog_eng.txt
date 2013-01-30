@@ -1,5 +1,10 @@
-﻿XviD4PSP 5.10.311.0 (18.01.2013), main changes:
+﻿XviD4PSP 5.10.312.0 (30.01.2013), main changes:
 
+>>> (r312) MediaBridge preview now maintain the AR.
+>>> (r312) PictureView preview completely reworked. Added ability to play the video (without sound) and for slow sources
+           it can be usefull to enable "Settings->Player engine->PictureView drop" to drop some frames while play back.
+           But, AviSynth now will be loaded all the time till preview is opened. Also, due to using InteropBitmap, this
+           preview will only work if .NET Framework 3.0 with SP1 is installed.
 >>> (r311) Support for opening multiple files via command line.
 >>> (r310) XviD4PSP and WPF Video Player: instead of OLE Drag&Drop now uses Win32 Drag&Drop, which works with UAC.
 >>> (r309) Added ability to sort presets by last modification time ("Settings->Global settings->Sort presets
