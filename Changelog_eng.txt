@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.312.0 (30.01.2013), main changes:
+﻿XviD4PSP 5.10.313.0 (01.02.2013), main changes:
 
+>>> (r313) If an error has occurred while loading the preview, it will no longer lead to closing current task.
+>>> (r313) PictureView: if InteropBitmap can't be used (.NET Framework 3.0 without SP1), then WriteableBitmap will be
+           used instead. It works less efficient, but at least it works.
 >>> (r312) MediaBridge preview now maintain the AR.
 >>> (r312) PictureView preview completely reworked. Added ability to play the video (without sound) and for slow sources
            it can be usefull to enable "Settings->Player engine->PictureView drop" to drop some frames while play back.

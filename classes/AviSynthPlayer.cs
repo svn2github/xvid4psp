@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Security;
 using System.Windows;
-
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using System.Threading;
 using System.Diagnostics;
@@ -36,19 +36,23 @@ namespace XviD4PSP
         public bool HasVideo = false;
         public bool IsError = false;
         private bool IsAborted = false;
-        public bool AllowDrop = false;
-        public double DropThreshold = 0.5;
-
+        private bool IsInterop = false;
+        public bool AllowDropFrames = false;
+        public double DropThreshold = 0.5;  //<0 - меньше кадров будет пропущено, но скорость может поплыть; >0 - больше кадров будет пропущено
+ 
         private int Width = 0;
         private int Height = 0;
         public int TotalFrames = 0;
-        public int CurrentFrame = 0;
         public double Framerate = 0;
+        public int CurrentFrame = 0;   //Номер кадра, который точно был показан
+        private int _CurrentFrame = 0; //Номер кадра при расчетах в PlayingLoop
 
         private int stride = 0;
+        private int bufSize = 0;
         private IntPtr MemSection = IntPtr.Zero;
-        private IntPtr MapView = IntPtr.Zero;
-        public InteropBitmap InteropBitmapSource = null;
+        private IntPtr VBuffer = IntPtr.Zero;
+        public ImageSource BitmapSource = null;
+        private ThreadStart UpdateDelegate = null;
         public DispatcherPriority Priority = DispatcherPriority.Normal;
 
         [DllImport("kernel32.dll", EntryPoint = "CreateFileMapping", SetLastError = true)]
@@ -65,17 +69,28 @@ namespace XviD4PSP
             //
         }
 
-        public void Open(string script)
+        public void Open(string scriptPath)
         {
             try
             {
-                this.script = script;
-                AllowDrop = Settings.PictureViewDropFrames;
-
+                script = scriptPath;
                 LoadAviSynth();
+
                 if (HasVideo)
                 {
-                    CreateInteropBitmap();
+                    try
+                    {
+                        //Framework 3.0 с SP1+
+                        CreateInteropBitmap();
+                        IsInterop = true;
+                    }
+                    catch (TypeLoadException)
+                    {
+                        //Framework 3.0 без SP1
+                        CreateWriteableBitmap();
+                        IsInterop = false;
+                    }
+
                     CreatePlayingThread();
                 }
             }
@@ -90,7 +105,7 @@ namespace XviD4PSP
             if (reader == null)
             {
                 reader = new AviSynthReader(AviSynthColorspace.RGB32, AudioSampleType.Undefined);
-                reader.ParseScript(script);
+                reader.OpenScript(script);
 
                 if (!reader.Clip.HasVideo || reader.FrameCount == 0)
                 {
@@ -109,27 +124,47 @@ namespace XviD4PSP
 
         private void CreateInteropBitmap()
         {
-            if (InteropBitmapSource == null)
+            if (BitmapSource == null)
             {
                 //Из-за бага в InteropBitmap вместо RGB24 придется использовать RGB32 (будет чуть медленнее).
-                //Иначе картинка не будет обновляться при Invalidate - баг исправлен в каком-то новом FrameWork`е.
+                //Иначе картинка не будет обновляться при Invalidate - баг исправлен в каком-то новом Framework`е.
                 PixelFormat format = PixelFormats.Bgr32;
                 stride = Width * (format.BitsPerPixel / 8);
-                uint bufSize = (uint)(stride * Height);
+                bufSize = stride * Height;
 
                 if (MemSection == IntPtr.Zero)
                 {
-                    MemSection = CreateFileMapping(new IntPtr(-1), IntPtr.Zero, 0x04, 0, bufSize, null);
+                    MemSection = CreateFileMapping(new IntPtr(-1), IntPtr.Zero, 0x04, 0, (uint)bufSize, null);
                     if (MemSection == IntPtr.Zero) throw new Exception("CreateFileMapping: " + new Win32Exception().Message);
                 }
 
-                if (MapView == IntPtr.Zero)
+                if (VBuffer == IntPtr.Zero)
                 {
-                    MapView = MapViewOfFile(MemSection, 0xF001F, 0, 0, bufSize);
-                    if (MapView == IntPtr.Zero) throw new Exception("MapViewOfFile: " + new Win32Exception().Message);
+                    VBuffer = MapViewOfFile(MemSection, 0xF001F, 0, 0, (uint)bufSize);
+                    if (VBuffer == IntPtr.Zero) throw new Exception("MapViewOfFile: " + new Win32Exception().Message);
                 }
 
-                InteropBitmapSource = Imaging.CreateBitmapSourceFromMemorySection(MemSection, Width, Height, format, stride, 0) as InteropBitmap;
+                BitmapSource = Imaging.CreateBitmapSourceFromMemorySection(MemSection, Width, Height, format, stride, 0) as InteropBitmap;
+                UpdateDelegate = () => { try { if (BitmapSource != null) ((InteropBitmap)BitmapSource).Invalidate(); } catch (Exception) { } };
+            }
+        }
+
+        private void CreateWriteableBitmap()
+        {
+            if (BitmapSource == null)
+            {
+                //WriteableBitmap в 3.0 без SP1 тоже работает только с RGB32, плюс оно само по себе медленнее.
+                //Обновление через BackBuffer работает быстрее, чем через WritePixels, но для BackBuffer нужен SP2.
+                PixelFormat format = PixelFormats.Bgr32;
+                stride = Width * (format.BitsPerPixel / 8);
+                bufSize = stride * Height;
+
+                if (VBuffer == IntPtr.Zero)
+                    VBuffer = Marshal.AllocHGlobal(bufSize);
+
+                Int32Rect WBRect = new Int32Rect(0, 0, Width, Height);
+                BitmapSource = new System.Windows.Media.Imaging.WriteableBitmap(Width, Height, 0, 0, format, null);
+                UpdateDelegate = () => { try { if (BitmapSource != null) ((WriteableBitmap)BitmapSource).WritePixels(WBRect, VBuffer, bufSize, stride); } catch (Exception) { } };
             }
         }
 
@@ -142,17 +177,18 @@ namespace XviD4PSP
                     IsAborted = true;
                     playing.Set();        //Снимаем с паузы PlayingLoop, чтоб там сработала проверка на IsAborted
                     processing.WaitOne(); //Ждем, пока обработается текущий кадр, если его считывание еще не закончилось
-                    //thread.Join();      //Дожидаемся окончания работы PlayingLoop (это блокирует основной поток, т.к. через Invoke в нем обновляется картинка!)
+                    thread.Join();        //Дожидаемся окончания работы PlayingLoop
                     thread = null;
                 }
-                if (InteropBitmapSource != null)
+                if (BitmapSource != null)
                 {
-                    InteropBitmapSource = null;
+                    BitmapSource = null;
                 }
-                if (MapView != IntPtr.Zero)
+                if (VBuffer != IntPtr.Zero)
                 {
-                    UnmapViewOfFile(MapView);
-                    MapView = IntPtr.Zero;
+                    if (IsInterop) UnmapViewOfFile(VBuffer);
+                    else Marshal.FreeHGlobal(VBuffer);
+                    VBuffer = IntPtr.Zero;
                 }
                 if (MemSection != IntPtr.Zero)
                 {
@@ -161,7 +197,8 @@ namespace XviD4PSP
                 }
                 if (reader != null)
                 {
-                    reader.Close();
+                    try { reader.Close(); }
+                    catch (Exception) { }
                     reader = null;
                 }
             }
@@ -186,26 +223,28 @@ namespace XviD4PSP
 
             while (!IsError && !IsAborted) //Зацикливаем воспроизведение (переход с конца на начало)
             {
-                while (!IsError && !IsAborted && CurrentFrame < reader.FrameCount) //Зацикливаем прогон кадров
+                while (!IsError && !IsAborted && _CurrentFrame < TotalFrames) //Зацикливаем прогон кадров
                 {
                     playing.WaitOne();
-
                     timer.Start();
 
-                    if (IsAborted) break;
-                    ReadFrame(CurrentFrame);
+                    if (IsAborted)
+                        return;
 
-                    Interlocked.Increment(ref CurrentFrame);
+                    processing.Reset();
+                    ShowFrame(_CurrentFrame);
+
+                    Interlocked.Increment(ref _CurrentFrame);
                     ticksToWait = ticksPerFrame - Math.Min(ticksCorrection, ticksPerFrame);
 
                     //Будем пропускать кадры?
-                    if (timer.ElapsedTicks > ticksPerFrame && AllowDrop)
+                    if (timer.ElapsedTicks > ticksPerFrame && AllowDropFrames)
                     {
                         //Без округления, просто прибавляем "порог" и отсекаем дробную часть
                         int drop = (int)((timer.ElapsedTicks / ticksPerFrame) + DropThreshold);
                         if (drop > 0)
                         {
-                            Interlocked.Add(ref CurrentFrame, drop);
+                            Interlocked.Add(ref _CurrentFrame, drop);
                             ticksToWait += drop * ticksPerFrame;
                         }
                     }
@@ -217,20 +256,22 @@ namespace XviD4PSP
                     //Нужна коррекция, т.к. пауза всегда длится дольше
                     ticksCorrection = timer.ElapsedTicks - ticksToWait;
 
+                    processing.Set();
                     timer.Reset();
+
+                    //Чем меньше операций останется между timer.Reset() и timer.Start(), тем точнее будет скорость.
+                    //Т.к. пока таймер остановлен, затраченное время не считается и погрешность будет накапливаться.
                 }
 
+                playing.Reset();
                 ticksCorrection = 0;
 
                 //Дошли до конца видео
                 if (!IsError && !IsAborted)
                 {
-                    playing.Reset();
-                    processing.WaitOne();
-
                     if (PlayerFinished != null)
                     {
-                        App.Current.Dispatcher.Invoke((ThreadStart)delegate()
+                        App.Current.Dispatcher.Invoke(Priority, (ThreadStart)delegate()
                         {
                             PlayerFinished(this);
                         });
@@ -239,29 +280,20 @@ namespace XviD4PSP
             }
         }
 
-        private void ReadFrame(int frame)
+        private void ShowFrame(int frame)
         {
             try
             {
-                processing.Reset();
-                reader.Clip.ReadFrame(MapView, stride, frame);
-                processing.Set();
+                Interlocked.Exchange(ref CurrentFrame, frame);
+                reader.Clip.ReadFrame(VBuffer, stride, frame);
 
-                //App.Current.Dispatcher.BeginInvoke(Priority, (ThreadStart)delegate()
-                App.Current.Dispatcher.Invoke(Priority, (ThreadStart)delegate()
-                {
-                    try { InteropBitmapSource.Invalidate(); }
-                    catch (Exception) { /*NullReference*/ };
-                });
+                App.Current.Dispatcher.BeginInvoke(Priority, UpdateDelegate);
             }
             catch (Exception ex)
             {
+                processing.Set();
                 if (!IsAborted)
                     SetError(ex);
-            }
-            finally
-            {
-                processing.Set();
             }
         }
 
@@ -270,7 +302,7 @@ namespace XviD4PSP
             IsError = true;
             if (PlayerError != null)
             {
-                App.Current.Dispatcher.Invoke((ThreadStart)delegate()
+                App.Current.Dispatcher.Invoke(Priority, (ThreadStart)delegate()
                 {
                     PlayerError(this, ex);
                 });
@@ -281,8 +313,11 @@ namespace XviD4PSP
         {
             if (!IsError && !IsAborted && HasVideo)
             {
-                PlayerState = PlayState.Running;
-                playing.Set();
+                if (PlayerState != PlayState.Running)
+                {
+                    PlayerState = PlayState.Running;
+                    playing.Set();
+                }
             }
         }
 
@@ -295,8 +330,9 @@ namespace XviD4PSP
                     //Сброс на начало
                     playing.Reset();
                     processing.WaitOne();
+                    Interlocked.Exchange(ref _CurrentFrame, 0);
                     if (Interlocked.Exchange(ref CurrentFrame, 0) != 0)
-                        ReadFrame(0);
+                        ShowFrame(0);
                 }
 
                 PlayerState = PlayState.Stopped;
@@ -313,6 +349,16 @@ namespace XviD4PSP
             }
         }
 
+        public void Abort()
+        {
+            if (PlayerState != PlayState.Init)
+            {
+                IsAborted = true;
+                playing.Set();
+                processing.WaitOne();
+            }
+        }
+
         public void SetFrame(int frame)
         {
             if (!IsError && !IsAborted && HasVideo)
@@ -322,13 +368,13 @@ namespace XviD4PSP
                     //Pause->Set->Play
                     playing.Reset();
                     processing.WaitOne();
-                    Interlocked.Exchange(ref CurrentFrame, frame);
+                    Interlocked.Exchange(ref _CurrentFrame, frame);
                     playing.Set();
                 }
                 else
                 {
-                    Interlocked.Exchange(ref CurrentFrame, frame);
-                    ReadFrame(frame);
+                    Interlocked.Exchange(ref _CurrentFrame, frame);
+                    ShowFrame(frame);
                 }
             }
         }

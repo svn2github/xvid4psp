@@ -1969,6 +1969,12 @@ namespace XviD4PSP
             mes.ShowMessage(message, info, Languages.Translate("Error"));
         }
 
+        private void PreviewError(string text, Brush foreground)
+        {
+            ErrBox.Child = new TextBlock() { Text = text, Background = Brushes.Black, Foreground = foreground, TextAlignment = TextAlignment.Center, FontFamily = new FontFamily("Arial") };
+            ErrBox.Visibility = Visibility.Visible;
+        }
+
         private void LoadVideo(MediaLoad mediaload)
         {
             this.mediaload = mediaload;
@@ -2018,7 +2024,7 @@ namespace XviD4PSP
                     else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge)
                         PlayWithMediaBridge(Settings.TempPath + "\\preview.avs");
                     else
-                        PlayWithAvsPlayer(m.script);
+                        PlayWithAvsPlayer(Settings.TempPath + "\\preview.avs");
 
                     this.Focus();
                     slider_pos.Focus(); //Переводит фокус на полосу прокрутки видео
@@ -2027,35 +2033,35 @@ namespace XviD4PSP
                     if (timer != null) timer.Start();
                 }
 
-                if (mediaload == MediaLoad.load) 
-                    MenuHider(true); //Делаем пункты меню активными
-
-                textbox_name.Text = m.taskname;
+                //Делаем пункты меню активными
+                if (mediaload == MediaLoad.load)
+                    MenuHider(true);
             }
             catch (Exception ex)
             {
                 CloseClip();
-                m = null;
-                MenuHider(false); //Делаем пункты меню неактивными
 
-                if (ex.Message.Contains("DirectX"))
+                if (mediaload == MediaLoad.load && ex.Message.Contains("DirectX"))
                 {
                     Message mess = new Message(this);
                     mess.ShowMessage(Languages.Translate("DirectX update required! Do it now?"),
                         Languages.Translate("Error"), Message.MessageStyle.YesNo);
                     if (mess.result == Message.Result.Yes)
                     {
+                        m = null;
                         Process.Start(Calculate.StartupPath + "\\apps\\DirectX_Update\\dxwebsetup.exe");
                         Close();
+                        return;
                     }
                 }
                 else
                 {
                     ErrorException("LoadVideo: " + ex.Message, ex.StackTrace);
+                    PreviewError(Languages.Translate("Error") + "...", Brushes.Red);
                 }
-
-                return;
             }
+
+            textbox_name.Text = m.taskname;
         }
 
         public void SetHotKeys()
@@ -2572,9 +2578,7 @@ namespace XviD4PSP
             if (Settings.PlayerEngine.ToString() == ((MenuItem)sender).Header.ToString()) return;
 
             PlayState cstate = currentState;
-            oldpos = Position;
             if (m != null) CloseClip();
-            oldpos = Position;
 
             //Удаляем старое
             if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow)
@@ -4375,8 +4379,8 @@ namespace XviD4PSP
 
         public void SwitchToFullScreen()
         {
-            if (this.IsAudioOnly || (this.graphBuilder == null && script_box.Visibility != Visibility.Visible && Pic.Visibility != Visibility.Visible && ErrBox.Visibility != Visibility.Visible))
-                if (!IsFullScreen) return; //Если файл был закрыт при фуллскрине, продолжаем, чтоб вернуть нормальный размер окна
+            if (this.IsAudioOnly || (this.graphBuilder == null && script_box.Visibility != Visibility.Visible && Pic.Visibility != Visibility.Visible))
+                if (!IsFullScreen && ErrBox.Visibility != Visibility.Visible) return; //Если файл был закрыт при фуллскрине, продолжаем, чтоб вернуть нормальный размер окна
 
             //Если не Фуллскрин, то делаем Фуллскрин
             if (!IsFullScreen)
@@ -4513,7 +4517,7 @@ namespace XviD4PSP
                 //AviSynthPlayer (PictureView)
                 if (avsPlayer != null)
                 {
-                    avsPlayer.Stop();
+                    avsPlayer.Abort();
                     avsPlayer.Close();
                     avsPlayer = null;
 
@@ -4606,12 +4610,13 @@ namespace XviD4PSP
             }
         }
 
-        private void PlayWithAvsPlayer(string script)
+        private void PlayWithAvsPlayer(string scriptPath)
         {
             avsPlayer = new AviSynthPlayer();
+            avsPlayer.AllowDropFrames = Settings.PictureViewDropFrames;
             avsPlayer.PlayerError += new AvsPlayerError(AvsPlayerError);
-            avsPlayer.Open(script);
 
+            avsPlayer.Open(scriptPath);
             if (avsPlayer.IsError)
                 return;
 
@@ -4640,7 +4645,7 @@ namespace XviD4PSP
                     return;
 
                 avsPlayer.PlayerFinished += new AvsPlayerFinished(AvsPlayerFinished);
-                Pic.Source = avsPlayer.InteropBitmapSource;
+                Pic.Source = avsPlayer.BitmapSource;
                 Pic.Visibility = Visibility.Visible;
 
                 if (currentState == PlayState.Running)
@@ -4669,8 +4674,7 @@ namespace XviD4PSP
             }
             else
             {
-                ErrBox.Child = new TextBlock() { Text = "NO VIDEO", Background = Brushes.Black, Foreground = Brushes.Gainsboro, TextAlignment = TextAlignment.Center, FontFamily = new FontFamily("Arial") };
-                ErrBox.Visibility = Visibility.Visible;
+                PreviewError("NO VIDEO", Brushes.Gainsboro);
             }
         }
 
@@ -4682,15 +4686,13 @@ namespace XviD4PSP
             if (ex is AviSynthException)
             {
                 //Ависинтовские ошибки - выводим красным на чёрном
-                ErrBox.Child = new TextBlock() { Text = ex.Message, Background = Brushes.Black, Foreground = Brushes.Red, TextAlignment = TextAlignment.Center, FontFamily = new FontFamily("Arial") };
-                ErrBox.Visibility = Visibility.Visible;
+                PreviewError(ex.Message, Brushes.Red);
                 IsAviSynthError = true;
             }
             else
             {
                 ErrorException("AviSynthPlayer: " + ex.Message, ex.StackTrace);
-                ErrBox.Child = new TextBlock() { Text = "Error...", Background = Brushes.Black, Foreground = Brushes.Red, TextAlignment = TextAlignment.Center, FontFamily = new FontFamily("Arial") };
-                ErrBox.Visibility = Visibility.Visible;
+                PreviewError(Languages.Translate("Error") + "...", Brushes.Red);
             }
         }
 
@@ -4861,8 +4863,7 @@ namespace XviD4PSP
                 if (m.isvideo)
                 {
                     //Видео должно было быть..
-                    ErrBox.Child = new TextBlock() { Text = "NO VIDEO", Background = Brushes.Black, Foreground = Brushes.Gainsboro, TextAlignment = TextAlignment.Center, FontFamily = new FontFamily("Arial") };
-                    ErrBox.Visibility = Visibility.Visible;
+                    PreviewError("NO VIDEO", Brushes.Gainsboro);
                 }
             }
 
@@ -5410,8 +5411,7 @@ namespace XviD4PSP
                 if (!VideoElement.HasVideo && m.isvideo)
                 {
                     //Видео должно было быть..
-                    ErrBox.Child = new TextBlock() { Text = "NO VIDEO", Background = Brushes.Black, Foreground = Brushes.Gainsboro, TextAlignment = TextAlignment.Center, FontFamily = new FontFamily("Arial") };
-                    ErrBox.Visibility = Visibility.Visible;
+                    PreviewError("NO VIDEO", Brushes.Gainsboro);
                 }
             }
             catch (Exception ex)
@@ -5466,6 +5466,7 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate()
                 {
                     ErrorException("BridgeCallback: " + ex.Message, ex.StackTrace);
+                    PreviewError(Languages.Translate("Error") + "...", Brushes.Red);
                 });
             }
         }
@@ -7176,7 +7177,7 @@ namespace XviD4PSP
         private void check_pictureview_drop_Clicked(object sender, RoutedEventArgs e)
         {
             Settings.PictureViewDropFrames = check_pictureview_drop.IsChecked;
-            if (avsPlayer != null) avsPlayer.AllowDrop = check_pictureview_drop.IsChecked;
+            if (avsPlayer != null) avsPlayer.AllowDropFrames = check_pictureview_drop.IsChecked;
         }
     }
 }
