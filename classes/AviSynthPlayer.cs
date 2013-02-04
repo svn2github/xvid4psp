@@ -38,7 +38,7 @@ namespace XviD4PSP
         private bool IsAborted = false;
         private bool IsInterop = false;
         public bool AllowDropFrames = false;
-        public double DropThreshold = 0.5;  //<0 - меньше кадров будет пропущено, но скорость может поплыть; >0 - больше кадров будет пропущено
+        private bool ResetTimer = false;
  
         private int Width = 0;
         private int Height = 0;
@@ -218,63 +218,61 @@ namespace XviD4PSP
             Stopwatch timer = new Stopwatch();
             long ticksPerSecond = Stopwatch.Frequency;
             long ticksPerFrame = (long)(ticksPerSecond * (1.0 / Framerate));
-            long ticksToWait = ticksPerFrame;
-            long ticksCorrection = 0;
+            long ticksToNextFrame = 0;
 
-            while (!IsError && !IsAborted) //Зацикливаем воспроизведение (переход с конца на начало)
+            timer.Start();
+
+            while (!IsError && !IsAborted)
             {
-                while (!IsError && !IsAborted && _CurrentFrame < TotalFrames) //Зацикливаем прогон кадров
+                playing.WaitOne();
+
+                if (IsError || IsAborted)
+                    return;
+
+                //После простоя
+                if (ResetTimer)
                 {
-                    playing.WaitOne();
-                    timer.Start();
-
-                    if (IsAborted)
-                        return;
-
-                    processing.Reset();
-                    ShowFrame(_CurrentFrame);
-
-                    Interlocked.Increment(ref _CurrentFrame);
-                    ticksToWait = ticksPerFrame - Math.Min(ticksCorrection, ticksPerFrame);
-
-                    //Будем пропускать кадры?
-                    if (timer.ElapsedTicks > ticksPerFrame && AllowDropFrames)
-                    {
-                        //Без округления, просто прибавляем "порог" и отсекаем дробную часть
-                        int drop = (int)((timer.ElapsedTicks / ticksPerFrame) + DropThreshold);
-                        if (drop > 0)
-                        {
-                            Interlocked.Add(ref _CurrentFrame, drop);
-                            ticksToWait += drop * ticksPerFrame;
-                        }
-                    }
-
-                    //Ждем оставшееся время перед показом следующего кадра
-                    while (timer.ElapsedTicks < ticksToWait && !IsAborted)
-                        Thread.Sleep(1);
-
-                    //Нужна коррекция, т.к. пауза всегда длится дольше
-                    ticksCorrection = timer.ElapsedTicks - ticksToWait;
-
-                    processing.Set();
                     timer.Reset();
-
-                    //Чем меньше операций останется между timer.Reset() и timer.Start(), тем точнее будет скорость.
-                    //Т.к. пока таймер остановлен, затраченное время не считается и погрешность будет накапливаться.
+                    timer.Start();
+                    ticksToNextFrame = 0;
+                    ResetTimer = false;
                 }
 
-                playing.Reset();
-                ticksCorrection = 0;
+                processing.Reset();
+                ShowFrame(_CurrentFrame);
+
+                ticksToNextFrame += ticksPerFrame;
+                Interlocked.Increment(ref _CurrentFrame);
+
+                //Будем пропускать кадры?
+                if (timer.ElapsedTicks >= ticksToNextFrame && AllowDropFrames)
+                {
+                    int drop = Convert.ToInt32((timer.ElapsedTicks - ticksToNextFrame) / ticksPerFrame);
+                    Interlocked.Add(ref _CurrentFrame, drop);
+                    ticksToNextFrame += drop * ticksPerFrame;
+                }
+
+                //Ждем оставшееся время перед показом следующего кадра
+                while (timer.ElapsedTicks < ticksToNextFrame && !IsError && !IsAborted)
+                    Thread.Sleep(1);
+
+                processing.Set();
 
                 //Дошли до конца видео
-                if (!IsError && !IsAborted)
+                if (_CurrentFrame >= TotalFrames)
                 {
-                    if (PlayerFinished != null)
+                    playing.Reset();
+                    ResetTimer = true;
+
+                    if (!IsError && !IsAborted)
                     {
-                        App.Current.Dispatcher.Invoke(Priority, (ThreadStart)delegate()
+                        if (PlayerFinished != null)
                         {
-                            PlayerFinished(this);
-                        });
+                            App.Current.Dispatcher.Invoke(Priority, (ThreadStart)delegate()
+                            {
+                                PlayerFinished(this);
+                            });
+                        }
                     }
                 }
             }
@@ -316,6 +314,7 @@ namespace XviD4PSP
                 if (PlayerState != PlayState.Running)
                 {
                     PlayerState = PlayState.Running;
+                    ResetTimer = true;
                     playing.Set();
                 }
             }
@@ -345,6 +344,7 @@ namespace XviD4PSP
             if (!IsError && !IsAborted && HasVideo)
             {
                 PlayerState = PlayState.Paused;
+                ResetTimer = true;
                 playing.Reset();
             }
         }
@@ -369,6 +369,7 @@ namespace XviD4PSP
                     playing.Reset();
                     processing.WaitOne();
                     Interlocked.Exchange(ref _CurrentFrame, frame);
+                    ResetTimer = true;
                     playing.Set();
                 }
                 else

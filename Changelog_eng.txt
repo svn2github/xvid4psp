@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.313.0 (01.02.2013), main changes:
+﻿XviD4PSP 5.10.314.0 (04.02.2013), main changes:
 
+>>> (r314) PictureView: increased accuracy of framerate holding.
 >>> (r313) If an error has occurred while loading the preview, it will no longer lead to closing current task.
 >>> (r313) PictureView: if InteropBitmap can't be used (.NET Framework 3.0 without SP1), then WriteableBitmap will be
            used instead. It works less efficient, but at least it works.
