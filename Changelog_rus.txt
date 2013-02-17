@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.315.0 (17.02.2013), основные изменения:
+﻿XviD4PSP 5.10.316.0 (17.02.2013), основные изменения:
 
+>>> (r316) DirectShowLib-2005.dll, MediaBridge.dll, SharpDX.dll и SharpDX.DirectSound.dll перемещены в dlls\Player.
 >>> (r315) Настройки, которые (скорее в тестовых целях) можно задать для PictureView через скрипт:
            ShowPictureViewInfo=true - вывод некоторой информации, в основном касается звуковых параметров.
            OPT_UseWaveExtensible=false - переключает формат описания звука с WAVEFORMATEXTENSIBLE на WAVEFORMATEX.

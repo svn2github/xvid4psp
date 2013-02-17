@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
+using System.Reflection;
 
 namespace WPF_VideoPlayer
 {
@@ -12,6 +13,9 @@ namespace WPF_VideoPlayer
             //Ловим необработанные исключения
             Application.Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(Current_DispatcherUnhandledException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+
+            //Подгружаем dll для плейера
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
         }
 
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
@@ -42,6 +46,13 @@ namespace WPF_VideoPlayer
                 txt += "!\r\n\r\n" + obj.ToString();
 
             MessageBox.Show(txt, "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Stop);
+        }
+
+        Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.Contains("DirectShowLib-2005")) return Assembly.LoadFrom("dlls\\Player\\DirectShowLib-2005.dll");
+            else if (args.Name.Contains("MediaBridge")) return Assembly.LoadFrom("dlls\\Player\\MediaBridge.dll");
+            else return null;
         }
     }
 }

@@ -7,7 +7,7 @@
 	x:Class="XviD4PSP.MainWindow"
 	x:Name="Window"
 	Title="XviD4PSP - AviSynth-based MultiMedia Converter"
-	Width="747" Height="577" MinWidth="250" MinHeight="100" SizeToContent="Manual" LocationChanged="MainWindow_LocationChanged" SizeChanged="MainWindow_SizeChanged" Closing="MainWindow_Closing" MouseLeftButtonDown="Window_MouseLeftButtonDown" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
+	Width="747" Height="577" MinWidth="250" MinHeight="100" SizeToContent="Manual" Closing="MainWindow_Closing" MouseLeftButtonDown="Window_MouseLeftButtonDown" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
     <Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -366,7 +366,7 @@
             <Image x:Name="image_volume_on" Margin="584,6,0,6" Width="Auto" Height="Auto" HorizontalAlignment="Left" Source="..\pictures\Volume.png" Stretch="None" Visibility="Visible"/>
             <Image x:Name="image_volume_off" Margin="584,6,0,6" Width="Auto" Height="Auto" HorizontalAlignment="Left" Source="..\pictures\Volume2.png" Stretch="None" Visibility="Collapsed"/>
         </Grid>
-        <Grid x:Name="grid_tasks" Background="{DynamicResource black_gradient_2}" Margin="0,60.96,0,0" SizeChanged="grid_tasks_SizeChanged">
+        <Grid x:Name="grid_tasks" Background="{DynamicResource black_gradient_2}" Margin="0,60.96,0,0">
             <ContentControl x:Name="content_tasks">
                 <ListView IsEnabled="True" x:Name="list_tasks" Background="#FF3B3B3B" Foreground="#FFFFFFFF" SelectionMode="Single" OverridesDefaultStyle="False" Margin="8,8,8,8" Width="Auto" Height="Auto" SelectionChanged="list_tasks_SelectionChanged">
                     <ListView.Resources>

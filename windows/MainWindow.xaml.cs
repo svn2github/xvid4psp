@@ -395,6 +395,11 @@ namespace XviD4PSP
                         VideoElement.MediaEnded += new RoutedEventHandler(VideoElement_MediaEnded);
                     }
 
+                    //Не в xaml, чтоб не срабатывали до загрузки
+                    this.LocationChanged += new EventHandler(MainWindow_LocationChanged);
+                    this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
+                    this.grid_tasks.SizeChanged += new SizeChangedEventHandler(grid_tasks_SizeChanged);
+
                     //Если AviSynth не был найден при старте
                     if (SysInfo.AVSVersionFloat == 0)
                     {

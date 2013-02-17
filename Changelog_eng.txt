@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.315.0 (17.02.2013), main changes:
+﻿XviD4PSP 5.10.316.0 (17.02.2013), main changes:
 
+>>> (r316) DirectShowLib-2005.dll, MediaBridge.dll, SharpDX.dll and SharpDX.DirectSound.dll moved to dlls\Player.
 >>> (r315) Some options, that can be applied to PictureView via AviSynth script (mostly for testing purposes):
            ShowPictureViewInfo=true - to output some info, it is related to audio in the first place.
            OPT_UseWaveExtensible=false - to switch audio description from WAVEFORMATEXTENSIBLE to WAVEFORMATEX.

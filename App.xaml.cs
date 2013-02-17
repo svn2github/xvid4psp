@@ -12,6 +12,7 @@ using System.Windows.Navigation;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Reflection;
 
 namespace XviD4PSP
 {
@@ -24,6 +25,9 @@ namespace XviD4PSP
             //Ловим необработанные исключения
             Application.Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(Current_DispatcherUnhandledException);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+
+            //Подгружаем dll для плейера
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
         }
 
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
@@ -88,6 +92,15 @@ namespace XviD4PSP
 
             MessageBox.Show(txt + (log_saved ? "\r\n\r\nThis log was saved here:\r\n  " + path + "\r\n" : ""),
                 "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Stop);
+        }
+
+        Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.Contains("DirectShowLib-2005")) return Assembly.LoadFrom("dlls\\Player\\DirectShowLib-2005.dll");
+            else if (args.Name.Contains("MediaBridge")) return Assembly.LoadFrom("dlls\\Player\\MediaBridge.dll");
+            else if (args.Name.Contains("SharpDX.DirectSound")) return Assembly.LoadFrom("dlls\\Player\\SharpDX.DirectSound.dll");
+            else if (args.Name.Contains("SharpDX")) return Assembly.LoadFrom("dlls\\Player\\SharpDX.dll");
+            else return null;
         }
 
         private void Copy_PreviewMouseUp(object sender, RoutedEventArgs e)
