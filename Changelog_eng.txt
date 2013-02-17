@@ -1,5 +1,13 @@
-﻿XviD4PSP 5.10.314.0 (04.02.2013), main changes:
+﻿XviD4PSP 5.10.315.0 (17.02.2013), main changes:
 
+>>> (r315) Some options, that can be applied to PictureView via AviSynth script (mostly for testing purposes):
+           ShowPictureViewInfo=true - to output some info, it is related to audio in the first place.
+           OPT_UseWaveExtensible=false - to switch audio description from WAVEFORMATEXTENSIBLE to WAVEFORMATEX.
+           OPT_dwChannelMask=value(int) - to override the channels mask (layout) when using WAVEFORMATEXTENSIBLE.
+>>> (r315) Added optional audio output via DirectSound (using SharpDX wrapper). It is disabled by default, but
+           can be enabled in the "Settings->Player engine->PictureView output->Enable audio" menu. Note that there
+           is absolutely no warranty that it will work (especially when outputing a multi-channel or multi-bit audio
+           via obsolete sound cards and\or broken drivers). And the audio\video sync is also not guaranteed.
 >>> (r314) PictureView: increased accuracy of framerate holding.
 >>> (r313) If an error has occurred while loading the preview, it will no longer lead to closing current task.
 >>> (r313) PictureView: if InteropBitmap can't be used (.NET Framework 3.0 without SP1), then WriteableBitmap will be

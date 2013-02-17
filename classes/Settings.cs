@@ -3198,5 +3198,26 @@ namespace XviD4PSP
                 SetBool("PictureViewDropFrames", value);
             }
         }
+
+        //Звук для PictureView
+        public static bool PictureViewAudio
+        {
+            get
+            {
+                object value = GetValue("PictureViewAudio");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("PictureViewAudio", value);
+            }
+        }
     }
 }

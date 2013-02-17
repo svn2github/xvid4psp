@@ -2032,10 +2032,6 @@ namespace XviD4PSP
                     //Запускаем таймер обновления позиции
                     if (timer != null) timer.Start();
                 }
-
-                //Делаем пункты меню активными
-                if (mediaload == MediaLoad.load)
-                    MenuHider(true);
             }
             catch (Exception ex)
             {
@@ -2060,6 +2056,10 @@ namespace XviD4PSP
                     PreviewError(Languages.Translate("Error") + "...", Brushes.Red);
                 }
             }
+
+            //Делаем пункты меню активными
+            if (mediaload == MediaLoad.load)
+                MenuHider(true);
 
             textbox_name.Text = m.taskname;
         }
@@ -2302,7 +2302,10 @@ namespace XviD4PSP
                 target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.") +
                     "\r\n" + Languages.Translate("You can also enter a time (HH:MM:SS.ms or #h #m #s #ms).") + "\r\n\r\n" + Languages.Translate("Enter - apply, Esc - cancel.");
 
-                check_pictureview_drop.ToolTip = Languages.Translate("Allow frame dropping to maintain nominal playback speed");
+                check_pictureview_drop.Header = Languages.Translate("Drop frames");
+                check_pictureview_drop.ToolTip = Languages.Translate("Allow frame dropping to preserve nominal playback speed");
+                check_pictureview_audio.Header = Languages.Translate("Enable audio");
+                check_pictureview_audio.ToolTip = Languages.Translate("Allow audio output. Note that this may or may not work and that the audio/video sync is also not guaranteed!");
                 check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
                 check_scriptview_white.ToolTip = Languages.Translate("Enable white background for ScriptView");
@@ -2392,14 +2395,11 @@ namespace XviD4PSP
             slider_Volume.Value = Settings.VolumeLevel; //Установка значения громкости из реестра..
             VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //.. и пересчет его для ДиректШоу
             slider_Volume.ValueChanged += new RoutedPropertyChangedEventHandler<double>(Volume_ValueChanged); //Не в xaml, чтоб не срабатывал до загрузки
-            if (slider_Volume.Value <= 0 || Settings.PlayerEngine == Settings.PlayerEngines.PictureView)
-            {
-                image_volume_on.Visibility = Visibility.Collapsed;
-                image_volume_off.Visibility = Visibility.Visible;
-            }
+            SetVolumeIcon();
 
             check_old_seeking.IsChecked = OldSeeking = Settings.OldSeeking;
             check_pictureview_drop.IsChecked = Settings.PictureViewDropFrames;
+            check_pictureview_audio.IsChecked = Settings.PictureViewAudio;
         }
 
         private void Languages_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -2562,6 +2562,7 @@ namespace XviD4PSP
                 }
                 else if (avsPlayer != null && !avsPlayer.IsError)
                 {
+                    if (currentState == PlayState.Running) PauseClip();
                     int new_frame = avsPlayer.CurrentFrame + step;
                     new_frame = (new_frame < 0) ? 0 : (new_frame > avsPlayer.TotalFrames) ? avsPlayer.TotalFrames : new_frame;
                     if (avsPlayer.CurrentFrame != new_frame) avsPlayer.SetFrame(new_frame);
@@ -2623,7 +2624,7 @@ namespace XviD4PSP
             currentState = cstate;
 
             //Обновляем иконку громкости
-            Volume_ValueChanged(null, null);
+            SetVolumeIcon();
 
             //Обновляем превью
             if (m != null)
@@ -4612,7 +4613,8 @@ namespace XviD4PSP
 
         private void PlayWithAvsPlayer(string scriptPath)
         {
-            avsPlayer = new AviSynthPlayer();
+            avsPlayer = new AviSynthPlayer(this);
+            avsPlayer.EnableAudio = Settings.PictureViewAudio;
             avsPlayer.AllowDropFrames = Settings.PictureViewDropFrames;
             avsPlayer.PlayerError += new AvsPlayerError(AvsPlayerError);
 
@@ -4622,6 +4624,7 @@ namespace XviD4PSP
 
             IsAviSynthError = false;
             IsAudioOnly = !avsPlayer.HasVideo;
+            avsPlayer.Volume = VolumeSet;
 
             if (!IsAudioOnly)
             {
@@ -4686,12 +4689,12 @@ namespace XviD4PSP
             if (ex is AviSynthException)
             {
                 //Ависинтовские ошибки - выводим красным на чёрном
-                PreviewError(ex.Message, Brushes.Red);
+                PreviewError(ex.Message.Trim(), Brushes.Red);
                 IsAviSynthError = true;
             }
             else
             {
-                ErrorException("AviSynthPlayer: " + ex.Message, ex.StackTrace);
+                ErrorException("AviSynthPlayer: " + ex.Message.Trim(), ex.StackTrace);
                 PreviewError(Languages.Translate("Error") + "...", Brushes.Red);
             }
         }
@@ -6100,11 +6103,19 @@ namespace XviD4PSP
         private void Volume_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
         {
             VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000); //Пересчитывание громкости для ДиректШоу
-            if (this.graphBuilder != null && Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) //Если ДиректШоу и Граф не пуст..
-                basicAudio.put_Volume(VolumeSet); //..то задаем громкость для ДиректШоу
+            if (this.graphBuilder != null && basicAudio != null) basicAudio.put_Volume(VolumeSet); //Задаем громкость для ДиректШоу
+            else if (avsPlayer != null && !avsPlayer.IsError) avsPlayer.Volume = VolumeSet;        //Задаем громкость для PictureView
 
             //Иконка регулятора громкости
-            if (slider_Volume.Value <= 0.0 || Settings.PlayerEngine == Settings.PlayerEngines.PictureView)
+            SetVolumeIcon();
+
+            //Запись значения громкости в реестр
+            Settings.VolumeLevel = slider_Volume.Value;
+        }
+
+        private void SetVolumeIcon()
+        {
+            if (slider_Volume.Value <= 0.0 || Settings.PlayerEngine == Settings.PlayerEngines.PictureView && !Settings.PictureViewAudio)
             {
                 image_volume_on.Visibility = Visibility.Collapsed;
                 image_volume_off.Visibility = Visibility.Visible;
@@ -6114,15 +6125,12 @@ namespace XviD4PSP
                 image_volume_on.Visibility = Visibility.Visible;
                 image_volume_off.Visibility = Visibility.Collapsed;
             }
-
-            //Запись значения громкости в реестр
-            Settings.VolumeLevel = slider_Volume.Value;
         }
 
         //Меняем громкость колесиком мышки
         private void Volume_Wheel(object sender, MouseWheelEventArgs e)
         {
-            if (sender == slider_Volume || IsFullScreen && VideoElement.Source != null)
+            if (sender == slider_Volume || IsFullScreen && (VideoElement.Source != null || avsPlayer != null))
             {
                 if (e.Delta > 0)
                     VolumePlus();
@@ -6567,57 +6575,64 @@ namespace XviD4PSP
 
         private void MenuHider(bool ShowItems)
         {
-            //Делаем пункты меню (не)активными
-            mnCloseFile.IsEnabled = ShowItems;
-            mnSave.IsEnabled = ShowItems;
-            menu_save_frame.IsEnabled = ShowItems;
-            menu_savethm.IsEnabled = ShowItems;
-            mnUpdateVideo.IsEnabled = ShowItems;
-            cmn_refresh.IsEnabled = ShowItems;
-            menu_demux_video.IsEnabled = ShowItems;
-            menu_autocrop.IsEnabled = ShowItems;
-            menu_detect_interlace.IsEnabled = ShowItems;
-            menu_demux.IsEnabled = ShowItems;
-            menu_save_wav.IsEnabled = ShowItems;
-            menu_audiooptions.IsEnabled = ShowItems;
-            mnAddSubtitles.IsEnabled = ShowItems;
-            mnRemoveSubtitles.IsEnabled = ShowItems;
-            menu_createautoscript.IsEnabled = ShowItems;
-            menu_save_script.IsEnabled = ShowItems;
-            menu_run_script.IsEnabled = ShowItems;
-            target_goto.IsEnabled = ShowItems;
-            menu_createtestscript.IsEnabled = ShowItems;
-            cmn_addtobookmarks.IsEnabled = cmn_deletebookmarks.IsEnabled = ShowItems;
-
-            cmn_bookmarks.Items.Clear();
-
-            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            if (m != null)
+            try
             {
-                this.Title = Path.GetFileName(m.infilepath) + "  - XviD4PSP - v" + version;
-                this.menu_createtestscript.IsChecked = m.testscript;
+                //Делаем пункты меню (не)активными
+                mnCloseFile.IsEnabled = ShowItems;
+                mnSave.IsEnabled = ShowItems;
+                menu_save_frame.IsEnabled = ShowItems;
+                menu_savethm.IsEnabled = ShowItems;
+                mnUpdateVideo.IsEnabled = ShowItems;
+                cmn_refresh.IsEnabled = ShowItems;
+                menu_demux_video.IsEnabled = ShowItems;
+                menu_autocrop.IsEnabled = ShowItems;
+                menu_detect_interlace.IsEnabled = ShowItems;
+                menu_demux.IsEnabled = ShowItems;
+                menu_save_wav.IsEnabled = ShowItems;
+                menu_audiooptions.IsEnabled = ShowItems;
+                mnAddSubtitles.IsEnabled = ShowItems;
+                mnRemoveSubtitles.IsEnabled = ShowItems;
+                menu_createautoscript.IsEnabled = ShowItems;
+                menu_save_script.IsEnabled = ShowItems;
+                menu_run_script.IsEnabled = ShowItems;
+                target_goto.IsEnabled = ShowItems;
+                menu_createtestscript.IsEnabled = ShowItems;
+                cmn_addtobookmarks.IsEnabled = cmn_deletebookmarks.IsEnabled = ShowItems;
 
-                //Восстанавливаем трим
-                if (m.trims.Count > 0)
-                    SetTrimsButtons();
-                else
-                    ResetTrim();
+                cmn_bookmarks.Items.Clear();
 
-                //Восстанавливаем закладки
-                if (m.bookmarks.Count > 0)
+                string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                if (m != null)
                 {
-                    foreach (TimeSpan bookmark in m.bookmarks)
-                        add_bookmark_to_cmn(bookmark.ToString());
-                    cmn_bookmarks.IsEnabled = true;
+                    this.Title = Path.GetFileName(m.infilepath) + "  - XviD4PSP - v" + version;
+                    this.menu_createtestscript.IsChecked = m.testscript;
+
+                    //Восстанавливаем трим
+                    if (m.trims.Count > 0)
+                        SetTrimsButtons();
+                    else
+                        ResetTrim();
+
+                    //Восстанавливаем закладки
+                    if (m.bookmarks.Count > 0)
+                    {
+                        foreach (TimeSpan bookmark in m.bookmarks)
+                            add_bookmark_to_cmn(bookmark.ToString());
+                        cmn_bookmarks.IsEnabled = true;
+                    }
+                    else
+                        cmn_bookmarks.IsEnabled = false;
                 }
                 else
-                    cmn_bookmarks.IsEnabled = false;
+                {
+                    this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + version;
+                    this.menu_createtestscript.IsChecked = false;
+                    this.cmn_bookmarks.IsEnabled = false;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                this.Title = "XviD4PSP - AviSynth-based MultiMedia Converter  -  v" + version;
-                this.menu_createtestscript.IsChecked = false;
-                this.cmn_bookmarks.IsEnabled = false;
+                ErrorException("MenuHider: " + ex.Message, ex.StackTrace);
             }
         }
 
@@ -7178,6 +7193,20 @@ namespace XviD4PSP
         {
             Settings.PictureViewDropFrames = check_pictureview_drop.IsChecked;
             if (avsPlayer != null) avsPlayer.AllowDropFrames = check_pictureview_drop.IsChecked;
+        }
+
+        private void check_pictureview_audio_Clicked(object sender, RoutedEventArgs e)
+        {
+            Settings.PictureViewAudio = check_pictureview_audio.IsChecked;
+            if (Settings.PlayerEngine == Settings.PlayerEngines.PictureView)
+            {
+                SetVolumeIcon();
+
+                if (m != null && avsPlayer != null)
+                {
+                    LoadVideo(MediaLoad.update);
+                }
+            }
         }
     }
 }

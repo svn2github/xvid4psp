@@ -24,6 +24,9 @@
                         <Setter Property="GroupName" Value="Radio"/>
                         <Setter Property="IsHitTestVisible" Value="false"/>
                     </Style>
+                    <Style TargetType="{x:Type MenuItem}">
+                        <Setter Property="ToolTipService.ShowDuration" Value="10000"/>
+                    </Style>
                 </Menu.Resources>
                 <MenuItem Header="File" x:Name="mnFile">
                     <MenuItem Header="Open file..." x:Name="mnOpen" Click="OpenFile_Click"/>
@@ -204,7 +207,10 @@
                                 <RadioButton x:Name="check_engine_pictureview"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="PictureView drop" x:Name="check_pictureview_drop" Click="check_pictureview_drop_Clicked" IsCheckable="True" StaysOpenOnClick="True" />
+                        <MenuItem x:Name="menu_pictureview_settings" Header="PictureView output">
+                            <MenuItem Header="Drop frames" x:Name="check_pictureview_drop" Click="check_pictureview_drop_Clicked" IsCheckable="True" StaysOpenOnClick="True" />
+                            <MenuItem Header="Enable audio" x:Name="check_pictureview_audio" Click="check_pictureview_audio_Clicked" IsCheckable="True" StaysOpenOnClick="True" />
+                        </MenuItem>
                         <Separator/>
                         <MenuItem Header="Preview" StaysOpenOnClick="True" Click="scriptview_Click">
                             <MenuItem.Icon>
