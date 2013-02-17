@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
 using System.Reflection;
+using System.IO;
 
 namespace WPF_VideoPlayer
 {
@@ -48,11 +49,14 @@ namespace WPF_VideoPlayer
             MessageBox.Show(txt, "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Stop);
         }
 
-        Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            if (args.Name.Contains("DirectShowLib-2005")) return Assembly.LoadFrom("dlls\\Player\\DirectShowLib-2005.dll");
-            else if (args.Name.Contains("MediaBridge")) return Assembly.LoadFrom("dlls\\Player\\MediaBridge.dll");
-            else return null;
+            if (args.Name.Contains("DirectShowLib-2005"))
+                return Assembly.LoadFrom(Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName) + "\\dlls\\Player\\DirectShowLib-2005.dll");
+            else if (args.Name.Contains("MediaBridge"))
+                return Assembly.LoadFrom(Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName) + "\\dlls\\Player\\MediaBridge.dll");
+            else
+                return null;
         }
     }
 }

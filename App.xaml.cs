@@ -94,12 +94,12 @@ namespace XviD4PSP
                 "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Stop);
         }
 
-        Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            if (args.Name.Contains("DirectShowLib-2005")) return Assembly.LoadFrom("dlls\\Player\\DirectShowLib-2005.dll");
-            else if (args.Name.Contains("MediaBridge")) return Assembly.LoadFrom("dlls\\Player\\MediaBridge.dll");
-            else if (args.Name.Contains("SharpDX.DirectSound")) return Assembly.LoadFrom("dlls\\Player\\SharpDX.DirectSound.dll");
-            else if (args.Name.Contains("SharpDX")) return Assembly.LoadFrom("dlls\\Player\\SharpDX.dll");
+            if (args.Name.Contains("DirectShowLib-2005")) return Assembly.LoadFrom(Calculate.StartupPath + "\\dlls\\Player\\DirectShowLib-2005.dll");
+            else if (args.Name.Contains("MediaBridge")) return Assembly.LoadFrom(Calculate.StartupPath + "\\dlls\\Player\\MediaBridge.dll");
+            else if (args.Name.Contains("SharpDX.DirectSound")) return Assembly.LoadFrom(Calculate.StartupPath + "\\dlls\\Player\\SharpDX.DirectSound.dll");
+            else if (args.Name.Contains("SharpDX")) return Assembly.LoadFrom(Calculate.StartupPath + "\\dlls\\Player\\SharpDX.dll");
             else return null;
         }
 
