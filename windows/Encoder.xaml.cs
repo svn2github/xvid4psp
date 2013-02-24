@@ -446,8 +446,8 @@ namespace XviD4PSP
             for (int n = 0; n < m.vpasses.Count; n++)
                 m.vpasses[n] = m.vpasses[n].ToString().Replace(" --extra:", "");
 
-            //Для Lossless нужно убрать ключ --profile
-            if (!is_x262 && x264.IsLossless(m))
+            //Для Lossless и для 10-битных I422, I444 и RGB нужно убрать ключ --profile
+            if (!is_x262 && (x264.IsLossless(m) || is_10bit && m.x264options.colorspace != "I420"))
             {
                 for (int n = 0; n < m.vpasses.Count; n++)
                     m.vpasses[n] = Regex.Replace(m.vpasses[n].ToString(), @"\s?--profile\s+\w+", "", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);

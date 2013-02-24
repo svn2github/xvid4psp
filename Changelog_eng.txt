@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.317.0 (17.02.2013), main changes:
+﻿XviD4PSP 5.10.318.0 (24.02.2013), main changes:
 
+>>> (r318) x264 10-bit: when output colorspace is I422, I444 or RGB, the key "--profile high10" must be removed
+           from the CLI (rep. by Okocha1976).
 >>> (r317) Fix for r316.
 >>> (r316) DirectShowLib-2005.dll, MediaBridge.dll, SharpDX.dll and SharpDX.DirectSound.dll moved to dlls\Player.
 >>> (r315) Some options, that can be applied to PictureView via AviSynth script (mostly for testing purposes):
