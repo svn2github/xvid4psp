@@ -1724,6 +1724,9 @@ namespace XviD4PSP
                 if (currentState == PlayState.Running)
                     PauseClip();
 
+                if (avsPlayer != null && !avsPlayer.IsError)
+                    avsPlayer.UnloadAviSynth();
+
                 string oldlocked_name = mass.outfilepath;
 
                 mass.outfilepath = OpenDialogs.SaveDialog(mass);
@@ -1877,7 +1880,6 @@ namespace XviD4PSP
             CloseChildWindows();
 
             CloseClip();
-            SetPlayIcon();
 
             if (Settings.DeleteTempFiles)
             {
@@ -4552,6 +4554,8 @@ namespace XviD4PSP
             textbox_name.Text = textbox_frame.Text = "";
             textbox_time.Text = textbox_duration.Text = "00:00:00";
             progress_top.Width = slider_pos.Value = 0.0;
+
+            SetPlayIcon();
         }
 
         private void CloseInterfaces()
@@ -4653,6 +4657,7 @@ namespace XviD4PSP
                     return;
 
                 avsPlayer.PlayerFinished += new AvsPlayerFinished(AvsPlayerFinished);
+                avsPlayer.AvsStateChanged += new AvsState(AvsStateChanged);
                 Pic.Source = avsPlayer.BitmapSource;
                 Pic.Visibility = Visibility.Visible;
 
@@ -4667,7 +4672,7 @@ namespace XviD4PSP
                     //Запуск на паузе
                     avsPlayer.Pause();
                     this.currentState = PlayState.Paused;
-                    SetPlayIcon();
+                    avsPlayer.UnloadAviSynth();
                 }
 
                 MoveVideoWindow();
@@ -4707,6 +4712,19 @@ namespace XviD4PSP
         private void AvsPlayerFinished(object sender)
         {
             StopClip();
+        }
+
+        private void AvsStateChanged(object sender, bool AvsIsLoaded)
+        {
+            if (AvsIsLoaded)
+            {
+                if (currentState == PlayState.Running)
+                    SetPauseIcon();
+                else
+                    SetPlayIcon();
+            }
+            else
+                SetStopIcon();
         }
 
         private void PlayMovieInWindow(string filename)
@@ -5587,6 +5605,11 @@ namespace XviD4PSP
         private void SetPlayIcon()
         {
             image_play.Source = new BitmapImage(new Uri(@"../pictures/play_new.png", UriKind.RelativeOrAbsolute));
+        }
+
+        private void SetStopIcon()
+        {
+            image_play.Source = new BitmapImage(new Uri(@"../pictures/stop_new.png", UriKind.RelativeOrAbsolute));
         }
 
         private void CloseChildWindows()

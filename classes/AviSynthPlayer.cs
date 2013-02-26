@@ -20,6 +20,7 @@ namespace XviD4PSP
 {
     public delegate void AvsPlayerFinished(object sender);
     public delegate void AvsPlayerError(object sender, Exception ex);
+    public delegate void AvsState(object sender, bool AvsIsLoaded);
 
     public class AviSynthPlayer
     {
@@ -27,6 +28,7 @@ namespace XviD4PSP
         public PlayState PlayerState = PlayState.Init;
         public event AvsPlayerFinished PlayerFinished;
         public event AvsPlayerError PlayerError;
+        public event AvsState AvsStateChanged;
 
         private static object locker = new object();
         private ManualResetEvent playing_v = new ManualResetEvent(false);
@@ -117,61 +119,113 @@ namespace XviD4PSP
 
         public void Open(string scriptPath)
         {
+            lock (locker)
+            {
+                try
+                {
+                    script = scriptPath;
+                    LoadAviSynth();
+
+                    if (IsError || IsAborted)
+                        return;
+
+                    if (HasVideo)
+                    {
+                        try
+                        {
+                            //Framework 3.0 с SP1+
+                            CreateInteropBitmap();
+                        }
+                        catch (TypeLoadException)
+                        {
+                            //Framework 3.0 без SP1
+                            CreateWriteableBitmap();
+                        }
+
+                        CreateVideoThread();
+                    }
+
+                    if (HasAudio)
+                    {
+                        SetUpAudioDevice();
+                        CreateAudioThread();
+                    }
+
+                    #region ShowPictureViewInfo
+                    if (HasVideo && reader.GetVarBoolean("ShowPictureViewInfo", false))
+                    {
+                        SpeakerConfiguration conf = 0; SpeakerGeometry geom = 0;
+                        if (HasAudio) AudioDevice.GetSpeakerConfiguration(out conf, out geom);
+
+                        Stopwatch sw = Stopwatch.StartNew();
+                        for (int i = 0; i < 100; i++) Thread.Sleep(1);
+                        sw.Stop();
+
+                        Message mes = new Message(Owner);
+                        mes.ShowMessage("Video\r\n  Resolution: " + reader.Width + "x" + reader.Height + ", FrameRate: " + reader.Framerate + ", Format: " +
+                            reader.Clip.OriginalColorspace + ((reader.Clip.OriginalColorspace != AviSynthColorspace.RGB32) ? "->RGB32" : "") + " \r\n  Output: " +
+                            ((IsInterop) ? "InteropBitmap" : "WriteableBitmap (Install SP1 for .NET Framework 3.0!)") + "\r\n\r\nAudio\r\n" +
+                            ((HasAudio) ? "  Bits: " + BufferDesc.Format.BitsPerSample + ((reader.Clip.SampleType == AudioSampleType.FLOAT) ? " FLOAT" : "") +
+                            ", SampleRate: " + BufferDesc.Format.SampleRate + ", Channels: " + BufferDesc.Format.Channels + ((BufferDesc.Format.Encoding == WaveFormatEncoding.Extensible) ?
+                            ", Mask: " + ((WaveFormatExtensible)BufferDesc.Format).ChannelMask + " (" + (int)((WaveFormatExtensible)BufferDesc.Format).ChannelMask + ")" : "") +
+                            "\r\n  PrimaryBuffers: " + AudioDevice.Capabilities.PrimaryBuffers + ", MixingBuffers: " + AudioDevice.Capabilities.MaxHardwareMixingAllBuffers +
+                            " (" + AudioDevice.Capabilities.FreeHardwareMixingAllBuffers + "), 3DBuffers: " + AudioDevice.Capabilities.MaxHardware3DAllBuffers + " (" +
+                            AudioDevice.Capabilities.FreeHardware3DAllBuffers + "), MemBytes: " + AudioDevice.Capabilities.TotalHardwareMemBytes + " (" +
+                            AudioDevice.Capabilities.FreeHardwareMemBytes + "), SampleRate: " + AudioDevice.Capabilities.MinSecondarySampleRate + " - " +
+                            AudioDevice.Capabilities.MaxSecondarySampleRate + (((AudioDevice.Capabilities.Flags & CapabilitiesFlags.ContinousRate) > 0) ? " (continuous)" : "") +
+                            "\r\n  SpeakerConfiguration: " + conf + ", SpeakerGeometry: " + geom + "\r\n" : "  None" + ((!EnableAudio) ? " (disabled)" : "") + "\r\n") +
+                            "\r\nTimers\r\n  Sleep(100): " + sw.ElapsedMilliseconds + ", HighResolutionStopwatch: " + Stopwatch.IsHighResolution, Languages.Translate("Info"));
+                    }
+                    #endregion
+                }
+                catch (Exception ex)
+                {
+                    SetError(ex);
+                }
+            }
+        }
+
+        private void LoadAviSynth()
+        {
             try
             {
-                script = scriptPath;
-                LoadAviSynth();
-
-                if (HasVideo)
+                if (reader == null)
                 {
-                    try
+                    reader = new AviSynthReader(AviSynthColorspace.RGB32, AudioSampleType.Undefined);
+                    reader.OpenScript(script);
+
+                    if (!reader.Clip.HasVideo || reader.FrameCount == 0)
                     {
-                        //Framework 3.0 с SP1+
-                        CreateInteropBitmap();
-                        IsInterop = true;
+                        HasVideo = false;
                     }
-                    catch (TypeLoadException)
+                    else
                     {
-                        //Framework 3.0 без SP1
-                        CreateWriteableBitmap();
-                        IsInterop = false;
+                        HasVideo = true;
+                        Width = reader.Width;
+                        Height = reader.Height;
+                        TotalFrames = reader.FrameCount;
+                        Framerate = reader.Framerate;
                     }
 
-                    CreateVideoThread();
+                    if (!EnableAudio || reader.SamplesCount == 0 || reader.Samplerate == 0 || reader.Channels == 0)
+                    {
+                        HasAudio = false;
+                    }
+                    else
+                    {
+                        HasAudio = true;
+                        Samplerate = reader.Samplerate;
+                        TotalSamples = reader.SamplesCount;
+                    }
+
+                    if (AvsStateChanged != null)
+                    {
+                        OwnerDispatcher.Invoke(Priority, (ThreadStart)delegate()
+                        {
+                            AvsStateChanged(this, true);
+                        });
+                    }
                 }
-
-                if (HasAudio)
-                {
-                    SetUpAudioDevice();
-                    CreateAudioThread();
-                }
-
-                #region ShowPictureViewInfo
-                if (HasVideo && reader.GetVarBoolean("ShowPictureViewInfo", false))
-                {
-                    SpeakerConfiguration conf = 0; SpeakerGeometry geom = 0;
-                    if (HasAudio) AudioDevice.GetSpeakerConfiguration(out conf, out geom);
-
-                    Stopwatch sw = Stopwatch.StartNew();
-                    for (int i = 0; i < 100; i++) Thread.Sleep(1);
-                    sw.Stop();
-
-                    Message mes = new Message(Owner);
-                    mes.ShowMessage("Video\r\n  Resolution: " + reader.Width + "x" + reader.Height + ", FrameRate: " + reader.Framerate + ", Format: " +
-                        reader.Clip.OriginalColorspace + ((reader.Clip.OriginalColorspace != AviSynthColorspace.RGB32) ? "->RGB32" : "") + " \r\n  Output: " +
-                        ((IsInterop) ? "InteropBitmap" : "WriteableBitmap (Install SP1 for .NET Framework 3.0!)") + "\r\n\r\nAudio\r\n" +
-                        ((HasAudio) ? "  Bits: " + BufferDesc.Format.BitsPerSample + ((reader.Clip.SampleType == AudioSampleType.FLOAT) ? " FLOAT" : "") +
-                        ", SampleRate: " + BufferDesc.Format.SampleRate + ", Channels: " + BufferDesc.Format.Channels + ((BufferDesc.Format.Encoding == WaveFormatEncoding.Extensible) ?
-                        ", Mask: " + ((WaveFormatExtensible)BufferDesc.Format).ChannelMask + " (" + (int)((WaveFormatExtensible)BufferDesc.Format).ChannelMask + ")" : "") +
-                        "\r\n  PrimaryBuffers: " + AudioDevice.Capabilities.PrimaryBuffers + ", MixingBuffers: " + AudioDevice.Capabilities.MaxHardwareMixingAllBuffers +
-                        " (" + AudioDevice.Capabilities.FreeHardwareMixingAllBuffers + "), 3DBuffers: " + AudioDevice.Capabilities.MaxHardware3DAllBuffers + " (" +
-                        AudioDevice.Capabilities.FreeHardware3DAllBuffers + "), MemBytes: " + AudioDevice.Capabilities.TotalHardwareMemBytes + " (" +
-                        AudioDevice.Capabilities.FreeHardwareMemBytes + "), SampleRate: " + AudioDevice.Capabilities.MinSecondarySampleRate + " - " +
-                        AudioDevice.Capabilities.MaxSecondarySampleRate + (((AudioDevice.Capabilities.Flags & CapabilitiesFlags.ContinousRate) > 0) ? " (continuous)" : "") +
-                        "\r\n  SpeakerConfiguration: " + conf + ", SpeakerGeometry: " + geom + "\r\n" : "  None" + ((!EnableAudio) ? " (disabled)" : "") + "\r\n") +
-                        "\r\nTimers\r\n  Sleep(100): " + sw.ElapsedMilliseconds + ", HighResolutionStopwatch: " + Stopwatch.IsHighResolution, Languages.Translate("Info"));
-                }
-                #endregion
             }
             catch (Exception ex)
             {
@@ -179,35 +233,26 @@ namespace XviD4PSP
             }
         }
 
-        private void LoadAviSynth()
+        public void UnloadAviSynth()
         {
-            if (reader == null)
+            lock (locker)
             {
-                reader = new AviSynthReader(AviSynthColorspace.RGB32, AudioSampleType.Undefined);
-                reader.OpenScript(script);
+                if (reader != null)
+                {
+                    try { reader.Close(); }
+                    //catch (Exception) { } //Всё-равно вылезет в ~AviSynthClip()
+                    finally
+                    {
+                        reader = null;
 
-                if (!reader.Clip.HasVideo || reader.FrameCount == 0)
-                {
-                    HasVideo = false;
-                }
-                else
-                {
-                    HasVideo = true;
-                    Width = reader.Width;
-                    Height = reader.Height;
-                    TotalFrames = reader.FrameCount;
-                    Framerate = reader.Framerate;
-                }
-
-                if (!EnableAudio || reader.SamplesCount == 0 || reader.Samplerate == 0 || reader.Channels == 0)
-                {
-                    HasAudio = false;
-                }
-                else
-                {
-                    HasAudio = true;
-                    Samplerate = reader.Samplerate;
-                    TotalSamples = reader.SamplesCount;
+                        if (!IsError && !IsAborted && AvsStateChanged != null)
+                        {
+                            OwnerDispatcher.Invoke(Priority, (ThreadStart)delegate()
+                            {
+                                AvsStateChanged(this, false);
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -216,6 +261,8 @@ namespace XviD4PSP
         {
             if (BitmapSource == null)
             {
+                IsInterop = true;
+
                 //Из-за бага в InteropBitmap вместо RGB24 придется использовать RGB32 (будет чуть медленнее).
                 //Иначе картинка не будет обновляться при Invalidate - баг исправлен в каком-то новом Framework`е.
                 PixelFormat format = PixelFormats.Bgr32;
@@ -243,6 +290,8 @@ namespace XviD4PSP
         {
             if (BitmapSource == null)
             {
+                IsInterop = false;
+
                 //WriteableBitmap в 3.0 без SP1 тоже работает только с RGB32, плюс оно само по себе медленнее.
                 //Обновление через BackBuffer работает быстрее, чем через WritePixels, но для BackBuffer нужен SP2.
                 PixelFormat format = PixelFormats.Bgr32;
@@ -652,12 +701,7 @@ namespace XviD4PSP
 
                     AdjustMediaTimer(0);
 
-                    if (reader != null)
-                    {
-                        try { reader.Close(); }
-                        //catch (Exception) { } //Всё-равно вылезет в ~AviSynthClip()
-                        finally { reader = null; }
-                    }
+                    UnloadAviSynth();
                 }
             }
         }
@@ -670,7 +714,15 @@ namespace XviD4PSP
                 {
                     if (PlayerState != PlayState.Running)
                     {
+                        LoadAviSynth();
+
+                        if (IsError || IsAborted)
+                            return;
+
                         AdjustMediaTimer(period);
+
+                        if (IsError || IsAborted)
+                            return;
 
                         PlayerState = PlayState.Running;
                         Interlocked.Exchange(ref _CurrentFrame, CurrentFrame);
@@ -727,6 +779,7 @@ namespace XviD4PSP
                     PlayerState = PlayState.Paused;
                     ResetTimer = true;
                     playing_v.Reset();
+                    processing.WaitOne();
 
                     if (HasAudio)
                         StopAudio();
@@ -776,6 +829,11 @@ namespace XviD4PSP
                     }
                     else
                     {
+                        LoadAviSynth();
+
+                        if (IsError || IsAborted)
+                            return;
+
                         Interlocked.Exchange(ref _CurrentFrame, frame);
                         ShowFrame(frame);
                     }
