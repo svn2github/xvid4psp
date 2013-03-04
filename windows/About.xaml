@@ -6,7 +6,7 @@
 	x:Class="XviD4PSP.About"
 	x:Name="Window"
 	Title="About"
-	Width="496" Height="361" ResizeMode="NoResize" ShowInTaskbar="True" Topmost="False" WindowStartupLocation="CenterOwner" xmlns:MyUserControl="clr-namespace:MyUserControl">
+	Width="496" Height="361" ResizeMode="NoResize" ShowInTaskbar="True" Topmost="False" WindowStartupLocation="CenterOwner" SourceInitialized="Window_SourceInitialized" xmlns:MyUserControl="clr-namespace:MyUserControl">
 
 	<Grid x:Name="LayoutRoot" Width="Auto" Height="Auto" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">

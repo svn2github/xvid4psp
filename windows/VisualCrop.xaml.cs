@@ -85,8 +85,16 @@ namespace XviD4PSP
             GC.Collect();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            this.SizeToContent = SizeToContent.Manual;
+            Calculate.CheckWindowPos(this, true);
+            this.MaxWidth = double.PositiveInfinity;
+            this.MaxHeight = double.PositiveInfinity;
+        }
+
         [DllImport("gdi32.dll")]
-        static extern bool DeleteObject(IntPtr hObject);
+        private static extern bool DeleteObject(IntPtr hObject);
 
         private void ShowFrame(int frame)
         {

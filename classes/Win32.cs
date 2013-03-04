@@ -67,6 +67,9 @@ namespace XviD4PSP
         [DllImport("User32.dll")]
         public static extern int GetMenuString(int hMenu, uint uIDItem, StringBuilder lpString, int nMaxCount, uint uFlag);
 
+        [DllImport("user32.dll", EntryPoint = "SetForegroundWindow")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
         // The FindWindow function retrieves a handle to the top-level window whose class name
         // and window name match the specified strings. This function does not search child windows.
         // This function does not perform a case-sensitive search.

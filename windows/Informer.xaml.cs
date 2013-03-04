@@ -44,6 +44,11 @@ namespace XviD4PSP
             ShowDialog();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         private void CreateBackgroundWorker()
         {
             worker = new BackgroundWorker();
@@ -52,7 +57,7 @@ namespace XviD4PSP
             worker.WorkerSupportsCancellation = true;
         }
 
-        void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try
             {

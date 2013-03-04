@@ -194,6 +194,11 @@ namespace XviD4PSP
             ShowDialog();
 		}
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         public static string GetFixedFieldString(string FOrder)
         {
             FieldOrder eFOrder = (FieldOrder)Enum.Parse(typeof(FieldOrder), FOrder);

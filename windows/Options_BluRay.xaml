@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.Options_BluRay"
 	x:Name="Window"
 	Title="BluRay options:"
-	Width="420" Height="220" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	Width="420" Height="220" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" VerticalAlignment="Top" SourceInitialized="Window_SourceInitialized" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">

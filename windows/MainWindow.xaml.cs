@@ -89,7 +89,6 @@ namespace XviD4PSP
         private int opened_files = 0;         //Кол-во открытых файлов при открытии папки
         private double fps = 0;               //Значение fps для текущего клипа; будет определяться каждый раз при загрузке (обновлении) превью
         private bool OldSeeking = false;      //Способ позиционирования, old - непрерывное, new - только при отпускании кнопки мыши
-        private double dpi = 1.0;             //Для масштабирования окна ДиректШоу-превью
         private bool IsBatchOpening = false;  //true при пакетном открытии
         private bool PauseAfterFirst = false; //Пакетное открытие с паузой после 1-го файла
         private string[] batch_files;         //Сохраненный список файлов для пакетного открытия с паузой
@@ -99,17 +98,6 @@ namespace XviD4PSP
 
         private enum MediaLoad { load = 1, update }
         private enum PlayState { Stopped, Paused, Running, Init }
-
-        [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
-        private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
-        [DllImport("user32.dll", EntryPoint = "GetDC")]
-        private static extern IntPtr GetDC(IntPtr ptr);
-        [DllImport("user32.dll", EntryPoint = "ReleaseDC")]
-        private static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDc);
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        private static extern bool DeleteObject(IntPtr hObject);
-        [DllImport("user32.dll", EntryPoint = "SetForegroundWindow")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         public MainWindow()
         {
@@ -233,11 +221,8 @@ namespace XviD4PSP
                 textbox_name.Text = textbox_frame.Text = textbox_frame_goto.Text = "";
                 textbox_time.Text = textbox_duration.Text = "00:00:00";
 
-                //Определяем коэффициент для масштабирования окна ДиректШоу-превью
-                IntPtr ScreenDC = GetDC(IntPtr.Zero); //88-w, 90-h
-                double _dpi = (double)GetDeviceCaps(ScreenDC, 88) / 96.0;
-                if (_dpi != 0) dpi = _dpi;
-                ReleaseDC(IntPtr.Zero, ScreenDC);
+                //Определяем коэффициент dpi
+                SysInfo.RetrieveDPI(this);
             }
             catch (Exception ex)
             {
@@ -247,7 +232,6 @@ namespace XviD4PSP
             try
             {
                 //events
-                this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
                 this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown);
                 this.StateChanged += new EventHandler(MainWindow_StateChanged);
                 this.textbox_name.MouseEnter += new MouseEventHandler(textbox_name_MouseEnter); //Мышь вошла в зону с названием файла
@@ -264,10 +248,22 @@ namespace XviD4PSP
             }
         }
 
+        private void MainWindow_SourceInitialized(object sender, EventArgs e)
+        {
+            Handle = new WindowInteropHelper(this).Handle;
+
+            //Вторая попытка для dpi
+            if (SysInfo.dpi == 0)
+                SysInfo.RetrieveDPI(this);
+
+            Calculate.CheckWindowPos(this, ref Handle, true);
+            this.MaxWidth = double.PositiveInfinity;
+            this.MaxHeight = double.PositiveInfinity;
+        }
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             TrayIcon.Visible = Settings.TrayIconIsEnabled;
-            Handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
 
             if (Settings.Win7TaskbarIsEnabled && !Win7Taskbar.InitializeWin7Taskbar())
             {
@@ -2007,6 +2003,13 @@ namespace XviD4PSP
 
             try
             {
+                //Окно ошибок (если не закрылось в CloseClip)
+                if (ErrBox.Visibility != Visibility.Collapsed)
+                {
+                    ErrBox.Child = null;
+                    ErrBox.Visibility = Visibility.Collapsed;
+                }
+
                 //Пишем скрипт в файл
                 AviSynthScripting.WriteScriptToFile(m.script, "preview");
 
@@ -2280,7 +2283,7 @@ namespace XviD4PSP
                 menu_detect_interlace.Header = Languages.Translate("Detect interlace");
                 menu_home.Header = Languages.Translate("Home page");
                 menu_support.Header = Languages.Translate("Support forum");
-                menu_donate.Header = Languages.Translate("Donate");
+                //menu_donate.Header = Languages.Translate("Donate");
                 menu_avisynth_guide_en.Header = Languages.Translate("AviSynth guide") + " (EN)";
                 menu_avisynth_guide_ru.Header = Languages.Translate("AviSynth guide") + " (RU)";
 
@@ -4934,6 +4937,7 @@ namespace XviD4PSP
                 double left = 0, top = 0;
                 double width = 0, height = 0;
                 double aspect = m.outaspect;
+                double dpi = SysInfo.dpi;
 
                 //Аспект сообщения об ошибке
                 if (IsAviSynthError)
@@ -5766,7 +5770,7 @@ namespace XviD4PSP
 
                     Settings.DVDPath = folder.SelectedPath;
                     Massive x = new Massive();
-                    DVDImport dvd = new DVDImport(x, folder.SelectedPath, dpi);
+                    DVDImport dvd = new DVDImport(x, folder.SelectedPath);
 
                     if (dvd.m != null)
                         action_open(dvd.m);
@@ -6848,7 +6852,7 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    SetForegroundWindow(avsp.MainWindowHandle);
+                    Win32.SetForegroundWindow(avsp.MainWindowHandle);
                 }
             }
             catch (Exception ex)

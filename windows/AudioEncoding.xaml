@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.AudioEncoding"
 	x:Name="Window"
 	Title="Audio encoding settings"
-	Width="Auto" Height="Auto" MinWidth="300" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" Background="{DynamicResource BlackGradientHard}" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	Width="Auto" Height="Auto" MinWidth="300" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" SourceInitialized="Window_SourceInitialized" Background="{DynamicResource BlackGradientHard}" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 	<Grid x:Name="LayoutRoot">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>

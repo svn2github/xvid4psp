@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.FilesListWindow"
 	x:Name="Window"
 	Title="Add or remove friend files:"
-	Width="370" Height="196" ResizeMode="NoResize" MinWidth="370" ShowInTaskbar="True" SizeToContent="WidthAndHeight" Topmost="False" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	Width="370" Height="196" ResizeMode="NoResize" MinWidth="370" ShowInTaskbar="True" SizeToContent="WidthAndHeight" Topmost="False" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SourceInitialized="Window_SourceInitialized">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid.ColumnDefinitions>

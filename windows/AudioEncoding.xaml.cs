@@ -104,6 +104,11 @@ namespace XviD4PSP
             ShowDialog();
 		}
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         private void LoadCodecWindow()
         {
             //определяем аудио потоки

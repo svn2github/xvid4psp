@@ -64,10 +64,13 @@ namespace XviD4PSP
             ShowDialog();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         [DllImport("user32.dll")]
         private static extern short GetAsyncKeyState(int vKey); //GetKeyState
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -76,9 +79,10 @@ namespace XviD4PSP
             //Встроенные в C# способы определения состояния мыши для этой цели не годятся.
             if (IsLoaded && (GetAsyncKeyState(1) < 0 || GetAsyncKeyState(2) < 0))
             {
-                this.MaxWidth = SystemParameters.WorkArea.Width;
-                this.MaxHeight = SystemParameters.WorkArea.Height;
                 this.SizeChanged -= new SizeChangedEventHandler(Window_SizeChanged);
+                this.SizeToContent = SizeToContent.Manual;
+                this.MaxWidth = double.PositiveInfinity;
+                this.MaxHeight = double.PositiveInfinity;
             }
         }
 
@@ -154,7 +158,7 @@ namespace XviD4PSP
                 else
                 {
                     IntPtr wnd = (avsp != null) ? avsp.MainWindowHandle : p.avsp.MainWindowHandle;
-                    SetForegroundWindow(wnd);
+                    Win32.SetForegroundWindow(wnd);
                 }
             }
             catch (Exception ex)

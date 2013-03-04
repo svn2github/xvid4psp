@@ -95,10 +95,18 @@ namespace XviD4PSP
             if (this.WindowState != System.Windows.WindowState.Minimized)
             {
                 this.Name = "Window";
+                Calculate.CheckWindowPos(this, false);
+
                 if (!Owner.IsVisible) Owner.Show();
                 if (Owner.WindowState == System.Windows.WindowState.Minimized)
                     Owner.WindowState = System.Windows.WindowState.Normal;
             }
+        }
+
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            if (this.WindowState != WindowState.Minimized)
+                Calculate.CheckWindowPos(this, false);
         }
 
         private void CreateBackgroundWorker()

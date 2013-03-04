@@ -90,6 +90,11 @@ namespace XviD4PSP
             ShowDialog();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         //Блокировка изменения высоты окна вручную..
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {

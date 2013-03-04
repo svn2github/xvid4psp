@@ -48,6 +48,11 @@ namespace XviD4PSP
             ShowDialog();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         private void list_files_KeyDown(object sender, KeyEventArgs e)
         {
             if ((e.Key == Key.Delete || e.Key == Key.OemMinus || e.Key == Key.Subtract) && list_files.SelectedItem != null) btRemove_Click(null, null);

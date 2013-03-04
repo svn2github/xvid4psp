@@ -25,6 +25,7 @@ namespace XviD4PSP
         private BackgroundWorker worker = null;
         private Process encoderProcess = null;
         private IntPtr Handle = IntPtr.Zero;
+        private bool IsError = false;
         private int num_closes = 0;
         public Massive m;
 
@@ -63,7 +64,6 @@ namespace XviD4PSP
             total = m.infileslist.Length;
             Title = Languages.Translate("Indexing");
             text_info.Content = Languages.Translate("Please wait... Work in progress...");
-            this.ContentRendered += new EventHandler(Window_ContentRendered);
 
             //BackgroundWorker
             CreateBackgroundWorker();
@@ -72,9 +72,14 @@ namespace XviD4PSP
             ShowDialog();
         }
 
-        void Window_ContentRendered(object sender, EventArgs e)
+        private void Window_SourceInitialized(object sender, EventArgs e)
         {
-            if (Handle == IntPtr.Zero)
+            Calculate.CheckWindowPos(this, ref Handle, false);
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            if (!IsError)
                 Win7Taskbar.SetProgressIndeterminate(this, ref Handle);
         }
 
@@ -297,6 +302,7 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
             else
             {
+                IsError = true;
                 if (worker != null) worker.WorkerReportsProgress = false;
                 if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
                 Win7Taskbar.SetProgressTaskComplete(Handle, TBPF.ERROR);

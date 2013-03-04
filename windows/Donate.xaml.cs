@@ -26,6 +26,11 @@ namespace XviD4PSP
             Show();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         private void button_ok_Click(object sender, RoutedEventArgs e)
         {
             Close();
@@ -39,7 +44,6 @@ namespace XviD4PSP
 
         private void button_email_Click(object sender, RoutedEventArgs e)
         {
-
             try
             {
                // Settings.WasDonate = true;
@@ -50,6 +54,5 @@ namespace XviD4PSP
                 ErrorExeption(ex.Message);
             }
         }
-
 	}
 }

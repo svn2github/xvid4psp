@@ -92,7 +92,6 @@ namespace XviD4PSP
 
         public Decoders_Settings(Massive mass, System.Windows.Window owner, int set_focus_to)
         {
-            this.Opacity = 0;
             this.InitializeComponent();
             this.Owner = owner;
 
@@ -247,8 +246,10 @@ namespace XviD4PSP
             ShowDialog();
         }
 
-        private void Window_ContentRendered(object sender, EventArgs e)
+        private void Window_SourceInitialized(object sender, EventArgs e)
         {
+            Calculate.CheckWindowPos(this, false);
+
             //Подгоняем высоту ListView
             double new_height = 136;
             ListView listview = (listview_vdecoders.IsVisible) ? listview_vdecoders : listview_adecoders;
@@ -266,7 +267,6 @@ namespace XviD4PSP
             }
 
             listview_vdecoders.Height = listview_adecoders.Height = new_height;
-            this.Opacity = 1;
         }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)

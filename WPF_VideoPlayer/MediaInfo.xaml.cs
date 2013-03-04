@@ -67,6 +67,15 @@ namespace WPF_VideoPlayer
             ShowDialog();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            if (Settings.CheckWindowsPos)
+            {
+                IntPtr Handle = new WindowInteropHelper(this).Handle;
+                ((MainWindow)Owner).CheckWindowPos(this, Handle, false);
+            }
+        }
+
         private void button_open_Click(object sender, RoutedEventArgs e)
         {
             try

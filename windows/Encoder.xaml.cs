@@ -181,7 +181,13 @@ namespace XviD4PSP
             worker.RunWorkerAsync();
         }
 
-        void Encoder_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            //Сработает, когда будет вызван Show()
+            Calculate.CheckWindowPos(this, false);
+        }
+
+        private void Encoder_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!Win7Taskbar.IsInitialized) return;
             if (this.IsVisible)

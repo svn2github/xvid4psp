@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.ColorCorrection"
 	x:Name="Window"
 	Title="Color correction"
-	Width="352" Height="Auto" ResizeMode="NoResize" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+	Width="352" Height="Auto" ResizeMode="NoResize" SizeToContent="Height" WindowStartupLocation="CenterOwner" SourceInitialized="Window_SourceInitialized">
 	<Grid x:Name="LayoutRoot">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*"/>

@@ -267,5 +267,47 @@ namespace WPF_VideoPlayer
                 SetString("WPFPlayer_MI_ColumnSize", value);
             }
         }
+
+        //Разрешает/запрещает изменять размер основного окна при запуске
+        public static bool WindowResize
+        {
+            get
+            {
+                object value = GetValue("WPFPlayer_WindowResize");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("WPFPlayer_WindowResize", value);
+            }
+        }
+
+        //Ограничение размеров и позиции окон
+        public static bool CheckWindowsPos
+        {
+            get
+            {
+                object value = GetValue("WPFPlayer_CheckWindowsPos");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("WPFPlayer_CheckWindowsPos", value);
+            }
+        }
     }
 }

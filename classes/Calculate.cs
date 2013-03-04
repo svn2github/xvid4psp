@@ -1161,5 +1161,70 @@ namespace XviD4PSP
 
             return res;
         }
+
+        public static void CheckWindowPos(Window wnd, bool limit_size)
+        {
+            IntPtr hwnd = IntPtr.Zero;
+            CheckWindowPos(wnd, ref hwnd, limit_size);
+        }
+
+        public static void CheckWindowPos(Window wnd, ref IntPtr hwnd, bool limit_size)
+        {
+            try
+            {
+                if (!Settings.CheckWindowsPos || !wnd.IsVisible)
+                    return;
+
+                if (hwnd == IntPtr.Zero)
+                    hwnd = new WindowInteropHelper(wnd).Handle;
+
+                if (hwnd == IntPtr.Zero)
+                    return;
+
+                //Монитор, на котором окно занимает бОльшую площадь (или ближайший к окну).
+                //SystemParameters.WorkArea - только для основного монитора, но уже с dpi.
+                Rectangle _WorkingArea = System.Windows.Forms.Screen.FromHandle(hwnd).WorkingArea;
+
+                //Масштабируем под dpi
+                double dpi = SysInfo.dpi;
+                Rect WorkingArea = (_WorkingArea.Width <= 0 || _WorkingArea.Height <= 0) ? SystemParameters.WorkArea :
+                    new Rect(_WorkingArea.X / dpi, _WorkingArea.Y / dpi, _WorkingArea.Width / dpi, _WorkingArea.Height / dpi);
+
+                //Ограничение размеров окна
+                if (limit_size)
+                {
+                    wnd.MaxWidth = WorkingArea.Width;
+                    wnd.MaxHeight = WorkingArea.Height;
+                    wnd.UpdateLayout();
+                }
+
+                //Вписывание в границы
+                if (wnd.ActualWidth > 0 && wnd.ActualHeight > 0 && !double.IsNaN(wnd.Left) && !double.IsNaN(wnd.Top))
+                {
+                    if (wnd.Left < WorkingArea.Left)
+                    {
+                        //Слева
+                        wnd.Left = WorkingArea.Left;
+                    }
+                    else if (wnd.Left - WorkingArea.Left + wnd.ActualWidth > WorkingArea.Width)
+                    {
+                        //Справа
+                        wnd.Left = WorkingArea.Width - wnd.ActualWidth + WorkingArea.Left;
+                    }
+
+                    if (wnd.Top < WorkingArea.Top)
+                    {
+                        //Сверху
+                        wnd.Top = WorkingArea.Top;
+                    }
+                    else if (wnd.Top - WorkingArea.Top + wnd.ActualHeight > WorkingArea.Height)
+                    {
+                        //Снизу
+                        wnd.Top = WorkingArea.Height - wnd.ActualHeight + WorkingArea.Top;
+                    }
+                }
+            }
+            catch (Exception) { }
+        }
     }
 }

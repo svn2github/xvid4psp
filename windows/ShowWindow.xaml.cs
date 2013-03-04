@@ -26,10 +26,14 @@ namespace XviD4PSP
             this.textbox_search.Text = (button_search.Content = Languages.Translate("Search")) + "...";
 
             Show();
+        }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
             this.SizeToContent = SizeToContent.Manual;
-            this.MaxWidth = SystemParameters.WorkArea.Width;
-            this.MaxHeight = SystemParameters.WorkArea.Height;
+            Calculate.CheckWindowPos(this, true);
+            this.MaxWidth = double.PositiveInfinity;
+            this.MaxHeight = double.PositiveInfinity;
         }
 
         private void button_search_Click(object sender, RoutedEventArgs e)

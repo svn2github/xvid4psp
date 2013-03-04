@@ -4,7 +4,7 @@
 	x:Class="WPF_VideoPlayer.MediaInfo"
 	x:Name="Window"
 	Title="MediaInfo"
-	Width="500" Height="500" MinWidth="474" MinHeight="150" SizeToContent="Manual" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	Width="500" Height="500" MinWidth="474" MinHeight="150" SizeToContent="Manual" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SourceInitialized="Window_SourceInitialized">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">

@@ -7,7 +7,7 @@
 	x:Class="XviD4PSP.MainWindow"
 	x:Name="Window"
 	Title="XviD4PSP - AviSynth-based MultiMedia Converter"
-	Width="747" Height="577" MinWidth="250" MinHeight="100" SizeToContent="Manual" Closing="MainWindow_Closing" MouseLeftButtonDown="Window_MouseLeftButtonDown" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
+	Width="747" Height="577" MinWidth="250" MinHeight="100" SizeToContent="Manual" Closing="MainWindow_Closing" MouseLeftButtonDown="Window_MouseLeftButtonDown" SourceInitialized="MainWindow_SourceInitialized" Loaded="MainWindow_Loaded" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" HorizontalAlignment="Left">
     <Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -343,8 +343,8 @@
                 <MenuItem Header="Help" x:Name="mnHelp">
                     <MenuItem Header="About" x:Name="mnAbout" Click="mnAbout_Click"/>
                     <Separator/>
-                    <MenuItem x:Name="menu_donate" Header="Donate" Click="menu_donate_Click"/>
-                    <Separator/>
+                    <!--MenuItem x:Name="menu_donate" Header="Donate" Click="menu_donate_Click"/>
+                    <Separator/-->
                     <MenuItem Header="Support forum" x:Name="menu_support" Click="menu_help_Click"/>
                     <MenuItem x:Name="menu_home" Header="Home page" Click="menu_help_Click"/>
                     <MenuItem x:Name="menu_Google_code" Header="Google-code" Click="menu_help_Click"/>

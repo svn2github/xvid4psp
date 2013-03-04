@@ -22,6 +22,7 @@ using System.Windows.Interop;
 using System.Windows.Input;
 using Microsoft.Win32;
 using System.Windows.Media.Imaging;
+using System.Drawing;
 
 namespace WPF_VideoPlayer
 {
@@ -56,7 +57,7 @@ namespace WPF_VideoPlayer
         private System.Windows.WindowState oldstate;
         private bool IsRendererARFixed = false;
         private bool OldSeeking = false;
-        private double dpi = 1.0;
+        private double dpi = 0.0;
         private MediaLoad mediaload;
 
         private enum PlayState { Stopped, Paused, Running, Init }
@@ -76,13 +77,16 @@ namespace WPF_VideoPlayer
             try
             {
                 //Установка параметров окна из сохраненных настроек
-                string[] value = (Settings.WindowLocation).Split('/');
-                if (value.Length == 4)
+                if ((check_window_size.IsChecked = Settings.WindowResize))
                 {
-                    this.Width = Convert.ToDouble(value[0]);
-                    this.Height = Convert.ToDouble(value[1]);
-                    this.Left = Convert.ToDouble(value[2]);
-                    this.Top = Convert.ToDouble(value[3]);
+                    string[] value = (Settings.WindowLocation).Split('/');
+                    if (value.Length == 4)
+                    {
+                        this.Width = Convert.ToDouble(value[0]);
+                        this.Height = Convert.ToDouble(value[1]);
+                        this.Left = Convert.ToDouble(value[2]);
+                        this.Top = Convert.ToDouble(value[3]);
+                    }
                 }
 
                 this.button_open.Content = Languages.Translate("Open");
@@ -101,7 +105,11 @@ namespace WPF_VideoPlayer
                 this.menu_player_engine.Header = Languages.Translate("Player engine");
                 this.check_old_seeking.ToolTip = Languages.Translate("If checked, Old method (continuous positioning while you move slider) will be used,") +
                     Environment.NewLine + Languages.Translate("otherwise New method is used (recommended) - position isn't set untill you release mouse button");
-                this.check_win7_taskbar.ToolTip = Languages.Translate("Enable Windows 7 taskbar progress indication");
+
+                this.menu_misc.Header = Languages.Translate("Misc");
+                this.check_win7_taskbar.Header = Languages.Translate("Enable Windows 7 taskbar progress indication");
+                this.check_window_size.Header = Languages.Translate("Restore the size and location of the main window");
+                this.check_window_pos.Header = Languages.Translate("Fit windows to the working area bounds");
 
                 if (Settings.PlayerEngine == Settings.PlayerEngines.DirectShow) check_engine_directshow.IsChecked = true;
                 else if (Settings.PlayerEngine == Settings.PlayerEngines.MediaBridge) check_engine_mediabridge.IsChecked = true;
@@ -120,12 +128,10 @@ namespace WPF_VideoPlayer
                 slider_Volume.Value = Settings.VolumeLevel;
                 VolumeSet = -(int)(10000 - Math.Pow(slider_Volume.Value, 1.0 / 5) * 10000);
                 if (slider_Volume.Value == 0) image_volume.Source = new BitmapImage(new Uri(@"../pictures/Volume2.png", UriKind.RelativeOrAbsolute));
+                slider_Volume.ValueChanged += new RoutedPropertyChangedEventHandler<double>(Volume_ValueChanged); //Не в xaml, чтоб не срабатывал до загрузки
 
-                //Определяем коэффициент для масштабирования окна ДиректШоу-превью
-                IntPtr ScreenDC = GetDC(IntPtr.Zero); //88-w, 90-h
-                double _dpi = (double)GetDeviceCaps(ScreenDC, 88) / 96.0;
-                if (_dpi != 0) dpi = _dpi;
-                ReleaseDC(IntPtr.Zero, ScreenDC);
+                //Определяем коэффициент dpi
+                RetrieveDPI();
 
                 DDHelper ddh = new DDHelper(this);
                 ddh.GotFiles += new DDEventHandler(DD_GotFiles);
@@ -136,10 +142,24 @@ namespace WPF_VideoPlayer
             }
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void MainWindow_SourceInitialized(object sender, EventArgs e)
         {
             this.Handle = new WindowInteropHelper(this).Handle;
 
+            //Вторая попытка для dpi
+            if (dpi == 0)
+                RetrieveDPI();
+
+            if ((check_window_pos.IsChecked = Settings.CheckWindowsPos))
+            {
+                CheckWindowPos(this, Handle, true);
+                this.MaxWidth = double.PositiveInfinity;
+                this.MaxHeight = double.PositiveInfinity;
+            }
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
             if (Settings.Win7TaskbarIsEnabled && !Win7Taskbar.InitializeWin7Taskbar())
             {
                 System.Windows.MessageBox.Show(Languages.Translate("Failed to initialize Windows 7 taskbar interface.") +
@@ -1509,6 +1529,107 @@ namespace WPF_VideoPlayer
             {
                 Win7Taskbar.UninitializeWin7Taskbar();
             }
+        }
+
+        private void check_window_size_Clicked(object sender, RoutedEventArgs e)
+        {
+            Settings.WindowResize = check_window_size.IsChecked;
+        }
+
+        private void check_window_pos_Clicked(object sender, RoutedEventArgs e)
+        {
+            Settings.CheckWindowsPos = check_window_pos.IsChecked;
+        }
+
+        //Коэффициент для масштабирования DIP<->DDP
+        private void RetrieveDPI()
+        {
+            try
+            {
+                if (!this.IsVisible)
+                {
+                    //Первый дефолт
+                    dpi = 0;
+
+                    IntPtr ScreenDC = IntPtr.Zero;
+                    try
+                    {
+                        //Когда окна еще нет
+                        ScreenDC = GetDC(IntPtr.Zero); //88-x(w), 90-y(h)
+                        dpi = (double)GetDeviceCaps(ScreenDC, 88) / 96.0;
+                    }
+                    finally
+                    {
+                        ReleaseDC(IntPtr.Zero, ScreenDC);
+                    }
+                }
+                else
+                {
+                    //Второй дефолт
+                    dpi = 1;
+
+                    //Когда окно уже есть (это вторая попытка)
+                    PresentationSource source = PresentationSource.FromVisual(this);
+                    if (source != null)
+                    {
+                        CompositionTarget target = source.CompositionTarget; //M11-x(w), M22-y(h)
+                        if (target != null) dpi = source.CompositionTarget.TransformToDevice.M11;
+                    }
+                }
+            }
+            catch (Exception) { }
+        }
+
+        public void CheckWindowPos(Window wnd, IntPtr hwnd, bool limit_size)
+        {
+            try
+            {
+                if (!wnd.IsVisible || hwnd == IntPtr.Zero)
+                    return;
+
+                //Монитор, на котором окно занимает бОльшую площадь (или ближайший к окну).
+                //SystemParameters.WorkArea - только для основного монитора, но уже с dpi.
+                Rectangle _WorkingArea = System.Windows.Forms.Screen.FromHandle(hwnd).WorkingArea;
+
+                //Масштабируем под dpi
+                Rect WorkingArea = (_WorkingArea.Width <= 0 || _WorkingArea.Height <= 0) ? SystemParameters.WorkArea :
+                    new Rect(_WorkingArea.X / dpi, _WorkingArea.Y / dpi, _WorkingArea.Width / dpi, _WorkingArea.Height / dpi);
+
+                //Ограничение размеров окна
+                if (limit_size)
+                {
+                    wnd.MaxWidth = WorkingArea.Width;
+                    wnd.MaxHeight = WorkingArea.Height;
+                    wnd.UpdateLayout();
+                }
+
+                //Вписывание в границы
+                if (wnd.ActualWidth > 0 && wnd.ActualHeight > 0 && !double.IsNaN(wnd.Left) && !double.IsNaN(wnd.Top))
+                {
+                    if (wnd.Left < WorkingArea.Left)
+                    {
+                        //Слева
+                        wnd.Left = WorkingArea.Left;
+                    }
+                    else if (wnd.Left - WorkingArea.Left + wnd.ActualWidth > WorkingArea.Width)
+                    {
+                        //Справа
+                        wnd.Left = WorkingArea.Width - wnd.ActualWidth + WorkingArea.Left;
+                    }
+
+                    if (wnd.Top < WorkingArea.Top)
+                    {
+                        //Сверху
+                        wnd.Top = WorkingArea.Top;
+                    }
+                    else if (wnd.Top - WorkingArea.Top + wnd.ActualHeight > WorkingArea.Height)
+                    {
+                        //Снизу
+                        wnd.Top = WorkingArea.Height - wnd.ActualHeight + WorkingArea.Top;
+                    }
+                }
+            }
+            catch (Exception) { }
         }
     }
 }

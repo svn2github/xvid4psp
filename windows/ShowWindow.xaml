@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.ShowWindow"
 	x:Name="Window"
 	Title="Changelog:"
-	Width="600" Height="600" MinWidth="400" MinHeight="200" MaxWidth="900" MaxHeight="700" ResizeMode="CanResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	Width="600" Height="600" MinWidth="400" MinHeight="200" MaxWidth="900" MaxHeight="700" ResizeMode="CanResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" Background="#FFFFFFFF" SourceInitialized="Window_SourceInitialized" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38.96" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">
             <GroupBox Foreground="#FFFFFFFF" x:Name="group_box" Header="Changelog" Margin="6,2,6,6" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">

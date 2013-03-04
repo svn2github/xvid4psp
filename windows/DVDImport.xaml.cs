@@ -70,12 +70,12 @@ namespace XviD4PSP
         private bool isInfoLoading = true;
         private IFilterGraph graph;
 
-        public DVDImport(Massive mass, string dvdpath, double dpi)
+        public DVDImport(Massive mass, string dvdpath)
         {
             this.InitializeComponent();
             this.Owner = App.Current.MainWindow;
             this.m = mass.Clone();
-            this.dpi = dpi;
+            this.dpi = SysInfo.dpi;
 
             DDHelper ddh = new DDHelper(this);
             ddh.GotFiles += new DDEventHandler(DD_GotFiles);
@@ -127,6 +127,11 @@ namespace XviD4PSP
             Title = "DVD: " + Calculate.GetDVDName(vobs[0]);
 
             this.ShowDialog();
+        }
+
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)

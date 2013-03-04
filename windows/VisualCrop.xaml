@@ -4,7 +4,7 @@
 	x:Class="XviD4PSP.VisualCrop"
 	x:Name="Window"
 	Title="VisualCrop"
-	Width="730" Height="400" MinWidth="730" MinHeight="380" ResizeMode="CanResize" SizeChanged="WindowSizeChanged" SizeToContent="Height" WindowStartupLocation="CenterOwner" PreviewKeyDown="WindowKeyDown" Closing="WindowClosing" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+	Width="730" Height="400" MinWidth="730" MinHeight="380" ResizeMode="CanResize" SizeChanged="WindowSizeChanged" SizeToContent="Height" WindowStartupLocation="CenterOwner" PreviewKeyDown="WindowKeyDown" Closing="WindowClosing" SourceInitialized="Window_SourceInitialized" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
     <Grid x:Name="LayoutRoot" Width="Auto" Height="Auto" Background="{x:Null}">
         <Grid Margin="0,0,0,74" x:Name="Picture" Width="Auto" Height="Auto" MouseLeftButtonDown="MouseClick" MouseRightButtonDown="MouseClick" MouseMove="MoveMouse" MouseWheel="WheelMouse" Background="{DynamicResource black_gradient_2}">
             <Image x:Name="Pic" Margin="0,0,0,0" Width="Auto" Height="Auto" Stretch="Uniform" Source="..\pictures\vc_background.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>

@@ -4,7 +4,7 @@
 	x:Class="XviD4PSP.Donate"
 	x:Name="Window"
 	Title="Donate"
-	Width="580" Height="324" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+	Width="580" Height="324" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SourceInitialized="Window_SourceInitialized" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid Margin="0,0,0,38" x:Name="grid_main" Background="{DynamicResource black_gradient_2}">

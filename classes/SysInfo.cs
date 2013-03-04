@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Windows;
+using System.Windows.Media;
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
@@ -230,6 +232,53 @@ namespace XviD4PSP
             }
             catch (Exception) { }
             return false;
+        }
+
+        [DllImport("user32.dll", EntryPoint = "GetDC")]
+        private static extern IntPtr GetDC(IntPtr ptr);
+        [DllImport("user32.dll", EntryPoint = "ReleaseDC")]
+        private static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDc);
+        [DllImport("gdi32.dll", EntryPoint = "GetDeviceCaps")]
+        private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+
+        //Коэффициент для масштабирования DIP<->DDP
+        public static double dpi { get; private set; }
+        public static void RetrieveDPI(Window wnd)
+        {
+            try
+            {
+                if (!wnd.IsVisible)
+                {
+                    //Первый дефолт
+                    dpi = 0;
+
+                    IntPtr ScreenDC = IntPtr.Zero;
+                    try
+                    {
+                        //Когда окна еще нет
+                        ScreenDC = GetDC(IntPtr.Zero); //88-x(w), 90-y(h)
+                        dpi = (double)GetDeviceCaps(ScreenDC, 88) / 96.0;
+                    }
+                    finally
+                    {
+                        ReleaseDC(IntPtr.Zero, ScreenDC);
+                    }
+                }
+                else
+                {
+                    //Второй дефолт
+                    dpi = 1;
+
+                    //Когда окно уже есть (это вторая попытка)
+                    PresentationSource source = PresentationSource.FromVisual(wnd);
+                    if (source != null)
+                    {
+                        CompositionTarget target = source.CompositionTarget; //M11-x(w), M22-y(h)
+                        if (target != null) dpi = source.CompositionTarget.TransformToDevice.M11;
+                    }
+                }
+            }
+            catch (Exception) { }
         }
     }
 }

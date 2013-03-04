@@ -3219,5 +3219,26 @@ namespace XviD4PSP
                 SetBool("PictureViewAudio", value);
             }
         }
+
+        //Ограничение размеров и позиции окон
+        public static bool CheckWindowsPos
+        {
+            get
+            {
+                object value = GetValue("CheckWindowsPos");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("CheckWindowsPos", value);
+            }
+        }
     }
 }

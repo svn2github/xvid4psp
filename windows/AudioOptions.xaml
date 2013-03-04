@@ -6,7 +6,7 @@
 	x:Class="XviD4PSP.AudioOptions"
 	x:Name="Window"
 	Title="Audio options:"
-	Width="640" Height="510" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" xmlns:MyUserControl="clr-namespace:MyUserControl" OverridesDefaultStyle="False" Background="#FFFFFFFF">
+	Width="640" Height="510" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SourceInitialized="Window_SourceInitialized" xmlns:MyUserControl="clr-namespace:MyUserControl" OverridesDefaultStyle="False" Background="#FFFFFFFF">
 	<Window.Resources>
 		<ControlTemplate x:Key="GlassButtonRounded" TargetType="{x:Type Button}">
 			<ControlTemplate.Resources>

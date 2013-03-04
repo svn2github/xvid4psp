@@ -33,6 +33,11 @@ namespace XviD4PSP
             else this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, true);
+        }
+
         public void ShowMessage(string text)
         { SetUpWindow(text, null, "Message", MessageStyle.Ok); }
 
@@ -55,10 +60,10 @@ namespace XviD4PSP
         private void SetUpWindow(string text, string info, string title, MessageStyle style)
         {
             this.Title = title;
-            text_message.Content = text;
+            text_message.Text = text;
             if (!string.IsNullOrEmpty(info))
             {
-                text_info.Content = info;
+                text_info.Text = info;
                 btInfo.Visibility = Visibility.Visible;
             }
 
@@ -113,7 +118,10 @@ namespace XviD4PSP
         private void btInfo_Click(object sender, RoutedEventArgs e)
         {
             if (text_info.Visibility == Visibility.Collapsed)
+            {
                 text_info.Visibility = Visibility.Visible;
+                Calculate.CheckWindowPos(this, true);
+            }
             else
                 text_info.Visibility = Visibility.Collapsed;
         }
@@ -122,9 +130,15 @@ namespace XviD4PSP
         {
             try
             {
-                Win32.CopyToClipboard(text_message.Content + ((text_info.Content.ToString() != "Info text") ? "\r\n\r\n" + text_info.Content : ""));
+                Win32.CopyToClipboard(text_message.Text + ((btInfo.Visibility == Visibility.Visible) ? "\r\n\r\n" + text_info.Text : ""));
             }
             catch (Exception) { }
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
+                cm_copy_Click(null, null);
         }
 
         private void LayoutRoot_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

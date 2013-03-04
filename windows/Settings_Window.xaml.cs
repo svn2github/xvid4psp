@@ -38,7 +38,8 @@ namespace XviD4PSP
             check_search_temp.Content = Languages.Translate("Search the best temp folder place on program start");
             check_auto_colormatrix.Content = Languages.Translate("Auto apply ColorMatrix for MPEG2 files");
             label_temppath.Content = Languages.Translate("Temp folder path:");
-            check_window_dim.Content = Languages.Translate("Remember last window location");
+            check_window_size.Content = Languages.Translate("Restore the size and location of the main window");
+            check_window_pos.Content = Languages.Translate("Fit windows to the working area bounds");
             check_hide_comments.Content = Languages.Translate("Remove comments (#text) from the AviSynth script");
             check_show_ftooltips.Content = Languages.Translate("Show advanced tooltips for filtering presets");
             check_resize_first.Content = Languages.Translate("Make crop/resize before filtering (otherwise - after filtering)");
@@ -113,7 +114,7 @@ namespace XviD4PSP
             check_search_temp.IsChecked = Settings.SearchTempPath;
             textbox_temp.Text = Settings.TempPath;
             check_auto_colormatrix.IsChecked = Settings.AutoColorMatrix;
-            check_window_dim.IsChecked = Settings.WindowResize;                                   //Запоминать параметры окна
+            check_window_size.IsChecked = Settings.WindowResize;                                  //Восстанавливать параметры главного окна
             check_hide_comments.IsChecked = Settings.HideComments;                                //Удалять комментарии из скрипта
             check_show_ftooltips.IsChecked = Settings.ShowFToolTips;                              //Показывать подсказки к пресетам фильтрации
             check_resize_first.IsChecked = Settings.ResizeFirst;                                  //Ресайз перед фильтрацией
@@ -142,6 +143,9 @@ namespace XviD4PSP
             check_sort_by_time.IsChecked = Settings.SortPresetsByTime;                            //Сортировка пресетов по времени изменений
             check_auto_abort.IsChecked = Settings.AutoAbortEncoding;                              //Автоматически прерывать зависшие задания
 
+            if ((bool)(check_window_pos.IsChecked = Settings.CheckWindowsPos))                    //Проверять размер и расположение окон
+                this.SourceInitialized += new EventHandler(Window_SourceInitialized);
+
             //Загружаем HotKeys (плюс перевод к действиям)
             foreach (string line in HotKeys.Data)
             {
@@ -165,6 +169,11 @@ namespace XviD4PSP
             else if (set_focus_to == 5) tab_hotkeys.IsSelected = true;
 
             ShowDialog();
+        }
+
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
         }
 
         //Нажатия кнопок для HotKeys
@@ -287,11 +296,16 @@ namespace XviD4PSP
         {
             Settings.AutoColorMatrix = check_auto_colormatrix.IsChecked.Value;
         }
-        
+
         //Обработка чекбокса "помнить позицию окна"
+        private void check_window_size_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.WindowResize = check_window_size.IsChecked.Value;
+        }
+
         private void check_window_pos_Click(object sender, RoutedEventArgs e)
         {
-            Settings.WindowResize = check_window_dim.IsChecked.Value;
+            Settings.CheckWindowsPos = check_window_pos.IsChecked.Value;
         }
 
         //Обработка чекбокса "удалять комментарии"

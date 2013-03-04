@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.Normalize"
 	x:Name="Window"
 	Title="Normalizer"
-	MinWidth="298" Height="90" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	MinWidth="298" Height="90" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SourceInitialized="Window_SourceInitialized" ContentRendered="Window_ContentRendered">
 
 	<Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
 		<Label OpacityMask="{x:Null}" x:Name="text_info" Content="Volume gain detecting..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,6,0" VerticalAlignment="Top"/>

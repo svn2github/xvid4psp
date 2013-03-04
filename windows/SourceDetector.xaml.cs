@@ -79,7 +79,6 @@ namespace XviD4PSP
             progress_total.Maximum = 100;
             Title = Languages.Translate("Detecting interlace") + "...";
             label_info.Content = Languages.Translate("Please wait... Work in progress...");
-            this.ContentRendered += new EventHandler(Window_ContentRendered);
 
             //BackgroundWorker
             CreateBackgroundWorker();
@@ -88,9 +87,14 @@ namespace XviD4PSP
             ShowDialog();
         }
 
-        void Window_ContentRendered(object sender, EventArgs e)
+        private void Window_SourceInitialized(object sender, EventArgs e)
         {
-            if (Handle == IntPtr.Zero)
+            Calculate.CheckWindowPos(this, ref Handle, false);
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            if (!IsErrors)
                 Win7Taskbar.SetProgressIndeterminate(this, ref Handle);
         }
 
@@ -748,6 +752,7 @@ namespace XviD4PSP
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ErrorExceptionDelegate(ErrorException), data, info);
             else
             {
+                IsErrors = true;
                 if (worker != null) worker.WorkerReportsProgress = false;
                 if (Handle == IntPtr.Zero) Handle = new WindowInteropHelper(this).Handle;
                 Win7Taskbar.SetProgressTaskComplete(Handle, TBPF.ERROR);

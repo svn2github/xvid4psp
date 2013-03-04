@@ -62,6 +62,11 @@ namespace XviD4PSP
             Show();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         private void button_open_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             ArrayList files = OpenDialogs.GetFilesFromConsole("ov");

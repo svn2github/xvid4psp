@@ -203,6 +203,11 @@ namespace XviD4PSP
             SetTooltips();
         }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Calculate.CheckWindowPos(this, false);
+        }
+
         private void SetAudioOptions()
         {
             //определяем аудио потоки

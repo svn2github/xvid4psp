@@ -194,8 +194,12 @@ namespace XviD4PSP
             UpdateCombosIsEnabled();
 
             Show();
+        }
 
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
             this.ActiveHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            Calculate.CheckWindowPos(this, ref ActiveHandle, false);
         }
 
         private void FFRebuilder_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)

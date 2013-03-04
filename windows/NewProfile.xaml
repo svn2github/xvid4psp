@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.NewProfile"
 	x:Name="Window"
 	Title="New profile"
-	Width="240" Height="126" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+	Width="240" Height="126" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SourceInitialized="Window_SourceInitialized">
 
 	<Grid x:Name="LayoutRoot">
 		<Grid.RowDefinitions>

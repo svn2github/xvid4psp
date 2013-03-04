@@ -193,7 +193,9 @@ namespace XviD4PSP
             {
                 if (IsInitialized)
                 {
-                    Handle = new System.Windows.Interop.WindowInteropHelper(wnd).Handle;
+                    if (Handle == IntPtr.Zero)
+                        Handle = new System.Windows.Interop.WindowInteropHelper(wnd).Handle;
+
                     SetProgressState(Handle, TBPF.INDETERMINATE);
                 }
             }

@@ -5,7 +5,7 @@
     x:Class="XviD4PSP.MT_Settings"
 	x:Name="Window"
 	Title="MT settings"
-	Width="400" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="Height" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
+	Width="400" Height="Auto" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="Height" SourceInitialized="Window_SourceInitialized" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:MyUserControl="clr-namespace:MyUserControl">
     <Grid x:Name="LayoutRoot">
         <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35" ToolTipService.ShowOnDisabled="True" ToolTipService.ShowDuration="15000">
             <GroupBox Foreground="#FFFFFFFF" x:Name="MT" Header="MT settings" Margin="4,3,4,6" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">

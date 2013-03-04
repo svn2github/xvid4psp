@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.FFRebuilder"
 	x:Name="Window"
 	Title="FFRebuilder"
-	Width="610" Height="520" MinWidth="610" MinHeight="520" ResizeMode="CanResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+	Width="610" Height="520" MinWidth="610" MinHeight="520" ResizeMode="CanResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SourceInitialized="Window_SourceInitialized">
 
     <Grid x:Name="LayoutRoot">
         <Grid x:Name="grid_main" Background="{DynamicResource black_gradient_2}" Margin="0,0,0,35">

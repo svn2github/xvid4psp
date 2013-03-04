@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.Decoder"
 	x:Name="Window"
 	Title="Decoder"
-	Width="298" Height="90" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SizeToContent="Manual">
+	Width="298" Height="90" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SizeToContent="Manual" SourceInitialized="Window_SourceInitialized">
 
 	<Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
 		<Label OpacityMask="{x:Null}" x:Name="label_info" Content="Sound decoding..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" Margin="8,8,8,0" VerticalAlignment="Top"/>

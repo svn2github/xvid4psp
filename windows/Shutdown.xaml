@@ -5,7 +5,7 @@
 	x:Class="XviD4PSP.Shutdown"
 	x:Name="Window"
 	Title="Message"
-	Width="287" Height="159" ResizeMode="NoResize" ShowInTaskbar="True" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
+	Width="287" Height="159" ResizeMode="NoResize" ShowInTaskbar="True" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" SourceInitialized="Window_SourceInitialized">
 
 	<Grid x:Name="LayoutRoot" Background="{x:Null}">
 		<Grid.ColumnDefinitions>
