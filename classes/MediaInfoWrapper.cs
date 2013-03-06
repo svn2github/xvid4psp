@@ -212,10 +212,14 @@ namespace XviD4PSP
         public int ATrackOrder(int track)
         {
             string s = Get(StreamKind.Audio, track, "StreamOrder");
-            if (Int32.TryParse(s, NumberStyles.Integer, null, out track))
-                return track;
-            else
-                return -1;
+            if (!string.IsNullOrEmpty(s))
+            {
+                int index = s.IndexOf("-"); //0-1 (TS)
+                if (index >= 0) s = s.Substring(index + 1);
+                if (Int32.TryParse(s, NumberStyles.Integer, null, out index))
+                    return index;
+            }
+            return -1;
         }
 
         public int VTrackID()
@@ -228,18 +232,22 @@ namespace XviD4PSP
 
         public int VTrackOrder()
         {
-            int z = 0;
             string s = Get(StreamKind.Video, 0, "StreamOrder");
-            if (Int32.TryParse(s, NumberStyles.Integer, null, out z))
-                return z;
-            else
-                return -1;
+            if (!string.IsNullOrEmpty(s))
+            {
+                int index = s.IndexOf("-"); //0-1 (TS)
+                if (index >= 0) s = s.Substring(index + 1);
+                if (Int32.TryParse(s, NumberStyles.Integer, null, out index))
+                    return index;
+            }
+            return -1;
         }
 
         public string VCodecString
         {
             get
             {
+                //(Codec fields are DEPRECATED)
                 string s = Get(StreamKind.Video, 0, "Codec/String");
                 //string fcc = Get(StreamKind.Video, 0, "Codec/CC");
                 //string a = Get(StreamKind.Video, 0, "Format");
@@ -259,6 +267,7 @@ namespace XviD4PSP
         {
             get
             {
+                //(Codec fields are DEPRECATED)
                 string s = Get(StreamKind.Video, 0, "Codec/String");
                 string fcc = Get(StreamKind.Video, 0, "Codec/CC");
 
@@ -302,11 +311,13 @@ namespace XviD4PSP
 
         public string ACodecString(int track)
         {
+            //(Codec fields are DEPRECATED)
             return Get(StreamKind.Audio, track, "Codec/String");
         }
 
         public string ACodecShort(int track)
         {
+            //(Codec fields are DEPRECATED)
             string s = Get(StreamKind.Audio, track, "Codec/String");
             //string fcc = Get(StreamKind.Audio, track, "Codec/CC");
             //string a = Get(StreamKind.Audio, track, "Format");

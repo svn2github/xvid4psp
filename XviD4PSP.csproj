@@ -484,6 +484,7 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="pictures\folder.png" />
     <Resource Include="pictures\warning.png" />
     <Resource Include="pictures\logo_x262.png" />
     <Resource Include="pictures\logo_QAAC.png" />

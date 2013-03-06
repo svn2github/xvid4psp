@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.320.0 (04.03.2013), main changes:
+﻿XviD4PSP 5.10.321.0 (07.03.2013), main changes:
 
+>>> (r321) The content of subfolders in the apps\Custom folder (only *.exe, *.com, *.bat and *.cmd files)
+           will be shown in "Tools" menu. Also it is now possible to open a tools folders from this menu.
 >>> (r320) Added an option to check the location of the newly created windows on the screen. If a window not
            fit to the working area, it will be relocated to fit this area. If several monitors is installed,
            the working area of the one that contains the bigger part of the window will be used. If current

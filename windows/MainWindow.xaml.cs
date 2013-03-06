@@ -231,6 +231,16 @@ namespace XviD4PSP
 
             try
             {
+                //Пользовательские утилиты
+                LoadCustomTools();
+            }
+            catch (Exception ex)
+            {
+                ErrorException("Initializing (CustomTools): " + ex.Message, ex.StackTrace);
+            }
+
+            try
+            {
                 //events
                 this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown);
                 this.StateChanged += new EventHandler(MainWindow_StateChanged);
@@ -532,9 +542,9 @@ namespace XviD4PSP
                     //Tools
                     case ("Media Info"): menu_info_media_Click(menu_info_media, null); break;
                     case ("FFRebuilder"): menu_ffrebuilder_Click(null, null); break;
-                    case ("DGIndex"): mn_apps_Click(mnDGIndex, null); break;
+                    case ("DGIndex"): mn_apps_Click(menu_dgindex, null); break;
                     case ("DGPulldown"): mn_apps_Click(menu_dgpulldown, null); break;
-                    case ("DGAVCIndex"): mn_apps_Click(mnDGAVCIndex, null); break;
+                    case ("DGAVCIndex"): mn_apps_Click(menu_dgavcindex, null); break;
                     case ("VirtualDubMod"): mn_apps_Click(menu_virtualdubmod, null); break;
                     case ("AVI-Mux"): mn_apps_Click(menu_avimux, null); break;
                     case ("tsMuxeR"): mn_apps_Click(menu_tsmuxer, null); break;
@@ -888,44 +898,139 @@ namespace XviD4PSP
             Close();
         }
 
+        private void LoadCustomTools()
+        {
+            string tools_folder = "\\apps\\Custom";
+            string tools_path = Calculate.StartupPath + tools_folder;
+            if (!Directory.Exists(tools_path))
+                return;
+
+            Array dirs = Directory.GetDirectories(tools_path);
+            if (dirs.Length == 0)
+                return;
+
+            Array.Sort(dirs);
+            int index = mnTools.Items.IndexOf(menu_custom_tools);
+
+            foreach (string dir in dirs)
+            {
+                Array files = Directory.GetFiles(dir);
+                if (files.Length > 0)
+                {
+                    Array.Sort(files);
+                    MenuItem tool = new MenuItem();
+
+                    foreach (string file in files)
+                    {
+                        string ext = Path.GetExtension(file).ToLower();
+                        if (ext == ".exe" || ext == ".com" || ext == ".bat" || ext == ".cmd")
+                        {
+                            MenuItem item = new MenuItem();
+                            item.Click += new RoutedEventHandler(mn_apps_Click);
+                            item.Header = Path.GetFileNameWithoutExtension(file);
+                            item.Tag = file;
+                            tool.Items.Add(item);
+                        }
+                    }
+
+                    if (tool.Items.Count > 0)
+                    {
+                        if (sep_custom_tools.Visibility != Visibility.Visible)
+                            sep_custom_tools.Visibility = Visibility.Visible;
+
+                        Image image = new Image();
+
+                        //Все значения должны быть как в xaml для иконок у "фиксированных" утилит!
+                        image.Source = new BitmapImage(new Uri(@"../pictures/folder.png", UriKind.RelativeOrAbsolute));
+                        image.MouseDown += new MouseButtonEventHandler(open_tools_Click);
+                        image.ToolTip = Languages.Translate("Open folder");
+                        image.Margin = new Thickness(0, 0, 0, 4);
+                        image.IsHitTestVisible = true;
+                        image.Stretch = Stretch.Fill;
+                        image.Width = 15;
+                        image.Height = 14;
+                        image.Tag = dir;
+
+                        tool.Icon = image;
+                        tool.Header = Path.GetFileName(dir);
+                        mnTools.Items.Insert(index, tool);
+                        index += 1;
+                    }
+                }
+            }
+        }
+
+        private void open_tools_Click(object sender, MouseButtonEventArgs e)
+        {
+            mnTools.IsSubmenuOpen = false;
+            mn_apps_Click(sender, null);
+        }
+
         private void mn_apps_Click(object sender, RoutedEventArgs e)
         {
             string path = Calculate.StartupPath;
-            if (sender == mnDGIndex) path += "\\apps\\DGMPGDec\\DGIndex.exe";
-            else if (sender == menu_dgpulldown) path += "\\apps\\DGPulldown\\DGPulldown.exe";
-            else if (sender == mnDGAVCIndex) path += "\\apps\\DGAVCDec\\DGAVCIndex.exe";
-            else if (sender == menu_virtualdubmod) path += "\\apps\\VirtualDubMod\\VirtualDubMod.exe";
-            else if (sender == menu_avimux) path += "\\apps\\AVI-Mux\\AVIMux_GUI.exe";
-            else if (sender == menu_tsmuxer) path += "\\apps\\tsMuxeR\\tsMuxerGUI.exe";
-            else if (sender == menu_mkvextract) path += "\\apps\\MKVtoolnix\\MKVExtractGUI2.exe";
-            else if (sender == menu_mkvmerge) path += "\\apps\\MKVtoolnix\\mmg.exe";
-            else if (sender == menu_yamb) path += "\\apps\\MP4Box\\Yamb.exe";
-            else if (sender == menu_directx_update) path += "\\apps\\DirectX_Update\\dxwebsetup.exe";
+            if (sender is MenuItem)
+            {
+                //Исполняемые файлы утилит
+                if (sender == menu_dgindex) path += "\\apps\\DGMPGDec\\DGIndex.exe";
+                else if (sender == menu_dgpulldown) path += "\\apps\\DGPulldown\\DGPulldown.exe";
+                else if (sender == menu_dgavcindex) path += "\\apps\\DGAVCDec\\DGAVCIndex.exe";
+                else if (sender == menu_virtualdubmod) path += "\\apps\\VirtualDubMod\\VirtualDubMod.exe";
+                else if (sender == menu_avimux) path += "\\apps\\AVI-Mux\\AVIMux_GUI.exe";
+                else if (sender == menu_tsmuxer) path += "\\apps\\tsMuxeR\\tsMuxerGUI.exe";
+                else if (sender == menu_mkvextract) path += "\\apps\\MKVtoolnix\\MKVExtractGUI2.exe";
+                else if (sender == menu_mkvmerge) path += "\\apps\\MKVtoolnix\\mmg.exe";
+                else if (sender == menu_yamb) path += "\\apps\\MP4Box\\Yamb.exe";
+                else if (sender == menu_directx_update) path += "\\apps\\DirectX_Update\\dxwebsetup.exe";
+                else if (((MenuItem)sender).Tag != null) path = ((MenuItem)sender).Tag.ToString();
+                else return;
+            }
+            else if (sender is Image)
+            {
+                //Папки с утилитами
+                if (sender == folder_dgindex) path += "\\apps\\DGMPGDec";
+                else if (sender == folder_dgpulldown) path += "\\apps\\DGPulldown";
+                else if (sender == folder_dgavcindex) path += "\\apps\\DGAVCDec";
+                else if (sender == folder_virtualdubmod) path += "\\apps\\VirtualDubMod";
+                else if (sender == folder_avimux) path += "\\apps\\AVI-Mux";
+                else if (sender == folder_tsmuxer) path += "\\apps\\tsMuxeR";
+                else if (sender == folder_mkvextract) path += "\\apps\\MKVtoolnix";
+                else if (sender == folder_mkvmerge) path += "\\apps\\MKVtoolnix";
+                else if (sender == folder_yamb) path += "\\apps\\MP4Box";
+                else if (((Image)sender).Tag != null) path = ((Image)sender).Tag.ToString();
+                else return;
+            }
+            else
+                return;
+
             try
             {
                 Process.Start(path);
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
         private void menu_help_Click(object sender, RoutedEventArgs e)
         {
-            string path = "http://forum.winnydows.com";
-            if (sender == menu_home) path = "http://www.winnydows.com";
+            string path = "";
+            if (sender == menu_support) path = "http://forum.winnydows.com";
+            else if (sender == menu_home) path = "http://www.winnydows.com";
             else if (sender == menu_Google_code) path = "http://code.google.com/p/xvid4psp/";
             else if (sender == menu_my_mail) path = "mailto:forclip@gmail.com";
             else if (sender == menu_avisynth_guide_en) path = "http://avisynth.org/mediawiki/Internal_filters";
             else if (sender == menu_avisynth_guide_ru) path = "http://avisynth.org.ru/docs/russian/index.htm";
+            else return;
+
             try
             {
                 Process.Start(path);
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -2123,9 +2228,9 @@ namespace XviD4PSP
                 //Tools
                 menu_info_media.InputGestureText = HotKeys.GetKeys("Media Info");
                 menu_ffrebuilder.InputGestureText = HotKeys.GetKeys("FFRebuilder");
-                mnDGIndex.InputGestureText = HotKeys.GetKeys("DGIndex");
+                menu_dgindex.InputGestureText = HotKeys.GetKeys("DGIndex");
                 menu_dgpulldown.InputGestureText = HotKeys.GetKeys("DGPulldown");
-                mnDGAVCIndex.InputGestureText = HotKeys.GetKeys("DGAVCIndex");
+                menu_dgavcindex.InputGestureText = HotKeys.GetKeys("DGAVCIndex");
                 menu_virtualdubmod.InputGestureText = HotKeys.GetKeys("VirtualDubMod");
                 menu_avimux.InputGestureText = HotKeys.GetKeys("AVI-Mux");
                 menu_tsmuxer.InputGestureText = HotKeys.GetKeys("tsMuxeR");
@@ -2306,7 +2411,6 @@ namespace XviD4PSP
                 button_trim_plus.ToolTip = Languages.Translate("Next/New region");
                 button_trim_minus.ToolTip = Languages.Translate("Previous region");
                 button_trim_delete.ToolTip = Languages.Translate("Delete current region");
-                menu_open_folder.Header = Languages.Translate("Open folder") + "...";
                 mnApps_Folder.Header = Languages.Translate("Open XviD4PSP folder");
                 menu_info_media.ToolTip = Languages.Translate("Provides exhaustive information about the open file.") + Environment.NewLine + Languages.Translate("You can manually choose a file to open and select the type of information to show too.");
                 target_goto.ToolTip = Languages.Translate("Frame counter. Click on this area to enter frame number to go to.") + "\r\n" + Languages.Translate("Rigth-click will insert current frame number.") +
@@ -2322,6 +2426,18 @@ namespace XviD4PSP
                 cmn_addtobookmarks.Header = Languages.Translate("Add/Remove bookmark");
                 cmn_deletebookmarks.Header = Languages.Translate("Delete all bookmarks");
                 cmn_bookmarks.Header = Languages.Translate("Bookmarks");
+
+                string open_folder = Languages.Translate("Open folder");
+                menu_open_folder.Header = open_folder + "...";
+                folder_dgindex.ToolTip = open_folder;
+                folder_dgpulldown.ToolTip = open_folder;
+                folder_dgavcindex.ToolTip = open_folder;
+                folder_virtualdubmod.ToolTip = open_folder;
+                folder_avimux.ToolTip = open_folder;
+                folder_tsmuxer.ToolTip = open_folder;
+                folder_mkvextract.ToolTip = open_folder;
+                folder_mkvmerge.ToolTip = open_folder;
+                folder_yamb.ToolTip = open_folder;
             }
             catch { }
         }
@@ -4332,6 +4448,7 @@ namespace XviD4PSP
         {
             try
             {
+                menu_script.IsSubmenuOpen = false;
                 System.Windows.Forms.OpenFileDialog s = new System.Windows.Forms.OpenFileDialog();
                 string path = (sender == edit_wmp) ? Settings.WMP_Path : (sender == edit_mpc) ? Settings.MPC_Path : Settings.WPF_Path;
                 s.InitialDirectory = (path != "" && Directory.Exists(Path.GetDirectoryName(path))) ? Path.GetDirectoryName(path) : Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);

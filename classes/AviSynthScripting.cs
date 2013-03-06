@@ -107,113 +107,113 @@ namespace XviD4PSP
            m.script = "";
 
            //загружаем доп функции
-           m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
-           m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
+           m.script += "Import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
+           m.script += "Import(\"" + startup_path + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
 
            //загружаем необходимые плагины импорта
            if (m.vdecoder == Decoders.MPEG2Source)
-               m.script += "loadplugin(\"" + startup_path + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.AVCSource)
-               m.script += "loadplugin(\"" + startup_path + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DGMultiSource)
-               m.script += "loadplugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DirectShowSource2)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.RawSource)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.QTInput)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\QTSource.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\QTSource.dll\")" + Environment.NewLine;
 
            if (m.vdecoder == Decoders.FFmpegSource2 || instream.decoder == Decoders.FFAudioSource)
            {
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
-               m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
+               m.script += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
            }
 
            if (instream.decoder == Decoders.NicAC3Source || instream.decoder == Decoders.NicMPG123Source ||
                instream.decoder == Decoders.NicDTSSource || instream.decoder == Decoders.RaWavSource)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
            else if (instream.decoder == Decoders.bassAudioSource)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
 
            if (m.deinterlace == DeinterlaceType.TIVTC || m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI ||
                m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI || m.deinterlace == DeinterlaceType.TDecimate ||
                m.deinterlace == DeinterlaceType.TDecimate_23 || m.deinterlace == DeinterlaceType.TDecimate_24 ||
                m.deinterlace == DeinterlaceType.TDecimate_25 || m.deinterlace == DeinterlaceType.TFM ||
                m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
            if (m.deinterlace == DeinterlaceType.TomsMoComp)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TomsMoComp.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TomsMoComp.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.TDeint)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.TDeintEDI)
            {
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.TIVTC_TDeintEDI)
            {
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TMM.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TMM.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.YadifModEDI || m.deinterlace == DeinterlaceType.YadifModEDI2 ||
                m.deinterlace == DeinterlaceType.TIVTC_YadifModEDI)
            {
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadifmod.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadifmod.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.LeakKernelDeint)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\LeakKernelDeint.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\LeakKernelDeint.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.Yadif)
-               m.script += "loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
+               m.script += "LoadCPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.SmoothDeinterlace)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SmoothDeinterlacer.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SmoothDeinterlacer.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.NNEDI)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
            else if (m.deinterlace == DeinterlaceType.MCBob)
            {
-               m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-2" + ((SysInfo.AVSVersionFloat < 2.6f) ? "5" : "6") + ".dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Repair.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
+               m.script += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\MCBob_mod.avs\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-2" + ((SysInfo.AVSVersionFloat < 2.6f) ? "5" : "6") + ".dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Repair.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrain.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.QTGMC || m.deinterlace == DeinterlaceType.QTGMC_2)
            {
-               m.script += "import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\QTGMC.avs\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrainSSE2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RepairSSE2.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-2" + ((SysInfo.AVSVersionFloat < 2.6f) ? "5" : "6") + ".dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\fft3dfilter.dll\")" + Environment.NewLine;
-               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
-               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI3.dll\")" + Environment.NewLine;
-               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
-               m.script += "loadcplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
-               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
-               m.script += "#loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\AddGrainC.dll\")" + Environment.NewLine;
+               m.script += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\QTGMC.avs\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RemoveGrainSSE2.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\RepairSSE2.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mt_masktools-2" + ((SysInfo.AVSVersionFloat < 2.6f) ? "5" : "6") + ".dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\fft3dfilter.dll\")" + Environment.NewLine;
+               m.script += "#LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VerticalCleaner.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\nnedi3.dll\")" + Environment.NewLine;
+               m.script += "#LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI3.dll\")" + Environment.NewLine;
+               m.script += "#LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\EEDI2.dll\")" + Environment.NewLine;
+               m.script += "LoadCPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\yadif.dll\")" + Environment.NewLine;
+               m.script += "#LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\TDeint.dll\")" + Environment.NewLine;
+               m.script += "#LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\AddGrainC.dll\")" + Environment.NewLine;
            }
            else if (m.deinterlace == DeinterlaceType.FieldDeinterlace)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Decomb.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\Decomb.dll\")" + Environment.NewLine;
 
            if (m.subtitlepath != null)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VSFilter.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\VSFilter.dll\")" + Environment.NewLine;
 
            if (m.iscolormatrix)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\ColorMatrix.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\ColorMatrix.dll\")" + Environment.NewLine;
 
            if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\soxfilter.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\soxfilter.dll\")" + Environment.NewLine;
 
            if (m.frameratemodifer == FramerateModifers.ConvertMFlowFPS)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\mvtools2.dll\")" + Environment.NewLine;
 
            if (m.resizefilter == Resizers.SplineResize || m.resizefilter == Resizers.Spline100Resize || m.resizefilter == Resizers.Spline144Resize)
-               m.script += "loadplugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SplineResize.dll\")" + Environment.NewLine;
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\SplineResize.dll\")" + Environment.NewLine;
 
            m.script += Environment.NewLine;
 
@@ -802,42 +802,42 @@ namespace XviD4PSP
            string script = "";
 
            // загружаем доп функции
-           script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
-           script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
+           script += "Import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\AudioFunctions.avs\")" + Environment.NewLine;
+           script += "Import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\functions\\VideoFunctions.avs\")" + Environment.NewLine;
 
            //загружаем необходимые плагины импорта
            if (m.vdecoder == Decoders.AVCSource)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.MPEG2Source)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DGMultiSource)
-               script += "loadplugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DirectShowSource2)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.RawSource)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\rawsource.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.QTInput)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\QTSource.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\QTSource.dll\")" + Environment.NewLine;
 
            if (m.vdecoder == Decoders.FFmpegSource2 || instream.decoder == Decoders.FFAudioSource)
            {
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
-               script += "import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.dll\")" + Environment.NewLine;
+               script += "Import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
            }
 
            if (instream.decoder == Decoders.NicAC3Source || instream.decoder == Decoders.NicMPG123Source ||
                instream.decoder == Decoders.NicDTSSource || instream.decoder == Decoders.RaWavSource)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
            else if (instream.decoder == Decoders.bassAudioSource)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\bass\\bassAudio.dll\")" + Environment.NewLine;
 
            if (mode == ScriptMode.Autocrop)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\AutoCrop.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\AutoCrop.dll\")" + Environment.NewLine;
            if (mode == ScriptMode.Interlace)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\TIVTC.dll\")" + Environment.NewLine;
 
            if (instream.channelconverter != AudioOptions.ChannelConverters.KeepOriginalChannels)
-               script += "loadplugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\soxfilter.dll\")" + Environment.NewLine;
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\soxfilter.dll\")" + Environment.NewLine;
 
            script += Environment.NewLine;
 
