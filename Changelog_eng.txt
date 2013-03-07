@@ -1,5 +1,8 @@
-﻿XviD4PSP 5.10.321.0 (07.03.2013), main changes:
+﻿XviD4PSP 5.10.322.0 (07.03.2013), main changes:
 
+>>> (r322) In addition to r321 it is now also possible to specify a custom tools via apps\Custom\Tools.ini.
+           Every line, that starts not with the "#" symbol, will be treated as a valid path. This path can
+           be relative or absolute and lead to a file or to a folder.
 >>> (r321) The content of subfolders in the apps\Custom folder (only *.exe, *.com, *.bat and *.cmd files)
            will be shown in "Tools" menu. Also it is now possible to open a tools folders from this menu.
 >>> (r320) Added an option to check the location of the newly created windows on the screen. If a window not

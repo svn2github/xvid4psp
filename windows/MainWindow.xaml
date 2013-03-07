@@ -327,7 +327,7 @@
                     <Separator/>
                     <MenuItem x:Name="menu_dgindex" Header="DGIndex" Click="mn_apps_Click" Width="Auto" Height="Auto">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_dgindex" ToolTip="Open folder" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_dgindex" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_dgpulldown" Header="DGPulldown" Click="mn_apps_Click">

@@ -900,63 +900,115 @@ namespace XviD4PSP
 
         private void LoadCustomTools()
         {
-            string tools_folder = "\\apps\\Custom";
-            string tools_path = Calculate.StartupPath + tools_folder;
+            string tools_path = Calculate.StartupPath + "\\apps\\Custom";
             if (!Directory.Exists(tools_path))
                 return;
 
-            Array dirs = Directory.GetDirectories(tools_path);
-            if (dirs.Length == 0)
-                return;
-
-            Array.Sort(dirs);
+            //Индекс скрытого пункта меню Tools->Custom
             int index = mnTools.Items.IndexOf(menu_custom_tools);
 
-            foreach (string dir in dirs)
+            //Сначала из ini-файла
+            if (File.Exists(tools_path + "\\Tools.ini"))
             {
-                Array files = Directory.GetFiles(dir);
-                if (files.Length > 0)
+                using (StreamReader reader = new StreamReader(tools_path + "\\Tools.ini", Encoding.Default))
                 {
-                    Array.Sort(files);
-                    MenuItem tool = new MenuItem();
-
-                    foreach (string file in files)
+                    while (!reader.EndOfStream)
                     {
-                        string ext = Path.GetExtension(file).ToLower();
-                        if (ext == ".exe" || ext == ".com" || ext == ".bat" || ext == ".cmd")
+                        string line = reader.ReadLine();
+                        if (line != null && (line = line.Trim()).Length > 0 && !line.StartsWith("#"))
                         {
-                            MenuItem item = new MenuItem();
-                            item.Click += new RoutedEventHandler(mn_apps_Click);
-                            item.Header = Path.GetFileNameWithoutExtension(file);
-                            item.Tag = file;
-                            tool.Items.Add(item);
+                            //Мусор и относительный путь
+                            line = line.Trim(new char[] { '"' });
+                            line = Path.Combine(tools_path, line.TrimStart(new char[] { '/', '\\' }));
+
+                            if (Path.HasExtension(line))
+                            {
+                                //Это файл
+                                FillToolsItems(new string[] { line }, Path.GetDirectoryName(line), true, ref index);
+                            }
+                            else
+                            {
+                                //Это директория
+                                line = line.TrimEnd(new char[] { '/', '\\' });
+                                Array files = Directory.GetFiles(line);
+                                if (files.Length > 0)
+                                {
+                                    Array.Sort(files);
+                                    FillToolsItems(files, line, false, ref index);
+                                }
+                            }
                         }
                     }
+                }
+            }
 
-                    if (tool.Items.Count > 0)
+            //Теперь из подпапок
+            Array dirs = Directory.GetDirectories(tools_path);
+            if (dirs.Length > 0)
+            {
+                Array.Sort(dirs);
+                foreach (string dir in dirs)
+                {
+                    Array files = Directory.GetFiles(dir);
+                    if (files.Length > 0)
                     {
-                        if (sep_custom_tools.Visibility != Visibility.Visible)
-                            sep_custom_tools.Visibility = Visibility.Visible;
-
-                        Image image = new Image();
-
-                        //Все значения должны быть как в xaml для иконок у "фиксированных" утилит!
-                        image.Source = new BitmapImage(new Uri(@"../pictures/folder.png", UriKind.RelativeOrAbsolute));
-                        image.MouseDown += new MouseButtonEventHandler(open_tools_Click);
-                        image.ToolTip = Languages.Translate("Open folder");
-                        image.Margin = new Thickness(0, 0, 0, 4);
-                        image.IsHitTestVisible = true;
-                        image.Stretch = Stretch.Fill;
-                        image.Width = 15;
-                        image.Height = 14;
-                        image.Tag = dir;
-
-                        tool.Icon = image;
-                        tool.Header = Path.GetFileName(dir);
-                        mnTools.Items.Insert(index, tool);
-                        index += 1;
+                        Array.Sort(files);
+                        FillToolsItems(files, dir, false, ref index);
                     }
                 }
+            }
+        }
+
+        private void FillToolsItems(Array files, string dir, bool single_item, ref int item_index)
+        {
+            MenuItem tool = null;
+            foreach (string file in files)
+            {
+                string ext = (!single_item) ? Path.GetExtension(file).ToLower() : null;
+                if (single_item || ext == ".exe" || ext == ".com" || ext == ".bat" || ext == ".cmd")
+                {
+                    MenuItem item = new MenuItem();
+                    item.Click += new RoutedEventHandler(mn_apps_Click);
+                    item.Header = Path.GetFileNameWithoutExtension(file);
+                    item.Tag = file;
+
+                    if (!single_item)
+                    {
+                        if (tool == null)
+                            tool = new MenuItem();
+
+                        tool.Items.Add(item);
+                    }
+                    else
+                    {
+                        tool = item;
+                        break;
+                    }
+                }
+            }
+
+            if (tool != null && (single_item || tool.Items.Count > 0))
+            {
+                if (sep_custom_tools.Visibility != Visibility.Visible)
+                    sep_custom_tools.Visibility = Visibility.Visible;
+
+                Image image = new Image();
+
+                //Все значения должны быть как в xaml для иконок у "фиксированных" утилит!
+                image.Source = new BitmapImage(new Uri(@"../pictures/folder.png", UriKind.RelativeOrAbsolute));
+                image.MouseDown += new MouseButtonEventHandler(open_tools_Click);
+                image.ToolTip = Languages.Translate("Open folder");
+                image.Margin = new Thickness(0, 0, 0, 4);
+                image.IsHitTestVisible = true;
+                image.Stretch = Stretch.Fill;
+                image.Width = 15;
+                image.Height = 14;
+                image.Tag = dir;
+
+                tool.Icon = image;
+                if (!single_item) tool.Header = Path.GetFileName(dir);
+                mnTools.Items.Insert(item_index, tool);
+                item_index += 1;
             }
         }
 
@@ -1005,7 +1057,12 @@ namespace XviD4PSP
 
             try
             {
-                Process.Start(path);
+                Process pr = new Process();
+                ProcessStartInfo info = new ProcessStartInfo();
+                if (sender is MenuItem) info.WorkingDirectory = Path.GetDirectoryName(path);
+                info.FileName = path;
+                pr.StartInfo = info;
+                pr.Start();
             }
             catch (Exception ex)
             {
