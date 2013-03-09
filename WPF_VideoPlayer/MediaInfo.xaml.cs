@@ -119,7 +119,8 @@ namespace WPF_VideoPlayer
                     MediaInfo_Open(MI_Handle, infilepath);
                     MediaInfo_Option(MI_Handle, "Complete", (Settings.MI_Full ? "1" : ""));
                     MediaInfo_Option(MI_Handle, "Language", "  Config_Text_ColumnSize;" + Settings.MI_ColumnSize);
-                    tbxInfo.Text = Marshal.PtrToStringUni(MediaInfo_Inform(MI_Handle, IntPtr.Zero));
+                    tbxInfo.Text = Marshal.PtrToStringUni(MediaInfo_Option(MI_Handle, "Info_Version", "")) + "\r\n\r\n";
+                    tbxInfo.Text += Marshal.PtrToStringUni(MediaInfo_Inform(MI_Handle, IntPtr.Zero));
                 }
             }
             catch (Exception ex)

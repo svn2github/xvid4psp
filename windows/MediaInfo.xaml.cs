@@ -90,12 +90,15 @@ namespace XviD4PSP
 
                 if (infomode == InfoMode.MediaInfo)
                 {
+                    //http://mediainfo.sourceforge.net/en/Support/SDK/More_Info
+
                     //краткая инфа
                     MediaInfoWrapper media = new MediaInfoWrapper();
                     media.Open(infilepath);
                     media.Option("Complete", "");
                     media.Option("Language", "  Config_Text_ColumnSize;" + Settings.MI_ColumnSize);
-                    tbxInfo.Text = media.Inform();
+                    tbxInfo.Text = media.Option("Info_Version", "") + "\r\n\r\n";
+                    tbxInfo.Text += media.Inform();
                     media.Close();
                 }
                 else if (infomode == InfoMode.MediaInfoFull)
@@ -105,7 +108,8 @@ namespace XviD4PSP
                     media.Open(infilepath);
                     media.Option("Complete", "1");
                     media.Option("Language", "  Config_Text_ColumnSize;" + Settings.MI_ColumnSize);
-                    tbxInfo.Text = media.Inform();
+                    tbxInfo.Text = media.Option("Info_Version", "") + "\r\n\r\n";
+                    tbxInfo.Text += media.Inform();
                     media.Close();
                 }
                 else if (infomode == InfoMode.MP4BoxInfo)
