@@ -2117,6 +2117,26 @@ namespace XviD4PSP
             }
         }
 
+        public static int RecentFilesCount
+        {
+            get
+            {
+                object value = GetValue("RecentFilesCount");
+                if (value == null)
+                {
+                    return 5;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("RecentFilesCount", value);
+            }
+        }
+
         public static bool ScriptView
         {
             get

@@ -996,7 +996,7 @@ namespace XviD4PSP
 
                 //Все значения должны быть как в xaml для иконок у "фиксированных" утилит!
                 image.Source = new BitmapImage(new Uri(@"../pictures/folder.png", UriKind.RelativeOrAbsolute));
-                image.MouseDown += new MouseButtonEventHandler(open_tools_Click);
+                image.MouseLeftButtonUp += new MouseButtonEventHandler(open_tools_Click);
                 image.ToolTip = Languages.Translate("Open folder");
                 image.Margin = new Thickness(0, 0, 0, 4);
                 image.IsHitTestVisible = true;
@@ -1014,6 +1014,7 @@ namespace XviD4PSP
 
         private void open_tools_Click(object sender, MouseButtonEventArgs e)
         {
+            e.Handled = true;
             mnTools.IsSubmenuOpen = false;
             mn_apps_Click(sender, null);
         }
@@ -1828,7 +1829,6 @@ namespace XviD4PSP
 
                 //снимаем выделение
                 list_tasks.SelectedIndex = -1;
-                //OldSelectedIndex = -1;
 
                 //загружаем скрипт в форму
                 if (!IsBatchOpening)
@@ -1837,13 +1837,21 @@ namespace XviD4PSP
                     {
                         //Обновляем список недавно открытых файлов
                         string source = (string.IsNullOrEmpty(m.infilepath_source)) ? m.infilepath : m.infilepath_source;
-                        string[] rfiles = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
+                        string[] files = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
                         string output = source + "; ";
-                        for (int i = 0; i < rfiles.Length && i < 5; i++)
+
+                        int items = 1; //Первый - source
+                        int count = Settings.RecentFilesCount;
+                        for (int i = 0; i < files.Length && items < count; i++)
                         {
-                            string line = rfiles[i].Trim();
-                            if (line != source && line != "") output += (line + "; ");
+                            string file = files[i].Trim();
+                            if (file.Length > 0 && file != source)
+                            {
+                                output += (file + "; ");
+                                items += 1;
+                            }
                         }
+
                         Settings.RecentFiles = output;
                         UpdateRecentFiles();
                     }
@@ -2321,16 +2329,15 @@ namespace XviD4PSP
                 menu_save_frame.Header = Languages.Translate("Save frame") + "...";
                 menu_savethm.Header = Languages.Translate("Save") + " THM...";
                 mnRecentFiles.Header = Languages.Translate("Recent files");
+                button_recent_items_minus.ToolTip = Languages.Translate("Decrease");
+                button_recent_items_plus.ToolTip = Languages.Translate("Increase");
 
                 mnVideo.Header = Languages.Translate("Video");
                 mnAudio.Header = Languages.Translate("Audio");
                 mnSubtitles.Header = Languages.Translate("Subtitles");
-                //mnPlayer.Header = Languages.Translate("Player");
                 menu_audiooptions.Header = Languages.Translate("Processing options") + "...";
                 menu_save_wav.Header = Languages.Translate("Save to WAV") + "...";
                 menu_demux.Header = menu_demux_video.Header = Languages.Translate("Demux") + "...";
-                //menu_demux.Header = Languages.Translate("Save to");
-                //menu_demux_video.Header = Languages.Translate("Save to");
 
                 menu_avsp.Header = Languages.Translate("AvsP editor");
                 menu_editscript.Header = Languages.Translate("Edit filtering script");
@@ -2573,6 +2580,7 @@ namespace XviD4PSP
             else menu_auto_volume_onexp.IsChecked = true;
 
             cmenu_is_always_delete_encoded.IsChecked = Settings.AutoDeleteTasks;
+            recent_items_count.Text = Settings.RecentFilesCount.ToString();
 
             //Установка параметров регулятора громкости
             slider_Volume.Value = Settings.VolumeLevel; //Установка значения громкости из реестра..
@@ -3963,10 +3971,6 @@ namespace XviD4PSP
                 combo_vencoding.SelectedItem = m.vencoding;
                 Settings.SetVEncodingPreset(m.format, m.vencoding);
 
-                //запоминаем выделенное задание
-                //OldSelectedIndex = list_tasks.SelectedIndex;
-                //IsTaskSelection = true;
-
                 if (script != m.script)
                     LoadVideo(MediaLoad.load);
                 else
@@ -4505,6 +4509,7 @@ namespace XviD4PSP
         {
             try
             {
+                e.Handled = true;
                 menu_script.IsSubmenuOpen = false;
                 System.Windows.Forms.OpenFileDialog s = new System.Windows.Forms.OpenFileDialog();
                 string path = (sender == edit_wmp) ? Settings.WMP_Path : (sender == edit_mpc) ? Settings.MPC_Path : Settings.WPF_Path;
@@ -6932,21 +6937,60 @@ namespace XviD4PSP
             ValidateTrimAndCopy(m);
         }
 
+        private void RecentFilesSeparator_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!((Separator)sender).IsVisible)
+                return;
+
+            double left = 0;
+            DependencyObject parent = sender as DependencyObject;
+            if (VisualTreeHelper.GetChildrenCount(parent) > 0)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, 0);
+                if (child is Grid && VisualTreeHelper.GetChildrenCount(child) > 0)
+                {
+                    ((Grid)child).Margin = new Thickness(0, 1, 0, 3); //{0,6,0,4}
+                    child = VisualTreeHelper.GetChild(child, 0);
+                    if (child is System.Windows.Shapes.Rectangle)
+                    {
+                        //Отступ слева для стилей меню с вертикальным разделителем
+                        left = ((System.Windows.Shapes.Rectangle)child).Margin.Left; //{30,0,1,1}
+                    }
+                }
+            }
+
+            if (left > 0) mnRecentFilesSet.Margin = new Thickness(left, 0, 0, 0);
+            ((Separator)sender).Loaded -= new RoutedEventHandler(RecentFilesSeparator_Loaded);
+        }
+
         private void UpdateRecentFiles()
         {
-            mnRecentFiles.Items.Clear();
-            string file = "";
-            string[] rfiles = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
-            for (int i = 0; i < rfiles.Length && i < 5; i++)
+            //Два последних пункта - для настройки!
+            while (mnRecentFiles.Items.Count > 2)
+                mnRecentFiles.Items.RemoveAt(0);
+
+            int index = 0;
+            int count = Settings.RecentFilesCount;
+            string[] files = Settings.RecentFiles.Split(new string[] { ";" }, StringSplitOptions.None);
+            for (int i = 0; i < files.Length && index < count; i++)
             {
-                if (string.IsNullOrEmpty(file = rfiles[i].Trim())) break;
-                MenuItem mn = new MenuItem();
-                mn.Header = "_" + Calculate.GetShortPath(file);
-                mn.ToolTip = file;
-                mn.Icon = new TextBlock { Text = ((i + 1) + ".") };
-                mn.Click += new RoutedEventHandler(menu_rf_Click);
-                mnRecentFiles.Items.Add(mn);
+                string file = files[i].Trim();
+                if (file.Length > 0)
+                {
+                    MenuItem item = new MenuItem();
+                    item.Icon = new TextBlock { Text = ((index + 1) + "."), HorizontalAlignment = HorizontalAlignment.Center };
+                    item.Header = new TextBlock { Text = Calculate.GetShortPath(file) };
+                    item.Click += new RoutedEventHandler(menu_rf_Click);
+                    item.ToolTip = file;
+
+                    mnRecentFiles.Items.Insert(index, item);
+                    index += 1;
+                }
             }
+
+            //Файлов нет
+            if (index == 0)
+                mnRecentFiles.Items.Insert(0, new MenuItem() { IsEnabled = false });
         }
 
         private void menu_rf_Click(object sender, RoutedEventArgs e)
@@ -6959,8 +7003,20 @@ namespace XviD4PSP
                 x.infileslist = new string[] { x.infilepath };
                 action_open(x);
             }
-            else 
+            else
                 new Message(this).ShowMessage(Languages.Translate("Can`t find file") + ": " + file, Languages.Translate("Error"), Message.MessageStyle.Ok);
+        }
+
+        private void recent_items_count_Click(object sender, RoutedEventArgs e)
+        {
+            int count = Settings.RecentFilesCount;
+            if (sender == button_recent_items_minus && count > 1) count -= 1;
+            else if (sender == button_recent_items_plus && count < 30) count += 1;
+            else return;
+
+            Settings.RecentFilesCount = count;
+            recent_items_count.Text = count.ToString();
+            //UpdateRecentFiles(); //Всё будет прыгать..
         }
 
         private void button_apply_Click(object sender, RoutedEventArgs e)

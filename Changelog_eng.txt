@@ -1,5 +1,6 @@
-﻿XviD4PSP 5.10.322.0 (07.03.2013), main changes:
+﻿XviD4PSP 5.10.323.0 (09.03.2013), main changes:
 
+>>> (r323) "File->Recent files" - their count now can be adjusted from 1 to 30 in the same menu.
 >>> (r322) In addition to r321 it is now also possible to specify a custom tools via apps\Custom\Tools.ini.
            Every line, that starts not with the "#" symbol, will be treated as a valid path. This path can
            be relative or absolute and lead to a file or to a folder.

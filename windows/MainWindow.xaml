@@ -42,7 +42,33 @@
                     <MenuItem Header="Save frame..." x:Name="menu_save_frame" Click="menu_save_frame_Click"/>
                     <MenuItem x:Name="menu_savethm" Header="Save THM..." Click="menu_savethm_Click" IsEnabled="True"/>
                     <Separator/>
-                    <MenuItem x:Name="mnRecentFiles" Header="Recent files"/>
+                    <MenuItem x:Name="mnRecentFiles" Header="Recent files">
+                        <Separator Loaded="RecentFilesSeparator_Loaded"/>
+                        <MenuItem x:Name="mnRecentFilesSet" StaysOpenOnClick="True">
+                            <MenuItem.Resources>
+                                <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type MenuItem}">
+                                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Border Margin="0,1,0,4" BorderThickness="0" BorderBrush="Transparent">
+                                                        <ContentPresenter ContentSource="Header"/>
+                                                    </Border>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </MenuItem.Resources>
+                            <MenuItem.Header>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Button x:Name="button_recent_items_minus" Content="-" Width="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="recent_items_count_Click"/>
+                                    <TextBlock x:Name="recent_items_count" Text="5" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                                    <Button x:Name="button_recent_items_plus" Content="+" Width="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" Click="recent_items_count_Click"/>
+                                </StackPanel>
+                            </MenuItem.Header>
+                        </MenuItem>
+                    </MenuItem>
                     <Separator/>
                     <MenuItem x:Name="mnExit" Header="Exit" Click="mnExit_Click"/>
                 </MenuItem>
@@ -86,17 +112,17 @@
                     <Separator/>
                     <MenuItem x:Name="menu_playinwmp" Header="Play in Windows Media Player" Click="menu_play_in_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="edit_wmp" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="edit_player_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="edit_wmp" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="edit_player_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_playinmpc" Header="Play in Media Player Classic" Click="menu_play_in_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="edit_mpc" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="edit_player_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="edit_mpc" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="edit_player_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_playinwpf" Header="Play in WPF Video Player" Click="menu_play_in_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="edit_wpf" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="edit_player_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="edit_wpf" Source="..\pictures\folder_magnify.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="edit_player_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                 </MenuItem>
@@ -327,48 +353,48 @@
                     <Separator/>
                     <MenuItem x:Name="menu_dgindex" Header="DGIndex" Click="mn_apps_Click" Width="Auto" Height="Auto">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_dgindex" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_dgindex" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_dgpulldown" Header="DGPulldown" Click="mn_apps_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_dgpulldown" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_dgpulldown" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_dgavcindex" Header="DGAVCIndex" Click="mn_apps_Click" Width="Auto" Height="Auto">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_dgavcindex" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_dgavcindex" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
                     <MenuItem x:Name="menu_virtualdubmod" Header="VirtualDubMod" Click="mn_apps_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_virtualdubmod" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_virtualdubmod" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_avimux" Header="AVI-Mux" Click="mn_apps_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_avimux" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_avimux" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_tsmuxer" Header="tsMuxeR" Click="mn_apps_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_tsmuxer" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_tsmuxer" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_mkvextract" Header="MKVExtract" Click="mn_apps_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_mkvextract" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_mkvextract" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_mkvmerge" Header="MKVMerge" Click="mn_apps_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_mkvmerge" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_mkvmerge" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem x:Name="menu_yamb" Header="Yamb" Click="mn_apps_Click">
                         <MenuItem.Icon>
-                            <Image x:Name="folder_yamb" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseDown="open_tools_Click" IsHitTestVisible="True"/>
+                            <Image x:Name="folder_yamb" Source="..\pictures\folder.png" Stretch="Fill" Width="15" Height="14" Margin="0,0,0,4" MouseLeftButtonUp="open_tools_Click" IsHitTestVisible="True"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
@@ -430,7 +456,7 @@
                                     <Setter Property="Opacity" Value="0"/>
                                 </Style>
                             </GridView.ColumnHeaderContainerStyle>
-                            <GridViewColumn Header="ID"  DisplayMemberBinding="{Binding Path=Id}"/>
+                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Path=Id}"/>
                             <!--GridViewColumn Header="THM" DisplayMemberBinding="{Binding Path=THM}"/-->
                             <GridViewColumn Header="Status" DisplayMemberBinding="{Binding Path=Status}"/>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=Name}"/>
