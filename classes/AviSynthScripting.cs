@@ -1032,9 +1032,8 @@ namespace XviD4PSP
 
        public static string LoadScript(string scriptpath)
        {
-           string line;
-           string x = "";
-           string startup_path = Calculate.StartupPath;
+           string line = "", disable = "", output = "";
+           bool path = false, disabled = false, comments = !Settings.HideComments;
            using (StreamReader sr = new StreamReader(scriptpath, System.Text.Encoding.Default))
            {
                while (!sr.EndOfStream)
@@ -1042,46 +1041,35 @@ namespace XviD4PSP
                    line = sr.ReadLine();
                    if (line.StartsWith("#"))
                    {
-                       if (line.EndsWith(".dll")) x += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\")\r\n";
-                       else if (line.EndsWith(".avs")) x += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\")\r\n";
-                       else if (line.EndsWith(".avsi")) x += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\")\r\n";
-                       else if (line.EndsWith(".vdf")) x += "LoadVirtualDubPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\" + line.Replace("#", "") + "\", ";
-                       else if (line.StartsWith("#vdf_arguments:"))
+                       disable = (disabled = (line.Length > 1 && line[1] == '#')) ? "#" : "";
+                       if (line.EndsWith(".dll")) { output += disable + "LoadPlugin(XviD4PSPPluginsPath + \"" + line.TrimStart('#') + "\")\r\n"; path = true; }
+                       else if (line.EndsWith(".avs")) { output += disable + "Import(XviD4PSPPluginsPath + \"" + line.TrimStart('#') + "\")\r\n"; path = true; }
+                       else if (line.EndsWith(".avsi")) { output += disable + "Import(XviD4PSPPluginsPath + \"" + line.TrimStart('#') + "\")\r\n"; path = true; }
+                       else if (line.EndsWith(".vdf")) { output += disable + "LoadVirtualDubPlugin(XviD4PSPPluginsPath + \"" + line.TrimStart('#') + "\", "; path = true; }
+                       else if (!disabled && line.StartsWith("#vdf_arguments:") || disabled && line.StartsWith("##vdf_arguments:"))
                        {
-                           string[] v = line.Split(new string[] { ":" }, StringSplitOptions.None);
-                           x += "\"" + v[1] + "\", " + v[2] + ")" + Environment.NewLine;
+                           string[] args = line.Split(new string[] { ":" }, StringSplitOptions.None);
+                           output += "\"" + args[1] + "\", " + args[2] + ")" + Environment.NewLine;
                        }
-                       else if (!Settings.HideComments) x += line + Environment.NewLine;
+                       else if (comments) output += line + Environment.NewLine;
                    }
                    else
-                       x += line + Environment.NewLine;
+                       output += line + Environment.NewLine;
                }
            }
-           return x;
+           return (path) ? ("XviD4PSPPluginsPath = \"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\\"\r\n" + output) : output;
        }
 
        public static Massive WriteScriptToFile(Massive m)
        {
-           StreamWriter sw = new StreamWriter(Settings.TempPath + "\\" + m.key + ".avs", false, System.Text.Encoding.Default);
-           string[] separator = new string[] { Environment.NewLine };
-           string[] lines = m.script.Split(separator, StringSplitOptions.None);
-           foreach (string line in lines)
-                   sw.WriteLine(line);
-           sw.Close();
-
            m.scriptpath = Settings.TempPath + "\\" + m.key + ".avs";
-
+           File.WriteAllText(m.scriptpath, m.script, Encoding.Default);
            return m;
        }
 
        public static void WriteScriptToFile(string script, string scriptname)
        {
-           StreamWriter sw = new StreamWriter(Settings.TempPath + "\\" + scriptname + ".avs", false, System.Text.Encoding.Default);
-           string[] separator = new string[] { Environment.NewLine };
-           string[] lines = script.Split(separator, StringSplitOptions.None);
-           foreach (string line in lines)
-               sw.WriteLine(line);
-           sw.Close();
+           File.WriteAllText(Settings.TempPath + "\\" + scriptname + ".avs", script, Encoding.Default);
        }
 
        private const string InterlaceScript =

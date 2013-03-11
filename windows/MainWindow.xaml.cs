@@ -4596,7 +4596,9 @@ namespace XviD4PSP
                 if (graphBuilder != null || Pic.Visibility != Visibility.Collapsed)
                     MoveVideoWindow();
 
-                script_box.Margin = ErrBox.Margin = new Thickness(0, 0, 0, 38);
+                script_box.BorderThickness = new Thickness(1, 1, 1, 2);
+                script_box.Margin = new Thickness(1, 1, 1, 38);
+                ErrBox.Margin = new Thickness(0, 0, 0, 38);
             }
             else
             {
@@ -4621,6 +4623,7 @@ namespace XviD4PSP
                 if (graphBuilder != null || Pic.Visibility != Visibility.Collapsed)
                     MoveVideoWindow();
 
+                script_box.BorderThickness = new Thickness(2);
                 script_box.Margin = ErrBox.Margin = new Thickness(8, 56, 8, 8);
             }
             slider_pos.Focus();

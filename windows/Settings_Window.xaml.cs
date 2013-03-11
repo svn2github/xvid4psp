@@ -38,6 +38,8 @@ namespace XviD4PSP
             check_search_temp.Content = Languages.Translate("Search the best temp folder place on program start");
             check_auto_colormatrix.Content = Languages.Translate("Auto apply ColorMatrix for MPEG2 files");
             label_temppath.Content = Languages.Translate("Temp folder path:");
+            button_temppath.ToolTip = Languages.Translate("Edit path");
+            button_temppath_open.ToolTip = Languages.Translate("Open folder");
             check_window_size.Content = Languages.Translate("Restore the size and location of the main window");
             check_window_pos.Content = Languages.Translate("Fit windows to the working area bounds");
             check_hide_comments.Content = Languages.Translate("Remove comments (#text) from the AviSynth script");
