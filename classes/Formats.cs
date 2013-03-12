@@ -556,7 +556,7 @@ namespace XviD4PSP
                 this.Muxers = new string[] { "mkvmerge", "ffmpeg" };
                 this.Muxer = "mkvmerge";
                 this.CLI_ffmpeg = "";
-                this.CLI_mkvmerge = "[v]--compression -1:none[/v][a]--compression -1:none[/a][o][/o]";
+                this.CLI_mkvmerge = "[v][/v][a][/a][o]--engage no_cue_duration --engage no_cue_relative_position[/o]";
 
                 this.Extensions = new string[] { "mkv" };
                 this.Extension = "mkv";
@@ -1589,7 +1589,7 @@ namespace XviD4PSP
                 this.Muxer = "mkvmerge";
 
                 this.CLI_ffmpeg = "";
-                this.CLI_mkvmerge = "[v]--compression -1:none[/v][a]--compression -1:none --language %a_id%:\"%lang%\"[/a][o]--title \"%out_name%\"[/o]";
+                this.CLI_mkvmerge = "[v][/v][a]--language %a_id%:\"%lang%\"[/a][o]--title \"%out_name%\" --engage no_cue_duration --engage no_cue_relative_position[/o]";
                 this.CLI_mp4box = "[v]:name=\"VIDEO\"[/v][a]:lang=\"%lang%\":name=\"AUDIO\"[/a][o]-itags name=\"%out_name%\"[/o]";
                 this.CLI_tsmuxer = "[v]lang=English[/v][a]lang=%lang%[/a][o]--no-pcr-on-video-pid --new-audio-pes --vbr --vbv-len=500[/o]";
                 this.CLI_virtualdubmod = "[v]title=\"%out_name%\"[/v][a]title=\"Audio stream #1\" language=\"%lang%\"[/a][o]interleave=\"1, 500, 1, 0\"[/o]";
