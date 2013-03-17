@@ -44,7 +44,7 @@
                     <Separator/>
                     <MenuItem x:Name="mnRecentFiles" Header="Recent files">
                         <Separator Loaded="RecentFilesSeparator_Loaded"/>
-                        <MenuItem x:Name="mnRecentFilesSet" StaysOpenOnClick="True">
+                        <MenuItem x:Name="mnRecentFilesSet" IsTabStop="False" StaysOpenOnClick="True">
                             <MenuItem.Resources>
                                 <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
                                     <Setter Property="Template">

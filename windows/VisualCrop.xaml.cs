@@ -6,11 +6,10 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
-using System.Diagnostics;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace XviD4PSP
@@ -19,9 +18,6 @@ namespace XviD4PSP
     {
         private static object locker = new object();
         private AviSynthReader reader = null;
-        private ImageSource picture = null;
-        private Image image = null;
-        private Bitmap bmp = null;
         private Massive oldm;
         public Massive m;
 
@@ -31,17 +27,28 @@ namespace XviD4PSP
         private int top = 0;
         private int right = 0;
         private int bottom = 0;
-        private int brightness = 0;
         private double fps = 0;
 
         private string script = "";
         private string frame_of = "";
         private string cropped_s = "";
         private bool WindowLoaded = false;
-        private bool GreenLight = false;
+        private bool IgnoreMouse = false;
         private bool OldSeeking = false; //Settings.OldSeeking;
 
-        public VisualCrop(Massive mass, System.Windows.Window owner)
+        private byte R = 255;
+        private byte G = 255;
+        private byte B = 255;
+        private byte A = 200;
+
+        private bool IsError = false;
+        private bool HasVideo = false;
+        private IntPtr buffer = IntPtr.Zero;
+        private PixelFormat format = PixelFormats.Bgr24;
+        private int bpp = PixelFormats.Bgr24.BitsPerPixel / 8;
+        private int stride = 0;
+
+        public VisualCrop(Massive mass, Window owner)
         {
             m = mass.Clone();
             oldm = mass.Clone();
@@ -56,8 +63,12 @@ namespace XviD4PSP
             numt.Value = top = m.cropt;
             numb.Value = bottom = m.cropb;
 
-            PicBack.Opacity = Settings.VCropOpacity / 10.0;
-            brightness = Settings.VCropBrightness * 10;
+            Color color = Settings.VCropBrush;
+            slider_R.Value = R = color.R;
+            slider_G.Value = G = color.G;
+            slider_B.Value = B = color.B;
+            slider_A.Value = A = color.A;
+            FinalColor.Color = Color.FromArgb(255, R, G, B);
 
             numl.ToolTip = Languages.Translate("Left");
             numt.ToolTip = Languages.Translate("Top");
@@ -67,22 +78,55 @@ namespace XviD4PSP
             button_autocrop.ToolTip = Languages.Translate("Autocrop black borders");
             button_autocrop_current.ToolTip = Languages.Translate("Autocrop on current frame");
             button_uncrop.ToolTip = Languages.Translate("Remove crop");
+            button_settings.ToolTip = Languages.Translate("Settings");
+            slider_A.ToolTip = Languages.Translate("Transparency of the mask");
+            slider_R.ToolTip = slider_G.ToolTip = slider_B.ToolTip = Languages.Translate("Brightness of the mask");
+
             button_fullscreen.ToolTip = Languages.Translate("Fullscreen mode");
             button_cancel.Content = Languages.Translate("Cancel");
             frame_of = Languages.Translate("Frame XX of YY").ToLower();
             cropped_s = Languages.Translate("cropped size");
 
-            slider_pos.Maximum = m.inframes;
-            slider_pos.Value = (Settings.VCropFrame == "THM-frame") ? m.thmframe : 0;
+            try
+            {
+                reader = new AviSynthReader(AviSynthColorspace.RGB24, AudioSampleType.Undefined);
+                reader.ParseScript(script);
 
-            ShowFrame((int)slider_pos.Value);
-            if (left != 0 || right != 0 || top != 0 || bottom != 0) PutBorders();
-            else if (image != null) ShowTitle();
+                if (reader.Clip.HasVideo && reader.FrameCount > 0)
+                {
+                    slider_pos.Maximum = reader.FrameCount;
+                    slider_pos.Value = (Settings.VCropFrame == "THM-frame") ? m.thmframe : 0;
+                    numl.Maximum = numr.Maximum = width = reader.Width;
+                    numt.Maximum = numb.Maximum = height = reader.Height;
+                    fps = reader.Framerate;
 
-            WindowLoaded = true;
+                    stride = width * bpp;
+                    buffer = Marshal.AllocHGlobal(stride * height);
+                    HasVideo = true;
 
-            ShowDialog();
-            GC.Collect();
+                    SetFrame((int)slider_pos.Value);
+                    ShowCroppedFrame();
+                }
+                else
+                {
+                    PreviewError("NO VIDEO", Brushes.Gainsboro);
+                }
+            }
+            catch (Exception ex)
+            {
+                SetPreviewError(ex);
+            }
+
+            if (IsError)
+            {
+                CloseReader();
+                Close();
+            }
+            else
+            {
+                WindowLoaded = true;
+                ShowDialog();
+            }
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -91,130 +135,116 @@ namespace XviD4PSP
             Calculate.CheckWindowPos(this, true);
             this.MaxWidth = double.PositiveInfinity;
             this.MaxHeight = double.PositiveInfinity;
+            if (Settings.VCropFullscreen && !IsError && HasVideo)
+                button_fullscreen_Click(null, null);
         }
 
-        [DllImport("gdi32.dll")]
-        private static extern bool DeleteObject(IntPtr hObject);
-
-        private void ShowFrame(int frame)
+        private void SetFrame(int frame)
         {
-            IntPtr hObject = IntPtr.Zero;
             try
             {
-                if (reader == null)
+                if (reader != null && !IsError && HasVideo)
                 {
-                    //Открываем скрипт
-                    reader = new AviSynthReader(AviSynthColorspace.RGB24, AudioSampleType.Undefined);
-                    reader.ParseScript(script);
-                    fps = reader.Framerate;
+                    reader.Clip.ReadFrame(buffer, stride, frame);
                 }
-
-                //Получаем картинку
-                image = reader.ReadFrameBitmap(frame);
-                bmp = new System.Drawing.Bitmap(image);
-                hObject = bmp.GetHbitmap();
-                picture = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hObject, IntPtr.Zero, Int32Rect.Empty,
-                   System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); //Переводим картинку в Source
-
-                //Определяем ограничения
-                numl.Maximum = numr.Maximum = width = bmp.Width;
-                numt.Maximum = numb.Maximum = height = bmp.Height;
-
-                Pic.Source = PicBack.Source = picture;
             }
             catch (Exception ex)
             {
-                ErrorException("VisualCrop (ShowFrame): " + ex.Message, ex.StackTrace);
-                CloseReader();
-            }
-            finally
-            {
-                if (bmp != null) bmp.Dispose();
-                DeleteObject(hObject);
-                GC.Collect();
+                SetPreviewError(ex);
             }
         }
 
-        private void PutBorders()
+        private void ShowCroppedFrame()
         {
-            if (image == null) return;
-            IntPtr hObject = IntPtr.Zero;
             try
             {
-                bmp = new System.Drawing.Bitmap(image);
-                CropImage(ref bmp);
-                hObject = bmp.GetHbitmap();
-                ImageSource picture = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(hObject, IntPtr.Zero, Int32Rect.Empty,
-                   System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+                if (reader == null || IsError || !HasVideo)
+                    return;
 
-                Pic.Source = picture;
-                ShowTitle();
+                #region
+                //В buffer`е содержится исходная картинка без бордюров. Тут из неё делается
+                //копия, на которую будут наложены бордюры с учетом их яркости и прозрачности.
+                //Можно было бы сделать две картинки (как раньше): исходную - с изображением,
+                //вторую поверх неё - только с бордюрами (центр - прозрачный). Это было бы
+                //быстрее в работе, т.к. при позиционировании не пришлось бы изменять вторую
+                //картинку с бордюрами, а при изменении бордюров не требовалось бы делать
+                //копию исходной картинки. Но WPF очень коряво ресайзит границы перехода
+                //от бордюра к прозрачной области. Если же изменить опции рендеринга для
+                //картинки на NearestNeighbor, то эта проблема пропадает, но вместо неё
+                //появляется доп. погрешность. Есть еще вариант отображать бордюры самим
+                //WPF (4 Rectangle по краям), но скорее всего проблем будет еще больше..
+                #endregion
+
+                byte[] pixels = new byte[stride * height];
+                Marshal.Copy(buffer, pixels, 0, pixels.Length);
+
+                byte Ainv = (byte)(255 - A); //Инверсия прозрачности
+                byte RA = (byte)((R * A) / 255); //R с учетом прозрачности
+                byte GA = (byte)((G * A) / 255); //G с учетом прозрачности
+                byte BA = (byte)((B * A) / 255); //B с учетом прозрачности
+
+                unsafe
+                {
+                    fixed (byte* pointer = pixels)
+                    {
+                        byte* pixel = pointer;
+                        int topPixels = width * top;
+                        int bottomPixels = width * bottom;
+                        int centerHeight = height - top - bottom;
+                        int centerJump = (width - left - right) * bpp;
+
+                        for (int j = 0; j < bottomPixels; j++) //Снизу
+                        {
+                            *pixel = (byte)(((*pixel * Ainv) / 255) + BA); pixel++;
+                            *pixel = (byte)(((*pixel * Ainv) / 255) + GA); pixel++;
+                            *pixel = (byte)(((*pixel * Ainv) / 255) + RA); pixel++;
+                            //*pixel = 255; pixel++; //Для RGB32
+                        }
+                        for (int j = 0; j < centerHeight; j++) //Середина
+                        {
+                            for (int i = 0; i < left; i++) //Слева
+                            {
+                                *pixel = (byte)(((*pixel * Ainv) / 255) + BA); pixel++;
+                                *pixel = (byte)(((*pixel * Ainv) / 255) + GA); pixel++;
+                                *pixel = (byte)(((*pixel * Ainv) / 255) + RA); pixel++;
+                                //*pixel = 255; pixel++;
+                            }
+                            pixel += centerJump;
+                            for (int i = 0; i < right; i++) //Справа
+                            {
+                                *pixel = (byte)(((*pixel * Ainv) / 255) + BA); pixel++;
+                                *pixel = (byte)(((*pixel * Ainv) / 255) + GA); pixel++;
+                                *pixel = (byte)(((*pixel * Ainv) / 255) + RA); pixel++;
+                                //*pixel = 255; pixel++;
+                            }
+                        }
+                        for (int j = 0; j < topPixels; j++) //Сверху
+                        {
+                            *pixel = (byte)(((*pixel * Ainv) / 255) + BA); pixel++;
+                            *pixel = (byte)(((*pixel * Ainv) / 255) + GA); pixel++;
+                            *pixel = (byte)(((*pixel * Ainv) / 255) + RA); pixel++;
+                            //*pixel = 255; pixel++;
+                        }
+                    }
+                }
+
+                if (reader != null && !IsError)
+                {
+                    Pic.Source = BitmapSource.Create(width, height, 0, 0, format, null, pixels, stride);
+                    pixels = null;
+                    ShowTitle();
+                }
             }
             catch (Exception ex)
             {
-                ErrorException("VisualCrop (PutBorders): " + ex.Message, ex.StackTrace);
-            }
-            finally
-            {
-                if (bmp != null) bmp.Dispose();
-                DeleteObject(hObject);
-                GC.Collect();
-            }
-        }
+                if (ex is AccessViolationException)
+                    throw;
 
-        //Закрашивание пикселей (позаимствовано из MeGUI`я)
-        private unsafe void CropImage(ref Bitmap b)
-        {
-            BitmapData image = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            byte* pointer = (byte*)image.Scan0.ToPointer();
-            byte* pixel;
-            int stride = image.Stride;
-            byte white = (byte)brightness;
-           
-            pixel = pointer;
-            int width = b.Width;
-            int height = b.Height;
-            int width3 = 3 * width;
-            int left3 = 3 * left;
-            int right3 = 3 * right;
-
-            int lineGap = stride - width3;
-            int centerJump = width3 - left3 - right3;
-            for (int j = 0; j < top; j++)
-            {
-                for (int i = 0; i < width3; i++)
-                {
-                    *pixel = white;
-                    pixel++;
-                }
-                pixel += lineGap;
+                if (Pic.Source != null)
+                    ErrorException("VisualCrop (ShowCroppedFrame): " + ex.Message, ex.StackTrace);
+                else
+                    SetPreviewError(ex);
             }
-            int heightb = height - bottom;
-            for (int j = top; j < heightb; j++)
-            {
-                for (int i = 0; i < left3; i++)
-                {
-                    *pixel = white;
-                    pixel++;
-                }
-                pixel += centerJump;
-                for (int i = 0; i < right3; i++)
-                {
-                    *pixel = white;
-                    pixel++;
-                }
-                pixel += lineGap;
-            }
-            for (int j = b.Height - bottom; j < height; j++)
-            {
-                for (int i = 0; i < width3; i++)
-                {
-                    *pixel = white;
-                    pixel++;
-                }
-                pixel += lineGap;
-            }
-            b.UnlockBits(image);
         }
 
         private void button_ok_Click(object sender, RoutedEventArgs e)
@@ -234,23 +264,43 @@ namespace XviD4PSP
             Close();
         }
 
+        private void SetPreviewError(Exception ex)
+        {
+            if (!IsError)
+            {
+                IsError = true;
+                Pic.Source = null;
+                Pic.Visibility = Visibility.Collapsed;
+
+                //Добавляем скрипт в StackTrace
+                string stack = ex.StackTrace;
+                if (!string.IsNullOrEmpty(script))
+                    stack += Calculate.WrapScript(script, 150);
+
+                ErrorException("VisualCrop: " + ex.Message.Trim(), stack);
+                PreviewError(Languages.Translate("Error") + "...", Brushes.Red);
+            }
+        }
+
+        private void PreviewError(string text, Brush foreground)
+        {
+            ErrBox.Child = new TextBlock() { Text = text, Background = Brushes.Black, Foreground = foreground, TextAlignment = TextAlignment.Center, FontFamily = new FontFamily("Arial") };
+            ErrBox.Visibility = Visibility.Visible;
+        }
+
         private void ErrorException(string message, string info)
         {
-            //Добавляем скрипт в StackTrace
-            if (!string.IsNullOrEmpty(script))
-                info += Calculate.WrapScript(script, 150);
-
             new Message((this.IsLoaded) ? this : Owner).ShowMessage(message, info, Languages.Translate("Error"));
         }
 
         private void changedl(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
-            if (WindowLoaded)
+            if (WindowLoaded && !IsError)
             {
                 if (Convert.ToInt32(numl.Value) % 2 == 0)
                 {
                     left = (int)numl.Value;
-                    if (left + right < width) PutBorders();
+                    if (left + right < width) ShowCroppedFrame();
                     else numl.Value = width - right - 1;
                 }
                 else
@@ -260,12 +310,12 @@ namespace XviD4PSP
 
         private void changedr(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
-            if (WindowLoaded)
+            if (WindowLoaded && !IsError)
             {
                 if (Convert.ToInt32(numr.Value) % 2 == 0)
                 {
                     right = (int)numr.Value;
-                    if (left + right < width) PutBorders();
+                    if (left + right < width) ShowCroppedFrame();
                     else numr.Value = width - left - 1;
                 }
                 else
@@ -275,12 +325,12 @@ namespace XviD4PSP
 
         private void changedt(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
-            if (WindowLoaded)
+            if (WindowLoaded && !IsError)
             {
                 if (Convert.ToInt32(numt.Value) % 2 == 0)
                 {
                     top = (int)numt.Value;
-                    if (top + bottom < height) PutBorders();
+                    if (top + bottom < height) ShowCroppedFrame();
                     else numt.Value = height - bottom - 1;
                 }
                 else
@@ -290,12 +340,12 @@ namespace XviD4PSP
 
         private void changedb(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
-            if (WindowLoaded)
+            if (WindowLoaded && !IsError)
             {
                 if (Convert.ToInt32(numb.Value) % 2 == 0)
                 {
                     bottom = (int)numb.Value;
-                    if (top + bottom < height) PutBorders();
+                    if (top + bottom < height) ShowCroppedFrame();
                     else numb.Value = height - top - 1;
                 }
                 else
@@ -311,98 +361,119 @@ namespace XviD4PSP
 
         private void slider_pos_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (slider_pos.IsMouseOver && slider_pos.Tag == null)
+            if (!IsError && HasVideo && slider_pos.IsMouseOver && slider_pos.Tag == null)
             {
                 if (OldSeeking)
                 {
-                    ShowFrame((int)(slider_pos.Value));
-                    PutBorders();
+                    SetFrame((int)slider_pos.Value);
+                    ShowCroppedFrame();
                 }
                 else
                     ShowTitle(); //Пересчет номера кадра
             }
         }
 
-        private void slider_pos_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void slider_pos_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (slider_pos.IsMouseOver && !OldSeeking)
+            if (!IsError && HasVideo && slider_pos.IsMouseOver && !OldSeeking)
             {
-                ShowFrame((int)(slider_pos.Value));
-                PutBorders();
+                SetFrame((int)slider_pos.Value);
+                ShowCroppedFrame();
             }
         }
 
-        private void slider_pos_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void slider_pos_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             /*Settings.OldSeeking =*/ OldSeeking = !OldSeeking;
             if (OldSeeking) Title = "Old Seeking"; else Title = "New Seeking";
             //((MainWindow)(Owner.Owner)).check_old_seeking.IsChecked = OldSeeking;
         }
 
-        private void MouseClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MouseClick(object sender, MouseButtonEventArgs e)
         {  
-            ChangeZones(e.GetPosition(Pic), (e.ChangedButton == System.Windows.Input.MouseButton.Left), (e.ClickCount == 2));
+            ChangeZones(e.GetPosition(Pic), (e.ChangedButton == MouseButton.Left), (e.ClickCount == 2));
         }
 
-        private void MoveMouse(object sender, System.Windows.Input.MouseEventArgs e)
+        private void MoveMouse(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed && GreenLight)
+            if (e.LeftButton == MouseButtonState.Pressed && !IgnoreMouse)
                 ChangeZones(e.GetPosition(Pic), true, false);
         }
 
-        private void ChangeZones(System.Windows.Point point, bool left, bool twice)
+        private void ChangeZones(Point point, bool left, bool twice)
         {
-            GreenLight = true;
-            if (point.Y < Pic.ActualHeight / 3)
-                if (left) numt.Value = Convert.ToInt32(((double)height * point.Y) / Pic.ActualHeight);          //Сверху
-                else numt.Value = 0;
-            else if (point.Y > Pic.ActualHeight / 1.5)
-                if (left) numb.Value = Convert.ToInt32(height - ((double)height * point.Y) / Pic.ActualHeight); //Снизу
-                else numb.Value = 0;
-            else if (point.X < Pic.ActualWidth / 3)
-                if (left) numl.Value = Convert.ToInt32(((double)width * point.X) / Pic.ActualWidth);            //Слева
-                else numl.Value = 0;
-            else if (point.X > Pic.ActualWidth / 1.5)
-                if (left) numr.Value = Convert.ToInt32(width - ((double)width * point.X) / Pic.ActualWidth);    //Справа
-                else numr.Value = 0;
-            else if (left && twice) button_fullscreen_Click(null, null);                                        //Центр - Фуллскрин
+            if (!IsError && HasVideo && Pic.ActualHeight > 0)
+            {
+                IgnoreMouse = false;
+                if (point.Y > Pic.ActualHeight / 1.5)
+                    if (left) numt.Value = Convert.ToInt32(height - ((double)height * point.Y) / Pic.ActualHeight); //Сверху
+                    else numt.Value = 0;
+                else if (point.Y < Pic.ActualHeight / 3)
+                    if (left) numb.Value = Convert.ToInt32(((double)height * point.Y) / Pic.ActualHeight);          //Снизу
+                    else numb.Value = 0;
+                else if (point.X < Pic.ActualWidth / 3)
+                    if (left) numl.Value = Convert.ToInt32(((double)width * point.X) / Pic.ActualWidth);            //Слева
+                    else numl.Value = 0;
+                else if (point.X > Pic.ActualWidth / 1.5)
+                    if (left) numr.Value = Convert.ToInt32(width - ((double)width * point.X) / Pic.ActualWidth);    //Справа
+                    else numr.Value = 0;
+                else if (left && twice) button_fullscreen_Click(null, null);                                        //Центр - Фуллскрин
+                else if (!left) cmn_settings.IsOpen = true;                                                         //Центр - настройки
+            }
+            else if (ErrBox.Visibility == Visibility.Visible && left && twice)
+            {
+                button_fullscreen_Click(null, null);
+            }
         }
-        
-        private void WheelMouse(object sender, System.Windows.Input.MouseWheelEventArgs e)
+
+        private void WheelMouse(object sender, MouseWheelEventArgs e)
         {
-            int d = (e.Delta < 0) ? -2 : 2;
-            if (e.GetPosition(Pic).Y < Pic.ActualHeight / 3) numt.Value = numt.Value + d;         //Сверху
-            else if (e.GetPosition(Pic).Y > Pic.ActualHeight / 1.5) numb.Value = numb.Value + d;  //Снизу
-            else if (e.GetPosition(Pic).X < Pic.ActualWidth / 3) numl.Value = numl.Value + d;     //Слева
-            else if (e.GetPosition(Pic).X > Pic.ActualWidth / 1.5) numr.Value = numr.Value + d;   //Справа
+            if (!IsError && HasVideo && Pic.ActualHeight > 0)
+            {
+                int d = (e.Delta < 0) ? -2 : 2;
+                Point point = e.GetPosition(Pic);
+                if (point.Y > Pic.ActualHeight / 1.5) numt.Value = numt.Value + d;       //Сверху
+                else if (point.Y < Pic.ActualHeight / 3) numb.Value = numb.Value + d;    //Снизу
+                else if (point.X < Pic.ActualWidth / 3) numl.Value = numl.Value + d;     //Слева
+                else if (point.X > Pic.ActualWidth / 1.5) numr.Value = numr.Value + d;   //Справа
+            }
         }
 
         private void button_AutoCrop_Click(object sender, RoutedEventArgs e)
         {
-            Autocrop acrop = new Autocrop(m, this, -1);
-            if (acrop.m != null)
+            if (!IsError && HasVideo)
             {
-                m = acrop.m.Clone();
-                SetValues(m.cropl, m.cropt, m.cropr, m.cropb);
-                PutBorders();
+                Autocrop acrop = new Autocrop(m, this, -1);
+                if (acrop.m != null)
+                {
+                    m = acrop.m.Clone();
+                    SetValues(m.cropl, m.cropt, m.cropr, m.cropb);
+                    ShowCroppedFrame();
+                }
             }
         }
 
         private void button_AutoCrop_current_Click(object sender, RoutedEventArgs e)
         {
-            Autocrop acrop = new Autocrop(m, this, (int)slider_pos.Value);
-            if (acrop.m != null)
+            if (!IsError && HasVideo)
             {
-                m = acrop.m.Clone();
-                SetValues(m.cropl, m.cropt, m.cropr, m.cropb);
-                PutBorders();
+                Autocrop acrop = new Autocrop(m, this, (int)slider_pos.Value);
+                if (acrop.m != null)
+                {
+                    m = acrop.m.Clone();
+                    SetValues(m.cropl, m.cropt, m.cropr, m.cropb);
+                    ShowCroppedFrame();
+                }
             }
         }
 
         private void button_uncrop_Click(object sender, RoutedEventArgs e)
         {
-            SetValues(0, 0, 0, 0);
-            PutBorders();
+            if (!IsError && HasVideo)
+            {
+                SetValues(0, 0, 0, 0);
+                ShowCroppedFrame();
+            }
         }
 
         private void SetValues(int _left, int _top, int _right, int _bottom)
@@ -434,14 +505,14 @@ namespace XviD4PSP
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            GreenLight = false; //Чтоб кроп не срабатывал при включении Фуллскрина
+            IgnoreMouse = true; //Чтоб кроп не срабатывал при включении Фуллскрина
         }
 
         private void ShowTitle()
         {
             string modw, modh;
-            int cw = m.inresw - left - right, ch = m.inresh - top - bottom;
-            
+            int cw = width - left - right, ch = height - top - bottom;
+
             if (cw % 16 == 0) modw = "16";
             else if (cw % 8 == 0) modw = "8";
             else if (cw % 4 == 0) modw = "4";
@@ -454,7 +525,7 @@ namespace XviD4PSP
             else if (ch % 2 == 0) modh = "2";
             else modh = "1";
 
-            Title = m.inresw + "x" + m.inresh + " -> " + cw + "x" + ch + " (" + modw + "x" + modh + ", " + cropped_s + ") | " +
+            Title = width + "x" + height + " -> " + cw + "x" + ch + " (" + modw + "x" + modh + ", " + cropped_s + ") | " +
                 frame_of.Replace("xx", ((int)slider_pos.Value).ToString()).Replace("yy", ((int)slider_pos.Maximum).ToString());
         }
 
@@ -486,15 +557,18 @@ namespace XviD4PSP
 
         private void Frame_Shift(int step)
         {
-            int new_frame = (int)slider_pos.Value + step;
-            new_frame = (new_frame < 0) ? 0 : (new_frame > (int)slider_pos.Maximum) ? (int)slider_pos.Maximum : new_frame;
-            if (new_frame != (int)slider_pos.Value)
+            if (!IsError && HasVideo)
             {
-                slider_pos.Tag = new object();
-                slider_pos.Value = new_frame;
-                slider_pos.Tag = null;
-                ShowFrame(new_frame);
-                PutBorders();
+                int new_frame = (int)slider_pos.Value + step;
+                new_frame = (new_frame < 0) ? 0 : (new_frame > (int)slider_pos.Maximum) ? (int)slider_pos.Maximum : new_frame;
+                if (new_frame != (int)slider_pos.Value)
+                {
+                    slider_pos.Tag = new object();
+                    slider_pos.Value = new_frame;
+                    slider_pos.Tag = null;
+                    SetFrame(new_frame);
+                    ShowCroppedFrame();
+                }
             }
         }
 
@@ -507,12 +581,55 @@ namespace XviD4PSP
         {
             lock (locker)
             {
+                if (buffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(buffer);
+                    buffer = IntPtr.Zero;
+                }
                 if (reader != null)
                 {
                     reader.Close();
                     reader = null;
                 }
             }
+        }
+
+        private void slider_color_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (((Slider)sender).IsFocused)
+            {
+                R = (byte)slider_R.Value;
+                G = (byte)slider_G.Value;
+                B = (byte)slider_B.Value;
+                A = (byte)slider_A.Value;
+
+                FinalColor.Color = Color.FromArgb(255, R, G, B);
+                Settings.VCropBrush = Color.FromArgb(A, R, G, B);
+
+                if (left != 0 || right != 0 || top != 0 || bottom != 0)
+                    ShowCroppedFrame();
+            }
+        }
+
+        private void button_settings_Click(object sender, RoutedEventArgs e)
+        {
+            if (!IsError && HasVideo && !cmn_settings.IsOpen)
+            {
+                //Чтоб через кнопку открывалось в центре
+                cmn_settings.Placement = PlacementMode.Center;
+                cmn_settings.PlacementTarget = Picture;
+                cmn_settings.IsOpen = true;
+            }
+            else
+            {
+                cmn_settings.IsOpen = false;
+            }
+        }
+
+        private void cmn_settings_Closed(object sender, RoutedEventArgs e)
+        {
+            //Возвращаем обратно открытие в точке клика
+            cmn_settings.Placement = PlacementMode.MousePoint;
         }
     }
 }

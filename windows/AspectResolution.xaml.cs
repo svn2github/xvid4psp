@@ -91,12 +91,9 @@ namespace XviD4PSP
             text_ffmpeg_ar.Content = Languages.Translate("Use FFmpeg AR info:");
             text_ffmpeg_ar.ToolTip = check_use_ffmpeg_ar.ToolTip = Languages.Translate("MediaInfo provides rounded values, so for better precision it`s recommended to use AR info from the FFmpeg") +
                 ".\r\n" + Languages.Translate("This option is meaningful only when a file is opening.") + "\r\n\r\n" + _def + on;
-            text_visualcrop_opacity.Content = Languages.Translate("Background opacity:");
-            combo_visualcrop_opacity.ToolTip = _def + "2";
-            text_visualcrop_brightness.Content = Languages.Translate("Brightness of the mask:");
-            combo_visualcrop_brightness.ToolTip = _def + "25";
             text_visualcrop_frame.Content = Languages.Translate("Startup frame:");
             combo_visualcrop_frame.ToolTip = _def + Languages.Translate("THM-frame");
+            text_visualcrop_fullscreen.Content = Languages.Translate("Open window in fullscreen mode") + ":";
             manual_outaspect.ToolTip = Languages.Translate("In case of non-anamorphic encoding: Aspect = Width/Height.") +
                 "\r\n" + Languages.Translate("In case of anamorphic encoding: Aspect = (Width/Height)*SAR.");
             manual_outsar.ToolTip = Languages.Translate("Leave it empty for non-anamorphic encoding.") +
@@ -117,17 +114,11 @@ namespace XviD4PSP
 
             check_autocrop_new_mode.IsChecked = Settings.AutocropMostCommon;
 
-            for (int n = 0; n < 10; n++)
-                combo_visualcrop_opacity.Items.Add(n);
-            combo_visualcrop_opacity.SelectedItem = Settings.VCropOpacity;
-
-            for (int n = 0; n < 26; n++)
-                combo_visualcrop_brightness.Items.Add(n);
-            combo_visualcrop_brightness.SelectedItem = Settings.VCropBrightness;
-
             combo_visualcrop_frame.Items.Add(new ComboBoxItem() { Tag = "THM-frame", Content = Languages.Translate("THM-frame") });
             combo_visualcrop_frame.Items.Add(new ComboBoxItem() { Tag = "1-st frame", Content = Languages.Translate("1-st frame") });
             combo_visualcrop_frame.SelectedValue = Settings.VCropFrame;
+
+            check_visualcrop_fullscreen.IsChecked = Settings.VCropFullscreen;
 
             combo_recalculate.Items.Add(new ComboBoxItem() { Tag = CropRecalculate.Nothing, Content = Languages.Translate(CropRecalculate.Nothing.ToString()) });
             combo_recalculate.Items.Add(new ComboBoxItem() { Tag = CropRecalculate.Aspect, Content = Languages.Translate(CropRecalculate.Aspect.ToString()) });
@@ -719,28 +710,17 @@ namespace XviD4PSP
             Settings.UseFFmpegAR = check_use_ffmpeg_ar.IsChecked.Value;
         }
 
-        private void combo_visualcrop_opacity_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if ((combo_visualcrop_opacity.IsDropDownOpen || combo_visualcrop_opacity.IsSelectionBoxHighlighted) && combo_visualcrop_opacity.SelectedItem != null)
-            {
-                Settings.VCropOpacity = Convert.ToInt32(combo_visualcrop_opacity.SelectedItem);
-            }
-        }
-
-        private void combo_visualcrop_brightness_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if ((combo_visualcrop_brightness.IsDropDownOpen || combo_visualcrop_brightness.IsSelectionBoxHighlighted) && combo_visualcrop_brightness.SelectedItem != null)
-            {
-                Settings.VCropBrightness = Convert.ToInt32(combo_visualcrop_brightness.SelectedItem);
-            }
-        }
-
         private void combo_visualcrop_frame_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if ((combo_visualcrop_frame.IsDropDownOpen || combo_visualcrop_frame.IsSelectionBoxHighlighted) && combo_visualcrop_frame.SelectedItem != null)
             {
                 Settings.VCropFrame = ((ComboBoxItem)combo_visualcrop_frame.SelectedItem).Tag.ToString();
             }
+        }
+
+        private void check_visualcrop_fullscreen_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.VCropFullscreen = check_visualcrop_fullscreen.IsChecked.Value;
         }
 
         private void CalculateMod()

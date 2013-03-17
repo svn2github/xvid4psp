@@ -484,6 +484,7 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="pictures\settings12.png" />
     <Resource Include="pictures\folder.png" />
     <Resource Include="pictures\warning.png" />
     <Resource Include="pictures\logo_x262.png" />
@@ -493,7 +494,6 @@
     <Resource Include="pictures\folder_magnify.png" />
     <Resource Include="main.ico" />
     <Resource Include="pictures\logo_FF_FLAC.png" />
-    <Resource Include="pictures\vc_background.PNG" />
     <Resource Include="pictures\Bottom.png" />
     <Resource Include="pictures\Left.png" />
     <Resource Include="pictures\Right.png" />
@@ -507,8 +507,6 @@
     <Resource Include="pictures\settings.png" />
     <Resource Include="pictures\edit.png" />
     <Resource Include="pictures\settings1.png" />
-    <Resource Include="pictures\Volume_Disable.PNG" />
-    <Resource Include="pictures\Volume1.PNG" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="classes\PowerManagement\PowerManagementResource.resx">

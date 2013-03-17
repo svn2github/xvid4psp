@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Win32;
 using System.IO;
+using System.Windows.Media;
 
 namespace XviD4PSP
 {
@@ -1715,43 +1716,42 @@ namespace XviD4PSP
             }
         }
 
-        public static int VCropOpacity
+        public static bool VCropFullscreen
         {
             get
             {
-                object value = GetValue("VCropOpacity");
+                object value = GetValue("VCropFullscreen");
                 if (value == null)
                 {
-                    return 2;
+                    return false;
                 }
                 else
                 {
-                    return Convert.ToInt32(value);
+                    return Convert.ToBoolean(value);
                 }
             }
             set
             {
-                SetInt("VCropOpacity", value);
+                SetBool("VCropFullscreen", value);
             }
         }
 
-        public static int VCropBrightness
+        public static Color VCropBrush
         {
             get
             {
-                object value = GetValue("VCropBrightness");
-                if (value == null)
+                object value = GetValue("VCropBrush");
+                if (value != null)
                 {
-                    return 25;
+                    try { return (Color)ColorConverter.ConvertFromString(Convert.ToString(value)); }
+                    catch (FormatException) { }
                 }
-                else
-                {
-                    return Convert.ToInt32(value);
-                }
+
+                return new Color() { A = 200, R = 255, G = 255, B = 255 }; //#C8FFFFFF
             }
             set
             {
-                SetInt("VCropBrightness", value);
+                SetString("VCropBrush", Convert.ToString(value));
             }
         }
 
@@ -1834,7 +1834,7 @@ namespace XviD4PSP
                 SetBool("BatchCloneDeint", value);
             }
         }
-        
+
         public static bool BatchCloneFPS
         {
             get
@@ -1854,7 +1854,7 @@ namespace XviD4PSP
                 SetBool("BatchCloneFPS", value);
             }
         }
-        
+
         public static bool BatchCloneAudio
         {
             get

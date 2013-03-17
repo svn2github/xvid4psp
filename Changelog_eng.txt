@@ -1,5 +1,9 @@
-﻿XviD4PSP 5.10.326.0 (12.03.2013), main changes:
+﻿XviD4PSP 5.10.327.0 (17.03.2013), main changes:
 
+>>> (r327) Manual crop window: changed the way of getting and rendering the images. Added ability to change
+           the color and transparency of the mask right in this window. From the "Resolution/Aspect->Settings->
+           Manual crop" window removed some options, that doesn't requires there anymore, and added an option
+           to "Open window in fullscreen mode" (to launch Manual crop in maximized state).
 >>> (r326) Changed the defaults for muxing via MKVMerge (removed --compression -1:none key; added --engage
            no_cue_duration and --engage no_cue_relative_position keys). This defaults can be changed in the
            format settings window on the "Muxing" tab.

@@ -99,16 +99,12 @@
                         <GroupBox Foreground="#FFFFFFFF" x:Name="group_visualcrop" Header="Manual crop" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="4,3,6,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_opacity" Content="Background opacity:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
-                                    <ComboBox x:Name="combo_visualcrop_opacity" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_visualcrop_opacity_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </DockPanel>
-                                <DockPanel Margin="4,0,6,0" Width="Auto" Height="Auto">
-                                    <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_brightness" Content="Brightness of the mask:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
-                                    <ComboBox x:Name="combo_visualcrop_brightness" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_visualcrop_brightness_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </DockPanel>
-                                <DockPanel Margin="4,0,6,3" Width="Auto" Height="Auto" >
                                     <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_frame" Content="Startup frame:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left"/>
                                     <ComboBox x:Name="combo_visualcrop_frame" Width="100" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectedValuePath="Tag" SelectionChanged="combo_visualcrop_frame_SelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </DockPanel>
+                                <DockPanel Margin="4,1,6,4" Width="Auto" Height="Auto">
+                                    <Label OpacityMask="{x:Null}" x:Name="text_visualcrop_fullscreen" Content="Open window in fullscreen mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Width="Auto" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="2,0,0,0" Padding="2.5"/>
+                                    <CheckBox x:Name="check_visualcrop_fullscreen" Width="Auto" Height="Auto" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_visualcrop_fullscreen_Click" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
