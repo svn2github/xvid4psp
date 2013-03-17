@@ -78,7 +78,7 @@
                             <MenuItem.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                     <GradientStop Color="Black" Offset="0.0"/>
-                                    <GradientStop Color="Green" Offset="1.0"/>
+                                    <GradientStop Color="#FF00EE00" Offset="1.0"/>
                                 </LinearGradientBrush>
                             </MenuItem.Background>
                             <MenuItem.Header>

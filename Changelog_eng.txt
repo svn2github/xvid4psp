@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.327.0 (17.03.2013), main changes:
+﻿XviD4PSP 5.10.328.0 (17.03.2013), main changes:
 
+>>> (r328) PictureView: audio and video playing threads will be created only when the play back is actually
+           started, as they aren't needed before this point.
 >>> (r327) Manual crop window: changed the way of getting and rendering the images. Added ability to change
            the color and transparency of the mask right in this window. From the "Resolution/Aspect->Settings->
            Manual crop" window removed some options, that doesn't requires there anymore, and added an option

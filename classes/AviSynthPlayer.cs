@@ -46,7 +46,7 @@ namespace XviD4PSP
         private bool ResetTimer = false;
         public bool AllowDropFrames = false;
         public bool EnableAudio = false;
- 
+
         private int Width = 0;
         private int Height = 0;
         public int TotalFrames = 0;
@@ -141,14 +141,11 @@ namespace XviD4PSP
                             //Framework 3.0 без SP1
                             CreateWriteableBitmap();
                         }
-
-                        CreateVideoThread();
                     }
 
                     if (HasAudio)
                     {
                         SetUpAudioDevice();
-                        CreateAudioThread();
                     }
 
                     #region ShowPictureViewInfo
@@ -304,16 +301,6 @@ namespace XviD4PSP
                 Int32Rect WBRect = new Int32Rect(0, 0, Width, Height);
                 BitmapSource = new System.Windows.Media.Imaging.WriteableBitmap(Width, Height, 0, 0, format, null);
                 UpdateDelegate = () => { try { if (BitmapSource != null) ((WriteableBitmap)BitmapSource).WritePixels(WBRect, VBuffer, bufSize, stride); } catch (Exception) { } };
-            }
-        }
-
-        private void CreateVideoThread()
-        {
-            if (thread_v == null)
-            {
-                thread_v = new Thread(new ThreadStart(VideoLoop));
-                //thread_v.Priority = ThreadPriority.AboveNormal;
-                thread_v.Start();
             }
         }
 
@@ -497,16 +484,6 @@ namespace XviD4PSP
             }
         }
 
-        private void CreateAudioThread()
-        {
-            if (thread_a == null)
-            {
-                thread_a = new Thread(new ThreadStart(AudioLoop));
-                thread_a.Priority = ThreadPriority.AboveNormal;
-                thread_a.Start();
-            }
-        }
-
         private void AudioLoop()
         {
             //Notify не используются из-за ихних багов..
@@ -617,6 +594,30 @@ namespace XviD4PSP
             }
         }
 
+        private void CreatePlayingThreads()
+        {
+            try
+            {
+                if (HasVideo && thread_v == null)
+                {
+                    thread_v = new Thread(new ThreadStart(VideoLoop));
+                    //thread_v.Priority = ThreadPriority.AboveNormal;
+                    thread_v.Start();
+                }
+
+                if (HasAudio && thread_a == null)
+                {
+                    thread_a = new Thread(new ThreadStart(AudioLoop));
+                    thread_a.Priority = ThreadPriority.AboveNormal;
+                    thread_a.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                SetError(ex);
+            }
+        }
+
         private void SetError(Exception ex)
         {
             if (IsError || IsAborted)
@@ -715,12 +716,14 @@ namespace XviD4PSP
                     if (PlayerState != PlayState.Running)
                     {
                         LoadAviSynth();
-
                         if (IsError || IsAborted)
                             return;
 
                         AdjustMediaTimer(period);
+                        if (IsError || IsAborted)
+                            return;
 
+                        CreatePlayingThreads();
                         if (IsError || IsAborted)
                             return;
 
