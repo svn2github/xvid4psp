@@ -33,6 +33,7 @@ namespace XviD4PSP
         public ArrayList deletefiles = new ArrayList();
         private ArrayList ffcache = new ArrayList();
         private ArrayList dgcache = new ArrayList();
+        private ArrayList lsmashcache = new ArrayList();
         private static object backup_lock = new object();
         private static object avsp_lock = new object();
         private static object locker = new object();
@@ -750,6 +751,18 @@ namespace XviD4PSP
                     foreach (string file in Directory.GetFiles(Settings.TempPath, "*.ffindex")) SafeDelete(file);
                 }
 
+                //Удаление индекс-файлов от LSMASH
+                if (Settings.DeleteLSMASHCache)
+                {
+                    //Которые рядом с исходником
+                    foreach (string file in lsmashcache)
+                        SafeDelete(file);
+
+                    //Которые в Темп-папке (это аудио кэш)
+                    foreach (string file in Directory.GetFiles(Settings.TempPath, "*.lwi"))
+                        SafeDelete(file);
+                }
+
                 //Удаление DGIndex-кэша
                 if (Settings.DeleteDGIndexCache)
                 {
@@ -1212,6 +1225,13 @@ namespace XviD4PSP
                         }
                     }
 
+                    //Возможные индекс-файлы от LSMASH
+                    foreach (string file in x.infileslist)
+                    {
+                        if (!lsmashcache.Contains(file + ".lwi"))
+                            lsmashcache.Add(file + ".lwi");
+                    }
+
                     if (x.inaudiostreams.Count > 0)
                     {
                         AudioStream s = (AudioStream)x.inaudiostreams[x.inaudiostream];
@@ -1342,6 +1362,13 @@ namespace XviD4PSP
                         if (!ffcache.Contains(file + ".ffindex"))
                             ffcache.Add(file + ".ffindex");
                     }
+                }
+
+                //Возможные индекс-файлы от LSMASH
+                foreach (string file in x.infileslist)
+                {
+                    if (!lsmashcache.Contains(file + ".lwi"))
+                        lsmashcache.Add(file + ".lwi");
                 }
 
                 //присваиваем заданию уникальный ключ
@@ -1521,20 +1548,27 @@ namespace XviD4PSP
 
                         AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
 
-                        //Только FFmpegSource2 умеет переключать треки, для него их можно не извлекать
-                        if (instream.audiopath == null && instream.decoder == 0 && x.inaudiostream > 0 &&
-                            !(x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && Settings.FFMS_Enable_Audio))
+                        //Требуется извлечение звука
+                        if (instream.audiopath == null && instream.decoder == 0 && x.inaudiostream > 0)
                         {
-                            string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
-                            instream.audiopath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
-                            instream.audiofiles = new string[] { instream.audiopath };
-                            instream = Format.GetValidADecoder(instream);
+                            //FFMS2 и LSMASH умеют переключать треки, для них их можно не извлекать
+                            if (!(x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && Settings.FFMS_Enable_Audio ||
+                                ((x.vdecoder == AviSynthScripting.Decoders.LSMASHVideoSource || x.vdecoder == AviSynthScripting.Decoders.LWLibavVideoSource) &&
+                                Settings.LSMASH_Enable_Audio)))
+                            {
+                                string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
+                                instream.audiopath = Settings.TempPath + "\\" + x.key + "_" + x.inaudiostream + outext;
+                                instream.audiofiles = new string[] { instream.audiopath };
+                                instream = Format.GetValidADecoder(instream);
+                            }
                         }
                     }
 
-                    //Извлечение звука для FFmpegSource2 и DirectShowSource, для DirectShowSource2 звук будет извлечен в Caching (тут, если это автовыбор)
+                    //Извлечение звука (если запрещено прямое декодирование из исходника, декодер этого не умеет или это автовыбор трека)
                     if (x.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && !Settings.FFMS_Enable_Audio ||
                         x.vdecoder == AviSynthScripting.Decoders.DirectShowSource && !Settings.DSS_Enable_Audio ||
+                        (x.vdecoder == AviSynthScripting.Decoders.LSMASHVideoSource || x.vdecoder == AviSynthScripting.Decoders.LWLibavVideoSource) &&
+                        !Settings.LSMASH_Enable_Audio || x.vdecoder == AviSynthScripting.Decoders.DirectShowSource2 ||
                         ((AudioStream)x.inaudiostreams[x.inaudiostream]).audiopath != null && x.isvideo)
                     {
                         AudioStream instream = (AudioStream)x.inaudiostreams[x.inaudiostream];
@@ -7428,6 +7462,13 @@ namespace XviD4PSP
                     if (!ffcache.Contains(file + ".ffindex"))
                         ffcache.Add(file + ".ffindex");
                 }
+            }
+
+            //Возможные индекс-файлы от LSMASH
+            foreach (string file in mass.infileslist)
+            {
+                if (!lsmashcache.Contains(file + ".lwi"))
+                    lsmashcache.Add(file + ".lwi");
             }
 
             //Кэш от DGIndex

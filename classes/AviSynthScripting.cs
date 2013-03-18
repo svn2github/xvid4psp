@@ -28,7 +28,11 @@ namespace XviD4PSP
            NicMPG123Source,   //NicAudio.dll
            bassAudioSource,   //bassAudio.dll
            RawSource,         //RawSource.dll
-           QTInput            //QTSource.dll + QuickTime
+           QTInput,           //QTSource.dll + QuickTime
+           LSMASHVideoSource, //LSMASHSource.dll
+           LSMASHAudioSource, //LSMASHSource.dll
+           LWLibavVideoSource,//LSMASHSource.dll
+           LWLibavAudioSource //LSMASHSource.dll
        }
 
        public enum Resizers
@@ -130,6 +134,12 @@ namespace XviD4PSP
                m.script += "Import(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
            }
 
+           if (m.vdecoder == Decoders.LSMASHVideoSource || instream.decoder == Decoders.LSMASHAudioSource ||
+               m.vdecoder == Decoders.LWLibavVideoSource || instream.decoder == Decoders.LWLibavAudioSource)
+           {
+               m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\LSMASHSource.dll\")" + Environment.NewLine;
+           }
+
            if (instream.decoder == Decoders.NicAC3Source || instream.decoder == Decoders.NicMPG123Source ||
                instream.decoder == Decoders.NicDTSSource || instream.decoder == Decoders.RaWavSource)
                m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
@@ -217,7 +227,7 @@ namespace XviD4PSP
 
            m.script += Environment.NewLine;
 
-           //Память и многопоточность_1
+           //Память и многопоточность(1)
            int memory_max = (SysInfo.AVSIsMT) ? Settings.SetMemoryMax : 0;
            int mtmode_1 = (SysInfo.AVSIsMT && m.vdecoder != Decoders.Import && m.vdecoder != Decoders.BlankClip) ? Settings.SetMTMode_1 : 0;
            if (memory_max > 0) m.script += "SetMemoryMax(" + memory_max + ")\r\n" + ((mtmode_1 == 0) ? "\r\n" : "");
@@ -292,7 +302,7 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   //Изменения под FFmpegSource2
+                   //Изменения под декодеры
                    string cache_path = "";
                    string assume_fps = "";
                    if (m.vdecoder == Decoders.FFmpegSource2)
@@ -306,6 +316,20 @@ namespace XviD4PSP
                        cache_path = ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
                            ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
                    }
+                   else if (m.vdecoder == Decoders.LSMASHVideoSource)
+                   {
+                       //LSMASHVideoSource(string source, int "track"(0), int "threads"(0), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
+                       cache_path = ", track=0" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", dr=false";
+                   }
+                   else if (m.vdecoder == Decoders.LWLibavVideoSource)
+                   {
+                       //LWLibavVideoSource(string source, int "stream_index"(-1), int "threads"(0), bool "cache"(true), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
+                       cache_path = ", stream_index=-1" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") +
+                       ", cache=true, dr=false";
+                   }
+
                    n++;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + dss2 + cache_path + ")" + assume_fps;
                    if (n < m.infileslist.Length) invideostring += "++";
@@ -313,39 +337,79 @@ namespace XviD4PSP
            }
 
            //теперь звук!
-           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0 && instream.audiopath != null)
+           if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
            {
-               //прописываем импорт видео
-               m.script += "video = " + invideostring + Environment.NewLine;
-               
-               //пришиваем звук
-               string ffindex = "";
-               string inaudiostring = "";
-               string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
-               string nicaudio = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
-                   instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" :
-                   (instream.decoder == Decoders.RaWavSource) ? ", 0" : ""; //0 - это дефолт, но его забыли выставить в RaWavSource
-               if (instream.audiofiles != null && instream.audiofiles.Length > 0)
+               if (instream.audiopath != null) //Извлеченные треки
                {
-                   int n = 0;
-                   foreach (string file in instream.audiofiles)
+                   //прописываем импорт видео
+                   m.script += "video = " + invideostring + Environment.NewLine;
+
+                   //пришиваем звук
+                   string ffindex = "";
+                   string inaudiostring = "";
+                   string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
+                   string nicaudio = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
+                       instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" :
+                       (instream.decoder == Decoders.RaWavSource) ? ", 0" : ""; //0 - это дефолт, но его забыли выставить в старых версиях RaWavSource
+
+                   //LSMASHAudioSource(string source, int "track"(0), bool "skip_priming"(true), string "layout"(""))
+                   //LWLibavAudioSource(string source, int "stream_index"(-1), bool "cache"(true), bool "av_sync"(false), string "layout"(""))
+                   string lsmash = (instream.decoder == Decoders.LSMASHAudioSource) ? ", track=0, skip_priming=true" :
+                       (instream.decoder == Decoders.LWLibavAudioSource) ? ", stream_index=-1, cache=true, av_sync=false" : "";
+
+                   if (instream.audiofiles != null && instream.audiofiles.Length > 0)
                    {
-                       n++;
-                       ffindex += "FFIndex(" + "\"" + file + "\")\r\n";
-                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + nicaudio + ")";
-                       if (n < instream.audiofiles.Length) inaudiostring += "++";
+                       int n = 0;
+                       foreach (string file in instream.audiofiles)
+                       {
+                           n++;
+                           ffindex += "FFIndex(" + "\"" + file + "\")\r\n";
+                           inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + nicaudio + lsmash + ")";
+                           if (n < instream.audiofiles.Length) inaudiostring += "++";
+                       }
                    }
+                   else
+                   {
+                       ffindex += "FFIndex(" + "\"" + instream.audiopath + "\")\r\n";
+                       inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + nicaudio + lsmash + ")";
+                   }
+
+                   //объединение
+                   if (instream.decoder == Decoders.FFAudioSource) m.script += ffindex;
+                   m.script += "audio = " + inaudiostring + Environment.NewLine;
+                   m.script += "AudioDub(video, audio)" + Environment.NewLine;
+               }
+               else if ((m.vdecoder == Decoders.LSMASHVideoSource || m.vdecoder == Decoders.LWLibavVideoSource) && Settings.EnableAudio && Settings.LSMASH_Enable_Audio) //Декодирование напрямую из исходника
+               {
+                   //прописываем импорт видео
+                   m.script += "video = " + invideostring + Environment.NewLine;
+
+                   //пришиваем звук
+                   string inaudiostring = "";
+                   string decoder = (m.vdecoder == Decoders.LSMASHVideoSource) ? Decoders.LSMASHAudioSource.ToString() : Decoders.LWLibavAudioSource.ToString();
+
+                   //LSMASHAudioSource(string source, int "track"(0), bool "skip_priming"(true), string "layout"(""))
+                   //LWLibavAudioSource(string source, int "stream_index"(-1), bool "cache"(true), bool "av_sync"(false), string "layout"(""))
+                   string lsmash = (m.vdecoder == Decoders.LSMASHVideoSource) ? (", track=" + instream.mi_id + ", skip_priming=true") :
+                        (", stream_index=" + instream.ff_order + ", cache=true, av_sync=false");
+
+                   int n = 0;
+                   foreach (string file in m.infileslist)
+                   {
+                       n += 1;
+                       inaudiostring += decoder + "(\"" + file + "\"" + lsmash + ")";
+                       if (n < m.infileslist.Length) inaudiostring += "++";
+                   }
+
+                   //объединение
+                   m.script += "audio = " + inaudiostring + Environment.NewLine;
+                   m.script += "AudioDub(video, audio)" + Environment.NewLine;
                }
                else
                {
-                   ffindex += "FFIndex(" + "\"" + instream.audiopath + "\")\r\n";
-                   inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + nicaudio + ")";
+                   //прописываем импорт всего клипа
+                   m.script += invideostring + Environment.NewLine;
                }
-               if (instream.decoder == Decoders.FFAudioSource) m.script += ffindex;
-               m.script += "audio = " + inaudiostring + Environment.NewLine;
-
-               //объединение
-               m.script += "AudioDub(video, audio)" + Environment.NewLine;
            }
            else
            {
@@ -355,7 +419,7 @@ namespace XviD4PSP
 
            m.script += Environment.NewLine;
 
-           //Многопоточность_2
+           //Многопоточность(2)
            if (mtmode_1 > 0)
            {
                int mtmode_2 = Settings.SetMTMode_2;
@@ -825,6 +889,12 @@ namespace XviD4PSP
                script += "Import(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\FFMS2.avsi\")" + Environment.NewLine;
            }
 
+           if (m.vdecoder == Decoders.LSMASHVideoSource || instream.decoder == Decoders.LSMASHAudioSource ||
+               m.vdecoder == Decoders.LWLibavVideoSource || instream.decoder == Decoders.LWLibavAudioSource)
+           {
+               script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\LSMASHSource.dll\")" + Environment.NewLine;
+           }
+
            if (instream.decoder == Decoders.NicAC3Source || instream.decoder == Decoders.NicMPG123Source ||
                instream.decoder == Decoders.NicDTSSource || instream.decoder == Decoders.RaWavSource)
                script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\NicAudio.dll\")" + Environment.NewLine;
@@ -912,7 +982,7 @@ namespace XviD4PSP
                int n = 0;
                foreach (string file in m.infileslist)
                {
-                   //Изменения под FFmpegSource2
+                   //Изменения под декодеры
                    string cache_path = "";
                    string assume_fps = "";
                    if (m.vdecoder == Decoders.FFmpegSource2)
@@ -922,6 +992,20 @@ namespace XviD4PSP
                        cache_path = ", rffmode=0" + ((Settings.FFMS_Threads > 0) ? ", threads=" + Settings.FFMS_Threads : "") +
                            ((m.ffms_indexintemp) ? ", cachefile=\"" + Settings.TempPath + "\\" + Path.GetFileName(file) + ".ffindex\"" : "");
                    }
+                   else if (m.vdecoder == Decoders.LSMASHVideoSource)
+                   {
+                       //LSMASHVideoSource(string source, int "track"(0), int "threads"(0), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
+                       cache_path = ", track=0" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", dr=false";
+                   }
+                   else if (m.vdecoder == Decoders.LWLibavVideoSource)
+                   {
+                       //LWLibavVideoSource(string source, int "stream_index"(-1), int "threads"(0), bool "cache"(true), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
+                       cache_path = ", stream_index=-1" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") +
+                       ", cache=true, dr=false";
+                   }
+
                    n += 1;
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\"" + audio + fps + convertfps + dss2 + cache_path + ")" + assume_fps;
                    if (n < m.infileslist.Length) invideostring += "++";
@@ -929,39 +1013,79 @@ namespace XviD4PSP
            }
 
            //импорт звука и объединение
-           if (m.inaudiostreams.Count > 0 && instream.audiopath != null && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
+           if (m.inaudiostreams.Count > 0 && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
            {
-               //прописываем импорт видео
-               script += "video = " + invideostring + Environment.NewLine;
-
-               //пришиваем звук
-               string ffindex = "";
-               string inaudiostring = "";
-               string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
-               string nicaudio = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
-                   instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" :
-                   (instream.decoder == Decoders.RaWavSource) ? ", 0" : ""; //0 - это дефолт, но его забыли выставить в RaWavSource
-               if (instream.audiofiles != null && instream.audiofiles.Length > 0)
+               if (instream.audiopath != null) //Извлеченные треки
                {
-                   int n = 0;
-                   foreach (string file in instream.audiofiles)
+                   //прописываем импорт видео
+                   script += "video = " + invideostring + Environment.NewLine;
+
+                   //пришиваем звук
+                   string ffindex = "";
+                   string inaudiostring = "";
+                   string no_video = (instream.decoder == Decoders.DirectShowSource) ? ", video=false" : "";
+                   string nicaudio = (instream.decoder == Decoders.NicAC3Source && Settings.NicAC3_DRC ||
+                       instream.decoder == Decoders.NicDTSSource && Settings.NicDTS_DRC) ? ", drc=1" :
+                       (instream.decoder == Decoders.RaWavSource) ? ", 0" : ""; //0 - это дефолт, но его забыли выставить в старых версиях RaWavSource
+
+                   //LSMASHAudioSource(string source, int "track"(0), bool "skip_priming"(true), string "layout"(""))
+                   //LWLibavAudioSource(string source, int "stream_index"(-1), bool "cache"(true), bool "av_sync"(false), string "layout"(""))
+                   string lsmash = (instream.decoder == Decoders.LSMASHAudioSource) ? ", track=0, skip_priming=true" :
+                       (instream.decoder == Decoders.LWLibavAudioSource) ? ", stream_index=-1, cache=true, av_sync=false" : "";
+
+                   if (instream.audiofiles != null && instream.audiofiles.Length > 0)
                    {
-                       n++;
-                       ffindex += "FFIndex(" + "\"" + file + "\")\r\n";
-                       inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + nicaudio + ")";
-                       if (n < instream.audiofiles.Length) inaudiostring += "++";
+                       int n = 0;
+                       foreach (string file in instream.audiofiles)
+                       {
+                           n++;
+                           ffindex += "FFIndex(" + "\"" + file + "\")\r\n";
+                           inaudiostring += instream.decoder.ToString() + "(\"" + file + "\"" + no_video + nicaudio + lsmash + ")";
+                           if (n < instream.audiofiles.Length) inaudiostring += "++";
+                       }
                    }
+                   else
+                   {
+                       ffindex += "FFIndex(" + "\"" + instream.audiopath + "\")\r\n";
+                       inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + nicaudio + lsmash + ")";
+                   }
+
+                   //объединение
+                   if (instream.decoder == Decoders.FFAudioSource) script += ffindex;
+                   script += "audio = " + inaudiostring + Environment.NewLine;
+                   script += "AudioDub(video, audio)" + Environment.NewLine;
+               }
+               else if ((m.vdecoder == Decoders.LSMASHVideoSource || m.vdecoder == Decoders.LWLibavVideoSource) && Settings.EnableAudio && Settings.LSMASH_Enable_Audio) //Декодирование напрямую из исходника
+               {
+                   //прописываем импорт видео
+                   script += "video = " + invideostring + Environment.NewLine;
+
+                   //пришиваем звук
+                   string inaudiostring = "";
+                   string decoder = (m.vdecoder == Decoders.LSMASHVideoSource) ? Decoders.LSMASHAudioSource.ToString() : Decoders.LWLibavAudioSource.ToString();
+
+                   //LSMASHAudioSource(string source, int "track"(0), bool "skip_priming"(true), string "layout"(""))
+                   //LWLibavAudioSource(string source, int "stream_index"(-1), bool "cache"(true), bool "av_sync"(false), string "layout"(""))
+                   string lsmash = (m.vdecoder == Decoders.LSMASHVideoSource) ? (", track=" + instream.mi_id + ", skip_priming=true") :
+                        (", stream_index=" + instream.ff_order + ", cache=true, av_sync=false");
+
+                   int n = 0;
+                   foreach (string file in m.infileslist)
+                   {
+                       n += 1;
+                       inaudiostring += decoder + "(\"" + file + "\"" + lsmash + ")";
+                       if (n < m.infileslist.Length) inaudiostring += "++";
+                   }
+
+                   //объединение
+                   script += "audio = " + inaudiostring + Environment.NewLine;
+                   script += "AudioDub(video, audio)" + Environment.NewLine;
                }
                else
                {
-                   ffindex += "FFIndex(" + "\"" + instream.audiopath + "\")\r\n";
-                   inaudiostring += instream.decoder.ToString() + "(\"" + instream.audiopath + "\"" + no_video + nicaudio + ")";
+                   //прописываем импорт всего клипа
+                   script += invideostring + Environment.NewLine;
                }
-               if (instream.decoder == Decoders.FFAudioSource) script += ffindex;
-               script += "audio = " + inaudiostring + Environment.NewLine;
-
-               //объединение
-               script += "AudioDub(video, audio)" + Environment.NewLine;
            }
            else
            {

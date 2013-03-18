@@ -36,6 +36,8 @@ namespace XviD4PSP
         private string dec_dss = AviSynthScripting.Decoders.DirectShowSource.ToString();
         private string dec_dss2 = AviSynthScripting.Decoders.DirectShowSource2.ToString();
         private string dec_ffms = AviSynthScripting.Decoders.FFmpegSource2.ToString();
+        private string dec_lwlv = AviSynthScripting.Decoders.LWLibavVideoSource.ToString();
+        private string dec_lsmv = AviSynthScripting.Decoders.LSMASHVideoSource.ToString();
         private string dec_qts = AviSynthScripting.Decoders.QTInput.ToString();
 
         //Список аудио декодеров
@@ -46,6 +48,8 @@ namespace XviD4PSP
         private string dec_wav = AviSynthScripting.Decoders.WAVSource.ToString();
         private string dec_bass = AviSynthScripting.Decoders.bassAudioSource.ToString();
         private string dec_ffas = AviSynthScripting.Decoders.FFAudioSource.ToString();
+        private string dec_lwla = AviSynthScripting.Decoders.LWLibavAudioSource.ToString();
+        private string dec_lsma = AviSynthScripting.Decoders.LSMASHAudioSource.ToString();
 
         //Подсказки к видео декодерам
         private string tltp_avi = Languages.Translate("This decoder uses VFW AVIFile interface, or AviSynth`s built-in OpenDML code (taken from VirtualDub).") +
@@ -62,6 +66,10 @@ namespace XviD4PSP
             "\r\n" + Languages.Translate("However, Haali Media Splitter is still required if you want to open MPEG-PS/TS or OGM files with this decoder.") +
             "\r\n" + Languages.Translate("Decoding of interlaced H.264 may be broken (due to limitations of FFmpeg)!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_lwlv = Languages.Translate("This decoder (based on FFmpeg) uses their own splitters and decoders, but requires some extra time for indexing your file.").Replace("FFmpeg", "Libav") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_lsmv = Languages.Translate("This decoder (based on L-SMASH) uses their own splitters and decoders.") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": MPEG-4 (mp4, mov, 3gp)";
         private string tltp_qts = Languages.Translate("This decoder uses QuickTime environment for decoding, so QuickTime is required!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": mov";
 
@@ -73,6 +81,8 @@ namespace XviD4PSP
         private string tltp_wav = Languages.Translate("Supported formats") + ": wav (2Gb max!)";
         private string tltp_bass = Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
         private string tltp_ffas = Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_lwla = Languages.Translate("Supported formats") + ": " + Languages.Translate("various (multi-format decoder)");
+        private string tltp_lsma = Languages.Translate("Supported formats") + ": MPEG-4 (m4a, mp4, mov, 3gp)";
 
         //Дефолты
         string on = Languages.Translate("On");
@@ -109,19 +119,25 @@ namespace XviD4PSP
             Title = Languages.Translate("Decoding");
             button_ok.Content = Languages.Translate("OK");
             check_dss_convert_fps.ToolTip = _def + on;
-            check_dss_audio.Content = check_ffms_audio.Content = Languages.Translate("Enable Audio");
+            check_dss_audio.Content = check_ffms_audio.Content = check_lsmash_audio.Content = Languages.Translate("Enable Audio");
             check_dss_audio.ToolTip = Languages.Translate("Allow DirectShowSource to decode audio directly from the source-file (without demuxing)");
             check_force_film.Content = Languages.Translate("Auto force Film at") + " (%):";
             check_force_film.ToolTip = Languages.Translate("Auto force Film if Film percentage is more than selected value (for NTSC sources only)") + "\r\n\r\n" + _def + on;
             num_force_film.ToolTip = _def + "95";
-            check_ffms_force_fps.Content = Languages.Translate("Add AssumeFPS()");
-            check_ffms_force_fps.ToolTip = Languages.Translate("Force FPS using AssumeFPS()") + "\r\n\r\n" + _def + on;
+            check_ffms_force_fps.Content = check_lsmash_force_fps.Content = Languages.Translate("Add AssumeFPS()");
+            check_ffms_force_fps.ToolTip = check_lsmash_force_fps.ToolTip = Languages.Translate("Force FPS using AssumeFPS()") + "\r\n\r\n" + _def + on;
             check_ffms_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "FFmpegSource2") + "\r\n\r\n" + _def + off;
+            check_lsmash_audio.ToolTip = check_dss_audio.ToolTip.ToString().Replace("DirectShowSource", "LSMASH/LWLibav") + "\r\n\r\n" + _def + on;
             check_dss_audio.ToolTip += "\r\n\r\n" + _def + on;
             check_ffms_reindex.Content = Languages.Translate("Overwrite existing index files");
             check_ffms_reindex.ToolTip = Languages.Translate("Always re-index the source file and overwrite existing index file, even if it was valid") + "\r\n\r\n" + _def + off;
             check_ffms_timecodes.Content = Languages.Translate("Timecodes");
             check_ffms_timecodes.ToolTip = Languages.Translate("Extract timecodes to a file") + "\r\n\r\n" + _def + off;
+            combo_ffms_threads.ToolTip = label_ffms_threads.ToolTip = "1 = " + Languages.Translate("disable multithreading (recommended)") + "\r\nAuto = " +
+                Languages.Translate("logical CPU's count") + "\r\n\r\n" + Languages.Translate("Attention! Multithreaded decoding can be unstable!") + "\r\n\r\n" + _def + "1";
+            label_ffms_threads.Content = label_lsmash_threads.Content = "- " + Languages.Translate("Decoding threads").ToLower();
+            combo_lsmash_threads.ToolTip = label_lsmash_threads.ToolTip = _def + "Auto";
+
             check_drc_ac3.ToolTip = check_drc_dts.ToolTip = Languages.Translate("Apply DRC (Dynamic Range Compression) for this decoder") + "\r\n\r\n" + _def + off;
             group_misc.Header = Languages.Translate("Misc");
             check_enable_audio.Content = Languages.Translate("Enable audio in input files");
@@ -134,9 +150,6 @@ namespace XviD4PSP
             button_vdec_add.Content = button_adec_add.Content = Languages.Translate("Add");
             button_vdec_delete.Content = button_adec_delete.Content = Languages.Translate("Remove");
             button_vdec_reset.Content = button_adec_reset.Content = Languages.Translate("Reset");
-            combo_ffms_threads.ToolTip = label_ffms_threads.ToolTip = "1 = " + Languages.Translate("disable multithreading (recommended)") + "\r\nAuto = " +
-                Languages.Translate("logical CPU's count") + "\r\n\r\n" + Languages.Translate("Attention! Multithreaded decoding can be unstable!") + "\r\n\r\n" + _def + "1";
-            label_ffms_threads.Content = "- " + Languages.Translate("Decoding threads").ToLower();
             group_tracks.Header = Languages.Translate("Track selection");
             check_tracks_manual.Content = Languages.Translate("Manual");
             check_tracks_manual.ToolTip = Languages.Translate("During the opening of the file you will be prompted to select the track.");
@@ -195,6 +208,14 @@ namespace XviD4PSP
             for (int i = 1; i < 21; i++)
                 combo_ffms_threads.Items.Add(i);
             combo_ffms_threads.SelectedIndex = Settings.FFMS_Threads;
+
+            check_lsmash_force_fps.IsChecked = Settings.LSMASH_AssumeFPS;
+            check_lsmash_audio.IsChecked = Settings.LSMASH_Enable_Audio;
+
+            combo_lsmash_threads.Items.Add("Auto");
+            for (int i = 1; i < 21; i++)
+                combo_lsmash_threads.Items.Add(i);
+            combo_lsmash_threads.SelectedIndex = Settings.LSMASH_Threads;
 
             //Режим автовыбора треков
             if (Settings.DefaultATrackMode == Settings.ATrackModes.Language)
@@ -317,6 +338,8 @@ namespace XviD4PSP
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_dss, ToolTip = tltp_dss });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_dss2, ToolTip = tltp_dss2 });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_ffms, ToolTip = tltp_ffms });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_lwlv, ToolTip = tltp_lwlv });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_lsmv, ToolTip = tltp_lsmv });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_qts, ToolTip = tltp_qts });
             vcombo.SelectedIndex = (int)vcombo.Tag;
             vdecoders_loaded = true;
@@ -338,6 +361,8 @@ namespace XviD4PSP
             acombo.Items.Add(new ComboBoxItem() { Content = dec_bass, ToolTip = tltp_bass });
             acombo.Items.Add(new ComboBoxItem() { Content = dec_ffas, ToolTip = tltp_ffas });
             acombo.Items.Add(new ComboBoxItem() { Content = dec_dss, ToolTip = tltp_dss });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_lwla, ToolTip = tltp_lwla });
+            acombo.Items.Add(new ComboBoxItem() { Content = dec_lsma, ToolTip = tltp_lsma });
             acombo.SelectedIndex = (int)acombo.Tag;
             adecoders_loaded = true;
         }
@@ -364,7 +389,9 @@ namespace XviD4PSP
                     else if (dec.Equals(dec_dss, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dss; index = 2; }
                     else if (dec.Equals(dec_dss2, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dss2; index = 3; }
                     else if (dec.Equals(dec_ffms, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_ffms; index = 4; }
-                    else if (dec.Equals(dec_qts, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_qts; index = 5; }
+                    else if (dec.Equals(dec_lwlv, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_lwlv; index = 5; }
+                    else if (dec.Equals(dec_lsmv, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_lsmv; index = 6; }
+                    else if (dec.Equals(dec_qts, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_qts; index = 7; }
 
                     //Сортировка начала\конца списка
                     if (ext == mpeg_psts) { mpeg_dec = dec; mpeg_index = index; } //Это в начало
@@ -409,6 +436,8 @@ namespace XviD4PSP
                     else if (dec.Equals(dec_bass, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_bass; index = 5; }
                     else if (dec.Equals(dec_ffas, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_ffas; index = 6; }
                     else if (dec.Equals(dec_dss, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dss; index = 7; }
+                    else if (dec.Equals(dec_lwla, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_lwla; index = 8; }
+                    else if (dec.Equals(dec_lsma, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_lsma; index = 9; }
 
                     //Сортировка начала\конца списка
                     if (ext == other_files) { other_dec = dec; other_index = index; } //Это в конец
@@ -1284,6 +1313,24 @@ namespace XviD4PSP
             if (cod != 7) val += "hc" + cod;
             if (res != 3) val += "hr" + res;
             Settings.DSS2_LAVV_Settings = val;
+        }
+
+        private void check_lsmash_force_fps_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.LSMASH_AssumeFPS = check_lsmash_force_fps.IsChecked.Value;
+        }
+
+        private void check_lsmash_audio_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.LSMASH_Enable_Audio = check_lsmash_audio.IsChecked.Value;
+        }
+
+        private void combo_lsmash_threads_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_lsmash_threads.IsDropDownOpen || combo_lsmash_threads.IsSelectionBoxHighlighted) && combo_lsmash_threads.SelectedIndex != -1)
+            {
+                Settings.LSMASH_Threads = combo_lsmash_threads.SelectedIndex;
+            }
         }
     }
 }

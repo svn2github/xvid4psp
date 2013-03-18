@@ -1,5 +1,11 @@
-﻿XviD4PSP 5.10.328.0 (17.03.2013), main changes:
+﻿XviD4PSP 5.10.329.0 (18.03.2013), main changes:
 
+>>> (r329) Audio\Video decoding: added support for LSMASHVideoSource, LSMASHAudioSource, LWLibavVideoSource
+           and LWLibavAudioSource (all 4 from the LSMASHSource.dll). LWLibav*Source - this is a multiformat
+           decoder, it will index your file before opening (unfortunatelly, currently it is not possible to
+           show the progress of this process). LSMASH*Source - only for MPEG-4 format (mp4, mov, 3gp), it
+           will not indexing anything. To enable deletion of the index-files from the LWLibav*Source (*.lwi),
+           which is disabled by default, go to the "Settings->Global settings->Temporal files" window.
 >>> (r328) PictureView: audio and video playing threads will be created only when the play back is actually
            started, as they aren't needed before this point.
 >>> (r327) Manual crop window: changed the way of getting and rendering the images. Added ability to change

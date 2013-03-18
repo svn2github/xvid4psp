@@ -108,7 +108,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource2" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_ffmpegsource" Header="FFmpegSource2" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
                                     <CheckBox x:Name="check_ffms_force_fps" Width="180" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_ffms_force_fps_Click"/>
@@ -121,6 +121,18 @@
                                 <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
                                     <ComboBox x:Name="combo_ffms_threads" Width="50" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_ffms_threads_SelectionChanged"/>
                                     <Label OpacityMask="{x:Null}" x:Name="label_ffms_threads" Content="- decoding threads" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_lsmash" Header="LSMASHVideo/LWLibavVideo" Margin="4,3,4,6" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                            <StackPanel>
+                                <DockPanel Margin="0,3,0,0" Width="Auto" Height="Auto">
+                                    <CheckBox x:Name="check_lsmash_force_fps" Width="180" Height="Auto" Content="Add AssumeFPS()" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_lsmash_force_fps_Click"/>
+                                    <CheckBox x:Name="check_lsmash_audio" Width="Auto" Height="Auto" Content="Enable Audio" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="50,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_lsmash_audio_Click"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,2,0,4" Width="Auto" Height="Auto">
+                                    <ComboBox x:Name="combo_lsmash_threads" Width="50" Height="21" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" SelectionChanged="combo_lsmash_threads_SelectionChanged"/>
+                                    <Label OpacityMask="{x:Null}" x:Name="label_lsmash_threads" Content="- decoding threads" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="4,0,0,0" Padding="0" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>

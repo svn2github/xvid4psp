@@ -307,14 +307,19 @@ namespace XviD4PSP
                 //передаём активный трек на выход
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
 
-                //Только FFmpegSource2 умеет переключать треки, для него их можно не извлекать
-                if (instream.audiopath == null && instream.decoder == 0 && m.inaudiostream > 0 &&
-                    !(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && Settings.FFMS_Enable_Audio))
+                //Требуется извлечение звука
+                if (instream.audiopath == null && instream.decoder == 0 && m.inaudiostream > 0)
                 {
-                    string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
-                    instream.audiopath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
-                    instream.audiofiles = new string[] { instream.audiopath };
-                    instream = Format.GetValidADecoder(instream);
+                    //FFMS2 и LSMASH умеют переключать треки, для них их можно не извлекать
+                    if (!(m.vdecoder == AviSynthScripting.Decoders.FFmpegSource2 && Settings.FFMS_Enable_Audio ||
+                        ((m.vdecoder == AviSynthScripting.Decoders.LSMASHVideoSource || m.vdecoder == AviSynthScripting.Decoders.LWLibavVideoSource) &&
+                        Settings.LSMASH_Enable_Audio)))
+                    {
+                        string outext = Format.GetValidRAWAudioEXT(instream.codecshort);
+                        instream.audiopath = Settings.TempPath + "\\" + m.key + "_" + m.inaudiostream + outext;
+                        instream.audiofiles = new string[] { instream.audiopath };
+                        instream = Format.GetValidADecoder(instream);
+                    }
                 }
 
                 textbox_apath.Text = instream.audiopath;

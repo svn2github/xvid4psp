@@ -3260,5 +3260,89 @@ namespace XviD4PSP
                 SetBool("CheckWindowsPos", value);
             }
         }
+
+        //Принудительно фиксировать fps для LSMASH
+        public static bool LSMASH_AssumeFPS
+        {
+            get
+            {
+                object value = GetValue("LSMASH_AssumeFPS");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("LSMASH_AssumeFPS", value);
+            }
+        }
+
+        //Разрешить декодирование звука через LSMASH
+        public static bool LSMASH_Enable_Audio
+        {
+            get
+            {
+                object value = GetValue("LSMASH_Enable_Audio");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("LSMASH_Enable_Audio", value);
+            }
+        }
+
+        //Кол-во потоков для LSMASH
+        public static int LSMASH_Threads
+        {
+            get
+            {
+                object value = GetValue("LSMASH_Threads");
+                if (value == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return Convert.ToInt32(value);
+                }
+            }
+            set
+            {
+                SetInt("LSMASH_Threads", value);
+            }
+        }
+
+        //Удалять индекс-файлы LSMASH (LWLibav)
+        public static bool DeleteLSMASHCache
+        {
+            get
+            {
+                object value = GetValue("DeleteLSMASHCache");
+                if (value == null)
+                {
+                    return false; //*.lwi вроде как еще и файл некоего LightWorks
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("DeleteLSMASHCache", value);
+            }
+        }
     }
 }
