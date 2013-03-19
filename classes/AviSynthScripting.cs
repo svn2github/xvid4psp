@@ -339,7 +339,7 @@ namespace XviD4PSP
            //теперь звук!
            if (m.inaudiostreams.Count > 0 && m.outaudiostreams.Count > 0)
            {
-               if (instream.audiopath != null) //Извлеченные треки
+               if (instream.audiopath != null) //Извлеченные или внешние треки
                {
                    //прописываем импорт видео
                    m.script += "video = " + invideostring + Environment.NewLine;
@@ -390,7 +390,7 @@ namespace XviD4PSP
 
                    //LSMASHAudioSource(string source, int "track"(0), bool "skip_priming"(true), string "layout"(""))
                    //LWLibavAudioSource(string source, int "stream_index"(-1), bool "cache"(true), bool "av_sync"(false), string "layout"(""))
-                   string lsmash = (m.vdecoder == Decoders.LSMASHVideoSource) ? (", track=" + instream.mi_id + ", skip_priming=true") :
+                   string lsmash = (m.vdecoder == Decoders.LSMASHVideoSource) ? (", track=" + (instream.mi_order + 1) + ", skip_priming=true") :
                         (", stream_index=" + instream.ff_order + ", cache=true, av_sync=false");
 
                    int n = 0;
@@ -1015,7 +1015,7 @@ namespace XviD4PSP
            //импорт звука и объединение
            if (m.inaudiostreams.Count > 0 && mode != ScriptMode.VCrop && mode != ScriptMode.Autocrop && mode != ScriptMode.Interlace)
            {
-               if (instream.audiopath != null) //Извлеченные треки
+               if (instream.audiopath != null) //Извлеченные или внешние треки
                {
                    //прописываем импорт видео
                    script += "video = " + invideostring + Environment.NewLine;
@@ -1066,7 +1066,7 @@ namespace XviD4PSP
 
                    //LSMASHAudioSource(string source, int "track"(0), bool "skip_priming"(true), string "layout"(""))
                    //LWLibavAudioSource(string source, int "stream_index"(-1), bool "cache"(true), bool "av_sync"(false), string "layout"(""))
-                   string lsmash = (m.vdecoder == Decoders.LSMASHVideoSource) ? (", track=" + instream.mi_id + ", skip_priming=true") :
+                   string lsmash = (m.vdecoder == Decoders.LSMASHVideoSource) ? (", track=" + (instream.mi_order + 1) + ", skip_priming=true") :
                         (", stream_index=" + instream.ff_order + ", cache=true, av_sync=false");
 
                    int n = 0;

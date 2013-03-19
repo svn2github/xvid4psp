@@ -1,5 +1,7 @@
-﻿XviD4PSP 5.10.329.0 (18.03.2013), main changes:
+﻿XviD4PSP 5.10.330.0 (19.03.2013), main changes:
 
+>>> (r330) For LSMASHAudioSource changed the way how requested audio track number is calculated when decoding
+           directly from the source file.
 >>> (r329) Audio\Video decoding: added support for LSMASHVideoSource, LSMASHAudioSource, LWLibavVideoSource
            and LWLibavAudioSource (all 4 from the LSMASHSource.dll). LWLibav*Source - this is a multiformat
            decoder, it will index your file before opening (unfortunatelly, currently it is not possible to
