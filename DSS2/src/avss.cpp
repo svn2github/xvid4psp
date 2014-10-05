@@ -152,7 +152,7 @@ class DSS2 : public IClip
 			CComPtr<IFileSourceFilter> pLAVS;
 
 			LAVSplitterSettings lss = {};
-			ParseLAVSplitterSettings(&lss, lavs); //"l3 vc2 sm2 sl[] sa[] ti0"
+			ParseLAVSplitterSettings(&lss, lavs); //"l3 vc2 sm2 sl[] sa[] es0 ti0"
 
 			if (lss.Loading == LFSystem || lss.Loading == LFSystemS)
 			{

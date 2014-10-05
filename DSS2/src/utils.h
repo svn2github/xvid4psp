@@ -16,6 +16,7 @@ struct LAVSplitterSettings              //x = digit
 	unsigned int SMode;                 //smx
 	WCHAR SLanguage[LANG_BUFFER_SIZE];  //sl[...]
 	WCHAR SAdvanced[LANG_BUFFER_SIZE];  //sa[...]
+	bool ExtSegments;                   //esx
 	bool TrayIcon;                      //tix
 };
 
@@ -51,7 +52,8 @@ enum HWCodecs
 	H264 = 1,
 	VC1 = 2,
 	MPEG2 = 4,
-	MPEG4 = 8
+	MPEG4 = 8,
+	HEVC = 16
 };
 
 CComPtr<IPin> GetPin(IBaseFilter *pF, bool include_connected, PIN_DIRECTION dir, const GUID *pMT = NULL);

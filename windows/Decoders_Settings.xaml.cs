@@ -288,6 +288,9 @@ namespace XviD4PSP
             }
 
             listview_vdecoders.Height = listview_adecoders.Height = new_height;
+
+            listview.UpdateLayout();
+            this.InvalidateVisual();
         }
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -1129,7 +1132,8 @@ namespace XviD4PSP
             label_lavd_hw.Content = Languages.Translate("Hardware decoding") + ":";
             combo_lavd_hw.Items.Add("Disabled");
             combo_lavd_hw.Items.Add("CUDA");
-            combo_lavd_hw.Items.Add("QuickSink");
+            combo_lavd_hw.Items.Add("QuickSync");
+            combo_lavd_hw.Items.Add("DXVA2");
             combo_lavd_hw.Tag = _def + "Disabled";
             combo_lavd_hw.SelectedIndex = 0;
 
@@ -1138,11 +1142,13 @@ namespace XviD4PSP
             check_dss2_hw_vc1.ToolTip = txt + _def + on;
             check_dss2_hw_mpeg2.ToolTip = txt + _def + on;
             check_dss2_hw_mpeg4.ToolTip = txt + _def + off;
+            check_dss2_hw_hevc.ToolTip = txt + _def + off;
 
             check_dss2_hw_h264.IsChecked = true;
             check_dss2_hw_vc1.IsChecked = true;
             check_dss2_hw_mpeg2.IsChecked = true;
             check_dss2_hw_mpeg4.IsChecked = false;
+            check_dss2_hw_hevc.IsChecked = false;
 
             txt = Languages.Translate("Enable hardware decoding for this resolution");
             check_dss2_hw_sd.ToolTip = txt + " ( <= 1024x576)\r\n\r\n" + _def + on;
@@ -1204,25 +1210,26 @@ namespace XviD4PSP
                 }
                 else if (s[i] == 'h' && nnext_i >= 0)
                 {
-                    if (next_ch == 'm') //hm - HW Mode (от 0 до 2)
+                    if (next_ch == 'm') //hm - HW Mode (от 0 до 3)
                     {
                         combo_lavd_hw.SelectedIndex = Math.Min(nnext_i, combo_lavd_hw.Items.Count - 1);
                         i += 2;
                     }
-                    else if (next_ch == 'c') //hc - HW Codecs (от 0 до 15)
+                    else if (next_ch == 'c') //hc - HW Codecs (от 0 до 31)
                     {
                         int val = nnext_i;
                         if (i + 3 < s.Length && s[i + 3] >= 48 && s[i + 3] <= 57)
                         {
                             val *= 10;
                             val += s[i + 3] - 48;
-                            if (val > 15) val = 15;
+                            if (val > 31) val = 31;
                             i += 1;
                         }
                         check_dss2_hw_h264.IsChecked = ((val & 1) > 0);
                         check_dss2_hw_vc1.IsChecked = ((val & 2) > 0);
                         check_dss2_hw_mpeg2.IsChecked = ((val & 4) > 0);
                         check_dss2_hw_mpeg4.IsChecked = ((val & 8) > 0);
+                        check_dss2_hw_hevc.IsChecked = ((val & 16) > 0);
                         i += 2;
                     }
                     else if (next_ch == 'r') //hr - HW Resolutions (от 0 до 7)
@@ -1307,6 +1314,7 @@ namespace XviD4PSP
             if (check_dss2_hw_vc1.IsChecked.Value) cod += 2;
             if (check_dss2_hw_mpeg2.IsChecked.Value) cod += 4;
             if (check_dss2_hw_mpeg4.IsChecked.Value) cod += 8;
+            if (check_dss2_hw_hevc.IsChecked.Value) cod += 16;
             if (check_dss2_hw_sd.IsChecked.Value) res += 1;
             if (check_dss2_hw_hd.IsChecked.Value) res += 2;
             if (check_dss2_hw_uhd.IsChecked.Value) res += 4;

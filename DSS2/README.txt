@@ -1,4 +1,4 @@
-avss (DSS2) modded by fcp, version 2.0.0.10; LAVFilters settings interface version 0.55.1.
+avss (DSS2) modded by fcp, version 2.0.0.13; LAVFilters settings interface version 0.63.0.
 
 
 DSS2(string filename, float "fps", int "cache", int "seekthr", int "preroll", int "subsm", string "lavs", string "lavd",
@@ -27,12 +27,12 @@ DSS2(string filename, float "fps", int "cache", int "seekthr", int "preroll", in
    value to 10, 20,... or probably 100 and even more (for ts\m2ts files). Or repack your file to something more seekable. Or use DGDecNV.
 8. Added "subsm" setting (int, default = 0, if < 0 rounded to 0):
    0 = do not load subs (or "old method of building the Graph").
-   1 = try to Render the first pin with MEDIATYPE_Subtitle or MEDIATYPE_Text, if GrapthBuilder can't render this pin - you will get an error.
+   1 = try to Render the first pin with MEDIATYPE_Subtitle or MEDIATYPE_Text, if GraphBuilder can't render this pin - you will get an error.
    2+ = 1 + force loading of DirectVobSub to the Graph. If not installed (failed to CoCreateInstance) - it will be loaded directly from VSFilter.dll.
         If Haali Media Splitter is used with "Autoload VSFilter = Yes" - DSS2 will not load DirectVobSub, assuming that it will be loaded by Haali.
 9. Added "lavs" and "lavd" options (string, default = ""). When not an empty string (not a ""), LAVSplitter and\or LAVVideo will be used.
    You can also pass some settings to LAVFilters via this keys.
-   9.1 Available options for LAVSplitter and default values are "l3 vc2 sm2 sl[] sa[] ti0", where:
+   9.1 Available options for LAVSplitter and default values are "l3 vc2 sm2 sl[] sa[] es0 ti0", where:
        l3 (l - Load, loading mode, from 0 to 3):
           0 = load LAVSplitter from system (must be installed\registered), do not apply custom settings (all other settings below will be ignored).
           1 = load LAVSplitter directly from LAVSplitter.ax, do not apply custom settings. If not installed, LAVSplitter will use default settings,
@@ -50,6 +50,9 @@ DSS2(string filename, float "fps", int "cache", int "seekthr", int "preroll", in
           3 = "Advanced"
        sl[] (Subs Languages, string that contain subtitle preferred languages as ISO 639-2 language codes, empty by default, sl[write_something_here])
        sa[] (Subs Advanced, string with values for Advanced mode, empty by default, sa[write_something_here])
+       es0 (es - External Segments, from 0 to x):
+          0 = don't load Matroska Linked Segments from other files
+          1+ = load Matroska Linked Segments from other files
        ti0 (ti - Tray Icon, from 0 to x):
           0 = off
           1+ = on
@@ -87,22 +90,24 @@ DSS2(string filename, float "fps", int "cache", int "seekthr", int "preroll", in
        vc1 (vc - VC-1 decoding, from 0 to x):
           0 = do not use MS WMV9 DMO Decoder for decoding VC-1\WMV3
           1+ = use MS WMV9 DMO Decoder for decoding VC-1\WMV3
-       hm0 (hm - Hardware acceleration Mode, from 0 to 2):
+       hm0 (hm - Hardware acceleration Mode, from 0 to 3):
           0 = None
           1 = CUDA
-          2 = QuickSink
-       hc7 (hc - Hardware Codecs, from 0 to 15):
+          2 = QuickSync
+          3 = DXVA2 (copy-back)
+       hc7 (hc - Hardware Codecs, from 0 to 31):
           1 = H264
           2 = VC-1
           4 = MPEG2
           8 = MPEG4
-          up to 15 - a bitwise-encoded combination (a summ of required values), for example: 7 (1+2+4) = H264, VC-1 and MPEG2 will be enabled, but MPEG4 will not
+          16 = HEVC
+          up to 31 - a bitwise-encoded combination (a summ of required values), for example: 7 (1+2+4) = H264, VC-1 and MPEG2 will be enabled, but MPEG4 will not
        hr3 (hc - Hardware Resolutions, from 0 to 7):
           1 = SD ( <= 1024x576)
           2 = HD ( <= 1980x1200)
           4 = UHD ( > 1980x1200)
           up to 7 - a bitwise-encoded combination (a summ of required values), for example: 3 (1+2) = SD and HD will be enabled, but UHD will not
-       hd0 (hd - Hardware Deinterlacer, from 0 to 2):
+       hd0 (hd - Hardware Deinterlacer (only for CUDA and QuickSync, not for DXVA), from 0 to 2):
           0 = Weave (none)
           1 = Adaptive
           2 = Adaptive x2 fps

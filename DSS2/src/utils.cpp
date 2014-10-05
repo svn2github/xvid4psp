@@ -171,6 +171,7 @@ void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s)
 	lss->SMode = 2;            //Режим субтитров: 0 = NoSubs, 1 = ForcedOnly, 2 = Default, 3 = Advanced
 	lss->SLanguage[0] = '\0';  //Строка с кодами языков для автовыбора субтитров
 	lss->SAdvanced[0] = '\0';  //Строка с Advanced-настройками для автовыбора субтитров
+	lss->ExtSegments = false;  //Загружать linked segments из соседних файлов (для MKV)
 	lss->TrayIcon = false;     //Иконка в трее
 
 	const int l_len = sizeof(lss->SLanguage)/sizeof(lss->SLanguage[0]);
@@ -202,6 +203,11 @@ void ParseLAVSplitterSettings(LAVSplitterSettings *lss, const char *s)
 			else if ((s[i] == 'v' || s[i] == 'V') && (next_ch == 'c' || next_ch == 'C') && nnext_i >= 0) //vc - VC1Fix (от 0 до 2)
 			{
 				lss->VC1Fix = min(nnext_i, 2);
+				i += 2;
+			}
+			else if ((s[i] == 'e' || s[i] == 'E') && (next_ch == 's' || next_ch == 'S') && nnext_i >= 0) //es - ExtSegments (0 = false, 1+ = true)
+			{
+				lss->ExtSegments = (nnext_i > 0);
 				i += 2;
 			}
 			else if ((s[i] == 't' || s[i] == 'T') && (next_ch == 'i' || next_ch == 'I') && nnext_i >= 0) //ti - TrayIcon (0 = false, 1+ = true)
@@ -283,7 +289,7 @@ void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s)
 	lvs->FieldOrder = 0;     //Порядок полей при деинтерлейсе: 0 = Auto, 1 = TFF, 2 = BFF
 	lvs->SWDeint = 0;        //Софтварный деинтерлейс: 0 = None, 1 = Yadif, 2 = Yadif (x2)
 	lvs->WMVDMO = true;      //Использовать MS WMV9 DMO Decoder для декодирования VC-1\WMV3
-	lvs->HWMode = 0;         //Хардварное декодирование: 0 = выкл., 1 = CUDA, 2 = QuickSink
+	lvs->HWMode = 0;         //Хардварное декодирование: 0 = выкл., 1 = CUDA, 2 = QuickSink, 3 = DXVA2 (copy-back)
 	lvs->HWCodecs = 7;       //Кодеки, для которых хардварное декодирование будет использовано (если включено)
 	lvs->HWRes = 3;          //Разрешения, для которых можно использовать хардварное декодирование
 	lvs->HWDeint = 0;        //Хардварный деинтерлейс: 0 = Weave, 1 = Adaptive, 2 = Adaptive (x2)
@@ -355,19 +361,19 @@ void ParseLAVVideoSettings(LAVVideoSettings *lvs, const char *s)
 		}
 		else if ((s[i] == 'h' || s[i] == 'H') && nnext_i >=0)
 		{
-			if (next_ch == 'm' || next_ch == 'M') //hm - HW Mode (от 0 до 2)
+			if (next_ch == 'm' || next_ch == 'M') //hm - HW Mode (от 0 до 3)
 			{
-				lvs->HWMode = min(nnext_i, 2);
+				lvs->HWMode = min(nnext_i, 3);
 				i += 2;
 			}
-			else if (next_ch == 'c' || next_ch == 'C') //hc - HW Codecs (от 0 до 15)
+			else if (next_ch == 'c' || next_ch == 'C') //hc - HW Codecs (от 0 до 31)
 			{
 				lvs->HWCodecs = nnext_i;
 				if (i + 3 < strlen(s) && s[i + 3] >= 48 && s[i + 3] <= 57)
 				{
 					lvs->HWCodecs *= 10;
 					lvs->HWCodecs += s[i + 3] - 48;
-					if (lvs->HWCodecs > 15) lvs->HWCodecs = 15;
+					if (lvs->HWCodecs > 31) lvs->HWCodecs = 31;
 					i += 1;
 				}
 				i += 2;
@@ -403,6 +409,7 @@ bool ApplyLAVSplitterSettings(IFileSourceFilter *pLAVS, LAVSplitterSettings lss)
 	pLAVSs->SetSubtitleMode((LAVSubtitleMode)lss.SMode);
 	pLAVSs->SetPreferredSubtitleLanguages(lss.SLanguage);
 	pLAVSs->SetAdvancedSubtitleConfig(lss.SAdvanced);
+	pLAVSs->SetLoadMatroskaExternalSegments(lss.ExtSegments);
 	pLAVSs->SetTrayIcon(lss.TrayIcon);
 
 	return true;
@@ -468,6 +475,7 @@ bool ApplyLAVVideoSettings(IBaseFilter *pLAVV, LAVVideoSettings lvs, unsigned in
 		pLAVVs->SetHWAccelCodec(HWCodec_VC1, (lvs.HWCodecs & VC1));
 		pLAVVs->SetHWAccelCodec(HWCodec_MPEG2, (lvs.HWCodecs & MPEG2));
 		pLAVVs->SetHWAccelCodec(HWCodec_MPEG4, (lvs.HWCodecs & MPEG4));
+		pLAVVs->SetHWAccelCodec(HWCodec_HEVC, (lvs.HWCodecs & HEVC));
 		pLAVVs->SetHWAccelResolutionFlags(lvs.HWRes);
 
 		if (lvs.DeintMode == 0 || lvs.HWDeint == 0) //Weave

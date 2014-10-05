@@ -1,4 +1,8 @@
-﻿XviD4PSP 5.10.330.0 (19.03.2013), main changes:
+﻿XviD4PSP 5.10.331.0 (xx.xx.xxxx), main changes:
+
+>>> (r331) "Tools->Open XviD4PSP folder" - was broken since r321, fixed now.
+>>> (r331) DSS2: updates for LAVFilters 0.63.0. DXVA2 hardware decoding mode is now also choosable, and
+           HEVC codec too (HEVC "hybrid" hw-acceleration is stated as experimental in LAVFilters 0.63.0).
 
 >>> (r330) For LSMASHAudioSource changed the way how requested audio track number is calculated when decoding
            directly from the source file.

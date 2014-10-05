@@ -1038,7 +1038,8 @@ namespace XviD4PSP
             if (sender is MenuItem)
             {
                 //Исполняемые файлы утилит
-                if (sender == menu_dgindex) path += "\\apps\\DGMPGDec\\DGIndex.exe";
+                if (sender == mnApps_Folder) { /*Папка XviD4PSP*/}
+                else if (sender == menu_dgindex) path += "\\apps\\DGMPGDec\\DGIndex.exe";
                 else if (sender == menu_dgpulldown) path += "\\apps\\DGPulldown\\DGPulldown.exe";
                 else if (sender == menu_dgavcindex) path += "\\apps\\DGAVCDec\\DGAVCIndex.exe";
                 else if (sender == menu_virtualdubmod) path += "\\apps\\VirtualDubMod\\VirtualDubMod.exe";

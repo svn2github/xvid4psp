@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2010-2012 Hendrik Leppkes
+ *      Copyright (C) 2010-2014 Hendrik Leppkes
  *      http://www.1f0.de
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -77,8 +77,18 @@ typedef enum LAVVideoCodec {
   Codec_Snow,
   Codec_FFV1,
   Codec_v210,
+  Codec_JPEG2000,
+  Codec_VMNC,
+  Codec_FLIC,
+  Codec_G2M,
+  Codec_ICOD,
+  Codec_THP,
+  Codec_HEVC,
+  Codec_VP9,
+  Codec_TrueMotion,
+  Codec_VP7,
 
-  Codec_VideoNB            // Number of entrys (do not use when dynamically linking)
+  Codec_VideoNB            // Number of entries (do not use when dynamically linking)
 };
 
 // Codecs with hardware acceleration
@@ -88,8 +98,9 @@ typedef enum LAVVideoHWCodec {
   HWCodec_MPEG2 = Codec_MPEG2,
   HWCodec_MPEG4 = Codec_MPEG4,
   HWCodec_MPEG2DVD,
+  HWCodec_HEVC,
 
-  HWCodec_NB    = HWCodec_MPEG2DVD + 1
+  HWCodec_NB    = HWCodec_HEVC + 1
 };
 
 // Flags for HW Resolution support
@@ -167,6 +178,8 @@ typedef enum LAVOutPixFmts {
   LAVOutPixFmt_YV16,            // 4:2:2, 8-bit, planar
   LAVOutPixFmt_YV24,            // 4:4:4, 8-bit, planar
 
+  LAVOutPixFmt_RGB48,           // 48-bit RGB (16-bit per pixel, BGR)
+
   LAVOutPixFmt_NB               // Number of formats
 } LAVOutPixFmts;
 
@@ -204,14 +217,14 @@ interface ILAVVideoSettings : public IUnknown
   // >1 = Multi-Threading with the specified number of threads
   STDMETHOD_(DWORD,GetNumThreads)() = 0;
 
-  // Set wether the aspect ratio encoded in the stream should be forwarded to the renderer,
+  // Set whether the aspect ratio encoded in the stream should be forwarded to the renderer,
   // or the aspect ratio specified by the source filter should be kept.
   // 0 = AR from the source filter
   // 1 = AR from the Stream
   // 2 = AR from stream if source is not reliable
   STDMETHOD(SetStreamAR)(DWORD bStreamAR) = 0;
 
-  // Get wether the aspect ratio encoded in the stream should be forwarded to the renderer,
+  // Get whether the aspect ratio encoded in the stream should be forwarded to the renderer,
   // or the aspect ratio specified by the source filter should be kept.
   // 0 = AR from the source filter
   // 1 = AR from the Stream
@@ -280,11 +293,11 @@ interface ILAVVideoSettings : public IUnknown
   // Get the deinterlacing output for the hardware decoder
   STDMETHOD_(LAVDeintOutput, GetHWAccelDeintOutput)() = 0;
 
-  // Set wether the hardware decoder should force high-quality deinterlacing
+  // Set whether the hardware decoder should force high-quality deinterlacing
   // Note: this option is not supported on all decoder implementations and/or all operating systems
   STDMETHOD(SetHWAccelDeintHQ)(BOOL bHQ) = 0;
 
-  // Get wether the hardware decoder should force high-quality deinterlacing
+  // Get whether the hardware decoder should force high-quality deinterlacing
   // Note: this option is not supported on all decoder implementations and/or all operating systems
   STDMETHOD_(BOOL, GetHWAccelDeintHQ)() = 0;
 
@@ -343,6 +356,12 @@ interface ILAVVideoSettings : public IUnknown
 
   // Get the Deint Mode
   STDMETHOD_(LAVDeintMode,GetDeinterlacingMode)() = 0;
+
+  // Set the index of the GPU to be used for hardware decoding
+  // Only supported for CUVID and DXVA2 copy-back. If the device is not valid, it'll fallback to auto-detection
+  // Must be called before an input is connected to LAV Video, and the setting is non-persistent
+  // NOTE: For CUVID, the index defines the index of the CUDA capable device, while for DXVA2, the list includes all D3D9 devices
+  STDMETHOD(SetGPUDeviceIndex)(DWORD dwDevice) = 0;
 };
 
 // LAV Video status interface
@@ -350,5 +369,5 @@ interface ILAVVideoSettings : public IUnknown
 interface ILAVVideoStatus : public IUnknown
 {
   // Get the name of the active decoder (can return NULL if none is active)
-  STDMETHOD_(const WCHAR *, GetActiveDecoderName)() = 0;
+  STDMETHOD_(LPCWSTR, GetActiveDecoderName)() = 0;
 };
