@@ -125,6 +125,9 @@ namespace XviD4PSP
             catch (Exception) { return 0; }
         }
 
+        private const uint GMEM_MOVEABLE = 0x0002;
+        private const uint CF_UNICODETEXT = 13;
+
         [DllImport("user32.dll")]
         private static extern bool OpenClipboard(IntPtr hWndNewOwner);
         [DllImport("user32.dll")]
@@ -134,25 +137,61 @@ namespace XviD4PSP
         [DllImport("user32.dll")]
         private static extern bool CloseClipboard();
 
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GlobalAlloc(uint uFlags, uint dwBytes);
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GlobalLock(IntPtr hMem);
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GlobalUnlock(IntPtr hMem);
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GlobalFree(IntPtr hMem);
+
+        [DllImport("kernel32.dll")]
+        private static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
+
         public static bool CopyToClipboard(string text)
         {
             bool ok = false;
             if (OpenClipboard(IntPtr.Zero))
             {
-                IntPtr pText = IntPtr.Zero;
+                IntPtr hGlobal = IntPtr.Zero;
                 try
                 {
                     if (EmptyClipboard())
                     {
-                        pText = Marshal.StringToHGlobalUni(text);          //StringToHGlobalAnsi
-                        ok = (SetClipboardData(13, pText) != IntPtr.Zero); //1 - CF_TEXT, 13 - CF_UNICODETEXT
+                        uint bytes = (uint)((text.Length + 1) * 2);
+                        hGlobal = GlobalAlloc(GMEM_MOVEABLE, bytes);
+
+                        if (hGlobal != IntPtr.Zero)
+                        {
+                            IntPtr hText = GlobalLock(hGlobal);
+                            if (hText != IntPtr.Zero)
+                            {
+                                try
+                                {
+                                    unsafe
+                                    {
+                                        fixed (char* firstChar = text)
+                                        {
+                                            CopyMemory(hText, (IntPtr)firstChar, bytes);
+                                        }
+                                    }
+                                }
+                                finally
+                                {
+                                    GlobalUnlock(hText);
+                                }
+
+                                ok = (SetClipboardData(CF_UNICODETEXT, hGlobal) != IntPtr.Zero);
+                            }
+                        }
                     }
                 }
                 finally
                 {
                     CloseClipboard();
-                    if (!ok && pText != IntPtr.Zero)
-                        Marshal.FreeHGlobal(pText);
+                    if (!ok && hGlobal != IntPtr.Zero)
+                        GlobalFree(hGlobal);
                 }
             }
             return ok;
