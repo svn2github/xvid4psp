@@ -92,9 +92,9 @@ namespace XviD4PSP
                     m.inframes = media.Frames;
                     m.standart = media.Standart;
 
-                    //Возвращаем 29фпс для мпег2 видео с пуллдауном, т.к. MediaInfo выдает для него 23фпс, а MPEG2Source из-за пуллдауна декодирует с 29-ю..
-                    //Продолжительность пересчитывается в Caching
-                    if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source)
+                    //Возвращаем 29фпс для видео с пуллдауном, т.к. MediaInfo выдает для него 23фпс, а MPEG2Source\DGSource
+                    //без ForceFilm из-за пуллдауна будет декодировать с 29-ю. Продолжительность пересчитывается в Caching.
+                    if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source || m.vdecoder == AviSynthScripting.Decoders.DGSource)
                     {
                         if (media.ScanOrder.Contains("Pulldown") && m.inframerate == "23.976" && !m.IsForcedFilm)
                         {

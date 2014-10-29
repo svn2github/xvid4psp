@@ -2,44 +2,34 @@
 using System.IO;
 using System.Net;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Navigation;
-using System.Threading;
-using System.Diagnostics;
 using System.Windows.Threading;
-using System.ComponentModel;
-using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Collections;
 using System.Windows.Interop;
+using System.Diagnostics;
+using System.ComponentModel;
+using System.Collections;
+using System.Text.RegularExpressions;
+using System.Text;
 
 namespace XviD4PSP
 {
-	public partial class Indexing
+	public partial class Indexing_DGIndexNV
 	{
         private static object locker = new object();
         private BackgroundWorker worker = null;
         private Process encoderProcess = null;
         private IntPtr Handle = IntPtr.Zero;
         private bool IsError = false;
-        private string filelistpath;
-        private string indexfile;
-        private int FilmPercent = -1;
         private int num_closes = 0;
-        private int iHandle;
+        private string indexfile;
         public Massive m;
 
-		public Indexing()
+		public Indexing_DGIndexNV()
 		{
 			this.InitializeComponent();
 			// Insert code required on object creation below this point.
 		}
 
-        public Indexing(Massive mass)
+        public Indexing_DGIndexNV(Massive mass)
         {
             this.InitializeComponent();
             this.Owner = App.Current.MainWindow;
@@ -102,9 +92,6 @@ namespace XviD4PSP
             }
             else
             {
-                //Удаляем мусор
-                SafeFileDelete(filelistpath);
-
                 //Удаление индекс-папки при отмене или ошибке
                 if ((num_closes > 0 || m == null) && File.Exists(indexfile))
                     SafeDirDelete(Path.GetDirectoryName(indexfile));
@@ -186,7 +173,7 @@ namespace XviD4PSP
                 if (prCurrent.IsIndeterminate)
                 {
                     prCurrent.IsIndeterminate = false;
-                    label_info.Content = Languages.Translate("Indexing") + " (DGIndex)...";
+                    label_info.Content = Languages.Translate("Indexing") + " (DGIndexNV)...";
                 }
 
                 prCurrent.Value = e.ProgressPercentage;
@@ -204,53 +191,60 @@ namespace XviD4PSP
             {
                 indexfile = m.indexfile;
 
+                encoderProcess = new Process();
+                ProcessStartInfo info = new ProcessStartInfo();
+
+                info.FileName = Calculate.StartupPath + "\\apps\\DGDecNV\\DGIndexNV.exe";
+                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+
+                //DGIndexNV.exe отсутствует
+                if (!File.Exists(info.FileName))
+                {
+                    throw new Exception("DGIndexNV <- " + Languages.Translate("You need to obtain your licensed copy of the DGDecNV package from the author (Donald Graft) in order to use it!") +
+                    "\r\n" + Languages.Translate("Home page") + ": http://rationalqm.us/dgdecnv/dgdecnv.html");
+                }
+
                 //создаём папку
                 if (!Directory.Exists(Path.GetDirectoryName(m.indexfile)))
                     Directory.CreateDirectory(Path.GetDirectoryName(m.indexfile));
 
-                encoderProcess = new Process();
-                ProcessStartInfo info = new ProcessStartInfo();
-
-                info.FileName = Calculate.StartupPath + "\\apps\\DGMPGDec\\DGIndex.exe";
-                info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-
                 //создаём список файлов
                 string files_list = "";
-                foreach (string _line in m.infileslist) files_list += _line + "\r\n";
-                File.WriteAllText((filelistpath = Settings.TempPath + "\\" + m.key + ".lst"), files_list, Encoding.Default);
-
-                //Выходим при отмене
-                if (worker.CancellationPending) return;
+                for (int i = 0; i < m.infileslist.Length; i++)
+                {
+                    files_list += "\"" + m.infileslist[i] + "\"";
+                    if (i < m.infileslist.Length - 1) files_list += ",";
+                }
 
                 //Извлекаем звук, только если он нам нужен
-                string ademux = (Settings.EnableAudio) ? "-OM=2" : "-OM=0";
+                string ademux = (Settings.EnableAudio) ? " -a" : "";
 
-                info.Arguments = "-SD=\" -FO=0 " + ademux + " -BF=\"" + filelistpath + "\" -OF=\"" + Calculate.RemoveExtention(m.indexfile, true) + "\" -HIDE -EXIT";
+                //Выходим при отмене
+                if (worker.CancellationPending)
+                    return;
 
+                //DGIndexNV -i "d:\files\my wedding day.264","d:\files\my divorce day.264" -o "d:\my wedding day.dgi" -e
+                info.Arguments = "-i " + files_list + " -o \"" + Calculate.RemoveExtention(m.indexfile, true) + ".dgi\" -h" + ademux;
+
+                info.CreateNoWindow = true;
+                info.UseShellExecute = false;
+                info.RedirectStandardOutput = true;
+                info.RedirectStandardError = false;
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
                 encoderProcess.PriorityClass = ProcessPriorityClass.Normal;
                 encoderProcess.PriorityBoostEnabled = true;
 
-                for (int i = 0; iHandle == 0 && i < 20; i++)
+                Match mat;
+                Regex r = new Regex(@"(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                while (!encoderProcess.HasExited)
                 {
-                    iHandle = Win32.GetWindowHandle("DGIndex[");
-                    Thread.Sleep(100);
-                }
-
-                if (iHandle != 0)
-                {
-                    Match mat;
-                    StringBuilder st = new StringBuilder(256);
-                    Regex r = new Regex(@"(\d+)%", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                    while (!encoderProcess.HasExited)
+                    string line = encoderProcess.StandardOutput.ReadLine();
+                    if (line != null)
                     {
-                        if (Win32.GetWindowText(iHandle, st, 256) > 0)
-                        {
-                            mat = r.Match(st.ToString());
-                            if (mat.Success) worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
-                        }
-                        Thread.Sleep(100);
+                        mat = r.Match(line);
+                        if (mat.Success)
+                            worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
                     }
                 }
 
@@ -259,63 +253,25 @@ namespace XviD4PSP
                 //Индекс-файл не найден
                 if (!worker.CancellationPending && !File.Exists(m.indexfile))
                     throw new Exception(Languages.Translate("Can`t find file") + ": " + m.indexfile);
-            }
-            catch (Exception ex)
-            {
-                if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
-                {
-                    //Ошибка
-                    e.Result = ex;
-                }
 
-                m = null;
-                return;
-            }
-
-            try
-            {
-                //Auto ForceFilm (только для 23.976, 29.970, и если частота неизвестна)
-                if (worker.CancellationPending || !Settings.DGForceFilm || !string.IsNullOrEmpty(m.inframerate) && m.inframerate != "23.976" && m.inframerate != "29.970")
+                if (worker.CancellationPending)
                     return;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //worker или m == null
+                if (worker != null && !worker.CancellationPending && m != null && num_closes == 0)
+                {
+                    //Ошибка
+                    e.Result = ex;
+                }
+
+                m = null;
                 return;
             }
 
-            try //Теперь ForceFilm
+            try //Перепроверка индекса и ForceFilm
             {
-                FilmPercent = 0;
-
-                //Получение процента для ForceFilm
-                Match mat; //FINISHED  94.57% FILM
-                Regex r = new Regex(@"^FINISHED\s+(\d+\.*\d*)%.FILM", RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                using (StreamReader sr = new StreamReader(m.indexfile, Encoding.Default))
-                    while (!sr.EndOfStream)
-                    {
-                        mat = r.Match(sr.ReadLine());
-                        if (mat.Success) FilmPercent = Convert.ToInt32(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
-                    }
-
-                //Выход при отмене, или если процент Film недостаточен
-                if (worker.CancellationPending || FilmPercent < Settings.DGFilmPercent) return;
-
-                //Перезапись d2v-файла
-                string file = "", line = "";
-                using (StreamReader sr = new StreamReader(m.indexfile, Encoding.Default))
-                    while (!sr.EndOfStream)
-                    {
-                        line = sr.ReadLine();
-                        if (line.StartsWith("Field_Operation")) file += "Field_Operation=1\r\n";
-                        else if (line.StartsWith("Frame_Rate")) file += "Frame_Rate=23976 (24000/1001)\r\n";
-                        else file += line + Environment.NewLine;
-                    }
-
-                using (StreamWriter sw = new StreamWriter(m.indexfile, false, Encoding.Default))
-                    sw.Write(file);
-
-                m.IsForcedFilm = true;
+                m.IsForcedFilm = CheckIndexAndForceFilm(m.indexfile, m.inframerate);
             }
             catch (Exception ex)
             {
@@ -327,6 +283,88 @@ namespace XviD4PSP
 
                 m = null;
             }
+        }
+
+        public static bool CheckIndexAndForceFilm(string indexfile, string inframerate)
+        {
+            int FilmPercent = 0;
+            int size_w = 0, size_h = 0;
+            int fps_n = 0, fps_d = 0;
+            string line;
+
+            #region
+            /*
+             * FPS 25000 / 1000
+             * CODED 30791
+             * PLAYBACK 30791
+             * 0.00% FILM
+             * ORDER 1
+             * -------------
+             * SIZ 720 x 480 
+             * FPS 30000 / 1001
+             * CODED 679
+             * PLAYBACK 849
+             * 100.00% FILM
+             * ORDER 1
+             * -------------
+             * Файл не проиндексировался:
+             * SIZ 0 x 0 
+             * FPS 0 / 0
+             * CODED 0
+             * PLAYBACK 0
+             * 0.00% FILM
+             * ORDER -1
+             */
+            #endregion
+
+            //Проверка индекса и получение процента для ForceFilm
+            Match mat; //100.00% FILM
+            Regex film = new Regex(@"^(\d+\.*\d*)%\sFILM", RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex size = new Regex(@"^SIZ\s(\d+)\sx\s(\d+)", RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex fps = new Regex(@"^FPS\s(\d+)\s/\s(\d+)", RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            using (StreamReader sr = new StreamReader(indexfile, Encoding.Default))
+                while (!sr.EndOfStream)
+                {
+                    line = sr.ReadLine();
+
+                    mat = film.Match(line);
+                    if (mat.Success)
+                    {
+                        FilmPercent = Convert.ToInt32(Calculate.ConvertStringToDouble(mat.Groups[1].Value));
+                        continue;
+                    }
+
+                    mat = size.Match(line);
+                    if (mat.Success)
+                    {
+                        size_w = Convert.ToInt32(mat.Groups[1].Value);
+                        size_h = Convert.ToInt32(mat.Groups[2].Value);
+                        continue;
+                    }
+
+                    mat = fps.Match(line);
+                    if (mat.Success)
+                    {
+                        fps_n = Convert.ToInt32(mat.Groups[1].Value);
+                        fps_d = Convert.ToInt32(mat.Groups[2].Value);
+                        continue;
+                    }
+                }
+
+            //Кривой индекс (произошла ошибка)
+            if (size_w == 0 || size_h == 0 || fps_n == 0 || fps_d == 0)
+            {
+                throw new Exception(Languages.Translate("Broken or incomplete index file detected!") + "\r\n" +
+                    Languages.Translate("Unsupported by DGDIndexNV container or codec - one of the reasons for this."));
+            }
+
+            if (!Settings.DGForceFilm || FilmPercent < Settings.DGFilmPercent)
+                return false;
+
+            if (!string.IsNullOrEmpty(inframerate) && (inframerate == "23.976" || inframerate == "29.970"))
+                return true;
+
+            return false;
         }
 
         private void worker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -339,37 +377,10 @@ namespace XviD4PSP
             else if (e.Result != null)
             {
                 m = null;
-                if (FilmPercent < 0)
-                    ErrorException("Indexing (DGIndex): " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
-                else
-                    ErrorException("Auto ForceFilm: " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
+                ErrorException("Indexing (DGIndexNV): " + ((Exception)e.Result).Message, ((Exception)e.Result).StackTrace);
             }
 
             Close();
-        }
-
-        public static ArrayList GetTracks(string indexfile) //звук, получение списка звуковых треков
-        {
-            ArrayList tracklist = new ArrayList();
-            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(indexfile), "*"))
-            {
-                string ext = Path.GetExtension(file).ToLower();
-                string path = Path.GetFileNameWithoutExtension(indexfile);
-
-                //Отрезаем .track_number (для файлов, полученных после tsMuxeR`а)
-                if (path.Length >= 12 && path.Contains(".track_"))
-                    path = Regex.Replace(path, @"\.track_\d+", "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-
-                if (Path.GetFileNameWithoutExtension(file).StartsWith(path))
-                {
-                    if (ext == ".mpa" || ext == ".ac3" || ext == ".wav" || ext == ".mp2" || ext == ".mp3" || ext == ".dts" || ext == ".m4a" || ext == ".aac"
-                         || ext == ".flac" || ext == ".ape" || ext == ".aiff" || ext == ".aif" || ext == ".wv" || ext == ".ogg" || ext == ".wma")
-                    {
-                        tracklist.Add(file);
-                    }
-                }
-            }
-            return tracklist;
         }
 
         internal delegate void ErrorExceptionDelegate(string data, string info);

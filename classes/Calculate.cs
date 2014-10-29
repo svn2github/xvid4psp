@@ -749,7 +749,7 @@ namespace XviD4PSP
                 return null;
         }
 
-        public static string GetBestIndexFile(string infilepath)
+        public static string GetBestIndexFile(string infilepath, bool NV)
         {
             string title = "";
             if (IsValidVOBName(infilepath))
@@ -763,16 +763,35 @@ namespace XviD4PSP
             string dvdname = GetDVDName(infilepath);
 
             //Куда помещать индекс-папку
-            if (IsReadOnly(infilepath) || Settings.DGIndexInTemp)
+            if (!NV)
             {
-                //В Temp-папку
-                indexpath = Settings.TempPath + "\\" + dvdname + ".index\\" + dvdname + title + ".d2v";
+                //Для DGIndex
+                if (IsReadOnly(infilepath) || Settings.DGIndexInTemp)
+                {
+                    //В Temp-папку
+                    indexpath = Settings.TempPath + "\\" + dvdname + ".index\\" + dvdname + title + ".d2v";
+                }
+                else
+                {
+                    //Рядом с исходником (если это ДВД, то имеет смысл изменить имя папки на более короткое)
+                    indexpath = Path.GetDirectoryName(infilepath) + "\\" + ((title.Length > 0 && dvdname.Length > 10) ? "DGIndex" : dvdname) +
+                        ".index\\" + dvdname + title + ".d2v";
+                }
             }
             else
             {
-                //Рядом с исходником (если это ДВД, то имеет смысл изменить имя папки на более короткое)
-                indexpath = Path.GetDirectoryName(infilepath) + "\\" + ((title.Length > 0 && dvdname.Length > 10) ? "DGIndex" : dvdname) +
-                    ".index\\" + dvdname + title + ".d2v";
+                //Для DGIndexNV
+                if (IsReadOnly(infilepath) || Settings.DGIndexNVInTemp)
+                {
+                    //В Temp-папку
+                    indexpath = Settings.TempPath + "\\" + dvdname + ".idxNV\\" + dvdname + title + ".dgi";
+                }
+                else
+                {
+                    //Рядом с исходником (если это ДВД, то имеет смысл изменить имя папки на более короткое)
+                    indexpath = Path.GetDirectoryName(infilepath) + "\\" + ((title.Length > 0 && dvdname.Length > 10) ? "DGIndexNV" : dvdname) +
+                        ".idxNV\\" + dvdname + title + ".dgi";
+                }
             }
 
             //Проверяем длину пути, если есть превышение - вылезет Exception с красивым сообщением :)

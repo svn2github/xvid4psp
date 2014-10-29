@@ -32,10 +32,6 @@ namespace XviD4PSP
             check_x262_ssim.ToolTip = check_x264_ssim.ToolTip.ToString().Replace("x264", "x262");
             check_show_arguments.Content = Languages.Translate("Show encoding arguments");
             check_show_script.Content = Languages.Translate("Show AviSynth script");
-            check_ffms_cache_in_temp.Content = Languages.Translate("Create FFmpegSource2 cache in Temp folder");
-            check_delete_ff_cache.Content = Languages.Translate("Auto delete FFmpegSource2 cache");
-            check_delete_lsmash_cache.Content = Languages.Translate("Auto delete LWLibav cache");
-            check_delete_dgindex_cache.Content = Languages.Translate("Auto delete DGIndex cache");
             check_search_temp.Content = Languages.Translate("Search the best temp folder place on program start");
             check_auto_colormatrix.Content = Languages.Translate("Auto apply ColorMatrix for MPEG2 files");
             label_temppath.Content = Languages.Translate("Temp folder path:");
@@ -52,7 +48,6 @@ namespace XviD4PSP
             label_extensions.Content = Languages.Translate("Only files with this extensions will be opened:");
             check_batch_autoencoding.Content = Languages.Translate("Start encoding after opening all files");
             check_is_always_close_encoding.Content = Languages.Translate("Autoclose encoding window if task was successfully accomplished");
-            check_dgindex_cache_in_temp.Content = Languages.Translate("Create DGIndex cache in Temp folder");
             label_clone.Content = Languages.Translate("Clone from the already opened file to each other:");
             check_clone_ar.Content = Languages.Translate("Aspect/Resolution info (crop, aspect, etc)");
             check_clone_trim.Content = Languages.Translate("Trim");
@@ -60,6 +55,16 @@ namespace XviD4PSP
             check_clone_fps.Content = Languages.Translate("Framerate");
             check_clone_audio.Content = Languages.Translate("Audio options");
             check_batch_pause.Content = Languages.Translate("Make a pause after 1-st opened file");
+
+            string create_cache = " - " + Languages.Translate("Create caches in Temp folder");
+            string delete_cache = " - " + Languages.Translate("Auto delete caches");
+            check_ffms_cache_in_temp.Content = "FFmpegSource2" + create_cache;
+            check_delete_ff_cache.Content = "FFmpegSource2" + delete_cache;
+            check_dgindex_cache_in_temp.Content = "DGIndex" + create_cache;
+            check_delete_dgindex_cache.Content = "DGIndex" + delete_cache;
+            check_dgindexnv_cache_in_temp.Content = "DGIndexNV" + create_cache;
+            check_delete_dgindexnv_cache.Content = "DGIndexNV" + delete_cache;
+            check_delete_lsmash_cache.Content = "LWLibav" + delete_cache;
 
             if (SysInfo.GetOSArchInt() == 64)
             {
@@ -115,6 +120,7 @@ namespace XviD4PSP
             check_delete_ff_cache.IsChecked = Settings.DeleteFFCache;
             check_delete_lsmash_cache.IsChecked = Settings.DeleteLSMASHCache;
             check_delete_dgindex_cache.IsChecked = Settings.DeleteDGIndexCache;
+            check_delete_dgindexnv_cache.IsChecked = Settings.DeleteDGIndexNVCache;
             check_search_temp.IsChecked = Settings.SearchTempPath;
             textbox_temp.Text = Settings.TempPath;
             check_auto_colormatrix.IsChecked = Settings.AutoColorMatrix;
@@ -127,8 +133,9 @@ namespace XviD4PSP
             check_logfile_tempfolder.IsChecked = Settings.LogInTemp;                              //.. а файл поместить во временную папку
             textbox_extensions.Text = Settings.GoodFilesExtensions;                               //Окно со списком допустимых расширений файлов (при пакетной обработке)
             check_batch_autoencoding.IsChecked = Settings.AutoBatchEncoding;                      //Автозапуск кодирования (при пакетной обработке)
-            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp;                       //Помещать DGIndex-кэш в Темп-папку
             check_ffms_cache_in_temp.IsChecked = Settings.FFMS_IndexInTemp;                       //Помещать FFMS2-кэш в Темп-папку
+            check_dgindex_cache_in_temp.IsChecked = Settings.DGIndexInTemp;                       //Помещать DGIndex-кэш в Темп-папку
+            check_dgindexnv_cache_in_temp.IsChecked = Settings.DGIndexNVInTemp;                   //Помещать DGIndexNV-кэш в Темп-папку
             check_clone_ar.IsChecked = Settings.BatchCloneAR;                                     //Наследовать параметры Разрешения\Аспекта от предыдущего файла (при пакетной обработке)
             check_clone_trim.IsChecked = Settings.BatchCloneTrim;                                 //То-же что и выше, но для обрезки
             check_clone_deint.IsChecked = Settings.BatchCloneDeint;                               //А это для деинтерлейса
@@ -138,8 +145,8 @@ namespace XviD4PSP
             check_use_avs4x264.IsChecked = Settings.UseAVS4x264;                                  //Запускать x264\x264_64 через avs4x264
             check_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
             check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled =
-                 check_delete_lsmash_cache.IsEnabled =
-                 check_delete_dgindex_cache.IsEnabled = Settings.DeleteTempFiles);                //Удалять кэши и временные файлы
+                 check_delete_lsmash_cache.IsEnabled = check_delete_dgindex_cache.IsEnabled =
+                 check_delete_dgindexnv_cache.IsEnabled = Settings.DeleteTempFiles);              //Удалять кэши и временные файлы
             check_use_trayicon.IsChecked = Settings.TrayIconIsEnabled;                            //Иконка в трее вкл\выкл
             check_audio_first.IsChecked = Settings.EncodeAudioFirst;                              //Кодировать сначала звук, потом видео
             check_use_win7taskbar.IsChecked = Settings.Win7TaskbarIsEnabled;                      //Поддержка таскбара в Win7 вкл\выкл
@@ -261,27 +268,41 @@ namespace XviD4PSP
         {
             Settings.DeleteTempFiles = check_delete_ff_cache.IsEnabled =
                 check_delete_lsmash_cache.IsEnabled = check_delete_dgindex_cache.IsEnabled =
-                !check_dont_delete_caches.IsChecked.Value;
-        }
-
-        private void check_delete_ff_cache_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.DeleteFFCache = check_delete_ff_cache.IsChecked.Value;
+                check_delete_dgindexnv_cache.IsEnabled = !check_dont_delete_caches.IsChecked.Value;
         }
 
         private void check_ffms_cache_in_temp_Click(object sender, RoutedEventArgs e)
         {
             Settings.FFMS_IndexInTemp = check_ffms_cache_in_temp.IsChecked.Value;
         }
-
-        private void check_delete_lsmash_cache_Click(object sender, RoutedEventArgs e)
+        private void check_delete_ff_cache_Click(object sender, RoutedEventArgs e)
         {
-            Settings.DeleteLSMASHCache = check_delete_lsmash_cache.IsChecked.Value;
+            Settings.DeleteFFCache = check_delete_ff_cache.IsChecked.Value;
+        }
+
+        private void check_dgindex_cache_in_temp_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DGIndexInTemp = check_dgindex_cache_in_temp.IsChecked.Value;
         }
 
         private void check_delete_dgindex_cache_Click(object sender, RoutedEventArgs e)
         {
             Settings.DeleteDGIndexCache = check_delete_dgindex_cache.IsChecked.Value;
+        }
+
+        private void check_dgindexnv_cache_in_temp_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DGIndexNVInTemp = check_dgindexnv_cache_in_temp.IsChecked.Value;
+        }
+
+        private void check_delete_dgindexnv_cache_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DeleteDGIndexNVCache = check_delete_dgindexnv_cache.IsChecked.Value;
+        }
+
+        private void check_delete_lsmash_cache_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.DeleteLSMASHCache = check_delete_lsmash_cache.IsChecked.Value;
         }
 
         private void check_search_temp_Click(object sender, RoutedEventArgs e)
@@ -376,11 +397,6 @@ namespace XviD4PSP
         private void check_is_always_close_encoding_Click(object sender, RoutedEventArgs e)
         {
             Settings.AutoClose = check_is_always_close_encoding.IsChecked.Value;
-        }
-
-        private void check_dgindex_cache_in_temp_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.DGIndexInTemp = check_dgindex_cache_in_temp.IsChecked.Value;
         }
 
         private void check_clone_ar_Click(object sender, RoutedEventArgs e)

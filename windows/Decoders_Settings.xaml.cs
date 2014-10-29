@@ -39,6 +39,7 @@ namespace XviD4PSP
         private string dec_lwlv = AviSynthScripting.Decoders.LWLibavVideoSource.ToString();
         private string dec_lsmv = AviSynthScripting.Decoders.LSMASHVideoSource.ToString();
         private string dec_qts = AviSynthScripting.Decoders.QTInput.ToString();
+        private string dec_dgnv = AviSynthScripting.Decoders.DGSource.ToString();
 
         //Список аудио декодеров
         private string dec_ac3 = AviSynthScripting.Decoders.NicAC3Source.ToString();
@@ -54,7 +55,7 @@ namespace XviD4PSP
         //Подсказки к видео декодерам
         private string tltp_avi = Languages.Translate("This decoder uses VFW AVIFile interface, or AviSynth`s built-in OpenDML code (taken from VirtualDub).") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": avi, vdr";
-        private string tltp_m2s = Languages.Translate("Probably the best choice for MPEG-files. It provides frame accurate seeking and uses internal MPEG1/2 decoder.") +
+        private string tltp_m2s = "(DGIndex, DGMPGDec)\r\n" + Languages.Translate("Probably the best choice for MPEG-files. It provides frame accurate seeking and uses internal MPEG1/2 decoder.") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": MPEG2-PS/TS (mpg, vob, mod,..)";
         private string tltp_dss = Languages.Translate("This decoder uses installed on your system DirecShow filters (splitters and decoders, including their settings!) for decoding.") +
             "\r\n" + Languages.Translate("Frame accurate seeking is not guaranteed!") +
@@ -72,6 +73,9 @@ namespace XviD4PSP
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": MPEG-4 (mp4, mov, 3gp)";
         private string tltp_qts = Languages.Translate("This decoder uses QuickTime environment for decoding, so QuickTime is required!") +
             "\r\n\r\n" + Languages.Translate("Supported formats") + ": mov";
+        private string tltp_dgnv = "(DGIndexNV, DGDecNV)\r\n" + Languages.Translate("This decoder uses an NVIDIA video card for decoding, it provides frame accurate seeking.") +
+            "\r\n" + Languages.Translate("You need to obtain your licensed copy of the DGDecNV package from the author (Donald Graft) in order to use it!") +
+            "\r\n\r\n" + Languages.Translate("Supported formats") + ": MPEG-PS/TS, MP4, MKV; MPEG2, H264, VC1";
 
         //Подсказки к аудио декодерам
         private string tltp_ac3 = Languages.Translate("Supported formats") + ": ac3";
@@ -344,6 +348,7 @@ namespace XviD4PSP
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_lwlv, ToolTip = tltp_lwlv });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_lsmv, ToolTip = tltp_lsmv });
             vcombo.Items.Add(new ComboBoxItem() { Content = dec_qts, ToolTip = tltp_qts });
+            vcombo.Items.Add(new ComboBoxItem() { Content = dec_dgnv, ToolTip = tltp_dgnv });
             vcombo.SelectedIndex = (int)vcombo.Tag;
             vdecoders_loaded = true;
         }
@@ -395,6 +400,7 @@ namespace XviD4PSP
                     else if (dec.Equals(dec_lwlv, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_lwlv; index = 5; }
                     else if (dec.Equals(dec_lsmv, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_lsmv; index = 6; }
                     else if (dec.Equals(dec_qts, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_qts; index = 7; }
+                    else if (dec.Equals(dec_dgnv, StringComparison.InvariantCultureIgnoreCase)) { dec = dec_dgnv; index = 8; }
 
                     //Сортировка начала\конца списка
                     if (ext == mpeg_psts) { mpeg_dec = dec; mpeg_index = index; } //Это в начало
@@ -547,7 +553,7 @@ namespace XviD4PSP
                 timer.Start();
             }
 
-            //Мы всегда оказываемся сдесь при переключении табов
+            //Мы всегда оказываемся здесь при переключении табов
             tab_lav_splitter.Visibility = Visibility.Collapsed;
             tab_lav_decoder.Visibility = Visibility.Collapsed;
         }

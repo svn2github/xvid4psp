@@ -237,7 +237,7 @@ namespace XviD4PSP
            {
                if (ext == "d2v") return AviSynthScripting.Decoders.MPEG2Source;
                if (ext == "dga") return AviSynthScripting.Decoders.AVCSource;
-               if (ext == "dgi") return AviSynthScripting.Decoders.DGMultiSource;
+               if (ext == "dgi") return AviSynthScripting.Decoders.DGSource;
            }
 
            string mpeg_dec = "", other_dec = AviSynthScripting.Decoders.DirectShowSource.ToString(); //Дефолты

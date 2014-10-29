@@ -23,14 +23,16 @@ namespace XviD4PSP
         private BackgroundWorker worker = null;
         private AviSynthReader reader = null;
         private int num_closes = 0;
+        private bool NV = false;
         private string script;
         public Massive m;
 
-        public IndexChecker(Massive mass)
+        public IndexChecker(Massive mass, bool NV)
         {
             this.InitializeComponent();
             this.Owner = App.Current.MainWindow;
             this.m = mass.Clone();
+            this.NV = NV;
 
             //забиваем
             prCurrent.Maximum = 100;
@@ -75,7 +77,7 @@ namespace XviD4PSP
                 if (worker.CancellationPending) return;
 
                 //проверка на невалидную индексацию
-                if (m.invcodecshort != "MPEG2" && m.invcodecshort != "MPEG1")
+                if (!NV && m.invcodecshort != "MPEG2" && m.invcodecshort != "MPEG1")
                 {
                     //Выходим отсюда, декодер будет выбран позже
                     m.indexfile = null;
@@ -84,24 +86,47 @@ namespace XviD4PSP
                 }
 
                 //получаем индекс файл
-                m.indexfile = Calculate.GetBestIndexFile(m.infilepath);
+                m.indexfile = Calculate.GetBestIndexFile(m.infilepath, NV);
 
                 //определяем видео декодер
-                m.vdecoder = AviSynthScripting.Decoders.MPEG2Source;
+                if (NV)
+                {
+                    m.vdecoder = AviSynthScripting.Decoders.DGSource;
+                    m.dgdecnv_path = Calculate.StartupPath + "\\apps\\DGDecNV\\";
+                }
+                else
+                    m.vdecoder = AviSynthScripting.Decoders.MPEG2Source;
 
                 if (File.Exists(m.indexfile) && !worker.CancellationPending)
                 {
+                    //Определяем, использовался ли Force Film (#1)
+                    //Для DGSource ForceFilm задается через скрипт, а не через правку индекс-файла,
+                    //его в любой момент можно вкл\выкл, поэтому тут нужно определиться, использовать ли ForceFilm.
+                    if (m.vdecoder == AviSynthScripting.Decoders.DGSource)
+                    {
+                        if (Indexing_DGIndexNV.CheckIndexAndForceFilm(m.indexfile, m.inframerate))
+                        {
+                            m.IsForcedFilm = true;
+                            m.interlace = SourceType.UNKNOWN;
+                        }
+                    }
+
                     //проверяем папки
                     script = AviSynthScripting.GetInfoScript(m, AviSynthScripting.ScriptMode.Info);
                     reader = new AviSynthReader();
                     reader.ParseScript(script);
                     m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
 
-                    //Определяем, использовался ли Force Film
-                    if ((pulldown && m.inframerate == "23.976" || m.inframerate == "29.970") && Math.Abs(reader.Framerate - 23.976) < 0.001)
+                    //Определяем, использовался ли Force Film (#2)
+                    //Для MPEG2Source ForceFilm задается через правку индекс-файла,
+                    //поэтому изменив его однажды (при индексации) ForceFilm всегда будет вкл.
+                    if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source)
                     {
-                        m.IsForcedFilm = true;
-                        m.interlace = SourceType.UNKNOWN;
+                        if ((pulldown && m.inframerate == "23.976" || m.inframerate == "29.970") && Math.Abs(reader.Framerate - 23.976) < 0.001)
+                        {
+                            m.IsForcedFilm = true;
+                            m.interlace = SourceType.UNKNOWN;
+                        }
                     }
 
                     //Закрываем ридер
@@ -196,8 +221,8 @@ namespace XviD4PSP
             {
                 Exception ex = (Exception)e.Result;
 
-                //Проблемы при открытии существующего d2v-файла (возможно это кэш от другого файла, уже не существующего)
-                if (ex.Message.StartsWith("MPEG2Source"))
+                //Проблемы при открытии существующего индекс-файла (возможно это кэш от другого файла, уже не существующего)
+                if (ex.Message.StartsWith("MPEG2Source") || ex.Message.StartsWith("DGSource: Could not open one of the input files"))
                 {
                     SafeDirDelete(Path.GetDirectoryName(m.indexfile));
                 }

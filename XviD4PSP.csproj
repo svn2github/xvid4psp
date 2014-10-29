@@ -230,6 +230,10 @@
     <Compile Include="windows\Decoders_Settings.xaml.cs">
       <DependentUpon>Decoders_Settings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="windows\Indexing_DGIndexNV.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>Indexing_DGIndexNV.xaml</DependentUpon>
+    </Compile>
     <Compile Include="windows\MT_Settings.xaml.cs">
       <DependentUpon>MT_Settings.xaml</DependentUpon>
     </Compile>
@@ -361,6 +365,10 @@
     <Page Include="windows\Caching.xaml" />
     <Page Include="windows\AudioEncoding.xaml" />
     <Page Include="windows\Decoders_Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="windows\Indexing_DGIndexNV.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -1,0 +1,13 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	x:Class="XviD4PSP.Indexing_DGIndexNV"
+	x:Name="Window"
+	Title="Indexing"
+	MinWidth="298" Height="90" ResizeMode="NoResize" SizeToContent="Width" WindowStartupLocation="CenterOwner" Closing="Window_Closing" SourceInitialized="Window_SourceInitialized" ContentRendered="Window_ContentRendered">
+
+    <Grid x:Name="LayoutRoot" Background="{DynamicResource black_gradient_2}">
+		<ProgressBar x:Name="prCurrent" Foreground="{DynamicResource StrawBerryBrush}" Margin="8,0,8,8" VerticalAlignment="Bottom" Height="12" IsIndeterminate="True"/>
+		<Label OpacityMask="{x:Null}" x:Name="label_info" Content="Indexing..." Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="8,8,6,0" VerticalAlignment="Top"/>
+	</Grid>
+</Window>

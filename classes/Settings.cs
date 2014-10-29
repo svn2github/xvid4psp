@@ -1091,6 +1091,26 @@ namespace XviD4PSP
             }
         }
 
+        public static bool DeleteDGIndexNVCache
+        {
+            get
+            {
+                object value = GetValue("DeleteDGIndexNVCache");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("DeleteDGIndexNVCache", value);
+            }
+        }
+
         public static bool SearchTempPath
         {
             get
@@ -1612,6 +1632,27 @@ namespace XviD4PSP
             }
         }
 
+        //DGIndexNV-кэш в Темп-папку
+        public static bool DGIndexNVInTemp
+        {
+            get
+            {
+                object value = GetValue("DGIndexNVInTemp");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("DGIndexNVInTemp", value);
+            }
+        }
+
         //Папка для batch-encoding исходников
         public static string BatchPath
         {
@@ -1986,7 +2027,7 @@ namespace XviD4PSP
                     return "Open file(s)=Ctrl+O; Open folder=Ctrl+Alt+O; Open DVD folder=Ctrl+D; Decode file=Ctrl+Alt+D; Join file=Ctrl+J; Close file=Ctrl+C; Save task=Ctrl+S; Save frame=Ctrl+F; Save THM frame=Ctrl+Alt+F; Refresh preview=Shift+R; VDemux=Shift+V; " +
                         "Decoding=D; Detect black borders=Shift+B; Detect interlace=Shift+I; Color correction=C; Resolution/Aspect=R; Interlace/Framerate=I; VEncoding settings=V; ADemux=Shift+A; Save to WAV=W; Editing options=Ctrl+A; AEncoding settings=A; Add subtitles=Insert; " +
                         "Remove subtitles=Delete; AvsP editor=E; Edit filtering script=S; Apply test script=Ctrl+T; Save script=Shift+S; Run script=Ctrl+R; MT settings=Shift+T; Windows Media Player=Shift+M; Media Player Classic=M; WPF Video Player=Ctrl+M; Global settings=G; Media Info=F1; " +
-                        "FFRebuilder=F2; DGIndex=F4; DGPulldown=F5; DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; 100 frames forward=Ctrl+Up; " +
+                        "FFRebuilder=F2; DGIndex=F4; DGIndexNV=F5; DGAVCIndex=F6; VirtualDubMod=F7; AVI-Mux=F8; tsMuxeR=F9; MKVExtract=F10; MKVMerge=F11; Yamb=F12; Frame forward=Right; Frame back=Left; 10 frames forward=Ctrl+Right; 10 frames backward=Ctrl+Left; 100 frames forward=Ctrl+Up; " +
                         "100 frames backward=Ctrl+Down; 30 sec. forward=Shift+Right; 30 sec. backward=Shift+Left; 3 min. forward=Shift+Up; 3 min. backward=Shift+Down; Play-Pause=Space; Fullscreen=Esc; Volume+=Up; Volume-=Down; Set Start=Home; Set End=End; Next/New region=PageUp; " +
                         "Previous region=Next; Apply Trim=T; Add/Remove bookmark=Ctrl+B; Edit format=F;";
                 }

@@ -16,7 +16,7 @@ namespace XviD4PSP
            OpenDMLSource,     //AviSynth
            MPEG2Source,       //DGDecode.dll
            AVCSource,         //DGAVCDecode.dll
-           DGMultiSource,     //DGDecodeNV.dll
+           DGSource,          //DGDecodeNV.dll
            DirectShowSource,  //DirectShowSource.dll
            DirectShowSource2, //avss.dll+VideoFunctions.avs
            FFmpegSource2,     //ffms2.dll+FFMS2.avsi
@@ -119,7 +119,7 @@ namespace XviD4PSP
                m.script += "LoadPlugin(\"" + startup_path + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.AVCSource)
                m.script += "LoadPlugin(\"" + startup_path + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.DGMultiSource)
+           else if (m.vdecoder == Decoders.DGSource)
                m.script += "LoadPlugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DirectShowSource2)
                m.script += "LoadPlugin(\"" + startup_path + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
@@ -283,10 +283,6 @@ namespace XviD4PSP
                    if (n < m.infileslist.Length) invideostring += "++";
                }
            }
-           else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source) //мпег2 и MPEG2Source
-           {
-               invideostring = m.vdecoder.ToString() + "(\"" + m.indexfile + "\", cpu=0, info=3)";
-           }
            else if (ext == ".dga" || ext == ".dgi")
            {
                int n = 0;
@@ -296,6 +292,14 @@ namespace XviD4PSP
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
                    if (n < m.infileslist.Length) invideostring += "++";
                }
+           }
+           else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source) //мпег2 и MPEG2Source
+           {
+               invideostring = m.vdecoder.ToString() + "(\"" + m.indexfile + "\", cpu=0, info=3)";
+           }
+           else if (ext != ".dgi" && m.vdecoder == Decoders.DGSource)
+           {
+               invideostring = m.vdecoder.ToString() + "(\"" + m.indexfile + "\", fieldop=" + (m.IsForcedFilm ? "1" : "0") + ")";
            }
            else //другое
            {
@@ -487,7 +491,7 @@ namespace XviD4PSP
            if (m.iscolormatrix)
            {
                string colormatrix = "ColorMatrix(";
-               if (m.vdecoder == Decoders.MPEG2Source || m.vdecoder == Decoders.DGMultiSource)
+               if (m.vdecoder == Decoders.MPEG2Source || m.vdecoder == Decoders.DGSource)
                {
                    if (m.interlace == SourceType.FILM ||
                        m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
@@ -874,7 +878,7 @@ namespace XviD4PSP
                script += "LoadPlugin(\"" + Calculate.StartupPath + "\\apps\\DGAVCDec\\DGAVCDecode.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.MPEG2Source)
                script += "LoadPlugin(\"" + Calculate.StartupPath + "\\apps\\DGMPGDec\\DGDecode.dll\")" + Environment.NewLine;
-           else if (m.vdecoder == Decoders.DGMultiSource)
+           else if (m.vdecoder == Decoders.DGSource)
                script += "LoadPlugin(\"" + m.dgdecnv_path + "DGDecodeNV.dll\")" + Environment.NewLine;
            else if (m.vdecoder == Decoders.DirectShowSource2)
                script += "LoadPlugin(\"" + Calculate.StartupPath + "\\dlls\\AviSynth\\plugins\\avss.dll\")" + Environment.NewLine;
@@ -963,10 +967,6 @@ namespace XviD4PSP
                    if (n < m.infileslist.Length) invideostring += "++";
                }
            }
-           else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source)
-           {
-               invideostring = m.vdecoder.ToString() + "(\"" + m.indexfile + "\", cpu=0, info=3)";
-           }
            else if (ext == ".dga" || ext == ".dgi")
            {
                int n = 0;
@@ -976,6 +976,14 @@ namespace XviD4PSP
                    invideostring += m.vdecoder.ToString() + "(\"" + file + "\")";
                    if (n < m.infileslist.Length) invideostring += "++";
                }
+           }
+           else if (ext != ".d2v" && m.vdecoder == Decoders.MPEG2Source)
+           {
+               invideostring = m.vdecoder.ToString() + "(\"" + m.indexfile + "\", cpu=0, info=3)";
+           }
+           else if (ext != ".dgi" && m.vdecoder == Decoders.DGSource)
+           {
+               invideostring = m.vdecoder.ToString() + "(\"" + m.indexfile + "\", fieldop=" + (m.IsForcedFilm ? "1" : "0") + ")"; ;
            }
            else
            {

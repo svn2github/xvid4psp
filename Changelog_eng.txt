@@ -1,6 +1,12 @@
-﻿XviD4PSP 5.10.332.0 (xx.xx.xxxx), main changes:
+﻿XviD4PSP 5.10.333.0 (29.10.2014), main changes:
 
 
+>>> (r333) Added support for indexing files via DGIndexNV. In order to use it you must obtain your own licensed
+           copy of DGDecNV package and put it into the \apps\DGDecNV folder, then select DGSource on the "Video->
+           Decoding" tab. In the "Tools" menu DGPulldown replaced with DGIndexNV. Clicking on the "folder" icon
+           at this item will open the folder \apps\DGDecNV. If not exist, it will be created first. Clicking on
+           the item itself will run DGIndexNV.exe or open the website of the author of this utility (if the file
+           does not exist). And here it is: http://rationalqm.us/dgdecnv/dgdecnv.html
 >>> (r332) Reworked copying to the clipboard (Issue 79).
 >>> (r331) "Tools->Open XviD4PSP folder" - was broken since r321, fixed now.
 >>> (r331) DSS2: updates for LAVFilters 0.63.0. DXVA2 hardware decoding mode is now also choosable, and

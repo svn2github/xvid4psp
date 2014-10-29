@@ -100,7 +100,7 @@
                                 </DockPanel>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="MPEG2Source" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
+                        <GroupBox Foreground="#FFFFFFFF" x:Name="group_mpeg2source" Header="MPEG2Source, DGSource" Margin="4,3,4,0" VerticalAlignment="Top" FontSize="12" Style="{DynamicResource GroupBoxStyleNew}">
                             <StackPanel>
                                 <DockPanel Margin="0,3,0,3" Width="Auto" Height="24">
                                     <CheckBox x:Name="check_force_film" Width="210" Height="Auto" Content="Auto force Film at (%):" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" Margin="4,0,0,0" FontSize="14" Foreground="#FFFFFFFF" Click="check_force_film_Click"/>

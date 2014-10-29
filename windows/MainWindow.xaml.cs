@@ -33,6 +33,7 @@ namespace XviD4PSP
         public ArrayList deletefiles = new ArrayList();
         private ArrayList ffcache = new ArrayList();
         private ArrayList dgcache = new ArrayList();
+        private ArrayList dgcacheNV = new ArrayList();
         private ArrayList lsmashcache = new ArrayList();
         private static object backup_lock = new object();
         private static object avsp_lock = new object();
@@ -544,7 +545,7 @@ namespace XviD4PSP
                     case ("Media Info"): menu_info_media_Click(menu_info_media, null); break;
                     case ("FFRebuilder"): menu_ffrebuilder_Click(null, null); break;
                     case ("DGIndex"): mn_apps_Click(menu_dgindex, null); break;
-                    case ("DGPulldown"): mn_apps_Click(menu_dgpulldown, null); break;
+                    case ("DGIndexNV"): mn_apps_Click(menu_dgindexnv, null); break;
                     case ("DGAVCIndex"): mn_apps_Click(menu_dgavcindex, null); break;
                     case ("VirtualDubMod"): mn_apps_Click(menu_virtualdubmod, null); break;
                     case ("AVI-Mux"): mn_apps_Click(menu_avimux, null); break;
@@ -727,7 +728,7 @@ namespace XviD4PSP
                 goto finish;
             }
 
-            if (m != null) CloseFile();
+            if (m != null) CloseFile(false);
 
             //Удаляем резервную копию заданий
             SafeDelete(Settings.TempPath + "\\backup.tsks");
@@ -769,6 +770,13 @@ namespace XviD4PSP
                     foreach (string cache_path in dgcache)
                         SafeDirDelete(Path.GetDirectoryName(cache_path), false);
                 }
+
+                //Удаление DGIndexNV-кэша
+                if (Settings.DeleteDGIndexNVCache)
+                {
+                    foreach (string cache_path in dgcacheNV)
+                        SafeDirDelete(Path.GetDirectoryName(cache_path), false);
+                }
             }
 
             finish:
@@ -789,11 +797,11 @@ namespace XviD4PSP
             if (kill_me) Process.GetCurrentProcess().Kill();
         }
 
-        private void clear_dgindex_cache()
+        private void clear_dgindex_cache(bool force_deletion)
         {
             try
             {
-                if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && Settings.DeleteDGIndexCache)
+                if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && (Settings.DeleteDGIndexCache || force_deletion))
                 {
                     //Выходим, если кэш-файл был создан не нами
                     if (!dgcache.Contains(m.indexfile) || m.indexfile == m.infilepath) return;
@@ -807,6 +815,29 @@ namespace XviD4PSP
                     //Удаляем папку с кэшем
                     SafeDirDelete(Path.GetDirectoryName(m.indexfile), false);
                     dgcache.Remove(m.indexfile);
+                }
+            }
+            catch (Exception) { }
+        }
+
+        private void clear_dgindexNV_cache(bool force_deletion)
+        {
+            try
+            {
+                if (m.vdecoder == AviSynthScripting.Decoders.DGSource && (Settings.DeleteDGIndexNVCache || force_deletion))
+                {
+                    //Выходим, если кэш-файл был создан не нами
+                    if (!dgcacheNV.Contains(m.indexfile) || m.indexfile == m.infilepath) return;
+
+                    //Выходим, если кэш-файл используется в каком-либо задании
+                    foreach (Task task in list_tasks.Items)
+                    {
+                        if (task.Mass.indexfile == m.indexfile) return;
+                    }
+
+                    //Удаляем папку с кэшем
+                    SafeDirDelete(Path.GetDirectoryName(m.indexfile), false);
+                    dgcacheNV.Remove(m.indexfile);
                 }
             }
             catch (Exception) { }
@@ -897,7 +928,7 @@ namespace XviD4PSP
 
         private void button_close_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (m != null) CloseFile();
+            if (m != null) CloseFile(false);
         }
 
         private void button_save_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -1034,13 +1065,16 @@ namespace XviD4PSP
 
         private void mn_apps_Click(object sender, RoutedEventArgs e)
         {
+            bool dgnv_file = false;
+            bool dgnv_folder = false;
             string path = Calculate.StartupPath;
+
             if (sender is MenuItem)
             {
                 //Исполняемые файлы утилит
-                if (sender == mnApps_Folder) { /*Папка XviD4PSP*/}
+                if (sender == mnApps_Folder) { /*Папка XviD4PSP*/ }
                 else if (sender == menu_dgindex) path += "\\apps\\DGMPGDec\\DGIndex.exe";
-                else if (sender == menu_dgpulldown) path += "\\apps\\DGPulldown\\DGPulldown.exe";
+                else if (sender == menu_dgindexnv) { path += "\\apps\\DGDecNV\\DGIndexNV.exe"; dgnv_file = true; }
                 else if (sender == menu_dgavcindex) path += "\\apps\\DGAVCDec\\DGAVCIndex.exe";
                 else if (sender == menu_virtualdubmod) path += "\\apps\\VirtualDubMod\\VirtualDubMod.exe";
                 else if (sender == menu_avimux) path += "\\apps\\AVI-Mux\\AVIMux_GUI.exe";
@@ -1056,7 +1090,7 @@ namespace XviD4PSP
             {
                 //Папки с утилитами
                 if (sender == folder_dgindex) path += "\\apps\\DGMPGDec";
-                else if (sender == folder_dgpulldown) path += "\\apps\\DGPulldown";
+                else if (sender == folder_dgindexnv) { path += "\\apps\\DGDecNV"; dgnv_folder = true; }
                 else if (sender == folder_dgavcindex) path += "\\apps\\DGAVCDec";
                 else if (sender == folder_virtualdubmod) path += "\\apps\\VirtualDubMod";
                 else if (sender == folder_avimux) path += "\\apps\\AVI-Mux";
@@ -1072,6 +1106,20 @@ namespace XviD4PSP
 
             try
             {
+                if (dgnv_folder)
+                {
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+                }
+                else if (dgnv_file)
+                {
+                    if (!File.Exists(path))
+                    {
+                        Process.Start("http://rationalqm.us/dgdecnv/dgdecnv.html");
+                        return;
+                    }
+                }
+
                 Process pr = new Process();
                 ProcessStartInfo info = new ProcessStartInfo();
                 if (sender is MenuItem) info.WorkingDirectory = Path.GetDirectoryName(path);
@@ -1180,24 +1228,12 @@ namespace XviD4PSP
                 {
                     string ext = Path.GetExtension(x.infilepath).ToLower();
 
-                    //Для MPEG2Source надо переиндексировать - проще закрыть и открыть файл(ы) заново
-                    if (x.vdecoder == AviSynthScripting.Decoders.MPEG2Source && !string.IsNullOrEmpty(x.indexfile) && ext != ".d2v")
+                    //Для MPEG2Source и DGSource надо переиндексировать - проще закрыть и открыть файл(ы) заново
+                    if (x.vdecoder == AviSynthScripting.Decoders.MPEG2Source && !string.IsNullOrEmpty(x.indexfile) && ext != ".d2v" ||
+                        x.vdecoder == AviSynthScripting.Decoders.DGSource && !string.IsNullOrEmpty(x.indexfile) && ext != ".dgi")
                     {
-                        //Наверно не самое удачное решение..
-                        bool delete_temp = Settings.DeleteTempFiles;
-                        bool delete_dgindex = Settings.DeleteDGIndexCache;
-                        Settings.DeleteTempFiles = Settings.DeleteDGIndexCache = true;
-
-                        try
-                        {
-                            //Тут должна удалиться индекс-папка
-                            CloseFile();
-                        }
-                        finally
-                        {
-                            Settings.DeleteTempFiles = delete_temp;
-                            Settings.DeleteDGIndexCache = delete_dgindex;
-                        }
+                        //Тут должна удалиться индекс-папка
+                        CloseFile(true);
 
                         x.inaudiostreams = new ArrayList();
                         x.outaudiostreams = new ArrayList();
@@ -1221,7 +1257,7 @@ namespace XviD4PSP
                         Indexing_FFMS ffindex = new Indexing_FFMS(x);
                         if (ffindex.m == null)
                         {
-                            CloseFile();
+                            CloseFile(false);
                             return;
                         }
                     }
@@ -1318,7 +1354,7 @@ namespace XviD4PSP
                     return;
 
                 //Закрываем уже открытый файл; обнуляем трим и его кнопки
-                if (!IsBatchOpening && m != null) CloseFile();
+                if (!IsBatchOpening && m != null) CloseFile(false);
                 else ResetTrim();
 
                 //Загружаем сохраненные задания
@@ -1447,27 +1483,31 @@ namespace XviD4PSP
                     }
                 }
 
-                //если файл MPEG делаем запрос на индексацию
-                if (Calculate.IsMPEG(x.infilepath) && ext != ".d2v")
+                //Имя для DVD
+                if (Calculate.IsValidVOBName(x.infilepath))
                 {
-                    if (Calculate.IsValidVOBName(x.infilepath))
-                    {
-                        x.dvdname = Calculate.GetDVDName(x.infilepath);
-                        string title = Calculate.GetTitleNum(x.infilepath);
-                        if (!string.IsNullOrEmpty(title)) title = "_T" + title;
-                        x.taskname = x.dvdname + title;
-                    }
+                    x.dvdname = Calculate.GetDVDName(x.infilepath);
+                    string title = Calculate.GetTitleNum(x.infilepath);
+                    if (!string.IsNullOrEmpty(title)) title = "_T" + title;
+                    x.taskname = x.dvdname + title;
+                }
 
-                    if (Format.GetValidVDecoder(x) == AviSynthScripting.Decoders.MPEG2Source)
+                //Определяем видеодекодер (#1)
+                x.vdecoder = Format.GetValidVDecoder(x);
+
+                //Проверка необходимости индексации для DGIndex\DGIndexNV
+                if (x.vdecoder == AviSynthScripting.Decoders.MPEG2Source && ext != ".d2v" || x.vdecoder == AviSynthScripting.Decoders.DGSource && ext != ".dgi")
+                {
+                    if (x.vdecoder == AviSynthScripting.Decoders.MPEG2Source)
                     {
-                        //проверяем индекс папку (проверка содержимого файла - если там МПЕГ, то нужна индексация; тут-же идет запуск МедиаИнфо)
-                        IndexChecker ich = new IndexChecker(x);
+                        //Проверяем индекс папку (проверка содержимого файла для DGIndex - если там MPEG1\2, то можно индексировать; тут-же идет запуск MediaInfo)
+                        IndexChecker ich = new IndexChecker(x, false);
                         if (ich.m == null) return;
                         x = ich.m.Clone();
 
                         if (x.indexfile != null)
                         {
-                            //индексация
+                            //Индексация DGIndex
                             if (!File.Exists(x.indexfile))
                             {
                                 Indexing index = new Indexing(x);
@@ -1478,6 +1518,36 @@ namespace XviD4PSP
                             //Добавление кэш-файла в список на удаление
                             if (!dgcache.Contains(x.indexfile) && Path.GetDirectoryName(x.indexfile).EndsWith(".index") && x.indexfile != x.infilepath)
                                 dgcache.Add(x.indexfile);
+                        }
+                        else if (x.vdecoder == 0)
+                        {
+                            //Определяем видеодекодер (#2)
+                            //Файл распознался, как MPEG-PS\TS, но внутри оказался не MPEG1\2, поэтому декодер обнулился.
+                            //Вторая попытка - на случай, если для "другие файлы" выбран DGSource.
+                            x.vdecoder = Format.GetValidVDecoder(x);
+                        }
+                    }
+
+                    if (x.vdecoder == AviSynthScripting.Decoders.DGSource)
+                    {
+                        //Проверяем индекс папку
+                        IndexChecker ich = new IndexChecker(x, true);
+                        if (ich.m == null) return;
+                        x = ich.m.Clone();
+
+                        if (x.indexfile != null)
+                        {
+                            //Индексация DGIndexNV
+                            if (!File.Exists(x.indexfile))
+                            {
+                                Indexing_DGIndexNV index = new Indexing_DGIndexNV(x);
+                                if (index.m == null) return;
+                                x = index.m.Clone();
+                            }
+
+                            //Добавление кэш-файла в список на удаление
+                            if (!dgcacheNV.Contains(x.indexfile) && Path.GetDirectoryName(x.indexfile).EndsWith(".idxNV") && x.indexfile != x.infilepath)
+                                dgcacheNV.Add(x.indexfile);
                         }
                     }
                 }
@@ -1490,7 +1560,7 @@ namespace XviD4PSP
                     x = info.m.Clone();
                 }
 
-                //определяем видео декодер
+                //Определяем видеодекодер (#3), т.к. выше он мог обнулиться
                 if (x.vdecoder == 0) x.vdecoder = Format.GetValidVDecoder(x);
 
                 //принудительный фикс цвета для DVD
@@ -2075,17 +2145,18 @@ namespace XviD4PSP
             }
         }
 
-        private void CloseFile()
+        private void CloseFile(bool force_delete_caches)
         {
             //закрываем все дочерние окна
             CloseChildWindows();
 
             CloseClip();
 
-            if (Settings.DeleteTempFiles)
+            if (Settings.DeleteTempFiles || force_delete_caches)
             {
-                clear_dgindex_cache();           // - Кэш от DGIndex
-                clear_audio_and_video_caches();  // - Извлеченные или декодированные аудио и видео файлы
+                clear_dgindex_cache(force_delete_caches);    // - Кэш от DGIndex
+                clear_dgindexNV_cache(force_delete_caches);  // - Кэш от DGIndexNV
+                clear_audio_and_video_caches();              // - Извлеченные или декодированные аудио и видео файлы
             }
 
             SafeDelete(Settings.TempPath + "\\preview.avs");
@@ -2329,7 +2400,7 @@ namespace XviD4PSP
                 menu_info_media.InputGestureText = HotKeys.GetKeys("Media Info");
                 menu_ffrebuilder.InputGestureText = HotKeys.GetKeys("FFRebuilder");
                 menu_dgindex.InputGestureText = HotKeys.GetKeys("DGIndex");
-                menu_dgpulldown.InputGestureText = HotKeys.GetKeys("DGPulldown");
+                menu_dgindexnv.InputGestureText = HotKeys.GetKeys("DGIndexNV");
                 menu_dgavcindex.InputGestureText = HotKeys.GetKeys("DGAVCIndex");
                 menu_virtualdubmod.InputGestureText = HotKeys.GetKeys("VirtualDubMod");
                 menu_avimux.InputGestureText = HotKeys.GetKeys("AVI-Mux");
@@ -2529,7 +2600,7 @@ namespace XviD4PSP
                 string open_folder = Languages.Translate("Open folder");
                 menu_open_folder.Header = open_folder + "...";
                 folder_dgindex.ToolTip = open_folder;
-                folder_dgpulldown.ToolTip = open_folder;
+                folder_dgindexnv.ToolTip = open_folder;
                 folder_dgavcindex.ToolTip = open_folder;
                 folder_virtualdubmod.ToolTip = open_folder;
                 folder_avimux.ToolTip = open_folder;
@@ -3115,8 +3186,8 @@ namespace XviD4PSP
             //Переключились на MPEG2Source
             if (m.vdecoder == AviSynthScripting.Decoders.MPEG2Source && old_m.vdecoder != AviSynthScripting.Decoders.MPEG2Source)
             {
-                //Если индекс-файла нет, то надо индексировать (со всеми проверками - проще открыть файл заново)
-                if ((string.IsNullOrEmpty(m.indexfile) || !File.Exists(m.indexfile)))
+                //Если индекс-файла нет или он не тот, то надо индексировать (со всеми проверками - проще открыть файл заново)
+                if (string.IsNullOrEmpty(m.indexfile) || !File.Exists(m.indexfile) || Path.GetExtension(m.indexfile).ToLower() != ".d2v")
                 {
                     //Но проверить на МПЕГ можно и тут
                     if (m.invcodecshort == "MPEG1" || m.invcodecshort == "MPEG2")
@@ -3125,7 +3196,7 @@ namespace XviD4PSP
                         x.inaudiostreams = new ArrayList();
                         x.outaudiostreams = new ArrayList();
 
-                        CloseFile();
+                        CloseFile(false);
                         action_open(x);
                         return;
                     }
@@ -3134,6 +3205,22 @@ namespace XviD4PSP
                         restore = true;
                         goto finish;
                     }
+                }
+            }
+
+            //Переключились на DGSource
+            if (m.vdecoder == AviSynthScripting.Decoders.DGSource && old_m.vdecoder != AviSynthScripting.Decoders.DGSource)
+            {
+                //Если индекс-файла нет или он не тот, то надо индексировать (со всеми проверками - проще открыть файл заново)
+                if (string.IsNullOrEmpty(m.indexfile) || !File.Exists(m.indexfile) || Path.GetExtension(m.indexfile).ToLower() != ".dgi")
+                {
+                    Massive x = m.Clone();
+                    x.inaudiostreams = new ArrayList();
+                    x.outaudiostreams = new ArrayList();
+
+                    CloseFile(false);
+                    action_open(x);
+                    return;
                 }
             }
 
@@ -7480,6 +7567,18 @@ namespace XviD4PSP
                     if (File.Exists(mass.indexfile) && !dgcache.Contains(mass.indexfile) &&
                         Path.GetDirectoryName(mass.indexfile).EndsWith(".index") && mass.indexfile != mass.infilepath)
                         dgcache.Add(mass.indexfile);
+                }
+                catch { }
+            }
+
+            //Кэш от DGIndexNV
+            if (mass.vdecoder == AviSynthScripting.Decoders.DGSource && mass.indexfile != null)
+            {
+                try
+                {
+                    if (File.Exists(mass.indexfile) && !dgcacheNV.Contains(mass.indexfile) &&
+                        Path.GetDirectoryName(mass.indexfile).EndsWith(".idxNV") && mass.indexfile != mass.infilepath)
+                        dgcacheNV.Add(mass.indexfile);
                 }
                 catch { }
             }
