@@ -1,6 +1,7 @@
-﻿XviD4PSP 5.10.333.0 (29.10.2014), main changes:
+﻿XviD4PSP 5.10.334.0 (28.12.2014), main changes:
 
 
+>>> (r334) Fixed error handling for recent version of bassAudioSource.
 >>> (r333) Added support for indexing files via DGIndexNV. In order to use it you must obtain your own licensed
            copy of DGDecNV package and put it into the \apps\DGDecNV folder, then select DGSource on the "Video->
            Decoding" tab. In the "Tools" menu DGPulldown replaced with DGIndexNV. Clicking on the "folder" icon

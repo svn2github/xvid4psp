@@ -21,7 +21,10 @@
 #include "utils.h"
 #include "guids.h"
 
-#if defined AVS_26
+
+#if defined(AVS_PLUS)
+#include "avisynth_plus.h"
+#elif defined(AVS_26)
 #include "avisynth_26.h"
 #else
 #include "avisynth.h"
@@ -756,7 +759,7 @@ public:
 	// TODO
 	void __stdcall GetAudio(void *buf, __int64 start, __int64 count, IScriptEnvironment *env) { memset(buf, 0, (size_t)m_vi.BytesFromAudioSamples(count)); }
 	bool __stdcall GetParity(int n) { return true; }
-#ifdef AVS_26
+#if defined(AVS_26) || defined(AVS_PLUS)
 	int __stdcall SetCacheHints(int cachehints, int frame_range) { return 0; }
 #else
 	void __stdcall SetCacheHints(int cachehints, int frame_range) { }
@@ -842,7 +845,7 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	return dss2;
 }
 
-#ifdef AVS_26
+#if defined(AVS_26) || defined(AVS_PLUS)
 const AVS_Linkage *AVS_linkage = 0;
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScriptEnvironment* env, const AVS_Linkage* const vectors)
 {

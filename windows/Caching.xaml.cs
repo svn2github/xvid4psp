@@ -340,13 +340,13 @@ namespace XviD4PSP
                 worker.RunWorkerAsync();
                 return;
             }
-            else if (error == "File could not be opened!" && instream.decoder == AviSynthScripting.Decoders.bassAudioSource)
+            else if (instream.decoder == AviSynthScripting.Decoders.bassAudioSource && error.EndsWith("File could not be opened!"))
             {
                 instream.decoder = AviSynthScripting.Decoders.FFAudioSource;
                 worker.RunWorkerAsync();
                 return;
             }
-            else if (error.Contains("convertfps") && m.vdecoder == AviSynthScripting.Decoders.DirectShowSource)
+            else if (m.vdecoder == AviSynthScripting.Decoders.DirectShowSource && error.Contains("convertfps"))
             {
                 m.isconvertfps = false;
                 worker.RunWorkerAsync();

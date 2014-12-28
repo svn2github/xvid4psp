@@ -2,7 +2,7 @@ avss (DSS2) modded by fcp, version 2.0.0.13; LAVFilters settings interface versi
 
 
 DSS2(string filename, float "fps", int "cache", int "seekthr", int "preroll", int "subsm", string "lavs", string "lavd",
-     string "lavf_path", string "dvs_path", bool "flipv", bool "fliph", int "timeout")
+     string "lavf_path", string "dvs_path", bool "flipv", bool "fliph", string "pixel_type", int "timeout")
 
 
 1. CP_OEMCP replaced with CP_ACP, to fix codepage issue.
@@ -144,5 +144,8 @@ DSS2(string filename, float "fps", int "cache", int "seekthr", int "preroll", in
     AviSynth functions. Also it seems like RGB processing in DSS2 was flipped vertically, at least comparing with DSS. Besides RGB32, RGB24 is now
     also allowed, not sure why it wasn't..
 
-12. Added "timeout" setting (int, default = 30, if < 0 rounded to 0) - maximum amount of time when waiting for the decoded frame, in seconds.
+12. Added "pixel_type" setting to choose output colorspace (string, "" by default). Allowed values are (only one): YV12, YUY2, RGB24, RGB32 and RGB,
+    or "" to enable all.
+
+13. Added "timeout" setting (int, default = 30, if < 0 rounded to 0) - maximum amount of time when waiting for the decoded frame, in seconds.
     0 = INFINITE, but in this case DSS2 in some situations may hangs again on broken streams.

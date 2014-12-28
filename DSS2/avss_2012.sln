@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "avss", "avss.vcxproj", "{5E55B17C-DC5A-4558-9877-3182736CA91E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		25 Debug|Win32 = 25 Debug|Win32
+		25 Release|Win32 = 25 Release|Win32
+		26 Debug|Win32 = 26 Debug|Win32
+		26 Release|Win32 = 26 Release|Win32
+		Avs+ Debug x64|Win32 = Avs+ Debug x64|Win32
+		Avs+ Release x64|Win32 = Avs+ Release x64|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.25 Debug|Win32.ActiveCfg = Debug|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.25 Debug|Win32.Build.0 = Debug|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.25 Release|Win32.ActiveCfg = Release|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.25 Release|Win32.Build.0 = Release|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.26 Debug|Win32.ActiveCfg = Debug_26|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.26 Debug|Win32.Build.0 = Debug_26|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.26 Release|Win32.ActiveCfg = Release_26|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.26 Release|Win32.Build.0 = Release_26|Win32
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.Avs+ Debug x64|Win32.ActiveCfg = Debug_avsplus_x64|x64
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.Avs+ Debug x64|Win32.Build.0 = Debug_avsplus_x64|x64
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.Avs+ Release x64|Win32.ActiveCfg = Release_avsplus_x64|x64
+		{5E55B17C-DC5A-4558-9877-3182736CA91E}.Avs+ Release x64|Win32.Build.0 = Release_avsplus_x64|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

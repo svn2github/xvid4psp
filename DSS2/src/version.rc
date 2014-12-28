@@ -56,7 +56,9 @@ BEGIN
     "    BEGIN\r\n"
     "        BLOCK ""000004b0""\r\n"
     "        BEGIN\r\n"
-    "#ifdef AVS_26\r\n"
+    "#if defined(AVS_PLUS)\r\n"
+    "            VALUE ""FileDescription"", ""DSS2 - DirectShow source plugin for AviSynth+ x64""\r\n"
+    "#elif defined(AVS_26)\r\n"
     "            VALUE ""FileDescription"", ""DSS2 - DirectShow source plugin for AviSynth 2.6""\r\n"
     "#else\r\n"
     "            VALUE ""FileDescription"", ""DSS2 - DirectShow source plugin for AviSynth 2.5""\r\n"
@@ -105,7 +107,9 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-#ifdef AVS_26
+#if defined(AVS_PLUS)
+            VALUE "FileDescription", "DSS2 - DirectShow source plugin for AviSynth+ x64"
+#elif defined(AVS_26)
             VALUE "FileDescription", "DSS2 - DirectShow source plugin for AviSynth 2.6"
 #else
             VALUE "FileDescription", "DSS2 - DirectShow source plugin for AviSynth 2.5"
