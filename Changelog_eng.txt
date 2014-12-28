@@ -1,6 +1,8 @@
-﻿XviD4PSP 5.10.334.0 (28.12.2014), main changes:
+﻿XviD4PSP 5.10.335.0 (28.12.2014), main changes:
 
 
+>>> (r335) Auto aborting of freezed tasks ("Settings->Global settings->Encoding"): it is now possible to adjust
+           the time threshold.
 >>> (r334) Fixed error handling for recent version of bassAudioSource.
 >>> (r333) Added support for indexing files via DGIndexNV. In order to use it you must obtain your own licensed
            copy of DGDecNV package and put it into the \apps\DGDecNV folder, then select DGSource on the "Video->

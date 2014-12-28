@@ -68,7 +68,10 @@
                             <CheckBox x:Name="check_logfile_tempfolder" Width="Auto" Height="Auto" Content="in Temp folder" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" IsEnabled="{Binding Path=IsChecked, ElementName=check_log_to_file}" HorizontalAlignment="Left" Margin="16,0,0,0" VerticalAlignment="Top" Click="check_logfile_tempfolder_Click" d:LayoutOverrides="Width, Height"/>
                         </StackPanel>
                         <CheckBox x:Name="check_is_always_close_encoding" Width="Auto" Height="Auto" Content="Autoclose encoding window if task was successfully accomplished" FontSize="14" Foreground="#FFFFFFFF" Click="check_is_always_close_encoding_Click" HorizontalAlignment="Left" Margin="8,140,0,8" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
-                        <CheckBox x:Name="check_auto_abort" Width="Auto" Height="Auto" Content="Cancel encoding if there is no progress for a long time" FontSize="14" Foreground="#FFFFFFFF" Click="check_auto_abort_Click" HorizontalAlignment="Left" Margin="8,162,0,8" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="8,162,0,5">
+                            <CheckBox x:Name="check_auto_abort" Width="Auto" Height="Auto" Content="Cancel encoding if there is no progress (in minutes):" FontSize="14" Foreground="#FFFFFFFF" Click="check_auto_abort_Click" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" d:LayoutOverrides="Width, Height"/>
+                            <MyUserControl:NumericUpDown Height="22" x:Name="num_auto_abort" HorizontalAlignment="Left" Margin="8,-2,0,0" VerticalAlignment="Center" Width="50" Change="1" DecimalPlaces="0" Maximum="60" Minimum="1" Value="10" ValueChanged="num_auto_abort_ValueChanged"/>
+                        </StackPanel>
                     </Grid>
 				</TabItem>
 			    <TabItem Header="Batch encoding" x:Name="tab_open_folder">

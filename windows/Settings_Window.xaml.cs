@@ -97,7 +97,7 @@ namespace XviD4PSP
             check_enable_backup.Content = Languages.Translate("Create a backups of the tasks list");
             check_validate_pathes.Content = Languages.Translate("Check for illegal characters in pathes");
             check_sort_by_time.Content = Languages.Translate("Sort presets by last modification time");
-            check_auto_abort.Content = Languages.Translate("Cancel encoding if there is no progress for a long time");
+            check_auto_abort.Content = Languages.Translate("Cancel encoding if there is no progress (in minutes):");
 
             button_restore_hotkeys.Content = Languages.Translate("Restore default settings");
             button_edit_hotkeys.Content = Languages.Translate("Edit");
@@ -154,6 +154,8 @@ namespace XviD4PSP
             check_validate_pathes.IsChecked = Settings.ValidatePathes;                            //Проверять пути на "нехорошие" символы
             check_sort_by_time.IsChecked = Settings.SortPresetsByTime;                            //Сортировка пресетов по времени изменений
             check_auto_abort.IsChecked = Settings.AutoAbortEncoding;                              //Автоматически прерывать зависшие задания
+            num_auto_abort.Value = Settings.AutoAbortThreshold;                                   //Время отсутствия прогресса для определения зависания
+            num_auto_abort.Tag = (check_auto_abort.IsChecked.Value) ? null : "Inactive";
 
             if ((bool)(check_window_pos.IsChecked = Settings.CheckWindowsPos))                    //Проверять размер и расположение окон
                 this.SourceInitialized += new EventHandler(Window_SourceInitialized);
@@ -601,7 +603,22 @@ namespace XviD4PSP
 
         private void check_auto_abort_Click(object sender, RoutedEventArgs e)
         {
-            Settings.AutoAbortEncoding = check_auto_abort.IsChecked.Value;
+            if (check_auto_abort.IsChecked.Value)
+            {
+                num_auto_abort.Tag = null;
+                Settings.AutoAbortEncoding = true;
+            }
+            else
+            {
+                num_auto_abort.Tag = "Inactive";
+                Settings.AutoAbortEncoding = false;
+            }
+        }
+
+        private void num_auto_abort_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        {
+            if (num_auto_abort.IsAction)
+                Settings.AutoAbortThreshold = Convert.ToInt32(num_auto_abort.Value);
         }
 
         private void check_sort_by_time_Click(object sender, RoutedEventArgs e)

@@ -53,7 +53,7 @@ namespace XviD4PSP
         private double encoder_fps = 0.0;
         private List<double> fps_averages = new List<double>();
         private TimeSpan last_update = TimeSpan.Zero;
-        private double last_update_threshold = 10; //Мин.
+        private double last_update_threshold = Settings.AutoAbortThreshold;
         private string busyfile;
         private string outpath_src;
         private Format.Muxers muxer;

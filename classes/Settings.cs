@@ -2990,6 +2990,27 @@ namespace XviD4PSP
             }
         }
 
+        //Отмена кодирования зависших заданий (время)
+        public static int AutoAbortThreshold
+        {
+            get
+            {
+                object value = GetValue("AutoAbortThreshold");
+                if (value == null)
+                {
+                    return 10; //Мин.
+                }
+                else
+                {
+                    return Math.Min(Math.Max(Convert.ToInt32(value), 1), 60);
+                }
+            }
+            set
+            {
+                SetInt("AutoAbortThreshold", value);
+            }
+        }
+
         //Режим автовыбора звуковой дорожки
         public static ATrackModes DefaultATrackMode
         {
