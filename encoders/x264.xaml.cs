@@ -85,6 +85,7 @@ namespace XviD4PSP
             combo_adapt_quant_mode.Items.Add("None");
             combo_adapt_quant_mode.Items.Add("VAQ");
             combo_adapt_quant_mode.Items.Add("A-VAQ");
+            combo_adapt_quant_mode.Items.Add("BA-VAQ");
 
             //прогружаем деблокинг
             for (int n = -6; n <= 6; n++)
@@ -186,16 +187,22 @@ namespace XviD4PSP
             combo_colorprim.Items.Add("smpte170m");
             combo_colorprim.Items.Add("smpte240m");
             combo_colorprim.Items.Add("film");
+            combo_colorprim.Items.Add("bt2020");
 
             combo_transfer.Items.Add("Undefined");
             combo_transfer.Items.Add("bt709");
             combo_transfer.Items.Add("bt470m");
             combo_transfer.Items.Add("bt470bg");
+            combo_transfer.Items.Add("smpte170m");
+            combo_transfer.Items.Add("smpte240m");
             combo_transfer.Items.Add("linear");
             combo_transfer.Items.Add("log100");
             combo_transfer.Items.Add("log316");
-            combo_transfer.Items.Add("smpte170m");
-            combo_transfer.Items.Add("smpte240m");
+            combo_transfer.Items.Add("iec61966-2-4");
+            combo_transfer.Items.Add("bt1361e");
+            combo_transfer.Items.Add("iec61966-2-1");
+            combo_transfer.Items.Add("bt2020-10");
+            combo_transfer.Items.Add("bt2020-12");
 
             combo_colormatrix.Items.Add("Undefined");
             combo_colormatrix.Items.Add("bt709");
@@ -205,6 +212,8 @@ namespace XviD4PSP
             combo_colormatrix.Items.Add("smpte240m");
             combo_colormatrix.Items.Add("GBR");
             combo_colormatrix.Items.Add("YCgCo");
+            combo_colormatrix.Items.Add("bt2020nc");
+            combo_colormatrix.Items.Add("bt2020c");
 
             combo_colorspace.Items.Add("I420");
             combo_colorspace.Items.Add("I422");
@@ -395,12 +404,9 @@ namespace XviD4PSP
             else combo_lookahead_threads.SelectedItem = m.x264options.lookahead_threads;
 
             check_enable_psy.IsChecked = !m.x264options.no_psy;
-            check_aud.IsChecked = m.x264options.aud;
             num_ratio_ip.Value = m.x264options.ratio_ip;
             num_ratio_pb.Value = m.x264options.ratio_pb;
             num_slices.Value = m.x264options.slices;
-            check_pic_struct.IsChecked = m.x264options.pic_struct;
-            check_fake_int.IsChecked = m.x264options.fake_int;
 
             if (m.x264options.range_in == "auto") combo_range_in.SelectedIndex = 0;
             else if (m.x264options.range_in == "tv") combo_range_in.SelectedIndex = 1;
@@ -414,8 +420,13 @@ namespace XviD4PSP
             combo_transfer.SelectedItem = m.x264options.transfer;
             combo_colormatrix.SelectedItem = m.x264options.colormatrix;
             combo_colorspace.SelectedItem = m.x264options.colorspace;
-            check_non_deterministic.IsChecked = m.x264options.non_deterministic;
+
+            check_stitchable.IsChecked = m.x264options.stitchable;
+            check_fake_int.IsChecked = m.x264options.fake_int;
             check_bluray.IsChecked = m.x264options.bluray;
+            check_non_deterministic.IsChecked = m.x264options.non_deterministic;
+            check_pic_struct.IsChecked = m.x264options.pic_struct;
+            check_aud.IsChecked = m.x264options.aud;
 
             //Кол-во потоков для x264-го
             if (m.x264options.threads == "auto") combo_threads_count.SelectedIndex = 0;
@@ -538,6 +549,7 @@ namespace XviD4PSP
             combo_open_gop.IsEnabled = !m.x264options.extra_cli.Contains("--open-gop");
             num_slices.IsEnabled = !m.x264options.extra_cli.Contains("--slices ");
             check_pic_struct.IsEnabled = !m.x264options.extra_cli.Contains("--pic-struct");
+            check_stitchable.IsEnabled = !m.x264options.extra_cli.Contains("--stitchable");
             check_fake_int.IsEnabled = !m.x264options.extra_cli.Contains("--fake-interlaced");
             combo_range_in.IsEnabled = !m.x264options.extra_cli.Contains("--input-range ");
             combo_range_out.IsEnabled = !m.x264options.extra_cli.Contains("--range ");
@@ -711,8 +723,8 @@ namespace XviD4PSP
                     "Placebo - super high quality encoding";
             }
             combo_badapt_mode.ToolTip = "Adaptive B-frame decision method (--b-adapt, default: " + (def.b_adapt == 0 ? "Disabled)" : def.b_adapt == 1 ? "Fast)" : "Optimal");
-            combo_adapt_quant_mode.ToolTip = "AQ mode (--aq-mode, default: " + (def.aqmode == 0 ? "None" : def.aqmode == 1 ? "VAQ" : "A-VAQ") + ")\r\n" +
-                        "None - disabled, 0\r\nVAQ - variance AQ (complexity mask), 1\r\nA-VAQ - auto-variance AQ (experimental), 2";
+            combo_adapt_quant_mode.ToolTip = "AQ mode (--aq-mode, default: " + (def.aqmode == 0 ? "None" : def.aqmode == 1 ? "VAQ" : def.aqmode == 2 ? "A-VAQ" : "BA-VAQ") + ")\r\n" +
+                        "None - disabled, 0\r\nVAQ - variance AQ (complexity mask), 1\r\nA-VAQ - auto-variance AQ, 2\r\nBA-VAQ - auto-variance AQ with bias to dark scenes, 3";
             combo_adapt_quant.ToolTip = "AQ Strength (--ag-strength, default: " + def.aqstrength + ")\r\n" +
                         "Reduces blocking and blurring in flat and textured areas: 0.5 - weak AQ, 1.5 - strong AQ";
             num_psyrdo.ToolTip = "Strength of psychovisual RD optimization, requires Subpixel ME >= 6 (--psy-rd, default: " + def.psyrdo.ToString(cult_info) + ")";
@@ -738,6 +750,7 @@ namespace XviD4PSP
             combo_open_gop.ToolTip = "Use recovery points to close GOPs, requires B-frames (--open-gop, default: " + (!def.open_gop ? "No" : "Yes") + ")";
             num_slices.ToolTip = "Number of slices per frame (--slices, default: " + def.slices + ")";
             check_pic_struct.ToolTip = "Force pic_struct in Picture Timing SEI (--pic-struct, default: unchecked)";
+            check_stitchable.ToolTip = "Don't optimize headers based on video content, ensures ability to recombine a segmented encode (--stitchable, default: unchecked)";
             check_fake_int.ToolTip = "Flag stream as interlaced but encode progressive (--fake-interlaced, default: unchecked)";
             combo_range_in.ToolTip = "Forces the range of the input (--input-range, default: Auto)\r\nIf input and output ranges aren't the same, x264 will perform range conversion!";
             combo_range_out.ToolTip = "Sets the range of the output (--range, default: Auto)\r\nIf input and output ranges aren't the same, x264 will perform range conversion!";
@@ -1030,6 +1043,9 @@ namespace XviD4PSP
                 else if (value == "--pic-struct")
                     m.x264options.pic_struct = true;
 
+                else if (value == "--stitchable")
+                    m.x264options.stitchable = true;
+
                 else if (value == "--fake-interlaced")
                     m.x264options.fake_int = true;
 
@@ -1295,6 +1311,9 @@ namespace XviD4PSP
 
             if (m.x264options.fake_int && !defaults.fake_int && !m.x264options.extra_cli.Contains("--fake-interlaced"))
                 line += " --fake-interlaced";
+
+            if (m.x264options.stitchable && !defaults.stitchable && !m.x264options.extra_cli.Contains("--stitchable"))
+                line += " --stitchable";
 
             if (m.x264options.range_in != defaults.range_in && !m.x264options.extra_cli.Contains("--input-range "))
                 line += " --input-range " + m.x264options.range_in;
@@ -2329,6 +2348,13 @@ namespace XviD4PSP
         {
             m.x264options.fake_int = check_fake_int.IsChecked.Value;
             SetAVCProfile();
+            root_window.UpdateManualProfile();
+            UpdateCLI();
+        }
+
+        private void check_stitchable_Click(object sender, RoutedEventArgs e)
+        {
+            m.x264options.stitchable = check_stitchable.IsChecked.Value;
             root_window.UpdateManualProfile();
             UpdateCLI();
         }

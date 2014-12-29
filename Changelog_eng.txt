@@ -1,6 +1,8 @@
-﻿XviD4PSP 5.10.335.0 (28.12.2014), main changes:
+﻿XviD4PSP 5.10.336.0 (29.12.2014), main changes:
 
 
+>>> (r336) x264: added --aq-mode 3, --stitchable, and new items for "Color primaries, Transfer characteristics,
+           Color matrix settings".
 >>> (r335) Auto aborting of freezed tasks ("Settings->Global settings->Encoding"): it is now possible to adjust
            the time threshold.
 >>> (r334) Fixed error handling for recent version of bassAudioSource.

@@ -936,6 +936,19 @@ namespace XviD4PSP
             }
         }
 
+        private bool _stitchable = false;
+        public bool stitchable
+        {
+            get
+            {
+                return _stitchable;
+            }
+            set
+            {
+                _stitchable = value;
+            }
+        }
+
         private string _range_in = "auto";
         public string range_in
         {
