@@ -1,6 +1,11 @@
-﻿XviD4PSP 5.10.336.0 (29.12.2014), main changes:
+﻿XviD4PSP 5.10.337.0 (09.01.2015), main changes:
 
 
+>>> (r337) Format settings window: maximum resolution increased to 7680x4320, minimum mod for width decreased
+           to 2. There is no changes in the formats itself.
+>>> (r337) MKVMerge: the keys for audio\video tracks muxing moved to the default settings in the format settings
+           window, added --disable-track-statistics-tags key. If these MKVMerge-muxing settings already has been
+           changed, you need to Reset them now (in this window)!
 >>> (r336) x264: added --aq-mode 3, --stitchable, and new items for "Color primaries, Transfer characteristics,
            Color matrix settings".
 >>> (r335) Auto aborting of freezed tasks ("Settings->Global settings->Encoding"): it is now possible to adjust

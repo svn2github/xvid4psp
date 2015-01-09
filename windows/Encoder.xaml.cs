@@ -3371,24 +3371,22 @@ namespace XviD4PSP
             }
 
             //video
+            int vID = 0;
             string video = "";
             if (IsDirectRemuxingPossible && m.outvcodec == "Copy")
             {
                 //Видео из исходника (режим Copy без демукса)
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                int vID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? m.invideostream_ff_order :
+                vID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? m.invideostream_ff_order :
                     (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? m.invideostream_mi_order :
                     m.invideostream_mi_id; //avi, rm, ogm
 
                 mux_v = (!string.IsNullOrEmpty(mux_v)) ? mux_v.Replace("%v_id%", vID.ToString()) + " " : "";
-                video = "-d " + vID + " -A -S " + mux_v + "\"" + m.infilepath + "\" ";
+                video = "-d " + vID + " " + mux_v + "\"" + m.infilepath + "\" ";
             }
             else
             {
                 //Обычный муксинг
-                string ext = Path.GetExtension(m.outvideofile).ToLower();
-                int vID = 0;
-
                 string rate = "--default-duration " + vID + ":" + m.outframerate + "fps ";
                 if (m.outvcodec == "Copy")
                 {
@@ -3399,10 +3397,11 @@ namespace XviD4PSP
                 }
 
                 mux_v = (!string.IsNullOrEmpty(mux_v)) ? mux_v.Replace("%v_id%", vID.ToString()) + " " : "";
-                video = rate + "-d " + vID + " -A -S " + mux_v + "\"" + m.outvideofile + "\" ";
+                video = rate + "-d " + vID + " " + mux_v + "\"" + m.outvideofile + "\" ";
             }
 
             //audio
+            int aID = 0;
             string audio = "";
             if (m.outaudiostreams.Count > 0)
             {
@@ -3413,7 +3412,7 @@ namespace XviD4PSP
                 {
                     //Звук из исходника (режим Copy без демукса)
                     string ext = Path.GetExtension(m.infilepath).ToLower();
-                    int aID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? instream.ff_order :
+                    aID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? instream.ff_order :
                     (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? instream.mi_order :
                     instream.mi_id; //avi, rm, ogm
 
@@ -3425,12 +3424,11 @@ namespace XviD4PSP
                     }
 
                     mux_a = (!string.IsNullOrEmpty(mux_a)) ? mux_a.Replace("%a_id%", aID.ToString()) + " " : "";
-                    audio = "-a " + aID + delay + " -D -S --no-chapters " + mux_a + "\"" + m.infilepath + "\" ";
+                    audio = "-a " + aID + delay + " " + mux_a + "\"" + m.infilepath + "\" ";
                 }
                 else
                 {
                     //Обычный муксинг
-                    int aID = 0;
                     string aext = Path.GetExtension(outstream.audiopath).ToLower();
                     if (aext == ".avi") aID = 1; //Видеофайл, добавленный как внешний аудиотрек - не запрещено, но и не поддерживается!
 
@@ -3446,8 +3444,12 @@ namespace XviD4PSP
 
                     string delay = (CopyDelay) ? " --sync " + aID + ":" + outstream.delay : "";
                     mux_a = (!string.IsNullOrEmpty(mux_a)) ? mux_a.Replace("%a_id%", aID.ToString()) + " " : "";
-                    audio = "-a " + aID + sbr + delay + " -D -S --no-chapters " + mux_a + "\"" + outstream.audiopath + "\" ";
+                    audio = "-a " + aID + sbr + delay + " " + mux_a + "\"" + outstream.audiopath + "\" ";
                 }
+            }
+            else
+            {
+                aID = -1;
             }
 
             //split
@@ -3461,8 +3463,8 @@ namespace XviD4PSP
             }
 
             //Ввод полученных аргументов командной строки
-            mux_o = (!string.IsNullOrEmpty(mux_o)) ? mux_o + " " : "";
-            info.Arguments = "-o \"" + m.outfilepath + "\" " + mux_o + video + audio + split + charset;
+            mux_o = (!string.IsNullOrEmpty(mux_o)) ? mux_o.Replace("%v_id%", vID.ToString()).Replace("%a_id%", aID.ToString()) + " " : "";
+            info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + mux_o + split + charset;
 
             //прописываем аргументы командной строки
             SetLog("");

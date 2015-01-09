@@ -241,7 +241,7 @@ namespace XviD4PSP
             if (def.Resolution_IsEditable)
             {
                 //Кратность для ширины
-                for (int w = 4; w <= 16; w *= 2)
+                for (int w = 2; w <= 16; w *= 2)
                     combo_ValidModW.Items.Add(w);
                 int modw = Format.GetValidModW(format);
                 if (!combo_ValidModW.Items.Contains(modw))
@@ -326,12 +326,12 @@ namespace XviD4PSP
                 combo_split.IsEnabled = true;
 
                 info = info.Replace("MUXER", "MKVMerge");
-                string video = "%v_id% - " + Languages.Translate("video track ID (TID, track number)") + "\r\n\r\n";
-                string audio = "%a_id% - " + Languages.Translate("audio track ID (TID, track number)") + "\r\n\r\n";
+                string video = "%v_id% - " + Languages.Translate("video track ID (TID, track number)") + "\r\n";
+                string audio = "%a_id% - " + Languages.Translate("audio track ID (TID, track number)") + "\r\n";
 
-                textbox_mux_v.ToolTip = info + wcards + video + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_mkvmerge))) ? empty : temp);
-                textbox_mux_a.ToolTip = info + wcards + audio + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_mkvmerge))) ? empty : temp);
-                textbox_mux_o.ToolTip = info + wcards + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_mkvmerge))) ? empty : temp);
+                textbox_mux_v.ToolTip = info + wcards + video + "\r\n" + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", def.CLI_mkvmerge))) ? empty : temp);
+                textbox_mux_a.ToolTip = info + wcards + audio + "\r\n" + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", def.CLI_mkvmerge))) ? empty : temp);
+                textbox_mux_o.ToolTip = info + wcards + video + audio + "\r\n" + common + _def + ((string.IsNullOrEmpty(temp = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", def.CLI_mkvmerge))) ? empty : temp);
             }
             else if (combo_Muxer.SelectedItem.ToString() == "mp4box")
             {
@@ -402,7 +402,7 @@ namespace XviD4PSP
                 //Ширина
                 int n = 16, value;
                 int step = Format.GetValidModW(format);
-                while (n < 1920 + step)
+                while (n < 7680 + step)
                 {
                     combo_MinResolutionW.Items.Add(n);
                     combo_MidResolutionW.Items.Add(n);
@@ -422,7 +422,7 @@ namespace XviD4PSP
                 //Высота
                 n = 16;
                 step = Format.GetValidModH(format);
-                while (n < 1088 + step)
+                while (n < 4320 + step)
                 {
                     combo_MinResolutionH.Items.Add(n);
                     combo_MidResolutionH.Items.Add(n);
@@ -534,7 +534,7 @@ namespace XviD4PSP
                 combo_MidResolutionH.ToolTip = combo_thm_H.ToolTip + " (" + Languages.Translate("limited maximum, for auto selection") + ")" + _def + def.MidH;
                 combo_MaxResolutionW.ToolTip = combo_thm_W.ToolTip + " (" + Languages.Translate("Maximum").ToLower() + ")" + _def + def.MaxW;
                 combo_MaxResolutionH.ToolTip = combo_thm_H.ToolTip + " (" + Languages.Translate("Maximum").ToLower() + ")" + _def + def.MaxH;
-                combo_ValidModW.ToolTip = combo_thm_W.ToolTip + " (" + Languages.Translate("multiplier") + ")\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "4, 8") + _def + def.ModW;
+                combo_ValidModW.ToolTip = combo_thm_W.ToolTip + " (" + Languages.Translate("multiplier") + ")\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "2, 4, 8") + _def + def.ModW;
                 combo_ValidModH.ToolTip = combo_thm_H.ToolTip + " (" + Languages.Translate("multiplier") + ")\r\n" + Languages.Translate("Values XX are strongly NOT recommended!").Replace("XX", "2, 4") + _def + def.ModH;
             }
             if (textbox_aspects.IsEnabled) textbox_aspects.ToolTip = Languages.Translate("Aspect ratios.") + "\r\n" + Languages.Translate("Valid values:") + " 1.3333 (4:3), 1.5000, 1.6667, 1.7647 (16:9), 1.7778 (16:9), 1.8500, 2.3529, ...\r\n" +
