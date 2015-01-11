@@ -1323,13 +1323,22 @@ namespace XviD4PSP
         {
             if (e.Key == Key.Enter || e.Key == Key.Return)
             {
-                if (combo_help.IsSelectionBoxHighlighted) button_help_Click(null, null);
-                else if (textbox_search.IsFocused) button_search_Click(null, null);
+                if (combo_help.IsSelectionBoxHighlighted)
+                    button_help_Click(null, null);
+                else if (textbox_search.IsFocused || textbox_help.IsFocused && textbox_search.Text.Length > 0 && textbox_search.Foreground == Brushes.Black)
+                    button_search_Click(null, null);
             }
-            else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control || e.Key == Key.F3)
+            else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
             {
-                if (textbox_search.Text == "" || textbox_search.Foreground != Brushes.Black) textbox_search.Focus();
-                else button_search_Click(null, null);
+                textbox_search.Focus();
+                textbox_search.SelectAll();
+            }
+            else if (e.Key == Key.F3)
+            {
+                if (textbox_search.Text == "" || textbox_search.Foreground != Brushes.Black)
+                    textbox_search.Focus();
+                else
+                    button_search_Click(null, null);
             }
         }
 

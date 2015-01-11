@@ -1245,5 +1245,15 @@ namespace XviD4PSP
             }
             catch (Exception) { }
         }
+
+        public static string GetLSMASHFormat8(AviSynthColorspace csp)
+        {
+            //Что LSMASH нам выдал с хаком, то ему и укажем, но уже в варианте 8-bit.
+            if (csp == AviSynthColorspace.I420) return "YUV420P8";
+            if (csp == AviSynthColorspace.YV12) return "YUV420P8";
+            if (csp == AviSynthColorspace.YV16) return "YUV422P8"; //"YUY2"
+            if (csp == AviSynthColorspace.YV24) return "YUV444P8";
+            return "YUY2";
+        }
     }
 }

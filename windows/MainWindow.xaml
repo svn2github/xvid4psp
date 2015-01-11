@@ -411,7 +411,6 @@
                     <Separator/-->
                     <MenuItem x:Name="menu_support" Header="Support forum" Click="menu_help_Click"/>
                     <MenuItem x:Name="menu_home" Header="Home page" Click="menu_help_Click"/>
-                    <MenuItem x:Name="menu_Google_code" Header="Google-code" Click="menu_help_Click"/>
                     <MenuItem x:Name="menu_my_mail" Header="forclip@gmail.com" Click="menu_help_Click"/>
                     <Separator/>
                     <MenuItem x:Name="menu_avisynth_guide_en" Header="AviSynth guide (EN)" Click="menu_help_Click"/>

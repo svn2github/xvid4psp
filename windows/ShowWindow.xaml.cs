@@ -24,6 +24,7 @@ namespace XviD4PSP
             this.text_box.FontFamily = Font;
             this.text_box.Text = Text;
             this.textbox_search.Text = (button_search.Content = Languages.Translate("Search")) + "...";
+            this.text_box.Focus();
 
             Show();
         }
@@ -81,12 +82,20 @@ namespace XviD4PSP
         {
             if (e.Key == Key.Enter || e.Key == Key.Return)
             {
-                button_search_Click(null, null);
+                if (textbox_search.IsFocused || text_box.IsFocused && textbox_search.Text.Length > 0 && textbox_search.Foreground == Brushes.Black)
+                    button_search_Click(null, null);
             }
-            else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control || e.Key == Key.F3)
+            else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
             {
-                if (textbox_search.Text == "" || textbox_search.Foreground != Brushes.Black) textbox_search.Focus();
-                else button_search_Click(null, null);
+                textbox_search.Focus();
+                textbox_search.SelectAll();
+            }
+            else if (e.Key == Key.F3)
+            {
+                if (textbox_search.Text == "" || textbox_search.Foreground != Brushes.Black)
+                    textbox_search.Focus();
+                else
+                    button_search_Click(null, null);
             }
         }
 

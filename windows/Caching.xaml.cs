@@ -86,7 +86,16 @@ namespace XviD4PSP
                 }
 
                 if (m.isvideo && ext != ".avs" && (reader.Width == 0 || reader.Height == 0))
+                {
                     throw new Exception(m.vdecoder.ToString() + " can't decode video (zero-size image was returned)!");
+                }
+                else if ((m.vdecoder == AviSynthScripting.Decoders.LSMASHVideoSource || m.vdecoder == AviSynthScripting.Decoders.LWLibavVideoSource) && //16 - допуск на паддинг и т.д.
+                    string.IsNullOrEmpty(m.disable_hacked_vout) && ((Math.Abs(reader.Width / 2 - m.inresw) < 16) || (Math.Abs(reader.Height / 2 - m.inresh)) < 16))
+                {
+                    //LSMASH декодирует многобитное видео с удвоением ширины\высоты, пока-что это не поддерживается
+                    m.disable_hacked_vout = Calculate.GetLSMASHFormat8(reader.Clip.OriginalColorspace);
+                    throw new Exception("Hacked output");
+                }
                 else
                 {
                     m.inresw = reader.Width;
@@ -154,7 +163,7 @@ namespace XviD4PSP
                     try
                     {
                         //записываем скрипт с ошибкой в файл
-                        AviSynthScripting.WriteScriptToFile(script, "error");
+                        AviSynthScripting.WriteScriptToFile(script + "\r\n\r\n__END__\r\n\r\n   Error: " + ex.Message + "\r\n" + ex.StackTrace, "error");
                     }
                     catch (Exception) { }
                 }
@@ -349,6 +358,11 @@ namespace XviD4PSP
             else if (m.vdecoder == AviSynthScripting.Decoders.DirectShowSource && error.Contains("convertfps"))
             {
                 m.isconvertfps = false;
+                worker.RunWorkerAsync();
+                return;
+            }
+            else if (error == "Hacked output")
+            {
                 worker.RunWorkerAsync();
                 return;
             }

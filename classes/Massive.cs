@@ -1420,5 +1420,19 @@ namespace XviD4PSP
                 _bookmarks = value;
             }
         }
+
+        //Pixel format для LSMASHSource, чтоб отключить многобитный хак
+        private string _disable_hacked_vout = "";
+        public string disable_hacked_vout
+        {
+            get
+            {
+                return _disable_hacked_vout;
+            }
+            set
+            {
+                _disable_hacked_vout = value;
+            }
+        }
     }
 }

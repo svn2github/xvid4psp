@@ -30,7 +30,7 @@
                         </GroupBox>
                         <GroupBox Margin="4,120.2,4,142" Header="Info" VerticalAlignment="Stretch" Foreground="#FFFFFFFF" x:Name="group_info">
                             <Grid Width="Auto" Height="Auto">
-                                <TextBox x:Name="text_info" Text="" TextWrapping="NoWrap" Margin="6,5,6,5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                                <TextBox x:Name="text_info" Text="" TextWrapping="NoWrap" IsReadOnly="True" Margin="6,5,6,5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Margin="4,0,4,6" Header="Options" Foreground="#FFFFFFFF" x:Name="group_options" Height="136" VerticalAlignment="Bottom">
@@ -62,7 +62,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <ProgressBar x:Name="progress" Foreground="{DynamicResource StrawBerryBrush}" Margin="4,0,4,6" VerticalAlignment="Bottom" Height="12"/>
-                        <TextBox x:Name="textbox_log" Text="" TextWrapping="NoWrap" Margin="4,4,4,26" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                        <TextBox x:Name="textbox_log" Text="" TextWrapping="NoWrap" IsReadOnly="True" Margin="4,4,4,26" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Help" x:Name="tab_help">
@@ -77,7 +77,7 @@
                         <Button x:Name="button_help" Content="OK" Foreground="#FFFFFFFF"  Margin="210,3,4,0" Width="70" Height="24" Template="{DynamicResource GlassButton}" VerticalAlignment="Top" HorizontalAlignment="Left" Click="button_help_Click"/>
                         <TextBox x:Name="textbox_search" Text="Search..." TextWrapping="Wrap" Margin="4,4,80,26" Height="22" Width="200" VerticalAlignment="Top" HorizontalAlignment="Right" VerticalScrollBarVisibility="Auto" KeyDown="textbox_KeyDown" FontStyle="Oblique" Foreground="Gray" VerticalContentAlignment="Center" GotFocus="textbox_search_GotFocus"/>
                         <Button x:Name="button_search" Content="Search" Foreground="#FFFFFFFF"  Margin="0,3,4,0" Width="70" Height="24" Template="{DynamicResource GlassButton}" VerticalAlignment="Top" HorizontalAlignment="Right" Click="button_search_Click"/>
-                        <TextBox x:Name="textbox_help" Text="" TextWrapping="NoWrap" AcceptsReturn="True" Margin="4,32,4,6" FontFamily="Lucida Console" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" KeyDown="textbox_KeyDown"/>
+                        <TextBox x:Name="textbox_help" Text="" TextWrapping="NoWrap" AcceptsReturn="True" IsReadOnly="True" Margin="4,32,4,6" FontFamily="Lucida Console" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" KeyDown="textbox_KeyDown"/>
                     </Grid>
                 </TabItem>
             </TabControl>

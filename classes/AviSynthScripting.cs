@@ -322,16 +322,19 @@ namespace XviD4PSP
                    }
                    else if (m.vdecoder == Decoders.LSMASHVideoSource)
                    {
-                       //LSMASHVideoSource(string source, int "track"(0), int "threads"(0), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       //LSMASHVideoSource(string source, int track = 0, int threads = 0, int seek_mode = 0, int seek_threshold = 10, bool dr = false,
+                       //int fpsnum = 0, int fpsden = 1, bool stacked = false, string format = "")
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
-                       cache_path = ", track=0" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", dr=false";
+                       cache_path = ", track=0" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", dr=false" +
+                           (!string.IsNullOrEmpty(m.disable_hacked_vout) ? ", format=\"" + m.disable_hacked_vout + "\", stacked=true" : "");
                    }
                    else if (m.vdecoder == Decoders.LWLibavVideoSource)
                    {
-                       //LWLibavVideoSource(string source, int "stream_index"(-1), int "threads"(0), bool "cache"(true), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       //LWLibavVideoSource(string source, int stream_index = -1, int threads = 0, bool cache = true, int seek_mode = 0, int seek_threshold = 10,
+                       //bool dr = false, int fpsnum = 0, int fpsden = 1, bool repeat = false, int dominance = 0, bool stacked = false, string format = "")
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
-                       cache_path = ", stream_index=-1" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") +
-                       ", cache=true, dr=false";
+                       cache_path = ", stream_index=-1" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", cache=true, dr=false" +
+                           (!string.IsNullOrEmpty(m.disable_hacked_vout) ? ", format=\"" + m.disable_hacked_vout + "\", stacked=true" : "");
                    }
 
                    n++;
@@ -1002,16 +1005,19 @@ namespace XviD4PSP
                    }
                    else if (m.vdecoder == Decoders.LSMASHVideoSource)
                    {
-                       //LSMASHVideoSource(string source, int "track"(0), int "threads"(0), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       //LSMASHVideoSource(string source, int track = 0, int threads = 0, int seek_mode = 0, int seek_threshold = 10, bool dr = false,
+                       //int fpsnum = 0, int fpsden = 1, bool stacked = false, string format = "")
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
-                       cache_path = ", track=0" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", dr=false";
+                       cache_path = ", track=0" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", dr=false" +
+                           (!string.IsNullOrEmpty(m.disable_hacked_vout) ? ", format=\"" + m.disable_hacked_vout + "\", stacked=true" : "");
                    }
                    else if (m.vdecoder == Decoders.LWLibavVideoSource)
                    {
-                       //LWLibavVideoSource(string source, int "stream_index"(-1), int "threads"(0), bool "cache"(true), int "seek_mode"(0), int "seek_threshold"(10), bool "dr"(false))
+                       //LWLibavVideoSource(string source, int stream_index = -1, int threads = 0, bool cache = true, int seek_mode = 0, int seek_threshold = 10,
+                       //bool dr = false, int fpsnum = 0, int fpsden = 1, bool repeat = false, int dominance = 0, bool stacked = false, string format = "")
                        assume_fps = (!string.IsNullOrEmpty(m.inframerate) && Settings.LSMASH_AssumeFPS) ? ".AssumeFPS(" + m.inframerate + ")" : "";
-                       cache_path = ", stream_index=-1" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") +
-                       ", cache=true, dr=false";
+                       cache_path = ", stream_index=-1" + ((Settings.LSMASH_Threads > 0) ? ", threads=" + Settings.LSMASH_Threads : "") + ", cache=true, dr=false" +
+                           (!string.IsNullOrEmpty(m.disable_hacked_vout) ? ", format=\"" + m.disable_hacked_vout + "\", stacked=true" : "");
                    }
 
                    n += 1;

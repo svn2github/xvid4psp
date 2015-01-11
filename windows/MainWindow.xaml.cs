@@ -1136,9 +1136,8 @@ namespace XviD4PSP
         private void menu_help_Click(object sender, RoutedEventArgs e)
         {
             string path = "";
-            if (sender == menu_support) path = "http://forum.winnydows.com";
-            else if (sender == menu_home) path = "http://www.winnydows.com";
-            else if (sender == menu_Google_code) path = "http://code.google.com/p/xvid4psp/";
+            if (sender == menu_support) path = "http://rutracker.org/forum/viewforum.php?f=23";
+            else if (sender == menu_home) path = "http://code.google.com/p/xvid4psp/";
             else if (sender == menu_my_mail) path = "mailto:forclip@gmail.com";
             else if (sender == menu_avisynth_guide_en) path = "http://avisynth.org/mediawiki/Internal_filters";
             else if (sender == menu_avisynth_guide_ru) path = "http://avisynth.org.ru/docs/russian/index.htm";
@@ -2557,7 +2556,7 @@ namespace XviD4PSP
                 menu_autocrop.Header = Languages.Translate("Detect black borders");
                 menu_detect_interlace.Header = Languages.Translate("Detect interlace");
                 menu_home.Header = Languages.Translate("Home page");
-                menu_support.Header = Languages.Translate("Support forum");
+                menu_support.Header = Languages.Translate("Support forum") + " (RU)";
                 //menu_donate.Header = Languages.Translate("Donate");
                 menu_avisynth_guide_en.Header = Languages.Translate("AviSynth guide") + " (EN)";
                 menu_avisynth_guide_ru.Header = Languages.Translate("AviSynth guide") + " (RU)";

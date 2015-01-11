@@ -1,6 +1,8 @@
-﻿XviD4PSP 5.10.337.0 (09.01.2015), main changes:
+﻿XviD4PSP 5.10.338.0 (12.01.2015), main changes:
 
 
+>>> (r338) LSMASHSource: auto detecting of high-bit output from it and specifying the nearest 8-bit format in
+           this case.
 >>> (r337) Format settings window: maximum resolution increased to 7680x4320, minimum mod for width decreased
            to 2. There is no changes in the formats itself.
 >>> (r337) MKVMerge: the keys for audio\video tracks muxing moved to the default settings in the format settings

@@ -3413,8 +3413,8 @@ namespace XviD4PSP
                     //Звук из исходника (режим Copy без демукса)
                     string ext = Path.GetExtension(m.infilepath).ToLower();
                     aID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? instream.ff_order :
-                    (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? instream.mi_order :
-                    instream.mi_id; //avi, rm, ogm
+                        (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? instream.mi_order :
+                        instream.mi_id; //avi, rm, ogm
 
                     string delay = "";
                     if (CopyDelay)
