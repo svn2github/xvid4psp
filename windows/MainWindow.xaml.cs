@@ -1139,8 +1139,8 @@ namespace XviD4PSP
             if (sender == menu_support) path = "http://rutracker.org/forum/viewforum.php?f=23";
             else if (sender == menu_home) path = "http://code.google.com/p/xvid4psp/";
             else if (sender == menu_my_mail) path = "mailto:forclip@gmail.com";
-            else if (sender == menu_avisynth_guide_en) path = "http://avisynth.org/mediawiki/Internal_filters";
-            else if (sender == menu_avisynth_guide_ru) path = "http://avisynth.org.ru/docs/russian/index.htm";
+            else if (sender == menu_avisynth_guide_en) path = "http://avisynth.nl/index.php/Main_Page";
+            else if (sender == menu_avisynth_guide_ru) path = "http://unreal666.hdd1.ru/docs/avisynth/russian/index.htm";
             else return;
 
             try

@@ -1,6 +1,11 @@
-﻿XviD4PSP 5.10.338.0 (12.01.2015), main changes:
+﻿XviD4PSP 5.10.339.0 (14.01.2015), main changes:
 
 
+>>> (r339) Help menu: web links updated.
+>>> (r339) Changed progress detection for recent MP4Box, as the result removed support for old NicMP4Box.
+           For "MP4 iPod 50G" and "MP4 iPod 55G" formats removed autoselection of the muxer, it can be
+           chosen manually in the format settings window.
+>>> (r339) QAAC: added "Delay signaling" (--gapless-mode) and "Compensate encoder delay" (--no-delay) options.
 >>> (r338) LSMASHSource: auto detecting of high-bit output from it and specifying the nearest 8-bit format in
            this case.
 >>> (r337) Format settings window: maximum resolution increased to 7680x4320, minimum mod for width decreased

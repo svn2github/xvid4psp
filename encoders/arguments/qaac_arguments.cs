@@ -67,5 +67,31 @@ namespace XviD4PSP
                 _accuracy = value;
             }
         }
+
+        private bool _no_delay = false;
+        public bool no_delay
+        {
+            get
+            {
+                return _no_delay;
+            }
+            set
+            {
+                _no_delay = value;
+            }
+        }
+
+        private int _gapless_mode = 0;
+        public int gapless_mode
+        {
+            get
+            {
+                return _gapless_mode;
+            }
+            set
+            {
+                _gapless_mode = value;
+            }
+        }
     }
 }

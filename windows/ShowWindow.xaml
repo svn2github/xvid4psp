@@ -13,7 +13,7 @@
             </GroupBox>
         </Grid>
         <Grid x:Name="grid_buttons" VerticalAlignment="Bottom" Height="38.96" Background="{DynamicResource black_gradient}">
-            <TextBox x:Name="textbox_search" Text="Search..." TextWrapping="Wrap" Margin="8,0,0,1" Height="22" Width="200" VerticalAlignment="Center" HorizontalAlignment="Left" VerticalScrollBarVisibility="Auto" KeyDown="textbox_KeyDown" FontStyle="Oblique" Foreground="Gray" VerticalContentAlignment="Center" GotFocus="textbox_search_GotFocus"/>
+            <TextBox x:Name="textbox_search" Text="Search..." TextWrapping="Wrap" Margin="8,0,0,1" Height="22" Width="200" VerticalAlignment="Center" HorizontalAlignment="Left" VerticalScrollBarVisibility="Auto" KeyDown="textbox_KeyDown" FontStyle="Oblique" Foreground="Gray" VerticalContentAlignment="Center" GotFocus="textbox_search_GotFocus" LostFocus="textbox_search_LostFocus"/>
             <Button x:Name="button_search" Content="Search" Foreground="#FFFFFFFF"  Margin="214,0,0,0" Width="75" Height="24" Template="{DynamicResource GlassButton}" VerticalAlignment="Center" HorizontalAlignment="Left" Click="button_search_Click"/>
             <Button x:Name="button_ok" Content="Ok" Click="button_ok_Click" Margin="0,0,8,0" Width="75" Height="24" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}"/>
         </Grid>

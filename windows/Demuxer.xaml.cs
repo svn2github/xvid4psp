@@ -256,8 +256,8 @@ namespace XviD4PSP
             info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
-            info.RedirectStandardOutput = true;
-            info.RedirectStandardError = false;
+            info.RedirectStandardOutput = false;
+            info.RedirectStandardError = true;
             info.CreateNoWindow = true;
             encodertext.Length = 0;
 
@@ -285,7 +285,7 @@ namespace XviD4PSP
             //первый проход
             while (!encoderProcess.HasExited)
             {
-                line = encoderProcess.StandardOutput.ReadLine();
+                line = encoderProcess.StandardError.ReadLine();
 
                 if (line != null)
                 {

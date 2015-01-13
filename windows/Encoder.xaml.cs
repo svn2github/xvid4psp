@@ -2019,7 +2019,7 @@ namespace XviD4PSP
             info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
-            info.RedirectStandardOutput = true;
+            info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
@@ -2365,20 +2365,11 @@ namespace XviD4PSP
 
             encoderProcess = new Process();
             ProcessStartInfo info = new ProcessStartInfo();
-
-            bool old_muxer = false; //Использование старого NicMP4Box в случае его наличия - необходим для воспроизведения на Иподе файлов с большим разрешением
-            if (m.format == Format.ExportFormats.Mp4iPod55G && (/*m.outvcodec == "x264" || */m.outvcodec == "Copy") && File.Exists(Calculate.StartupPath + "\\apps\\MP4Box\\NicMP4Box.exe"))
-            {
-                old_muxer = true;
-                info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\NicMP4Box.exe";
-            }
-            else
-                info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
-
+            info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
-            info.RedirectStandardOutput = true;
-            info.RedirectStandardError = false;
+            info.RedirectStandardOutput = false;
+            info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
             string rate = "-fps " + m.outframerate + " ";
@@ -2392,12 +2383,7 @@ namespace XviD4PSP
 
             //Доп. параметры муксинга
             string mux_v = "", mux_a = "", mux_o = "";
-            if (!old_muxer && (m.format == Format.ExportFormats.Mp4iPod50G || m.format == Format.ExportFormats.Mp4iPod55G))
-            {
-                //пробный агрумент для ипода (для больших разрешений и 5.5G его все-равно не достаточно)
-                mux_o = "-ipod ";
-            }
-            else if (Formats.GetDefaults(m.format).IsEditable)
+            if (Formats.GetDefaults(m.format).IsEditable)
             {
                 //Получение CLI и расшифровка подставных значений
                 string muxer_cli = Calculate.ExpandVariables(m, Formats.GetSettings(m.format, "CLI_mp4box", Formats.GetDefaults(m.format).CLI_mp4box));
@@ -2430,7 +2416,7 @@ namespace XviD4PSP
             SetLog("");
             if (Settings.ArgumentsToLog)
             {
-                SetLog((old_muxer ? "NicMP4Box.exe: " : "MP4Box.exe: ") + info.Arguments);
+                SetLog("MP4Box.exe: " + info.Arguments);
                 SetLog("");
             }
 
@@ -2473,7 +2459,7 @@ namespace XviD4PSP
             while (!encoderProcess.HasExited)
             {
                 locker.WaitOne();
-                line = encoderProcess.StandardOutput.ReadLine();
+                line = encoderProcess.StandardError.ReadLine();
 
                 if (line != null)
                 {
@@ -2491,7 +2477,7 @@ namespace XviD4PSP
             }
 
             //Дочитываем остатки лога, если что-то не успело считаться
-            line = encoderProcess.StandardOutput.ReadToEnd();
+            line = encoderProcess.StandardError.ReadToEnd();
             if (!string.IsNullOrEmpty(line)) AppendEncoderText(Calculate.FilterLogMessage(r, line));
 
             //Отлавливаем ошибку по ErrorLevel
@@ -2535,7 +2521,7 @@ namespace XviD4PSP
             info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
-            info.RedirectStandardOutput = true;
+            info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
             info.CreateNoWindow = true;
 
@@ -2655,12 +2641,7 @@ namespace XviD4PSP
 
             //Доп. параметры муксинга
             string mux_v = "", mux_a = "", mux_o = "";
-            if (m.format == Format.ExportFormats.Mp4iPod55G)
-            {
-                //Добавляем ipod atom для 5.5G
-                mux_o = " -f ipod";
-            }
-            else if (Formats.GetDefaults(m.format).IsEditable)
+            if (Formats.GetDefaults(m.format).IsEditable)
             {
                 //Получение CLI и расшифровка подставных значений
                 string muxer_cli = Calculate.ExpandVariables(m, Formats.GetSettings(m.format, "CLI_ffmpeg", Formats.GetDefaults(m.format).CLI_ffmpeg));

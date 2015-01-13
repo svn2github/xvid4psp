@@ -85,7 +85,8 @@ namespace XviD4PSP
             button_add_profile.ToolTip = Languages.Translate("Add profile");
             button_remove_profile.ToolTip = Languages.Translate("Remove profile");
             button_store_profile.ToolTip = Languages.Translate("Save changes");
-            textbox_search.Text = (button_search.Content = Languages.Translate("Search")) + "...";
+            button_search.Content = Languages.Translate("Search");
+            textbox_search.Text = button_search.Content + "...";
             button_open.ToolTip = Languages.Translate("Open");
             button_save.ToolTip = Languages.Translate("Save");
             progress.Maximum = 100;
@@ -1309,13 +1310,21 @@ namespace XviD4PSP
 
         private void textbox_search_GotFocus(object sender, RoutedEventArgs e)
         {
-            //Это нужно только один раз
-            if (textbox_search.IsFocused)
+            if (textbox_search.Foreground != Brushes.Black)
             {
                 textbox_search.Text = "";
                 textbox_search.Foreground = Brushes.Black;
                 textbox_search.FontStyle = FontStyles.Normal;
-                textbox_search.GotFocus -= new RoutedEventHandler(textbox_search_GotFocus);
+            }
+        }
+
+        private void textbox_search_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (textbox_search.Text.Length == 0)
+            {
+                textbox_search.Text = button_search.Content + "...";
+                textbox_search.Foreground = Brushes.Gray;
+                textbox_search.FontStyle = FontStyles.Oblique;
             }
         }
 

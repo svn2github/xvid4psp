@@ -1025,11 +1025,10 @@ namespace XviD4PSP
                 this.LimitedToStereo = true;
                 this.LimitedToStereo_IsEditable = true;
 
-                //MP4Box или NicMP4box
-                this.Muxers = new string[] { "auto" };
-                this.Muxer = "auto";
-                //this.CLI_ffmpeg = "[v][/v][a][/a][o]-f ipod[/o]";
-                //this.CLI_mp4box = "[v][/v][a][/a][o]-ipod[/o]";
+                this.Muxers = new string[] { "mp4box", "ffmpeg" };
+                this.Muxer = (format == Format.ExportFormats.Mp4iPod50G) ? "mp4box" : "ffmpeg";
+                this.CLI_ffmpeg = "[v][/v][a][/a][o]-f ipod[/o]";
+                this.CLI_mp4box = "[v][/v][a][/a][o]-ipod[/o]";
 
                 this.Extensions = new string[] { "mp4", "m4v" };
                 this.Extension = "mp4";

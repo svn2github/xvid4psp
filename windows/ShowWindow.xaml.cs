@@ -23,7 +23,8 @@ namespace XviD4PSP
             this.group_box.Header = this.Title = Title;
             this.text_box.FontFamily = Font;
             this.text_box.Text = Text;
-            this.textbox_search.Text = (button_search.Content = Languages.Translate("Search")) + "...";
+            this.button_search.Content = Languages.Translate("Search");
+            this.textbox_search.Text = button_search.Content + "...";
             this.text_box.Focus();
 
             Show();
@@ -68,13 +69,21 @@ namespace XviD4PSP
 
         private void textbox_search_GotFocus(object sender, RoutedEventArgs e)
         {
-            //Это нужно только один раз
-            if (textbox_search.IsFocused)
+            if (textbox_search.Foreground != Brushes.Black)
             {
                 textbox_search.Text = "";
                 textbox_search.Foreground = Brushes.Black;
                 textbox_search.FontStyle = FontStyles.Normal;
-                textbox_search.GotFocus -= new RoutedEventHandler(textbox_search_GotFocus);
+            }
+        }
+
+        private void textbox_search_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (textbox_search.Text.Length == 0)
+            {
+                textbox_search.Text = button_search.Content + "...";
+                textbox_search.Foreground = Brushes.Gray;
+                textbox_search.FontStyle = FontStyles.Oblique;
             }
         }
 

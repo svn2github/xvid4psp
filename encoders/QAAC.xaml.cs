@@ -41,6 +41,10 @@ namespace XviD4PSP
             combo_aac_profile.Items.Add("AAC-LC");
             combo_aac_profile.Items.Add("AAC-HE");
 
+            combo_gapless_mode.Items.Add("iTunSMPB");
+            combo_gapless_mode.Items.Add("ISO");
+            combo_gapless_mode.Items.Add("iTunSMPB + ISO");
+
             //Предупреждение о неточности битрейта
             combo_bitrate.Tag = Languages.Translate("Do not expect that selected bitrate will be strictly observed by the encoder!") + "\r\n" +
                 Languages.Translate("The actual value will varies with encoding mode (ABR/CBR/CVBR), profile (LC/HE), sample rate and number of channels.") + "\r\n" +
@@ -48,6 +52,8 @@ namespace XviD4PSP
 
             text_mode.Content = Languages.Translate("Encoding mode") + ":";
             text_accuracy.Content = Languages.Translate("Accuracy") + ":";
+            text_gapless_mode.Content = Languages.Translate("Delay signaling") + ":";
+            check_no_delay.Content = Languages.Translate("Compensate encoder delay");
 
             LoadFromProfile();
         }
@@ -76,6 +82,8 @@ namespace XviD4PSP
 
             combo_accuracy.SelectedIndex = m.qaac_options.accuracy;
             combo_aac_profile.SelectedItem = m.qaac_options.aacprofile;
+            combo_gapless_mode.SelectedIndex = m.qaac_options.gapless_mode;
+            check_no_delay.IsChecked = m.qaac_options.no_delay;
         }
 
         private void LoadBitrates()
@@ -163,6 +171,14 @@ namespace XviD4PSP
                 {
                     m.qaac_options.aacprofile = "AAC-HE";
                 }
+                else if (value == "--no-delay")
+                {
+                    m.qaac_options.no_delay = true;
+                }
+                else if (value == "--gapless-mode")
+                {
+                    m.qaac_options.gapless_mode = Convert.ToInt32(cli[n + 1]);
+                }
 
                 n++;
             }
@@ -201,6 +217,12 @@ namespace XviD4PSP
                 //AAC-HE
                 if (m.qaac_options.aacprofile == "AAC-HE") line += " --he";
             }
+
+            if (m.qaac_options.gapless_mode != 0)
+                line += " --gapless-mode " + m.qaac_options.gapless_mode;
+
+            if (m.qaac_options.no_delay)
+                line += " --no-delay";
 
             //забиваем данные в массив
             outstream.passes = line;
@@ -257,6 +279,18 @@ namespace XviD4PSP
                     text_bitrate.Content = (combo_mode.SelectedIndex == 3) ? str_quality : str_bitrate;
                 }
 
+                if (combo_aac_profile.SelectedIndex == 1 ||  //AAC-HE
+                    combo_mode.SelectedIndex == 4)           //ALAC
+                {
+                    m.qaac_options.no_delay = false;
+                    check_no_delay.IsChecked = false;
+                    check_no_delay.IsEnabled = false;
+                }
+                else
+                {
+                    check_no_delay.IsEnabled = true;
+                }
+
                 combo_bitrate.IsEnabled = combo_accuracy.IsEnabled = (combo_mode.SelectedIndex != 4);
             }
         }
@@ -300,6 +334,21 @@ namespace XviD4PSP
                 root_window.UpdateOutSize();
                 root_window.UpdateManualProfile();
             }
+
+            if (combo_aac_profile.SelectedIndex != -1)
+            {
+                if (combo_aac_profile.SelectedIndex == 1 ||  //AAC-HE
+                    combo_mode.SelectedIndex == 4)           //ALAC
+                {
+                    m.qaac_options.no_delay = false;
+                    check_no_delay.IsChecked = false;
+                    check_no_delay.IsEnabled = false;
+                }
+                else
+                {
+                    check_no_delay.IsEnabled = true;
+                }
+            }
         }
 
         private void text_bitrate_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -333,6 +382,25 @@ namespace XviD4PSP
                 {
                     new Message(root_window).ShowMessage(ex.Message, Languages.Translate("Error"));
                 }
+            }
+        }
+
+        private void check_no_delay_Click(object sender, RoutedEventArgs e)
+        {
+            m.qaac_options.no_delay = check_no_delay.IsChecked.Value;
+
+            root_window.UpdateOutSize();
+            root_window.UpdateManualProfile();
+        }
+
+        private void combo_gapless_mode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_gapless_mode.IsDropDownOpen || combo_gapless_mode.IsSelectionBoxHighlighted) && combo_gapless_mode.SelectedIndex != -1)
+            {
+                m.qaac_options.gapless_mode = combo_gapless_mode.SelectedIndex;
+
+                root_window.UpdateOutSize();
+                root_window.UpdateManualProfile();
             }
         }
     }

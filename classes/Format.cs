@@ -1469,13 +1469,6 @@ namespace XviD4PSP
                return Muxers.tsmuxer;
            else if (m.format == ExportFormats.DpgNintendoDS)
                return Muxers.dpgmuxer;
-           else if (m.format == ExportFormats.Mp4iPod50G)
-               return Muxers.mp4box;
-           else if (m.format == Format.ExportFormats.Mp4iPod55G)
-           {
-               if (m.outvcodec == "x264") return Muxers.ffmpeg; //ipod atom
-               else return Muxers.mp4box;
-           }
            else if (Formats.GetDefaults(m.format).IsEditable)
            {
                //Кодирование сразу в контейнер
