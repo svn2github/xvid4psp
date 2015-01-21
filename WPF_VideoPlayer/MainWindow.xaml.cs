@@ -394,6 +394,7 @@ namespace WPF_VideoPlayer
                             VHost = null;
                             VHandle = IntPtr.Zero;
                             VHostElement.Child = null;
+                            VHostElement.Visibility = Visibility.Collapsed;
                         }
                     }
                     if (this.VideoElement.Source != null)
@@ -734,6 +735,7 @@ namespace WPF_VideoPlayer
                 //Создаём Win32-окно, т.к. использовать WPF-поверхность не получится
                 VHost = new VideoHwndHost();
                 VHost.RepaintRequired += new EventHandler(VHost_RepaintRequired);
+                VHostElement.Visibility = Visibility.Visible;
                 VHostElement.Child = VHost;
                 VHandle = VHost.Handle;
 
@@ -836,6 +838,7 @@ namespace WPF_VideoPlayer
                     VHost = null;
                     VHandle = IntPtr.Zero;
                     VHostElement.Child = null;
+                    VHostElement.Visibility = Visibility.Collapsed;
                 }
             }
 
@@ -952,7 +955,8 @@ namespace WPF_VideoPlayer
                             if (filterInfo.pGraph != null)
                                 Marshal.ReleaseComObject(filterInfo.pGraph);
 
-                            AddFilterToMenu(filterInfo.achName, ((pFilter[0] as ISpecifyPropertyPages) != null));
+                            AddFilterToMenu(filterInfo.achName, ((pFilter[0] as ISpecifyPropertyPages) != null) &&
+                                !filterInfo.achName.StartsWith("mediabridge"));
                         }
 
                         Marshal.ReleaseComObject(pFilter[0]);
@@ -1207,7 +1211,7 @@ namespace WPF_VideoPlayer
         {
             if (this.VideoElement.HasVideo || this.VideoElement.HasAudio)
             {
-                this.slider_pos.Maximum = this.VideoElement.NaturalDuration.TimeSpan.TotalSeconds;
+                this.slider_pos.Maximum = NaturalDuration.TotalSeconds;
                 TimeSpan tCode = TimeSpan.Parse(TimeSpan.FromSeconds(NaturalDuration.TotalSeconds).ToString().Split('.')[0]);
                 textbox_duration.Text = tCode.ToString();
 

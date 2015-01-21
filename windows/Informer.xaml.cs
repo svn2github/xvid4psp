@@ -247,6 +247,7 @@ namespace XviD4PSP
                     if (File.Exists(ifo))
                     {
                         //через MediaInfo
+                        media.Close();
                         media.Open(ifo);
                         int n = 0;
                         foreach (object o in m.inaudiostreams)
@@ -263,6 +264,13 @@ namespace XviD4PSP
                         m.outduration = m.induration;
                         m.inframes = (int)(m.induration.TotalSeconds * Calculate.ConvertStringToDouble(m.inframerate));
                         vs.Close();
+
+                        #region Язык через VStrip:
+                        //iifo_lang_tbl[] parse_ifo.c (The ISO 639 language codes)
+                        //??? (AC3 2ch, 0xBD 0x80) [0,1] //MI - "Unknown"
+                        //Italiano (AC3 2ch, 0xBD 0x82) [0,1]" //MI - "Italian", есть и др. несоответствия..
+                        //Russian (AC3 2ch, 0xBD 0x80) [0,1]"
+                        #endregion
                     }
 
                     //закрываем MediaInfo

@@ -1,6 +1,8 @@
-﻿XviD4PSP 5.10.339.0 (14.01.2015), main changes:
+﻿XviD4PSP 5.10.340.0 (21.01.2015), main changes:
 
 
+>>> (r340) DVD-import window: changed IFO-based calculation of title's duration; switched back to VStrip.dll
+           determination of resolution, AR and standard; added selection of playing vob and fullscreen mode.
 >>> (r339) Help menu: web links updated.
 >>> (r339) Changed progress detection for recent MP4Box, as the result removed support for old NicMP4Box.
            For "MP4 iPod 50G" and "MP4 iPod 55G" formats removed autoselection of the muxer, it can be

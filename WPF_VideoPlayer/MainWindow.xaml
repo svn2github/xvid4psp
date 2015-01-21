@@ -120,6 +120,6 @@
         <Image Width="Auto" Source="pictures\volume.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,144,12" x:Name="image_volume"/>
         <Slider x:Name="slider_Volume" Style="{DynamicResource GlassSlider}" Margin="0,0,20,8" ClipToBounds="False" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="Auto" MinWidth="120" MaxWidth="120" Height="24" IsMoveToPointEnabled="False" Maximum="1" SmallChange="0.05" LargeChange="0.1" />
         <MediaElement Name="VideoElement" Margin="0,40,0,60" Volume="{Binding Path=Value, ElementName=slider_Volume}" MouseWheel="Mouse_Wheel" Visibility="Collapsed"/>
-        <Border Name="VHostElement" Margin="0,40,0,60" Background="Transparent" Opacity="0"/>
+        <Border Name="VHostElement" Margin="0,40,0,60" Background="Transparent" Opacity="0" Visibility="Collapsed"/>
     </Grid>
 </Window>

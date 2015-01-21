@@ -25,6 +25,13 @@ namespace XviD4PSP
                 Assembly this_assembly = Assembly.GetExecutingAssembly();
                 text_version.Text = "Version: " + this_assembly.GetName().Version.ToString();
                 text_version.Text += " (" + File.GetLastWriteTime(this_assembly.GetModules()[0].FullyQualifiedName).ToString("dd.MM.yyyy") + ")";
+
+                object[] attributes = this_assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
+                if (attributes.Length > 0)
+                {
+                    string copyright = ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
+                    if (copyright.Length > 10) text_copyright.Text = copyright.Substring(10);
+                }
             }
             catch { }
 

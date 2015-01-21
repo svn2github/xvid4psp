@@ -23,25 +23,15 @@ using System.Windows.Media.Imaging;
 
 namespace XviD4PSP
 {
-    internal enum MediaType
-    {
-        Audio,
-        Video
-    }
-
-    internal enum PlayState
-    {
-        Stopped,
-        Paused,
-        Running,
-        Init
-    }
-
     public partial class DVDImport
     {
-        private const int WMGraphNotify = 0x0400 + 13;
-        private const int VolumeFull = 0;
-        private const int VolumeSilence = -10000;
+        private enum PlayState
+        {
+            Stopped,
+            Paused,
+            Running,
+            Init
+        }
 
         private static object locker = new object();
         private IGraphBuilder graphBuilder = null;
@@ -59,7 +49,8 @@ namespace XviD4PSP
         private double dpi = 1.0;
         private double in_ar = 0;
         private string filepath = string.Empty;
-        private bool isAudioOnly = false;
+        private bool IsAudioOnly = false;
+        private bool IsFullScreen = false;
         private PlayState currentState = PlayState.Stopped;
 
         private HwndSource source;
@@ -69,6 +60,7 @@ namespace XviD4PSP
         private ArrayList dvd;
         private bool isInfoLoading = true;
         private IFilterGraph graph;
+        private const int WMGraphNotify = 0x0400 + 13;
 
         public DVDImport(Massive mass, string dvdpath)
         {
@@ -86,11 +78,13 @@ namespace XviD4PSP
             button_ok.Content = Languages.Translate("OK");
             button_play.ToolTip = Languages.Translate("Play-Pause");
             button_stop.ToolTip = Languages.Translate("Stop");
+            button_fullscreen.ToolTip = Languages.Translate("Fullscreen");
+            combo_vob.ToolTip = button_play.ToolTip;
 
             //events
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
             this.Closing += new System.ComponentModel.CancelEventHandler(MainWindow_Closing);
-            this.KeyUp += new KeyEventHandler(MainWindow_KeyUp);
+            this.PreviewKeyDown += new KeyEventHandler(MainWindow_KeyDown);
 
             //подготавливаем список титлов
             string[] maintitles = Directory.GetFiles(dvdpath, "VTS_*1.VOB", SearchOption.AllDirectories);
@@ -124,6 +118,9 @@ namespace XviD4PSP
             //забиваем и выделяем пустой титл
             combo_titles.Items.Add(Calculate.GetTimeline(0));
             combo_titles.SelectedIndex = 0;
+            combo_vob.Items.Add("VTS_00_0.VOB");
+            combo_vob.SelectedIndex = 0;
+
             Title = "DVD: " + Calculate.GetDVDName(vobs[0]);
 
             this.ShowDialog();
@@ -134,13 +131,22 @@ namespace XviD4PSP
             Calculate.CheckWindowPos(this, false);
         }
 
-        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (this.graphBuilder != null)
+            e.Handled = false;
+
+            if (this.graphBuilder != null || IsFullScreen)
             {
-                if (e.Key == Key.Space)
+                string key = new KeyConverter().ConvertToString(e.Key);
+                string mod = new ModifierKeysConverter().ConvertToString(Keyboard.Modifiers);
+                string Action = HotKeys.GetAction("=" + ((mod.Length > 0) ? mod + "+" : "") + key);
+                if (Action.Length > 0)
                 {
-                    PauseClip();
+                    switch (Action)
+                    {
+                        case ("Play-Pause"): PauseClip(); e.Handled = true; break;
+                        case ("Fullscreen"): SwitchToFullScreen(); e.Handled = true; break;
+                    }
                 }
             }
         }
@@ -158,12 +164,11 @@ namespace XviD4PSP
                     if (this.currentState != PlayState.Init)
                         CloseClip();
 
-                    //список плохих титлов
-                    ArrayList badlist = new ArrayList();
-
                     if (isInfoLoading)
                     {
+                        string info = "";
                         double maximum = 0;
+                        double titleduration = 0.0;
                         int index_of_maximum = 0;
                         int num = 0;
 
@@ -175,95 +180,81 @@ namespace XviD4PSP
 
                             if (File.Exists(ifopath))
                             {
-                                MediaInfoWrapper media = new MediaInfoWrapper();
-                                media.Open(ifopath);
-                                string info = media.Width + "x" + media.Height + " " + media.AspectString + " " + media.Standart;
-                                media.Close();
-
                                 //получаем информацию из ифо
                                 VStripWrapper vs = new VStripWrapper();
                                 vs.Open(ifopath);
-                                double titleduration = vs.Duration().TotalSeconds;
-                                //string   info = vs.Width() + "x" + vs.Height() + " " + vs.System(); //При обращении к ifoGetVideoDesc на некоторых системах происходит вылет VStrip.dll..
-                                //Теперь нужная инфа будет браться из МедиаИнфо..
+                                titleduration = vs.Duration().TotalSeconds;
+                                info = vs.GetVideoInfo();
                                 vs.Close();
 
                                 string titlenum = Calculate.GetTitleNum(titles[0]);
                                 combo_titles.Items.Add("T" + titlenum + " " + info + " " + Calculate.GetTimeline(titleduration) + " - " + titles.Length + " file(s)");
-
-                                //Ищем самый продолжительный титл
-                                if (titleduration > maximum)
-                                {
-                                    maximum = titleduration;
-                                    index_of_maximum = num;
-                                }
-                                num += 1;
                             }
-                            //метод если нет IFO
                             else
                             {
-                                try
+                                //метод если нет IFO (через DS)
+                                info = "";
+                                bool first = true, error = false;
+                                foreach (string tilte in titles)
                                 {
-                                    int n = 0;
-                                    double titleduration = 0.0;
-                                    string info = "";
-                                    foreach (string tilte in titles)
+                                    try
                                     {
                                         int hr = 0;
-
                                         this.graphBuilder = (IGraphBuilder)new FilterGraph();
 
                                         // Have the graph builder construct its the appropriate graph automatically
                                         hr = this.graphBuilder.RenderFile(tilte, null);
                                         DsError.ThrowExceptionForHR(hr);
 
-                                        // QueryInterface for DirectShow interfaces
-                                        this.mediaControl = (IMediaControl)this.graphBuilder;
-                                        this.mediaPosition = (IMediaPosition)this.graphBuilder;
-
-                                        //определяем длительность
-                                        double cduration = 0.0;
-                                        hr = mediaPosition.get_Duration(out cduration);
-                                        DsError.ThrowExceptionForHR(hr);
-
                                         //определяем различные параметры
-                                        if (n == 0)
+                                        if (first)
                                         {
-                                            this.basicVideo = this.graphBuilder as IBasicVideo;
-                                            //this.basicAudio = this.graphBuilder as IBasicAudio;
-                                            int resw;
-                                            int resh;
+                                            int resw, resh;
                                             double AvgTimePerFrame;
+                                            this.basicVideo = this.graphBuilder as IBasicVideo;
                                             hr = basicVideo.get_SourceWidth(out resw);
                                             DsError.ThrowExceptionForHR(hr);
                                             hr = basicVideo.get_SourceHeight(out resh);
                                             DsError.ThrowExceptionForHR(hr);
                                             hr = basicVideo.get_AvgTimePerFrame(out AvgTimePerFrame);
+                                            DsError.ThrowExceptionForHR(hr);
                                             double framerate = 1 / AvgTimePerFrame;
-                                            string system = "NTSC";
-                                            if (framerate == 25.0)
-                                                system = "PAL";
+                                            string system = (framerate == 25.0 || framerate == 50.0) ? "PAL" : "NTSC";
 
-                                            info += resw + "x" + resh + " " + system + " ";
+                                            info = resw + "x" + resh + " " + system;
+                                            first = false;
                                         }
 
-                                        //освобождаем ресурсы
-                                        CloseInterfaces();
+                                        //определяем длительность
+                                        double cduration = 0.0;
+                                        this.mediaPosition = (IMediaPosition)this.graphBuilder;
+                                        hr = mediaPosition.get_Duration(out cduration);
+                                        DsError.ThrowExceptionForHR(hr);
 
                                         titleduration += cduration;
-
-                                        n++;
                                     }
+                                    catch (Exception)
+                                    {
+                                        error = true;
+                                    }
+                                    finally
+                                    {
+                                        //освобождаем ресурсы
+                                        CloseInterfaces();
+                                    }
+                                }
 
-                                    string titlenum = Calculate.GetTitleNum(titles[0]);
-                                    combo_titles.Items.Add("T" + titlenum + " " + info + Calculate.GetTimeline(titleduration));
-                                }
-                                catch
-                                {
-                                    badlist.Add(obj);
-                                    CloseInterfaces();
-                                }
+                                string titlenum = Calculate.GetTitleNum(titles[0]);
+                                combo_titles.Items.Add("T" + titlenum + " " + info + " " + Calculate.GetTimeline(titleduration) + (error ? " ERROR" : "") + " - " + titles.Length + " file(s)");
                             }
+
+                            //Ищем самый продолжительный титл
+                            if (titleduration > maximum)
+                            {
+                                maximum = titleduration;
+                                index_of_maximum = num;
+                            }
+                            num += 1;
                         }
 
                         combo_titles.Items.RemoveAt(0);
@@ -271,20 +262,35 @@ namespace XviD4PSP
                         this.isInfoLoading = false;
                     }
 
-                    //удаляем плохие титлы
-                    foreach (object obj in badlist)
-                        dvd.Remove(obj);
-
-                    //загружаем титл
                     string[] deftitles = (string[])dvd[combo_titles.SelectedIndex];
-                    this.filepath = deftitles[0];
-                    string title_s = Calculate.GetTitleNum(this.filepath);
-                    textbox_name.Text = Calculate.GetDVDName(this.filepath) + " T" + title_s;
-                    m.infilepath = this.filepath;
-                    m.infileslist = deftitles;
 
-                    //Определяем аспект для DirectShow плейера (чтоб не вызывать еще раз MediaInfo)
-                    string aspect = Calculate.GetRegexValue(@"\s\d+x\d+\s(\d+:\d+)\s", combo_titles.SelectedItem.ToString());
+                    if (combo_vob.Tag == null)
+                    {
+                        //Загружаем титл, выбираем первый воб
+                        combo_vob.Items.Clear();
+                        foreach (string vob in deftitles)
+                            combo_vob.Items.Add(Path.GetFileName(vob).ToUpper());
+                        combo_vob.SelectedIndex = 0;
+
+                        this.filepath = deftitles[0];
+                        string title_s = Calculate.GetTitleNum(this.filepath);
+                        textbox_name.Text = Calculate.GetDVDName(this.filepath) + " T" + title_s;
+                        m.infilepath = this.filepath;
+                        m.infileslist = deftitles;
+                    }
+                    else
+                    {
+                        //Выбираем конкретный воб (только для показа в этом окне)
+                        this.filepath = deftitles[(int)combo_vob.Tag];
+                        combo_vob.Tag = null;
+
+                        //При ошибке могло сброситься
+                        string title_s = Calculate.GetTitleNum(this.filepath);
+                        textbox_name.Text = Calculate.GetDVDName(this.filepath) + " T" + title_s;
+                    }
+
+                    //Определяем аспект для плейера (чтоб не вызывать еще раз MediaInfo)
+                    string aspect = Calculate.GetRegexValue(@"\s(\d+:\d+)\s", combo_titles.SelectedItem.ToString());
                     if (!string.IsNullOrEmpty(aspect))
                     {
                         if (aspect == "4:3") in_ar = 4.0 / 3.0;
@@ -293,6 +299,7 @@ namespace XviD4PSP
                     }
 
                     // Reset status variables
+                    this.IsAudioOnly = true;
                     this.currentState = PlayState.Stopped;
 
                     // Start playing the media file
@@ -300,13 +307,15 @@ namespace XviD4PSP
                         PlayMovieInWindow(this.filepath);
                     else
                         PlayWithMediaBridge(this.filepath);
+
+                    this.Focus();
                 }
                 catch (Exception ex)
                 {
-                    textbox_name.Text = "";
                     CloseClip();
                     this.filepath = String.Empty;
-                    ErrorException("MainFormLoader: " + ex.Message, ex.StackTrace);
+                    textbox_name.Text = Languages.Translate("Error") + "...";
+                    ErrorException(((isInfoLoading) ? "SortingTitles: " : "PlaySelectedVOB: ") + ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -318,9 +327,6 @@ namespace XviD4PSP
 
             if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
             {
-                this.LocationChanged += new EventHandler(MainWindow_LocationChanged);
-                this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
-
                 source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
                 source.AddHook(new HwndSourceHook(WndProc));
 
@@ -328,8 +334,6 @@ namespace XviD4PSP
                 timer = new System.Timers.Timer();
                 timer.Elapsed += new System.Timers.ElapsedEventHandler(timer_Elapsed);
                 timer.Interval = 50;
-
-                VideoElement.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -342,8 +346,6 @@ namespace XviD4PSP
                 VideoElement.MediaOpened += new RoutedEventHandler(VideoElement_MediaOpened);
                 VideoElement.MediaEnded += new RoutedEventHandler(VideoElement_MediaEnded);
                 VisualTarget.Rendering += new EventHandler(VisualTarget_Rendering);
-
-                VideoElement.Visibility = Visibility.Visible;
             }
 
             worker = new BackgroundWorker();
@@ -372,20 +374,22 @@ namespace XviD4PSP
                     textbox_name.Text = Path.GetFileName(this.filepath);
 
                     // Reset status variables
+                    this.IsAudioOnly = true;
                     this.currentState = PlayState.Stopped;
-                    //this.currentVolume = VolumeFull;
 
                     // Start playing the media file
                     if (Settings.PlayerEngine != Settings.PlayerEngines.MediaBridge)
                         PlayMovieInWindow(this.filepath);
                     else
                         PlayWithMediaBridge(this.filepath);
+
+                    this.Focus();
                 }
                 catch (Exception ex)
                 {
-                    textbox_name.Text = "";
                     CloseClip();
                     this.filepath = String.Empty;
+                    textbox_name.Text = Languages.Translate("Error") + "...";
                     ErrorException("Drag&Drop: " + ex.Message, ex.StackTrace);
                 }
             }
@@ -428,13 +432,13 @@ namespace XviD4PSP
 
         private void MainWindow_LocationChanged(object sender, EventArgs e)
         {
-            if (!this.isAudioOnly)
+            if (!IsFullScreen)
                 MoveVideoWindow();
         }
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!this.isAudioOnly)
+            if (!IsFullScreen)
                 MoveVideoWindow();
         }
 
@@ -442,7 +446,6 @@ namespace XviD4PSP
         {
             if (this.graphBuilder != null)
             {
-                this.textbox_name.Text = "";
                 CloseClip();
                 this.filepath = String.Empty;
             }
@@ -497,14 +500,15 @@ namespace XviD4PSP
                     // Free DirectShow interfaces
                     CloseInterfaces();
 
-                    this.isAudioOnly = true; //Перенесено сюда
-
                     if (VHost != null)
                     {
                         VHost.Dispose();
                         VHost = null;
                         VHandle = IntPtr.Zero;
                         VHostElement.Child = null;
+                        VHostElement.Visibility = Visibility.Collapsed;
+                        VHostElement.Width = VHostElement.Height = 0;
+                        VHostElement.Margin = new Thickness(0);
                     }
 
                     // No current media state
@@ -513,7 +517,11 @@ namespace XviD4PSP
                 else if (this.VideoElement.Source != null)
                 {
                     VideoElement.Stop();
+                    VideoElement.Close();
                     VideoElement.Source = null;
+                    VideoElement.Visibility = Visibility.Collapsed;
+                    VideoElement.Width = VideoElement.Height = 0;
+                    VideoElement.Margin = new Thickness(0);
                     this.currentState = PlayState.Init;
 
                     if (this.graphBuilder != null)
@@ -543,6 +551,7 @@ namespace XviD4PSP
             }
 
             //update titles
+            textbox_name.Text = "";
             textbox_time.Text = "00:00:00";
             progress_top.Width = 0.0;
             slider_pos.Value = 0.0;
@@ -558,11 +567,13 @@ namespace XviD4PSP
                 lock (locker)
                 {
                     // Relinquish ownership (IMPORTANT!) after hiding video window
-                    if (!this.isAudioOnly && this.videoWindow != null)
+                    if (!this.IsAudioOnly && this.videoWindow != null)
                     {
                         hr = this.videoWindow.put_Visible(OABool.False);
                         DsError.ThrowExceptionForHR(hr);
                         hr = this.videoWindow.put_Owner(IntPtr.Zero);
+                        DsError.ThrowExceptionForHR(hr);
+                        hr = this.videoWindow.put_MessageDrain(IntPtr.Zero);
                         DsError.ThrowExceptionForHR(hr);
                     }
 
@@ -642,6 +653,7 @@ namespace XviD4PSP
                 //Создаём Win32-окно, т.к. использовать WPF-поверхность не получится
                 VHost = new VideoHwndHost();
                 VHost.RepaintRequired += new EventHandler(VHost_RepaintRequired);
+                VHostElement.Visibility = Visibility.Visible;
                 VHostElement.Child = VHost;
                 VHandle = VHost.Handle;
 
@@ -716,7 +728,7 @@ namespace XviD4PSP
             
             // Is this an audio-only file (no video component)?
             CheckIsAudioOnly();
-            if (!this.isAudioOnly)
+            if (!this.IsAudioOnly)
             {
                 //Определяем аспект, если он нам не известен
                 if (in_ar == 0)
@@ -731,6 +743,9 @@ namespace XviD4PSP
                 {
                     // Setup the video window
                     hr = this.videoWindow.put_Owner(this.source.Handle);
+                    DsError.ThrowExceptionForHR(hr);
+
+                    hr = this.videoWindow.put_MessageDrain(this.source.Handle);
                     DsError.ThrowExceptionForHR(hr);
 
                     hr = this.videoWindow.put_WindowStyle(DirectShowLib.WindowStyle.Child | DirectShowLib.WindowStyle.ClipSiblings |
@@ -748,14 +763,15 @@ namespace XviD4PSP
                     VHost = null;
                     VHandle = IntPtr.Zero;
                     VHostElement.Child = null;
+                    VHostElement.Visibility = Visibility.Collapsed;
+                    VHostElement.Width = VHostElement.Height = 0;
+                    VHostElement.Margin = new Thickness(0);
                 }
             }
 
             // Have the graph signal event via window callbacks for performance
             hr = this.mediaEventEx.SetNotifyWindow(this.source.Handle, WMGraphNotify, IntPtr.Zero);
             DsError.ThrowExceptionForHR(hr);
-
-            this.Focus();
 
             // Run the graph to play the media file
             hr = this.mediaControl.Run();
@@ -764,10 +780,7 @@ namespace XviD4PSP
             this.currentState = PlayState.Running;
             SetPauseIcon();
 
-            double duration = 0.0;
-            hr = mediaPosition.get_Duration(out duration);
-            DsError.ThrowExceptionForHR(hr);
-            slider_pos.Maximum = duration;
+            slider_pos.Maximum = NaturalDuration.TotalSeconds;
 
             //Запускаем таймер обновления позиции
             if (timer != null) timer.Start();
@@ -777,7 +790,7 @@ namespace XviD4PSP
         {
             try
             {
-                if (this.videoWindow == null && this.EVRControl == null)
+                if (this.videoWindow == null && this.EVRControl == null && VideoElement.Source == null)
                     return;
 
                 double left = 0, top = 0;
@@ -798,6 +811,10 @@ namespace XviD4PSP
                         System.Drawing.Size size, size_ar;
                         MFError.ThrowExceptionForHR(EVRControl.GetNativeVideoSize(out size, out size_ar));
                         aspect = ((double)size_ar.Width / (double)size_ar.Height);
+                    }
+                    else if (VideoElement.Source != null && VideoElement.HasVideo)
+                    {
+                        aspect = ((double)VideoElement.NaturalVideoWidth / (double)VideoElement.NaturalVideoHeight);
                     }
                 }
 
@@ -838,6 +855,13 @@ namespace XviD4PSP
                     MFError.ThrowExceptionForHR(EVRControl.SetVideoPosition(null, new MFRect(0, 0, Convert.ToInt32(dpi * VHostElement.ActualWidth),
                         Convert.ToInt32(dpi * VHostElement.ActualHeight))));
                 }
+                else if (VideoElement.Source != null && VideoElement.HasVideo)
+                {
+                    //Используем тот-же метод, что и для EVR
+                    VideoElement.Margin = new Thickness(Convert.ToInt32(left), Convert.ToInt32(top), 0, 0);
+                    VideoElement.Width = Convert.ToInt32(width);
+                    VideoElement.Height = Convert.ToInt32(height);
+                }
             }
             catch (Exception ex)
             {
@@ -847,7 +871,7 @@ namespace XviD4PSP
 
         private void VHost_RepaintRequired(object sender, EventArgs e)
         {
-            if (!isAudioOnly && EVRControl != null)
+            if (!IsAudioOnly && EVRControl != null)
                 EVRControl.RepaintVideo();
         }
 
@@ -858,18 +882,18 @@ namespace XviD4PSP
             {
                 System.Drawing.Size size, size_ar;
                 hr = EVRControl.GetNativeVideoSize(out size, out size_ar);
-                this.isAudioOnly = (hr < 0 || size.Width == 0 || size.Height == 0);
+                this.IsAudioOnly = (hr < 0 || size.Width == 0 || size.Height == 0);
             }
             else if ((this.videoWindow == null) || (this.basicVideo == null))
             {
                 // Audio-only files have no video interfaces.  This might also
                 // be a file whose video component uses an unknown video codec.
-                this.isAudioOnly = true;
+                this.IsAudioOnly = true;
             }
             else
             {
                 OABool lVisible;
-                this.isAudioOnly = false;
+                this.IsAudioOnly = false;
                 hr = this.videoWindow.get_Visible(out lVisible);
                 if (hr < 0)
                 {
@@ -880,15 +904,15 @@ namespace XviD4PSP
                     // of a supported format.
                     if (hr == unchecked((int)0x80004002))      //E_NOINTERFACE
                     {
-                        this.isAudioOnly = true;
+                        this.IsAudioOnly = true;
                     }
                     else if (hr == unchecked((int)0x80040209)) //VFW_E_NOT_CONNECTED 
                     {
-                        this.isAudioOnly = true;
+                        this.IsAudioOnly = true;
                     }
                     else
                     {
-                        this.isAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
+                        this.IsAudioOnly = true;               //Всё-равно видео окна скорее всего не будет
                         DsError.ThrowExceptionForHR(hr);
                     }
                 }
@@ -973,6 +997,11 @@ namespace XviD4PSP
                         HandleGraphEvent();
                         break;
                     }
+                case 0x0203: //0x0203 WM_LBUTTONDBLCLK (0x0201 WM_LBUTTONDOWN, 0x0202 WM_LBUTTONUP)
+                    {
+                        SwitchToFullScreen();
+                        break;
+                    }
             }
             return IntPtr.Zero;
         }
@@ -1009,10 +1038,12 @@ namespace XviD4PSP
             MediaBridge.MediaBridgeManager.RegisterCallback(url, BridgeCallback);
             VideoElement.Volume = Settings.VolumeLevel; //Громкость для МедиаБридж
 
+            VideoElement.Visibility = Visibility.Visible;
             VideoElement.Source = new Uri(url);
             VideoElement.Play();
 
             this.currentState = PlayState.Running;
+            SetPauseIcon();
         }
 
         private void BridgeCallback(MediaBridge.MediaBridgeGraphInfo GraphInfo)
@@ -1030,7 +1061,21 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
+                CloseClipMediaBridge();
                 ErrorException("BridgeCallback: " + ex.Message, ex.StackTrace);
+            }
+        }
+
+        internal delegate void CloseClipMediaBridgeDelegate();
+        private void CloseClipMediaBridge()
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new CloseClipMediaBridgeDelegate(CloseClipMediaBridge));
+            else
+            {
+                CloseClip();
+                this.filepath = String.Empty;
+                textbox_name.Text = Languages.Translate("Error") + "...";
             }
         }
 
@@ -1038,7 +1083,18 @@ namespace XviD4PSP
         {
             if (VideoElement.HasVideo || VideoElement.HasAudio)
             {
-                slider_pos.Maximum = VideoElement.NaturalDuration.TimeSpan.TotalSeconds;
+                slider_pos.Maximum = NaturalDuration.TotalSeconds;
+
+                if (VideoElement.HasVideo)
+                {
+                    IsAudioOnly = false;
+                    MoveVideoWindow();
+                }
+                else
+                {
+                    IsAudioOnly = true;
+                    VideoElement.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -1076,7 +1132,7 @@ namespace XviD4PSP
                         DsError.ThrowExceptionForHR(hr);
                         return TimeSpan.FromSeconds(duration);
                     }
-                    else if (this.graphBuilder != null && this.VideoElement.Source != null)
+                    else if (this.graphBuilder != null && this.VideoElement.Source != null && VideoElement.NaturalDuration.HasTimeSpan)
                     {
                         return this.VideoElement.NaturalDuration.TimeSpan;
                     }
@@ -1146,8 +1202,18 @@ namespace XviD4PSP
 
         private void combo_titles_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_titles.IsDropDownOpen || combo_titles.IsSelectionBoxHighlighted)
+            if ((combo_titles.IsDropDownOpen || combo_titles.IsSelectionBoxHighlighted) && combo_titles.SelectedIndex != -1)
             {
+                combo_vob.Tag = null;
+                worker.RunWorkerAsync();
+            }
+        }
+
+        private void combo_vob_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_vob.IsDropDownOpen || combo_vob.IsSelectionBoxHighlighted) && combo_vob.SelectedIndex != -1)
+            {
+                combo_vob.Tag = combo_vob.SelectedIndex;
                 worker.RunWorkerAsync();
             }
         }
@@ -1185,6 +1251,42 @@ namespace XviD4PSP
                 Message mes = new Message(this.IsLoaded ? this : Owner);
                 mes.ShowMessage(data, info, Languages.Translate("Error"), Message.MessageStyle.Ok);
             }
+        }
+
+        private void SwitchToFullScreen()
+        {
+            if ((IsAudioOnly || graphBuilder == null) && !IsFullScreen)
+                return;
+
+            if (!IsFullScreen)
+            {
+                this.IsFullScreen = true;
+                this.WindowStyle = System.Windows.WindowStyle.None;
+                this.WindowState = System.Windows.WindowState.Maximized;
+            }
+            else
+            {
+                this.WindowState = System.Windows.WindowState.Normal;
+                this.WindowStyle = System.Windows.WindowStyle.SingleBorderWindow;
+                this.IsFullScreen = false;
+            }
+
+            if (this.graphBuilder != null)
+            {
+                MoveVideoWindow();
+                this.Focus();
+            }
+        }
+
+        private void Player_Mouse_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2 && e.ChangedButton == MouseButton.Left)
+                SwitchToFullScreen();
+        }
+
+        private void button_fullscreen_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchToFullScreen();
         }
     }
 }
