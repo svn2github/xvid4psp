@@ -28,6 +28,8 @@ namespace XviD4PSP
             Title = Languages.Translate("Settings") + ":";
             check_x264_psnr.ToolTip = Languages.Translate("Show x264 PSNR info");
             check_x264_ssim.ToolTip = Languages.Translate("Show x264 SSIM info");
+            check_x265_psnr.ToolTip = check_x264_psnr.ToolTip.ToString().Replace("x264", "x265");
+            check_x265_ssim.ToolTip = check_x264_ssim.ToolTip.ToString().Replace("x264", "x265");
             check_x262_psnr.ToolTip = check_x264_psnr.ToolTip.ToString().Replace("x264", "x262");
             check_x262_ssim.ToolTip = check_x264_ssim.ToolTip.ToString().Replace("x264", "x262");
             check_show_arguments.Content = Languages.Translate("Show encoding arguments");
@@ -68,13 +70,16 @@ namespace XviD4PSP
 
             if (SysInfo.GetOSArchInt() == 64)
             {
-                check_use_avs4x264.Content = Languages.Translate("Use 64-bit x264");
-                check_use_avs4x264.ToolTip = Languages.Translate("This option will allow you to use 64-bit x264 with 32-bit AviSynth (via avs4x264 proxy)");
+                check_use_64x264.Content = Languages.Translate("Use 64-bit x264");
+                check_use_64x264.ToolTip = Languages.Translate("This option will allow you to use 64-bit x264 with 32-bit AviSynth (via avs4x264 proxy)");
+                check_use_64x265.Content = check_use_64x264.Content.ToString().Replace("x264", "x265");
+                check_use_64x265.ToolTip = check_use_64x264.ToolTip.ToString().Replace("x264", "x265");
             }
             else
             {
-                check_use_avs4x264.Content = Languages.Translate("Run x264 using avs4x264 proxy");
-                check_use_avs4x264.ToolTip = Languages.Translate("Use this option if you run out of memory due to 32-bit OS limitation of ~2GB per process");
+                check_use_64x264.Content = Languages.Translate("Run x264 using avs4x264 proxy");
+                check_use_64x264.ToolTip = Languages.Translate("Use this option if you run out of memory due to 32-bit OS limitation of ~2GB per process");
+                check_use_64x265.IsEnabled = false;
             }
 
             check_dont_delete_caches.Content = Languages.Translate("Don`t delete any caches and temporal files");
@@ -113,6 +118,8 @@ namespace XviD4PSP
 
             check_x264_psnr.IsChecked = Settings.x264_PSNR;
             check_x264_ssim.IsChecked = Settings.x264_SSIM;
+            check_x265_psnr.IsChecked = Settings.x265_PSNR;
+            check_x265_ssim.IsChecked = Settings.x265_SSIM;
             check_x262_psnr.IsChecked = Settings.x262_PSNR;
             check_x262_ssim.IsChecked = Settings.x262_SSIM;
             check_show_arguments.IsChecked = Settings.ArgumentsToLog;
@@ -142,7 +149,8 @@ namespace XviD4PSP
             check_clone_fps.IsChecked = Settings.BatchCloneFPS;                                   //Это для fps
             check_clone_audio.IsChecked = Settings.BatchCloneAudio;                               //Ну а это для звуковых параметров
             check_batch_pause.IsChecked = Settings.BatchPause;                                    //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
-            check_use_avs4x264.IsChecked = Settings.UseAVS4x264;                                  //Запускать x264\x264_64 через avs4x264
+            check_use_64x264.IsChecked = Settings.UseAVS4x264;                                    //Запускать x264\x264_64 через avs4x264
+            check_use_64x265.IsChecked = Settings.UseAVS4x265;                                    //Использовать 64-битный x265
             check_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
             check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled =
                  check_delete_lsmash_cache.IsEnabled = check_delete_dgindex_cache.IsEnabled =
@@ -244,6 +252,16 @@ namespace XviD4PSP
         private void check_x264_ssim_Click(object sender, RoutedEventArgs e)
         {
             Settings.x264_SSIM = check_x264_ssim.IsChecked.Value;
+        }
+
+        private void check_x265_psnr_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.x265_PSNR = check_x265_psnr.IsChecked.Value;
+        }
+
+        private void check_x265_ssim_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.x265_SSIM = check_x265_ssim.IsChecked.Value;
         }
 
         private void check_x262_psnr_Click(object sender, RoutedEventArgs e)
@@ -431,9 +449,14 @@ namespace XviD4PSP
             Settings.BatchPause = check_batch_pause.IsChecked.Value;
         }
 
-        private void check_use_avs4x264_Click(object sender, RoutedEventArgs e)
+        private void check_use_64x264_Click(object sender, RoutedEventArgs e)
         {
-            Settings.UseAVS4x264 = check_use_avs4x264.IsChecked.Value;
+            Settings.UseAVS4x264 = check_use_64x264.IsChecked.Value;
+        }
+
+        private void check_use_64x265_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.UseAVS4x265 = check_use_64x265.IsChecked.Value;
         }
 
         private void button_restore_hotkeys_Click(object sender, RoutedEventArgs e)

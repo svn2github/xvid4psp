@@ -317,18 +317,18 @@ namespace XviD4PSP
             //берём пока что за основу последнюю строку
             string line = m.vpasses[m.vpasses.Count - 1].ToString();
 
-            string[] separator = new string[] { " " };
-            string[] cli = line.Split(separator, StringSplitOptions.None);
-            int n = 0;
-
-            foreach (string value in cli)
+            string value = "";
+            string[] cli = line.Split(new string[] { " " }, StringSplitOptions.None);
+            for (int n = 0; n < cli.Length; n++)
             {
+                value = cli[n];
+
                 if (value == "-bitrate")
-                    m.outvbitrate = Convert.ToInt32(cli[n + 1]);
+                    m.outvbitrate = Convert.ToInt32(cli[++n]);
 
                 if (value == "-size")
                 {
-                    m.outvbitrate = Convert.ToInt32(cli[n + 1]) / 1000;
+                    m.outvbitrate = Convert.ToInt32(cli[++n]) / 1000;
                     if (m.vpasses.Count == 3)
                         mode = Settings.EncodingModes.ThreePassSize;
                     else if (m.vpasses.Count == 2)
@@ -340,7 +340,7 @@ namespace XviD4PSP
                     if (value == "-cq")
                     {
                         mode = Settings.EncodingModes.Quality;
-                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[++n]);
                     }
                 }
 
@@ -349,7 +349,7 @@ namespace XviD4PSP
                     if (value == "-cq")
                     {
                         mode = Settings.EncodingModes.TwoPassQuality;
-                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[++n]);
                     }
                 }
 
@@ -358,19 +358,19 @@ namespace XviD4PSP
                     if (value == "-cq")
                     {
                         mode = Settings.EncodingModes.ThreePassQuality;
-                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[n + 1]);
+                        m.outvbitrate = (decimal)Calculate.ConvertStringToDouble(cli[++n]);
                     }
                 }
 
                 if (value == "-quality")
-                    m.XviD_options.quality = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.quality = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-nochromame")
                     m.XviD_options.chromame = false;
 
                 else if (value == "-qtype")
                 {
-                    int qtype = Convert.ToInt32(cli[n + 1]);
+                    int qtype = Convert.ToInt32(cli[++n]);
                     if (qtype == 0)
                         m.XviD_options.qmatrix = "H263";
                     if (qtype == 1)
@@ -392,14 +392,14 @@ namespace XviD4PSP
                     m.XviD_options.trellis = false;
 
                 else if (value == "-vhqmode")
-                    m.XviD_options.vhqmode = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.vhqmode = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-metric")
-                    m.XviD_options.metric = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.metric = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-zones")
                 {
-                    string zone = cli[n + 1];
+                    string zone = cli[++n];
                     m.XviD_options.gray = zone.Contains("G");
                     m.XviD_options.cartoon = zone.Contains("C");
                     m.XviD_options.chroma_opt = zone.Contains("O");
@@ -421,96 +421,94 @@ namespace XviD4PSP
                     m.XviD_options.closedgop = false;
 
                 else if (value == "-max_bframes")
-                    m.XviD_options.bframes = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.bframes = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-lumimasking")
                     m.XviD_options.masking = 2;
 
                 else if (value == "-masking")
-                    m.XviD_options.masking = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.masking = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-fourcc")
-                    m.XviD_options.fourcc = cli[n + 1];
+                    m.XviD_options.fourcc = cli[++n];
 
                 else if (value == "-max_key_interval")
-                    m.XviD_options.keyint = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.keyint = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-bquant_ratio")
-                    m.XviD_options.b_ratio = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.b_ratio = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-bquant_offset")
-                    m.XviD_options.b_offset = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.b_offset = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-reaction")
-                    m.XviD_options.reaction = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.reaction = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-averaging")
-                    m.XviD_options.averaging = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.averaging = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-smoother")
-                    m.XviD_options.smoother = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.smoother = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-kboost")
-                    m.XviD_options.kboost = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.kboost = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-ostrength")
-                    m.XviD_options.ostrength = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.ostrength = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-oimprove")
-                    m.XviD_options.oimprove = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.oimprove = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-odegrade")
-                    m.XviD_options.odegrade = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.odegrade = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-chigh")
-                    m.XviD_options.chigh = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.chigh = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-clow")
-                    m.XviD_options.clow = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.clow = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-overhead")
-                    m.XviD_options.overhead = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.overhead = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-vbvmax")
-                    m.XviD_options.vbvmax = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.vbvmax = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-vbvsize")
-                    m.XviD_options.vbvsize = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.vbvsize = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-vbvpeak")
-                    m.XviD_options.vbvpeak = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.vbvpeak = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-imin")
                 {
                     m.XviD_options.mins += 1;
-                    m.XviD_options.imin = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.imin = Convert.ToInt32(cli[++n]);
                 }
 
                 else if (value == "-pmin")
                 {
                     m.XviD_options.mins += 1;
-                    m.XviD_options.pmin = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.pmin = Convert.ToInt32(cli[++n]);
                 }
 
                 else if (value == "-bmin")
                 {
                     m.XviD_options.mins += 1;
-                    m.XviD_options.bmin = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.bmin = Convert.ToInt32(cli[++n]);
                 }
 
                 else if (value == "-imax")
-                    m.XviD_options.imax = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.imax = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-pmax")
-                    m.XviD_options.pmax = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.pmax = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-bmax")
-                    m.XviD_options.bmax = Convert.ToInt32(cli[n + 1]);
+                    m.XviD_options.bmax = Convert.ToInt32(cli[++n]);
 
                 else if (value == "-full1pass")
                     m.XviD_options.full_first_pass = true;
-
-                n++;
             }
 
             //прописываем вычисленное колличество проходов
@@ -776,7 +774,7 @@ namespace XviD4PSP
 
         private void combo_mode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_mode.IsDropDownOpen || combo_mode.IsSelectionBoxHighlighted)
+            if ((combo_mode.IsDropDownOpen || combo_mode.IsSelectionBoxHighlighted) && combo_mode.SelectedItem != null)
             {
                 //запоминаем старый режим
                 oldmode = m.encodingmode;
@@ -886,7 +884,7 @@ namespace XviD4PSP
 
         private void combo_quality_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_quality.IsDropDownOpen || combo_quality.IsSelectionBoxHighlighted)
+            if ((combo_quality.IsDropDownOpen || combo_quality.IsSelectionBoxHighlighted) && combo_quality.SelectedItem != null)
             {
                 m.XviD_options.quality = Convert.ToInt32(combo_quality.SelectedItem.ToString().Substring(0, 1));
                 root_window.UpdateManualProfile();
@@ -903,7 +901,7 @@ namespace XviD4PSP
 
         private void combo_qmatrix_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_qmatrix.IsDropDownOpen || combo_qmatrix.IsSelectionBoxHighlighted)
+            if ((combo_qmatrix.IsDropDownOpen || combo_qmatrix.IsSelectionBoxHighlighted) && combo_qmatrix.SelectedItem != null)
             {
                 m.XviD_options.qmatrix = combo_qmatrix.SelectedItem.ToString();
                 root_window.UpdateManualProfile();
@@ -920,7 +918,7 @@ namespace XviD4PSP
 
         private void combo_vhqmode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_vhqmode.IsDropDownOpen || combo_vhqmode.IsSelectionBoxHighlighted)
+            if ((combo_vhqmode.IsDropDownOpen || combo_vhqmode.IsSelectionBoxHighlighted) && combo_vhqmode.SelectedItem != null)
             {
                 m.XviD_options.vhqmode = Convert.ToInt32(combo_vhqmode.SelectedItem.ToString().Substring(0, 1));
                 root_window.UpdateManualProfile();
@@ -930,7 +928,7 @@ namespace XviD4PSP
 
         private void combo_metric_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_metric.IsDropDownOpen || combo_metric.IsSelectionBoxHighlighted)
+            if ((combo_metric.IsDropDownOpen || combo_metric.IsSelectionBoxHighlighted) && combo_metric.SelectedItem != null)
             {
                 m.XviD_options.metric = Convert.ToInt32(combo_metric.SelectedItem.ToString().Substring(0, 1));
                 root_window.UpdateManualProfile();
@@ -1011,7 +1009,7 @@ namespace XviD4PSP
 
         private void combo_bframes_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_bframes.IsDropDownOpen || combo_bframes.IsSelectionBoxHighlighted)
+            if ((combo_bframes.IsDropDownOpen || combo_bframes.IsSelectionBoxHighlighted) && combo_bframes.SelectedItem != null)
             {
                 m.XviD_options.bframes = Convert.ToInt32(combo_bframes.SelectedItem);
 
@@ -1034,7 +1032,7 @@ namespace XviD4PSP
 
         private void combo_masking_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_masking.IsDropDownOpen || combo_masking.IsSelectionBoxHighlighted)
+            if ((combo_masking.IsDropDownOpen || combo_masking.IsSelectionBoxHighlighted) && combo_masking.SelectedIndex != -1)
             {
                 m.XviD_options.masking = combo_masking.SelectedIndex;
                 root_window.UpdateManualProfile();
@@ -1044,7 +1042,7 @@ namespace XviD4PSP
 
         private void combo_codec_preset_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_codec_preset.IsDropDownOpen || combo_codec_preset.IsSelectionBoxHighlighted)
+            if ((combo_codec_preset.IsDropDownOpen || combo_codec_preset.IsSelectionBoxHighlighted) && combo_codec_preset.SelectedItem != null)
             {
                 CodecPresets preset = (CodecPresets)Enum.Parse(typeof(CodecPresets), combo_codec_preset.SelectedItem.ToString());
 
@@ -1305,7 +1303,7 @@ namespace XviD4PSP
 
         private void combo_fourcc_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_fourcc.IsDropDownOpen || combo_fourcc.IsSelectionBoxHighlighted)
+            if ((combo_fourcc.IsDropDownOpen || combo_fourcc.IsSelectionBoxHighlighted) && combo_fourcc.SelectedItem != null)
             {
                 m.XviD_options.fourcc = combo_fourcc.SelectedItem.ToString();
                 Settings.XviDFOURCC = m.XviD_options.fourcc;
@@ -1382,7 +1380,7 @@ namespace XviD4PSP
 
         private void combo_imin_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_imin.IsDropDownOpen || combo_imin.IsSelectionBoxHighlighted)
+            if ((combo_imin.IsDropDownOpen || combo_imin.IsSelectionBoxHighlighted) && combo_imin.SelectedItem != null)
             {
                 m.XviD_options.imin = Convert.ToInt32(combo_imin.SelectedItem);
 
@@ -1393,7 +1391,7 @@ namespace XviD4PSP
 
         private void combo_imax_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_imax.IsDropDownOpen || combo_imax.IsSelectionBoxHighlighted)
+            if ((combo_imax.IsDropDownOpen || combo_imax.IsSelectionBoxHighlighted) && combo_imax.SelectedItem != null)
             {
                 m.XviD_options.imax = Convert.ToInt32(combo_imax.SelectedItem);
 
@@ -1404,7 +1402,7 @@ namespace XviD4PSP
 
         private void combo_pmin_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_pmin.IsDropDownOpen || combo_pmin.IsSelectionBoxHighlighted)
+            if ((combo_pmin.IsDropDownOpen || combo_pmin.IsSelectionBoxHighlighted) && combo_pmin.SelectedItem != null)
             {
                 m.XviD_options.pmin = Convert.ToInt32(combo_pmin.SelectedItem);
 
@@ -1415,7 +1413,7 @@ namespace XviD4PSP
 
         private void combo_pmax_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_pmax.IsDropDownOpen || combo_pmax.IsSelectionBoxHighlighted)
+            if ((combo_pmax.IsDropDownOpen || combo_pmax.IsSelectionBoxHighlighted) && combo_pmax.SelectedItem != null)
             {
                 m.XviD_options.pmax = Convert.ToInt32(combo_pmax.SelectedItem);
 
@@ -1426,7 +1424,7 @@ namespace XviD4PSP
 
         private void combo_bmin_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_bmin.IsDropDownOpen || combo_bmin.IsSelectionBoxHighlighted)
+            if ((combo_bmin.IsDropDownOpen || combo_bmin.IsSelectionBoxHighlighted) && combo_bmin.SelectedItem != null)
             {
                 m.XviD_options.bmin = Convert.ToInt32(combo_bmin.SelectedItem);
 
@@ -1437,7 +1435,7 @@ namespace XviD4PSP
 
         private void combo_bmax_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_bmax.IsDropDownOpen || combo_bmax.IsSelectionBoxHighlighted)
+            if ((combo_bmax.IsDropDownOpen || combo_bmax.IsSelectionBoxHighlighted) && combo_bmax.SelectedItem != null)
             {
                 m.XviD_options.bmax = Convert.ToInt32(combo_bmax.SelectedItem);
 
@@ -1459,7 +1457,7 @@ namespace XviD4PSP
 
         private void combo_threads_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_threads.IsDropDownOpen || combo_threads.IsSelectionBoxHighlighted)
+            if ((combo_threads.IsDropDownOpen || combo_threads.IsSelectionBoxHighlighted) && combo_threads.SelectedIndex != -1)
             {
                 Settings.XviD_Threads = combo_threads.SelectedIndex;
 

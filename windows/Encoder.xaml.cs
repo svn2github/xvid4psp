@@ -280,8 +280,26 @@ namespace XviD4PSP
                         encoderProcess.WaitForExit();
                     }
                 }
-                catch { }
+                catch (Exception) { }
             }
+
+            try
+            {
+                //StdErr (XviD)
+                if (readFromStdErrThread != null)
+                {
+                    readFromStdErrThread.Abort();
+                    readFromStdErrThread = null;
+                }
+
+                //StdOut (x265)
+                if (readFromStdOutThread != null)
+                {
+                    readFromStdOutThread.Abort();
+                    readFromStdOutThread = null;
+                }
+            }
+            catch (Exception) { }
 
             if (avs != null && avs.IsBusy())
             {
@@ -570,9 +588,18 @@ namespace XviD4PSP
                 info.FileName = Calculate.StartupPath + "\\apps\\x264_pmp\\x264.exe";
             else
             {
+                bool avs4 = Settings.UseAVS4x264;
                 if (bdepth != 8) in_depth = "--input-depth " + bdepth + " ";
-                if (Settings.UseAVS4x264 || bdepth != 8) { executable = (SysInfo.GetOSArchInt() == 64) ? "-L x264_64.exe " : "-L x264.exe "; }
-                info.FileName = Calculate.StartupPath + "\\apps\\" + ((is_10bit) ? "x264_10b\\" : "x264\\") + ((executable.Length > 0) ? "avs4x264.exe" : "x264.exe");
+
+                if (avs4 || bdepth != 8)
+                {
+                    executable = ((avs4 && SysInfo.GetOSArchInt() == 64) ? "-L x264_64" : "-L x264") + ((is_10bit) ? "_10b.exe " : ".exe ");
+                    info.FileName = Calculate.StartupPath + "\\apps\\x264\\avs4x26x.exe";
+                }
+                else
+                {
+                    info.FileName = Calculate.StartupPath + "\\apps\\x264\\x264" + ((is_10bit) ? "_10b.exe" : ".exe");
+                }
             }
 
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
@@ -628,7 +655,7 @@ namespace XviD4PSP
             SetLog("");
             if (Settings.ArgumentsToLog)
             {
-                SetLog(((!is_x262) ? ((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") : "x262.exe: ") + info.Arguments);
+                SetLog(Path.GetFileName(info.FileName) + ": " + info.Arguments);
                 SetLog("");
             }
 
@@ -684,7 +711,7 @@ namespace XviD4PSP
                 SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog(((!is_x262) ? ((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") : "x262.exe: ") + info.Arguments);
+                    SetLog(Path.GetFileName(info.FileName) + ": " + info.Arguments);
                     SetLog("");
                 }
 
@@ -706,7 +733,7 @@ namespace XviD4PSP
                 SetLog("");
                 if (Settings.ArgumentsToLog)
                 {
-                    SetLog(((!is_x262) ? ((executable.Length > 0) ? "avs4x264.exe: " : "x264.exe: ") : "x262.exe: ") + info.Arguments);
+                    SetLog(Path.GetFileName(info.FileName) + ": " + info.Arguments);
                     SetLog("");
                 }
 
@@ -740,8 +767,12 @@ namespace XviD4PSP
             encoderProcess.Start();
             SetPriority(Settings.ProcessPriority);
 
+            //[50.7%] 258/509 frames, 58.97 fps, 507.93 kb/s, eta 0:00:04 (обычная версия)
+            //             frames     fps     kb/s    elapsed   remain     size    est.size
+            //[ 51.3%]    261/509    63.86   508.15   0:00:04   0:00:03  647.60 KB    1.23 MB (x264_enc_time)
+
             string line;
-            string pat = @"(\d+)/(\d+).frames,.(\d+.\d+).fps";
+            string pat = @"\]\D+?(\d+)\/(\d+)\D+?(\d+\.\d+)";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
 
@@ -765,7 +796,7 @@ namespace XviD4PSP
                             if (!is_x262) SetLog("x264 [total]: " + line);
                             else SetLog("x262 [total]: " + line);
                         }
-                        else
+                        else if (!line.StartsWith("     "))
                         {
                             //AppendEncoderText(line);
                             SetLog(line);
@@ -796,6 +827,371 @@ namespace XviD4PSP
             }
 
             encodertext.Length = 0;
+        }
+
+        private void make_x265()
+        {
+            //10-bit depth энкодер
+            bool is_10bit = (m.x265options.profile.ToString().EndsWith("10"));
+
+            //Хакнутый скрипт
+            int bdepth = Calculate.GetScriptBitDepth(m.script);
+
+            //Убираем метку " --extra:"
+            for (int n = 0; n < m.vpasses.Count; n++)
+                m.vpasses[n] = m.vpasses[n].ToString().Replace(" --extra:", "");
+
+            //прописываем интерлейс флаги
+            if (m.interlace == SourceType.FILM ||
+                m.interlace == SourceType.HYBRID_FILM_INTERLACED ||
+                m.interlace == SourceType.HYBRID_PROGRESSIVE_FILM ||
+                m.interlace == SourceType.HYBRID_PROGRESSIVE_INTERLACED ||
+                m.interlace == SourceType.INTERLACED)
+            {
+                if (m.deinterlace == DeinterlaceType.Disabled)
+                {
+                    for (int n = 0; n < m.vpasses.Count; n++)
+                        m.vpasses[n] = m.vpasses[n].ToString() + ((m.fieldOrder == FieldOrder.BFF) ? " --interlace bff" : " --interlace tff");
+                }
+            }
+
+            //проверяем есть ли --size режим
+            if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
+                m.encodingmode == Settings.EncodingModes.ThreePassSize ||
+                m.encodingmode == Settings.EncodingModes.OnePassSize)
+            {
+                int targetsize = (int)m.outvbitrate;
+                int outabitrate = 0;
+                int bitrate = 0;
+                if (m.outaudiostreams.Count > 0)
+                {
+                    AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+                    outabitrate = outstream.bitrate;
+
+                    if (File.Exists(outstream.audiopath))
+                        bitrate = Calculate.GetBitrateForSize((double)targetsize, outstream.audiopath, (int)m.outduration.TotalSeconds, m.outvcodec, m.format);
+                    else
+                        bitrate = Calculate.GetBitrateForSize((double)targetsize, outabitrate, (int)m.outduration.TotalSeconds, m.outvcodec, m.format);
+                }
+                else
+                {
+                    bitrate = Calculate.GetBitrateForSize((double)targetsize, outabitrate, (int)m.outduration.TotalSeconds, m.outvcodec, m.format);
+                }
+
+                m.outvbitrate = bitrate;
+
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace("--size " + targetsize, "--bitrate " + bitrate);
+            }
+
+            step++;
+
+            if (m.outvideofile == null)
+                m.outvideofile = Settings.TempPath + "\\" + m.key + ".265";
+
+            //Если можно кодировать сразу в контейнер или не требуется муксить
+            //(x265 пока-что не умеет во что-либо муксить, выдаёт только сырой поток)
+            if (muxer == Format.Muxers.Disabled || DontMuxStreams)
+            {
+                if (!DontMuxStreams)
+                {
+                    m.outvideofile = m.outfilepath;
+                }
+                else
+                {
+                    m.outvideofile = Calculate.RemoveExtention(m.outfilepath, true) + ".265";
+                }
+            }
+
+            //Используем готовый файл, только если это не кодирование сразу в контейнер
+            if ((muxer != Format.Muxers.Disabled || DontMuxStreams) && File.Exists(m.outvideofile) && new FileInfo(m.outvideofile).Length != 0)
+            {
+                SetLog(Languages.Translate("Using already created file") + ": " + m.outvideofile + Environment.NewLine);
+                if (m.vpasses.Count >= 2) step += m.vpasses.Count - 1;
+                return;
+            }
+
+            busyfile = Path.GetFileName(m.outvideofile);
+
+            string passlog = Calculate.RemoveExtention(m.outvideofile) + "log";
+
+            //info строка
+            SetLog("Encoding video to: " + m.outvideofile);
+            if (m.encodingmode == Settings.EncodingModes.Quality ||
+                m.encodingmode == Settings.EncodingModes.Quantizer ||
+                m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                SetLog(m.outvcodec + ((is_10bit) ? " 10-bit depth Q" : " Q") + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) +
+                    " " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
+            //else if (m.encodingmode == Settings.EncodingModes.TwoPassSize ||
+            //    m.encodingmode == Settings.EncodingModes.ThreePassSize)
+            //    SetLog(m.outvcodec + " " + m.outvbitrate + "mb " + m.outresw + "x" + m.outresh + " " +
+            //        m.outframerate + "fps (" + m.outframes + " frames)");
+            else
+                SetLog(m.outvcodec + ((is_10bit) ? " 10-bit depth " : " ") + m.outvbitrate + "kbps " + m.outresw + "x" + m.outresh + " " + m.outframerate + "fps (" + m.outframes + " frames)");
+
+            if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
+
+            encoderProcess = new Process();
+            ProcessStartInfo info = new ProcessStartInfo();
+
+            string in_depth = (bdepth != 8) ? "--input-depth " + bdepth + " " : "";
+            string executable = ((Settings.UseAVS4x265 && SysInfo.GetOSArchInt() == 64) ? "-L x265_64" : "-L x265") + ((is_10bit) ? "_10b.exe" : ".exe");
+            info.FileName = Calculate.StartupPath + "\\apps\\x265\\avs4x26x.exe";
+            info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+            info.UseShellExecute = false;
+            info.RedirectStandardOutput = true;
+            info.RedirectStandardError = true;
+            info.CreateNoWindow = true;
+
+            string arguments; //начало создания командной строчки для x264-го
+
+            string psnr = (Settings.x265_PSNR) ? " --psnr" : "";
+            string ssim = (Settings.x265_SSIM) ? " --ssim" : "";
+
+            string sar = "";
+            if (!m.vpasses[m.vpasses.Count - 1].ToString().Contains("--sar "))
+            {
+                if (!string.IsNullOrEmpty(m.sar) && m.sar != "1:1")
+                    sar = " --sar " + m.sar;
+                else
+                    sar = " --sar 1:1";
+            }
+
+            //Добавляем новое
+            for (int n = 0; n < m.vpasses.Count; n++)
+                m.vpasses[n] = executable + " \"" + m.scriptpath + "\" " + in_depth + m.vpasses[n] + psnr + ssim + sar;
+
+            arguments = m.vpasses[0].ToString();
+
+            if (m.vpasses.Count == 1)
+                info.Arguments = arguments + " --output \"" + m.outvideofile + "\"";
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+            {
+                arguments += " --stats \"" + passlog + "\"";
+                info.Arguments = arguments + " --output \"" + m.outvideofile + "\"";
+            }
+            else
+            {
+                arguments += " --stats \"" + passlog + "\"";
+                info.Arguments = arguments + " --output NUL";
+            }
+
+            //Вывод аргументов командной строки в лог, если эта опция включена
+            SetLog("");
+            if (Settings.ArgumentsToLog)
+            {
+                SetLog("avs4x26x.exe: " + info.Arguments);
+                SetLog("");
+            }
+
+            //Кодируем первый проход
+            Do_x265_Cycle(info);
+
+            //второй проход
+            if (m.vpasses.Count > 1 && !IsAborted && !IsErrors)
+            {
+                //режим двойного качества
+                int vbitrate = 0;
+                if (m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                    m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                {
+                    double fsize = new FileInfo(m.outvideofile).Length;
+                    fsize = fsize / 1024.0 / 1024.0;
+                    vbitrate = Calculate.GetBitrateForSize(fsize, 0, (int)m.outduration.TotalSeconds, m.outvcodec, m.format);
+                    int maxbitrate = Format.GetMaxVBitrate(m);
+                    SetLog(Languages.Translate("Best bitrate for") + " Q" + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1) + ": " + vbitrate + "kbps");
+                    if (vbitrate > maxbitrate)
+                    {
+                        vbitrate = maxbitrate;
+                        SetLog(Languages.Translate("But it`s more than maximum bitrate") + ": " + vbitrate + "kbps");
+                    }
+                }
+
+                if (m.vpasses.Count == 2) SetLog("...last pass...");
+                else if (m.vpasses.Count == 3) SetLog("...second pass...");
+
+                step++;
+                arguments = m.vpasses[1].ToString() + " --stats \"" + passlog + "\"";
+
+                if (m.vpasses.Count == 2)
+                {
+                    info.Arguments = arguments + " --output \"" + m.outvideofile + "\"";
+                }
+                else
+                {
+                    info.Arguments = arguments + " --output NUL";
+                }
+
+                //режим двойного качества
+                if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
+                {
+                    info.Arguments = info.Arguments.Replace("--crf " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "--bitrate " + vbitrate);
+                    m.outvbitrate = vbitrate;
+                }
+                //режим тройного качества
+                else if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                {
+                    info.Arguments = info.Arguments.Replace("--crf " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "--bitrate " + vbitrate);
+                    m.vpasses[2] = m.vpasses[2].ToString().Replace("--crf " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "--bitrate " + vbitrate);
+                    m.outvbitrate = vbitrate;
+                }
+
+                //прописываем аргументы командной строки
+                SetLog("");
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("avs4x26x.exe: " + info.Arguments);
+                    SetLog("");
+                }
+
+                //Кодируем второй проход
+                Do_x265_Cycle(info);
+            }
+
+            //третий проход
+            if (m.vpasses.Count == 3 && !IsAborted && !IsErrors)
+            {
+                SetLog("...last pass...");
+
+                step++;
+                arguments = m.vpasses[2].ToString() + " --stats \"" + passlog + "\"";
+                info.Arguments = arguments + " --output \"" + m.outvideofile + "\"";
+
+                //прописываем аргументы командной строки
+                SetLog("");
+                if (Settings.ArgumentsToLog)
+                {
+                    SetLog("avs4x26x.exe: " + info.Arguments);
+                    SetLog("");
+                }
+
+                //Кодируем третий проход
+                Do_x265_Cycle(info);
+            }
+
+            //чистим ресурсы
+            encoderProcess.Close();
+            encoderProcess.Dispose();
+            encoderProcess = null;
+
+            if (IsAborted || IsErrors) return;
+
+            //проверка на удачное завершение
+            if (!File.Exists(m.outvideofile) || new FileInfo(m.outvideofile).Length == 0)
+            {
+                IsErrors = true;
+                ErrorException(Languages.Translate("Can`t find output video file!"));
+            }
+
+            SetLog("");
+
+            SafeDelete(passlog);
+            SafeDelete(passlog + ".cutree");
+            encodertext.Length = 0;
+        }
+
+        private Thread readFromStdOutThread = null;
+        private void readOutStream()
+        {
+            try
+            {
+                if (IsAborted || encoderProcess == null) return;
+                using (StreamReader r = encoderProcess.StandardOutput)
+                {
+                    AppendEncoderText(r.ReadToEnd());
+                }
+            }
+            catch (Exception) { }
+        }
+
+        private void Do_x265_Cycle(ProcessStartInfo info)
+        {
+            encodertext.Length = 0;
+            encoderProcess.StartInfo = info;
+            readFromStdOutThread = new Thread(new ThreadStart(readOutStream));
+            encoderProcess.Start();
+            readFromStdOutThread.Start();
+            SetPriority(Settings.ProcessPriority);
+
+            string line;
+            string pat = @"\]\D+?(\d+)\/(\d+)\D+?(\d+\.\d+)";
+            Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match mat;
+
+            while (!encoderProcess.HasExited)
+            {
+                locker.WaitOne();
+                line = encoderProcess.StandardError.ReadLine();
+
+                if (line != null)
+                {
+                    mat = r.Match(line);
+                    if (mat.Success)
+                    {
+                        worker.ReportProgress(Convert.ToInt32(mat.Groups[1].Value));
+                        if (encoder_fps >= 0) encoder_fps = Calculate.ConvertStringToDouble(mat.Groups[3].Value);
+                    }
+                    else
+                    {
+                        SetLog(line);
+                    }
+                }
+            }
+
+            //Дочитываем остатки лога, если что-то не успело считаться
+            line = encoderProcess.StandardError.ReadToEnd();
+            if (!string.IsNullOrEmpty(line)) SetFilteredLog(r, line);
+            //SetLog(""); //Будет ниже, если будет нужно
+
+            //Дочитываем StdOut
+            readFromStdOutThread.Join();
+
+            //обнуляем прогресс
+            ResetProgress();
+
+            //Отлавливаем ошибку и доп. инфу по StdOut
+            if (!IsErrors && !IsAborted)
+            {
+                if (encodertext.Length > 0)
+                {
+                    string data = encodertext.ToString().Trim(new char[] { '\r', '\n' });
+                    if (data.StartsWith("encoded"))
+                    {
+                        SetLog("\r\nx265 [total]: " + data + "\r\n");
+                    }
+                    else if (data.StartsWith("Syntax"))
+                    {
+                        IsErrors = true;
+                        SetLog("\r\nYou have specified an invalid command line key(s)/value(s)!\r\n" +
+                            "Check valid command line arguments in x265.exe Help.\r\n");
+                        SetLog(Languages.Translate("Error") + "!");
+                    }
+                    else
+                    {
+                        //Разная доп. инфа
+                        SetLog("\r\n" + data + "\r\n");
+                    }
+                }
+                else
+                {
+                    SetLog("");
+                }
+            }
+
+            //Отлавливаем ошибку по ErrorLevel
+            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsErrors && !IsAborted)
+            {
+                IsErrors = true;
+                SetLog(Languages.Translate("Error") + "!");
+            }
+
+            if (readFromStdOutThread != null)
+            {
+                readFromStdOutThread.Abort();
+                readFromStdOutThread = null;
+            }
         }
 
         private void make_ffmpeg()
@@ -1209,11 +1605,15 @@ namespace XviD4PSP
         private Thread readFromStdErrThread = null;
         private void readErrStream()
         {
-            if (IsAborted || encoderProcess == null || encoderProcess.HasExited) return;
-            using (StreamReader r = encoderProcess.StandardError)
+            try
             {
-               AppendEncoderText(r.ReadToEnd());
+                if (IsAborted || encoderProcess == null) return;
+                using (StreamReader r = encoderProcess.StandardError)
+                {
+                    AppendEncoderText(r.ReadToEnd());
+                }
             }
+            catch (Exception) { }
         }
 
         private void Do_XviD_Cycle(ProcessStartInfo info)
@@ -1250,35 +1650,48 @@ namespace XviD4PSP
             //Дочитываем остатки лога, если что-то не успело считаться
             line = encoderProcess.StandardOutput.ReadToEnd();
             if (!string.IsNullOrEmpty(line)) SetFilteredLog(r, line);
-            SetLog("");
+            //SetLog(""); //Будет ниже, если будет нужно
+
+            //Дочитываем StdErr
+            readFromStdErrThread.Join();
 
             //обнуляем прогресс
             ResetProgress();
 
             //Отлавливаем ошибку по ErrorLevel
-            if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
+            if (!IsErrors && !IsAborted)
             {
-                Thread.Sleep(500);
-                if (encodertext.Length > 0 && encodertext.ToString().Contains("Usage : xvid_encraw"))
+                if (encoderProcess.HasExited && encoderProcess.ExitCode != 0)
                 {
-                    ErrorException("\r\nYou have specified an invalid command line key(s)/value(s).\r\n" +
-                        "Check valid command line arguments in xvid_encraw.exe Help.");
+                    if (encodertext.Length > 0 && encodertext.ToString().Contains("Usage : xvid_encraw"))
+                    {
+                        IsErrors = true;
+                        SetLog("\r\nYou have specified an invalid command line key(s)/value(s)!\r\n" +
+                            "Check valid command line arguments in xvid_encraw.exe Help.\r\n");
+                        SetLog(Languages.Translate("Error") + "!");
+                    }
+                    else
+                    {
+                        ErrorException(encodertext.ToString());
+                    }
+                }
+                else if (encodertext.Length > 0)
+                {
+                    //Разная доп. инфа
+                    SetLog("\r\n" + encodertext.ToString());
                 }
                 else
-                    ErrorException(encodertext.ToString());
-            }
-
-            //проверка на завершение
-            if (!encoderProcess.HasExited)
-            {
-                encoderProcess.Kill();
-                encoderProcess.WaitForExit();
+                {
+                    SetLog("");
+                }
             }
 
             //StdErr
             if (readFromStdErrThread != null)
+            {
                 readFromStdErrThread.Abort();
-            readFromStdErrThread = null;
+                readFromStdErrThread = null;
+            }
         }
 
         private void make_XviD()
@@ -1556,7 +1969,7 @@ namespace XviD4PSP
             if (!File.Exists(m.outvideofile) || new FileInfo(m.outvideofile).Length == 0)
             {
                 IsErrors = true;
-                ErrorException(encodertext.ToString());
+                ErrorException(Languages.Translate("Can`t find output video file!"));
             }
 
             encodertext.Length = 0;
@@ -2800,7 +3213,7 @@ namespace XviD4PSP
             //создаём мета файл
             string metapath = Settings.TempPath + "\\" + m.key + ".meta";
             string vcodec = (m.outvcodec == "Copy") ? m.invcodecshort : m.outvcodec;
-            string vtag = (vcodec == "MPEG2" || vcodec == "x262") ? "V_MPEG-2" : (vcodec == "VC1") ? "V_MS/VFW/WVC1" : "V_MPEG4/ISO/AVC";
+            string vtag = (vcodec == "MPEG2" || vcodec == "x262") ? "V_MPEG-2" : (vcodec == "HEVC" || vcodec == "x265") ? "V_MPEGH/ISO/HEVC" : (vcodec == "VC1") ? "V_MS/VFW/WVC1" : "V_MPEG4/ISO/AVC";
             string fps = (m.outvcodec == "Copy") ? ((!string.IsNullOrEmpty(m.inframerate)) ? ", fps=" + m.inframerate : "") : (!string.IsNullOrEmpty(m.outframerate)) ? ", fps=" + m.outframerate : "";
             string h264tweak = (vtag == "V_MPEG4/ISO/AVC") ? ", level=4.1, insertSEI, contSPS" : "";
             string bluray = (m.format == Format.ExportFormats.BluRay) ? " --blu-ray --auto-chapters=5" : "";
@@ -3971,6 +4384,8 @@ namespace XviD4PSP
 
                         string vcodec_info = (m.outvcodec == "x264") ? (((m.x264options.profile == x264.Profiles.High10) ? " 10-bit depth" : "") +
                             ((Settings.UseAVS4x264 && SysInfo.GetOSArchInt() == 64) ? " (x64)" : "")) :
+                            (m.outvcodec == "x265") ? (((m.x265options.profile.ToString().EndsWith("10")) ? " 10-bit depth" : "") +
+                            ((Settings.UseAVS4x265 && SysInfo.GetOSArchInt() == 64) ? " (x64)" : "")) :
                             (m.outvcodec == "XviD") ? (Settings.UseXviD_130) ? " (1.3.x)" : " (1.2.2)" : "";
 
                         if (m.invcodec != m.outvcodec)
@@ -4155,6 +4570,8 @@ namespace XviD4PSP
                 if (m.outvcodec == "x264" ||
                     m.outvcodec == "x262")
                     make_x264();
+                if (m.outvcodec == "x265")
+                    make_x265();
                 if (m.outvcodec == "XviD")
                     make_XviD();
                 if (m.outvcodec == "MPEG2" ||

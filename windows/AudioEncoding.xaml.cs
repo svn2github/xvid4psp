@@ -242,7 +242,7 @@ namespace XviD4PSP
 
         private void combo_profile_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_profile.IsDropDownOpen || combo_profile.IsSelectionBoxHighlighted)
+            if ((combo_profile.IsDropDownOpen || combo_profile.IsSelectionBoxHighlighted) && combo_profile.SelectedItem != null)
             {
                 RefreshCodecProfileWindow();
 
@@ -274,7 +274,7 @@ namespace XviD4PSP
 
         private void combo_codec_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_codec.IsDropDownOpen || combo_codec.IsSelectionBoxHighlighted)
+            if ((combo_codec.IsDropDownOpen || combo_codec.IsSelectionBoxHighlighted) && combo_codec.SelectedItem != null)
             {
                 //определяем аудио потоки
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];

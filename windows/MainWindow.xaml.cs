@@ -4005,26 +4005,22 @@ namespace XviD4PSP
                         //Копирование exe-файлов
                         if (Path.GetFileName(drop_data[0]).ToLower().EndsWith(".exe"))
                         {
-                            bool _10bit = (m != null && m.outvcodec == "x264" && m.x264options.profile == x264.Profiles.High10);
-                            string file_c = "", path_c = "", file_d = Path.GetFileName(drop_data[0]).ToLower();
-                            if (file_d == "x264.exe") { path_c = Calculate.StartupPath + ((_10bit) ? "\\apps\\x264_10b\\" : "\\apps\\x264\\"); file_c = "x264.exe"; }
-                            else if (file_d == "x264_64.exe") { path_c = Calculate.StartupPath + ((_10bit) ? "\\apps\\x264_10b\\" : "\\apps\\x264\\"); file_c = "x264_64.exe"; }
-                            else if (file_d == "ffmpeg.exe") { path_c = Calculate.StartupPath + "\\apps\\ffmpeg\\"; file_c = "ffmpeg.exe"; }
+                            string path = "", file = Path.GetFileName(drop_data[0]).ToLower();
+                            if (file.StartsWith("x265")) { path = Calculate.StartupPath + "\\apps\\x265"; }
+                            else if (file.StartsWith("x264")) { path = Calculate.StartupPath + "\\apps\\x264"; }
+                            else if (file.StartsWith("x262")) { path = Calculate.StartupPath + "\\apps\\x262"; }
+                            else if (file == "ffmpeg.exe") { path = Calculate.StartupPath + "\\apps\\ffmpeg"; }
+                            else { new Message(this).ShowMessage("I don't know what to do with \"" + Path.GetFileName(drop_data[0]) + "\"!", Languages.Translate("Error")); return; }
 
-                            if (!string.IsNullOrEmpty(file_c))
+                            try
                             {
-                                try
-                                {
-                                    File.Copy(drop_data[0], path_c + file_c, true);
-                                    new Message(this).ShowMessage("The file \"" + file_c + "\" was successfully copied to \r\n\"" + path_c + "\"", Languages.Translate("Complete"));
-                                }
-                                catch (Exception ex)
-                                {
-                                    new Message(this).ShowMessage("Copying file \"" + file_c + "\" to \"" + path_c + "\" thrown an Error:\r\n" + ex.Message, Languages.Translate("Error"));
-                                }
+                                File.Copy(drop_data[0], path + "\\" + file, true);
+                                new Message(this).ShowMessage("The file \"" + file + "\" was successfully copied to:\r\n\"" + path + "\"", Languages.Translate("Complete"));
                             }
-                            else
-                                new Message(this).ShowMessage("I don`t know what to do with \"" + Path.GetFileName(drop_data[0]) + "\"!", Languages.Translate("Error"));
+                            catch (Exception ex)
+                            {
+                                new Message(this).ShowMessage("Copying file \"" + file + "\" to \"" + path + "\" thrown an Error:\r\n" + ex.Message, ex.StackTrace, Languages.Translate("Error"));
+                            }
                         }
                         else
                         {

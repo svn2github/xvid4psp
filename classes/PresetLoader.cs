@@ -215,7 +215,8 @@ namespace XviD4PSP
         public static Massive DecodePresets(Massive m)
         {
             //расшифровываем видео параметры
-            if (m.outvcodec == "x264") m = x264.DecodeLine(m);
+            if (m.outvcodec == "x265") m = x265.DecodeLine(m);
+            else if (m.outvcodec == "x264") m = x264.DecodeLine(m);
             else if (m.outvcodec == "x262") m = x262.DecodeLine(m);
             else if (m.outvcodec == "XviD") m = XviD.DecodeLine(m);
             else if (m.outvcodec == "MPEG2") m = FMPEG2.DecodeLine(m);

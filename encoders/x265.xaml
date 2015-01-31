@@ -1,0 +1,174 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+	x:Class="XviD4PSP.x265"
+	x:Name="UserControl"
+	Width="Auto" Height="Auto" xmlns:MyUserControl="clr-namespace:MyUserControl" xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	<Grid x:Name="LayoutRoot" VerticalAlignment="Stretch" Background="{DynamicResource black_gradient_2}">
+        <Image Margin="0,0,0,0" Source="..\pictures\logo_x265.png" Stretch="None" VerticalAlignment="Top" Height="95" d:LayoutOverrides="Width" HorizontalAlignment="Center"/>
+        <TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,92,0,0">
+            <TabItem Header="Main" Width="50" Padding="0,2,0,2">
+                <Grid Width="304" Height="Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label OpacityMask="{x:Null}" x:Name="text_mode" Content="Encoding mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" Margin="2,10,0,0" VerticalAlignment="Top" />
+                    <ComboBox x:Name="combo_mode" VerticalAlignment="Top" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" Margin="0,14,4,0" SelectionChanged="combo_mode_SelectionChanged" HorizontalAlignment="Right" d:LayoutOverrides="HorizontalAlignment" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_bitrate" Content="Bitrate (kbps):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="2,38,0,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top" />
+                    <MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,41,4,0" VerticalAlignment="Top" Width="127" Height="Auto" x:Name="num_bitrate" ValueChanged="num_bitrate_ValueChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_hevc_profile" Content="HEVC profile:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="VerticalAlignment, Width, Height" Margin="2,66,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <ComboBox x:Name="combo_hevc_profile" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,70,4,0" d:LayoutOverrides="VerticalAlignment, Height" VerticalAlignment="Top" SelectionChanged="combo_hevc_profile_SelectionChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_level" Content="HEVC level | High:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="2,94,0,0" VerticalAlignment="Top" />
+                    <ComboBox HorizontalAlignment="Right" Margin="0,98,22,0" x:Name="combo_level" Width="110" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_level_SelectionChanged" VerticalAlignment="Top" />
+                    <CheckBox x:Name="check_high_tier" Width="14" Height="Auto" Content="" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,100,4,0" VerticalAlignment="Top" Click="check_high_tier_Click" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_tune" Content="Tune:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="2,122,0,0" VerticalAlignment="Top" />
+                    <ComboBox HorizontalAlignment="Right" Margin="0,126,4,0" x:Name="combo_tune" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_tune_SelectionChanged" VerticalAlignment="Top" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_codec_preset" Content="Codec preset:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" Margin="2,156,0,0" VerticalAlignment="Top" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_preset_name" Content="Medium" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Center" Margin="0,156,0,0" VerticalAlignment="Top" />
+                    <Slider x:Name="slider_preset" ToolTipService.ShowDuration="10000" Minimum="0" Maximum="9" TickFrequency="1" ValueChanged="slider_preset_ValueChanged" IsSnapToTickEnabled="True" TickPlacement="BottomRight" Foreground="White" Margin="4,184,4,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Style="{DynamicResource GlassSlider}" IsMoveToPointEnabled="True"/>
+                    <CheckBox x:Name="check_lossless" Width="Auto" Height="Auto" Content="Lossless" FontSize="14" Foreground="#FFFFFFFF" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="7,224,0,10" VerticalAlignment="Top" Click="check_lossless_Click" />
+                    <CheckBox x:Name="check_slow_first" Width="130" Height="Auto" Content="Slow 1-st pass" FontSize="14" Foreground="#FFFFFFFF" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,224,2,10" VerticalAlignment="Top" Click="check_slow_first_Click" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Motion" Width="58" Padding="0,2,0,2">
+                <Grid Width="304" Height="Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label OpacityMask="{x:Null}" x:Name="text_subme" Content="Subpixel ME:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="HorizontalAlignment" HorizontalAlignment="Left" Margin="2,10,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_subme" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,14,4,0" VerticalAlignment="Top" SelectionChanged="combo_subme_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_me" Content="ME algorithm: | range:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Width, Height" HorizontalAlignment="Left" Margin="2,38,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_me" Width="74" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,42,58,0" VerticalAlignment="Top" SelectionChanged="combo_me_SelectionChanged"/>
+                    <ComboBox x:Name="combo_merange" Width="50" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,42,4,0" VerticalAlignment="Top" SelectionChanged="combo_merange_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_max_merge" Content="Max. merge candidates:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="2,66,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_max_merge" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height, GridBox" HorizontalAlignment="Right" Margin="0,70,4,0" VerticalAlignment="Top" SelectionChanged="combo_max_merge_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_rd" Content="RDO level:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" Margin="2,94,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <ComboBox x:Name="combo_rd" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height, GridBox" HorizontalAlignment="Right" Margin="0,98,4,0" VerticalAlignment="Top" SelectionChanged="combo_rd_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_ctu" Content="Max. CU size:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Margin="2,122,0,0"/>
+                    <ComboBox x:Name="combo_ctu" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,126,4,0" SelectionChanged="combo_ctu_SelectionChanged" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
+                    <CheckBox x:Name="check_weightedp" Height="Auto" Content="Weighted P-frames" FontSize="14" Margin="7,164,7,0" Foreground="#FFFFFFFF" Click="check_weightedp_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="check_cu_lossless" Width="125" HorizontalAlignment="Right" Margin="0,164,7,0" VerticalAlignment="Top" Height="Auto" Content="CU lossless" FontSize="14" Foreground="#FFFFFFFF" Click="check_cu_lossless_Click"/>
+                    <CheckBox x:Name="check_weightedb" Height="Auto" Content="Weighted B-frames" FontSize="14" Margin="7,184,0,0" Foreground="#FFFFFFFF" d:LayoutOverrides="Height" VerticalAlignment="Top" HorizontalAlignment="Left" Click="check_weightedb_Click"/>
+                    <CheckBox x:Name="check_early_skip" Width="125" Height="Auto" Content="Early skip" FontSize="14" Margin="0,184,7,0" Foreground="#FFFFFFFF" d:LayoutOverrides="Height" VerticalAlignment="Top" HorizontalAlignment="Right" Click="check_early_skip_Click"/>
+                    <CheckBox x:Name="check_rect" Width="Auto" Height="Auto" Content="Rectangular MP" FontSize="14" Foreground="#FFFFFFFF" d:LayoutOverrides="HorizontalAlignment, Width, Height" HorizontalAlignment="Left" Margin="7,204,0,0" VerticalAlignment="Top" Click="check_rect_Click"/>
+                    <CheckBox x:Name="check_constr_intra" Width="132" Height="Auto" Content="Constrained intra" FontSize="14" Margin="0,204,0,0" Foreground="#FFFFFFFF" d:LayoutOverrides="Height" VerticalAlignment="Top" HorizontalAlignment="Right" Click="check_constr_intra_Click"/>
+                    <CheckBox x:Name="check_amp" Width="Auto" Height="Auto" Content="Asymmetric MP" FontSize="14" Foreground="#FFFFFFFF" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="7,224,0,0" VerticalAlignment="Top" Click="check_amp_Click"/>
+                    <CheckBox x:Name="check_b_intra" Width="125" Height="Auto" Content="B-intra" FontSize="14" Margin="0,224,7,10" Foreground="#FFFFFFFF" d:LayoutOverrides="Height" VerticalAlignment="Top" HorizontalAlignment="Right" Click="check_b_intra_Click"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Frames" Width="61" Padding="0,2,0,2">
+                <Grid Width="304" Height="Auto">
+                    <Label OpacityMask="{x:Null}" x:Name="text_bframes" Content="B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="2,10,0,0" VerticalAlignment="Top" />
+                    <ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,14,4,0" VerticalAlignment="Top" SelectionChanged="combo_bframes_SelectionChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_badapt_mode" Content="Adaptive B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="2,38,0,0" VerticalAlignment="Top" />
+                    <ComboBox x:Name="combo_badapt_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height, GridBox" HorizontalAlignment="Right" Margin="0,42,4,0" VerticalAlignment="Top" SelectionChanged="combo_badapt_mode_SelectionChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_bpyramid" Content="B-Pyramid mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" Margin="2,66,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <ComboBox x:Name="combo_bpyramid_mode" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height, GridBox" HorizontalAlignment="Right" Margin="0,70,4,0" VerticalAlignment="Top" SelectionChanged="combo_bpyramid_mode_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_ref" Content="Reference frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Margin="2,94,0,0" />
+                    <ComboBox x:Name="combo_ref" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,98,4,0" SelectionChanged="combo_ref_SelectionChanged" VerticalAlignment="Top" d:LayoutOverrides="Height" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_open_gop" Content="Use open GOPs:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" d:LayoutOverrides="Height" VerticalAlignment="Top" Margin="2,122,0,0" />
+                    <ComboBox x:Name="combo_open_gop" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,126,4,0" SelectionChanged="combo_open_gop_SelectionChanged" VerticalAlignment="Top" d:LayoutOverrides="Height" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_min_max_gop" Content="GOP size min: | max:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,150,0,0" d:LayoutOverrides="Height" />
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_min_gop" HorizontalAlignment="Right" Margin="0,153,70,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="999" Minimum="0" Value="0" ValueChanged="num_min_gop_ValueChanged" />
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_max_gop" HorizontalAlignment="Right" Margin="0,153,4,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="999" Minimum="0" Value="250" ValueChanged="num_max_gop_ValueChanged" />
+                    <Label OpacityMask="{x:Null}" x:Name="text_lookahead" Content="RC lookahead:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,178,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="Auto"/>
+                    <MyUserControl:NumericUpDown HorizontalAlignment="Right" Margin="0,181,4,0" VerticalAlignment="Top" Width="128" Height="Auto" x:Name="num_lookahead" Maximum="256" Minimum="0" ValueChanged="num_lookahead_ValueChanged"/>
+                    <CheckBox x:Name="check_deblocking" Width="Auto" Height="Auto" Content="Deblocking:" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_deblocking_Click" HorizontalAlignment="Left" Margin="7,212,0,0" d:LayoutOverrides="Height" VerticalAlignment="Top" />
+                    <ComboBox x:Name="combo_dstrength" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_dstrength_SelectionChanged" HorizontalAlignment="Right" Margin="0,210,70,0" d:LayoutOverrides="Height" VerticalAlignment="Top" IsEnabled="{Binding Path=IsChecked, ElementName=check_deblocking}" />
+                    <ComboBox x:Name="combo_dthreshold" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" SelectionChanged="combo_dthreshold_SelectionChanged" HorizontalAlignment="Right" Margin="0,210,4,0" d:LayoutOverrides="Height" VerticalAlignment="Top" IsEnabled="{Binding Path=IsChecked, ElementName=check_deblocking}" />
+                    <CheckBox x:Name="check_sao" Width="Auto" Height="Auto" Content="Sample Adaptive Offset" FontSize="14" Foreground="#FFFFFFFF" IsChecked="True" Click="check_sao_Click" HorizontalAlignment="Left" Margin="7,240,0,10" d:LayoutOverrides="Height" VerticalAlignment="Top" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Rate" Width="49" Padding="0,2,0,2">
+                <Grid Width="304" Height="Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label OpacityMask="{x:Null}" x:Name="text_qcomp" Content="QP curve compression:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_qcomp" HorizontalAlignment="Right" Margin="0,12,4,0" VerticalAlignment="Top" Width="128" Change="0.01" DecimalPlaces="2" Maximum="1.00" Minimum="0.50" Value="0.60" ValueChanged="num_qcomp_ValueChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_ratio" Content="QP ratio for I/P | P/B:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,38,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_ratio_ip" HorizontalAlignment="Right" Margin="0,41,70,0" VerticalAlignment="Top" Width="62" Change="0.01" DecimalPlaces="2" Maximum="10" Minimum="1" Value="1.40" ValueChanged="num_ratio_ip_ValueChanged"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_ratio_pb" HorizontalAlignment="Right" Margin="0,41,4,0" VerticalAlignment="Top" Width="62" Change="0.01" DecimalPlaces="2" Maximum="10" Minimum="1" Value="1.30" ValueChanged="num_ratio_pb_ValueChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_chroma_qp" Content="QP offset for Cb | Cr:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,66,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_chroma_qpb" HorizontalAlignment="Right" Margin="0,69,70,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="12" Minimum="-12" Value="0" ValueChanged="num_chroma_qpb_ValueChanged"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_chroma_qpr" HorizontalAlignment="Right" Margin="0,69,4,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="12" Minimum="-12" Value="0" ValueChanged="num_chroma_qpr_ValueChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_vbv" Content="VBV maxrate: | buffer:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,94,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_vbv_max" HorizontalAlignment="Right" Margin="0,97,70,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="99999" Minimum="0" Value="0" ValueChanged="num_vbv_max_ValueChanged"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_vbv_buf" HorizontalAlignment="Right" Margin="0,97,4,0" VerticalAlignment="Top" Width="62" Change="1" DecimalPlaces="0" Maximum="99999" Minimum="0" Value="0" ValueChanged="num_vbv_buf_ValueChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_vbv_init" Content="VBV initial occupancy:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,122,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_vbv_init" HorizontalAlignment="Right" Margin="0,125,4,0" VerticalAlignment="Top" Width="128" Change="0.01" DecimalPlaces="2" Maximum="1.0" Minimum="0" Value="0.90" ValueChanged="num_vbv_init_ValueChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_adapt_quant" Content="AQ mode: | strength:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,150,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_adapt_quant_mode" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,154,70,0" VerticalAlignment="Top" SelectionChanged="combo_adapt_quant_mode_SelectionChanged"/>
+                    <ComboBox x:Name="combo_adapt_quant" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,154,4,0" VerticalAlignment="Top" SelectionChanged="combo_adapt_quant_SelectionChanged"/>
+                    <CheckBox x:Name="check_cutree" Width="Auto" Height="Auto" Content="CUTree" FontSize="14" Foreground="#FFFFFFFF" Click="check_cutree_Clicked" HorizontalAlignment="Left" Margin="7,186,0,10" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Misc" Width="48" Padding="0,2,0,2">
+                <Grid Width="304" Height="Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label OpacityMask="{x:Null}" x:Name="text_psy" Content="Psy-RD: | Psy-RDOQ:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Margin="2,10,0,0" Foreground="#FFFFFFFF" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_psyrdo" HorizontalAlignment="Right" Margin="0,12,70,0" VerticalAlignment="Top" Width="62" Change="0.01" DecimalPlaces="2" Maximum="2.0" Minimum="0.0" Value="1.0" ValueChanged="num_psyrdo_ValueChanged"/>
+                    <MyUserControl:NumericUpDown Height="Auto" x:Name="num_psyrdoq" HorizontalAlignment="Right" Margin="0,12,4,0" VerticalAlignment="Top" Width="62" Change="0.01" DecimalPlaces="2" Maximum="50.0" Minimum="0.0" Value="1.0" ValueChanged="num_psyrdoq_ValueChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_range" Content="Levels range (out):" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,38,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_range_out" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,42,4,0" VerticalAlignment="Top" SelectionChanged="combo_range_out_SelectionChanged"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_colorprim" Content="Color primaries:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="2,66,0,0" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_colorprim" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,70,4,0" SelectionChanged="combo_colorprim_SelectionChanged" VerticalAlignment="Top"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_transfer" Content="Transfer characteristics:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="2,94,0,0" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_transfer" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,98,4,0" SelectionChanged="combo_transfer_SelectionChanged" VerticalAlignment="Top"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_colormatrix" Content="Color matrix setting:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="2,122,0,0" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_colormatrix" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,126,4,0" SelectionChanged="combo_colormatrix_SelectionChanged" VerticalAlignment="Top"/>
+                    <Label OpacityMask="{x:Null}" x:Name="text_hash" Content="Decoded picture hash:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="2,150,0,0" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combo_hash" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,154,4,0" SelectionChanged="combo_hash_SelectionChanged" VerticalAlignment="Top"/>
+                    <StackPanel Width="Auto" Height="Auto" Margin="0,186,0,6">
+                        <Grid Width="Auto" Height="Auto" Margin="0,0,0,0">
+                            <CheckBox x:Name="check_info" Width="Auto" Height="Auto" Content="Info" FontSize="14" Foreground="#FFFFFFFF" Click="check_info_Click" Margin="7,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <CheckBox x:Name="check_aud" Width="Auto" Height="Auto" Content="AUD" FontSize="14" Foreground="#FFFFFFFF" Click="check_aud_Click" Margin="60,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <CheckBox x:Name="check_hrd" Width="Auto" Height="Auto" Content="HRD" FontSize="14" Foreground="#FFFFFFFF" Click="check_hrd_Click" Margin="114,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <CheckBox x:Name="check_headers" Width="130" Height="Auto" Content="Headers repeat" FontSize="14" Foreground="#FFFFFFFF" IsChecked="False" Click="check_headers_Click" Margin="0,0,2,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Width="Auto" Height="Auto" Margin="0,20,0,0">
+                            <Label OpacityMask="{x:Null}" x:Name="text_hash1" Content="Parallel mode:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Margin="2,0,0,0" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                            <CheckBox x:Name="check_wpp" Width="Auto" Height="Auto" Content="WPP" FontSize="14" Foreground="#FFFFFFFF" Click="check_wpp_Click" Margin="114,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <CheckBox x:Name="check_pmode" Width="80" Height="Auto" Content="Analysis" FontSize="14" Foreground="#FFFFFFFF" Click="check_pmode_Click" Margin="0,0,52,0" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                            <CheckBox x:Name="check_pme" Width="46" Height="Auto" Content="ME" FontSize="14" Foreground="#FFFFFFFF" Click="check_pme_Click" Margin="0,0,4,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Width="Auto" Height="Auto" Margin="0,0,0,0">
+                            <Label OpacityMask="{x:Null}" x:Name="text_threads_count" Content="Threads | Frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" Margin="2,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <ComboBox x:Name="combo_threads_count" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,0,70,0" VerticalAlignment="Center" SelectionChanged="combo_threads_count_SelectionChanged" d:LayoutOverrides="Height"/>
+                            <ComboBox x:Name="combo_threads_frames" Width="62" Height="Auto" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Right" Margin="0,0,4,0" VerticalAlignment="Center" SelectionChanged="combo_threads_frames_SelectionChanged" d:LayoutOverrides="Height"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="CLI" Width="44" Padding="0,2,0,2">
+                <Grid Width="304" Height="251">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBox Margin="-2,-2,-2,31" BorderThickness="0" x:Name="textbox_cli" Text="" TextWrapping="Wrap" FontSize="11" FontFamily="Tahoma" />
+                    <Button x:Name="x265_help" Content="Help" Click="button_x265_help_Click" Width="92" HorizontalAlignment="Left" Margin="-1,225,0,2.7" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="Reset_CLI" Content="Reset" Click="button_Reset_CLI_Click" Width="92" HorizontalAlignment="Center" Margin="0,225,0,2.7" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                    <Button x:Name="Apply_CLI" Content="Apply" Click="button_Apply_CLI_Click" Width="92" HorizontalAlignment="Right" Margin="0,225,-1,2.7" Foreground="#FFFFFFFF" Template="{DynamicResource GlassButton}" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

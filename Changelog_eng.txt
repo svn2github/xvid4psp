@@ -1,6 +1,8 @@
-﻿XviD4PSP 5.10.340.0 (21.01.2015), main changes:
+﻿XviD4PSP 5.10.341.0 (31.01.2015), main changes:
 
 
+>>> (r341) Changed a little bit progress detection for x264, x264_enc_time's patched builds are also supported now.
+>>> (r341) Added support for x265 (8\10bit, x86\64). Logo for settings window - george$t and AkvenJan.
 >>> (r340) DVD-import window: changed IFO-based calculation of title's duration; switched back to VStrip.dll
            determination of resolution, AR and standard; added selection of playing vob and fullscreen mode.
 >>> (r339) Help menu: web links updated.

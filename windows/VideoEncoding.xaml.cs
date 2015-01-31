@@ -17,6 +17,7 @@ namespace XviD4PSP
         private bool profile_was_changed = false;
         private string old_vencoding;
 
+        x265 x265c;
         x264 x264c;
         x262 x262c;
         XviD xvid;
@@ -109,7 +110,12 @@ namespace XviD4PSP
         private void LoadCodecWindow()
         {
             //загрузка
-            if (m.outvcodec == "x264")
+            if (m.outvcodec == "x265")
+            {
+                x265c = new x265(m, this, p);
+                grid_codec.Children.Add(x265c);
+            }
+            else if (m.outvcodec == "x264")
             {
                 x264c = new x264(m, this, p);
                 grid_codec.Children.Add(x264c);
@@ -178,7 +184,12 @@ namespace XviD4PSP
         private void UnLoadCodecWindow()
         {
             //очистка
-            if (x264c != null)
+            if (x265c != null)
+            {
+                grid_codec.Children.Remove(x265c);
+                x265c = null;
+            }
+            else if (x264c != null)
             {
                 grid_codec.Children.Remove(x264c);
                 x264c = null;
@@ -242,7 +253,7 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (oldm != null && x264c == null && x262c == null && xvid == null) UpdateMassive(); //CustomCLI
+            if (oldm != null && x265c == null && x264c == null && x262c == null && xvid == null) UpdateMassive(); //CustomCLI
             Close();
         }
 
@@ -258,7 +269,7 @@ namespace XviD4PSP
 
         private void combo_profile_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_profile.IsDropDownOpen || combo_profile.IsSelectionBoxHighlighted)
+            if ((combo_profile.IsDropDownOpen || combo_profile.IsSelectionBoxHighlighted) && combo_profile.SelectedItem != null)
             {
                 RefreshCodecProfileWindow();
 
@@ -286,10 +297,11 @@ namespace XviD4PSP
 
         private void combo_codec_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (combo_codec.IsDropDownOpen || combo_codec.IsSelectionBoxHighlighted)
+            if ((combo_codec.IsDropDownOpen || combo_codec.IsSelectionBoxHighlighted) && combo_codec.SelectedItem != null)
             {
                 UnLoadCodecWindow();
 
+                m.x265options = new x265_arguments();
                 m.x264options = new x264_arguments();
                 m.x262options = new x262_arguments();
                 m.XviD_options = new XviD_arguments();
@@ -324,6 +336,7 @@ namespace XviD4PSP
                 
                 UpdateOutSize();
                 
+                if (x265c != null) x265c.UpdateCLI();
                 if (x264c != null) x264c.UpdateCLI();
                 if (x262c != null) x262c.UpdateCLI();
                 if (xvid != null) xvid.UpdateCLI();
@@ -362,10 +375,15 @@ namespace XviD4PSP
 
         private void UpdateMassive()
         {
-            if (x264c != null)
+            if (x265c != null)
+            {
+                m = x265c.m.Clone();
+                m = x265.EncodeLine(m);
+            }
+            else if (x264c != null)
             {
                 m = x264c.m.Clone();
-                m = x264.EncodeLine(m); //Обнуляет vpasses[x] и перезабивает заново на основе m.x264options (т.е. только предусмотренные ключи)
+                m = x264.EncodeLine(m);
             }
             else if (x262c != null)
             {
@@ -421,7 +439,8 @@ namespace XviD4PSP
 
         private void UpdateCodecMassive()
         {
-            if (x264c != null) x264c.m = m.Clone();
+            if (x265c != null) x265c.m = m.Clone();
+            else if (x264c != null) x264c.m = m.Clone();
             else if (x262c != null) x262c.m = m.Clone();
             else if (xvid != null) xvid.m = m.Clone();
             else if (mpeg1 != null) mpeg1.m = m.Clone();
@@ -455,7 +474,16 @@ namespace XviD4PSP
             //записываем профиль в реестр
             Settings.SetVEncodingPreset(m.format, combo_profile.SelectedItem.ToString());
 
-            if (x264c != null)
+            if (x265c != null)
+            {
+                //забиваем настройки из профиля
+                x265c.m.vencoding = combo_profile.SelectedItem.ToString();
+                x265c.m.outvcodec = PresetLoader.GetVCodec(x265c.m);
+                x265c.m.vpasses = PresetLoader.GetVCodecPasses(x265c.m);
+                x265c.m = PresetLoader.DecodePresets(x265c.m);
+                x265c.LoadFromProfile();
+            }
+            else if (x264c != null)
             {
                 //забиваем настройки из профиля
                 x264c.m.vencoding = combo_profile.SelectedItem.ToString();
@@ -560,7 +588,7 @@ namespace XviD4PSP
         {
             if (m.outvcodec == "Copy") return;
 
-            if (x264c == null && x262c == null && xvid == null)
+            if (x265c == null && x264c == null && x262c == null && xvid == null)
                 UpdateMassive(); //CustomCLI
 
             string auto_name = m.outvcodec + " ";
@@ -623,12 +651,12 @@ namespace XviD4PSP
             }
 
             //Не совсем понятно, зачем нужно перезагружаться с пресета, который мы только что сохранили..
-            if (x264c == null && x262c == null && xvid == null) //CustomCLI
+            if (x265c == null && x264c == null && x262c == null && xvid == null) //CustomCLI
             {
                 LoadProfileToCodec();
                 UpdateOutSize();
                 UpdateCodecMassive();
-            }       
+            }
         }
 
         private void button_remove_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -712,7 +740,8 @@ namespace XviD4PSP
         {
             if (profile_was_changed)
             {
-                if (x264c != null) m = x264c.m.Clone();
+                if (x265c != null) m = x265c.m.Clone();
+                else if (x264c != null) m = x264c.m.Clone();
                 else if (x262c != null) m = x262c.m.Clone();
                 else if (xvid != null) m = xvid.m.Clone();
             }

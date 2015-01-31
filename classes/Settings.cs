@@ -1131,6 +1131,46 @@ namespace XviD4PSP
             }
         }
 
+        public static bool x265_PSNR
+        {
+            get
+            {
+                object value = GetValue("x265_PSNR");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("x265_PSNR", value);
+            }
+        }
+
+        public static bool x265_SSIM
+        {
+            get
+            {
+                object value = GetValue("x265_SSIM");
+                if (value == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("x265_SSIM", value);
+            }
+        }
+
         public static bool x264_PSNR
         {
             get
@@ -2014,6 +2054,26 @@ namespace XviD4PSP
             set
             {
                 SetBool("UseAVS4x264", value);
+            }
+        }
+
+        public static bool UseAVS4x265
+        {
+            get
+            {
+                object value = GetValue("UseAVS4x265");
+                if (value == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Convert.ToBoolean(value);
+                }
+            }
+            set
+            {
+                SetBool("UseAVS4x265", value);
             }
         }
 

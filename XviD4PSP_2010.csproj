@@ -146,6 +146,7 @@
     <Compile Include="classes\PowerManagement\PowerManagerExeptions.cs" />
     <Compile Include="classes\VirtualDubModWrapper.cs" />
     <Compile Include="encoders\arguments\x262_arguments.cs" />
+    <Compile Include="encoders\arguments\x265_arguments.cs" />
     <Compile Include="encoders\arguments\XviD_arguments.cs" />
     <Compile Include="classes\PresetLoader.cs" />
     <Compile Include="classes\Format.cs" />
@@ -203,6 +204,9 @@
     </Compile>
     <Compile Include="encoders\x262.xaml.cs">
       <DependentUpon>x262.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="encoders\x265.xaml.cs">
+      <DependentUpon>x265.xaml</DependentUpon>
     </Compile>
     <Compile Include="encoders\XviD.xaml.cs">
       <DependentUpon>XviD.xaml</DependentUpon>
@@ -396,6 +400,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="encoders\x262.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="encoders\x265.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -660,6 +668,7 @@
     <Content Include="languages\Ukrainian.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="pictures\logo_x265.png" />
     <Resource Include="pictures\settings12.png" />
     <Resource Include="pictures\folder.png" />
     <Resource Include="pictures\warning.png" />

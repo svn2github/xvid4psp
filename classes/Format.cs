@@ -163,7 +163,7 @@ namespace XviD4PSP
 
        public static string[] GetVCodecsList(ExportFormats format)
        {
-           //XviD x264 x262 MPEG4 MPEG2 HUFF DV FLV1 FFV1
+           //x265 x264 x262 XviD MPEG4 MPEG2 HUFF DV FLV1 FFV1
 
            switch (format)
            {
@@ -333,6 +333,7 @@ namespace XviD4PSP
                        m.outvcodec == "DV" ||
                        m.outvcodec == "HUFF" ||
                        m.outvcodec == "FFV1" ||
+                       m.outvcodec == "x265" ||
                        m.outvcodec == "x264" ||
                        m.outvcodec == "x262" ||
                        m.outvcodec == "XviD")
@@ -1486,7 +1487,8 @@ namespace XviD4PSP
                    if (m.outaudiostreams.Count == 0)
                    {
                        //Звука нет и видеокодер может кодировать сразу в нужный контейнер
-                       if (m.outvcodec == "x264" && (ext == ".mkv" || ext == ".mp4" || ext == ".flv" || ext == ".264" || ext == ".h264") ||
+                       if (m.outvcodec == "x265" && (ext == ".265" || ext == ".h265") ||
+                           m.outvcodec == "x264" && (ext == ".mkv" || ext == ".mp4" || ext == ".flv" || ext == ".264" || ext == ".h264") ||
                            m.outvcodec == "x262" && (ext == ".mkv" || ext == ".mp4" || ext == ".flv" || ext == ".m2v" || ext == ".mpg") ||
                            m.outvcodec == "XviD" && (ext == ".avi") ||
                            m.outvcodec == "HUFF" ||
@@ -1937,7 +1939,7 @@ namespace XviD4PSP
 
        public static Massive GetValidVEncodingMode(Massive m)
        {
-           //XviD x264 x262 MPEG4 MPEG2 HUFF DV FLV1 FFV1
+           //x265 x264 x262 XviD MPEG4 MPEG2 HUFF DV FLV1 FFV1
            if (m.outvcodec == "XviD")
            {
                if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
@@ -1947,17 +1949,12 @@ namespace XviD4PSP
                if (m.encodingmode == Settings.EncodingModes.OnePassSize)
                    m.encodingmode = Settings.EncodingModes.TwoPassSize;
            }
-
-           if (m.outvcodec == "x264" || m.outvcodec == "x262")
+           else if (m.outvcodec == "x265" || m.outvcodec == "x264" || m.outvcodec == "x262")
            {
                if (m.encodingmode == Settings.EncodingModes.OnePassSize)
                    m.encodingmode = Settings.EncodingModes.TwoPassSize;
            }
-
-           if (m.outvcodec == "MPEG4" ||
-               m.outvcodec == "MPEG2" ||
-               m.outvcodec == "FLV1" ||
-               m.outvcodec == "MPEG1")
+           else if (m.outvcodec == "MPEG4" || m.outvcodec == "MPEG2" || m.outvcodec == "FLV1" || m.outvcodec == "MPEG1")
            {
                if (m.encodingmode == Settings.EncodingModes.ThreePass)
                    m.encodingmode = Settings.EncodingModes.TwoPass;
@@ -1969,8 +1966,7 @@ namespace XviD4PSP
                if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
                    m.encodingmode = Settings.EncodingModes.TwoPassQuality;
            }
-
-           if (m.outvcodec == "MJPEG")
+           else if (m.outvcodec == "MJPEG")
            {
                if (m.encodingmode == Settings.EncodingModes.ThreePass ||
                    m.encodingmode == Settings.EncodingModes.TwoPass)
@@ -1983,10 +1979,7 @@ namespace XviD4PSP
                    m.encodingmode == Settings.EncodingModes.TwoPassSize)
                    m.encodingmode = Settings.EncodingModes.OnePassSize;
            }
-
-           if (m.outvcodec == "HUFF" ||
-               m.outvcodec == "DV" ||
-               m.outvcodec == "FFV1")
+           else if (m.outvcodec == "HUFF" || m.outvcodec == "DV" || m.outvcodec == "FFV1")
            {
                if (m.encodingmode != Settings.EncodingModes.OnePass)
                    m.encodingmode = Settings.EncodingModes.OnePass;
