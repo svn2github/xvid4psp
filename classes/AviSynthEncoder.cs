@@ -416,21 +416,21 @@ namespace XviD4PSP
                 locker.Set();
         }
 
-        public void SetPriority(int prioritet)
+        public void SetPriority(int priority)
         {
             if (this._encoderProcess != null && !_encoderProcess.HasExited)
             {
-                if (prioritet == 0)
+                if (priority == 0)
                 {
                     _encoderProcess.PriorityClass = ProcessPriorityClass.Idle;
                     _encoderProcess.PriorityBoostEnabled = false;
                 }
-                else if (prioritet == 1)
+                else if (priority == 1)
                 {
                     _encoderProcess.PriorityClass = ProcessPriorityClass.Normal;
                     _encoderProcess.PriorityBoostEnabled = true;
                 }
-                else if (prioritet == 2)
+                else if (priority == 2)
                 {
                     _encoderProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
                     _encoderProcess.PriorityBoostEnabled = true;

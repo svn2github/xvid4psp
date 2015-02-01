@@ -386,7 +386,7 @@ namespace XviD4PSP
             num_lookahead.IsEnabled = !m.x262options.extra_cli.Contains("--rc-lookahead ");
             combo_lookahead_threads.IsEnabled = !m.x262options.extra_cli.Contains("--lookahead-threads ");
             combo_adapt_quant_mode.IsEnabled = !m.x262options.extra_cli.Contains("--aq-mode ");
-            combo_adapt_quant.IsEnabled = !m.x262options.extra_cli.Contains("--ag-strength ");
+            combo_adapt_quant.IsEnabled = !m.x262options.extra_cli.Contains("--aq-strength ");
             num_vbv_max.IsEnabled = !m.x262options.extra_cli.Contains("--vbv-maxrate ");
             num_vbv_buf.IsEnabled = !m.x262options.extra_cli.Contains("--vbv-bufsize ");
             num_vbv_init.IsEnabled = !m.x262options.extra_cli.Contains("--vbv-init ");

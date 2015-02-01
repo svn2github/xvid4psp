@@ -1,6 +1,10 @@
-﻿XviD4PSP 5.10.341.0 (31.01.2015), main changes:
+﻿XviD4PSP 5.10.342.0 (01.02.2015), main changes:
 
 
+>>> (r342) Encoder window: handling a child process when canceling encoding or changing encoding priority.
+           It is only actual for x264\x265, running through avs4x26x. Previously, changing the priority
+           worked only for avs4x26x and not for x264\x265. When cancelling the encoding, only avs4x26x was
+           killed, but x264\x265 still continued their work for some time.
 >>> (r341) Changed a little bit progress detection for x264, x264_enc_time's patched builds are also supported now.
 >>> (r341) Added support for x265 (8\10bit, x86\64). Logo for settings window - george$t and AkvenJan.
 >>> (r340) DVD-import window: changed IFO-based calculation of title's duration; switched back to VStrip.dll

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Reflection;
+using System.Management;
 
 namespace XviD4PSP
 {
@@ -254,7 +255,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -272,6 +273,20 @@ namespace XviD4PSP
 
             if (encoderProcess != null)
             {
+                Process child = null;
+                try
+                {
+                    if (GetChildProcess(encoderProcess, ref child) && !encoderProcess.HasExited)
+                        child.Kill();
+                }
+                catch (Exception) { }
+                if (child != null)
+                {
+                    child.Close();
+                    child.Dispose();
+                    child = null;
+                }
+
                 try
                 {
                     if (!encoderProcess.HasExited)
@@ -281,6 +296,12 @@ namespace XviD4PSP
                     }
                 }
                 catch (Exception) { }
+                if (encoderProcess != null)
+                {
+                    encoderProcess.Close();
+                    encoderProcess.Dispose();
+                    encoderProcess = null;
+                }
             }
 
             try
@@ -308,6 +329,37 @@ namespace XviD4PSP
             }
 
             p.outfiles.Remove(outpath_src);
+        }
+
+        private bool GetChildProcess(Process parent, ref Process child)
+        {
+            try
+            {
+                //Пока-что это всё нужно только для x264\x265 при их запуске через avs4x26x
+                if (parent.ProcessName.StartsWith("avs4x26", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    foreach (Process proc in Process.GetProcesses())
+                    {
+                        using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("Select ProcessID From Win32_Process Where ParentProcessID=" + parent.Id))
+                        {
+                            using (ManagementObjectCollection moc = searcher.Get())
+                            {
+                                foreach (ManagementObject mo in moc)
+                                {
+                                    int pid = Convert.ToInt32(mo["ProcessID"]);
+                                    mo.Dispose();
+
+                                    child = Process.GetProcessById(pid);
+                                    if (child != null && child.ProcessName.StartsWith("x26", StringComparison.InvariantCultureIgnoreCase))
+                                        return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception) { }
+            return false;
         }
 
         private void button_pause_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -364,7 +416,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -767,12 +819,12 @@ namespace XviD4PSP
             encoderProcess.Start();
             SetPriority(Settings.ProcessPriority);
 
-            //[50.7%] 258/509 frames, 58.97 fps, 507.93 kb/s, eta 0:00:04 (обычная версия)
-            //             frames     fps     kb/s    elapsed   remain     size    est.size
-            //[ 51.3%]    261/509    63.86   508.15   0:00:04   0:00:03  647.60 KB    1.23 MB (x264_enc_time)
+            //[50.7%] 258/509 frames, 58.97 fps, 507.93 kb/s, eta 0:00:04                      (обычная версия)
+            //             frames     fps     kb/s    elapsed   remain     size    est.size    (x264_enc_time)
+            //[ 51.3%]    261/509    63.86   508.15   0:00:04   0:00:03  647.60 KB    1.23 MB  (x264_enc_time)
 
             string line;
-            string pat = @"\]\D+?(\d+)\/(\d+)\D+?(\d+\.\d+)";
+            string pat = @"\]\D+(\d+)/(\d+)\D+(\d+\.\d+)";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
 
@@ -1116,7 +1168,7 @@ namespace XviD4PSP
             SetPriority(Settings.ProcessPriority);
 
             string line;
-            string pat = @"\]\D+?(\d+)\/(\d+)\D+?(\d+\.\d+)";
+            string pat = @"\]\D+(\d+)/(\d+)\D+(\d+\.\d+)";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
 
@@ -4149,7 +4201,7 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -4302,7 +4354,7 @@ namespace XviD4PSP
                 }
                 catch (Exception ex)
                 {
-                    ErrorException(ex.Message);
+                    ErrorException(ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -4802,7 +4854,7 @@ namespace XviD4PSP
                 if (!IsAborted && !IsErrors)
                 {
                     IsErrors = true;
-                    ErrorException(ex.Message);
+                    ErrorException(ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -4816,7 +4868,7 @@ namespace XviD4PSP
             } 
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -5030,16 +5082,24 @@ namespace XviD4PSP
             }
             catch (Exception ex)
             {
-                ErrorException(ex.Message);
+                ErrorException(ex.Message, ex.StackTrace);
             }
         }
 
         private void cbxPriority_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (cbxPriority.SelectedItem != null && cbxPriority.IsDropDownOpen)
+            if ((cbxPriority.IsDropDownOpen || cbxPriority.IsSelectionBoxHighlighted) && cbxPriority.SelectedIndex != -1)
             {
                 Settings.ProcessPriority = cbxPriority.SelectedIndex;
-                SetPriority(Settings.ProcessPriority);
+                try
+                {
+                    SetPriority(Settings.ProcessPriority);
+                }
+                catch (Exception ex)
+                {
+                    ErrorException(ex.Message, ex.StackTrace);
+                    AbortAction(true);
+                }
             }
         }
 
@@ -5060,38 +5120,75 @@ namespace XviD4PSP
             MediaInfo media = new MediaInfo(m.outfilepath, MediaInfo.InfoMode.MediaInfo, this);
         }
 
-        private void SetPriority(int prioritet)
+        private void SetPriority(int priority)
         {
             if (encoderProcess != null)
             {
-                if (prioritet == 0)
+                if (priority == 0)
                 {
                     encoderProcess.PriorityClass = ProcessPriorityClass.Idle;
                     encoderProcess.PriorityBoostEnabled = false;
                 }
-                else if (prioritet == 1)
+                else if (priority == 1)
                 {
                     encoderProcess.PriorityClass = ProcessPriorityClass.Normal;
                     encoderProcess.PriorityBoostEnabled = true;
                 }
-                else if (prioritet == 2)
+                else if (priority == 2)
                 {
                     encoderProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
                     encoderProcess.PriorityBoostEnabled = true;
                 }
+
+                Process child = null;
+                if (GetChildProcess(encoderProcess, ref child) && !encoderProcess.HasExited)
+                {
+                    try
+                    {
+                        if (priority == 0)
+                        {
+                            child.PriorityClass = ProcessPriorityClass.Idle;
+                            child.PriorityBoostEnabled = false;
+                        }
+                        else if (priority == 1)
+                        {
+                            child.PriorityClass = ProcessPriorityClass.Normal;
+                            child.PriorityBoostEnabled = true;
+                        }
+                        else if (priority == 2)
+                        {
+                            child.PriorityClass = ProcessPriorityClass.AboveNormal;
+                            child.PriorityBoostEnabled = true;
+                        }
+                    }
+                    finally
+                    {
+                        child.Close();
+                        child.Dispose();
+                        child = null;
+                    }
+                }
             }
+
             if (avs != null && avs.IsBusy())
             {
-                avs.SetPriority(prioritet);
+                avs.SetPriority(priority);
             }
         }
 
         private void ErrorException(string message)
         {
             SetLog("");
-            SetLog(Languages.Translate("Error") + ": " + Environment.NewLine + message);
+            SetLog(Languages.Translate("Error") + ":\r\n" + message);
             IsErrors = true;
             //ShowMessage(message);
+        }
+
+        private void ErrorException(string message, string stacktrace)
+        {
+            SetLog("");
+            SetLog(Languages.Translate("Error") + ":\r\n" + message + "\r\n\r\nStackTrace:\r\n" + stacktrace);
+            IsErrors = true;
         }
 
         internal delegate void MessageDelegate(string data);
@@ -5172,22 +5269,20 @@ namespace XviD4PSP
 
         private void combo_ending_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (combo_ending.IsDropDownOpen || combo_ending.IsSelectionBoxHighlighted)
+            if ((combo_ending.IsDropDownOpen || combo_ending.IsSelectionBoxHighlighted) && combo_ending.SelectedItem != null)
             {
-                if (combo_ending.SelectedItem != null)
-                {
-                    if (combo_ending.SelectedItem.ToString() == Languages.Translate("Wait"))
-                        ending = Shutdown.ShutdownMode.Wait;
-                    if (combo_ending.SelectedItem.ToString() == Languages.Translate("Standby"))
-                        ending = Shutdown.ShutdownMode.Standby;
-                    if (combo_ending.SelectedItem.ToString() == Languages.Translate("Hibernate"))
-                        ending = Shutdown.ShutdownMode.Hibernate;
-                    if (combo_ending.SelectedItem.ToString() == Languages.Translate("Shutdown"))
-                        ending = Shutdown.ShutdownMode.Shutdown;
-                    if (combo_ending.SelectedItem.ToString() == Languages.Translate("Exit"))
-                        ending = Shutdown.ShutdownMode.Exit;
-                    Settings.FinalAction = ending;
-                }
+                string ending_string = combo_ending.SelectedItem.ToString();
+                if (ending_string == Languages.Translate("Wait"))
+                    ending = Shutdown.ShutdownMode.Wait;
+                else if (ending_string == Languages.Translate("Standby"))
+                    ending = Shutdown.ShutdownMode.Standby;
+                else if (ending_string == Languages.Translate("Hibernate"))
+                    ending = Shutdown.ShutdownMode.Hibernate;
+                else if (ending_string == Languages.Translate("Shutdown"))
+                    ending = Shutdown.ShutdownMode.Shutdown;
+                else if (ending_string == Languages.Translate("Exit"))
+                    ending = Shutdown.ShutdownMode.Exit;
+                Settings.FinalAction = ending;
             }
         }
 
