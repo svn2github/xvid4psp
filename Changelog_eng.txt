@@ -1,6 +1,7 @@
-﻿XviD4PSP 5.10.342.0 (01.02.2015), main changes:
+﻿XviD4PSP 5.10.343.0 (03.02.2015), main changes:
 
 
+>>> (r343) x265: fixed Tune "Fast Decode" settings (they were from another preset by mistake).
 >>> (r342) Encoder window: handling a child process when canceling encoding or changing encoding priority.
            It is only actual for x264\x265, running through avs4x26x. Previously, changing the priority
            worked only for avs4x26x and not for x264\x265. When cancelling the encoding, only avs4x26x was

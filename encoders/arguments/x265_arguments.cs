@@ -29,8 +29,8 @@ namespace XviD4PSP
                 _rd = 2;
                 _reference = 1;
                 _deblocking = false;
-                _aqmode = 0; //X265_AQ_NONE
                 _aqstrength = "0.0";
+                _aqmode = 0; //X265_AQ_NONE
                 _cutree = false;
 
                 //scenecutThreshold = 0;
@@ -48,8 +48,8 @@ namespace XviD4PSP
                 _weightp = false;
                 _rd = 2;
                 _reference = 1;
-                _aqmode = 0; //X265_AQ_NONE
                 _aqstrength = "0.0";
+                _aqmode = 0; //X265_AQ_NONE
                 _cutree = false;
                 _sao = false;
 
@@ -164,6 +164,7 @@ namespace XviD4PSP
             {
                 _deblockBeta = -2;
                 _deblockTC = -2;
+                _b_intra = false;
                 _psyrdoq = 30;
                 _psyrdo = 0.5m;
                 _ratio_ip = 1.1m;
@@ -171,30 +172,37 @@ namespace XviD4PSP
                 _aqmode = 1; //X265_AQ_VARIANCE
                 _aqstrength = "0.3";
                 _qcomp = 0.8m;
-                _b_intra = false;
             }
             else if (tune == x265.Tunes.PSNR)
             {
                 _aqstrength = "0.0";
-                _psyrdoq = 0;
                 _psyrdo = 0;
+                _psyrdoq = 0;
             }
             else if (tune == x265.Tunes.SSIM)
             {
                 _aqmode = 2; //X265_AQ_AUTO_VARIANCE
-                _psyrdoq = 0;
                 _psyrdo = 0;
+                _psyrdoq = 0;
             }
             else if (tune == x265.Tunes.FastDecode)
             {
-                _b_adapt = 0;
-                _bframes = 0;
-                _lookahead = 0;
-                _cutree = false;
-                _threads_frames = 1;
-
-                //scenecutThreshold = 0;
+                _deblocking = false;
+                _sao = false;
+                _weightp = false;
+                _weightb = false;
+                _b_intra = false;
             }
+           /* zerolatency
+           {
+               _b_adapt = 0;
+               _bframes = 0;
+               _lookahead = 0;
+               _cutree = false;
+               _threads_frames = 1;
+
+               //scenecutThreshold = 0;
+           }*/
         }
 
         public x265_arguments Clone()
@@ -241,6 +249,7 @@ namespace XviD4PSP
             }
         }
 
+        //levelIdc
         private string _level = "unrestricted";
         public string level
         {
@@ -254,6 +263,7 @@ namespace XviD4PSP
             }
         }
 
+        //bHighTier
         private bool _high_tier = false;
         public bool high_tier
         {
@@ -267,6 +277,7 @@ namespace XviD4PSP
             }
         }
 
+        //bLossless
         private bool _lossless = false;
         public bool lossless
         {
@@ -280,6 +291,7 @@ namespace XviD4PSP
             }
         }
 
+        //maxNumReferences
         private int _reference = 3;
         public int reference
         {
@@ -293,6 +305,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableLoopFilter
         private bool _deblocking = true;
         public bool deblocking
         {
@@ -306,6 +319,7 @@ namespace XviD4PSP
             }
         }
 
+        //deblockingFilterTCOffset
         private int _deblockTC = 0;
         public int deblockTC
         {
@@ -319,6 +333,7 @@ namespace XviD4PSP
             }
         }
 
+        //deblockingFilterBetaOffset
         private int _deblockBeta = 0;
         public int deblockBeta
         {
@@ -332,6 +347,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableSAO
         private bool _sao = true;
         public bool sao
         {
@@ -345,6 +361,7 @@ namespace XviD4PSP
             }
         }
 
+        //subpelRefine
         private int _subme = 2;
         public int subme
         {
@@ -358,6 +375,7 @@ namespace XviD4PSP
             }
         }
 
+        //searchMethod
         private string _me = "hex";
         public string me
         {
@@ -371,6 +389,7 @@ namespace XviD4PSP
             }
         }
 
+        //searchRange
         private int _merange = 57;
         public int merange
         {
@@ -384,6 +403,7 @@ namespace XviD4PSP
             }
         }
 
+        //maxNumMergeCand
         private int _max_merge = 2;
         public int max_merge
         {
@@ -397,6 +417,7 @@ namespace XviD4PSP
             }
         }
 
+        //rdLevel
         private int _rd = 3;
         public int rd
         {
@@ -410,6 +431,7 @@ namespace XviD4PSP
             }
         }
 
+        //maxCUSize
         private int _ctu = 64;
         public int ctu
         {
@@ -423,6 +445,7 @@ namespace XviD4PSP
             }
         }
 
+        //bCULossless
         private bool _cu_lossless = false;
         public bool cu_lossless
         {
@@ -436,6 +459,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableEarlySkip
         private bool _early_skip = false;
         public bool early_skip
         {
@@ -449,6 +473,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableRectInter
         private bool _rect = false;
         public bool rect
         {
@@ -462,6 +487,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableAMP
         private bool _amp = false;
         public bool amp
         {
@@ -475,6 +501,7 @@ namespace XviD4PSP
             }
         }
 
+        //bframes
         private int _bframes = 4;
         public int bframes
         {
@@ -488,6 +515,7 @@ namespace XviD4PSP
             }
         }
 
+        //bBPyramid
         private bool _bpyramid = true;
         public bool bpyramid
         {
@@ -501,6 +529,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableWeightedBiPred
         private bool _weightb = false;
         public bool weightb
         {
@@ -514,6 +543,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableWeightedPred
         private bool _weightp = true;
         public bool weightp
         {
@@ -527,6 +557,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableConstrainedIntra
         private bool _constr_intra = false;
         public bool constr_intra
         {
@@ -540,6 +571,7 @@ namespace XviD4PSP
             }
         }
 
+        //bIntraInBFrames
         private bool _b_intra = false;
         public bool b_intra
         {
@@ -553,6 +585,7 @@ namespace XviD4PSP
             }
         }
 
+        //aqMode
         private int _aqmode = 1; //X265_AQ_VARIANCE
         public int aqmode
         {
@@ -566,6 +599,7 @@ namespace XviD4PSP
             }
         }
 
+        //aqStrength
         private string _aqstrength = "1.0";
         public string aqstrength
         {
@@ -579,6 +613,7 @@ namespace XviD4PSP
             }
         }
 
+        //cuTree
         private bool _cutree = true;
         public bool cutree
         {
@@ -592,6 +627,7 @@ namespace XviD4PSP
             }
         }
 
+        //psyRd
         private decimal _psyrdo = 1.0m;
         public decimal psyrdo
         {
@@ -605,6 +641,7 @@ namespace XviD4PSP
             }
         }
 
+        //psyRdoq
         private decimal _psyrdoq = 1.0m;
         public decimal psyrdoq
         {
@@ -618,6 +655,7 @@ namespace XviD4PSP
             }
         }
 
+        //poolNumThreads
         private int _threads = 0;
         public int threads
         {
@@ -631,6 +669,7 @@ namespace XviD4PSP
             }
         }
 
+        //frameNumThreads
         private int _threads_frames = 0;
         public int threads_frames
         {
@@ -644,6 +683,7 @@ namespace XviD4PSP
             }
         }
 
+        //bFrameAdaptive
         private int _b_adapt = 2; //X265_B_ADAPT_TRELLIS;
         public int b_adapt
         {
@@ -657,6 +697,7 @@ namespace XviD4PSP
             }
         }
 
+        //qCompress
         private decimal _qcomp = 0.60m;
         public decimal qcomp
         {
@@ -670,6 +711,7 @@ namespace XviD4PSP
             }
         }
 
+        //ipFactor
         private decimal _ratio_ip = 1.40m;
         public decimal ratio_ip
         {
@@ -683,6 +725,7 @@ namespace XviD4PSP
             }
         }
 
+        //pbFactor
         private decimal _ratio_pb = 1.30m;
         public decimal ratio_pb
         {
@@ -696,6 +739,7 @@ namespace XviD4PSP
             }
         }
 
+        //cbQpOffset
         private int _chroma_offset_cb = 0;
         public int chroma_offset_cb
         {
@@ -709,6 +753,7 @@ namespace XviD4PSP
             }
         }
 
+        //crQpOffset
         private int _chroma_offset_cr = 0;
         public int chroma_offset_cr
         {
@@ -722,6 +767,7 @@ namespace XviD4PSP
             }
         }
 
+        //vbvMaxBitrate
         private int _vbv_maxrate = 0;
         public int vbv_maxrate
         {
@@ -735,6 +781,7 @@ namespace XviD4PSP
             }
         }
 
+        //vbvBufferSize
         private int _vbv_bufsize = 0;
         public int vbv_bufsize
         {
@@ -748,6 +795,7 @@ namespace XviD4PSP
             }
         }
 
+        //vbvBufferInit
         private decimal _vbv_init = 0.90m;
         public decimal vbv_init
         {
@@ -761,6 +809,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableSlowFirstPass
         private bool _slow_firstpass = false;
         public bool slow_firstpass
         {
@@ -774,6 +823,7 @@ namespace XviD4PSP
             }
         }
 
+        //lookaheadDepth
         private int _lookahead = 20;
         public int lookahead
         {
@@ -787,6 +837,7 @@ namespace XviD4PSP
             }
         }
 
+        //keyframeMin
         private int _gop_min = 0;
         public int gop_min
         {
@@ -800,6 +851,7 @@ namespace XviD4PSP
             }
         }
 
+        //keyframeMax
         private int _gop_max = 250;
         public int gop_max
         {
@@ -813,6 +865,7 @@ namespace XviD4PSP
             }
         }
 
+        //bOpenGOP
         private bool _open_gop = true;
         public bool open_gop
         {
@@ -878,6 +931,7 @@ namespace XviD4PSP
             }
         }
 
+        //decodedPictureHashSEI
         private int _hash = 0;
         public int hash
         {
@@ -891,6 +945,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEmitInfoSEI
         private bool _info = true;
         public bool info
         {
@@ -904,6 +959,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableAccessUnitDelimiters
         private bool _aud = false;
         public bool aud
         {
@@ -917,6 +973,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEmitHRDSEI
         private bool _hrd = false;
         public bool hrd
         {
@@ -930,6 +987,7 @@ namespace XviD4PSP
             }
         }
 
+        //bRepeatHeaders
         private bool _headers_repeat = false;
         public bool headers_repeat
         {
@@ -943,6 +1001,7 @@ namespace XviD4PSP
             }
         }
 
+        //bDistributeModeAnalysis
         private bool _pmode = false;
         public bool pmode
         {
@@ -956,6 +1015,7 @@ namespace XviD4PSP
             }
         }
 
+        //bDistributeMotionEstimation
         private bool _pme = false;
         public bool pme
         {
@@ -969,6 +1029,7 @@ namespace XviD4PSP
             }
         }
 
+        //bEnableWavefront
         private bool _wpp = true;
         public bool wpp
         {

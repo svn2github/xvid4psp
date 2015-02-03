@@ -1493,19 +1493,27 @@ namespace XviD4PSP
 
                 m.x265options.deblockBeta = defaults.deblockBeta;
                 m.x265options.deblockTC = defaults.deblockTC;
-                m.x265options.psyrdo = defaults.psyrdo;
+                m.x265options.b_intra = defaults.b_intra;
                 m.x265options.psyrdoq = defaults.psyrdoq;
+                m.x265options.psyrdo = defaults.psyrdo;
                 m.x265options.ratio_ip = defaults.ratio_ip;
                 m.x265options.ratio_pb = defaults.ratio_pb;
                 m.x265options.aqmode = defaults.aqmode;
                 m.x265options.aqstrength = defaults.aqstrength;
                 m.x265options.qcomp = defaults.qcomp;
+                m.x265options.deblocking = defaults.deblocking;
+                m.x265options.sao = defaults.sao;
+                m.x265options.weightp = defaults.weightp;
+                m.x265options.weightb = defaults.weightb;
+                m.x265options.b_intra = defaults.b_intra;
+
+                /* zerolatency
                 m.x265options.b_adapt = defaults.b_adapt;
                 m.x265options.bframes = defaults.bframes;
                 m.x265options.lookahead = defaults.lookahead;
                 m.x265options.cutree = defaults.cutree;
                 m.x265options.threads_frames = defaults.threads_frames;
-                m.x265options.b_intra = defaults.b_intra;
+                */
 
                 /*
                 scenecutThreshold     scenecut
