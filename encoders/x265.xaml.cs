@@ -676,6 +676,11 @@ namespace XviD4PSP
                 else if (value == "--aq-strength")
                     m.x265options.aqstrength = cli[++n];
 
+                else if (value == "--cutree")
+                    m.x265options.cutree = true;
+                else if (value == "--no-cutree")
+                    m.x265options.cutree = false;
+
                 else if (value == "--psy-rd")
                     m.x265options.psyrdo = (decimal)Calculate.ConvertStringToDouble(cli[++n]);
 
@@ -967,6 +972,9 @@ namespace XviD4PSP
             if (m.x265options.aqstrength != defaults.aqstrength && m.x265options.aqmode != 0 && !m.x265options.extra_cli.Contains("--aq-strength "))
                 line += " --aq-strength " + m.x265options.aqstrength;
 
+            if (m.x265options.cutree != defaults.cutree && !m.x265options.extra_cli.Contains("--cutree") && !m.x265options.extra_cli.Contains("--no-cutree"))
+                line += (m.x265options.cutree) ? " --cutree" : " --no-cutree";
+
             if (!m.x265options.deblocking && defaults.deblocking && !m.x265options.extra_cli.Contains("--no-deblock"))
                 line += " --no-deblock";
 
@@ -1048,9 +1056,6 @@ namespace XviD4PSP
 
             if (m.x265options.chroma_offset_cr != defaults.chroma_offset_cr && !m.x265options.extra_cli.Contains("--crqpoffs "))
                 line += " --crqpoffs " + m.x265options.chroma_offset_cr;
-
-            if (m.x265options.ratio_pb != defaults.ratio_pb && !m.x265options.extra_cli.Contains("--pbratio "))
-                line += " --pbratio " + Calculate.ConvertDoubleToPointString((double)m.x265options.ratio_pb, 2);
 
             if (m.x265options.vbv_maxrate != defaults.vbv_maxrate && !m.x265options.extra_cli.Contains("--vbv-maxrate "))
                 line += " --vbv-maxrate " + m.x265options.vbv_maxrate;
