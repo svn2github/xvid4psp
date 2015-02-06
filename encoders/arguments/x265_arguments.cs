@@ -28,7 +28,6 @@ namespace XviD4PSP
                 _weightp = false;
                 _rd = 2;
                 _reference = 1;
-                _deblocking = false;
                 _aqstrength = "0.0";
                 _aqmode = 0; //X265_AQ_NONE
                 _cutree = false;
@@ -166,7 +165,7 @@ namespace XviD4PSP
                 _deblockTC = -2;
                 _b_intra = false;
                 _psyrdoq = 30;
-                _psyrdo = 0.5m;
+                _psyrd = 0.5m;
                 _ratio_ip = 1.1m;
                 _ratio_pb = 1.1m;
                 _aqmode = 1; //X265_AQ_VARIANCE
@@ -176,13 +175,13 @@ namespace XviD4PSP
             else if (tune == x265.Tunes.PSNR)
             {
                 _aqstrength = "0.0";
-                _psyrdo = 0;
+                _psyrd = 0;
                 _psyrdoq = 0;
             }
             else if (tune == x265.Tunes.SSIM)
             {
                 _aqmode = 2; //X265_AQ_AUTO_VARIANCE
-                _psyrdo = 0;
+                _psyrd = 0;
                 _psyrdoq = 0;
             }
             else if (tune == x265.Tunes.FastDecode)
@@ -628,16 +627,16 @@ namespace XviD4PSP
         }
 
         //psyRd
-        private decimal _psyrdo = 1.0m;
-        public decimal psyrdo
+        private decimal _psyrd = 0.3m;
+        public decimal psyrd
         {
             get
             {
-                return _psyrdo;
+                return _psyrd;
             }
             set
             {
-                _psyrdo = value;
+                _psyrd = value;
             }
         }
 
@@ -998,6 +997,20 @@ namespace XviD4PSP
             set
             {
                 _headers_repeat = value;
+            }
+        }
+
+        //bEnableTemporalSubLayers
+        private bool _temp_layers = false;
+        public bool temp_layers
+        {
+            get
+            {
+                return _temp_layers;
+            }
+            set
+            {
+                _temp_layers = value;
             }
         }
 

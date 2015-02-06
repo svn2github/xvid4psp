@@ -277,7 +277,7 @@ namespace XviD4PSP
             combo_adapt_quant.SelectedItem = m.x265options.aqstrength;
             check_cutree.IsChecked = m.x265options.cutree;
 
-            num_psyrdo.Value = m.x265options.psyrdo;
+            num_psyrd.Value = m.x265options.psyrd;
             num_psyrdoq.Value = m.x265options.psyrdoq;
 
             //прогружаем деблокинг
@@ -347,6 +347,7 @@ namespace XviD4PSP
             check_aud.IsChecked = m.x265options.aud;
             check_hrd.IsChecked = m.x265options.hrd;
             check_headers.IsChecked = m.x265options.headers_repeat;
+            check_temp_layers.IsChecked = m.x265options.temp_layers;
 
             check_wpp.IsChecked = m.x265options.wpp;
             check_pmode.IsChecked = m.x265options.pmode;
@@ -402,8 +403,8 @@ namespace XviD4PSP
             combo_adapt_quant.IsEnabled = !m.x265options.extra_cli.Contains("--aq-strength ");
             check_cutree.IsEnabled = !m.x265options.extra_cli.Contains("--cutree") && !m.x265options.extra_cli.Contains("--no-cutree");
 
-            num_psyrdo.IsEnabled = !m.x265options.extra_cli.Contains("--psy-rd ");
-            num_psyrdoq.IsEnabled = !m.x265options.extra_cli.Contains("--psy-rdoq ");
+            num_psyrd.IsEnabled = !m.x265options.extra_cli.Contains("--psy-rd ") && !m.x265options.extra_cli.Contains("--no-psy-rd");
+            num_psyrdoq.IsEnabled = !m.x265options.extra_cli.Contains("--psy-rdoq ") && !m.x265options.extra_cli.Contains("--no-psy-rdoq");
             combo_range_out.IsEnabled = !m.x265options.extra_cli.Contains("--range ");
             combo_colorprim.IsEnabled = !m.x265options.extra_cli.Contains("--colorprim ");
             combo_transfer.IsEnabled = !m.x265options.extra_cli.Contains("--transfer ");
@@ -413,7 +414,8 @@ namespace XviD4PSP
             check_info.IsEnabled = !m.x265options.extra_cli.Contains("--info") && !m.x265options.extra_cli.Contains("--no-info");
             check_aud.IsEnabled = !m.x265options.extra_cli.Contains("--aud") && !m.x265options.extra_cli.Contains("--no-aud");
             check_hrd.IsEnabled = !m.x265options.extra_cli.Contains("--hrd") && !m.x265options.extra_cli.Contains("--no-hrd");
-            check_headers.IsEnabled = !m.x265options.extra_cli.Contains("--repeat-headers") && !m.x265options.extra_cli.Contains("--repeat-headers");
+            check_headers.IsEnabled = !m.x265options.extra_cli.Contains("--repeat-headers") && !m.x265options.extra_cli.Contains("--no-repeat-headers");
+            check_temp_layers.IsEnabled = !m.x265options.extra_cli.Contains("--temporal-layers") && !m.x265options.extra_cli.Contains("--no-temporal-layers");
             check_wpp.IsEnabled = !m.x265options.extra_cli.Contains("--wpp") && !m.x265options.extra_cli.Contains("--no-wpp");
             check_pmode.IsEnabled = !m.x265options.extra_cli.Contains("--pmode") && !m.x265options.extra_cli.Contains("--no-pmode");
             check_pme.IsEnabled = !m.x265options.extra_cli.Contains("--pme") && !m.x265options.extra_cli.Contains("--no-pme");
@@ -450,7 +452,7 @@ namespace XviD4PSP
             combo_mode.ToolTip = "Encoding mode";
             combo_hevc_profile.ToolTip = "Limit HEVC profile (--profile, default: " + def.profile.ToString() + ")\r\n" +
                 "Auto - don't set the --profile key\r\nMain, Main 444 - 410, 444 (8 bit depth)\r\nMain 10b, Main 422 10b, Main 444 10b - 410, 422, 444 (10 bit depth)";
-            combo_level.ToolTip = "Force a minumum required decoder level (--level-idc, default: Unrestricted)";
+            combo_level.ToolTip = "Force a minimum required decoder level (--level-idc, default: Unrestricted)";
             check_high_tier.ToolTip = "If a decoder level is specified, this modifier selects High tier of that level (--[no-]high-tier, default: " + ((def.high_tier) ? _en : _dis) + ")";
             combo_tune.ToolTip = "Tune the settings for a particular type of source or situation (--tune, default: " + def.tune.ToString() + ")";
             if (m.encodingmode == Settings.EncodingModes.Quality ||
@@ -517,7 +519,7 @@ namespace XviD4PSP
             combo_adapt_quant.ToolTip = "AQ Strength (--ag-strength, default: " + def.aqstrength + ")\r\n" +
                         "Reduces blocking and blurring in flat and textured areas: 0.5 - weak AQ, 1.5 - strong AQ";
             check_cutree.ToolTip = "Enable CUTtree for Adaptive Quantization (--[no-]cutree, default: " + ((def.cutree) ? _en : _dis) + ")";
-            num_psyrdo.ToolTip = "Strength of psycho-visual rate distortion optimization (--psy-rd, default: " + def.psyrdo.ToString(cult_info) + ")";
+            num_psyrd.ToolTip = "Strength of psycho-visual rate distortion optimization (--psy-rd, default: " + def.psyrd.ToString(cult_info) + ")";
             num_psyrdoq.ToolTip = "Strength of psycho-visual optimization in quantization (--psy-rdoq, default: " + def.psyrdoq.ToString(cult_info) + ")";
             combo_range_out.ToolTip = "Specify black level and range of luma and chroma signals (--range, default: Auto)";
             combo_colorprim.ToolTip = "Specify color primaries (--colorprim, default: " + def.colorprim + ")";
@@ -528,6 +530,7 @@ namespace XviD4PSP
             check_aud.ToolTip = "Emit Access Unit Delimiters at the start of each access unit (--[no-]aud, default: " + ((def.aud) ? _en : _dis) + ")";
             check_hrd.ToolTip = "Enable HRD parameters signaling (--[no-]hrd, default: " + ((def.hrd) ? _en : _dis) + ")";
             check_headers.ToolTip = "Emit SPS and PPS headers at each keyframe (--[no-]repeat-headers, default: " + ((def.headers_repeat) ? _en : _dis) + ")";
+            check_temp_layers.ToolTip = "Enable a temporal sublayer for unreferenced B frames (--[no-]temporal-layers, default: " + ((def.temp_layers) ? _en : _dis) + ")";
             check_wpp.ToolTip = "Enable Wavefront Parallel Processing (--[no-]wpp, default: " + ((def.wpp) ? _en : _dis) + ")";
             check_pmode.ToolTip = "Enable parallel mode analysis (--[no-]pmode, default: " + ((def.pmode) ? _en : _dis) + ")";
             check_pme.ToolTip = "Enable parallel motion estimation (--[no-]pme, default: " + ((def.pme) ? _en : _dis) + ")";
@@ -682,10 +685,14 @@ namespace XviD4PSP
                     m.x265options.cutree = false;
 
                 else if (value == "--psy-rd")
-                    m.x265options.psyrdo = (decimal)Calculate.ConvertStringToDouble(cli[++n]);
+                    m.x265options.psyrd = (decimal)Calculate.ConvertStringToDouble(cli[++n]);
+                else if (value == "--no-psy-rd")
+                    m.x265options.psyrd = 0;
 
                 else if (value == "--psy-rdoq")
                     m.x265options.psyrdoq = (decimal)Calculate.ConvertStringToDouble(cli[++n]);
+                else if (value == "--no-psy-rdoq")
+                    m.x265options.psyrdoq = 0;
 
                 else if (value == "--deblock")
                 {
@@ -879,6 +886,11 @@ namespace XviD4PSP
                 else if (value == "--no-repeat-headers")
                     m.x265options.headers_repeat = false;
 
+                else if (value == "--temporal-layers")
+                    m.x265options.temp_layers = true;
+                else if (value == "--no-temporal-layers")
+                    m.x265options.temp_layers = false;
+
                 else if (value == "--wpp")
                     m.x265options.wpp = true;
                 else if (value == "--no-wpp")
@@ -1030,8 +1042,8 @@ namespace XviD4PSP
             if (m.x265options.weightp != defaults.weightp && !m.x265options.extra_cli.Contains("--weightp") && !m.x265options.extra_cli.Contains("--no-weightp"))
                 line += (m.x265options.weightp) ? " --weightp" : " --no-weightp";
 
-            if (m.x265options.psyrdo != defaults.psyrdo && !m.x265options.extra_cli.Contains("--psy-rd "))
-                line += " --psy-rd " + Calculate.ConvertDoubleToPointString((double)m.x265options.psyrdo, 2);
+            if (m.x265options.psyrd != defaults.psyrd && !m.x265options.extra_cli.Contains("--psy-rd "))
+                line += " --psy-rd " + Calculate.ConvertDoubleToPointString((double)m.x265options.psyrd, 2);
 
             if (m.x265options.psyrdoq != defaults.psyrdoq && !m.x265options.extra_cli.Contains("--psy-rdoq "))
                 line += " --psy-rdoq " + Calculate.ConvertDoubleToPointString((double)m.x265options.psyrdoq, 2);
@@ -1113,6 +1125,9 @@ namespace XviD4PSP
 
             if (m.x265options.headers_repeat != defaults.headers_repeat && !m.x265options.extra_cli.Contains("--repeat-headers") && !m.x265options.extra_cli.Contains("--no-repeat-headers"))
                 line += (m.x265options.headers_repeat) ? " --repeat-headers" : " --no-repeat-headers";
+
+            if (m.x265options.temp_layers != defaults.temp_layers && !m.x265options.extra_cli.Contains("--temporal-layers") && !m.x265options.extra_cli.Contains("--no-temporal-layers"))
+                line += (m.x265options.temp_layers) ? " --temporal-layers" : " --no-temporal-layers";
 
             if (m.x265options.wpp != defaults.wpp && !m.x265options.extra_cli.Contains("--wpp") && !m.x265options.extra_cli.Contains("--no-wpp"))
                 line += (m.x265options.wpp) ? " --wpp" : " --no-wpp";
@@ -1460,7 +1475,6 @@ namespace XviD4PSP
                 m.x265options.weightp = defaults.weightp;
                 m.x265options.rd = defaults.rd;
                 m.x265options.reference = defaults.reference;
-                m.x265options.deblocking = defaults.deblocking;
                 m.x265options.aqmode = defaults.aqmode;
                 m.x265options.aqstrength = defaults.aqstrength;
                 m.x265options.cutree = defaults.cutree;
@@ -1500,7 +1514,7 @@ namespace XviD4PSP
                 m.x265options.deblockTC = defaults.deblockTC;
                 m.x265options.b_intra = defaults.b_intra;
                 m.x265options.psyrdoq = defaults.psyrdoq;
-                m.x265options.psyrdo = defaults.psyrdo;
+                m.x265options.psyrd = defaults.psyrd;
                 m.x265options.ratio_ip = defaults.ratio_ip;
                 m.x265options.ratio_pb = defaults.ratio_pb;
                 m.x265options.aqmode = defaults.aqmode;
@@ -1578,11 +1592,11 @@ namespace XviD4PSP
             }
         }
 
-        private void num_psyrdo_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
+        private void num_psyrd_ValueChanged(object sender, RoutedPropertyChangedEventArgs<decimal> e)
         {
-            if (num_psyrdo.IsAction)
+            if (num_psyrd.IsAction)
             {
-                m.x265options.psyrdo = num_psyrdo.Value;
+                m.x265options.psyrd = num_psyrd.Value;
                 root_window.UpdateManualProfile();
                 UpdateCLI();
             }
@@ -1833,6 +1847,13 @@ namespace XviD4PSP
         private void check_headers_Click(object sender, RoutedEventArgs e)
         {
             m.x265options.headers_repeat = check_headers.IsChecked.Value;
+            root_window.UpdateManualProfile();
+            UpdateCLI();
+        }
+
+        private void check_temp_layers_Click(object sender, RoutedEventArgs e)
+        {
+            m.x265options.temp_layers = check_temp_layers.IsChecked.Value;
             root_window.UpdateManualProfile();
             UpdateCLI();
         }

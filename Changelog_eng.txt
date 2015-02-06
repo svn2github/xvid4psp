@@ -1,6 +1,7 @@
-﻿XviD4PSP 5.10.344.0 (04.02.2015), main changes:
+﻿XviD4PSP 5.10.345.0 (06.02.2015), main changes:
 
 
+>>> (r345) x265: another few small changes for the recent builds.
 >>> (r344) x265: fixed --cutree and --pbratio keys.
 >>> (r343) x265: fixed Tune "Fast Decode" settings (they were from another preset by mistake).
 >>> (r342) Encoder window: handling a child process when canceling encoding or changing encoding priority.
