@@ -1049,8 +1049,9 @@ namespace XviD4PSP
 
            else
            {
-               if (m.outvcodec == "x264")
-                   return 90000;//16384;
+               if (m.outvcodec == "x265" ||
+                   m.outvcodec == "x264")
+                   return 99999;
                else if (m.outvcodec == "x262" ||
                    m.outvcodec == "MPEG2" ||
                    m.outvcodec == "MPEG1")

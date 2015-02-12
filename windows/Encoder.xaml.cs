@@ -1588,25 +1588,8 @@ namespace XviD4PSP
             if (IsAborted || IsErrors) return;
 
             //FOURCC
-            if (!string.IsNullOrEmpty(fourcc) && fourcc.Length == 4 && Path.GetExtension(m.outvideofile).ToLower() == ".avi")
-            {
-                SetLog("FOURCC");
-                SetLog("------------------------------");
-                SetLog("FOURCC: FFVH > " + fourcc);
-                SetLog("");
-                
-                //Не знаю, насколько корректно "вслепую" менять значения, но в "AVI FOURCC Code Changer" сделано именно так
-                using (FileStream fs = new FileStream(m.outvideofile, FileMode.Open, FileAccess.Write))
-                {
-                    fs.Position = 112; //Description code
-                    fs.Write(Encoding.ASCII.GetBytes(fourcc), 0, 4);
-                    fs.Position = 188; //Used codec
-                    fs.Write(Encoding.ASCII.GetBytes(fourcc), 0, 4);
-                    fs.Flush();
-                }
-
-                SetLog("");
-            }
+            if (!string.IsNullOrEmpty(fourcc) && Path.GetExtension(m.outvideofile).ToLower() == ".avi")
+                make_fourcc(fourcc);
 
             //возвращаем путь
             m.outvideofile = oldfilepath;
@@ -2028,16 +2011,12 @@ namespace XviD4PSP
             SafeDelete(passlog1);
             SafeDelete(passlog2);
 
+            if (IsAborted || IsErrors) return;
             SetLog("");
 
             //FOURCC
-            if (m.XviD_options.fourcc != "XVID")
-            {
-                SetLog("FOURCC");
-                SetLog("------------------------------");
-                SetLog("FOURCC: XVID > " + m.XviD_options.fourcc);
+            if (!string.IsNullOrEmpty(m.XviD_options.fourcc) && m.XviD_options.fourcc != "XVID")
                 make_fourcc(m.XviD_options.fourcc);
-            }
         }
 
         private void make_sound()
@@ -3614,43 +3593,68 @@ namespace XviD4PSP
 
         private void make_fourcc(string fourcc)
         {
-            busyfile = Path.GetFileName(m.outvideofile);
+            SetLog("FOURCC");
+            SetLog("------------------------------");
+            SetLog("Input file: " + m.outvideofile);
 
-            encoderProcess = new Process();
-            ProcessStartInfo info = new ProcessStartInfo();
-
-            info.FileName = Calculate.StartupPath + "\\apps\\cfourcc\\cfourcc.exe";
-            info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-            //info.UseShellExecute = false;
-            //info.RedirectStandardOutput = true;
-            //info.RedirectStandardError = true;
-            info.CreateNoWindow = true;
-            info.WindowStyle = ProcessWindowStyle.Hidden;
-
-            //myProcess.StartInfo.Arguments = "-u " & NewFOURCC & " -d " & NewFOURCC & " " & """" & FilePath & """"
-            info.Arguments = "\"" + m.outvideofile + "\" -u " + fourcc + " -d " + fourcc;
-
-            //прописываем аргументы командной строки
-            SetLog("");
-            if (Settings.ArgumentsToLog)
+            bool ok = false;
+            if (fourcc.Length != 4)
             {
-                SetLog("cfourcc.exe:" + " " + info.Arguments);
-                SetLog("");
+                SetLog(Languages.Translate("Error") + ": \"" + fourcc + "\" - is not a valid value for 'FOUR'CC!\r\n");
+            }
+            else
+            {
+                //В использовавшемся ранее cfourcc.exe и в "AVI FOURCC Code Changer" принцип тот же
+                using (FileStream fs = new FileStream(m.outvideofile, FileMode.Open, FileAccess.ReadWrite))
+                {
+                    int pos = 0;
+                    const int AVILEN = 224, DWORD = 4;
+                    const int strh = 100, strf = 164;
+                    const int desc = 112, used = 188;
+                    byte[] AVIHDR = new byte[AVILEN];
+
+                    if (fs.Length > AVILEN)
+                    {
+                        while (pos < AVILEN)
+                            pos += fs.Read(AVIHDR, pos, AVILEN - pos);
+
+                        if (Encoding.ASCII.GetString(AVIHDR, 0, DWORD) == "RIFF" &&
+                            Encoding.ASCII.GetString(AVIHDR, strh, DWORD) == "strh" &&
+                            Encoding.ASCII.GetString(AVIHDR, strf, DWORD) == "strf")
+                        {
+                            SetLog("Desc. code: \"" + Encoding.ASCII.GetString(AVIHDR, desc, DWORD) + "\" -> \"" + fourcc + "\"");
+                            SetLog("Codec used: \"" + Encoding.ASCII.GetString(AVIHDR, used, DWORD) + "\" -> \"" + fourcc + "\"");
+
+                            fs.Position = desc; //Description code
+                            fs.Write(Encoding.ASCII.GetBytes(fourcc), 0, DWORD);
+                            fs.Position = used; //Used codec
+                            fs.Write(Encoding.ASCII.GetBytes(fourcc), 0, DWORD);
+                            fs.Flush();
+
+                            ok = true;
+                        }
+                        else
+                        {
+                            SetLog(Languages.Translate("Error") + ": Not an AVI or unsupported file!\r\n");
+                        }
+                    }
+                    else
+                    {
+                        SetLog(Languages.Translate("Error") + ": Empty or incomplete AVI file!\r\n");
+                    }
+                }
             }
 
-            encoderProcess.StartInfo = info;
-            encoderProcess.Start();
-            //SetPriority(Settings.ProcessPriority); //cfourcc.exe - работает слишком быстро :) иногда успевает закрыться до присвоения приоритета, что приводит к ошибке
-            encoderProcess.WaitForExit();
-
-            //чистим ресурсы
-            encoderProcess.Close();
-            encoderProcess.Dispose();
-            encoderProcess = null;
-
-            if (IsAborted || IsErrors) return;
-
-            SetLog("");
+            if (ok)
+            {
+                SetLog("OK!");
+                SetLog("\r\n");
+            }
+            else
+            {
+                SetLog(Languages.Translate("Error") + "!");
+                IsErrors = true;
+            }
         }
 
         private void make_vdubmod()

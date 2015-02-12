@@ -3257,6 +3257,7 @@ namespace XviD4PSP
             }
 
             m = FillAudio(m);
+            SetAudioPreset();
 
             //обнуляем громкость
             foreach (object s in m.inaudiostreams)
@@ -6356,7 +6357,11 @@ namespace XviD4PSP
                         string old_script = m.script;
 
                         //забиваем-обновляем аудио массивы
-                        if (fs.update_audio) m = FillAudio(m);
+                        if (fs.update_audio)
+                        {
+                            m = FillAudio(m);
+                            SetAudioPreset();
+                        }
 
                         //перезабиваем специфику формата
                         if (fs.update_framerate)

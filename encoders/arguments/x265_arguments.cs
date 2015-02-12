@@ -444,6 +444,20 @@ namespace XviD4PSP
             }
         }
 
+        //maxTUSize
+        private int _max_tu = 32;
+        public int max_tu
+        {
+            get
+            {
+                return _max_tu;
+            }
+            set
+            {
+                _max_tu = value;
+            }
+        }
+
         //bCULossless
         private bool _cu_lossless = false;
         public bool cu_lossless

@@ -71,14 +71,16 @@ namespace XviD4PSP
             if (SysInfo.GetOSArchInt() == 64)
             {
                 check_use_64x264.Content = Languages.Translate("Use 64-bit x264");
-                check_use_64x264.ToolTip = Languages.Translate("This option will allow you to use 64-bit x264 with 32-bit AviSynth (via avs4x264 proxy)");
+                check_use_64x264.ToolTip = Languages.Translate("This option will allow you to use 64-bit x264 with 32-bit AviSynth (via avs4x26x proxy)");
                 check_use_64x265.Content = check_use_64x264.Content.ToString().Replace("x264", "x265");
                 check_use_64x265.ToolTip = check_use_64x264.ToolTip.ToString().Replace("x264", "x265");
             }
             else
             {
-                check_use_64x264.Content = Languages.Translate("Run x264 using avs4x264 proxy");
+                check_use_64x264.Content = Languages.Translate("Run x264 using avs4x26x proxy");
                 check_use_64x264.ToolTip = Languages.Translate("Use this option if you run out of memory due to 32-bit OS limitation of ~2GB per process");
+                check_use_64x265.Content = Languages.Translate("Use 64-bit x264").Replace("x264", "x265");
+                check_use_64x265.IsChecked = false;
                 check_use_64x265.IsEnabled = false;
             }
 
@@ -149,8 +151,8 @@ namespace XviD4PSP
             check_clone_fps.IsChecked = Settings.BatchCloneFPS;                                   //Это для fps
             check_clone_audio.IsChecked = Settings.BatchCloneAudio;                               //Ну а это для звуковых параметров
             check_batch_pause.IsChecked = Settings.BatchPause;                                    //Пауза после первого открытого файла (чтоб выставить настройки и т.д.)
-            check_use_64x264.IsChecked = Settings.UseAVS4x264;                                    //Запускать x264\x264_64 через avs4x264
-            check_use_64x265.IsChecked = Settings.UseAVS4x265;                                    //Использовать 64-битный x265
+            check_use_64x264.IsChecked = Settings.UseAVS4x264;                                    //Запускать x264\x264_64 через avs4x26x
+            if (check_use_64x265.IsEnabled) check_use_64x265.IsChecked = Settings.UseAVS4x265;    //Использовать 64-битный x265
             check_is_always_close_encoding.IsChecked = Settings.AutoClose;                        //Автозакрытие окна кодирования
             check_dont_delete_caches.IsChecked = !(check_delete_ff_cache.IsEnabled =
                  check_delete_lsmash_cache.IsEnabled = check_delete_dgindex_cache.IsEnabled =

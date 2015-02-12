@@ -128,6 +128,11 @@ namespace XviD4PSP
             combo_ctu.Items.Add(32);
             combo_ctu.Items.Add(64);
 
+            combo_max_tu.Items.Add(4);
+            combo_max_tu.Items.Add(8);
+            combo_max_tu.Items.Add(16);
+            combo_max_tu.Items.Add(32);
+
             //B фреймы
             for (int n = 0; n <= 16; n++)
                 combo_bframes.Items.Add(n);
@@ -303,6 +308,7 @@ namespace XviD4PSP
             combo_max_merge.SelectedIndex = m.x265options.max_merge - 1;
             combo_rd.SelectedIndex = m.x265options.rd;
             combo_ctu.SelectedItem = m.x265options.ctu;
+            combo_max_tu.SelectedItem = m.x265options.max_tu;
             check_cu_lossless.IsChecked = m.x265options.cu_lossless;
             check_early_skip.IsChecked = m.x265options.early_skip;
             check_rect.IsChecked = m.x265options.rect;
@@ -371,6 +377,7 @@ namespace XviD4PSP
             combo_max_merge.IsEnabled = !m.x265options.extra_cli.Contains("--max-merge ");
             combo_rd.IsEnabled = !m.x265options.extra_cli.Contains("--rd ");
             combo_ctu.IsEnabled = !m.x265options.extra_cli.Contains("--ctu ");
+            combo_max_tu.IsEnabled = !m.x265options.extra_cli.Contains("--max-tu-size ");
             check_weightedp.IsEnabled = !m.x265options.extra_cli.Contains("--weightp") && !m.x265options.extra_cli.Contains("--no-weightp");
             check_weightedb.IsEnabled = !m.x265options.extra_cli.Contains("--weightb") && !m.x265options.extra_cli.Contains("--no-weightb");
             check_cu_lossless.IsEnabled = !m.x265options.extra_cli.Contains("--cu-lossless") && !m.x265options.extra_cli.Contains("--no-cu-lossless");
@@ -485,6 +492,7 @@ namespace XviD4PSP
             combo_max_merge.ToolTip = "Maximum number of merge candidates (--max-merge, default: " + def.max_merge + ")";
             combo_rd.ToolTip = "Level of RD in mode decision (--rd, default: " + def.rd + ")";
             combo_ctu.ToolTip = "Maximum CU size, WxH (--ctu, default: " + def.ctu + ")";
+            combo_max_tu.ToolTip = "Maximum TU size (<= CU size), WxH (--max-tu-size, default: " + def.max_tu + ")";
             check_weightedp.ToolTip = "Enable weighted prediction in P slices (--[no-]weightp, default: " + ((def.weightp) ? _en : _dis) + ")";
             check_weightedb.ToolTip = "Enable weighted prediction in B slices (--[no-]weightb, default: " + ((def.weightb) ? _en : _dis) + ")";
             check_cu_lossless.ToolTip = "Consider lossless mode in CU RDO decisions (--[no-]cu-lossless, default: " + ((def.cu_lossless) ? _en : _dis) + ")";
@@ -735,6 +743,9 @@ namespace XviD4PSP
 
                 else if (value == "--ctu" || value == "-s")
                     m.x265options.ctu = Convert.ToInt32(cli[++n]);
+
+                else if (value == "--max-tu-size")
+                    m.x265options.max_tu = Convert.ToInt32(cli[++n]);
 
                 else if (value == "--cu-lossless")
                     m.x265options.cu_lossless = true;
@@ -1008,6 +1019,9 @@ namespace XviD4PSP
 
             if (m.x265options.ctu != defaults.ctu && !m.x265options.extra_cli.Contains("--ctu ") && !m.x265options.extra_cli.Contains("-s "))
                 line += " --ctu " + m.x265options.ctu;
+
+            if (m.x265options.max_tu != defaults.max_tu && !m.x265options.extra_cli.Contains("--max-tu-size "))
+                line += " --max-tu-size " + m.x265options.max_tu;
 
             if (m.x265options.cu_lossless != defaults.cu_lossless && !m.x265options.extra_cli.Contains("--cu-lossless") && !m.x265options.extra_cli.Contains("--no-cu-lossless"))
                 line += (m.x265options.cu_lossless) ? " --cu-lossless" : " --no-cu-lossless";
@@ -2010,6 +2024,16 @@ namespace XviD4PSP
             if ((combo_ctu.IsDropDownOpen || combo_ctu.IsSelectionBoxHighlighted) && combo_ctu.SelectedItem != null)
             {
                 m.x265options.ctu = Convert.ToInt32(combo_ctu.SelectedItem);
+                root_window.UpdateManualProfile();
+                UpdateCLI();
+            }
+        }
+
+        private void combo_max_tu_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_max_tu.IsDropDownOpen || combo_max_tu.IsSelectionBoxHighlighted) && combo_max_tu.SelectedItem != null)
+            {
+                m.x265options.max_tu = Convert.ToInt32(combo_max_tu.SelectedItem);
                 root_window.UpdateManualProfile();
                 UpdateCLI();
             }
