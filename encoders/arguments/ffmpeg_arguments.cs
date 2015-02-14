@@ -16,6 +16,19 @@ namespace XviD4PSP
             return (ffmpeg_arguments)this.MemberwiseClone();
         }
 
+        private string _vcodec = null;
+        public string vcodec
+        {
+            get
+            {
+                return _vcodec;
+            }
+            set
+            {
+                _vcodec = value;
+            }
+        }
+
         private int _memethod = 2;
         public int memethod
         {
@@ -26,6 +39,19 @@ namespace XviD4PSP
             set
             {
                 _memethod = value;
+            }
+        }
+
+        private int _dia_size = 0;
+        public int dia_size
+        {
+            get
+            {
+                return _dia_size;
+            }
+            set
+            {
+                _dia_size = value;
             }
         }
 
@@ -172,6 +198,32 @@ namespace XviD4PSP
             }
         }
 
+        private bool _mv0 = false;
+        public bool mv0
+        {
+            get
+            {
+                return _mv0;
+            }
+            set
+            {
+                _mv0 = value;
+            }
+        }
+
+        private bool _mv4 = false;
+        public bool mv4
+        {
+            get
+            {
+                return _mv4;
+            }
+            set
+            {
+                _mv4 = value;
+            }
+        }
+
         private bool _qpel = false;
         public bool qpel
         {
@@ -182,19 +234,6 @@ namespace XviD4PSP
             set
             {
                 _qpel = value;
-            }
-        }
-
-        private bool _closedgop = false;
-        public bool closedgop
-        {
-            get
-            {
-                return _closedgop;
-            }
-            set
-            {
-                _closedgop = value;
             }
         }
 
@@ -250,7 +289,7 @@ namespace XviD4PSP
             }
         }
 
-        private string _brefine = "Disabled";
+        private string _brefine = "1";
         public string brefine
         {
             get
@@ -276,7 +315,7 @@ namespace XviD4PSP
             }
         }
 
-        private int _gopsize = 0;
+        private int _gopsize = 12;
         public int gopsize
         {
             get
@@ -289,16 +328,42 @@ namespace XviD4PSP
             }
         }
 
-        private string _fourcc_xvid = "XVID";
-        public string fourcc_xvid
+        private bool _enforce_gopsize = false;
+        public bool enforce_gopsize
         {
             get
             {
-                return _fourcc_xvid;
+                return _enforce_gopsize;
             }
             set
             {
-                _fourcc_xvid = value;
+                _enforce_gopsize = value;
+            }
+        }
+
+        private bool _closedgop = false;
+        public bool closedgop
+        {
+            get
+            {
+                return _closedgop;
+            }
+            set
+            {
+                _closedgop = value;
+            }
+        }
+
+        private string _fourcc = "Default";
+        public string fourcc
+        {
+            get
+            {
+                return _fourcc;
+            }
+            set
+            {
+                _fourcc = value;
             }
         }
 
@@ -484,16 +549,29 @@ namespace XviD4PSP
             }
         }
 
-        private int _dia_size = 0;
-        public int dia_size
+        private int _threads = 0;
+        public int threads
         {
             get
             {
-                return _dia_size;
+                return _threads;
             }
             set
             {
-                _dia_size = value;
+                _threads = value;
+            }
+        }
+
+        private string _extra_cli = "";
+        public string extra_cli
+        {
+            get
+            {
+                return _extra_cli;
+            }
+            set
+            {
+                _extra_cli = value;
             }
         }
     }

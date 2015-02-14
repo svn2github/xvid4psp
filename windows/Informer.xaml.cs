@@ -285,6 +285,7 @@ namespace XviD4PSP
                 if (m == null || worker.CancellationPending) return;
 
                 m.invideostream_ff_order = ff.FirstVideoStreamID();
+                m.invideostream_ff_order_filtered = ff.FilteredStreamOrder(m.invideostream_ff_order);
                 if (m.invideostream_mi_order < 0) m.invideostream_mi_order = m.invideostream_ff_order;
 
                 //null - MediaInfo для этого файла не запускалась (avs, grf..)
@@ -587,6 +588,7 @@ namespace XviD4PSP
                 if (ff.AudioStreams().Count > 0)
                 {
                     ArrayList AStreams = ff.AudioStreams();
+                    ArrayList AStreams_done = new ArrayList();
 
                     //подправляем кодек, ffID, язык
                     //Это будет работать как надо, только если очерёдность наших треков
@@ -596,39 +598,48 @@ namespace XviD4PSP
                     {
                         AudioStream s = (AudioStream)o;
                         s.ff_order = (int)AStreams[astream]; //ID трека для FFmpeg
+                        s.ff_order_filtered = ff.FilteredStreamOrder(s.ff_order);
                         if (s.mi_order < 0) s.mi_order = s.ff_order;
-                        if (s.bitrate == 0) s.bitrate = ff.StreamBitrate(s.ff_order);
+                        if (s.bitrate == 0) s.bitrate = ff.AudioBitrate(s.ff_order);
                         if (s.channels == 0) s.channels = ff.StreamChannels(s.ff_order);
                         if (s.samplerate == null) s.samplerate = ff.StreamSamplerate(s.ff_order);
                         if (s.language == "Unknown") s.language = ff.StreamLanguage(s.ff_order);
+                        s.ff_bits = ff.StreamBits(s.ff_order);
+                        s.ff_codec = ff.StreamCodec(s.ff_order);
                         if (s.codec == "A_MS/ACM")
                         {
-                            s.codec = ff.StreamCodec(s.ff_order);
+                            s.codec = s.ff_codec;
                             s.codecshort = ff.StreamCodecShort(s.ff_order);
                         }
+
+                        AStreams_done.Add(AStreams[astream]);
 
                         astream++;
                         if (astream >= AStreams.Count) break;
                     }
 
-                    if ((m.indexfile == null && Settings.EnableAudio || ext == ".avs") && m.inaudiostreams.Count < AStreams.Count)
+                    //Удаляем все FF-треки, инфа от которых уже взята
+                    foreach (object obj in AStreams_done)
+                        AStreams.Remove(obj);
+
+                    if ((m.indexfile == null && Settings.EnableAudio || ext == ".avs") && AStreams.Count > 0)
                     {
-                        //забиваем аудио, если они ещё не забиты (если у FFmpeg треков больше, чем у нас)
-                        //Все треки от FFmpeg добавляются к тем, что у нас уже есть. И если у нас уже что-то
-                        //есть, то мы можем получить дубли каких-то треков. Тут тоже нужно как-то сопоставлять
-                        //треки, и объединить это всё с кодом, который выше!
-                        //m.inaudiostreams.Clear(); //Может просто обнулить всё что уже есть? Тогда потеряем инфу о Delay.
+                        //забиваем аудио, если они ещё не забиты (если FF-треков осталось больше, чем у нас уже есть)
+                        //Все оставшиеся треки от FFmpeg добавляются к уже имеющимся. Тут тоже нужно как-то
+                        //сопоставлять треки, и объединить это всё с кодом, который выше!
                         foreach (int stream_num in AStreams)
                         {
                             AudioStream stream = new AudioStream();
-                            stream.codec = ff.StreamCodec(stream_num);
+                            stream.ff_bits = ff.StreamBits(stream_num);
+                            stream.ff_codec = stream.codec = ff.StreamCodec(stream_num);
                             stream.codecshort = ff.StreamCodecShort(stream_num);
-                            stream.bitrate = ff.StreamBitrate(stream_num);
+                            stream.bitrate = ff.AudioBitrate(stream_num);
                             stream.samplerate = ff.StreamSamplerate(stream_num);
                             stream.bits = ff.StreamBits(stream_num);
                             stream.channels = ff.StreamChannels(stream_num);
                             stream.language = ff.StreamLanguage(stream_num);
                             stream.mi_order = stream.ff_order = stream_num;
+                            stream.ff_order_filtered = ff.FilteredStreamOrder(stream_num);
                             m.inaudiostreams.Add(stream.Clone());
                         }
 

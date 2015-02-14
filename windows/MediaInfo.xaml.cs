@@ -120,8 +120,8 @@ namespace XviD4PSP
                     info.FileName = Calculate.StartupPath + "\\apps\\MP4Box\\MP4Box.exe";
                     info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
                     info.UseShellExecute = false;
-                    info.RedirectStandardOutput = true;
-                    info.RedirectStandardError = false;
+                    info.RedirectStandardOutput = false;
+                    info.RedirectStandardError = true;
                     info.CreateNoWindow = true;
 
                     info.Arguments = "-info \"" + infilepath + "\"";
@@ -129,7 +129,7 @@ namespace XviD4PSP
                     encoderProcess.StartInfo = info;
                     encoderProcess.Start();
 
-                    tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd();
+                    tbxInfo.Text = encoderProcess.StandardError.ReadToEnd();
                 }
                 else if (infomode == InfoMode.MKVInfo)
                 {
@@ -139,43 +139,17 @@ namespace XviD4PSP
                     info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvinfo.exe";
                     info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
                     info.UseShellExecute = false;
+                    info.StandardOutputEncoding = System.Text.Encoding.UTF8;
                     info.RedirectStandardOutput = true;
                     info.RedirectStandardError = false;
                     info.CreateNoWindow = true;
 
-                    string charset = "";
-                    string _charset = Settings.MKVToolnix_Charset;
-
-                    try
-                    {
-                        if (_charset == "")
-                        {
-                            info.StandardOutputEncoding = System.Text.Encoding.UTF8;
-                            charset = " --output-charset UTF-8";
-                        }
-                        else if (_charset.ToLower() == "auto")
-                        {
-                            info.StandardOutputEncoding = System.Text.Encoding.Default;
-                            charset = " --output-charset " + System.Text.Encoding.Default.HeaderName;
-                        }
-                        else
-                        {
-                            int page = 0;
-                            if (int.TryParse(_charset, out page))
-                                info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(page);
-                            else
-                                info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(_charset);
-                            charset = " --output-charset " + _charset;
-                        }
-                    }
-                    catch (Exception) { }
-
-                    info.Arguments = "\"" + infilepath + "\"" + charset;
+                    info.Arguments = "\"" + infilepath + "\" --output-charset UTF-8";
 
                     encoderProcess.StartInfo = info;
                     encoderProcess.Start();
 
-                    tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd().Replace("\r\r\n", "\r\n");
+                    tbxInfo.Text = encoderProcess.StandardOutput.ReadToEnd();
                 }
                 else if (infomode == InfoMode.FFmpegInfo)
                 {
@@ -185,15 +159,10 @@ namespace XviD4PSP
                     if (ff.info.Length > 0)
                     {
                         string sortedinfo = "";
-                        string[] lines = ff.info.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                        string[] lines = ff.info.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                         foreach (string line in lines)
                         {
-                            if (!line.StartsWith("  configuration:") &&
-                                !line.StartsWith("  lib") &&
-                                !line.StartsWith("  built on") &&
-                                !line.StartsWith("At least one output") &&
-                                !line.StartsWith("This program is not") &&
-                                line != "")
+                            if (!line.StartsWith("At least one output"))
                                 sortedinfo += line + Environment.NewLine;
                         }
 
@@ -225,7 +194,7 @@ namespace XviD4PSP
                         tbxInfo.Text += "Width               : " + ff.StreamW(num) + " pixels\r\n";
                         tbxInfo.Text += "Height              : " + ff.StreamH(num) + " pixels\r\n";
                         tbxInfo.Text += "Aspect (DAR)        : " + ff.StreamDAR(num) + Environment.NewLine;
-                        tbxInfo.Text += "Aspect (PAR)        : " + ff.StreamPAR(num) + Environment.NewLine;
+                        tbxInfo.Text += "Aspect (SAR)        : " + ff.StreamPAR(num) + Environment.NewLine;
                         tbxInfo.Text += "Colorspace          : " + ff.StreamColor(num) + Environment.NewLine;
                         tbxInfo.Text += "Framerate           : " + ff.StreamFramerate(num) + " fps\r\n";
                         tbxInfo.Text += "Bitrate             : " + ff.VideoBitrate(num) + " Kbps\r\n";
@@ -242,7 +211,7 @@ namespace XviD4PSP
                         tbxInfo.Text += "Channels            : " + ff.StreamChannels(num) + Environment.NewLine;
                         tbxInfo.Text += "Samplerate          : " + ff.StreamSamplerate(num) + " Hz\r\n";
                         tbxInfo.Text += "Language            : " + ff.StreamLanguage(num) + Environment.NewLine;
-                        tbxInfo.Text += "Bitrate             : " + ff.StreamBitrate(num) + " Kbps\r\n";
+                        tbxInfo.Text += "Bitrate             : " + ff.AudioBitrate(num) + " Kbps\r\n";
                         tbxInfo.Text += "Bits                : " + ff.StreamBits(num) + Environment.NewLine;
                         a_num += 1;
                     }

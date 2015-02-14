@@ -173,10 +173,10 @@ namespace XviD4PSP
             else if (m.outvcodec == "Copy")
             {
                 copyordisabled = new CopyOrDisabled();
-                    copyordisabled.text_info.Content = "Codec: " + m.invcodecshort + Environment.NewLine;
-                    copyordisabled.text_info.Content += "Bitrate: " + m.invbitrate + " kbps" + Environment.NewLine;
-                    copyordisabled.text_info.Content += "Resolution: " + m.inresw + "x" + m.inresh + Environment.NewLine;
-                    copyordisabled.text_info.Content += "Framerate: " + m.inframerate + " fps";
+                copyordisabled.text_info.Content = "Codec: " + m.invcodecshort + Environment.NewLine;
+                copyordisabled.text_info.Content += "Bitrate: " + m.invbitrate + " kbps" + Environment.NewLine;
+                copyordisabled.text_info.Content += "Resolution: " + m.inresw + "x" + m.inresh + Environment.NewLine;
+                copyordisabled.text_info.Content += "Framerate: " + m.inframerate + " fps";
                 grid_codec.Children.Add(copyordisabled);
             }
         }
@@ -253,7 +253,7 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (oldm != null && x265c == null && x264c == null && x262c == null && xvid == null) UpdateMassive(); //CustomCLI
+            if (oldm != null && x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null) UpdateMassive(); //CustomCLI
             Close();
         }
 
@@ -333,13 +333,14 @@ namespace XviD4PSP
 
                 //правим выходной битрейт
                 if (m.outvcodec == "Copy") m.outvbitrate = m.invbitrate;
-                
+
                 UpdateOutSize();
-                
+
                 if (x265c != null) x265c.UpdateCLI();
                 if (x264c != null) x264c.UpdateCLI();
                 if (x262c != null) x262c.UpdateCLI();
                 if (xvid != null) xvid.UpdateCLI();
+                if (mpeg4 != null) mpeg4.UpdateCLI();
             }
         }
 
@@ -588,7 +589,7 @@ namespace XviD4PSP
         {
             if (m.outvcodec == "Copy") return;
 
-            if (x265c == null && x264c == null && x262c == null && xvid == null)
+            if (x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null)
                 UpdateMassive(); //CustomCLI
 
             string auto_name = m.outvcodec + " ";
@@ -602,7 +603,7 @@ namespace XviD4PSP
             }
             else
             {
-                if (m.outvbitrate == 0)
+                if (m.outvbitrate == 0 || m.outvcodec == "x265" && m.x265options.lossless)
                     auto_name += "LL";
                 else
                 {
@@ -651,7 +652,7 @@ namespace XviD4PSP
             }
 
             //Не совсем понятно, зачем нужно перезагружаться с пресета, который мы только что сохранили..
-            if (x265c == null && x264c == null && x262c == null && xvid == null) //CustomCLI
+            if (x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null) //CustomCLI
             {
                 LoadProfileToCodec();
                 UpdateOutSize();
@@ -744,6 +745,7 @@ namespace XviD4PSP
                 else if (x264c != null) m = x264c.m.Clone();
                 else if (x262c != null) m = x262c.m.Clone();
                 else if (xvid != null) m = xvid.m.Clone();
+                else if (mpeg4 != null) m = mpeg4.m.Clone();
             }
             else UpdateMassive();
 

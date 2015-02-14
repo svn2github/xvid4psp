@@ -470,6 +470,20 @@ namespace XviD4PSP
             }
         }
 
+        //Порядковый номер трека в логе FFmpeg, с пропуском треков с "мусором"
+        private int _invideostream_ff_order_filtered = 0;
+        public int invideostream_ff_order_filtered
+        {
+            get
+            {
+                return _invideostream_ff_order_filtered;
+            }
+            set
+            {
+                _invideostream_ff_order_filtered = value;
+            }
+        }
+
         private int _intextstreams;
         public int intextstreams
         {

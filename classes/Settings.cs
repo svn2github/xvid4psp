@@ -891,26 +891,6 @@ namespace XviD4PSP
             }
         }
 
-        public static string Mpeg4FOURCC
-        {
-            get
-            {
-                object value = GetValue("Mpeg4FOURCC");
-                if (value == null)
-                {
-                    return "DIVX";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("Mpeg4FOURCC", value);
-            }
-        }
-
         public static string HUFFFOURCC
         {
             get
@@ -2444,28 +2424,6 @@ namespace XviD4PSP
             set
             {
                 SetInt("XviD_Threads", value);
-            }
-        }
-
-        //Charset для сообщений mkvmerge, mkvextract, mkvinfo
-        public static string MKVToolnix_Charset
-        {
-            get
-            {
-                object value = GetValue("MKVToolnix_Charset");
-                if (value == null)
-                {
-                    SetString("MKVToolnix_Charset", "");
-                    return "";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("MKVToolnix_Charset", value);
             }
         }
 

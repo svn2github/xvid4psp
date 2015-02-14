@@ -168,6 +168,7 @@ namespace XviD4PSP
             info.UseShellExecute = false;
             info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
+            info.StandardErrorEncoding = Encoding.UTF8;
             info.CreateNoWindow = true;
             encodertext.Length = 0;
 
@@ -181,7 +182,7 @@ namespace XviD4PSP
                 else if (outext == ".wav") { acodec = "pcm_s16le"; forceformat = " -f wav"; }
                 else if (outext == ".truehd") forceformat = " -f truehd";
 
-                info.Arguments = "-map 0." + s.ff_order + " -i \"" + source_file + "\" -vn -acodec " + acodec + forceformat + " \"" + outfile + "\"";
+                info.Arguments = "-hide_banner -nostdin -i \"" + source_file + "\" -map 0:" + s.ff_order + " -sn -vn -acodec " + acodec + forceformat + " \"" + outfile + "\"";
             }
             else if (mode == DemuxerMode.ExtractVideo)
             {
@@ -189,14 +190,17 @@ namespace XviD4PSP
                 //string outext = Path.GetExtension(outfile);
                 //if (outext == ".m2v")
                 //    forceformat = " -f vob";
-                info.Arguments = "-i \"" + source_file + "\" -an -vcodec copy" + forceformat + " \"" + outfile + "\"";
+                info.Arguments = "-hide_banner -nostdin -i \"" + source_file + "\" -map 0:v:0 -sn -an -vcodec copy" + forceformat + " \"" + outfile + "\"";
             }
+
+            double percentage_k = m.induration.TotalSeconds / 100.0;
+            TimeSpan current_sec = TimeSpan.Zero;
 
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
 
             string line;
-            string pat = @"time=(\d+.\d+)";
+            string pat = @"time=(\d+:\d+:\d+\.?\d*)";
             Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
 
@@ -208,10 +212,9 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success)
+                    if (mat.Success && TimeSpan.TryParse(mat.Groups[1].Value, out current_sec))
                     {
-                        double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                        worker.ReportProgress((int)((ctime / m.induration.TotalSeconds) * 100.0));
+                        worker.ReportProgress((int)(current_sec.TotalSeconds / percentage_k));
                     }
                     else
                     {
@@ -470,49 +473,23 @@ namespace XviD4PSP
             info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvextract.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
+            info.StandardOutputEncoding = System.Text.Encoding.UTF8;
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = false;
             info.CreateNoWindow = true;
             encodertext.Length = 0;
 
-            string charset = "";
-            string _charset = Settings.MKVToolnix_Charset;
-
-            try
-            {
-                if (_charset == "")
-                {
-                    info.StandardOutputEncoding = System.Text.Encoding.UTF8;
-                    charset = " --output-charset UTF-8";
-                }
-                else if (_charset.ToLower() == "auto")
-                {
-                    info.StandardOutputEncoding = System.Text.Encoding.Default;
-                    charset = " --output-charset " + System.Text.Encoding.Default.HeaderName;
-                }
-                else
-                {
-                    int page = 0;
-                    if (int.TryParse(_charset, out page))
-                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(page);
-                    else
-                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(_charset);
-                    charset = " --output-charset " + _charset;
-                }
-            }
-            catch (Exception) { }
-
             if (mode == DemuxerMode.ExtractAudio)
             {
                 AudioStream instream = (AudioStream)m.inaudiostreams[m.inaudiostream];
-                info.Arguments = "tracks " + flist + instream.mi_order + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + instream.mi_order + ":" + "\"" + outfile + "\" --output-charset UTF-8";
             }
             else if (mode == DemuxerMode.ExtractVideo)
-                info.Arguments = "tracks " + flist + m.invideostream_mi_order + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + m.invideostream_mi_order + ":" + "\"" + outfile + "\" --output-charset UTF-8";
             else if (mode == DemuxerMode.RepairMKV)
             {
                 info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvmerge.exe";
-                info.Arguments = "-S \"" + source_file + "\" -o \"" + outfile + "\"" + charset;
+                info.Arguments = "-S \"" + source_file + "\" -o \"" + outfile + "\" --output-charset UTF-8";
             }
 
             encoderProcess.StartInfo = info;

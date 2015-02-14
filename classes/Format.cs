@@ -1287,28 +1287,7 @@ namespace XviD4PSP
                }
                else if (muxer == Muxers.ffmpeg)
                {
-                   if (m.format == ExportFormats.Flv)
-                   {
-                       if (ext == ".flv")
-                       {
-                           if (m.outaudiostreams.Count == 0)
-                               return true;
-                           else
-                           {
-                               AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
-                               if (outstream.codec == "Copy" && !File.Exists(outstream.audiopath))
-                                   return true;
-                               else
-                                   return false;
-                           }
-                       }
-                       else
-                           return false;
-                   }
-                   else if (m.inaudiostreams.Count > 1 && m.outaudiostreams.Count > 0 && ((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "Copy")
-                       return false;
-                   else
-                       return true;
+                   return true;
                }
                else
                    return false;

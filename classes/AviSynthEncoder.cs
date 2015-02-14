@@ -291,7 +291,10 @@ namespace XviD4PSP
                     }
                 }
                 else if (encoderPath.Contains("ffmpeg.exe"))
+                {
                     info.Arguments = "-i - " + stream.passes + " -vn \"" + outfilepath + "\"";
+                    info.StandardErrorEncoding = Encoding.UTF8;
+                }
                 else if (encoderPath.Contains("aften.exe"))
                     info.Arguments = stream.passes + " - \"" + outfilepath + "\"";
 

@@ -122,7 +122,9 @@ namespace XviD4PSP
                 //получаем колличество секунд
                 ff = new FFInfo();
                 ff.Open(source_file);
-                int seconds = (int)ff.Duration().TotalSeconds;
+
+                double percentage_k = ff.Duration().TotalSeconds / 100.0;
+                TimeSpan current_sec = TimeSpan.Zero;
 
                 encoderProcess = new Process();
                 ProcessStartInfo info = new ProcessStartInfo();
@@ -130,36 +132,38 @@ namespace XviD4PSP
                 info.FileName = Calculate.StartupPath + "\\apps\\ffmpeg\\ffmpeg.exe";
                 info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
                 info.UseShellExecute = false;
-                info.RedirectStandardOutput = true;
+                info.RedirectStandardOutput = false;
                 info.RedirectStandardError = true;
+                info.StandardErrorEncoding = Encoding.UTF8;
                 info.CreateNoWindow = true;
 
-                string _format = "";
-                string _vcodec = "-vn";
-                string _acodec = "-an";
-                string yv12 = "";
-                string _framerate = "";
+                string map = "";
+                string sub = " -sn";
+                string vcodec = " -vn";
+                string acodec = " -an";
+                string framerate = "";
                 string aspect = "";
 
                 if (mode == DecoderModes.DecodeVideo)
                 {
-                    _vcodec = "-vcodec ffvhuff";//ffvhuff, ffv1
-                    yv12 = " -pix_fmt yuv420p";
+                    map = " -map 0:v:0";
+                    vcodec = " -vcodec ffvhuff -pix_fmt yuv420p"; //ffvhuff, ffv1
                     string dar = ff.StreamDARSelected(ff.FirstVideoStreamID());
                     aspect = (dar != "") ? " -aspect " + dar : "";
                 }
                 else if (mode == DecoderModes.DecodeAudio)
                 {
-                    _acodec = "-acodec pcm_s16le";
+                    map = " -map 0:a:0";
+                    acodec = " -acodec pcm_s16le";
                 }
-                else
+                else //DecodeAV - не используется
                 {
-                    _vcodec = "-vcodec ffvhuff";//ffvhuff, ffv1
-                    yv12 = " -pix_fmt yuv420p";
-                    _acodec = "-acodec pcm_s16le";
+                    map = " -map 0:v:0 -map 0:a:0";
+                    vcodec = " -vcodec ffvhuff -pix_fmt yuv420p"; //ffvhuff, ffv1
+                    acodec = " -acodec pcm_s16le";
                     m.inframerate = ff.StreamFramerate(ff.FirstVideoStreamID());
                     m.format = Settings.FormatOut;
-                    _framerate = " -r " + Format.GetValidFramerate(m).outframerate;
+                    framerate = " -r " + Format.GetValidFramerate(m).outframerate;
                     string dar = ff.StreamDARSelected(ff.FirstVideoStreamID());
                     aspect = (dar != "") ? " -aspect " + dar : "";
                 }
@@ -168,13 +172,12 @@ namespace XviD4PSP
                 ff.Close();
                 ff = null;
 
-                info.Arguments = "-i \"" + source_file +
-                    "\" " + _vcodec + " " + _acodec + _format + yv12 + _framerate + aspect + " \"" + outfile + "\"";
+                info.Arguments = "-hide_banner -nostdin -i \"" + source_file + "\"" + map + sub + vcodec + acodec + framerate + aspect + " \"" + outfile + "\"";
 
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
 
-                string line, pat = @"time=(\d+.\d+)";
+                string line, pat = @"time=(\d+:\d+:\d+\.?\d*)";
                 Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                 Match mat;
 
@@ -186,11 +189,9 @@ namespace XviD4PSP
                     if (line != null)
                     {
                         mat = r.Match(line);
-                        if (mat.Success)
+                        if (mat.Success && TimeSpan.TryParse(mat.Groups[1].Value, out current_sec))
                         {
-                            double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                            double pr = ((double)ctime / (double)seconds) * 100.0;
-                            worker.ReportProgress((int)pr);
+                            worker.ReportProgress((int)(current_sec.TotalSeconds / percentage_k));
                         }
                         else
                         {

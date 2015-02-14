@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Collections;
+using System.Text;
 
 namespace XviD4PSP
 {
@@ -34,19 +35,24 @@ namespace XviD4PSP
         private IntPtr ActiveHandle = IntPtr.Zero;
         private int Finished = -1; //0 - OK, 1 - Error
 
-        private enum acodecs { COPY, PCM, FLAC, DISABLED }
-        private enum vcodecs { COPY, FFV1, FFVHUFF, UNCOMPRESSED, DISABLED }
-        private enum formats { AUTO, AVI, DV, MP4, M4V, MOV, MKV, WEBM, MPG, TS, FLV, OGG, WMV, H264, VC1, AC3, FLAC, WAV, M4A, AAC, MKA, MP3, MP2, WMA, DTS, TRUEHD }
-        private enum colorspace { AUTO, YV12, YUY2, RGB24, RGB32 };
+        private enum acodecs { COPY, PCM, FLAC, ALAC, WAVPACK, DISABLED }
+        private enum vcodecs { COPY, FFV1, FFVHUFF, UTVIDEO, UNCOMPRESSED, DISABLED }
+        private enum formats { AUTO, AVI, DV, MP4, M4V, MOV, MKV, WEBM, MPG, TS, FLV, OGG, WMV, H264, H265, VC1, AC3, FLAC, WV, WAV, W64, M4A, AAC, MKA, MP3, MP2, WMA, DTS, TRUEHD }
+        private enum colorspaces { AUTO, YV12, YUY2, RGB24, RGB32 }
+
+        private const string aspect_auto = "AR";
+        private const string framerate_auto = "FPS";
+        private const string srate_auto = "SR";
+        private const string channels_auto = "CH";
 
         private string infile;
         private string outfile;
         private vcodecs vcodec = vcodecs.COPY;
         private acodecs acodec = acodecs.COPY;
         private string format = "AUTO";
-        private colorspace color = colorspace.YV12;
-        private string aspect = "AUTO";
-        private string framerate = "AUTO";
+        private colorspaces color = colorspaces.YV12;
+        private string aspect = aspect_auto;
+        private string framerate = framerate_auto;
         private string bits = "S16LE";
         private string command_line = null;
         private string profile = Settings.FFRebuilder_Profile;
@@ -54,9 +60,10 @@ namespace XviD4PSP
         private int last_search_index = 0;
         private ArrayList vtracks = new ArrayList();
         private ArrayList atracks = new ArrayList();
+        private int vtrack = 0;
         private int atrack = 0;
-        private string srate = "AUTO";
-        private string channels = "AUTO";
+        private string srate = srate_auto;
+        private string channels = channels_auto;
 
         public FFRebuilder(MainWindow owner)
         {
@@ -105,12 +112,12 @@ namespace XviD4PSP
 
             //Colorspace
             combo_colorspace.ToolTip = "Color space";
-            foreach (colorspace _color in Enum.GetValues(typeof(colorspace)))
+            foreach (colorspaces _color in Enum.GetValues(typeof(colorspaces)))
                 combo_colorspace.Items.Add(_color);
 
             //AR
             combo_aspect.ToolTip = Languages.Translate("Aspect");
-            combo_aspect.Items.Add("AUTO");
+            combo_aspect.Items.Add(aspect_auto);
             combo_aspect.Items.Add("1:1");
             combo_aspect.Items.Add("4:3");
             combo_aspect.Items.Add("1.66");
@@ -122,7 +129,7 @@ namespace XviD4PSP
 
             //FPS
             combo_framerate.ToolTip = Languages.Translate("Framerate");
-            combo_framerate.Items.Add("AUTO");
+            combo_framerate.Items.Add(framerate_auto);
             combo_framerate.Items.Add("15.000");
             combo_framerate.Items.Add("18.000");
             combo_framerate.Items.Add("20.000");
@@ -135,6 +142,10 @@ namespace XviD4PSP
             combo_framerate.Items.Add("50.000");
             combo_framerate.Items.Add("59.940");
             combo_framerate.Items.Add("60.000");
+
+            //Видео трек
+            combo_vtrack.Items.Add(new ComboBoxItem() { Content = "TRACK", ToolTip = Languages.Translate("Select video track") });
+            combo_vtrack.SelectedIndex = 0;
 
             //Acodec
             foreach (acodecs _acodec in Enum.GetValues(typeof(acodecs)))
@@ -157,21 +168,22 @@ namespace XviD4PSP
             combo_bits.Items.Add("U32LE");
 
             //Аудио трек
-            combo_atrack.Items.Add(new ComboBoxItem() { Content = "AUTO", ToolTip = Languages.Translate("Select audio track") });
+            combo_atrack.Items.Add(new ComboBoxItem() { Content = "TRACK", ToolTip = Languages.Translate("Select audio track") });
             combo_atrack.SelectedIndex = 0;
 
             //Дискретизация
             combo_srate.ToolTip = Languages.Translate("Samplerate");
-            combo_srate.Items.Add("AUTO");
+            combo_srate.Items.Add(srate_auto);
             combo_srate.Items.Add("22050");
             combo_srate.Items.Add("32000");
             combo_srate.Items.Add("44100");
             combo_srate.Items.Add("48000");
             combo_srate.Items.Add("96000");
+            combo_srate.Items.Add("192000");
 
             //Кол-во каналов
             combo_channels.ToolTip = Languages.Translate("Channels");
-            combo_channels.Items.Add("AUTO");
+            combo_channels.Items.Add(channels_auto);
             combo_channels.Items.Add("1");
             combo_channels.Items.Add("2");
             combo_channels.Items.Add("3");
@@ -184,10 +196,17 @@ namespace XviD4PSP
             //Help
             combo_help.Items.Add("-L");
             combo_help.Items.Add("-help");
+            combo_help.Items.Add("-help long");
+            combo_help.Items.Add("-help full");
             combo_help.Items.Add("-version");
             combo_help.Items.Add("-formats");
             combo_help.Items.Add("-codecs");
+            combo_help.Items.Add("-decoders");
+            combo_help.Items.Add("-encoders");
             combo_help.Items.Add("-filters");
+            combo_help.Items.Add("-pix_fmts");
+            combo_help.Items.Add("-sample_fmts");
+            combo_help.Items.Add("-layouts");
             combo_help.SelectedIndex = 1;
 
             LoadAllProfiles(); //Список профилей
@@ -274,14 +293,13 @@ namespace XviD4PSP
                 bool cli_loaded = false;
                 format = "AUTO";
                 vcodec = vcodecs.COPY;
-                color = colorspace.YV12;
-                aspect = "AUTO";
-                framerate = "AUTO";
+                color = colorspaces.YV12;
+                aspect = aspect_auto;
+                framerate = framerate_auto;
                 acodec = acodecs.COPY;
                 bits = "S16LE";
-                //atrack = 0; //Не сохраняется в пресете
-                srate = "AUTO";
-                channels = "AUTO";
+                srate = srate_auto;
+                channels = channels_auto;
 
                 if (profile != "Default")
                 {
@@ -293,7 +311,7 @@ namespace XviD4PSP
                             line = sr.ReadLine();
                             if (line == "[FORMAT]") format = sr.ReadLine().ToUpper();
                             else if (line == "[VCODEC]") vcodec = (vcodecs)Enum.Parse(typeof(vcodecs), sr.ReadLine(), true);
-                            else if (line == "[COLORSPACE]") color = (colorspace)Enum.Parse(typeof(colorspace), sr.ReadLine(), true);
+                            else if (line == "[COLORSPACE]") color = (colorspaces)Enum.Parse(typeof(colorspaces), sr.ReadLine(), true);
                             else if (line == "[ASPECT]") aspect = sr.ReadLine().ToUpper();
                             else if (line == "[FRAMERATE]") framerate = sr.ReadLine().ToUpper();
                             else if (line == "[ACODEC]") acodec = (acodecs)Enum.Parse(typeof(acodecs), sr.ReadLine(), true);
@@ -319,7 +337,6 @@ namespace XviD4PSP
                 combo_framerate.SelectedItem = framerate;
                 combo_acodec.SelectedItem = acodec;
                 combo_bits.SelectedItem = bits;
-                //combo_atrack.SelectedIndex = atrack;
                 if (!combo_srate.Items.Contains(srate))
                     combo_srate.Items.Add(srate);
                 combo_srate.SelectedItem = srate;
@@ -335,8 +352,8 @@ namespace XviD4PSP
                 //При ошибке загружаем дефолты
                 if (profile != "Default")
                 {
-                    ErrorException(Languages.Translate("Error loading profile") + " \"" + profile + "\": " + ex.Message +
-                        "\r\n" + Languages.Translate("Retrying with profile") + " \"Default\"...");
+                    //ErrorException(Languages.Translate("Error loading profile") + " \"" + profile + "\": " + ex.Message +
+                    //    "\r\n" + Languages.Translate("Retrying with profile") + " \"Default\"...");
                     combo_profile.SelectedItem = profile = Settings.FFRebuilder_Profile = "Default";
                     LoadFromProfile();
                     return;
@@ -351,8 +368,9 @@ namespace XviD4PSP
             try
             {
                 //Сброс треков
-                atracks = new ArrayList();
                 vtracks = new ArrayList();
+                atracks = new ArrayList();
+                vtrack = 0;
                 atrack = 0;
 
                 ff = new FFInfo();
@@ -368,7 +386,6 @@ namespace XviD4PSP
                             !line.StartsWith("  lib") &&
                             !line.StartsWith("  built on") &&
                             !line.StartsWith("At least one output") &&
-                            !line.StartsWith("This program is not") &&
                             line != "")
                             sortedinfo += line + Environment.NewLine;
                     }
@@ -383,8 +400,24 @@ namespace XviD4PSP
                 vtracks = ff.VideoStreams(); //Все видео
                 atracks = ff.AudioStreams(); //Все аудио
 
+                //Видео
+                combo_vtrack.Items.Clear();
+                combo_vtrack.Items.Add(new ComboBoxItem() { Content = "TRACK", ToolTip = Languages.Translate("Select video track") });
+                if (vtracks.Count > 0)
+                {
+                    for (int i = 0; i < vtracks.Count; i++)
+                    {
+                        ComboBoxItem item = new ComboBoxItem();
+                        item.Content = "#" + (i + 1);
+                        item.ToolTip = ff.StreamFull((int)vtracks[i]);
+                        combo_vtrack.Items.Add(item);
+                    }
+                }
+                combo_vtrack.SelectedIndex = 0;
+
+                //Аудио
                 combo_atrack.Items.Clear();
-                combo_atrack.Items.Add(new ComboBoxItem() { Content = "AUTO", ToolTip = Languages.Translate("Select audio track") });
+                combo_atrack.Items.Add(new ComboBoxItem() { Content = "TRACK", ToolTip = Languages.Translate("Select audio track") });
                 if (atracks.Count > 0)
                 {
                     for (int i = 0; i < atracks.Count; i++)
@@ -426,7 +459,8 @@ namespace XviD4PSP
                 //получаем колличество секунд
                 ff = new FFInfo();
                 ff.Open(infile);
-                int seconds = (int)ff.Duration().TotalSeconds;
+                double percentage_k = ff.Duration().TotalSeconds / 100.0;
+                TimeSpan current_sec = TimeSpan.Zero;
                 CloseFF();
 
                 encoderProcess = new Process();
@@ -437,17 +471,18 @@ namespace XviD4PSP
                 info.UseShellExecute = false;
                 info.RedirectStandardOutput = false;
                 info.RedirectStandardError = true;
+                info.StandardErrorEncoding = Encoding.UTF8;
                 info.CreateNoWindow = true;
 
                 //Получаем аргументы
-                info.Arguments = command_line.Replace("input_file", infile).Replace("output_file", outfile);
+                info.Arguments = command_line.Replace("input_file", infile).Replace("output_file", outfile) + " -hide_banner -nostdin";
                 SetLog(info.Arguments + Environment.NewLine);
 
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
 
                 string line;
-                string pat = @"time=(\d+.\d+)";
+                string pat = @"time=(\d+:\d+:\d+\.?\d*)";
                 Regex r = new Regex(pat, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
                 Match mat;
 
@@ -459,15 +494,13 @@ namespace XviD4PSP
                     if (line != null)
                     {
                         mat = r.Match(line);
-                        if (mat.Success == true)
+                        if (mat.Success && TimeSpan.TryParse(mat.Groups[1].Value, out current_sec))
                         {
-                            double ctime = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                            double pr = ((double)ctime / (double)seconds) * 100.0;
-                            worker.ReportProgress((int)pr);
+                            worker.ReportProgress((int)(current_sec.TotalSeconds / percentage_k));
                         }
                         else
                         {
-                            if (!line.StartsWith("Press [q]") && !line.StartsWith("    Last"))
+                            if (!line.StartsWith("    Last"))
                                 SetLog(line);
                         }
                     }
@@ -568,8 +601,36 @@ namespace XviD4PSP
             progress.Value = 0;
         }
 
+        private void PrepareMapping(ref string vmap, ref string amap)
+        {
+            //Определяем, нужно ли вписывать -map
+            bool vid = (vtracks.Count > 0 && vtrack > 0 && vtracks.Count >= vtrack && vcodec != vcodecs.DISABLED);
+            bool aud = (atracks.Count > 0 && atrack > 0 && atracks.Count >= atrack && acodec != acodecs.DISABLED);
+
+            if (vid && !aud)
+            {
+                vmap = " -map 0:" + vtracks[vtrack - 1];
+                amap = (atracks.Count > 0 && acodec != acodecs.DISABLED) ? " -map 0:" + atracks[0] : "";
+            }
+            else if (!vid && aud)
+            {
+                vmap = (vtracks.Count > 0 && vcodec != vcodecs.DISABLED) ? " -map 0:" + vtracks[0] : "";
+                amap = " -map 0:" + atracks[atrack - 1];
+            }
+            else if (vid && aud)
+            {
+                vmap = " -map 0:" + vtracks[vtrack - 1];
+                amap = " -map 0:" + atracks[atrack - 1];
+            }
+        }
+
         private void UpdateCommandLine()
         {
+            string _vmap = "", _amap = "";
+            PrepareMapping(ref _vmap, ref _amap);
+
+            string _sub = " -sn";
+
             string _vcodec = " -vcodec copy";
             if (vcodec == vcodecs.DISABLED) _vcodec = " -vn";
             else if (vcodec == vcodecs.UNCOMPRESSED) _vcodec = " -vcodec rawvideo";
@@ -578,71 +639,79 @@ namespace XviD4PSP
             string _acodec = " -acodec copy";
             if (acodec == acodecs.DISABLED) _acodec = " -an";
             else if (acodec == acodecs.FLAC) _acodec = " -acodec flac";
+            else if (acodec == acodecs.ALAC) _acodec = " -acodec alac";
+            else if (acodec == acodecs.WAVPACK) _acodec = " -acodec wavpack";
             else if (acodec == acodecs.PCM) _acodec = " -acodec pcm_" + bits.ToLower();
 
             string _format = "";
             if (format == "MPG") _format = " -f vob";
             else if (format == "H264") _format = " -f h264";
-            else if (format == "VC1") _format = " -f vc1";
+            else if (format == "H265") _format = " -f h265";
             else if (format == "WEBM") _format = " -f webm";
             else if (format == "TRUEHD") _format = " -f truehd";
 
             string _color = "";
-            if (vcodec == vcodecs.FFV1 || vcodec == vcodecs.FFVHUFF || vcodec == vcodecs.UNCOMPRESSED)
+            if (vcodec == vcodecs.FFV1)
             {
-                if (color == colorspace.YV12) _color = " -pix_fmt yuv420p";
-                else if (color == colorspace.YUY2) _color = " -pix_fmt yuv422p";
-                else if (color == colorspace.RGB24) _color = " -pix_fmt bgr24";
-                else if (color == colorspace.RGB32) _color = " -pix_fmt bgra";
+                if (color == colorspaces.YV12) _color = " -pix_fmt yuv420p";
+                else if (color == colorspaces.YUY2) _color = " -pix_fmt yuv422p";
+                else if (color == colorspaces.RGB24) _color = " -pix_fmt bgr0";
+                else if (color == colorspaces.RGB32) _color = " -pix_fmt bgra";
+            }
+            else if (vcodec == vcodecs.FFVHUFF)
+            {
+                if (color == colorspaces.YV12) _color = " -pix_fmt yuv420p";
+                else if (color == colorspaces.YUY2) _color = " -pix_fmt yuv422p";
+                else if (color == colorspaces.RGB24) _color = " -pix_fmt rgb24";
+                else if (color == colorspaces.RGB32) _color = " -pix_fmt bgra";
+            }
+            else if (vcodec == vcodecs.UTVIDEO)
+            {
+                if (color == colorspaces.YV12) _color = " -pix_fmt yuv420p";
+                else if (color == colorspaces.YUY2) _color = " -pix_fmt yuv422p";
+                else if (color == colorspaces.RGB24) _color = " -pix_fmt rgb24";
+                else if (color == colorspaces.RGB32) _color = " -pix_fmt rgba";
+            }
+            else if (vcodec == vcodecs.UNCOMPRESSED)
+            {
+                if (color == colorspaces.YV12) _color = " -pix_fmt yuv420p";
+                else if (color == colorspaces.YUY2) _color = " -pix_fmt yuv422p";
+                else if (color == colorspaces.RGB24) _color = " -pix_fmt bgr24";
+                else if (color == colorspaces.RGB32) _color = " -pix_fmt bgra";
             }
 
             string _aspect = "";
-            if (aspect != "AUTO" && vcodec != vcodecs.DISABLED) _aspect = " -aspect " + aspect;
+            if (aspect != aspect_auto && vcodec != vcodecs.DISABLED) _aspect = " -aspect " + aspect;
 
             string _framerate = "";
-            if (framerate != "AUTO" && vcodec != vcodecs.DISABLED) _framerate = " -r " + framerate;
-
-            string _vmap = "", _amap = "";
-            if (atracks.Count > 0 && atrack > 0 && atracks.Count >= atrack && acodec != acodecs.DISABLED)
-            {
-                _amap = " -map 0." + (int)atracks[atrack - 1];
-                if (vtracks.Count > 0 && vcodec != vcodecs.DISABLED)
-                    _vmap = " -map 0." + (int)vtracks[0];
-            }
+            if (framerate != framerate_auto && vcodec != vcodecs.DISABLED) _framerate = " -r " + framerate;
 
             string _srate = "";
-            if (srate != "AUTO" && (acodec == acodecs.FLAC || acodec == acodecs.PCM)) _srate = " -ar " + srate;
+            if (srate != srate_auto && acodec != acodecs.COPY && acodec != acodecs.DISABLED) _srate = " -ar " + srate;
 
             string _channels = "";
-            if (channels != "AUTO" && (acodec == acodecs.FLAC || acodec == acodecs.PCM)) _channels = " -ac " + channels;
+            if (channels != channels_auto && acodec != acodecs.COPY && acodec != acodecs.DISABLED) _channels = " -ac " + channels;
 
-            text_cli.Text = "-i \"input_file\" -sn" + _vmap + _amap + _vcodec + _color + _framerate + _aspect + _acodec + _srate + _channels + _format + " \"output_file\"";
+            text_cli.Text = "-i \"input_file\"" + _vmap + _amap + _sub + _vcodec + _color + _framerate + _aspect + _acodec + _srate + _channels + _format + " \"output_file\"";
             text_cli.CaretIndex = text_cli.Text.Length;
         }
 
         private void UpdateTracksMapping()
         {
-            string text = "";
+            //Сначала удаляем все " -map 0:x" (-map 0:v:0 -map 0:1 -map 0)
+            string text = Regex.Replace(text_cli.Text, @"\s?-map\s0\:?\S*", "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled).Trim();
 
-            //Сначала удаляем все " -map 0:x"
-            text = Regex.Replace(text_cli.Text, @"\s-map\s0\.\d+", "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled).Trim();
+            string vmap = "", amap = "";
+            PrepareMapping(ref vmap, ref amap);
 
-            //Определяем, нужно ли вписывать -map
-            string map = "";
-            if (atracks.Count > 0 && atrack > 0 && atracks.Count >= atrack && acodec != acodecs.DISABLED)
+            if (vmap.Length > 0 || amap.Length > 0)
             {
-                map = " -map 0." + (int)atracks[atrack - 1];
-                if (vtracks.Count > 0 && vcodec != vcodecs.DISABLED)
-                    map = " -map 0." + (int)vtracks[0] + map;
-
                 //Ищем, куда бы вписать..
                 int index = -1;
-                if ((index = text.IndexOf("-i \"input_file\" -sn", StringComparison.InvariantCultureIgnoreCase)) >= 0)
-                    text = text.Insert(index + 19, map);
-                else if ((index = text.IndexOf("-i \"input_file\"", StringComparison.InvariantCultureIgnoreCase)) >= 0)
-                    text = text.Insert(index + 15, map);
+                if ((index = text.IndexOf("-i \"input_file\"", StringComparison.InvariantCultureIgnoreCase)) >= 0)
+                    text = text.Insert(index + 15, vmap + amap);
                 else
-                    text = map + " " + text;
+                    text = (vmap + amap).TrimStart() + " " + text;
             }
 
             text_cli.Text = text;
@@ -777,7 +846,7 @@ namespace XviD4PSP
             {
                 if (textbox_infile.Text != "" && File.Exists(textbox_infile.Text) && textbox_outfile.Text != "")
                 {
-                    //запоминаем переменные
+                    //Запоминаем переменные
                     infile = textbox_infile.Text;
                     outfile = textbox_outfile.Text;
                     command_line = text_cli.Text;
@@ -896,14 +965,7 @@ namespace XviD4PSP
         {
             if ((combo_colorspace.IsDropDownOpen || combo_colorspace.IsSelectionBoxHighlighted) && combo_colorspace.SelectedItem != null)
             {
-                //FFV1 и FFVHUFF не поддерживают RGB24
-                if ((vcodec == vcodecs.FFV1 || vcodec == vcodecs.FFVHUFF) && ((colorspace)combo_colorspace.SelectedItem) == colorspace.RGB24)
-                {
-                    combo_colorspace.SelectedItem = color;
-                    return;
-                }
-
-                color = (colorspace)combo_colorspace.SelectedItem;
+                color = (colorspaces)combo_colorspace.SelectedItem;
                 UpdateCommandLine();
                 SetCustomProfile();
             }
@@ -926,6 +988,15 @@ namespace XviD4PSP
                 framerate = combo_framerate.SelectedItem.ToString();
                 UpdateCommandLine();
                 SetCustomProfile();
+            }
+        }
+
+        private void combo_vtrack_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((combo_vtrack.IsDropDownOpen || combo_vtrack.IsSelectionBoxHighlighted) && combo_vtrack.SelectedIndex != -1)
+            {
+                vtrack = combo_vtrack.SelectedIndex;
+                UpdateTracksMapping();
             }
         }
 
@@ -1002,14 +1073,20 @@ namespace XviD4PSP
                 }
                 else
                 {
-                    //AUTO, AVI, DV, MP4, M4V, MOV, MKV, WEBM, MPG, TS, FLV, OGG, WMV,
-                    //H264, VC1, AC3, FLAC, WAV, M4A, AAC, MKA, MP3, MP2, WMA, DTS, TRUEHD
+                    //AUTO, AVI, DV, MP4, M4V, MOV, MKV, WEBM, MPG, TS, FLV, OGG, WMV, H264, H265, VC1
+                    //AC3, FLAC, WV, WAV, W64, M4A, AAC, MKA, MP3, MP2, WMA, DTS, TRUEHD
                     format = combo_format.SelectedItem.ToString();
                     if (format == "WAV")
                     {
                         combo_vcodec.SelectedItem = vcodec = vcodecs.DISABLED;
                         if (acodec != acodecs.COPY && acodec != acodecs.PCM)
                             combo_acodec.SelectedItem = acodec = acodecs.PCM;
+                    }
+                    else if (format == "WV")
+                    {
+                        combo_vcodec.SelectedItem = vcodec = vcodecs.DISABLED;
+                        if (acodec != acodecs.COPY && acodec != acodecs.WAVPACK)
+                            combo_acodec.SelectedItem = acodec = acodecs.WAVPACK;
                     }
                     else if (format == "FLAC")
                     {
@@ -1029,7 +1106,7 @@ namespace XviD4PSP
                         combo_vcodec.SelectedItem = vcodec = vcodecs.DISABLED;
                         combo_acodec.SelectedItem = acodec = acodecs.COPY;
                     }
-                    else if (format == "H264" || format == "VC1")
+                    else if (format == "H264" || format == "H265" || format == "VC1")
                     {
                         combo_vcodec.SelectedItem = vcodec = vcodecs.COPY;
                         combo_acodec.SelectedItem = acodec = acodecs.DISABLED;
@@ -1154,9 +1231,12 @@ namespace XviD4PSP
                 text += "[CHANNELS]\r\n" + combo_channels.SelectedItem.ToString() + "\r\n\r\n";
                 text += "[COMMAND_LINE]\r\n";
 
+                string vmap = "", amap = "";
+                PrepareMapping(ref vmap, ref amap);
+
                 //Удаляем все " -map 0:x", т.к. эта опция зависит от исходника
-                if (combo_atrack.SelectedIndex > 0)
-                    text += Regex.Replace(text_cli.Text, @"\s-map\s0\.\d+", "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+                if (vmap.Length > 0 || amap.Length > 0)
+                    text += Regex.Replace(text_cli.Text, @"\s?-map\s0\:?\S*", "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled).Trim();
                 else
                     text += text_cli.Text;
 
@@ -1256,6 +1336,8 @@ namespace XviD4PSP
                 help.CreateNoWindow = true;
                 help.RedirectStandardOutput = true;
                 help.RedirectStandardError = true;
+                help.StandardOutputEncoding = Encoding.UTF8;
+                help.StandardErrorEncoding = Encoding.UTF8;
                 System.Diagnostics.Process p = System.Diagnostics.Process.Start(help);
                 //Именно в таком порядке (а по хорошему надо в отдельных потоках)
                 string std_out = p.StandardOutput.ReadToEnd();
@@ -1359,6 +1441,7 @@ namespace XviD4PSP
                 combo_colorspace.IsEnabled = false;
                 combo_aspect.IsEnabled = false;
                 combo_framerate.IsEnabled = false;
+                combo_vtrack.IsEnabled = false;
             }
             else if (vcodec == vcodecs.DISABLED)
             {
@@ -1366,6 +1449,7 @@ namespace XviD4PSP
                 combo_colorspace.IsEnabled = false;
                 combo_aspect.IsEnabled = false;
                 combo_framerate.IsEnabled = false;
+                combo_vtrack.IsEnabled = false;
             }
             else if (vcodec == vcodecs.COPY)
             {
@@ -1373,6 +1457,7 @@ namespace XviD4PSP
                 combo_colorspace.IsEnabled = false;
                 combo_aspect.IsEnabled = true;
                 combo_framerate.IsEnabled = true;
+                combo_vtrack.IsEnabled = true;
             }
             else
             {
@@ -1380,6 +1465,7 @@ namespace XviD4PSP
                 combo_colorspace.IsEnabled = true;
                 combo_aspect.IsEnabled = true;
                 combo_framerate.IsEnabled = true;
+                combo_vtrack.IsEnabled = true;
             }
 
             if (atracks.Count == 0)

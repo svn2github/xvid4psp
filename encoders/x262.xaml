@@ -56,6 +56,12 @@
             </TabItem>
             <TabItem Header="Frames" Width="61" Padding="0,2,0,2">
                 <Grid Width="304" Height="Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
                     <Label OpacityMask="{x:Null}" x:Name="text_bframes" Content="B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="2,10,0,0" VerticalAlignment="Top" />
                     <ComboBox x:Name="combo_bframes" Width="128" Height="Auto" IsSynchronizedWithCurrentItem="True" d:LayoutOverrides="Height" HorizontalAlignment="Right" Margin="0,14,4,0" VerticalAlignment="Top" SelectionChanged="combo_bframes_SelectionChanged" />
                     <Label OpacityMask="{x:Null}" x:Name="text_badapt_mode" Content="Adaptive B-frames:" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="14" Foreground="#FFFFFFFF" Height="Auto" d:LayoutOverrides="Height" HorizontalAlignment="Left" Margin="2,38,0,0" VerticalAlignment="Top" />

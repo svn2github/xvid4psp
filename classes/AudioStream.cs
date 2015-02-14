@@ -48,6 +48,19 @@ namespace XviD4PSP
             }
         }
 
+        private string _ff_codec;
+        public string ff_codec
+        {
+            get
+            {
+                return _ff_codec;
+            }
+            set
+            {
+                _ff_codec = value;
+            }
+        }
+
         private int _bitrate;
         public int bitrate
         {
@@ -84,6 +97,19 @@ namespace XviD4PSP
             set
             {
                 _bits = value;
+            }
+        }
+
+        private int _ff_bits = 0;
+        public int ff_bits
+        {
+            get
+            {
+                return _ff_bits;
+            }
+            set
+            {
+                _ff_bits = value;
             }
         }
 
@@ -162,6 +188,19 @@ namespace XviD4PSP
             set
             {
                 _ff_order = value;
+            }
+        }
+
+        private int _ff_order_filtered = 0;
+        public int ff_order_filtered
+        {
+            get
+            {
+                return _ff_order_filtered;
+            }
+            set
+            {
+                _ff_order_filtered = value;
             }
         }
 

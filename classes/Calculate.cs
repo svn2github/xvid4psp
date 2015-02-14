@@ -98,7 +98,7 @@ namespace XviD4PSP
             return null; //null, чтоб сработала защита от пустого профиля
         }
 
-        public static Settings.EncodingModes EncodingModeStringToEnum(string mode) //Не используется
+        public static Settings.EncodingModes EncodingModeStringToEnum(string mode)
         {
             if (mode == "1-Pass Bitrate") return Settings.EncodingModes.OnePass;
             else if (mode == "2-Pass Bitrate") return Settings.EncodingModes.TwoPass;
@@ -135,10 +135,7 @@ namespace XviD4PSP
             else if (channels == 2) return "Stereo";
             else if (channels == 3) return "Stereo LFE";
             else if (channels == 4) return "Quadro";
-            else if (channels == 5) return "5 channels";
-            else if (channels == 6) return "6 channels";
-            else if (channels == 7) return "7 channels";
-            else return "Unknown";
+            else return channels + " channels";
         }
 
         public static Massive UpdateOutFrames(Massive m)

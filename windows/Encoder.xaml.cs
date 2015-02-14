@@ -752,7 +752,7 @@ namespace XviD4PSP
                     m.outvbitrate = vbitrate;
                 }
                 //режим тройного качества
-                if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                else if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
                 {
                     info.Arguments = info.Arguments.Replace("--crf " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "--bitrate " + vbitrate);
                     m.vpasses[2] = m.vpasses[2].ToString().Replace("--crf " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "--bitrate " + vbitrate);
@@ -1248,14 +1248,9 @@ namespace XviD4PSP
 
         private void make_ffmpeg()
         {
-            //FOURCC
-            string fourcc = "";
-            if (m.outvcodec == "HUFF" && m.ffmpeg_options.fourcc_huff != "FFVH")
-            {
-                fourcc = m.ffmpeg_options.fourcc_huff;
-                for (int n = 0; n < m.vpasses.Count; n++)
-                    m.vpasses[n] = m.vpasses[n].ToString().Replace(" -vtag " + fourcc, "");
-            }
+            //Отключаем звук, убираем метку " -extra:"
+            for (int n = 0; n < m.vpasses.Count; n++)
+                m.vpasses[n] = "-an " + m.vpasses[n].ToString().Replace(" -extra:", "");
 
             //прописываем интерлейс флаги
             if (m.interlace == SourceType.FILM ||
@@ -1266,23 +1261,17 @@ namespace XviD4PSP
             {
                 if (m.deinterlace == DeinterlaceType.Disabled)
                 {
-                    //порядок полей
-                    int fieldorder = 1; //TopFieldFirst
-                    if (m.fieldOrder == FieldOrder.BFF)
-                        fieldorder = 0;
-
                     ArrayList newclis = new ArrayList();
                     foreach (string cli in m.vpasses)
                     {
-                        string newclie = cli;
+                        string newcli = cli + " -top " + ((m.fieldOrder == FieldOrder.TFF) ? "1" : "0"); //+ " -alternate_scan 1";
 
-                        newclie = newclie + " -top " + fieldorder;
-                        if (newclie.Contains("-flags "))
-                            newclie = newclie.Replace("-flags ", "-flags +ildct+ilme");
+                        if (newcli.Contains("-flags "))
+                            newcli = newcli.Replace("-flags ", "-flags +ildct+ilme");
                         else
-                            newclie = newclie + " -flags +ildct+ilme";
+                            newcli = newcli + " -flags +ildct+ilme";
 
-                        newclis.Add(newclie);
+                        newclis.Add(newcli);
                     }
 
                     //передаём обновленные параметры
@@ -1316,10 +1305,8 @@ namespace XviD4PSP
 
                 m.outvbitrate = bitrate;
 
-                ArrayList newclis = new ArrayList();
-                foreach (string cli in m.vpasses)
-                    newclis.Add(cli.Replace("-sizemode " + targetsize + "000", "-b " + bitrate + "000"));
-                m.vpasses = (ArrayList)newclis.Clone();
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString().Replace("-sizemode " + targetsize + "000", "-b:v " + bitrate + "000");
             }
 
             step++;
@@ -1331,7 +1318,7 @@ namespace XviD4PSP
                     m.outvideofile = Calculate.RemoveExtention(m.outfilepath, true);
                     if (m.format == Format.ExportFormats.BluRay)
                         m.outvideofile += "\\" + m.key; //Кодирование в папку
-                    
+
                     if (m.outvcodec == "MPEG2")
                         m.outvideofile += ".m2v";
                     else if (m.outvcodec == "MPEG1")
@@ -1362,14 +1349,6 @@ namespace XviD4PSP
 
             string passlog1 = Calculate.RemoveExtention(m.outvideofile, true) + "_1";
             string passlog2 = Calculate.RemoveExtention(m.outvideofile, true) + "_2";
-
-            //блок много процессорного кодирования
-            int cpucount = Environment.ProcessorCount;
-
-            //для кодеков без многопроцессорности
-            if (m.outvcodec == "MJPEG" ||
-                m.outvcodec == "FLV1")
-                cpucount = 1;
 
             if (muxer != Format.Muxers.Disabled || DontMuxStreams)
             {
@@ -1411,28 +1390,6 @@ namespace XviD4PSP
 
             if (m.vpasses.Count > 1) SetLog("\r\n...first pass...");
 
-            encoderProcess = new Process();
-            ProcessStartInfo info = new ProcessStartInfo();
-            string arguments;
-
-            info.FileName = Calculate.StartupPath + "\\apps\\ffmpeg\\ffmpeg.exe";
-            info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
-            info.UseShellExecute = false;
-            info.RedirectStandardOutput = false;
-            info.RedirectStandardError = true;
-            info.CreateNoWindow = true;
-            encodertext.Length = 0;
-
-            //фикс для частот которые не принимает ffmpeg
-            if (m.outframerate == "23.976" ||
-                m.outframerate == "29.970")
-            {
-                ArrayList newpass = new ArrayList();
-                foreach (string p in m.vpasses)
-                    newpass.Add("-r " + m.outframerate + " " + p);
-                m.vpasses = (ArrayList)newpass.Clone();
-            }
-
             //блок для кодирования в один присест
             string oldfilepath = m.outvideofile;
             if (muxer == Format.Muxers.Disabled && !DontMuxStreams)
@@ -1440,32 +1397,78 @@ namespace XviD4PSP
                 m.outvideofile = m.outfilepath;
                 if (m.outaudiostreams.Count > 0)
                 {
-                    //Перед объединением нужно убрать ключ -f из аудио cli.. 
-                    string a_cli = Regex.Replace(((AudioStream)m.outaudiostreams[m.outaudiostream]).passes, @"(\s?\-f\s\w*)", "");
-                    m.vpasses[m.vpasses.Count - 1] = m.vpasses[m.vpasses.Count - 1].ToString().Replace(" -an", "") + " " + a_cli.Trim();
+                    //Перед объединением нужно убрать ключ -an из видео и -f из аудио cli..
+                    m.vpasses[m.vpasses.Count - 1] = Regex.Replace(m.vpasses[m.vpasses.Count - 1].ToString(), @"(\s?\-an\s)", " ", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase).Trim() +
+                        " " + Regex.Replace(((AudioStream)m.outaudiostreams[m.outaudiostream]).passes, @"(\s?\-f\s\w*)", "", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase).Trim() +
+                        ((((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "FLAC") ? " -sample_fmt s16" : ""); //FLAC пока-что нужно ограничивать 16-ю битами..
                 }
             }
 
-            arguments = "-threads " + cpucount.ToString() + " " + m.vpasses[0];
+            //FOURCC
+            string fourcc = "";
+            if (!string.IsNullOrEmpty(m.ffmpeg_options.fourcc) && m.ffmpeg_options.fourcc != "Default")
+            {
+                if (Path.GetExtension(m.outvideofile).ToLower() == ".avi")
+                {
+                    //Для AVI сами сменим FOURCC в конце кодирования
+                    fourcc = m.ffmpeg_options.fourcc;
+                    for (int n = 0; n < m.vpasses.Count; n++)
+                        m.vpasses[n] = m.vpasses[n].ToString().Replace(" -vtag " + fourcc, "");
+                }
+                else
+                {
+                    //Для всего остального добавим -strict experimental, чтоб несколько
+                    //уменьшить шансы, что данное сочетание FOURCC\format не пропустит FFmpeg
+                    for (int n = 0; n < m.vpasses.Count; n++)
+                        m.vpasses[n] = m.vpasses[n].ToString() + " -strict experimental";
+                }
+            }
 
             //прописываем аспект
             if (!string.IsNullOrEmpty(m.sar))
-                arguments += " -aspect " + Calculate.ConvertDoubleToPointString(m.outaspect);
+            {
+                string ar = " -aspect " + Calculate.ConvertDoubleToPointString(m.outaspect, 4);
+                for (int n = 0; n < m.vpasses.Count; n++)
+                    m.vpasses[n] = m.vpasses[n].ToString() + ar;
+            }
+
+            string rate = "-r " + m.outframerate + " ";
+            if (m.outvcodec == "Copy")
+            {
+                if (m.inframerate != null)
+                    rate = "-r " + m.inframerate + " ";
+                else
+                    rate = "";
+            }
+
+            encoderProcess = new Process();
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = Calculate.StartupPath + "\\apps\\ffmpeg\\ffmpeg.exe";
+            info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
+            info.UseShellExecute = false;
+            info.RedirectStandardOutput = false;
+            info.RedirectStandardError = true;
+            info.StandardErrorEncoding = Encoding.UTF8;
+            info.CreateNoWindow = true;
 
             //Доп. параметры муксинга
-            string mux_o = "";
+            string mux_v = "", mux_o = "";
             if (muxer == Format.Muxers.Disabled && !DontMuxStreams && Formats.GetDefaults(m.format).IsEditable)
             {
-                //Получение CLI и расшифровка подставных значений (только общие опции, т.к. тут нет аудио и видео файлов)
+                //Получение CLI и расшифровка подставных значений (для видео - перед скриптом, общие - перед выходным файлом)
                 string muxer_cli = Calculate.ExpandVariables(m, Formats.GetSettings(m.format, "CLI_ffmpeg", Formats.GetDefaults(m.format).CLI_ffmpeg));
+                mux_v = Calculate.GetRegexValue(@"\[v\](.*?)\[/v\]", muxer_cli);
                 mux_o = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", muxer_cli);
+                mux_v = (!string.IsNullOrEmpty(mux_v)) ? mux_v + " " : "";
                 mux_o = (!string.IsNullOrEmpty(mux_o)) ? " " + mux_o : "";
             }
 
             if (m.vpasses.Count == 1)
-                info.Arguments = " -y -i \"" + m.scriptpath + "\" " + arguments + mux_o + " \"" + m.outvideofile + "\"";
+                info.Arguments = "-y " + rate + mux_v + "-i \"" + m.scriptpath + "\" " + m.vpasses[0] + mux_o + " \"" + m.outvideofile + "\" -hide_banner -nostdin";
+            else if (m.encodingmode == Settings.EncodingModes.TwoPassQuality || m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                info.Arguments = "-y " + rate + mux_v + "-i \"" + m.scriptpath + "\" -pass 1 -passlogfile \"" + passlog1 + "\" " + m.vpasses[0] + mux_o + " \"" + m.outvideofile + "\" -hide_banner -nostdin";
             else
-                info.Arguments = " -y -i \"" + m.scriptpath + "\" -pass 1 -passlogfile \"" + passlog1 + "\" " + arguments + " \"" + m.outvideofile + "\"";
+                info.Arguments = "-y " + rate + mux_v + "-i \"" + m.scriptpath + "\" -pass 1 -passlogfile \"" + passlog1 + "\" " + m.vpasses[0] + " -f null NUL -hide_banner -nostdin";
 
             //прописываем аргументы командной строки
             SetLog("");
@@ -1481,6 +1484,8 @@ namespace XviD4PSP
             //второй проход
             if (m.vpasses.Count > 1 && !IsAborted && !IsErrors)
             {
+                SetLog(encodertext.ToString());
+
                 //режим двойного качества
                 int vbitrate = 0;
                 if (m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
@@ -1502,28 +1507,23 @@ namespace XviD4PSP
                 else if (m.vpasses.Count == 3) SetLog("...second pass...");
 
                 step++;
-                arguments = "-threads " + cpucount.ToString() + " " + m.vpasses[1];
-
-                //прописываем аспект
-                if (!string.IsNullOrEmpty(m.sar))
-                    arguments += " -aspect " + Calculate.ConvertDoubleToPointString(m.outaspect);
 
                 if (m.vpasses.Count == 2)
-                    info.Arguments = " -y -i \"" + m.scriptpath + "\" -pass 2 -passlogfile \"" + passlog1 + "\" " + arguments + mux_o + " \"" + m.outvideofile + "\"";
+                    info.Arguments = "-y " + rate + mux_v + "-i \"" + m.scriptpath + "\" -pass 2 -passlogfile \"" + passlog1 + "\" " + m.vpasses[1] + mux_o + " \"" + m.outvideofile + "\" -hide_banner -nostdin";
                 else
-                    info.Arguments = " -y -i \"" + m.scriptpath + "\" -pass 2 -passlogfile \"" + passlog1 + "\" " + arguments + " \"" + m.outvideofile + "\"";
+                    info.Arguments = "-y " + rate + mux_v + "-i \"" + m.scriptpath + "\" -pass 3 -passlogfile \"" + passlog1 + "\" " + m.vpasses[1] + " -f null NUL -hide_banner -nostdin";
 
                 //режим двойного качества
                 if (m.encodingmode == Settings.EncodingModes.TwoPassQuality)
                 {
-                    info.Arguments = info.Arguments.Replace("-qscale " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "-b " + vbitrate + "k");
+                    info.Arguments = info.Arguments.Replace("-q:v " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "-b:v " + vbitrate + "k");
                     m.outvbitrate = vbitrate;
                 }
                 //режим тройного качества
-                if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                else if (m.encodingmode == Settings.EncodingModes.ThreePassQuality)
                 {
-                    info.Arguments = info.Arguments.Replace("-qscale " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "-b " + vbitrate + "k");
-                    m.vpasses[2] = m.vpasses[2].ToString().Replace("-qscale " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "-b " + vbitrate + "k");
+                    info.Arguments = info.Arguments.Replace("-q:v " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "-b:v " + vbitrate + "k");
+                    m.vpasses[2] = m.vpasses[2].ToString().Replace("-q:v " + Calculate.ConvertDoubleToPointString((double)m.outvbitrate, 1), "-b:v " + vbitrate + "k");
                     m.outvbitrate = vbitrate;
                 }
 
@@ -1542,16 +1542,12 @@ namespace XviD4PSP
             //третий проход
             if (m.vpasses.Count == 3 && !IsAborted && !IsErrors)
             {
+                SetLog(encodertext.ToString());
                 SetLog("...last pass...");
 
                 step++;
-                arguments = "-threads " + cpucount.ToString() + " " + m.vpasses[2];
 
-                //прописываем аспект
-                if (!string.IsNullOrEmpty(m.sar))
-                    arguments += " -aspect " + Calculate.ConvertDoubleToPointString(m.outaspect);
-
-                info.Arguments = " -y -i \"" + m.scriptpath + "\" -pass 2 -passlogfile \"" + passlog1 + "\" " + arguments + mux_o + " \"" + m.outvideofile + "\"";
+                info.Arguments = "-y " + rate + mux_v + "-i \"" + m.scriptpath + "\" -pass 2 -passlogfile \"" + passlog1 + "\" " + m.vpasses[2] + mux_o + " \"" + m.outvideofile + "\" -hide_banner -nostdin";
 
                 //прописываем аргументы командной строки
                 SetLog("");
@@ -1578,6 +1574,10 @@ namespace XviD4PSP
                 IsErrors = true;
                 ErrorException(Languages.Translate("Can`t find output video file!"));
             }
+            else
+            {
+                SetLog(encodertext.ToString());
+            }
 
             SafeDelete(passlog1 + "-0.log");
             SafeDelete(passlog2 + "-0.log");
@@ -1597,13 +1597,16 @@ namespace XviD4PSP
 
         private void Do_FFmpeg_Cycle(ProcessStartInfo info)
         {
+            encodertext.Length = 0;
             encoderProcess.StartInfo = info;
             encoderProcess.Start();
             SetPriority(Settings.ProcessPriority);
 
             string line;
             double fps = Calculate.ConvertStringToDouble(m.outframerate);
-            Regex r = new Regex(@"time=(\d+.\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            TimeSpan current_sec = TimeSpan.Zero;
+
+            Regex r = new Regex(@"time=(\d+:\d+:\d+\.?\d*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match mat;
 
             //первый проход
@@ -1615,9 +1618,9 @@ namespace XviD4PSP
                 if (line != null)
                 {
                     mat = r.Match(line);
-                    if (mat.Success)
+                    if (mat.Success && TimeSpan.TryParse(mat.Groups[1].Value, out current_sec))
                     {
-                        worker.ReportProgress((int)(Calculate.ConvertStringToDouble(mat.Groups[1].Value) * fps));
+                        worker.ReportProgress((int)(current_sec.TotalSeconds * fps));
                     }
                     else
                     {
@@ -1626,6 +1629,9 @@ namespace XviD4PSP
                 }
             }
 
+            //Дочитываем остатки лога, если что-то не успело считаться
+            AppendEncoderText(encoderProcess.StandardError.ReadToEnd());
+
             //обнуляем прогресс
             ResetProgress();
 
@@ -1633,7 +1639,7 @@ namespace XviD4PSP
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
             {
                 IsErrors = true;
-                ErrorException(encodertext.ToString() + encoderProcess.StandardError.ReadToEnd());
+                ErrorException(encodertext.ToString());
             }
         }
 
@@ -2357,8 +2363,8 @@ namespace XviD4PSP
             info.UseShellExecute = false;
             info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
+            info.StandardErrorEncoding = Encoding.UTF8;
             info.CreateNoWindow = true;
-            encodertext.Length = 0;
 
             string format = "";
             string outfile = "";
@@ -2378,8 +2384,7 @@ namespace XviD4PSP
                 if (outext == ".lpcm" || instream.codec == "LPCM")
                     forceformat = " -f s16be";
 
-                info.Arguments = "-map 0." + instream.ff_order + " -i \"" + m.infilepath +
-                    "\" -vn -acodec copy" + forceformat  + " \"" + outfile + "\"";
+                info.Arguments = "-i \"" + m.infilepath + "\" -map 0." + instream.ff_order + " -sn -vn -acodec copy" + forceformat + " \"" + outfile + "\"";
 
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
@@ -2413,7 +2418,7 @@ namespace XviD4PSP
                 //    format = " -f vob";
 
                 outfile = m.outvideofile;
-                info.Arguments = "-i \"" + m.infilepath + "\" -vcodec copy -an" + format + " \"" + outfile + "\"";
+                info.Arguments = "-i \"" + m.infilepath + "\" -map 0:v:0 -sn -an -vcodec copy" + format + " \"" + outfile + "\" -hide_banner -nostdin";
             }
 
             if (Settings.ArgumentsToLog)
@@ -2425,12 +2430,15 @@ namespace XviD4PSP
             SafeDelete(outfile);
 
             int outframes = m.outframes;
+            string outfps = m.outframerate;
+            m.outframerate = m.inframerate;
             m.outframes = m.inframes;
             SetMaximum(m.outframes);
 
             //Демуксим
             Do_FFmpeg_Cycle(info);
 
+            m.outframerate = outfps;
             m.outframes = outframes;
             SetMaximum(m.outframes);
 
@@ -2664,7 +2672,7 @@ namespace XviD4PSP
         private void demux_mkv(Demuxer.DemuxerMode dmode)
         {
            //список файлов
-            string flist = "";
+            string outfile = "", flist = "";
             foreach (string _file in m.infileslist)
                 flist += "\"" + _file + "\" ";
 
@@ -2674,37 +2682,10 @@ namespace XviD4PSP
             info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvextract.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
+            info.StandardOutputEncoding = System.Text.Encoding.UTF8;
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = false;
             info.CreateNoWindow = true;
-
-            string outfile = "";
-            string charset = "";
-            string _charset = Settings.MKVToolnix_Charset;
-
-            try
-            {
-                if (_charset == "")
-                {
-                    info.StandardOutputEncoding = System.Text.Encoding.UTF8;
-                    charset = " --output-charset UTF-8";
-                }
-                else if (_charset.ToLower() == "auto")
-                {
-                    info.StandardOutputEncoding = System.Text.Encoding.Default;
-                    charset = " --output-charset " + System.Text.Encoding.Default.HeaderName;
-                }
-                else
-                {
-                    int page = 0;
-                    if (int.TryParse(_charset, out page))
-                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(page);
-                    else
-                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(_charset);
-                    charset = " --output-charset " + _charset;
-                }
-            }
-            catch (Exception) { }
 
             if (dmode == Demuxer.DemuxerMode.ExtractAudio)
             {
@@ -2715,7 +2696,7 @@ namespace XviD4PSP
                 busyfile = Path.GetFileName(outstream.audiopath);
 
                 outfile = outstream.audiopath;
-                info.Arguments = "tracks " + flist + instream.mi_order + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + instream.mi_order + ":" + "\"" + outfile + "\" --output-charset UTF-8";
 
                 SetLog("Demuxing audio stream to: " + outstream.audiopath);
                 SetLog(instream.codecshort + " " + instream.bitrate + "kbps " + instream.channels + "ch " + instream.bits + "bit " + instream.samplerate + "khz" +
@@ -2738,7 +2719,7 @@ namespace XviD4PSP
                 busyfile = Path.GetFileName(m.outvideofile);
 
                 outfile = m.outvideofile;
-                info.Arguments = "tracks " + flist + m.invideostream_mi_order + ":" + "\"" + outfile + "\"" + charset;
+                info.Arguments = "tracks " + flist + m.invideostream_mi_order + ":" + "\"" + outfile + "\" --output-charset UTF-8";
 
                 SetLog("Demuxing video stream to: " + m.outvideofile);
                 SetLog(m.inresw + "x" + m.inresh + " " + m.invcodecshort + " " + m.invbitrate + "kbps " + m.inframerate + "fps" +
@@ -3080,8 +3061,8 @@ namespace XviD4PSP
             info.UseShellExecute = false;
             info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
+            info.StandardErrorEncoding = Encoding.UTF8;
             info.CreateNoWindow = true;
-            encodertext.Length = 0;
 
             //Доп. параметры муксинга
             string mux_v = "", mux_a = "", mux_o = "";
@@ -3093,35 +3074,60 @@ namespace XviD4PSP
                 mux_a = Calculate.GetRegexValue(@"\[a\](.*?)\[/a\]", muxer_cli);
                 mux_o = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", muxer_cli);
 
-                mux_v = (!string.IsNullOrEmpty(mux_v)) ? " " + mux_v : "";
+                mux_v = (!string.IsNullOrEmpty(mux_v)) ? mux_v + " " : "";
                 mux_a = (!string.IsNullOrEmpty(mux_a)) ? " " + mux_a : "";
                 mux_o = (!string.IsNullOrEmpty(mux_o)) ? " " + mux_o : "";
             }
 
-            string rate = " -r " + m.outframerate;
+            string rate = "-r " + m.outframerate + " ";
             if (m.outvcodec == "Copy")
             {
                 if (m.inframerate != null)
-                    rate = " -r " + m.inframerate;
+                    rate = "-r " + m.inframerate + " ";
                 else
                     rate = "";
             }
 
-            string addaudio = "";
+            string acodec = "";
+            string audiofile = "";
+            string map = " -map 0:v:0";
             if (m.outaudiostreams.Count > 0)
             {
-                string aformat = "";
+                audiofile = mux_a;
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
                 if (CopyDelay)
                 {
-                    addaudio = " -ss " + TimeSpan.FromMilliseconds(outstream.delay * -1.0).ToString();
-                    if (addaudio.Contains(".")) addaudio = addaudio.Remove(addaudio.Length - 4, 4);
+                    audiofile += " -ss " + TimeSpan.FromMilliseconds(outstream.delay * -1.0).ToString();
+                    if (audiofile.Contains(".")) audiofile = audiofile.Remove(audiofile.Length - 4, 4);
                 }
-                if (!File.Exists(outstream.audiopath)) addaudio += " -i \"" + m.infilepath + "\"" + aformat + " -acodec copy" + mux_a;
-                else addaudio += " -i \"" + outstream.audiopath + "\"" + aformat + " -acodec copy" + mux_a;
+                if (!File.Exists(outstream.audiopath))
+                {
+                    audiofile += " -i \"" + m.infilepath + "\"";
+                    map += " -map 1:" + ((AudioStream)m.inaudiostreams[m.inaudiostream]).ff_order;
+                }
+                else
+                {
+                    audiofile += " -i \"" + outstream.audiopath + "\"";
+                    map += " -map 1:a:0";
+                }
+
+                //Любой pcm-звук из vob FFmpeg обзывает "pcm_dvd", даже если он 16-бит,
+                //и не дает его потом скопировать (например в mkv). Битность вроде выдает правильно.
+                if (((AudioStream)m.inaudiostreams[m.inaudiostream]).ff_codec == "pcm_dvd" ||
+                    ((AudioStream)m.inaudiostreams[m.inaudiostream]).ff_codec == "pcm_bluray")
+                {
+                    string ext = Path.GetExtension(m.outfilepath).ToLower();
+                    int bits = ((AudioStream)m.inaudiostreams[m.inaudiostream]).ff_bits;
+                    if (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == "m2ts")
+                        acodec = " -acodec pcm_s" + ((bits > 0) ? bits : 16) + "be";
+                    else
+                        acodec = " -acodec pcm_s" + ((bits > 0) ? bits : 16) + "le";
+                }
+                else
+                    acodec = " -acodec copy";
             }
 
-            info.Arguments = "-i \"" + m.outvideofile + "\" -vcodec copy" + mux_v + addaudio + mux_o + rate + " \"" + m.outfilepath + "\"";
+            info.Arguments = rate + mux_v + "-i \"" + m.outvideofile + "\"" + audiofile + map + " -vcodec copy" + acodec + mux_o + " \"" + m.outfilepath + "\" -hide_banner -nostdin";
 
             //прописываем аргументы командной строки
             SetLog("");
@@ -3148,6 +3154,10 @@ namespace XviD4PSP
                 ErrorException(encodertext.ToString());
                 //throw new Exception(Languages.Translate("Can`t find output video file!"));
             }
+            else
+            {
+                SetLog(encodertext.ToString());
+            }
 
             encodertext.Length = 0;
             SetLog("");
@@ -3165,10 +3175,10 @@ namespace XviD4PSP
             info.UseShellExecute = false;
             info.RedirectStandardOutput = false;
             info.RedirectStandardError = true;
+            info.StandardErrorEncoding = Encoding.UTF8;
             info.CreateNoWindow = true;
-            encodertext.Length = 0;
 
-            info.Arguments = "-i \"" + m.scriptpath + "\" " + outstream.passes + " -vn \"" + outstream.audiopath + "\"";
+            info.Arguments = "-i \"" + m.scriptpath + "\" " + outstream.passes + " -vn \"" + outstream.audiopath + "\" -hide_banner -nostdin";
 
             //прописываем аргументы командной строки
             SetLog("");
@@ -3191,7 +3201,13 @@ namespace XviD4PSP
             //проверка на удачное завершение
             if (!File.Exists(outstream.audiopath) || new FileInfo(outstream.audiopath).Length == 0)
             {
-                throw new Exception(Languages.Translate("Can`t find output audio file!"));
+                IsErrors = true;
+                ErrorException(Languages.Translate("Can`t find output audio file!"));
+                //throw new Exception(Languages.Translate("Can`t find output audio file!"));
+            }
+            else
+            {
+                SetLog(encodertext.ToString());
             }
 
             encodertext.Length = 0;
@@ -3597,6 +3613,10 @@ namespace XviD4PSP
             SetLog("------------------------------");
             SetLog("Input file: " + m.outvideofile);
 
+            //4-й символ для 3-х символьных
+            if (fourcc.Length == 3)
+                fourcc += " ";
+
             bool ok = false;
             if (fourcc.Length != 4)
             {
@@ -3778,36 +3798,10 @@ namespace XviD4PSP
             info.FileName = Calculate.StartupPath + "\\apps\\MKVtoolnix\\mkvmerge.exe";
             info.WorkingDirectory = Path.GetDirectoryName(info.FileName);
             info.UseShellExecute = false;
+            info.StandardOutputEncoding = System.Text.Encoding.UTF8;
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = false;
             info.CreateNoWindow = true;
-
-            string charset = "";
-            string _charset = Settings.MKVToolnix_Charset;
-
-            try
-            {
-                if (_charset == "")
-                {
-                    info.StandardOutputEncoding = System.Text.Encoding.UTF8;
-                    charset = "--output-charset UTF-8";
-                }
-                else if (_charset.ToLower() == "auto")
-                {
-                    info.StandardOutputEncoding = System.Text.Encoding.Default;
-                    charset = "--output-charset " + System.Text.Encoding.Default.HeaderName;
-                }
-                else
-                {
-                    int page = 0;
-                    if (int.TryParse(_charset, out page))
-                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(page);
-                    else
-                        info.StandardOutputEncoding = System.Text.Encoding.GetEncoding(_charset);
-                    charset = "--output-charset " + _charset;
-                }
-            }
-            catch (Exception) { }
 
             //Доп. параметры муксинга
             string mux_v = "", mux_a = "", mux_o = "";
@@ -3820,6 +3814,11 @@ namespace XviD4PSP
                 mux_o = Calculate.GetRegexValue(@"\[o\](.*?)\[/o\]", muxer_cli);
             }
 
+            //Track IDs are assigned like this:
+            //AVI files: The video track has the ID 0. The audio tracks get IDs in ascending order starting at 1.
+            //AAC, AC3, MP3, SRT and WAV files: The one 'track' in that file gets the ID 0.
+            //Most other files: The track IDs are assigned in order the tracks are found in the file starting at 0.
+
             //video
             int vID = 0;
             string video = "";
@@ -3827,7 +3826,7 @@ namespace XviD4PSP
             {
                 //Видео из исходника (режим Copy без демукса)
                 string ext = Path.GetExtension(m.infilepath).ToLower();
-                vID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? m.invideostream_ff_order :
+                vID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? m.invideostream_ff_order_filtered :
                     (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? m.invideostream_mi_order :
                     m.invideostream_mi_id; //avi, rm, ogm
 
@@ -3862,7 +3861,7 @@ namespace XviD4PSP
                 {
                     //Звук из исходника (режим Copy без демукса)
                     string ext = Path.GetExtension(m.infilepath).ToLower();
-                    aID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? instream.ff_order :
+                    aID = (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts" || ext == ".m2t" || ext == ".mts") ? instream.ff_order_filtered :
                         (ext == ".mkv" || ext == ".webm" || ext == ".mp4" || ext == ".mov") ? instream.mi_order :
                         instream.mi_id; //avi, rm, ogm
 
@@ -3914,7 +3913,7 @@ namespace XviD4PSP
 
             //Ввод полученных аргументов командной строки
             mux_o = (!string.IsNullOrEmpty(mux_o)) ? mux_o.Replace("%v_id%", vID.ToString()).Replace("%a_id%", aID.ToString()) + " " : "";
-            info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + mux_o + split + charset;
+            info.Arguments = "-o \"" + m.outfilepath + "\" " + video + audio + mux_o + split + "--output-charset UTF-8";
 
             //прописываем аргументы командной строки
             SetLog("");
