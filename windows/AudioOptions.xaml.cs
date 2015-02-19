@@ -559,17 +559,43 @@ namespace XviD4PSP
         {
             //получаем медиа информацию
             MediaInfoWrapper mi = null;
+            FFInfo ff = null;
+
             try
             {
-                AudioStream stream;
+                AudioStream stream = null;
+                int old_stream = 0;
+
                 string ext = Path.GetExtension(infilepath).ToLower();
                 if (ext != ".avs" && ext != ".grf")
                 {
                     mi = new MediaInfoWrapper();
-                    stream = mi.GetAudioInfoFromAFile(infilepath);
-                    stream = Format.GetValidADecoder(stream);
-                    m.inaudiostream = m.inaudiostreams.Count;
-                    m.inaudiostreams.Add(stream.Clone());
+                    stream = mi.GetAudioInfoFromAFile(infilepath, false);
+                    stream.mi_order = mi.ATrackOrder(0);
+                    stream.mi_id = mi.ATrackID(0);
+
+                    ff = new FFInfo();
+                    ff.Open(infilepath);
+
+                    //Аналогично тому, как сделано в Informer'е
+                    if (ff.AudioStreams().Count > 0)
+                    {
+                        stream.ff_order = ff.FirstAudioStreamID();
+                        stream.ff_order_filtered = ff.FilteredStreamOrder(stream.ff_order);
+                        if (stream.mi_order < 0) stream.mi_order = stream.ff_order;
+                        if (stream.bitrate == 0) stream.bitrate = ff.AudioBitrate(stream.ff_order);
+                        if (stream.channels == 0) stream.channels = ff.StreamChannels(stream.ff_order);
+                        if (stream.samplerate == null) stream.samplerate = ff.StreamSamplerate(stream.ff_order);
+                        if (stream.language == "Unknown") stream.language = ff.StreamLanguage(stream.ff_order);
+                        stream.ff_bits = ff.StreamBits(stream.ff_order);
+                        //if (stream.bits == 0) stream.bits = stream.ff_bits;
+                        stream.ff_codec = ff.StreamCodec(stream.ff_order);
+                        if (stream.codec == "A_MS/ACM" || stream.codec == "")
+                        {
+                            stream.codec = stream.ff_codec;
+                            stream.codecshort = ff.StreamCodecShort(stream.ff_order);
+                        }
+                    }
                 }
                 else
                 {
@@ -578,23 +604,24 @@ namespace XviD4PSP
                     stream.audiofiles = new string[] { stream.audiopath };
                     stream.codec = stream.codecshort = "PCM";
                     stream.language = "Unknown";
-                    stream = Format.GetValidADecoder(stream);
-
-                    int old_stream = m.inaudiostream;
-                    m.inaudiostream = m.inaudiostreams.Count;
-                    m.inaudiostreams.Add(stream.Clone());
-
-                    //Оставшаяся инфа + ошибки
-                    Caching cach = new Caching(m);
-                    if (cach.m == null)
-                    {
-                        //Удаляем этот трек
-                        m.inaudiostream = old_stream;
-                        m.inaudiostreams.RemoveAt(m.inaudiostreams.Count - 1);
-                        return;
-                    }
-                    m = cach.m.Clone();
                 }
+
+                //Добавляем этот трек
+                old_stream = m.inaudiostream;
+                stream = Format.GetValidADecoder(stream);
+                m.inaudiostream = m.inaudiostreams.Count;
+                m.inaudiostreams.Add(stream.Clone());
+
+                //Оставшаяся инфа + ошибки
+                Caching cach = new Caching(m, true);
+                if (cach.m == null)
+                {
+                    //Удаляем этот трек
+                    m.inaudiostream = old_stream;
+                    m.inaudiostreams.RemoveAt(m.inaudiostreams.Count - 1);
+                    return;
+                }
+                m = cach.m.Clone();
 
                 textbox_apath.Text = infilepath;
 
@@ -606,6 +633,7 @@ namespace XviD4PSP
 
                 //прописываем в список внешний трек
                 ComboBoxItem item = new ComboBoxItem();
+                stream = (AudioStream)m.inaudiostreams[m.inaudiostream]; //Переопределяем с новыми параметрами
                 item.Content = (combo_atracks.Items.Count + 1).ToString("00") + ". " + stream.language + " " + stream.codecshort + " " + stream.channels + "ch";
                 item.ToolTip = item.Content + " " + stream.samplerate + "Hz " + stream.bitrate + "kbps " + stream.delay + "ms";
                 combo_atracks.Items.Add(item);
@@ -622,6 +650,12 @@ namespace XviD4PSP
                 {
                     mi.Close();
                     mi = null;
+                }
+
+                if (ff != null)
+                {
+                    ff.Close();
+                    ff = null;
                 }
             }
 

@@ -379,14 +379,10 @@ namespace XviD4PSP
                 if (ff.info.Length > 0)
                 {
                     string sortedinfo = "";
-                    string[] lines = ff.info.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                    string[] lines = ff.info.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string line in lines)
                     {
-                        if (!line.StartsWith("  configuration:") &&
-                            !line.StartsWith("  lib") &&
-                            !line.StartsWith("  built on") &&
-                            !line.StartsWith("At least one output") &&
-                            line != "")
+                        if (!line.StartsWith("At least one output"))
                             sortedinfo += line + Environment.NewLine;
                     }
 
@@ -476,7 +472,7 @@ namespace XviD4PSP
 
                 //Получаем аргументы
                 info.Arguments = command_line.Replace("input_file", infile).Replace("output_file", outfile) + " -hide_banner -nostdin";
-                SetLog(info.Arguments + Environment.NewLine);
+                SetLog("ffmpeg.exe: " + info.Arguments + Environment.NewLine);
 
                 encoderProcess.StartInfo = info;
                 encoderProcess.Start();
@@ -507,8 +503,10 @@ namespace XviD4PSP
                 }
 
                 //Дочитываем остатки лога
-                SetLog(encoderProcess.StandardError.ReadToEnd());
-                
+                line = encoderProcess.StandardError.ReadToEnd();
+                if (!string.IsNullOrEmpty(line)) SetLog(Calculate.FilterLogMessage(r, line));
+                else SetLog("");
+
                 //Проверяем на ошибки
                 if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
                     IsErrors = true;

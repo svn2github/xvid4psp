@@ -133,28 +133,7 @@ namespace XviD4PSP
             return value;
         }
 
-        //public AudioStream GetAudioInfo(Massive m)
-        //{
-        //    //выбираем трек
-        //    int n = m.inaudiostream;
-        //    AudioStream stream = new AudioStream();
-
-        //    Open(m.infilepath);
-
-        //    stream.codec = ACodecString(n);
-        //    stream.codecshort = ACodecShort(n);
-        //    m.inabitrate = AudioBitrate(n);
-        //    stream.id = AudioID(n);
-        //    stream.delay = Delay(n);
-        //    stream.samplerate = Samplerate(n);
-        //    m.inbits = Bits(n);
-        //    m.inachannels = Channels(n);
-
-        //    Close();
-        //    return stream;
-        //}
-
-        public AudioStream GetAudioInfoFromAFile(string filepath)
+        public AudioStream GetAudioInfoFromAFile(string filepath, bool and_close_mi)
         {
             AudioStream stream = new AudioStream();
             Open(filepath);
@@ -163,12 +142,12 @@ namespace XviD4PSP
             stream.audiofiles = new string[] { stream.audiopath };
             stream.codec = ACodecString(0);
             stream.codecshort = ACodecShort(0);
-            stream.language = AudioLanguage(0); //"Unknown";
+            stream.language = AudioLanguage(0);
             stream.bitrate = AudioBitrate(0);
-            stream.delay = 0;
             stream.samplerate = Samplerate(0);
             stream.channels = Channels(0);
             stream.bits = Bits(0);
+            stream.delay = 0;
 
             //определяем битрейт
             if (stream.bitrate == 0)
@@ -182,7 +161,9 @@ namespace XviD4PSP
                 }
             }
 
-            Close();
+            if (and_close_mi)
+                Close();
+
             return stream;
         }
 
@@ -256,9 +237,10 @@ namespace XviD4PSP
 
                 if (s == "")
                     s = Get(StreamKind.General, 0, "Codec/String");
-                if (s == "MPEG-4 AVC" ||
-                    s == "AVC")
-                    s = "h264";
+
+                if (s.ToLower().Contains("avc"))
+                    return "h264";
+
                 return s;
             }
         }
@@ -269,42 +251,54 @@ namespace XviD4PSP
             {
                 //(Codec fields are DEPRECATED)
                 string s = Get(StreamKind.Video, 0, "Codec/String");
-                string fcc = Get(StreamKind.Video, 0, "Codec/CC");
+                string fcc = Get(StreamKind.Video, 0, "Codec/CC").ToLower();
 
                 if (s == "")
                     s = Get(StreamKind.General, 0, "Codec/String");
 
-                if (s == "Sorenson Spark")
-                    s = "h263";
-                else if (s == "DivX 5" || s == "DivX 3 Low")
-                    s = "DivX";
-                else if (s == "XVID / V_MS/VFW/FOURCC")
-                    s = "XviD";
-                else if (s == "MPEG-1 Video" || s == "V_MPEG - 1")
-                    s = "MPEG1";
-                else if (s == "MPEG-2 Video" || s == "V_MPEG-2" || s == "MPEG-PS")
-                    s = "MPEG2";
-                else if (s == "WMV3")
-                    s = "WMV";
-                else if (s == "V_MS/VFW/WVC1" || s == "V_MS/VFW/FOURCC" || s == "WVC1" || s == "VC-1")
-                    s = "VC1";
-                else if (s == "H.264" || s == "MPEG-4 AVC" || s == "AVC" || s == "V_MPEG4/ISO/AVC")
-                    s = "h264";
-                else if (s == "MPEG-4" || s == "MPEG-4 Visual")
+                string lower = s.ToLower();
+
+                if (lower == "sorenson spark")
+                    return "h263";
+                if (lower.Contains("divx"))
+                    return "DivX";
+                if (lower.Contains("xvid")) //XVID / V_MS/VFW/FOURCC
+                    return "XviD";
+                if (lower.Contains("avc") || lower.Contains("264"))
+                    return "h264";
+                if (lower.Contains("mpeg"))
                 {
-                    if (fcc == "20")
-                        s = "MPEG4";
-                    else if (fcc == "DX50" || fcc == "DIVX")
-                        s = "DivX";
-                    else if (fcc == "XVID")
-                        s = "XviD";
-                    else
-                        s = "h264";
+                    if (lower.Contains("1"))
+                        return "MPEG1";
+                    if (lower.Contains("2") || lower.Contains("PS"))
+                        return "MPEG2";
+                    if (lower.Contains("4"))
+                    {
+                        if (fcc == "20")
+                            return "MPEG4";
+                        if (fcc == "dx50" || fcc == "divx")
+                            return "DivX";
+                        if (fcc == "xvid")
+                            return "XviD";
+                        return "h264";
+                    }
                 }
-                else if (s == "Flash Video")
-                    s = "FLV";
-                else if (s == "V_VP8")
-                    s = "VP8";
+                if (lower.Contains("wmv"))
+                    return "WMV";
+                if (lower.Contains("vc1") || lower.Contains("vc-1") ||
+                    lower == "v_ms/vfw/fourcc") //V_MS/VFW/FOURCC
+                    return "VC1";
+                if (lower.Contains("flash"))
+                    return "FLV";
+                if (lower.Contains("vp6"))
+                    return "VP6";
+                if (lower.Contains("vp7"))
+                    return "VP7";
+                if (lower.Contains("vp8"))
+                    return "VP8";
+                if (lower.Contains("vp9"))
+                    return "VP9";
+
                 return s;
             }
         }
@@ -324,33 +318,44 @@ namespace XviD4PSP
             //string b = Get(StreamKind.Audio, track, "CodecID");
             //string c = Get(StreamKind.Audio, track, "CodecID/Hint");
 
-            if (s == "MPEG-1 Audio layer 3" ||
-                s == "MPEG-1/2 L3" ||
-                s == "MPEG-1L3" ||
-                s == "MPEG1/2 L3" ||
-                s == "MPEG-1 Audio Layer 3" ||
-                s == "MPA1L3" ||
-                s == "MPA2L3" ||
-                s == "MPEG-2 Audio layer 3" ||
-                s == "A_MP3" ||
-                s == "MPEG-1 Audio")
-                s = "MP3";
-            else if (s == "MPEG-1 Audio layer 2")
-                s = "MP2";
-            else if (s == "Vorbis")
-                s = "OGG";
-            else if (s.Contains("AAC"))
-                s = "AAC";
-            else if (s == "WMA2" ||
-                s == "WMA3")
-                s = "WMA";
-            else if (s == "A_AC3")
-                s = "AC3";
-            else if (s == "A_DTS" ||
-                s == "DTS-HD")
-                s = "DTS";
-            else if (s == "A_LPCM")
-                s = "LPCM";
+            string lower = s.ToLower();
+
+            if (lower == "lossless")
+            {
+                s = Get(StreamKind.Audio, track, "Format");
+                lower = s.ToLower();
+            }
+
+            if (lower.Contains("mpeg"))
+            {
+                if (lower.Contains("layer 2") || lower.Contains("l2"))
+                    return "MP2";
+                if (lower.Contains("layer 3") || lower.Contains("l3") ||
+                    lower == "mpeg-1 audio")
+                    return "MP3";
+            }
+            if (lower == "mpa1l3" ||
+                lower == "mpa2l3" ||
+                lower == "a_mp3")
+                return "MP3";
+            if (lower == "vorbis")
+                return "OGG";
+            if (lower.Contains("aac"))
+                return "AAC";
+            if (lower.Contains("alac"))
+                return "ALAC";
+            if (lower.Contains("wma"))
+                return "WMA";
+            if (lower == "ac3+" ||
+                lower == "e-ac-3")
+                return "AC3+";
+            if (lower.Contains("ac3"))
+                return "AC3";
+            if (lower.Contains("dts"))
+                return "DTS";
+            if (lower == "a_lpcm")
+                return "LPCM";
+
             return s;
         }
 

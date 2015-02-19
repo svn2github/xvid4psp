@@ -912,8 +912,8 @@ namespace XviD4PSP
                     //проверка на удачное завершение
                     if (File.Exists(apath) && new FileInfo(apath).Length != 0)
                     {
-                        MediaInfoWrapper med = new MediaInfoWrapper();
-                        AudioStream s = med.GetAudioInfoFromAFile(apath);
+                        MediaInfoWrapper mi = new MediaInfoWrapper();
+                        AudioStream s = mi.GetAudioInfoFromAFile(apath, true);
                         s.decoder = AviSynthScripting.Decoders.WAVSource;
                         x.inaudiostreams.Add(s.Clone());
                         deletefiles.Add(apath);
@@ -1308,7 +1308,7 @@ namespace XviD4PSP
                     x.infilesizeint = (int)((double)sizeb / 1049511);
 
                     //получаем длительность и фреймы
-                    Caching cach = new Caching(x);
+                    Caching cach = new Caching(x, false);
                     if (cach.m == null) return;
                     x = cach.m.Clone();
 
@@ -1321,6 +1321,7 @@ namespace XviD4PSP
                     //загружаем обновлённый скрипт
                     m = x.Clone();
                     LoadVideo(MediaLoad.load);
+                    UpdateTaskMassive(m);
                 }
             }
             catch (Exception ex)
@@ -1434,8 +1435,8 @@ namespace XviD4PSP
                         foreach (string apath in atracks)
                         {
                             //забиваем в список все найденные треки
-                            MediaInfoWrapper med = new MediaInfoWrapper();
-                            AudioStream stream = med.GetAudioInfoFromAFile(apath);
+                            MediaInfoWrapper mi = new MediaInfoWrapper();
+                            AudioStream stream = mi.GetAudioInfoFromAFile(apath, true);
                             stream.delay = Calculate.GetDelay(apath);
                             x.inaudiostreams.Add(stream.Clone());
                             n++;
@@ -1679,7 +1680,7 @@ namespace XviD4PSP
                 x = Calculate.UpdateOutFrames(x);
 
                 //Получаем информацию через AviSynth и ловим ошибки
-                Caching cach = new Caching(x);
+                Caching cach = new Caching(x, false);
                 if (cach.m == null) return;
                 x = cach.m.Clone();
 
@@ -3236,7 +3237,7 @@ namespace XviD4PSP
             }
 
             //Получаем информацию через AviSynth и ловим ошибки
-            Caching cach = new Caching(m);
+            Caching cach = new Caching(m, false);
             if (cach.m == null)
             {
                 restore = true;

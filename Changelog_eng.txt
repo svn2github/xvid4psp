@@ -1,6 +1,10 @@
-﻿XviD4PSP 5.10.346.0 (12.02.2015), main changes:
+﻿XviD4PSP 5.10.348.0 (19.02.2015), main changes:
 
 
+>>> (r348) Handling of audio-only files in case MediaInfo can't see an audio track in it, but FFmpeg
+           can see it (DSD-files, for example). In the "Editing audio options" window improved info
+           detection when adding an external track.
+>>> (r347)
 >>> (r346) Removed cfourcc.exe, internal code will be used to change FOURCC in AVI.
 >>> (r346) x265: fixed incorrect bitrate restriction; added --max-tu-size key.
 >>> (r345) x265: another few small changes for the recent builds.

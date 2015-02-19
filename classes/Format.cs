@@ -1343,8 +1343,8 @@ namespace XviD4PSP
        public static string GetValidRAWAudioEXT(string codec)
        {
            if (codec == "PCM" || codec == "LPCM") return ".wav";
+           else if (codec == "QAAC" || codec == "ALAC") return ".m4a";
            else if (codec == "TrueHD") return ".ac3";
-           else if (codec == "QAAC") return ".m4a";
            else return "." + codec.ToLower();
        }
 

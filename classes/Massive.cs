@@ -387,19 +387,6 @@ namespace XviD4PSP
             }
         }
 
-        private bool _isanamorphic = false;
-        public bool IsAnamorphic
-        {
-            get
-            {
-                return _isanamorphic;
-            }
-            set
-            {
-                _isanamorphic = value;
-            }
-        }
-
         private AspectResolution.AspectFixes _aspectfix = AspectResolution.AspectFixes.Disabled;
         public AspectResolution.AspectFixes aspectfix
         {
@@ -410,19 +397,6 @@ namespace XviD4PSP
             set
             {
                 _aspectfix = value;
-            }
-        }
-
-        private int _inaudiostream = 0;
-        public int inaudiostream
-        {
-            get
-            {
-                return _inaudiostream;
-            }
-            set
-            {
-                _inaudiostream = value;
             }
         }
 
@@ -481,19 +455,6 @@ namespace XviD4PSP
             set
             {
                 _invideostream_ff_order_filtered = value;
-            }
-        }
-
-        private int _intextstreams;
-        public int intextstreams
-        {
-            get
-            {
-                return _intextstreams;
-            }
-            set
-            {
-                _intextstreams = value;
             }
         }
 
@@ -572,19 +533,6 @@ namespace XviD4PSP
             set
             {
                 _outvbitrate = value;
-            }
-        }
-
-        private string _standart;
-        public string standart
-        {
-            get
-            {
-                return _standart;
-            }
-            set
-            {
-                _standart = value;
             }
         }
 
@@ -1328,6 +1276,19 @@ namespace XviD4PSP
             set
             {
                 _inaudiostreams = value;
+            }
+        }
+
+        private int _inaudiostream = 0;
+        public int inaudiostream
+        {
+            get
+            {
+                return _inaudiostream;
+            }
+            set
+            {
+                _inaudiostream = value;
             }
         }
 

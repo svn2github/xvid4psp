@@ -1630,7 +1630,9 @@ namespace XviD4PSP
             }
 
             //Дочитываем остатки лога, если что-то не успело считаться
-            AppendEncoderText(encoderProcess.StandardError.ReadToEnd());
+            line = encoderProcess.StandardError.ReadToEnd();
+            if (!string.IsNullOrEmpty(line)) AppendFilteredEncoderText(r, line);
+            AppendEncoderText("");
 
             //обнуляем прогресс
             ResetProgress();
@@ -2903,7 +2905,8 @@ namespace XviD4PSP
 
             //Дочитываем остатки лога, если что-то не успело считаться
             line = encoderProcess.StandardError.ReadToEnd();
-            if (!string.IsNullOrEmpty(line)) AppendEncoderText(Calculate.FilterLogMessage(r, line));
+            if (!string.IsNullOrEmpty(line)) AppendFilteredEncoderText(r, line);
+            AppendEncoderText("");
 
             //Отлавливаем ошибку по ErrorLevel
             if (encoderProcess.HasExited && encoderProcess.ExitCode != 0 && !IsAborted)
@@ -3095,11 +3098,14 @@ namespace XviD4PSP
             {
                 audiofile = mux_a;
                 AudioStream outstream = (AudioStream)m.outaudiostreams[m.outaudiostream];
+
                 if (CopyDelay)
                 {
-                    audiofile += " -ss " + TimeSpan.FromMilliseconds(outstream.delay * -1.0).ToString();
-                    if (audiofile.Contains(".")) audiofile = audiofile.Remove(audiofile.Length - 4, 4);
+                    string delay = " -ss " + TimeSpan.FromMilliseconds(outstream.delay * -1.0).ToString();
+                    if (delay.Contains(".")) delay = delay.Remove(audiofile.Length - 4, 4);
+                    audiofile += delay;
                 }
+
                 if (!File.Exists(outstream.audiopath))
                 {
                     audiofile += " -i \"" + m.infilepath + "\"";
@@ -3118,7 +3124,7 @@ namespace XviD4PSP
                 {
                     string ext = Path.GetExtension(m.outfilepath).ToLower();
                     int bits = ((AudioStream)m.inaudiostreams[m.inaudiostream]).ff_bits;
-                    if (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == "m2ts")
+                    if (ext == ".mpg" || ext == ".vob" || ext == ".ts" || ext == ".m2ts")
                         acodec = " -acodec pcm_s" + ((bits > 0) ? bits : 16) + "be";
                     else
                         acodec = " -acodec pcm_s" + ((bits > 0) ? bits : 16) + "le";
@@ -3983,7 +3989,8 @@ namespace XviD4PSP
 
             //Дочитываем остатки лога, если что-то не успело считаться
             line = encoderProcess.StandardOutput.ReadToEnd();
-            if (!string.IsNullOrEmpty(line)) AppendEncoderText(Calculate.FilterLogMessage(r, line.Replace("\r\r\n", "\r\n")));
+            if (!string.IsNullOrEmpty(line)) AppendFilteredEncoderText(r, line.Replace("\r\r\n", "\r\n"));
+            AppendEncoderText("");
 
             //Отлавливаем ошибку по ErrorLevel (1 - Warning, 2 - Error)
             if (encoderProcess.HasExited && !IsAborted)
@@ -5267,6 +5274,16 @@ namespace XviD4PSP
             {
                 if (!string.IsNullOrEmpty(line) && !reg.IsMatch(line))
                     SetLog(line);
+            }
+        }
+
+        private void AppendFilteredEncoderText(Regex reg, string text)
+        {
+            string[] lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            foreach (string line in lines)
+            {
+                if (!string.IsNullOrEmpty(line) && !reg.IsMatch(line))
+                    AppendEncoderText(line);
             }
         }
 

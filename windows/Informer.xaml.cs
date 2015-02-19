@@ -62,7 +62,6 @@ namespace XviD4PSP
             try
             {
                 string ext = Path.GetExtension((m.infilepath_source != null) ? m.infilepath_source : m.infilepath).ToLower();
-
                 if (ext != ".avs" && ext != ".grf" && ext != ".d2v" && ext != ".dga" && ext != ".dgi")
                 {
                     //забиваем максимум параметров файла
@@ -70,7 +69,8 @@ namespace XviD4PSP
                     media.Open(m.infilepath);
 
                     //Выходим при отмене
-                    if (m == null || worker.CancellationPending) return;
+                    if (m == null || worker.CancellationPending)
+                        return;
 
                     m.invcodec = media.VCodecString;
                     m.invcodecshort = media.VCodecShort;
@@ -82,7 +82,6 @@ namespace XviD4PSP
                     m.pixelaspect = media.PixelAspect;
                     m.invideostream_mi_id = media.VTrackID();
                     m.invideostream_mi_order = media.VTrackOrder();
-                    m.intextstreams = media.CountTextStreams;
                     m.inframerate = media.FrameRate;
                     m.induration = TimeSpan.FromMilliseconds(media.Milliseconds);
                     m.outduration = m.induration;
@@ -90,7 +89,6 @@ namespace XviD4PSP
                     m.interlace_raw = media.ScanType;
                     m.fieldOrder_raw = media.ScanOrder;
                     m.inframes = media.Frames;
-                    m.standart = media.Standart;
 
                     //Возвращаем 29фпс для видео с пуллдауном, т.к. MediaInfo выдает для него 23фпс, а MPEG2Source\DGSource
                     //без ForceFilm из-за пуллдауна будет декодировать с 29-ю. Продолжительность пересчитывается в Caching.
@@ -134,8 +132,8 @@ namespace XviD4PSP
                         {
                             AudioStream stream = (AudioStream)m.inaudiostreams[m.inaudiostream];
                             //забиваем в список все найденные треки
-                            MediaInfoWrapper med = new MediaInfoWrapper();
-                            stream = med.GetAudioInfoFromAFile(stream.audiopath);
+                            MediaInfoWrapper mi = new MediaInfoWrapper();
+                            stream = mi.GetAudioInfoFromAFile(stream.audiopath, true);
                             stream.samplerate = header.samplerate.ToString();
                             m.inaudiostreams[m.inaudiostream] = stream;
                         }
@@ -153,11 +151,6 @@ namespace XviD4PSP
                         stream.language = "English";
 
                         m.isvideo = false;
-                        m.inframerate = "25.000";
-                        m.outframerate = m.inframerate;
-                        //m.inframes = (int)(m.induration.TotalSeconds * 25);
-                        //m.outframes = m.inframes;
-                        m.vdecoder = AviSynthScripting.Decoders.BlankClip;
                         stream.audiopath = m.infilepath;
                         stream = Format.GetValidADecoder(stream);
 
@@ -173,8 +166,8 @@ namespace XviD4PSP
                             AudioStream stream = new AudioStream();
 
                             //забиваем в список все найденные треки
-                            MediaInfoWrapper med = new MediaInfoWrapper();
-                            stream = med.GetAudioInfoFromAFile(apath);
+                            MediaInfoWrapper mi = new MediaInfoWrapper();
+                            stream = mi.GetAudioInfoFromAFile(apath, true);
                             stream.audiopath = apath;
                             stream.delay = Calculate.GetDelay(apath);
                             stream = Format.GetValidADecoder(stream);
@@ -210,11 +203,6 @@ namespace XviD4PSP
                                 if (media.CountVideoStreams == 0)
                                 {
                                     m.isvideo = false;
-                                    m.inframerate = "25.000";
-                                    m.outframerate = m.inframerate;
-                                    m.inframes = (int)(m.induration.TotalSeconds * 25);
-                                    m.outframes = m.inframes;
-                                    m.vdecoder = AviSynthScripting.Decoders.BlankClip;
                                     stream.audiopath = m.infilepath;
                                     stream = Format.GetValidADecoder(stream);
                                 }
@@ -277,378 +265,423 @@ namespace XviD4PSP
                     media.Close();
                 }
 
-                //довбиваем параметры с помощью FFmpeg
-                ff = new FFInfo();
-                ff.Open(m.infilepath);
-
-                //Выходим при отмене
-                if (m == null || worker.CancellationPending) return;
-
-                m.invideostream_ff_order = ff.FirstVideoStreamID();
-                m.invideostream_ff_order_filtered = ff.FilteredStreamOrder(m.invideostream_ff_order);
-                if (m.invideostream_mi_order < 0) m.invideostream_mi_order = m.invideostream_ff_order;
-
-                //null - MediaInfo для этого файла не запускалась (avs, grf..)
-                //"" - MediaInfo запускалась, но нужной инфы получить не удалось
-                if (m.inframerate == "")
+                if (ext == ".grf" || ext == ".d2v" || ext == ".dga" || ext == ".dgi")
                 {
-                    m.inframerate = ff.StreamFramerate(m.invideostream_ff_order);
-                    if (m.inframerate != "")
+                    #region grf, d2v, dga, dgi
+                    if (ext == ".grf")
                     {
-                        m.induration = ff.Duration();
-                        m.outduration = m.induration;
-                        m.inframes = (int)(m.induration.TotalSeconds * Calculate.ConvertStringToDouble(m.inframerate));
-                    }
-                }
-
-                if (ext == ".avs")
-                {
-                    //m.invideostream_ffid = 0;
-                    m.invcodec = ff.StreamCodec(m.invideostream_ff_order);
-                    m.invcodecshort = ff.StreamCodecShort(m.invideostream_ff_order);
-                    m.invbitrate = ff.VideoBitrate(m.invideostream_ff_order);
-                    m.inresw = ff.StreamW(m.invideostream_ff_order);
-                    m.inresh = ff.StreamH(m.invideostream_ff_order);
-                    m.inaspect = (double)m.inresw / (double)m.inresh;
-                }
-                else if (ext == ".grf")
-                {
-                    string infile = Path.GetFileNameWithoutExtension(m.infilepath).ToLower();
-                    if (infile.StartsWith("audio"))
-                    {
-                        //Это аудио-граф
-                        m.isvideo = false;
-                        m.inframerate = m.outframerate = "25.000";
-                        m.vdecoder = AviSynthScripting.Decoders.BlankClip;
-
-                        AudioStream stream = new AudioStream();
-                        stream.audiopath = m.infilepath;
-                        stream.audiofiles = new string[] { stream.audiopath };
-                        stream.codec = stream.codecshort = "PCM";
-                        stream.language = "Unknown";
-                        stream = Format.GetValidADecoder(stream);
-                        m.inaudiostreams.Add(stream.Clone());
-                    }
-                    else
-                    {
-                        //Это видео-граф
-                        m.invcodec = "RAWVIDEO";
-                        m.invcodecshort = "RAWVIDEO";
-
-                        //Если DirectShowSource не сможет определить fps, то требуемое значение можно будет указать в имени файла..
-                        Regex r = new Regex(@"(fps\s?=\s?([\d\.\,]*))", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        Match mat = r.Match(infile);
-                        if (mat.Success)
+                        string infile = Path.GetFileNameWithoutExtension(m.infilepath).ToLower();
+                        if (infile.StartsWith("audio"))
                         {
-                            double fps = Calculate.ConvertStringToDouble(mat.Groups[2].Value);
-                            if (fps > 0) m.inframerate = Calculate.ConvertDoubleToPointString(fps);
+                            //Это аудио-граф
+                            m.isvideo = false;
 
-                            //"Очищаем" имя файла
-                            infile = infile.Replace(mat.Groups[1].Value, "").Trim(new char[] { ' ', '_', '-', '(', ')', '.', ',' });
+                            AudioStream stream = new AudioStream();
+                            stream.audiopath = m.infilepath;
+                            stream.audiofiles = new string[] { stream.audiopath };
+                            stream.codec = stream.codecshort = "PCM";
+                            stream.language = "Unknown";
+                            stream = Format.GetValidADecoder(stream);
+                            m.inaudiostreams.Add(stream.Clone());
                         }
-
-                        //Ищем звук к нему
-                        if (Settings.EnableAudio)
+                        else
                         {
-                            //Почему на шаблон "audio*.grf" находятся и файлы типа "Копия audio file.grf"?!
-                            string[] afiles = Directory.GetFiles(Path.GetDirectoryName(m.infilepath), "audio*.grf");
-                            foreach (string afile in afiles)
+                            //Это видео-граф
+                            m.invcodec = "RAWVIDEO";
+                            m.invcodecshort = "RAWVIDEO";
+
+                            //Если DirectShowSource не сможет определить fps, то требуемое значение можно будет указать в имени файла..
+                            Regex r = new Regex(@"(fps\s?=\s?([\d\.\,]*))", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            Match mat = r.Match(infile);
+                            if (mat.Success)
                             {
-                                string aname = Path.GetFileNameWithoutExtension(afile).ToLower();
-                                if (aname.StartsWith("audio") && aname.Contains(infile))
+                                double fps = Calculate.ConvertStringToDouble(mat.Groups[2].Value);
+                                if (fps > 0) m.inframerate = Calculate.ConvertDoubleToPointString(fps);
+
+                                //"Очищаем" имя файла
+                                infile = infile.Replace(mat.Groups[1].Value, "").Trim(new char[] { ' ', '_', '-', '(', ')', '.', ',' });
+                            }
+
+                            //Ищем звук к нему
+                            if (Settings.EnableAudio)
+                            {
+                                //Почему на шаблон "audio*.grf" находятся и файлы типа "Копия audio file.grf"?!
+                                string[] afiles = Directory.GetFiles(Path.GetDirectoryName(m.infilepath), "audio*.grf");
+                                foreach (string afile in afiles)
                                 {
-                                    AudioStream stream = new AudioStream();
-                                    stream.audiopath = afile;
-                                    stream.audiofiles = new string[] { stream.audiopath };
-                                    stream.codec = stream.codecshort = "PCM";
-                                    stream.language = "Unknown";
-                                    stream = Format.GetValidADecoder(stream);
-                                    m.inaudiostreams.Add(stream.Clone());
-                                    break; //Только один трек
+                                    string aname = Path.GetFileNameWithoutExtension(afile).ToLower();
+                                    if (aname.StartsWith("audio") && aname.Contains(infile))
+                                    {
+                                        AudioStream stream = new AudioStream();
+                                        stream.audiopath = afile;
+                                        stream.audiofiles = new string[] { stream.audiopath };
+                                        stream.codec = stream.codecshort = "PCM";
+                                        stream.language = "Unknown";
+                                        stream = Format.GetValidADecoder(stream);
+                                        m.inaudiostreams.Add(stream.Clone());
+                                        break; //Только один трек
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                else if (ext == ".d2v")
-                {
-                    //Читаем d2v-файл
-                    int n = 0;
-                    string line = "";
-                    Match mat1;
-                    Match mat2;
-                    Regex r1 = new Regex(@"Picture_Size=(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                    Regex r2 = new Regex(@"Aspect_Ratio=(\d+\.*\d*):(\d+\.*\d*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                    int result1 = 720; int result2 = 576; double result3 = 4; double result4 = 3; //Значения по-умолчанию
-                    using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
-                        while (!sr.EndOfStream && n < 15) //Ограничиваемся первыми 15-ю строчками
-                        {
-                            line = sr.ReadLine();
-                            mat1 = r1.Match(line);
-                            mat2 = r2.Match(line);
-                            if (mat1.Success)
-                            {
-                                result1 = Convert.ToInt32(mat1.Groups[1].Value);
-                                result2 = Convert.ToInt32(mat1.Groups[2].Value);
-                            }
-                            if (mat2.Success)
-                            {
-                                result3 = Calculate.ConvertStringToDouble(mat2.Groups[1].Value);
-                                result4 = Calculate.ConvertStringToDouble(mat2.Groups[2].Value);
-                            }
-                            n += 1;
-                        }
-                    m.inresw = result1;
-                    m.inresh = result2;
-                    m.inaspect = result3 / result4;
-                    m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
-                    m.invcodecshort = "MPEG2";
-                }
-                else if (ext == ".dga")
-                {
-                    //Смотрим, на месте ли log-файл
-                    string log_file = Calculate.RemoveExtention(m.infilepath) + "log";
-                    if (File.Exists(log_file))
+                    else if (ext == ".d2v")
                     {
-                        //Читаем log-файл
-                        string text_log = "";
-                        Match mat;
-                        Regex r1 = new Regex(@"Frame.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        int result1 = 1280; int result2 = 720; double result3 = 1; double result4 = 1; //Значения по-умолчанию
-                        using (StreamReader sr = new StreamReader(log_file, System.Text.Encoding.Default))
-                            text_log = sr.ReadToEnd();
-
-                        mat = r1.Match(text_log);
-                        if (mat.Success)
-                        {
-                            result1 = Convert.ToInt32(mat.Groups[1].Value);
-                            result2 = Convert.ToInt32(mat.Groups[2].Value);
-                        }
-                        mat = r2.Match(text_log);
-                        if (mat.Success)
-                        {
-                            result3 = Convert.ToDouble(mat.Groups[1].Value);
-                            result4 = Convert.ToDouble(mat.Groups[2].Value);
-                        }
-
+                        //Читаем d2v-файл
+                        int n = 0;
+                        string line = "";
+                        Match mat1;
+                        Match mat2;
+                        Regex r1 = new Regex(@"Picture_Size=(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        Regex r2 = new Regex(@"Aspect_Ratio=(\d+\.*\d*):(\d+\.*\d*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                        int result1 = 720; int result2 = 576; double result3 = 4; double result4 = 3; //Значения по-умолчанию
+                        using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                            while (!sr.EndOfStream && n < 15) //Ограничиваемся первыми 15-ю строчками
+                            {
+                                line = sr.ReadLine();
+                                mat1 = r1.Match(line);
+                                mat2 = r2.Match(line);
+                                if (mat1.Success)
+                                {
+                                    result1 = Convert.ToInt32(mat1.Groups[1].Value);
+                                    result2 = Convert.ToInt32(mat1.Groups[2].Value);
+                                }
+                                if (mat2.Success)
+                                {
+                                    result3 = Calculate.ConvertStringToDouble(mat2.Groups[1].Value);
+                                    result4 = Calculate.ConvertStringToDouble(mat2.Groups[2].Value);
+                                }
+                                n += 1;
+                            }
                         m.inresw = result1;
                         m.inresh = result2;
-                        m.inaspect = (result3 / result4) * ((double)m.inresw / (double)m.inresh);
+                        m.inaspect = result3 / result4;
                         m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
-                        //можно еще определить тут фпс, но всё-равно это будет сделано позже через ависинт-скрипт (class Caching). 
-                        m.invcodecshort = "h264";
+                        m.invcodecshort = "MPEG2";
                     }
-                    else
+                    else if (ext == ".dga")
                     {
-                        //Если нет log-файла, ищем исходный файл и берем инфу из него
-                        Match mat;
-                        string source_file = "";
-                        Regex r = new Regex(@"(\D:\\.*\..*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
-                            for (int i = 0; i < 3 && !sr.EndOfStream; i += 1)
+                        //Смотрим, на месте ли log-файл
+                        string log_file = Calculate.RemoveExtention(m.infilepath) + "log";
+                        if (File.Exists(log_file))
+                        {
+                            //Читаем log-файл
+                            string text_log = "";
+                            Match mat;
+                            Regex r1 = new Regex(@"Frame.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            int result1 = 1280; int result2 = 720; double result3 = 1; double result4 = 1; //Значения по-умолчанию
+                            using (StreamReader sr = new StreamReader(log_file, System.Text.Encoding.Default))
+                                text_log = sr.ReadToEnd();
+
+                            mat = r1.Match(text_log);
+                            if (mat.Success)
                             {
-                                source_file = sr.ReadLine();
+                                result1 = Convert.ToInt32(mat.Groups[1].Value);
+                                result2 = Convert.ToInt32(mat.Groups[2].Value);
                             }
-                        mat = r.Match(source_file);
-                        if (mat.Success && File.Exists(source_file = mat.Groups[1].Value))
-                        {
-                            MediaInfoWrapper media = new MediaInfoWrapper();
-                            media.Open(source_file);
-                            m.invcodecshort = media.VCodecShort;
-                            m.inresw = media.Width;
-                            m.inresh = media.Height;
-                            m.inaspect = media.Aspect;
-                            m.pixelaspect = media.PixelAspect;
-                            media.Close();
-                        }
-                        else
-                        {
-                            throw new Exception(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + log_file +
-                                "\r\n" + Languages.Translate("And can`t determine the source-file."));
-                        }
-                    }
-                }
-                else if (ext == ".dgi")
-                {
-                    //Путь к декодеру 
-                    using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
-                        for (int i = 0; i < 2 && !sr.EndOfStream; i += 1)
-                        {
-                            m.dgdecnv_path = sr.ReadLine();
-                        }
-                    if (!File.Exists(m.dgdecnv_path + "DGDecodeNV.dll"))
-                    {
-                        throw new Exception(Languages.Translate("Can`t find file") + ": " + m.dgdecnv_path + "DGDecodeNV.dll");
-                    }
-
-                    //Смотрим, на месте ли log-файл
-                    string log_file = Calculate.RemoveExtention(m.infilepath) + "log";
-                    if (File.Exists(log_file))
-                    {
-                        //Читаем log-файл
-                        Match mat;
-                        string text_log = "";
-                        Regex r1 = new Regex(@"Coded.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        Regex r3 = new Regex(@"Aspect.Ratio:.(\d+\.*\d*):(\d+\.*\d*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        Regex r4 = new Regex(@"Video.Type:.(.*).", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        double result1, result2;
-                        text_log = File.ReadAllText(log_file, System.Text.Encoding.Default);
-
-                        //Разрешение (Coded Size:)
-                        mat = r1.Match(text_log);
-                        if (mat.Success)
-                        {
-                            m.inresw = Convert.ToInt32(mat.Groups[1].Value);
-                            m.inresh = Convert.ToInt32(mat.Groups[2].Value);
-
-                            //Аспект (SAR:)
                             mat = r2.Match(text_log);
                             if (mat.Success)
                             {
-                                result1 = Convert.ToDouble(mat.Groups[1].Value);
-                                result2 = Convert.ToDouble(mat.Groups[2].Value);
+                                result3 = Convert.ToDouble(mat.Groups[1].Value);
+                                result4 = Convert.ToDouble(mat.Groups[2].Value);
+                            }
 
-                                m.inaspect = (result1 / result2) * ((double)m.inresw / (double)m.inresh);
-                                m.pixelaspect = result1 / result2;
+                            m.inresw = result1;
+                            m.inresh = result2;
+                            m.inaspect = (result3 / result4) * ((double)m.inresw / (double)m.inresh);
+                            m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
+                            //можно еще определить тут фпс, но всё-равно это будет сделано позже через ависинт-скрипт (class Caching). 
+                            m.invcodecshort = "h264";
+                        }
+                        else
+                        {
+                            //Если нет log-файла, ищем исходный файл и берем инфу из него
+                            Match mat;
+                            string source_file = "";
+                            Regex r = new Regex(@"(\D:\\.*\..*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                                for (int i = 0; i < 3 && !sr.EndOfStream; i += 1)
+                                {
+                                    source_file = sr.ReadLine();
+                                }
+                            mat = r.Match(source_file);
+                            if (mat.Success && File.Exists(source_file = mat.Groups[1].Value))
+                            {
+                                MediaInfoWrapper media = new MediaInfoWrapper();
+                                media.Open(source_file);
+                                m.invcodecshort = media.VCodecShort;
+                                m.inresw = media.Width;
+                                m.inresh = media.Height;
+                                m.inaspect = media.Aspect;
+                                m.pixelaspect = media.PixelAspect;
+                                media.Close();
                             }
                             else
                             {
-                                //Аспект (Aspect Ratio:)
-                                mat = r3.Match(text_log);
+                                throw new Exception(Languages.Translate("Can`t find DGAVCIndex log-file:") + " " + log_file +
+                                    "\r\n" + Languages.Translate("And can`t determine the source-file."));
+                            }
+                        }
+                    }
+                    else if (ext == ".dgi")
+                    {
+                        //Путь к декодеру 
+                        using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                            for (int i = 0; i < 2 && !sr.EndOfStream; i += 1)
+                            {
+                                m.dgdecnv_path = sr.ReadLine();
+                            }
+                        if (!File.Exists(m.dgdecnv_path + "DGDecodeNV.dll"))
+                        {
+                            throw new Exception(Languages.Translate("Can`t find file") + ": " + m.dgdecnv_path + "DGDecodeNV.dll");
+                        }
+
+                        //Смотрим, на месте ли log-файл
+                        string log_file = Calculate.RemoveExtention(m.infilepath) + "log";
+                        if (File.Exists(log_file))
+                        {
+                            //Читаем log-файл
+                            Match mat;
+                            string text_log = "";
+                            Regex r1 = new Regex(@"Coded.Size:.(\d+)x(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            Regex r2 = new Regex(@"SAR:.(\d+):(\d+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            Regex r3 = new Regex(@"Aspect.Ratio:.(\d+\.*\d*):(\d+\.*\d*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            Regex r4 = new Regex(@"Video.Type:.(.*).", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            double result1, result2;
+                            text_log = File.ReadAllText(log_file, System.Text.Encoding.Default);
+
+                            //Разрешение (Coded Size:)
+                            mat = r1.Match(text_log);
+                            if (mat.Success)
+                            {
+                                m.inresw = Convert.ToInt32(mat.Groups[1].Value);
+                                m.inresh = Convert.ToInt32(mat.Groups[2].Value);
+
+                                //Аспект (SAR:)
+                                mat = r2.Match(text_log);
                                 if (mat.Success)
                                 {
-                                    result1 = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
-                                    result2 = Calculate.ConvertStringToDouble(mat.Groups[2].Value);
+                                    result1 = Convert.ToDouble(mat.Groups[1].Value);
+                                    result2 = Convert.ToDouble(mat.Groups[2].Value);
 
-                                    m.inaspect = result1 / result2;
-                                    m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
+                                    m.inaspect = (result1 / result2) * ((double)m.inresw / (double)m.inresh);
+                                    m.pixelaspect = result1 / result2;
                                 }
                                 else
                                 {
-                                    m.inaspect = (double)m.inresw / (double)m.inresh;
-                                    m.pixelaspect = 1.0;
+                                    //Аспект (Aspect Ratio:)
+                                    mat = r3.Match(text_log);
+                                    if (mat.Success)
+                                    {
+                                        result1 = Calculate.ConvertStringToDouble(mat.Groups[1].Value);
+                                        result2 = Calculate.ConvertStringToDouble(mat.Groups[2].Value);
+
+                                        m.inaspect = result1 / result2;
+                                        m.pixelaspect = m.inaspect / ((double)m.inresw / (double)m.inresh);
+                                    }
+                                    else
+                                    {
+                                        m.inaspect = (double)m.inresw / (double)m.inresh;
+                                        m.pixelaspect = 1.0;
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            m.inaspect = 16.0 / 9.0;
-                            m.pixelaspect = 1.0;
-                        }
-
-                        //Кодек
-                        mat = r4.Match(text_log);
-                        if (mat.Success)
-                        {
-                            string codec = mat.Groups[1].Value;
-                            if (codec == "AVC") codec = "h264";
-                            m.invcodecshort = codec;
-                        }
-                    }
-                    else
-                    {
-                        //Если нет log-файла, ищем исходный файл и берем инфу из него
-                        string source_file = "";
-                        Regex r = new Regex(@"(\D:\\.*\..*)\s\d+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-                        using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
-                            for (int i = 0; i < 4 && !sr.EndOfStream; i += 1)
+                            else
                             {
-                                source_file = sr.ReadLine();
+                                m.inaspect = 16.0 / 9.0;
+                                m.pixelaspect = 1.0;
                             }
-                        Match mat = r.Match(source_file);
-                        if (mat.Success && File.Exists(source_file = mat.Groups[1].Value))
-                        {
-                            MediaInfoWrapper media = new MediaInfoWrapper();
-                            media.Open(source_file);
-                            m.invcodecshort = media.VCodecShort;
-                            m.inresw = media.Width;
-                            m.inresh = media.Height;
-                            m.inaspect = media.Aspect;
-                            m.pixelaspect = media.PixelAspect;
-                            media.Close();
+
+                            //Кодек
+                            mat = r4.Match(text_log);
+                            if (mat.Success)
+                            {
+                                string codec = mat.Groups[1].Value;
+                                if (codec == "AVC") codec = "h264";
+                                m.invcodecshort = codec;
+                            }
                         }
                         else
                         {
-                            throw new Exception(Languages.Translate("Can`t find DGIndexNV log-file:") + " " + log_file +
-                               "\r\n" + Languages.Translate("And can`t determine the source-file."));
+                            //Если нет log-файла, ищем исходный файл и берем инфу из него
+                            string source_file = "";
+                            Regex r = new Regex(@"(\D:\\.*\..*)\s\d+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+                            using (StreamReader sr = new StreamReader(m.indexfile, System.Text.Encoding.Default))
+                                for (int i = 0; i < 4 && !sr.EndOfStream; i += 1)
+                                {
+                                    source_file = sr.ReadLine();
+                                }
+                            Match mat = r.Match(source_file);
+                            if (mat.Success && File.Exists(source_file = mat.Groups[1].Value))
+                            {
+                                MediaInfoWrapper media = new MediaInfoWrapper();
+                                media.Open(source_file);
+                                m.invcodecshort = media.VCodecShort;
+                                m.inresw = media.Width;
+                                m.inresh = media.Height;
+                                m.inaspect = media.Aspect;
+                                m.pixelaspect = media.PixelAspect;
+                                media.Close();
+                            }
+                            else
+                            {
+                                throw new Exception(Languages.Translate("Can`t find DGIndexNV log-file:") + " " + log_file +
+                                   "\r\n" + Languages.Translate("And can`t determine the source-file."));
+                            }
                         }
                     }
+                    #endregion
                 }
-                else if (m.isvideo && Settings.UseFFmpegAR)
+                else
                 {
-                    double par = ff.CalculatePAR(m.invideostream_ff_order);
-                    if (par != 0) m.pixelaspect = par;
-                    double dar = ff.CalculateDAR(m.invideostream_ff_order);
-                    if (dar != 0) m.inaspect = dar;
+                    //Довбиваем параметры с помощью FFmpeg
+                    ff = new FFInfo();
+                    ff.Open(m.infilepath);
+
+                    //Выходим при отмене
+                    if (m == null || worker.CancellationPending)
+                        return;
+
+                    //Видео
+                    if (ff.VideoStreams().Count > 0)
+                    {
+                        m.invideostream_ff_order = ff.FirstVideoStreamID();
+                        m.invideostream_ff_order_filtered = ff.FilteredStreamOrder(m.invideostream_ff_order);
+                        if (m.invideostream_mi_order < 0) m.invideostream_mi_order = m.invideostream_ff_order;
+
+                        if (ext == ".avs")
+                        {
+                            m.invcodec = ff.StreamCodec(m.invideostream_ff_order);
+                            m.invcodecshort = ff.StreamCodecShort(m.invideostream_ff_order);
+                            m.invbitrate = ff.VideoBitrate(m.invideostream_ff_order);
+                            m.inresw = ff.StreamW(m.invideostream_ff_order);
+                            m.inresh = ff.StreamH(m.invideostream_ff_order);
+                            m.inaspect = (double)m.inresw / (double)m.inresh;
+                        }
+                        else if (Settings.UseFFmpegAR)
+                        {
+                            double sar = ff.CalculateSAR(m.invideostream_ff_order);
+                            if (sar != 0) m.pixelaspect = sar;
+                            double dar = ff.CalculateDAR(m.invideostream_ff_order);
+                            if (dar != 0) m.inaspect = dar;
+                        }
+
+                        //null - MediaInfo для этого файла не запускалась (avs, grf,..)
+                        //"" - MediaInfo запускалась, но нужной инфы получить не удалось
+                        //При null тут все-же можно определить fps для avs, но т.к. FFmpeg
+                        //сильно округляет fps, то лучше сами позже определим его в Caching().
+                        if (m.inframerate == "")
+                        {
+                            m.inframerate = ff.StreamFramerate(m.invideostream_ff_order);
+                            if (m.inframerate != "")
+                            {
+                                m.induration = ff.Duration();
+                                m.outduration = m.induration;
+                                m.inframes = (int)(m.induration.TotalSeconds * Calculate.ConvertStringToDouble(m.inframerate));
+                            }
+                        }
+                    }
+
+                    //Аудио
+                    if (ff.AudioStreams().Count > 0)
+                    {
+                        ArrayList AStreams = ff.AudioStreams();
+                        ArrayList AStreams_done = new ArrayList();
+
+                        //подправляем кодек, ffID, язык
+                        //Это будет работать как надо, только если очерёдность наших треков
+                        //совпадает с их очерёдностью в FFmpeg, иначе инфа о треках перепутается!
+                        int astream = 0;
+                        foreach (object o in m.inaudiostreams)
+                        {
+                            AudioStream s = (AudioStream)o;
+                            s.ff_order = (int)AStreams[astream]; //ID трека для FFmpeg
+                            s.ff_order_filtered = ff.FilteredStreamOrder(s.ff_order);
+                            if (s.mi_order < 0) s.mi_order = s.ff_order;
+                            if (s.bitrate == 0) s.bitrate = ff.AudioBitrate(s.ff_order);
+                            if (s.channels == 0) s.channels = ff.StreamChannels(s.ff_order);
+                            if (s.samplerate == null) s.samplerate = ff.StreamSamplerate(s.ff_order);
+                            if (s.language == "Unknown") s.language = ff.StreamLanguage(s.ff_order);
+                            s.ff_bits = ff.StreamBits(s.ff_order);
+                            s.ff_codec = ff.StreamCodec(s.ff_order);
+                            if (s.codec == "A_MS/ACM" || s.codec == "")
+                            {
+                                s.codec = s.ff_codec;
+                                s.codecshort = ff.StreamCodecShort(s.ff_order);
+                            }
+
+                            AStreams_done.Add(AStreams[astream]);
+
+                            astream++;
+                            if (astream >= AStreams.Count) break;
+                        }
+
+                        //Удаляем все FF-треки, инфа от которых уже взята
+                        foreach (object obj in AStreams_done)
+                            AStreams.Remove(obj);
+
+                        //Еще раз перепроверка для звуковых файлов (файл без видео), если
+                        //выше через MI это не отловилось (т.е. через MI звук не обнаружился)
+                        bool is_audio_only = (m.isvideo && string.IsNullOrEmpty(m.inframerate) && string.IsNullOrEmpty(m.invcodec) && (m.inresw == 0 || m.inresh == 0) && ff.VideoStreams().Count == 0);
+
+                        if ((m.indexfile == null && Settings.EnableAudio || ext == ".avs" || is_audio_only) && AStreams.Count > 0)
+                        {
+                            //забиваем аудио, если они ещё не забиты (если FF-треков осталось больше, чем у нас уже есть)
+                            //Все оставшиеся треки от FFmpeg добавляются к уже имеющимся. Тут тоже нужно как-то
+                            //сопоставлять треки, и объединить это всё с кодом, который выше!
+                            foreach (int stream_num in AStreams)
+                            {
+                                AudioStream stream = new AudioStream();
+                                stream.ff_bits = ff.StreamBits(stream_num);
+                                stream.ff_codec = stream.codec = ff.StreamCodec(stream_num);
+                                stream.codecshort = ff.StreamCodecShort(stream_num);
+                                stream.bitrate = ff.AudioBitrate(stream_num);
+                                stream.samplerate = ff.StreamSamplerate(stream_num);
+                                stream.bits = ff.StreamBits(stream_num);
+                                stream.channels = ff.StreamChannels(stream_num);
+                                stream.language = ff.StreamLanguage(stream_num);
+                                stream.mi_order = stream.ff_order = stream_num;
+                                stream.ff_order_filtered = ff.FilteredStreamOrder(stream_num);
+
+                                if (is_audio_only)
+                                {
+                                    m.isvideo = false;
+
+                                    stream.audiopath = m.infilepath;
+                                    stream = Format.GetValidADecoder(stream);
+                                }
+
+                                m.inaudiostreams.Add(stream.Clone());
+                            }
+
+                            m.inaudiostream = 0;
+                        }
+                    }
+
+                    //Закрываем FFInfo
+                    CloseFFInfo();
                 }
 
-                //Аудио
-                if (ff.AudioStreams().Count > 0)
+                if (!m.isvideo)
                 {
-                    ArrayList AStreams = ff.AudioStreams();
-                    ArrayList AStreams_done = new ArrayList();
+                    m.invcodec = m.invcodecshort = "NONE";
+                    m.inframerate = m.outframerate = "25.000";
+                    m.vdecoder = AviSynthScripting.Decoders.BlankClip;
 
-                    //подправляем кодек, ffID, язык
-                    //Это будет работать как надо, только если очерёдность наших треков
-                    //совпадает с их очерёдностью в FFmpeg, иначе инфа о треках перепутается!
-                    int astream = 0;
-                    foreach (object o in m.inaudiostreams)
-                    {
-                        AudioStream s = (AudioStream)o;
-                        s.ff_order = (int)AStreams[astream]; //ID трека для FFmpeg
-                        s.ff_order_filtered = ff.FilteredStreamOrder(s.ff_order);
-                        if (s.mi_order < 0) s.mi_order = s.ff_order;
-                        if (s.bitrate == 0) s.bitrate = ff.AudioBitrate(s.ff_order);
-                        if (s.channels == 0) s.channels = ff.StreamChannels(s.ff_order);
-                        if (s.samplerate == null) s.samplerate = ff.StreamSamplerate(s.ff_order);
-                        if (s.language == "Unknown") s.language = ff.StreamLanguage(s.ff_order);
-                        s.ff_bits = ff.StreamBits(s.ff_order);
-                        s.ff_codec = ff.StreamCodec(s.ff_order);
-                        if (s.codec == "A_MS/ACM")
-                        {
-                            s.codec = s.ff_codec;
-                            s.codecshort = ff.StreamCodecShort(s.ff_order);
-                        }
-
-                        AStreams_done.Add(AStreams[astream]);
-
-                        astream++;
-                        if (astream >= AStreams.Count) break;
-                    }
-
-                    //Удаляем все FF-треки, инфа от которых уже взята
-                    foreach (object obj in AStreams_done)
-                        AStreams.Remove(obj);
-
-                    if ((m.indexfile == null && Settings.EnableAudio || ext == ".avs") && AStreams.Count > 0)
-                    {
-                        //забиваем аудио, если они ещё не забиты (если FF-треков осталось больше, чем у нас уже есть)
-                        //Все оставшиеся треки от FFmpeg добавляются к уже имеющимся. Тут тоже нужно как-то
-                        //сопоставлять треки, и объединить это всё с кодом, который выше!
-                        foreach (int stream_num in AStreams)
-                        {
-                            AudioStream stream = new AudioStream();
-                            stream.ff_bits = ff.StreamBits(stream_num);
-                            stream.ff_codec = stream.codec = ff.StreamCodec(stream_num);
-                            stream.codecshort = ff.StreamCodecShort(stream_num);
-                            stream.bitrate = ff.AudioBitrate(stream_num);
-                            stream.samplerate = ff.StreamSamplerate(stream_num);
-                            stream.bits = ff.StreamBits(stream_num);
-                            stream.channels = ff.StreamChannels(stream_num);
-                            stream.language = ff.StreamLanguage(stream_num);
-                            stream.mi_order = stream.ff_order = stream_num;
-                            stream.ff_order_filtered = ff.FilteredStreamOrder(stream_num);
-                            m.inaudiostreams.Add(stream.Clone());
-                        }
-
-                        m.inaudiostream = 0;
-                    }
+                    //Кол-во кадров и продолжительность определятся в Caching()
+                    //на основе реальной продолжительности звука от декодера
+                    m.induration = m.outduration = TimeSpan.Zero;
+                    m.inframes = m.outframes = 0;
                 }
 
-                //Закрываем FFInfo
-                CloseFFInfo();
+                //определяем аудио декодер
+                foreach (object o in m.inaudiostreams)
+                {
+                    AudioStream s = (AudioStream)o;
+                    if (s.decoder == 0)
+                        s = Format.GetValidADecoder(s);
+                }
 
                 //подсчитываем размер
                 long sizeb = 0;
@@ -659,14 +692,6 @@ namespace XviD4PSP
                 }
                 m.infilesize = Calculate.ConvertDoubleToPointString((double)sizeb / 1049511, 1) + " mb";
                 m.infilesizeint = (int)((double)sizeb / 1049511);
-
-                //определяем аудио декодер
-                foreach (object o in m.inaudiostreams)
-                {
-                    AudioStream s = (AudioStream)o;
-                    if (s.decoder == 0)
-                        s = Format.GetValidADecoder(s);
-                }
             }
             catch (Exception ex)
             {

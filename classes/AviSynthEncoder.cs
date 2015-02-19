@@ -265,19 +265,17 @@ namespace XviD4PSP
 
                 AudioStream stream = (AudioStream)m.outaudiostreams[m.outaudiostream];
 
-                if (encoderPath.Contains("neroAacEnc.exe"))
+                if (encoderPath.EndsWith("neroAacEnc.exe"))
                 {
                     info.Arguments = "-ignorelength " + stream.passes + " -if - -of \"" + outfilepath + "\"";
                 }
-                else if (encoderPath.Contains("qaac.exe"))
+                else if (encoderPath.EndsWith("qaac.exe"))
                 {
                     info.Arguments = stream.passes + " --no-optimize --ignorelength - -o \"" + outfilepath + "\"";
-
-                    //Начиная с версии 1.26 qaac.exe работает со stdout\stderr используя UTF-8
-                    info.StandardOutputEncoding = System.Text.Encoding.UTF8;
-                    info.StandardErrorEncoding = System.Text.Encoding.UTF8;
+                    info.StandardOutputEncoding = Encoding.UTF8;
+                    info.StandardErrorEncoding = Encoding.UTF8;
                 }
-                else if (encoderPath.Contains("lame.exe"))
+                else if (encoderPath.EndsWith("lame.exe"))
                 {
                     string resample = "";
                     if (m.mp3_options.forcesamplerate)
@@ -290,12 +288,13 @@ namespace XviD4PSP
                         if (!info.Arguments.Contains("-m m")) info.Arguments = "-m m " + info.Arguments;
                     }
                 }
-                else if (encoderPath.Contains("ffmpeg.exe"))
+                else if (encoderPath.EndsWith("ffmpeg.exe"))
                 {
-                    info.Arguments = "-i - " + stream.passes + " -vn \"" + outfilepath + "\"";
+                    info.Arguments = "-i - " + stream.passes + " -vn \"" + outfilepath + "\" -hide_banner -nostdin";
+                    info.StandardOutputEncoding = Encoding.UTF8;
                     info.StandardErrorEncoding = Encoding.UTF8;
                 }
-                else if (encoderPath.Contains("aften.exe"))
+                else if (encoderPath.EndsWith("aften.exe"))
                     info.Arguments = stream.passes + " - \"" + outfilepath + "\"";
 
                 //запоминаем аргументы для лога

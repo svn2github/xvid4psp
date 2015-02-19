@@ -223,9 +223,12 @@ namespace XviD4PSP
                 }
             }
 
+            //Дочитываем остатки лога, если что-то не успело считаться
+            line = encoderProcess.StandardError.ReadToEnd();
+            if (!string.IsNullOrEmpty(line)) AppendEncoderText(Calculate.FilterLogMessage(r, line));
+
             //чистим ресурсы
             exit_code = encoderProcess.ExitCode;
-            AppendEncoderText(encoderProcess.StandardError.ReadToEnd());
             encoderProcess.Close();
             encoderProcess.Dispose();
             encoderProcess = null;
@@ -236,7 +239,7 @@ namespace XviD4PSP
             if (exit_code != 0 && encodertext.Length > 0)
             {
                 //Оставляем только последнюю строчку из всего лога
-                string[] log = encodertext.ToString().Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                string[] log = encodertext.ToString().Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                 throw new Exception(log[log.Length - 1]);
             }
             if (!File.Exists(outfile) || new FileInfo(outfile).Length == 0)
@@ -303,6 +306,10 @@ namespace XviD4PSP
                     }
                 }
             }
+
+            //Дочитываем остатки лога, если что-то не успело считаться
+            line = encoderProcess.StandardError.ReadToEnd();
+            if (!string.IsNullOrEmpty(line)) AppendEncoderText(Calculate.FilterLogMessage(r, line));
 
             //чистим ресурсы
             exit_code = encoderProcess.ExitCode;

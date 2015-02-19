@@ -194,7 +194,7 @@ namespace XviD4PSP
                         tbxInfo.Text += "Width               : " + ff.StreamW(num) + " pixels\r\n";
                         tbxInfo.Text += "Height              : " + ff.StreamH(num) + " pixels\r\n";
                         tbxInfo.Text += "Aspect (DAR)        : " + ff.StreamDAR(num) + Environment.NewLine;
-                        tbxInfo.Text += "Aspect (SAR)        : " + ff.StreamPAR(num) + Environment.NewLine;
+                        tbxInfo.Text += "Aspect (SAR)        : " + ff.StreamSAR(num) + Environment.NewLine;
                         tbxInfo.Text += "Colorspace          : " + ff.StreamColor(num) + Environment.NewLine;
                         tbxInfo.Text += "Framerate           : " + ff.StreamFramerate(num) + " fps\r\n";
                         tbxInfo.Text += "Bitrate             : " + ff.VideoBitrate(num) + " Kbps\r\n";

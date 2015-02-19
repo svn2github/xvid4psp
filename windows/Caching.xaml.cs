@@ -20,14 +20,16 @@ namespace XviD4PSP
         private static object locker = new object();
         private BackgroundWorker worker = null;
         private AviSynthReader reader = null;
+        private bool only_audio = false;
         private int num_closes = 0;
         private int counter = 0;
         public Massive m;
 
-        public Caching(Massive mass)
+        public Caching(Massive mass, bool check_audio_only)
         {
             this.InitializeComponent();
             this.Owner = App.Current.MainWindow;
+            this.only_audio = check_audio_only;
             this.m = mass.Clone();
 
             //забиваем
@@ -58,7 +60,8 @@ namespace XviD4PSP
         private void worker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             //Выходим при отмене
-            if (m == null || worker.CancellationPending) return;
+            if (m == null || worker.CancellationPending)
+                return;
 
             string script = "";
             try
@@ -72,54 +75,72 @@ namespace XviD4PSP
                 reader.ParseScript(script);
 
                 //Выходим при отмене
-                if (m == null || worker.CancellationPending) return;
+                if (m == null || worker.CancellationPending)
+                    return;
 
-                AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
-
-                if (reader.Framerate != Double.PositiveInfinity && reader.Framerate != 0.0)
+                //Видео
+                if (!only_audio)
                 {
-                    m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
-                    m.outduration = m.induration;
-                    m.inframes = reader.FrameCount;
-                    if (string.IsNullOrEmpty(m.inframerate))
-                        m.inframerate = Calculate.ConvertDoubleToPointString(reader.Framerate);
-                }
-
-                if (m.isvideo && ext != ".avs" && (reader.Width == 0 || reader.Height == 0))
-                {
-                    throw new Exception(m.vdecoder.ToString() + " can't decode video (zero-size image was returned)!");
-                }
-                else if ((m.vdecoder == AviSynthScripting.Decoders.LSMASHVideoSource || m.vdecoder == AviSynthScripting.Decoders.LWLibavVideoSource) && //16 - допуск на паддинг и т.д.
-                    string.IsNullOrEmpty(m.disable_hacked_vout) && ((Math.Abs(reader.Width / 2 - m.inresw) < 16) || (Math.Abs(reader.Height / 2 - m.inresh)) < 16))
-                {
-                    //LSMASH декодирует многобитное видео с удвоением ширины\высоты, пока-что это не поддерживается
-                    m.disable_hacked_vout = Calculate.GetLSMASHFormat8(reader.Clip.OriginalColorspace);
-                    throw new Exception("Hacked output");
-                }
-                else
-                {
-                    m.inresw = reader.Width;
-                    m.inresh = reader.Height;
-
-                    if (m.inaspect == 0 || double.IsNaN(m.inaspect))
-                        m.inaspect = (double)m.inresw / (double)m.inresh;
-
-                    if (ext == ".avs")
+                    if (reader.Framerate != Double.PositiveInfinity && reader.Framerate != 0.0)
                     {
-                        //Считываем SAR из скрипта
-                        m.pixelaspect = reader.GetVarFloat("OUT_SAR_X", 1) / reader.GetVarFloat("OUT_SAR_Y", 1);
+                        m.induration = TimeSpan.FromSeconds((double)reader.FrameCount / reader.Framerate);
+                        m.outduration = m.induration;
+                        m.inframes = reader.FrameCount;
+                        if (string.IsNullOrEmpty(m.inframerate))
+                            m.inframerate = Calculate.ConvertDoubleToPointString(reader.Framerate);
+                    }
+
+                    if (m.isvideo && ext != ".avs" && (reader.Width == 0 || reader.Height == 0))
+                    {
+                        throw new Exception(m.vdecoder.ToString() + " can't decode video (zero-size image was returned)!");
+                    }
+                    else if ((m.vdecoder == AviSynthScripting.Decoders.LSMASHVideoSource || m.vdecoder == AviSynthScripting.Decoders.LWLibavVideoSource) && //16 - допуск на паддинг и т.д.
+                        string.IsNullOrEmpty(m.disable_hacked_vout) && ((Math.Abs(reader.Width / 2 - m.inresw) < 16) || (Math.Abs(reader.Height / 2 - m.inresh)) < 16))
+                    {
+                        //LSMASH декодирует многобитное видео с удвоением ширины\высоты, пока-что это не поддерживается
+                        m.disable_hacked_vout = Calculate.GetLSMASHFormat8(reader.Clip.OriginalColorspace);
+                        throw new Exception("Hacked output");
+                    }
+                    else
+                    {
+                        m.inresw = reader.Width;
+                        m.inresh = reader.Height;
+
+                        if (m.inaspect == 0 || double.IsNaN(m.inaspect))
+                            m.inaspect = (double)m.inresw / (double)m.inresh;
+
+                        if (ext == ".avs")
+                        {
+                            //Такое можно получить видимо только вписав в скрипт KillVideo()\KillAudio()
+                            if ((reader.Width == 0 || reader.Height == 0) && reader.Samplerate == 0)
+                                throw new Exception("An empty script (no video and no audio)!");
+
+                            //Считываем SAR из скрипта
+                            m.pixelaspect = reader.GetVarFloat("OUT_SAR_X", 1) / reader.GetVarFloat("OUT_SAR_Y", 1);
+                        }
                     }
                 }
 
-                int samplerate = reader.Samplerate;
-                if (samplerate == 0 && m.inaudiostreams.Count > 0 && Settings.EnableAudio)
+                //Звук
+                if (reader.Samplerate == 0)
                 {
-                    //похоже что звук не декодируется этим декодером
-                    throw new Exception("Script doesn't contain audio");
+                    if (m.inaudiostreams.Count > 0 && Settings.EnableAudio || only_audio)
+                    {
+                        //похоже что звук не декодируется этим декодером
+                        throw new Exception("Script doesn't contain audio!");
+                    }
                 }
-
-                if (samplerate != 0 && (m.inaudiostreams.Count > 0 || instream.samplerate == null))
+                else
                 {
+                    //Определение продолжительности и числа кадров для audio-only файлов (т.е. без видео)
+                    if (!m.isvideo && m.inframes == 0 && m.induration == TimeSpan.Zero)
+                    {
+                        m.induration = m.outduration = TimeSpan.FromSeconds(reader.SamplesCount / (double)reader.Samplerate);
+                        m.inframes = (int)(m.induration.TotalSeconds * ((!string.IsNullOrEmpty(m.inframerate)) ? Calculate.ConvertStringToDouble(m.inframerate) : 25));
+                    }
+
+                    AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
+
                     if (instream.channels > 0)
                     {
                         //вероятно аудио декодер меняет количество каналов
@@ -129,22 +150,18 @@ namespace XviD4PSP
                     else
                         instream.channels = reader.Channels;
 
-                    instream.samplerate = samplerate.ToString();
+                    instream.samplerate = reader.Samplerate.ToString();
                     instream.bits = reader.BitsPerSample;
 
-                    //Определение продолжительности и числа кадров только для звука (например, если исходник - RAW ААС)
-                    if (!m.isvideo && m.inframes == 0 && m.induration == TimeSpan.Zero)
+                    if (m.inaudiostreams.Count > 0)
                     {
-                        m.induration = m.outduration = TimeSpan.FromSeconds(reader.SamplesCount / (double)reader.Samplerate);
-                        m.inframes = (int)(m.induration.TotalSeconds * 25);
+                        //Битрейт для PCM
+                        if (instream.bitrate == 0 && (instream.codecshort == "PCM" || instream.codecshort == "LPCM"))
+                            instream.bitrate = (reader.BitsPerSample * reader.Samplerate * reader.Channels) / 1000; //kbps
                     }
-
-                    if (m.inaudiostreams.Count > 0 && instream.bitrate == 0 && (instream.codecshort == "PCM" || instream.codecshort == "LPCM"))
-                        instream.bitrate = (reader.BitsPerSample * reader.Samplerate * reader.Channels) / 1000; //kbps
-
-                    //если звук всё ещё не забит
-                    if (m.inaudiostreams.Count == 0 && ext == ".avs" && samplerate != 0)
+                    else if (ext == ".avs" && !only_audio)
                     {
+                        //Звук из скрипта
                         instream.bitrate = (reader.BitsPerSample * reader.Samplerate * reader.Channels) / 1000; //kbps
                         instream.codec = instream.codecshort = "PCM";
                         instream.language = "Unknown";
@@ -256,8 +273,8 @@ namespace XviD4PSP
             string ext = Path.GetExtension(m.infilepath).ToLower();
             AudioStream instream = (m.inaudiostreams.Count > 0) ? (AudioStream)m.inaudiostreams[m.inaudiostream] : new AudioStream();
 
-            //Ошибка в пользовательском скрипте или в графе
-            if (ext == ".avs" || ext == ".grf")
+            //Ошибка в пользовательском скрипте, в графе, или это была проверка звука
+            if (ext == ".avs" || ext == ".grf" || only_audio)
             {
                 ErrorException("Caching: " + error, stacktrace);
                 m = null;
@@ -266,7 +283,7 @@ namespace XviD4PSP
             }
 
             //Начался разбор ошибок
-            if ((error == "Script doesn't contain audio" || error.StartsWith("DirectShowSource:") ||
+            if ((error == "Script doesn't contain audio!" || error.StartsWith("DirectShowSource:") ||
                 error.StartsWith("FFAudioSource:") || error.Contains(" audio track")) && m.isvideo)
             {
                 bool demux_audio = true;
