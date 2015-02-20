@@ -253,7 +253,8 @@ namespace XviD4PSP
 
         private void button_ok_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (oldm != null && x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null) UpdateMassive(); //CustomCLI
+            if (oldm != null && x265c == null && x264c == null && x262c == null && xvid == null &&
+                mpeg4 == null && mpeg2 == null && mpeg1 == null && flv == null) UpdateMassive(); //CustomCLI
             Close();
         }
 
@@ -341,6 +342,9 @@ namespace XviD4PSP
                 if (x262c != null) x262c.UpdateCLI();
                 if (xvid != null) xvid.UpdateCLI();
                 if (mpeg4 != null) mpeg4.UpdateCLI();
+                if (mpeg2 != null) mpeg2.UpdateCLI();
+                if (mpeg1 != null) mpeg1.UpdateCLI();
+                if (flv != null) flv.UpdateCLI();
             }
         }
 
@@ -589,7 +593,7 @@ namespace XviD4PSP
         {
             if (m.outvcodec == "Copy") return;
 
-            if (x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null)
+            if (x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null && mpeg2 == null && mpeg1 == null && flv == null)
                 UpdateMassive(); //CustomCLI
 
             string auto_name = m.outvcodec + " ";
@@ -652,7 +656,7 @@ namespace XviD4PSP
             }
 
             //Не совсем понятно, зачем нужно перезагружаться с пресета, который мы только что сохранили..
-            if (x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null) //CustomCLI
+            if (x265c == null && x264c == null && x262c == null && xvid == null && mpeg4 == null && mpeg2 == null && mpeg1 == null && flv == null) //CustomCLI
             {
                 LoadProfileToCodec();
                 UpdateOutSize();
@@ -741,11 +745,15 @@ namespace XviD4PSP
         {
             if (profile_was_changed)
             {
+                //cli
                 if (x265c != null) m = x265c.m.Clone();
                 else if (x264c != null) m = x264c.m.Clone();
                 else if (x262c != null) m = x262c.m.Clone();
                 else if (xvid != null) m = xvid.m.Clone();
                 else if (mpeg4 != null) m = mpeg4.m.Clone();
+                else if (mpeg2 != null) m = mpeg2.m.Clone();
+                else if (mpeg1 != null) m = mpeg1.m.Clone();
+                else if (flv != null) m = flv.m.Clone();
             }
             else UpdateMassive();
 

@@ -96,12 +96,11 @@ namespace XviD4PSP
             {
                 //забиваем в список каналы звука
                 int n = 1;
-                foreach (object o in m.inaudiostreams)
+                foreach (AudioStream stream in m.inaudiostreams)
                 {
-                    AudioStream s = (AudioStream)o;
                     ComboBoxItem item = new ComboBoxItem();
-                    item.Content = n.ToString("00") + ". " + s.language + " " + s.codecshort + " " + s.channels + "ch";
-                    item.ToolTip = item.Content + " " + s.samplerate + "Hz " + s.bitrate + "kbps " + s.delay + "ms";
+                    item.Content = n.ToString("00") + ". " + stream.language + " " + stream.codecshort + " " + stream.channels + "ch";
+                    item.ToolTip = item.Content + " " + stream.samplerate + "Hz " + stream.bitrate + "kbps " + stream.delay + "ms";
                     combo_atracks.Items.Add(item);
                     n++;
                 }

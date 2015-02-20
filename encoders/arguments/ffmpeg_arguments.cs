@@ -380,19 +380,6 @@ namespace XviD4PSP
             }
         }
 
-        private string _fourcc_mpeg4 = "DIVX";
-        public string fourcc_mpeg4
-        {
-            get
-            {
-                return _fourcc_mpeg4;
-            }
-            set
-            {
-                _fourcc_mpeg4 = value;
-            }
-        }
-
         private string _fourcc_huff = "HFYU";
         public string fourcc_huff
         {
@@ -429,32 +416,6 @@ namespace XviD4PSP
             set
             {
                 _predictor = value;
-            }
-        }
-
-        private string _fourcc_mpeg1 = "MPEG";
-        public string fourcc_mpeg1
-        {
-            get
-            {
-                return _fourcc_mpeg1;
-            }
-            set
-            {
-                _fourcc_mpeg1 = value;
-            }
-        }
-
-        private string _fourcc_mpeg2 = "MPEG";
-        public string fourcc_mpeg2
-        {
-            get
-            {
-                return _fourcc_mpeg2;
-            }
-            set
-            {
-                _fourcc_mpeg2 = value;
             }
         }
 

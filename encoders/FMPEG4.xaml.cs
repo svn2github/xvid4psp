@@ -263,7 +263,7 @@ namespace XviD4PSP
                 num_dia_size.Value = m.ffmpeg_options.dia_size - 1;
             }
 
-            combo_cmp.SelectedIndex = m.ffmpeg_options.cmp;    
+            combo_cmp.SelectedIndex = m.ffmpeg_options.cmp;
             check_trellis.IsChecked = m.ffmpeg_options.trellis;
             check_gmc.IsChecked = m.ffmpeg_options.gmc;
             check_qpel.IsChecked = m.ffmpeg_options.qpel;
@@ -345,8 +345,8 @@ namespace XviD4PSP
             combo_mode.ToolTip = "Encoding mode";
 
             if (m.encodingmode == Settings.EncodingModes.OnePass ||
-                 m.encodingmode == Settings.EncodingModes.TwoPass ||
-                 m.encodingmode == Settings.EncodingModes.ThreePass)
+                m.encodingmode == Settings.EncodingModes.TwoPass ||
+                m.encodingmode == Settings.EncodingModes.ThreePass)
                 num_bitrate.ToolTip = "Set bitrate (Default: Auto)";
             else if (m.encodingmode == Settings.EncodingModes.OnePassSize ||
                 m.encodingmode == Settings.EncodingModes.TwoPassSize ||
@@ -356,9 +356,9 @@ namespace XviD4PSP
                 num_bitrate.ToolTip = "Set target quality (Default: 3)";
 
             if (m.encodingmode == Settings.EncodingModes.Quality ||
-               m.encodingmode == Settings.EncodingModes.Quantizer ||
-               m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
-               m.encodingmode == Settings.EncodingModes.ThreePassQuality)
+                m.encodingmode == Settings.EncodingModes.Quantizer ||
+                m.encodingmode == Settings.EncodingModes.TwoPassQuality ||
+                m.encodingmode == Settings.EncodingModes.ThreePassQuality)
             {
                 combo_codec_preset.ToolTip = "Default - reset codec settings to defaults" + Environment.NewLine +
                     "Turbo - fast encoding, big output file size" + Environment.NewLine +
@@ -373,7 +373,7 @@ namespace XviD4PSP
                     "Custom - custom codec settings";
             }
 
-            combo_qmatrix.ToolTip = "Use custom MPEG4 quantization matrix (-inter_matrix -intra_matrix, default: H263)";
+            combo_qmatrix.ToolTip = "Use custom quantization matrix (-inter_matrix -intra_matrix, default: H263)";
             check_trellis.ToolTip = "Trellis quantization (-trellis, default: unchecked)";
             check_gmc.ToolTip = "Use global motion compensation (-flags +gmc, default: unchecked)";
             check_qpel.ToolTip = "Use 1/4 pel motion compensation (-flags +qpel, default: unchecked)";
@@ -835,14 +835,18 @@ namespace XviD4PSP
                     m.ffmpeg_options.trellis = true;
                     m.ffmpeg_options.cmp = 2;
                 }
-
-                if (preset != CodecPresets.Custom)
+                else if (preset == CodecPresets.Custom)
                 {
-                    root_window.UpdateOutSize();
-                    root_window.UpdateManualProfile();
-                    m = DecodeLine(m); //Пересчитываем параметры из CLI в m.ffmpeg_options (это нужно для "-extra:")
-                    LoadFromProfile(); //Выставляем значения из m.ffmpeg_options в элементы управления
+                    IList items = e.RemovedItems;
+                    if (items != null && items.Count > 0)
+                        combo_codec_preset.SelectedItem = items[0];
+                    return;
                 }
+
+                root_window.UpdateOutSize();
+                root_window.UpdateManualProfile();
+                m = DecodeLine(m); //Пересчитываем параметры из CLI в m.ffmpeg_options (это нужно для "-extra:")
+                LoadFromProfile(); //Выставляем значения из m.ffmpeg_options в элементы управления
             }
         }
 

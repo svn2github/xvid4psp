@@ -851,46 +851,6 @@ namespace XviD4PSP
             }
         }
 
-        public static string Mpeg1FOURCC
-        {
-            get
-            {
-                object value = GetValue("Mpeg1FOURCC");
-                if (value == null)
-                {
-                    return "MPEG";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("Mpeg1FOURCC", value);
-            }
-        }
-
-        public static string Mpeg2FOURCC
-        {
-            get
-            {
-                object value = GetValue("Mpeg2FOURCC");
-                if (value == null)
-                {
-                    return "MPEG";
-                }
-                else
-                {
-                    return Convert.ToString(value);
-                }
-            }
-            set
-            {
-                SetString("Mpeg2FOURCC", value);
-            }
-        }
-
         public static string HUFFFOURCC
         {
             get

@@ -127,7 +127,7 @@
 			</GroupBox>
 			<GroupBox Margin="0,8,8,0" Header="Info" Foreground="#FFFFFFFF" x:Name="group_info" Width="178" Height="426" VerticalAlignment="Top" HorizontalAlignment="Right">
 				<Grid Width="Auto" Height="Auto">
-					<TextBox x:Name="texbox_info" Text="" TextWrapping="Wrap" Margin="8,8,8,8"/>
+					<TextBox x:Name="texbox_info" Text="" TextWrapping="Wrap" IsReadOnly="True" Margin="8,8,8,8"/>
 				</Grid>
 			</GroupBox>
 		</Grid>

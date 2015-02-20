@@ -322,6 +322,7 @@ namespace XviD4PSP
                     return "";
 
             if (value == "23.98") return "23.976";
+            if (value == "47.95") return "47.952";
             return Calculate.ConvertDoubleToPointString(Calculate.ConvertStringToDouble(value));
         }
 

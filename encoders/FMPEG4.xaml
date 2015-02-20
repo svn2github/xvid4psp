@@ -12,7 +12,7 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<Image Source="..\pictures\logo_FF_mpeg4.png" Stretch="None" Height="95" Margin="0,0,0,0" VerticalAlignment="Top"/>
-		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Grid.RowSpan="1" Margin="0,92,0,0" VerticalAlignment="Stretch">
+		<TabControl Height="Auto" Background="{x:Null}" IsSynchronizedWithCurrentItem="True" Margin="0,92,0,0">
 			<TabItem Header="Main" Width="50" Padding="0,2,0,2">
 				<Grid Width="304" Height="158">
 					<Grid.ColumnDefinitions>

@@ -441,7 +441,7 @@
     <Resource Include="pictures\logo_aften.png" />
     <Resource Include="pictures\logo_FF_dv.png" />
     <Resource Include="pictures\logo_FF_FFV1.png" />
-    <Resource Include="pictures\logo_FF_FLV.png" />
+    <Resource Include="pictures\logo_FF_FLV1.png" />
     <Resource Include="pictures\logo_FF_HUFF.png" />
     <Resource Include="pictures\logo_FF_LPCM.png" />
     <Resource Include="pictures\logo_FF_MJPEG.png" />

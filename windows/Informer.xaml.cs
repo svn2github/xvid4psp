@@ -152,6 +152,7 @@ namespace XviD4PSP
 
                         m.isvideo = false;
                         stream.audiopath = m.infilepath;
+                        stream.audiofiles = new string[] { stream.audiopath };
                         stream = Format.GetValidADecoder(stream);
 
                         m.inaudiostreams.Add(stream.Clone());
@@ -204,6 +205,7 @@ namespace XviD4PSP
                                 {
                                     m.isvideo = false;
                                     stream.audiopath = m.infilepath;
+                                    stream.audiofiles = new string[] { stream.audiopath };
                                     stream = Format.GetValidADecoder(stream);
                                 }
 
@@ -238,10 +240,9 @@ namespace XviD4PSP
                         media.Close();
                         media.Open(ifo);
                         int n = 0;
-                        foreach (object o in m.inaudiostreams)
+                        foreach (AudioStream stream in m.inaudiostreams)
                         {
-                            AudioStream s = (AudioStream)o;
-                            s.language = media.AudioLanguage(n);
+                            stream.language = media.AudioLanguage(n);
                             n++;
                         }
 
@@ -559,12 +560,41 @@ namespace XviD4PSP
                             m.inresh = ff.StreamH(m.invideostream_ff_order);
                             m.inaspect = (double)m.inresw / (double)m.inresh;
                         }
-                        else if (Settings.UseFFmpegAR)
+                        else
                         {
-                            double sar = ff.CalculateSAR(m.invideostream_ff_order);
-                            if (sar != 0) m.pixelaspect = sar;
-                            double dar = ff.CalculateDAR(m.invideostream_ff_order);
-                            if (dar != 0) m.inaspect = dar;
+                            //Через MI нашелся только звук, но у FFmpeg есть и видео
+                            if (!m.isvideo)
+                            {
+                                if (ext != ".cda")
+                                {
+                                    m.isvideo = true;
+                                    m.invcodec = ff.StreamCodec(m.invideostream_ff_order);
+                                    m.invcodecshort = ff.StreamCodecShort(m.invideostream_ff_order);
+                                    m.invbitrate = ff.VideoBitrate(m.invideostream_ff_order);
+                                    m.inresw = ff.StreamW(m.invideostream_ff_order);
+                                    m.inresh = ff.StreamH(m.invideostream_ff_order);
+
+                                    double sar = ff.CalculateSAR(m.invideostream_ff_order);
+                                    m.pixelaspect = (sar != 0) ? sar : 1.0;
+                                    double dar = ff.CalculateDAR(m.invideostream_ff_order);
+                                    m.inaspect = (dar != 0) ? dar : ((double)m.inresw / (double)m.inresh);
+
+                                    //Обнуляем аудио пути (там сейчас вписан сам исходник и декодер под его расширение)
+                                    foreach (AudioStream stream in m.inaudiostreams)
+                                    {
+                                        stream.audiopath = null;
+                                        stream.audiofiles = null;
+                                        stream.decoder = 0;
+                                    }
+                                }
+                            }
+                            else if (Settings.UseFFmpegAR)
+                            {
+                                double sar = ff.CalculateSAR(m.invideostream_ff_order);
+                                if (sar != 0) m.pixelaspect = sar;
+                                double dar = ff.CalculateDAR(m.invideostream_ff_order);
+                                if (dar != 0) m.inaspect = dar;
+                            }
                         }
 
                         //null - MediaInfo для этого файла не запускалась (avs, grf,..)
@@ -593,22 +623,21 @@ namespace XviD4PSP
                         //Это будет работать как надо, только если очерёдность наших треков
                         //совпадает с их очерёдностью в FFmpeg, иначе инфа о треках перепутается!
                         int astream = 0;
-                        foreach (object o in m.inaudiostreams)
+                        foreach (AudioStream stream in m.inaudiostreams)
                         {
-                            AudioStream s = (AudioStream)o;
-                            s.ff_order = (int)AStreams[astream]; //ID трека для FFmpeg
-                            s.ff_order_filtered = ff.FilteredStreamOrder(s.ff_order);
-                            if (s.mi_order < 0) s.mi_order = s.ff_order;
-                            if (s.bitrate == 0) s.bitrate = ff.AudioBitrate(s.ff_order);
-                            if (s.channels == 0) s.channels = ff.StreamChannels(s.ff_order);
-                            if (s.samplerate == null) s.samplerate = ff.StreamSamplerate(s.ff_order);
-                            if (s.language == "Unknown") s.language = ff.StreamLanguage(s.ff_order);
-                            s.ff_bits = ff.StreamBits(s.ff_order);
-                            s.ff_codec = ff.StreamCodec(s.ff_order);
-                            if (s.codec == "A_MS/ACM" || s.codec == "")
+                            stream.ff_order = (int)AStreams[astream]; //ID трека для FFmpeg
+                            stream.ff_order_filtered = ff.FilteredStreamOrder(stream.ff_order);
+                            if (stream.mi_order < 0) stream.mi_order = stream.ff_order;
+                            if (stream.bitrate == 0) stream.bitrate = ff.AudioBitrate(stream.ff_order);
+                            if (stream.channels == 0) stream.channels = ff.StreamChannels(stream.ff_order);
+                            if (stream.samplerate == null) stream.samplerate = ff.StreamSamplerate(stream.ff_order);
+                            if (stream.language == "Unknown") stream.language = ff.StreamLanguage(stream.ff_order);
+                            stream.ff_bits = ff.StreamBits(stream.ff_order);
+                            stream.ff_codec = ff.StreamCodec(stream.ff_order);
+                            if (stream.codec == "A_MS/ACM" || stream.codec == "")
                             {
-                                s.codec = s.ff_codec;
-                                s.codecshort = ff.StreamCodecShort(s.ff_order);
+                                stream.codec = stream.ff_codec;
+                                stream.codecshort = ff.StreamCodecShort(stream.ff_order);
                             }
 
                             AStreams_done.Add(AStreams[astream]);
@@ -647,8 +676,8 @@ namespace XviD4PSP
                                 if (is_audio_only)
                                 {
                                     m.isvideo = false;
-
                                     stream.audiopath = m.infilepath;
+                                    stream.audiofiles = new string[] { stream.audiopath };
                                     stream = Format.GetValidADecoder(stream);
                                 }
 
@@ -676,11 +705,10 @@ namespace XviD4PSP
                 }
 
                 //определяем аудио декодер
-                foreach (object o in m.inaudiostreams)
+                foreach (AudioStream stream in m.inaudiostreams)
                 {
-                    AudioStream s = (AudioStream)o;
-                    if (s.decoder == 0)
-                        s = Format.GetValidADecoder(s);
+                    if (stream.decoder == 0)
+                        stream.decoder = Format.GetValidADecoder(stream).decoder;
                 }
 
                 //подсчитываем размер

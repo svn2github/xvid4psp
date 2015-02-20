@@ -609,7 +609,6 @@ namespace XviD4PSP
             }
 
             busyfile = Path.GetFileName(m.outvideofile);
-
             string passlog = Calculate.RemoveExtention(m.outvideofile) + "log";
 
             //info строка
@@ -964,7 +963,6 @@ namespace XviD4PSP
             }
 
             busyfile = Path.GetFileName(m.outvideofile);
-
             string passlog = Calculate.RemoveExtention(m.outvideofile) + "log";
 
             //info строка
@@ -1345,11 +1343,6 @@ namespace XviD4PSP
                 return;
             }
 
-            busyfile = Path.GetFileName(m.outvideofile);
-
-            string passlog1 = Calculate.RemoveExtention(m.outvideofile, true) + "_1";
-            string passlog2 = Calculate.RemoveExtention(m.outvideofile, true) + "_2";
-
             if (muxer != Format.Muxers.Disabled || DontMuxStreams)
             {
                 //info строка для обычного кодирования
@@ -1403,6 +1396,9 @@ namespace XviD4PSP
                         ((((AudioStream)m.outaudiostreams[m.outaudiostream]).codec == "FLAC") ? " -sample_fmt s16" : ""); //FLAC пока-что нужно ограничивать 16-ю битами..
                 }
             }
+
+            busyfile = Path.GetFileName(m.outvideofile);
+            string passlog1 = Calculate.RemoveExtention(m.outvideofile, true) + "_1";
 
             //FOURCC
             string fourcc = "";
@@ -1580,7 +1576,6 @@ namespace XviD4PSP
             }
 
             SafeDelete(passlog1 + "-0.log");
-            SafeDelete(passlog2 + "-0.log");
 
             encodertext.Length = 0;
             SetLog("");
