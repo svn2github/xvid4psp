@@ -20,7 +20,7 @@
 #include "VideoSink.h"
 #include "utils.h"
 #include "guids.h"
-
+#include <math.h>
 
 #if defined(AVS_PLUS)
 #include "avisynth_plus.h"
@@ -70,7 +70,7 @@ class DSS2 : public IClip
 		                    m_timeout;
 
 	VideoInfo               m_vi;
-	__int64                 m_avgframe;
+	double                  m_avgframe;
 
 	void RegROT()
 	{
@@ -105,7 +105,7 @@ class DSS2 : public IClip
 			m_registered = false;
 	}
 
-	HRESULT Open(const wchar_t *filename, char *err, __int64 avgf, int subs_mode, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types)
+	HRESULT Open(const wchar_t *filename, char *err, double fps, unsigned int fps_den, int subs_mode, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types, int tc_offset)
 	{
 		InterlockedIncrement(&RefCount);
 
@@ -135,6 +135,7 @@ class DSS2 : public IClip
 		if (!sink2) { SetError("Get IVideoSink2: ", err); return E_NOINTERFACE; }
 
 		sink->SetAllowedTypes(pixel_types);
+		sink->SetTCOffset(tc_offset);
 		ResetEvent(m_hFrameReady);
 		sink2->NotifyFrame(m_hFrameReady);
 
@@ -404,33 +405,101 @@ class DSS2 : public IClip
 		if (FAILED(hr = sink2->GetFrameFormat(&type, &width, &height, &arx, &ary, &defd))) {
 			SetError("GetFrameFormat: ", err); return hr; }
 
-		REFERENCE_TIME duration;
+		REFERENCE_TIME duration, offset_tc, duration_tc;
+		if (FAILED(hr = sink->GetTCOffset(&offset_tc, &duration_tc))) {
+			SetError("GetTCOffset: ", err); return hr; }
+
 		if (FAILED(hr = ms->GetDuration(&duration))) {
 			SetError("GetDuration: ", err); return hr; }
 
-		if (defd <= 0)
-			defd = 400000;
+		bool still_picture = (duration == 0 && defd == 0 && duration_tc > 0);
+		if (defd == 0 && duration_tc > 1)  //AvgTimePerFrame   (VIDEOINFOHEADER)
+			defd = duration_tc;            //TimeEnd-TimeStart (IMediaSample::GetTime)
 
-		if (avgf > 0)
-			defd = avgf;
+		//Auto fps
+		if (fps <= 0)
+		{
+			if (still_picture)
+			{
+				fps = 25;
+				fps_den = 1;
+			}
+			else if (defd > 0)
+			{
+				__int64 _fps = (__int64)(10000000000.0 / defd + 0.5); //Немного округлим..
+				switch (_fps)
+				{
+				case 23976: fps = 24000; fps_den = 1001; break;   //23.97602
+				case 24000: fps = 24; fps_den = 1; break;         //24
+				case 25000: fps = 25; fps_den = 1; break;         //25
+				case 29970: fps = 30000; fps_den = 1001; break;   //29.97002
+				case 30000: fps = 30; fps_den = 1; break;         //30
+				case 48000: fps = 48; fps_den = 1; break;         //48
+				case 50000: fps = 50; fps_den = 1; break;         //50
+				case 59940: fps = 60000; fps_den = 1001; break;   //59.94005
+				case 60000: fps = 60; fps_den = 1; break;         //60
+				case 10000: fps = 100; fps_den = 1; break;        //100
+				case 11988: fps = 120000; fps_den = 1001; break;  //119.8801
+				case 12000: fps = 120000; fps_den = 1; break;     //120
+				default: fps = 10000000; fps_den = (unsigned int)defd;
+				}
+			}
+			else
+			{
+				SetError("Can't determine the frame rate!\n", err);
+				return E_FAIL;
+			}
+		}
+
+		if (fps_den == 0)
+		{
+			//fps=xx.xxx (фактически уже не используется, только
+			//если вдруг не удалось получить fps_num/fps_den)
+			m_avgframe = floor(10000000ll / fps + 0.5);
+			m_vi.SetFPS(10000000, (unsigned int)m_avgframe);
+		}
+		else
+		{
+			//fps_num/fps_den
+			m_avgframe = 10000000ll / ((floor(fps) / fps_den));
+			m_vi.SetFPS((unsigned int)fps, fps_den);
+		}
+
+		if (duration == 0 && !still_picture)
+		{
+			SetError("Can't determine the duration!\n", err);
+			return E_FAIL;
+		}
+
+		if (offset_tc > duration)
+		{
+			offset_tc = max(duration - duration_tc, 0);
+			sink->SetTCOffset(offset_tc);
+		}
+
+		duration -= offset_tc;
+		if (duration < m_avgframe)
+			duration = (__int64)m_avgframe;
+
+		m_vi.num_frames = (int)((duration / m_avgframe) + 0.5);
+		if (!m_f.SetCount(m_vi.num_frames))
+		{
+			SetError("Can't handle so many frames!\n", err);
+			return E_OUTOFMEMORY;
+		}
 
 		switch (type)
 		{
-			case IVS_RGB32: m_vi.pixel_type = VideoInfo::CS_BGR32; break;
-			case IVS_RGB24: m_vi.pixel_type = VideoInfo::CS_BGR24; break;
-			case IVS_YUY2: m_vi.pixel_type = VideoInfo::CS_YUY2; break;
-			case IVS_YV12: m_vi.pixel_type = VideoInfo::CS_YV12; break;
-			default: { SetError("Unsupported colorspace. ", err); return E_FAIL; }
+		case IVS_RGB32: m_vi.pixel_type = VideoInfo::CS_BGR32; break;
+		case IVS_RGB24: m_vi.pixel_type = VideoInfo::CS_BGR24; break;
+		case IVS_YUY2: m_vi.pixel_type = VideoInfo::CS_YUY2; break;
+		case IVS_YV12: m_vi.pixel_type = VideoInfo::CS_YV12; break;
+		default: { SetError("Unsupported colorspace!\n", err); return E_FAIL; }
 		}
 
 		//Crop (1 pixel), если требуется mod2
 		m_vi.width = width - ((m_vi.pixel_type == VideoInfo::CS_YUY2 || m_vi.pixel_type == VideoInfo::CS_YV12) ? (width % 2) : 0);
 		m_vi.height = height - ((m_vi.pixel_type == VideoInfo::CS_YV12) ? (height % 2) : 0);
-
-		m_vi.num_frames = (int)(duration / defd);
-		m_vi.SetFPS(10000000, (unsigned int)defd);
-
-		m_avgframe = defd;
 
 		m_pR = sink;
 		m_pGC = mc;
@@ -439,8 +508,6 @@ class DSS2 : public IClip
 		SetEvent(m_hFrameReady);
 
 		RegROT();
-
-		m_f.SetCount(m_vi.num_frames);
 
 		return S_OK;
 	}
@@ -598,7 +665,7 @@ class DSS2 : public IClip
 
 			if (df.timestamp >= 0)
 			{
-				int frameno = (int)((double)df.timestamp / m_avgframe + 0.5);
+				int frameno = (int)(df.timestamp / m_avgframe + 0.5);
 				if (frameno >= 0 && frameno < (int)m_f.GetCount())
 				{
 					fn = frameno;
@@ -630,14 +697,14 @@ public:
 		CloseHandle(m_hFrameReady);
 	}
 
-	HRESULT OpenFile(const wchar_t *filename, char *err, __int64 avgframe, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types, DWORD timeout)
+	HRESULT OpenFile(const wchar_t *filename, char *err, double fps, unsigned int fps_den, int cache, int seekthr, int preroll, int subsm, const char *lavs, const char *lavd, const char *lavf_path, const char *dvs_path, unsigned int pixel_types, DWORD timeout, int tc_offset)
 	{
 		m_qmax = cache;
 		m_seek_thr = seekthr;
 		m_preroll = preroll;
 		m_timeout = timeout;
 
-		return Open(filename, err, avgframe, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types);
+		return Open(filename, err, fps, fps_den, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types, tc_offset);
 	}
 
 	// IClip
@@ -676,7 +743,7 @@ public:
 			int pos_frame = m_qfirst - m_preroll;
 			if (pos_frame < 0) pos_frame = 0;
 
-			REFERENCE_TIME pos_time = m_avgframe * pos_frame - 10001; // -1ms, account for typical timestamps rounding
+			REFERENCE_TIME pos_time = (REFERENCE_TIME)(m_avgframe * pos_frame - 10001); // -1ms, account for typical timestamps rounding
 			if (pos_time < 0) pos_time = 0;
 
 			if (FAILED(m_pGS->SetPositions(&pos_time, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning)))
@@ -792,19 +859,37 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	if (filename == NULL || strlen(filename) == 0)
 		env->ThrowError("DSS2: Filename expected!");
 
-	__int64 avgframe = args[1].Defined() ? (__int64)(10000000ll / args[1].AsFloat() + 0.5) : 0;  //fps        (>0, undef.)
-	int cache = max(args[2].AsInt(10), 1);                                                       //cache      (>=1, def=10)
-	int seekthr = max(args[3].AsInt(100), 1);                                                    //seekthr    (>=1, def=100)
-	int preroll = max(args[4].AsInt(0), 0);                                                      //preroll    (>=0, def=0)
-	int subsm = max(args[5].AsInt(0), 0);                                                        //subsm      (>=0, def=0)
-	const char *lavs = args[6].AsString("");                                                     //lavs       (def="")
-	const char *lavd = args[7].AsString("");                                                     //lavd       (def="")
-	const char *lavf_path = args[8].AsString("LAVFilters");                                      //lavf_path  (def="LAVFilters")
-	const char *dvs_path = args[9].AsString("");                                                 //dvs_path   (def="")
-	bool flipv = args[10].AsBool(false);                                                         //flipv      (def=false)
-	bool fliph = args[11].AsBool(false);                                                         //fliph      (def=false)
-	const char *pixel_type = args[12].AsString("");                                              //pixel_type (def="")
-	DWORD timeout = max(args[13].AsInt(30), 0);                                                  //timeout    (>=0, def=30)
+	double fps = max(args[1].AsFloat(0), 0);                                                     //fps        (>=0, def=0,auto)
+	unsigned int fps_den = max(args[2].AsInt(0), 0);                                             //fps_den    (>=0, def=0)
+	int cache = max(args[3].AsInt(10), 1);                                                       //cache      (>=1, def=10)
+	int seekthr = max(args[4].AsInt(100), 1);                                                    //seekthr    (>=1, def=100)
+	int preroll = max(args[5].AsInt(0), 0);                                                      //preroll    (>=0, def=0)
+	int subsm = max(args[6].AsInt(0), 0);                                                        //subsm      (>=0, def=0)
+	const char *lavs = args[7].AsString("");                                                     //lavs       (def="")
+	const char *lavd = args[8].AsString("");                                                     //lavd       (def="")
+	const char *lavf_path = args[9].AsString("LAVFilters");                                      //lavf_path  (def="LAVFilters")
+	const char *dvs_path = args[10].AsString("");                                                //dvs_path   (def="")
+	bool flipv = args[11].AsBool(false);                                                         //flipv      (def=false)
+	bool fliph = args[12].AsBool(false);                                                         //fliph      (def=false)
+	const char *pixel_type = args[13].AsString("");                                              //pixel_type (def="")
+	DWORD timeout = max(args[14].AsInt(30), 0);                                                  //timeout    (>=0, def=30)
+	int tc_offset = max(args[15].AsInt(0), -1);                                                  //tc_offset  (>=-1, def=0)
+
+	if (fps > 0 && fps_den == 0)
+	{
+		try
+		{
+			//Пересчитываем fps=xx.xxx в num\den через AssumeFPS()
+			AVSValue temp_args[3] = { 0, 0, 0 }; //length, width, height
+			PClip temp_clip = env->Invoke("BlankClip", AVSValue(temp_args, 3)).AsClip();
+			AVSValue temp_args2[2] = { temp_clip, fps }; //clip, fps
+			temp_clip = env->Invoke("AssumeFPS", AVSValue(temp_args2, 2)).AsClip();
+			fps = temp_clip->GetVideoInfo().fps_numerator;
+			fps_den = temp_clip->GetVideoInfo().fps_denominator;
+		}
+		catch (IScriptEnvironment::NotFound) { }
+		catch (AvisynthError) { }
+	}
 
 	unsigned int pixel_types = (IVS_RGB24|IVS_RGB32|IVS_YUY2|IVS_YV12);
 	if (strlen(pixel_type) > 0)
@@ -822,7 +907,7 @@ static AVSValue __cdecl Create_DSS2(AVSValue args, void*, IScriptEnvironment* en
 	DSS2 *dss2 = new DSS2();
 	char err[ERRMSG_LEN] = {0};
 
-	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, avgframe, cache, seekthr, preroll, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types, timeout);
+	HRESULT hr = dss2->OpenFile(CA2WEX<128>(filename, CP_ACP), err, fps, fps_den, cache, seekthr, preroll, subsm, lavs, lavd, lavf_path, dvs_path, pixel_types, timeout, tc_offset);
 	if (FAILED(hr))
 	{
 		delete dss2;
@@ -854,6 +939,6 @@ extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScri
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
 {
 #endif
-	env->AddFunction("DSS2", "s+[fps]f[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[lavf_path]s[dvs_path]s[flipv]b[fliph]b[pixel_type]s[timeout]i", Create_DSS2, 0);
+	env->AddFunction("DSS2", "s+[fps]f[fps_den]i[cache]i[seekthr]i[preroll]i[subsm]i[lavs]s[lavd]s[lavf_path]s[dvs_path]s[flipv]b[fliph]b[pixel_type]s[timeout]i[tc_offset]i", Create_DSS2, 0);
 	return "DSS2";
 }

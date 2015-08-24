@@ -37,6 +37,8 @@ interface IVideoSink : public IUnknown {
   STDMETHOD(ReadFrame)(ReadFrameFunc f, void *arg) = 0;
 
   STDMETHOD(Reset)() = 0;
+  STDMETHOD(SetTCOffset)(REFERENCE_TIME offset) = 0;
+  STDMETHOD(GetTCOffset)(REFERENCE_TIME *offset, REFERENCE_TIME *duration) = 0;
 };
 
 [uuid("80CADA0E-DFA5-4fcc-99DD-52F7C1B0E575")]

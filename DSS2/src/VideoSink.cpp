@@ -202,6 +202,7 @@ public:
 
   BOOL            AtEOF() { return m_bAtEndOfStream; }
   REFERENCE_TIME  SegStartTime() { return m_tStart; }
+  REFERENCE_TIME  SegStopTime() { return m_tStop; }
   unsigned        GetTypes() { return m_types; }
   void            SetTypes(unsigned t) { m_types = t; }
 
@@ -286,10 +287,14 @@ class CVideoSink :
   CComPtr<IMediaSample>      m_sample;
   HANDLE                     m_hEvent1, m_hEvent2, m_hNotify;
   CComPtr<IVideoSinkNotify>  m_notify;
+  REFERENCE_TIME             m_tc_offset;
+  REFERENCE_TIME             m_tc_duration;
 
 public:
   CVideoSink(IUnknown *pUnk, HRESULT *phr) :
     CBaseFilter(_T("CVideoSink"), pUnk, &m_lock, CLSID_AegiVideoSink),
+    m_tc_duration(-1),
+    m_tc_offset(0),
     m_pin(NULL),
     m_rpp(NULL)
   {
@@ -322,6 +327,23 @@ public:
     else
       m_rpp->RegisterMediaTime(pS);
 
+	if (m_tc_duration < 0) //Один раз
+	{
+		REFERENCE_TIME rtS, rtE;
+		if (SUCCEEDED(pS->GetTime(&rtS, &rtE)))
+		{
+			m_tc_duration = max(rtE - rtS, 0);
+			if (m_tc_offset < 0)
+				m_tc_offset = max(rtS + m_pin->SegStartTime(), 0);
+		}
+		else
+		{
+			m_tc_duration = 0;
+			if (m_tc_offset < 0)
+				m_tc_offset = 0;
+		}
+	}
+
     // notify callback
     CComPtr<IVideoSinkNotify> notify = m_notify;
     HANDLE hNotify = m_hNotify;
@@ -350,6 +372,20 @@ public:
     if (pS == NULL)
       NotifyEvent(EC_COMPLETE, 0, (LONG_PTR)static_cast<IBaseFilter*>(this));
 
+    return S_OK;
+  }
+
+  STDMETHOD(SetTCOffset)(REFERENCE_TIME offset) {
+    CAutoLock lock(pStateLock());
+    m_tc_offset = offset;
+    return S_OK;
+  }
+
+  STDMETHOD(GetTCOffset)(REFERENCE_TIME *offset, REFERENCE_TIME *duration) {
+    CAutoLock lock(pStateLock());
+    if (m_tc_duration < 0) return E_FAIL; //Граф не запускался или IMediaSample не пришел
+    if (offset) *offset = m_tc_offset;
+    if (duration) *duration = m_tc_duration;
     return S_OK;
   }
 
@@ -431,7 +467,7 @@ public:
       {
         REFERENCE_TIME	rtS, rtE;
         if (SUCCEEDED(pS->GetTime(&rtS, &rtE)))
-          rtS += m_pin->SegStartTime();
+          rtS += m_pin->SegStartTime() - m_tc_offset;
         else
           rtS = -1;
 
